@@ -1,0 +1,143 @@
+{
+  "commands": {
+    "init": {
+      "aliases": [],
+      "args": {
+        "name": {
+          "description": "Project name",
+          "name": "name"
+        },
+        "dir": {
+          "description": "Output directory",
+          "name": "dir"
+        }
+      },
+      "description": "Scaffold a new Snapshot application",
+      "examples": [
+        "<%= config.bin %> init my-app",
+        "<%= config.bin %> init my-app ./apps/my-app --yes",
+        "<%= config.bin %> init my-app --template admin"
+      ],
+      "flags": {
+        "yes": {
+          "char": "y",
+          "description": "Skip prompts, use defaults",
+          "name": "yes",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "template": {
+          "description": "Template name (e.g. admin)",
+          "name": "template",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "no-git": {
+          "description": "Skip git init",
+          "name": "no-git",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "init",
+      "pluginAlias": "@lastshotlabs/snapshot",
+      "pluginName": "@lastshotlabs/snapshot",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "cli",
+        "commands",
+        "init.js"
+      ]
+    },
+    "sync": {
+      "aliases": [],
+      "args": {},
+      "description": "Sync OpenAPI schema to TypeScript types and React Query hooks",
+      "examples": [
+        "<%= config.bin %> sync --api http://localhost:3000",
+        "<%= config.bin %> sync --file ./schema.json --zod",
+        "<%= config.bin %> sync --api http://localhost:3000 --watch"
+      ],
+      "flags": {
+        "api": {
+          "description": "API URL to fetch OpenAPI schema from",
+          "name": "api",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "file": {
+          "description": "Local schema file path",
+          "name": "file",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "watch": {
+          "char": "w",
+          "description": "Watch for schema changes",
+          "name": "watch",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "zod": {
+          "description": "Generate Zod validators",
+          "name": "zod",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "api-dir": {
+          "description": "API implementation directory",
+          "name": "api-dir",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "hooks-dir": {
+          "description": "Generated hooks directory",
+          "name": "hooks-dir",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "types-path": {
+          "description": "Custom types path",
+          "name": "types-path",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "snapshot-import": {
+          "description": "Custom snapshot import name",
+          "name": "snapshot-import",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "sync",
+      "pluginAlias": "@lastshotlabs/snapshot",
+      "pluginName": "@lastshotlabs/snapshot",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "dist",
+        "cli",
+        "commands",
+        "sync.js"
+      ]
+    }
+  },
+  "version": "0.1.0"
+}
