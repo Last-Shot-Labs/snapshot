@@ -1,11 +1,46 @@
-export { createSnapshot } from './create-snapshot'
-export { ApiError } from './api/error'
-export { isMfaChallenge } from './types'
-export { formatAuthError, createAuthErrorFormatter } from './auth/error-format'
+// ── Core ─────────────────────────────────────────────────────────────────────
+export { createSnapshot } from "./create-snapshot";
+export { ApiError } from "./api/error";
+
+// ── Plugin system ────────────────────────────────────────────────────────────
+export type {
+  SnapshotPlugin,
+  SnapshotPluginContext,
+  SnapshotCallbacks,
+  SnapshotCoreConfig,
+  SnapshotCorePrimitives,
+  SnapshotInstance,
+  PluginHooks,
+  MergePluginHooks,
+} from "./plugins/types";
+
+// ── Plugin factories ─────────────────────────────────────────────────────────
+export { createAuthPlugin } from "./plugins/auth-plugin";
+export type { AuthPluginConfig, AuthPluginHooks } from "./plugins/auth-plugin";
+
+export { createWsPlugin } from "./plugins/ws-plugin";
+export type { WsPluginConfig, WsPluginHooks } from "./plugins/ws-plugin";
+
+export { createSsePlugin } from "./plugins/sse-plugin";
+export type { SsePluginConfig, SsePluginHooks } from "./plugins/sse-plugin";
+
+export { createCommunityPlugin } from "./plugins/community-plugin";
+export type {
+  CommunityPluginConfig,
+  CommunityPluginHooks,
+} from "./plugins/community-plugin";
+
+export { createWebhookPlugin } from "./plugins/webhook-plugin";
+
+export { createPushPlugin } from "./plugins/push-plugin";
+export type { PushPluginConfig, PushPluginHooks } from "./plugins/push-plugin";
+
+// ── Auth types ───────────────────────────────────────────────────────────────
+export { isMfaChallenge } from "./types";
+export { formatAuthError, createAuthErrorFormatter } from "./auth/error-format";
+export { defaultContract, mergeContract } from "./auth/contract";
 
 export type {
-  SnapshotConfig,
-  SnapshotInstance,
   AuthUser,
   LoginBody,
   LoginVars,
@@ -51,18 +86,34 @@ export type {
   PasskeyLoginVars,
   AuthErrorContext,
   AuthErrorConfig,
-} from './types'
+  SseEndpointConfig,
+  SseHookResult,
+  SseEventHookResult,
+  CommunityNotification,
+  CommunityNotificationType,
+  UseCommunityNotificationsOpts,
+  UseCommunityNotificationsResult,
+} from "./types";
 
-export type { TokenStorage } from './auth/storage'
-export type { WebSocketManager } from './ws/manager'
-export type { SseConnectionStatus } from './sse/manager'
-export type { SseConfig, SseEndpointConfig, SseHookResult, SseEventHookResult } from './types'
-export type { AuthContract, AuthContractConfig, AuthEndpoints, AuthHeaders } from './auth/contract'
-export { defaultContract, mergeContract } from './auth/contract'
-export { usePushNotifications } from './push/hook'
-export type { UsePushNotificationsOpts, UsePushNotificationsResult, PushState } from './push/hook'
-export type { CommunityNotification, CommunityNotificationType, UseCommunityNotificationsOpts, UseCommunityNotificationsResult } from './types'
-export { communityContract } from './community/contract'
+export type { TokenStorage } from "./auth/storage";
+export type { ApiClient, ApiClientConfig } from "./api/client";
+export type { WebSocketManager } from "./ws/manager";
+export type { SseConnectionStatus } from "./sse/manager";
+export type {
+  AuthContract,
+  AuthContractConfig,
+  AuthEndpoints,
+  AuthHeaders,
+} from "./auth/contract";
+export { usePushNotifications } from "./push/hook";
+export type {
+  UsePushNotificationsOpts,
+  UsePushNotificationsResult,
+  PushState,
+} from "./push/hook";
+
+// ── Community types ──────────────────────────────────────────────────────────
+export { communityContract } from "./community/contract";
 export type {
   ContainerResponse,
   CreateContainerBody,
@@ -87,9 +138,11 @@ export type {
   ListParams,
   ThreadListParams,
   ReplyListParams,
-} from './community/types'
-export type { CommunityHooks } from './community/hooks'
-export { webhooksContract } from './webhooks/contract'
+} from "./community/types";
+export type { CommunityHooks } from "./community/hooks";
+
+// ── Webhook types ────────────────────────────────────────────────────────────
+export { webhooksContract } from "./webhooks/contract";
 export type {
   WebhookEndpointResponse,
   CreateWebhookEndpointBody,
@@ -98,5 +151,5 @@ export type {
   ListWebhookEndpointsParams,
   ListWebhookDeliveriesParams,
   TestWebhookBody,
-} from './webhooks/types'
-export type { WebhookHooks } from './webhooks/hooks'
+} from "./webhooks/types";
+export type { WebhookHooks } from "./webhooks/hooks";

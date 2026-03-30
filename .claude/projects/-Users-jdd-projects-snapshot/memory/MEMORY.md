@@ -1,0 +1,8 @@
+- [User Profile](user_profile.md) — Solo dev, wants scalable software products, keeps day job
+- [Platform Vision](platform_vision.md) — Full-stack config-driven app platform (bunshot backend + snapshot frontend)
+- [Business Model](business_model.md) — Framework open source (MIT), platform app proprietary, no content marketing
+- [Architecture Decisions](architecture_decisions.md) — Config generation, audit suite, MCP, deploy pipeline, BYODB
+- [Prior Work](prior_work.md) — Config gen + audit suite built on bunshot, snapshot is the frontend framework
+- [Bunshot Plugin Roadmap](bunshot_plugin_roadmap.md) — Planned plugins: chat, notifications, oauth-server, transcode, game, MCP, LLM
+- [Data Generation Layer](data_generation_layer.md) — 12-op declarative entity/adapter code gen spec for bunshot
+- [Snapshot Roadmap](snapshot_roadmap.md) — Frontend features needed: offline docs, selective hooks, multi-client, apps-in-apps, config components, SSR
