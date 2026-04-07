@@ -103,6 +103,41 @@ export type {
   ConfirmManager,
 } from "./ui/actions/index";
 
+// Layout & Nav
+export {
+  Layout,
+  layoutConfigSchema,
+} from "./ui/components/layout/layout/index";
+export type {
+  LayoutConfig,
+  LayoutProps,
+  LayoutVariant,
+} from "./ui/components/layout/layout/index";
+export {
+  Nav,
+  navConfigSchema,
+  navItemSchema,
+  useNav,
+} from "./ui/components/layout/nav/index";
+export type {
+  NavConfig,
+  NavItemConfig,
+  ResolvedNavItem,
+  AuthUser,
+  UseNavResult,
+} from "./ui/components/layout/nav/index";
+
+// Component Registry
+export {
+  registerComponent,
+  getComponent,
+  getRegisteredTypes,
+} from "./ui/manifest/component-registry";
+export {
+  registerComponentSchema,
+  getComponentSchema,
+} from "./ui/manifest/schema";
+
 // Manifest & Rendering
 // export { ManifestApp } from './ui/manifest/manifest-app'
 // export { PageRenderer } from './ui/manifest/page-renderer'
