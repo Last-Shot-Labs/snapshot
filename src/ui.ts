@@ -209,6 +209,46 @@ export type {
   UseDetailCardResult,
 } from "./ui/components/data/detail-card/types";
 
+// AutoForm
+export { AutoForm } from "./ui/components/forms/auto-form/index";
+export {
+  autoFormConfigSchema,
+  fieldConfigSchema,
+} from "./ui/components/forms/auto-form/schema";
+export { useAutoForm } from "./ui/components/forms/auto-form/hook";
+export type {
+  AutoFormConfig,
+  FieldConfig,
+  FieldErrors,
+  TouchedFields,
+  UseAutoFormResult,
+} from "./ui/components/forms/auto-form/types";
+
+// Components — Modal
+export {
+  ModalComponent,
+  modalConfigSchema,
+} from "./ui/components/overlay/modal";
+export type { ModalConfig } from "./ui/components/overlay/modal";
+
+// Components — Drawer
+export {
+  DrawerComponent,
+  drawerConfigSchema,
+} from "./ui/components/overlay/drawer";
+export type { DrawerConfig } from "./ui/components/overlay/drawer";
+
+// Components — Tabs
+export {
+  TabsComponent,
+  tabsConfigSchema,
+  tabConfigSchema,
+} from "./ui/components/navigation/tabs";
+export type { TabsConfig, TabConfig } from "./ui/components/navigation/tabs";
+
+// Register all built-in components
+import "./ui/components/register";
+
 // Headless Hooks (Level 2/3)
 // export { useDataTable } from './ui/hooks/use-data-table'
 // export { useAutoForm } from './ui/hooks/use-auto-form'
