@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { ComponentRenderer } from "@lastshotlabs/snapshot/ui";
+import {
+  ComponentRenderer,
+  PageContextProvider,
+} from "@lastshotlabs/snapshot/ui";
 
 type Page = "dashboard" | "data" | "forms" | "overlay" | "structural";
 
@@ -31,7 +34,7 @@ const statCards = {
     },
     {
       type: "stat-card",
-      id: "users",
+      id: "users-count",
       data: "GET /api/stats/users",
       field: "value",
       label: "Total Users",
@@ -67,6 +70,7 @@ const statCards = {
 
 // ── Data page configs ───────────────────────────────────────────────────
 
+// DataTable uses useComponentData for data fetching
 const dataTable = {
   type: "data-table",
   id: "users-table",
@@ -74,8 +78,18 @@ const dataTable = {
   columns: [
     { field: "name", label: "Name", sortable: true },
     { field: "email", label: "Email", sortable: true },
-    { field: "role", label: "Role", format: "badge", badgeColors: { Admin: "blue", Editor: "green", Viewer: "gray" } },
-    { field: "status", label: "Status", format: "badge", badgeColors: { active: "green", inactive: "red" } },
+    {
+      field: "role",
+      label: "Role",
+      format: "badge",
+      badgeColors: { Admin: "blue", Editor: "green", Viewer: "gray" },
+    },
+    {
+      field: "status",
+      label: "Status",
+      format: "badge",
+      badgeColors: { active: "green", inactive: "red" },
+    },
     { field: "joined", label: "Joined", format: "date", sortable: true },
   ],
   searchable: { placeholder: "Search users...", fields: ["name", "email"] },
@@ -83,11 +97,28 @@ const dataTable = {
   pagination: { type: "offset", pageSize: 10 },
   density: "default",
   actions: [
-    { label: "Edit", icon: "pencil", action: { type: "toast", message: "Edit clicked for {name}" } },
-    { label: "Delete", icon: "trash", action: { type: "confirm", title: "Delete user?", message: "Are you sure you want to delete {name}?", onConfirm: { type: "toast", message: "Deleted {name}" } } },
+    {
+      label: "Edit",
+      icon: "pencil",
+      action: { type: "toast", message: "Edit clicked for {name}" },
+    },
+    {
+      label: "Delete",
+      icon: "trash",
+      action: {
+        type: "confirm",
+        title: "Delete user?",
+        message: "Are you sure you want to delete {name}?",
+        onConfirm: { type: "toast", message: "Deleted {name}" },
+      },
+    },
   ],
   bulkActions: [
-    { label: "Delete {count} users", icon: "trash", action: { type: "toast", message: "Bulk delete" } },
+    {
+      label: "Delete {count} users",
+      icon: "trash",
+      action: { type: "toast", message: "Bulk delete triggered" },
+    },
   ],
 };
 
@@ -106,7 +137,11 @@ const detailCard = {
     { field: "joined", label: "Member Since", format: "date" },
   ],
   actions: [
-    { label: "Edit Profile", icon: "pencil", action: { type: "toast", message: "Edit profile clicked" } },
+    {
+      label: "Edit Profile",
+      icon: "pencil",
+      action: { type: "toast", message: "Edit profile clicked" },
+    },
   ],
 };
 
@@ -118,16 +153,60 @@ const autoForm = {
   submit: "/api/users",
   method: "POST",
   fields: [
-    { name: "name", type: "text", label: "Full Name", required: true, placeholder: "Enter full name", validation: { minLength: 2 } },
-    { name: "email", type: "email", label: "Email Address", required: true, placeholder: "user@example.com" },
-    { name: "role", type: "select", label: "Role", options: [{ label: "Admin", value: "admin" }, { label: "Editor", value: "editor" }, { label: "Viewer", value: "viewer" }] },
-    { name: "department", type: "text", label: "Department", placeholder: "Engineering" },
-    { name: "bio", type: "textarea", label: "Bio", placeholder: "Tell us about yourself..." },
-    { name: "notifications", type: "checkbox", label: "Enable email notifications" },
+    {
+      name: "name",
+      type: "text",
+      label: "Full Name",
+      required: true,
+      placeholder: "Enter full name",
+      validation: { minLength: 2 },
+    },
+    {
+      name: "email",
+      type: "email",
+      label: "Email Address",
+      required: true,
+      placeholder: "user@example.com",
+    },
+    {
+      name: "role",
+      type: "select",
+      label: "Role",
+      options: [
+        { label: "Admin", value: "admin" },
+        { label: "Editor", value: "editor" },
+        { label: "Viewer", value: "viewer" },
+      ],
+    },
+    {
+      name: "department",
+      type: "text",
+      label: "Department",
+      placeholder: "Engineering",
+    },
+    {
+      name: "bio",
+      type: "textarea",
+      label: "Bio",
+      placeholder: "Tell us about yourself...",
+    },
+    {
+      name: "notifications",
+      type: "checkbox",
+      label: "Enable email notifications",
+    },
   ],
   submitLabel: "Create User",
-  onSuccess: { type: "toast", message: "User created successfully!", variant: "success" },
-  onError: { type: "toast", message: "Failed to create user", variant: "error" },
+  onSuccess: {
+    type: "toast",
+    message: "User created successfully!",
+    variant: "success",
+  },
+  onError: {
+    type: "toast",
+    message: "Failed to create user",
+    variant: "error",
+  },
 };
 
 // ── Overlay page configs ────────────────────────────────────────────────
@@ -135,7 +214,7 @@ const autoForm = {
 const modalTrigger = {
   type: "button",
   label: "Open Modal",
-  action: { type: "open-modal", modalId: "demo-modal" },
+  action: { type: "open-modal", modal: "demo-modal" },
   variant: "default",
 };
 
@@ -145,16 +224,30 @@ const modal = {
   title: "Example Modal",
   size: "md",
   content: [
-    { type: "heading", text: "Modal Content", level: 3 },
+    { type: "heading", text: "Send Feedback", level: 3 },
     {
       type: "form",
       submit: "/api/feedback",
       fields: [
-        { name: "feedback", type: "textarea", label: "Your Feedback", required: true },
-        { name: "rating", type: "select", label: "Rating", options: [{ label: "Great", value: "5" }, { label: "Good", value: "4" }, { label: "OK", value: "3" }] },
+        {
+          name: "feedback",
+          type: "textarea",
+          label: "Your Feedback",
+          required: true,
+        },
+        {
+          name: "rating",
+          type: "select",
+          label: "Rating",
+          options: [
+            { label: "Great", value: "5" },
+            { label: "Good", value: "4" },
+            { label: "OK", value: "3" },
+          ],
+        },
       ],
       submitLabel: "Submit Feedback",
-      onSuccess: { type: "close-modal", modalId: "demo-modal" },
+      onSuccess: { type: "close-modal", modal: "demo-modal" },
     },
   ],
 };
@@ -162,7 +255,7 @@ const modal = {
 const drawerTrigger = {
   type: "button",
   label: "Open Drawer",
-  action: { type: "open-modal", modalId: "demo-drawer" },
+  action: { type: "open-modal", modal: "demo-drawer" },
   variant: "outline",
 };
 
@@ -178,8 +271,24 @@ const drawer = {
       type: "form",
       submit: "/api/settings",
       fields: [
-        { name: "theme", type: "select", label: "Theme", options: [{ label: "Light", value: "light" }, { label: "Dark", value: "dark" }] },
-        { name: "language", type: "select", label: "Language", options: [{ label: "English", value: "en" }, { label: "Spanish", value: "es" }] },
+        {
+          name: "theme",
+          type: "select",
+          label: "Theme",
+          options: [
+            { label: "Light", value: "light" },
+            { label: "Dark", value: "dark" },
+          ],
+        },
+        {
+          name: "language",
+          type: "select",
+          label: "Language",
+          options: [
+            { label: "English", value: "en" },
+            { label: "Spanish", value: "es" },
+          ],
+        },
         { name: "compact", type: "checkbox", label: "Compact mode" },
       ],
       submitLabel: "Save Settings",
@@ -198,14 +307,25 @@ const tabs = {
       label: "Overview",
       content: [
         { type: "heading", text: "Overview Tab", level: 3 },
-        { type: "stat-card", data: "GET /api/stats/revenue", field: "value", label: "Revenue", format: "currency" },
+        {
+          type: "stat-card",
+          data: "GET /api/stats/revenue",
+          field: "value",
+          label: "Revenue",
+          format: "currency",
+        },
       ],
     },
     {
       label: "Details",
       content: [
         { type: "heading", text: "Details Tab", level: 3 },
-        { type: "detail-card", data: "GET /api/user/1", title: "User Info", fields: "auto" },
+        {
+          type: "detail-card",
+          data: "GET /api/user/1",
+          title: "User Info",
+          fields: "auto",
+        },
       ],
     },
     {
@@ -229,9 +349,36 @@ const structuralRow = {
       type: "row",
       gap: "sm",
       children: [
-        { type: "button", label: "Cancel", action: { type: "toast", message: "Cancelled" }, variant: "outline", size: "sm" },
-        { type: "button", label: "Save", action: { type: "toast", message: "Saved!", variant: "success" }, variant: "default", size: "sm" },
-        { type: "button", label: "Delete", action: { type: "confirm", title: "Delete?", message: "This cannot be undone.", onConfirm: { type: "toast", message: "Deleted" } }, variant: "destructive", size: "sm" },
+        {
+          type: "button",
+          label: "Cancel",
+          action: { type: "toast", message: "Cancelled" },
+          variant: "outline",
+          size: "sm",
+        },
+        {
+          type: "button",
+          label: "Save",
+          action: {
+            type: "toast",
+            message: "Saved!",
+            variant: "success",
+          },
+          variant: "default",
+          size: "sm",
+        },
+        {
+          type: "button",
+          label: "Delete",
+          action: {
+            type: "confirm",
+            title: "Delete?",
+            message: "This cannot be undone.",
+            onConfirm: { type: "toast", message: "Deleted" },
+          },
+          variant: "destructive",
+          size: "sm",
+        },
       ],
     },
   ],
@@ -262,7 +409,7 @@ const selectDemo = {
   placeholder: "Pick a color...",
 };
 
-// ── Page renderer ───────────────────────────────────────────────────────
+// ── UI helpers ──────────────────────────────────────────────────────────
 
 function ShowcaseSection({
   title,
@@ -283,74 +430,93 @@ function RenderConfig({ config }: { config: any }) {
   return <ComponentRenderer config={config} />;
 }
 
+/** Each page gets its own PageContextProvider for clean state isolation */
+function PageWrapper({ children }: { children: React.ReactNode }) {
+  return <PageContextProvider>{children}</PageContextProvider>;
+}
+
 function DashboardPage() {
   return (
-    <div className="showcase">
-      <ShowcaseSection title="Stat Cards">
-        <RenderConfig config={statCards} />
-      </ShowcaseSection>
-    </div>
+    <PageWrapper>
+      <div className="showcase">
+        <ShowcaseSection title="Stat Cards">
+          <RenderConfig config={statCards} />
+        </ShowcaseSection>
+      </div>
+    </PageWrapper>
   );
 }
 
 function DataPage() {
   return (
-    <div className="showcase">
-      <ShowcaseSection title="Data Table">
-        <RenderConfig config={dataTable} />
-      </ShowcaseSection>
-      <ShowcaseSection title="Detail Card">
-        <RenderConfig config={detailCard} />
-      </ShowcaseSection>
-    </div>
+    <PageWrapper>
+      <div className="showcase">
+        <ShowcaseSection title="Data Table">
+          <p style={{ fontSize: "0.8125rem", color: "var(--sn-color-muted-foreground, #6b7280)", marginBottom: "1rem" }}>
+            Note: DataTable currently expects data via FromRef. The table below shows the empty state.
+            StatCard and DetailCard fetch data directly from the mock API.
+          </p>
+          <RenderConfig config={dataTable} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Detail Card">
+          <RenderConfig config={detailCard} />
+        </ShowcaseSection>
+      </div>
+    </PageWrapper>
   );
 }
 
 function FormsPage() {
   return (
-    <div className="showcase">
-      <ShowcaseSection title="Auto Form">
-        <RenderConfig config={autoForm} />
-      </ShowcaseSection>
-    </div>
+    <PageWrapper>
+      <div className="showcase">
+        <ShowcaseSection title="Auto Form">
+          <RenderConfig config={autoForm} />
+        </ShowcaseSection>
+      </div>
+    </PageWrapper>
   );
 }
 
 function OverlayPage() {
   return (
-    <div className="showcase">
-      <ShowcaseSection title="Modal">
-        <div className="showcase__row">
-          <RenderConfig config={modalTrigger} />
-        </div>
-        <RenderConfig config={modal} />
-      </ShowcaseSection>
-      <ShowcaseSection title="Drawer">
-        <div className="showcase__row">
-          <RenderConfig config={drawerTrigger} />
-        </div>
-        <RenderConfig config={drawer} />
-      </ShowcaseSection>
-      <ShowcaseSection title="Tabs">
-        <RenderConfig config={tabs} />
-      </ShowcaseSection>
-    </div>
+    <PageWrapper>
+      <div className="showcase">
+        <ShowcaseSection title="Modal">
+          <div className="showcase__row">
+            <RenderConfig config={modalTrigger} />
+          </div>
+          <RenderConfig config={modal} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Drawer">
+          <div className="showcase__row">
+            <RenderConfig config={drawerTrigger} />
+          </div>
+          <RenderConfig config={drawer} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Tabs">
+          <RenderConfig config={tabs} />
+        </ShowcaseSection>
+      </div>
+    </PageWrapper>
   );
 }
 
 function StructuralPage() {
   return (
-    <div className="showcase">
-      <ShowcaseSection title="Row Layout + Buttons">
-        <RenderConfig config={structuralRow} />
-      </ShowcaseSection>
-      <ShowcaseSection title="Headings">
-        <RenderConfig config={headings} />
-      </ShowcaseSection>
-      <ShowcaseSection title="Select">
-        <RenderConfig config={selectDemo} />
-      </ShowcaseSection>
-    </div>
+    <PageWrapper>
+      <div className="showcase">
+        <ShowcaseSection title="Row Layout + Buttons">
+          <RenderConfig config={structuralRow} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Headings">
+          <RenderConfig config={headings} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Select">
+          <RenderConfig config={selectDemo} />
+        </ShowcaseSection>
+      </div>
+    </PageWrapper>
   );
 }
 

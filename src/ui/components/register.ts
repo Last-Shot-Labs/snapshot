@@ -11,6 +11,8 @@ import { AutoForm } from "./forms/auto-form/index";
 import { autoFormConfigSchema } from "./forms/auto-form/schema";
 import { ModalComponent, modalConfigSchema } from "./overlay/modal";
 import { DrawerComponent, drawerConfigSchema } from "./overlay/drawer";
+import { DetailCard } from "./data/detail-card/index";
+import { detailCardConfigSchema } from "./data/detail-card/schema";
 import { TabsComponent, tabsConfigSchema } from "./navigation/tabs";
 
 registerComponent(
@@ -30,6 +32,12 @@ registerComponent(
   AutoForm as Parameters<typeof registerComponent>[1],
 );
 registerComponentSchema("form", autoFormConfigSchema);
+
+registerComponent(
+  "detail-card",
+  DetailCard as Parameters<typeof registerComponent>[1],
+);
+registerComponentSchema("detail-card", detailCardConfigSchema);
 
 registerComponent(
   "modal",

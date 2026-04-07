@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Provider as JotaiProvider, createStore } from "jotai";
 import {
   resolveTokens,
-  useTokenEditor,
-  getAllFlavors,
   PageContextProvider,
-  AppContextProvider,
-  usePublish,
   SnapshotApiContext,
-  ComponentRenderer,
+  ToastContainer,
+  ConfirmDialog,
 } from "@lastshotlabs/snapshot/ui";
 import { TokenEditorSidebar } from "./token-editor";
 import { ComponentShowcase } from "./showcase";
@@ -19,13 +18,23 @@ style.id = "snapshot-tokens";
 style.textContent = initialCss;
 document.head.appendChild(style);
 
-// Register built-in components by importing the side-effect module
-import "@lastshotlabs/snapshot/ui";
+// Create providers once
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      staleTime: 60_000,
+    },
+  },
+});
+const jotaiStore = createStore();
 
-// Mock API client for the playground
+// Mock API client matching the interface components expect
 const mockApi = {
   get: async (url: string) => {
-    // Simulate API responses for demo components
+    // Simulate network delay
+    await new Promise((r) => setTimeout(r, 300));
+
     if (url.includes("/stats/revenue")) {
       return { value: 128450, change: 12.5 };
     }
@@ -63,10 +72,22 @@ const mockApi = {
     }
     return {};
   },
-  post: async () => ({ success: true }),
-  put: async () => ({ success: true }),
-  patch: async () => ({ success: true }),
-  delete: async () => ({ success: true }),
+  post: async (_url: string, _body: unknown) => {
+    await new Promise((r) => setTimeout(r, 500));
+    return { success: true };
+  },
+  put: async (_url: string, _body: unknown) => {
+    await new Promise((r) => setTimeout(r, 500));
+    return { success: true };
+  },
+  patch: async (_url: string, _body: unknown) => {
+    await new Promise((r) => setTimeout(r, 500));
+    return { success: true };
+  },
+  delete: async (_url: string) => {
+    await new Promise((r) => setTimeout(r, 500));
+    return { success: true };
+  },
 };
 
 export function App() {
@@ -77,24 +98,28 @@ export function App() {
   }, [darkMode]);
 
   return (
-    <SnapshotApiContext.Provider value={mockApi as any}>
-      <div className="playground">
-        <TokenEditorSidebar />
-        <div className="playground__main">
-          <div className="playground__header">
-            <h1>Snapshot Playground</h1>
-            <button
-              className="dark-toggle"
-              onClick={() => setDarkMode(!darkMode)}
-            >
-              {darkMode ? "Light Mode" : "Dark Mode"}
-            </button>
+    <QueryClientProvider client={queryClient}>
+      <JotaiProvider store={jotaiStore}>
+        <SnapshotApiContext.Provider value={mockApi as any}>
+          <div className="playground">
+            <TokenEditorSidebar />
+            <div className="playground__main">
+              <div className="playground__header">
+                <h1>Snapshot Playground</h1>
+                <button
+                  className="dark-toggle"
+                  onClick={() => setDarkMode(!darkMode)}
+                >
+                  {darkMode ? "Light Mode" : "Dark Mode"}
+                </button>
+              </div>
+              <ComponentShowcase />
+            </div>
+            <ToastContainer />
+            <ConfirmDialog />
           </div>
-          <PageContextProvider>
-            <ComponentShowcase />
-          </PageContextProvider>
-        </div>
-      </div>
-    </SnapshotApiContext.Provider>
+        </SnapshotApiContext.Provider>
+      </JotaiProvider>
+    </QueryClientProvider>
   );
 }
