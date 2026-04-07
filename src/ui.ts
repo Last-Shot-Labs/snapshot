@@ -143,6 +143,28 @@ export type {
   PageRendererProps,
 } from "./ui/manifest/index";
 
+// Layout & Nav Components
+export {
+  Layout,
+  layoutConfigSchema,
+} from "./ui/components/layout/layout/index";
+export type {
+  LayoutConfig,
+  LayoutProps,
+  LayoutVariant,
+} from "./ui/components/layout/layout/index";
+export {
+  Nav,
+  navConfigSchema,
+  useNav,
+} from "./ui/components/layout/nav/index";
+export type {
+  NavConfig,
+  NavItemConfig,
+  ResolvedNavItem,
+  UseNavResult,
+} from "./ui/components/layout/nav/index";
+
 // Headless Hooks (Level 2/3)
 // export { useDataTable } from './ui/hooks/use-data-table'
 // export { useAutoForm } from './ui/hooks/use-auto-form'
