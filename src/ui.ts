@@ -1,0 +1,38 @@
+/**
+ * @lastshotlabs/snapshot/ui
+ *
+ * Config-driven UI entry point. Everything needed to build applications
+ * from a JSON manifest — components, tokens, flavors, page rendering,
+ * context system, actions, and headless hooks.
+ *
+ * SDK consumers who write their own React import from '@lastshotlabs/snapshot'.
+ * Config-driven consumers import from '@lastshotlabs/snapshot/ui'.
+ */
+
+// Tokens & Flavors
+// export { resolveTokens } from './ui/tokens/resolve'
+// export { useTokenEditor } from './ui/tokens/editor'
+// export { defineFlavor, builtInFlavors } from './ui/tokens/flavors'
+
+// Context & Data Binding
+// export { PageContext, createPageContext } from './ui/context/page-context'
+// export { AppContext, createAppContext } from './ui/context/app-context'
+
+// Actions
+// export { executeAction } from './ui/actions/executor'
+
+// Manifest & Rendering
+// export { ManifestApp } from './ui/manifest/manifest-app'
+// export { PageRenderer } from './ui/manifest/page-renderer'
+// export { manifestSchema } from './ui/manifest/schema'
+
+// Headless Hooks (Level 2/3)
+// export { useDataTable } from './ui/hooks/use-data-table'
+// export { useAutoForm } from './ui/hooks/use-auto-form'
+// export { usePageContext } from './ui/hooks/use-page-context'
+// export { useAppContext } from './ui/hooks/use-app-context'
+
+// Types
+// export type { ThemeConfig, FlavorConfig } from './ui/tokens/types'
+// export type { ActionConfig } from './ui/actions/types'
+// export type { ManifestConfig, PageConfig } from './ui/manifest/types'
