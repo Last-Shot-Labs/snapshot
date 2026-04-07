@@ -234,6 +234,8 @@ export function StatCard({ config }: { config: StatCardConfig }) {
         display: "flex",
         flexDirection: "column",
         gap: "var(--sn-spacing-sm, 0.5rem)",
+        minWidth: 0,
+        overflow: "hidden",
       }}
     >
       {/* Loading state */}
@@ -339,10 +341,12 @@ export function StatCard({ config }: { config: StatCardConfig }) {
           <div
             data-testid="stat-card-value"
             style={{
-              fontSize: "1.875rem",
-              fontWeight: 700,
+              fontSize: "var(--sn-font-size-xl, 1.25rem)",
+              fontWeight: "var(--sn-font-weight-bold, 700)" as string,
               color: "var(--sn-color-foreground, #111827)",
-              lineHeight: 1.2,
+              lineHeight: "var(--sn-leading-tight, 1.25)",
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
             }}
           >
             {value}

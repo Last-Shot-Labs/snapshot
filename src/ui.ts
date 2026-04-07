@@ -246,6 +246,13 @@ export {
 } from "./ui/components/navigation/tabs";
 export type { TabsConfig, TabConfig } from "./ui/components/navigation/tabs";
 
+// Components — RichTextEditor
+export {
+  RichTextEditor,
+  richTextEditorConfigSchema,
+} from "./ui/components/content/rich-text-editor/index";
+export type { RichTextEditorConfig } from "./ui/components/content/rich-text-editor/index";
+
 // Icons
 export { Icon, ICON_PATHS } from "./ui/icons/index";
 export type { IconProps } from "./ui/icons/index";

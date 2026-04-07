@@ -65,15 +65,19 @@ function InlineComponentRenderer({ config }: { config: ComponentConfig }) {
   }
 
   const span = useResponsiveValue(config.span ?? undefined);
-  const style: CSSProperties | undefined = span
-    ? { gridColumn: `span ${span}` }
-    : undefined;
+  const configStyle = (config as Record<string, unknown>).style as
+    | Record<string, string | number>
+    | undefined;
+  const style: CSSProperties = {
+    ...(span ? { gridColumn: `span ${span}` } : undefined),
+    ...(configStyle as CSSProperties),
+  };
 
   return (
     <div
       data-snapshot-component={config.type}
       className={config.className}
-      style={style}
+      style={Object.keys(style).length > 0 ? style : undefined}
     >
       <Component config={config as Record<string, unknown>} />
     </div>
@@ -130,13 +134,39 @@ function Row({ config }: { config: Record<string, unknown> }) {
  * Heading — renders h1-h6 with text from config or FromRef.
  * Uses token-based font sizing.
  */
+/** Font size token per heading level. */
+const HEADING_SIZE: Record<number, string> = {
+  1: "var(--sn-font-size-4xl, 2.25rem)",
+  2: "var(--sn-font-size-3xl, 1.875rem)",
+  3: "var(--sn-font-size-2xl, 1.5rem)",
+  4: "var(--sn-font-size-xl, 1.25rem)",
+  5: "var(--sn-font-size-lg, 1.125rem)",
+  6: "var(--sn-font-size-md, 1rem)",
+};
+
 function Heading({ config }: { config: Record<string, unknown> }) {
   const headingConfig = config as unknown as HeadingConfig;
   const text = useSubscribe(headingConfig.text);
   const level = headingConfig.level ?? 2;
   const Tag = `h${level}` as const;
 
-  return <Tag>{typeof text === "string" ? text : String(text ?? "")}</Tag>;
+  return (
+    <Tag
+      style={{
+        fontSize: HEADING_SIZE[level],
+        fontWeight: level <= 2
+          ? "var(--sn-font-weight-bold, 700)"
+          : "var(--sn-font-weight-semibold, 600)",
+        lineHeight: "var(--sn-leading-tight, 1.25)",
+        letterSpacing: level <= 2
+          ? "var(--sn-tracking-tight, -0.025em)"
+          : "var(--sn-tracking-normal, 0)",
+        color: "var(--sn-color-foreground, #111827)",
+      }}
+    >
+      {typeof text === "string" ? text : String(text ?? "")}
+    </Tag>
+  );
 }
 
 // ── Button ──────────────────────────────────────────────────────────────────

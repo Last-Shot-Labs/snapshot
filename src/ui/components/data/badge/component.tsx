@@ -19,12 +19,21 @@ const SIZE_MAP = {
 } as const;
 
 /**
+ * Colors where the base token is a near-white/dark background, not a vivid
+ * accent.  These need special handling — their `-foreground` companion is
+ * the readable text color, not the base value itself.
+ */
+const BG_COLORS = new Set(["secondary", "muted", "accent"]);
+
+/**
  * Resolve variant-specific styles for a badge.
  */
 function getVariantStyles(
   variant: "solid" | "soft" | "outline" | "dot",
   color: string,
 ): React.CSSProperties {
+  const isBgColor = BG_COLORS.has(color);
+
   switch (variant) {
     case "solid":
       return {
@@ -32,20 +41,31 @@ function getVariantStyles(
         color: `var(--sn-color-${color}-foreground)`,
       };
     case "soft":
-      return {
-        backgroundColor: "var(--sn-color-secondary)",
-        color: `var(--sn-color-${color})`,
-      };
+      return isBgColor
+        ? {
+            backgroundColor: `var(--sn-color-${color})`,
+            color: `var(--sn-color-${color}-foreground)`,
+          }
+        : {
+            backgroundColor: `color-mix(in oklch, var(--sn-color-${color}) 15%, var(--sn-color-card, #ffffff))`,
+            color: `var(--sn-color-${color})`,
+          };
     case "outline":
-      return {
-        backgroundColor: "transparent",
-        border: `1px solid var(--sn-color-${color})`,
-        color: `var(--sn-color-${color})`,
-      };
+      return isBgColor
+        ? {
+            backgroundColor: "transparent",
+            border: `var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)`,
+            color: `var(--sn-color-${color}-foreground)`,
+          }
+        : {
+            backgroundColor: "transparent",
+            border: `var(--sn-border-thin, 1px) solid var(--sn-color-${color})`,
+            color: `var(--sn-color-${color})`,
+          };
     case "dot":
       return {
         backgroundColor: "var(--sn-color-secondary)",
-        color: `var(--sn-color-${color})`,
+        color: "var(--sn-color-secondary-foreground)",
       };
   }
 }
@@ -81,7 +101,7 @@ export function Badge({ config }: { config: BadgeConfig }) {
 
   if (visible === false) return null;
 
-  const color = config.color ?? "secondary";
+  const color = config.color ?? "primary";
   const variant = config.variant ?? "soft";
   const size = config.size ?? "md";
   const rounded = config.rounded ?? true;

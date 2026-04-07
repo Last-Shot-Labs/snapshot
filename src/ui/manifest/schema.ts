@@ -91,8 +91,10 @@ export const baseComponentConfigSchema = z.object({
   visible: z
     .union([z.boolean(), responsiveSchema(z.boolean()), fromRefSchema])
     .optional(),
-  /** Additional CSS class. */
+  /** Additional CSS class (supports Tailwind utility classes). */
   className: z.string().optional(),
+  /** Inline style overrides as a CSS property map. */
+  style: z.record(z.union([z.string(), z.number()])).optional(),
   /** Grid span when inside a row. */
   span: responsiveSchema(z.number().int().min(1).max(12)).optional(),
 });

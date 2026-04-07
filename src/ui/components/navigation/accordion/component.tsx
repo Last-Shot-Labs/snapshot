@@ -167,30 +167,34 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
               <Chevron open={isOpen} />
             </button>
 
-            {/* Content panel */}
+            {/* Content panel — uses CSS grid row trick for smooth height animation */}
             <div
               data-testid={`accordion-panel-${index}`}
               role="region"
               style={{
-                maxHeight: isOpen ? "2000px" : "0",
-                overflow: "hidden",
-                transition: `max-height var(--sn-duration-normal, 250ms) var(--sn-ease-out, ease-out)`,
+                display: "grid",
+                gridTemplateRows: isOpen ? "1fr" : "0fr",
+                transition: `grid-template-rows var(--sn-duration-normal, 250ms) var(--sn-ease-out, ease-out)`,
               }}
             >
-              <div
-                style={{
-                  padding: `0 var(--sn-spacing-md, 1rem) var(--sn-spacing-md, 1rem)`,
-                }}
-              >
-                {item.content.map((child, childIndex) => (
-                  <ComponentRenderer
-                    key={
-                      (child as ComponentConfig).id ??
-                      `accordion-${index}-child-${childIndex}`
-                    }
-                    config={child as ComponentConfig}
-                  />
-                ))}
+              <div style={{ overflow: "hidden" }}>
+                <div
+                  style={{
+                    padding: `0 var(--sn-spacing-md, 1rem) var(--sn-spacing-md, 1rem)`,
+                    opacity: isOpen ? 1 : 0,
+                    transition: `opacity var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)`,
+                  }}
+                >
+                  {item.content.map((child, childIndex) => (
+                    <ComponentRenderer
+                      key={
+                        (child as ComponentConfig).id ??
+                        `accordion-${index}-child-${childIndex}`
+                      }
+                      config={child as ComponentConfig}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 

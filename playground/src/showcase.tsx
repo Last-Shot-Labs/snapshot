@@ -420,15 +420,17 @@ const badgeRow = {
   gap: "sm",
   wrap: true,
   children: [
-    { type: "badge", text: "Default", color: "secondary", variant: "soft" },
+    { type: "badge", text: "Default", variant: "soft" },
     { type: "badge", text: "Primary", color: "primary", variant: "solid" },
     { type: "badge", text: "Success", color: "success", variant: "soft" },
     { type: "badge", text: "Warning", color: "warning", variant: "outline" },
     { type: "badge", text: "Destructive", color: "destructive", variant: "solid" },
     { type: "badge", text: "Info", color: "info", variant: "soft" },
-    { type: "badge", text: "Dot Variant", color: "primary", variant: "dot" },
-    { type: "badge", text: "Large", color: "accent", variant: "solid", size: "lg" },
-    { type: "badge", text: "Small", color: "muted", variant: "outline", size: "sm" },
+    { type: "badge", text: "Dot Variant", color: "success", variant: "dot" },
+    { type: "badge", text: "Large", color: "info", variant: "solid", size: "lg" },
+    { type: "badge", text: "Small", color: "warning", variant: "outline", size: "sm" },
+    { type: "badge", text: "Muted", color: "muted", variant: "soft" },
+    { type: "badge", text: "Secondary", color: "secondary", variant: "outline" },
   ],
 };
 
@@ -614,7 +616,7 @@ const timelineDemo = {
 const codeBlockDemo = {
   type: "code-block",
   title: "example.ts",
-  language: "TypeScript",
+  language: "typescript",
   showLineNumbers: true,
   showCopy: true,
   code: `import { createSnapshot } from "@lastshotlabs/snapshot";
@@ -625,6 +627,74 @@ const app = createSnapshot({
 });
 
 export const { useLogin, useLogout, useUser } = app;`,
+};
+
+const codeBlockPythonDemo = {
+  type: "code-block",
+  title: "server.py",
+  language: "python",
+  showLineNumbers: true,
+  code: `from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class User(BaseModel):
+    name: str
+    email: str
+    role: str = "viewer"
+
+@app.get("/users/{user_id}")
+async def get_user(user_id: int) -> User:
+    """Fetch a user by ID."""
+    if user_id <= 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return User(name="Alice", email="alice@example.com")`,
+};
+
+const richTextEditorDemo = {
+  type: "rich-text-editor",
+  content: `# Welcome to the Editor
+
+This is a **rich text editor** with _markdown_ support.
+
+## Features
+
+- Bold, italic, strikethrough formatting
+- Headings (h1-h3)
+- Bullet and ordered lists
+- Inline \`code\` and code blocks
+- [Links](https://example.com)
+- Blockquotes
+
+> This is a blockquote with **bold** text.
+
+\`\`\`typescript
+const greeting = "Hello, world!";
+console.log(greeting);
+\`\`\`
+
+Try editing this content!`,
+  toolbar: true,
+  mode: "edit",
+  minHeight: "300px",
+  maxHeight: "500px",
+  id: "demo-editor",
+};
+
+const richTextEditorPreviewDemo = {
+  type: "rich-text-editor",
+  content: `# Read-Only Preview
+
+This editor is in **preview mode**. The toolbar is hidden and content is rendered as formatted markdown.
+
+- Item one
+- Item two
+- Item three`,
+  readonly: true,
+  toolbar: false,
+  mode: "preview",
+  minHeight: "150px",
 };
 
 const fileUploaderDemo = {
@@ -880,11 +950,20 @@ function ContentPage() {
   return (
     <PageWrapper>
       <div className="showcase">
+        <ShowcaseSection title="Rich Text Editor">
+          <RenderConfig config={richTextEditorDemo} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Rich Text Editor (Preview Only)">
+          <RenderConfig config={richTextEditorPreviewDemo} />
+        </ShowcaseSection>
         <ShowcaseSection title="Timeline">
           <RenderConfig config={timelineDemo} />
         </ShowcaseSection>
-        <ShowcaseSection title="Code Block">
+        <ShowcaseSection title="Code Block (TypeScript)">
           <RenderConfig config={codeBlockDemo} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Code Block (Python)">
+          <RenderConfig config={codeBlockPythonDemo} />
         </ShowcaseSection>
         <ShowcaseSection title="File Uploader">
           <RenderConfig config={fileUploaderDemo} />

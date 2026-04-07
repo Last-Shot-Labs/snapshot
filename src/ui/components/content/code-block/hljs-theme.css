@@ -1,0 +1,149 @@
+/* ── Light mode syntax highlighting colors ─────────────────────── */
+[data-snapshot-component="code-block"],
+[data-snapshot-component="rich-text-editor"] {
+  --sn-syn-keyword: #8250df;
+  --sn-syn-string: #0a3069;
+  --sn-syn-comment: #6e7781;
+  --sn-syn-number: #0550ae;
+  --sn-syn-function: #8250df;
+  --sn-syn-builtin: #0550ae;
+  --sn-syn-type: #953800;
+  --sn-syn-variable: #953800;
+  --sn-syn-literal: #0550ae;
+  --sn-syn-attr: #116329;
+  --sn-syn-tag: #116329;
+  --sn-syn-meta: #6e7781;
+  --sn-syn-regexp: #0a3069;
+  --sn-syn-addition: #116329;
+  --sn-syn-deletion: #82071e;
+  --sn-syn-addition-bg: #dafbe1;
+  --sn-syn-deletion-bg: #ffebe9;
+}
+
+/* ── Dark mode syntax highlighting colors ──────────────────────── */
+.dark [data-snapshot-component="code-block"],
+.dark [data-snapshot-component="rich-text-editor"] {
+  --sn-syn-keyword: #ff7b72;
+  --sn-syn-string: #a5d6ff;
+  --sn-syn-comment: #8b949e;
+  --sn-syn-number: #79c0ff;
+  --sn-syn-function: #d2a8ff;
+  --sn-syn-builtin: #79c0ff;
+  --sn-syn-type: #ffa657;
+  --sn-syn-variable: #ffa657;
+  --sn-syn-literal: #79c0ff;
+  --sn-syn-attr: #7ee787;
+  --sn-syn-tag: #7ee787;
+  --sn-syn-meta: #8b949e;
+  --sn-syn-regexp: #a5d6ff;
+  --sn-syn-addition: #aff5b4;
+  --sn-syn-deletion: #ffdcd7;
+  --sn-syn-addition-bg: #033a16;
+  --sn-syn-deletion-bg: #67060c;
+}
+
+/* ── Token class mappings ──────────────────────────────────────── */
+[data-snapshot-component="code-block"] .hljs-keyword,
+[data-snapshot-component="rich-text-editor"] .hljs-keyword,
+[data-snapshot-component="code-block"] .hljs-selector-tag,
+[data-snapshot-component="rich-text-editor"] .hljs-selector-tag {
+  color: var(--sn-syn-keyword);
+}
+
+[data-snapshot-component="code-block"] .hljs-string,
+[data-snapshot-component="rich-text-editor"] .hljs-string,
+[data-snapshot-component="code-block"] .hljs-doctag,
+[data-snapshot-component="rich-text-editor"] .hljs-doctag {
+  color: var(--sn-syn-string);
+}
+
+[data-snapshot-component="code-block"] .hljs-comment,
+[data-snapshot-component="rich-text-editor"] .hljs-comment {
+  color: var(--sn-syn-comment);
+  font-style: italic;
+}
+
+[data-snapshot-component="code-block"] .hljs-number,
+[data-snapshot-component="rich-text-editor"] .hljs-number {
+  color: var(--sn-syn-number);
+}
+
+[data-snapshot-component="code-block"] .hljs-title,
+[data-snapshot-component="rich-text-editor"] .hljs-title,
+[data-snapshot-component="code-block"] .hljs-function,
+[data-snapshot-component="rich-text-editor"] .hljs-function {
+  color: var(--sn-syn-function);
+}
+
+[data-snapshot-component="code-block"] .hljs-built_in,
+[data-snapshot-component="rich-text-editor"] .hljs-built_in {
+  color: var(--sn-syn-builtin);
+}
+
+[data-snapshot-component="code-block"] .hljs-type,
+[data-snapshot-component="rich-text-editor"] .hljs-type {
+  color: var(--sn-syn-type);
+}
+
+[data-snapshot-component="code-block"] .hljs-variable,
+[data-snapshot-component="rich-text-editor"] .hljs-variable,
+[data-snapshot-component="code-block"] .hljs-template-variable,
+[data-snapshot-component="rich-text-editor"] .hljs-template-variable {
+  color: var(--sn-syn-variable);
+}
+
+[data-snapshot-component="code-block"] .hljs-literal,
+[data-snapshot-component="rich-text-editor"] .hljs-literal {
+  color: var(--sn-syn-literal);
+}
+
+[data-snapshot-component="code-block"] .hljs-attr,
+[data-snapshot-component="rich-text-editor"] .hljs-attr,
+[data-snapshot-component="code-block"] .hljs-attribute,
+[data-snapshot-component="rich-text-editor"] .hljs-attribute {
+  color: var(--sn-syn-attr);
+}
+
+[data-snapshot-component="code-block"] .hljs-selector-class,
+[data-snapshot-component="rich-text-editor"] .hljs-selector-class,
+[data-snapshot-component="code-block"] .hljs-tag,
+[data-snapshot-component="rich-text-editor"] .hljs-tag {
+  color: var(--sn-syn-tag);
+}
+
+[data-snapshot-component="code-block"] .hljs-meta,
+[data-snapshot-component="rich-text-editor"] .hljs-meta {
+  color: var(--sn-syn-meta);
+}
+
+[data-snapshot-component="code-block"] .hljs-regexp,
+[data-snapshot-component="rich-text-editor"] .hljs-regexp {
+  color: var(--sn-syn-regexp);
+}
+
+[data-snapshot-component="code-block"] .hljs-params,
+[data-snapshot-component="rich-text-editor"] .hljs-params {
+  color: inherit;
+}
+
+[data-snapshot-component="code-block"] .hljs-addition,
+[data-snapshot-component="rich-text-editor"] .hljs-addition {
+  color: var(--sn-syn-addition);
+  background-color: var(--sn-syn-addition-bg);
+}
+
+[data-snapshot-component="code-block"] .hljs-deletion,
+[data-snapshot-component="rich-text-editor"] .hljs-deletion {
+  color: var(--sn-syn-deletion);
+  background-color: var(--sn-syn-deletion-bg);
+}
+
+[data-snapshot-component="code-block"] .hljs-emphasis,
+[data-snapshot-component="rich-text-editor"] .hljs-emphasis {
+  font-style: italic;
+}
+
+[data-snapshot-component="code-block"] .hljs-strong,
+[data-snapshot-component="rich-text-editor"] .hljs-strong {
+  font-weight: 700;
+}

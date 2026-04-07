@@ -24,8 +24,10 @@ export const codeBlockConfigSchema = z
     type: z.literal("code-block"),
     /** The code content to display. Supports FromRef. */
     code: z.union([z.string(), fromRefSchema]),
-    /** Language label (displayed in title bar, not used for highlighting). */
+    /** Language for display and syntax highlighting (e.g. "typescript", "python"). */
     language: z.string().optional(),
+    /** Enable syntax highlighting via highlight.js. Default: true. */
+    highlight: z.boolean().optional(),
     /** Show line numbers. Default: false. */
     showLineNumbers: z.boolean().optional(),
     /** Show copy-to-clipboard button. Default: true. */

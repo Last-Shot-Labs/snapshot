@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
+import { Icon } from "../../../icons/index";
 import type { AlertConfig } from "./types";
 
-/** Default icons per variant. */
+/** Default icon names per variant. */
 const DEFAULT_ICONS: Record<string, string> = {
-  info: "\u24d8",
-  success: "\u2714",
-  warning: "\u26a0",
-  destructive: "\u26d4",
+  info: "info",
+  success: "check-circle",
+  warning: "alert-triangle",
+  destructive: "alert-circle",
 };
 
 /** Map variant to its semantic color token name. */
@@ -92,13 +93,13 @@ export function Alert({ config }: { config: AlertConfig }) {
           data-testid="alert-icon"
           aria-hidden="true"
           style={{
-            fontSize: "var(--sn-font-size-md, 1rem)",
             color: `var(--sn-color-${colorToken === "border" ? "muted-foreground" : colorToken})`,
             flexShrink: 0,
-            marginTop: "var(--sn-spacing-xs, 0.25rem)",
+            marginTop: "2px",
+            display: "flex",
           }}
         >
-          {icon}
+          <Icon name={icon} size={18} />
         </span>
       )}
 
@@ -166,9 +167,11 @@ export function Alert({ config }: { config: AlertConfig }) {
             fontSize: "var(--sn-font-size-md, 1rem)",
             lineHeight: 1,
             flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
           }}
         >
-          \u2715
+          <Icon name="x" size={16} />
         </button>
       )}
     </div>

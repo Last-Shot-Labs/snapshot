@@ -498,7 +498,10 @@ export function resolveTokens(config: ThemeConfig = {}): string {
   lightVars.push(`  --sn-radius-xl: 1rem;`);
   lightVars.push(`  --sn-radius-full: 9999px;`);
 
-  // Spacing — emit all scale stops
+  // Spacing — emit all scale stops (2xs through 3xl)
+  lightVars.push(
+    `  --sn-spacing-2xs: ${(0.125 * spacingMultiplier).toFixed(3)}rem;`,
+  );
   lightVars.push(
     `  --sn-spacing-xs: ${(0.25 * spacingMultiplier).toFixed(3)}rem;`,
   );
@@ -513,6 +516,12 @@ export function resolveTokens(config: ThemeConfig = {}): string {
   );
   lightVars.push(
     `  --sn-spacing-xl: ${(2 * spacingMultiplier).toFixed(3)}rem;`,
+  );
+  lightVars.push(
+    `  --sn-spacing-2xl: ${(3 * spacingMultiplier).toFixed(3)}rem;`,
+  );
+  lightVars.push(
+    `  --sn-spacing-3xl: ${(4 * spacingMultiplier).toFixed(3)}rem;`,
   );
 
   // Font
@@ -538,6 +547,9 @@ export function resolveTokens(config: ThemeConfig = {}): string {
   lightVars.push(`  --sn-font-size-md: ${base}px;`);
   lightVars.push(`  --sn-font-size-lg: ${(base * 1.125).toFixed(1)}px;`);
   lightVars.push(`  --sn-font-size-xl: ${(base * 1.25).toFixed(1)}px;`);
+  lightVars.push(`  --sn-font-size-2xl: ${(base * 1.5).toFixed(1)}px;`);
+  lightVars.push(`  --sn-font-size-3xl: ${(base * 1.875).toFixed(1)}px;`);
+  lightVars.push(`  --sn-font-size-4xl: ${(base * 2.25).toFixed(1)}px;`);
   // Font weight scale
   lightVars.push(`  --sn-font-weight-light: 300;`);
   lightVars.push(`  --sn-font-weight-normal: 400;`);
@@ -611,6 +623,21 @@ export function resolveTokens(config: ThemeConfig = {}): string {
   // Color aliases
   lightVars.push(`  --sn-color-surface: var(--sn-color-card);`);
   lightVars.push(`  --sn-color-text: var(--sn-color-foreground);`);
+
+  // Container max-widths
+  lightVars.push(`  --sn-container-xs: 20rem;`);
+  lightVars.push(`  --sn-container-sm: 24rem;`);
+  lightVars.push(`  --sn-container-md: 32rem;`);
+  lightVars.push(`  --sn-container-lg: 42rem;`);
+  lightVars.push(`  --sn-container-xl: 56rem;`);
+  lightVars.push(`  --sn-container-2xl: 72rem;`);
+  lightVars.push(`  --sn-container-full: 100%;`);
+  lightVars.push(`  --sn-container-prose: 65ch;`);
+
+  // Focus ring
+  lightVars.push(`  --sn-ring-width: 2px;`);
+  lightVars.push(`  --sn-ring-offset: 2px;`);
+  lightVars.push(`  --sn-ring-color: var(--sn-color-ring, var(--sn-color-primary));`);
 
   // Modal sizes
   lightVars.push(`  --sn-modal-size-sm: 24rem;`);

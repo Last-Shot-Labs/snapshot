@@ -1,13 +1,41 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+import hljs from "highlight.js/lib/core";
+import typescript from "highlight.js/lib/languages/typescript";
+import javascript from "highlight.js/lib/languages/javascript";
+import python from "highlight.js/lib/languages/python";
+import json from "highlight.js/lib/languages/json";
+import bash from "highlight.js/lib/languages/bash";
+import css from "highlight.js/lib/languages/css";
+import xml from "highlight.js/lib/languages/xml";
+import sql from "highlight.js/lib/languages/sql";
+import go from "highlight.js/lib/languages/go";
+import rust from "highlight.js/lib/languages/rust";
+import java from "highlight.js/lib/languages/java";
 import { useSubscribe } from "../../../context/hooks";
+import "./hljs-theme.css";
 import type { CodeBlockConfig } from "./types";
 
+// Register languages once at module level
+hljs.registerLanguage("typescript", typescript);
+hljs.registerLanguage("javascript", javascript);
+hljs.registerLanguage("python", python);
+hljs.registerLanguage("json", json);
+hljs.registerLanguage("bash", bash);
+hljs.registerLanguage("css", css);
+hljs.registerLanguage("html", xml);
+hljs.registerLanguage("xml", xml);
+hljs.registerLanguage("sql", sql);
+hljs.registerLanguage("go", go);
+hljs.registerLanguage("rust", rust);
+hljs.registerLanguage("java", java);
+
 /**
- * CodeBlock component — displays code with optional line numbers,
- * copy button, and title bar.
+ * CodeBlock component — displays code with syntax highlighting,
+ * optional line numbers, copy button, and title bar.
  *
- * Does not perform syntax highlighting — renders monospace text
- * with consistent token-based styling.
+ * Syntax highlighting is powered by highlight.js with colors mapped
+ * to `--sn-*` design tokens (no stock hljs themes). Highlighting is
+ * enabled by default and can be disabled via `highlight: false`.
  *
  * @param props - Component props containing the code block configuration
  *
@@ -28,6 +56,21 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const resolvedCode = useSubscribe(config.code);
   const codeText = typeof resolvedCode === "string" ? resolvedCode : "";
+
+  const highlightEnabled = config.highlight !== false;
+
+  // Compute highlighted HTML
+  const highlightedHtml = useMemo(() => {
+    if (!highlightEnabled || !codeText) return null;
+    try {
+      if (config.language && hljs.getLanguage(config.language)) {
+        return hljs.highlight(codeText, { language: config.language }).value;
+      }
+      return hljs.highlightAuto(codeText).value;
+    } catch {
+      return null;
+    }
+  }, [highlightEnabled, codeText, config.language]);
 
   if (visible === false) return null;
 
@@ -200,17 +243,30 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
           )}
 
           {/* Code content */}
-          <code
-            data-testid="code-block-code"
-            style={{
-              flex: 1,
-              whiteSpace: wrap ? "pre-wrap" : "pre",
-              wordBreak: wrap ? "break-all" : undefined,
-              color: "var(--sn-color-foreground, #111827)",
-            }}
-          >
-            {codeText}
-          </code>
+          {highlightedHtml ? (
+            <code
+              data-testid="code-block-code"
+              style={{
+                flex: 1,
+                whiteSpace: wrap ? "pre-wrap" : "pre",
+                wordBreak: wrap ? "break-all" : undefined,
+                color: "var(--sn-color-foreground, #111827)",
+              }}
+              dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+            />
+          ) : (
+            <code
+              data-testid="code-block-code"
+              style={{
+                flex: 1,
+                whiteSpace: wrap ? "pre-wrap" : "pre",
+                wordBreak: wrap ? "break-all" : undefined,
+                color: "var(--sn-color-foreground, #111827)",
+              }}
+            >
+              {codeText}
+            </code>
+          )}
         </pre>
       </div>
     </div>

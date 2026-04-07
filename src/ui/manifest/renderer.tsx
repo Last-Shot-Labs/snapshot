@@ -50,15 +50,19 @@ export function ComponentRenderer({ config }: ComponentRendererProps) {
   }
 
   const span = useResponsiveValue(config.span ?? undefined);
-  const style: CSSProperties | undefined = span
-    ? { gridColumn: `span ${span}` }
-    : undefined;
+  const configStyle = (config as Record<string, unknown>).style as
+    | Record<string, string | number>
+    | undefined;
+  const style: CSSProperties = {
+    ...(span ? { gridColumn: `span ${span}` } : undefined),
+    ...(configStyle as CSSProperties),
+  };
 
   return (
     <div
       data-snapshot-component={config.type}
       className={config.className}
-      style={style}
+      style={Object.keys(style).length > 0 ? style : undefined}
     >
       <Component config={config as Record<string, unknown>} />
     </div>

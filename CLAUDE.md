@@ -372,12 +372,13 @@ will silently fall back to a hardcoded value, breaking theme switching.
 **Radius:** `--sn-radius-none`, `--sn-radius-xs`, `--sn-radius-sm`, `--sn-radius-md`,
 `--sn-radius-lg`, `--sn-radius-xl`, `--sn-radius-full`
 
-**Spacing:** `--sn-spacing-xs`, `--sn-spacing-sm`, `--sn-spacing-md`, `--sn-spacing-lg`,
-`--sn-spacing-xl`
+**Spacing:** `--sn-spacing-2xs`, `--sn-spacing-xs`, `--sn-spacing-sm`, `--sn-spacing-md`,
+`--sn-spacing-lg`, `--sn-spacing-xl`, `--sn-spacing-2xl`, `--sn-spacing-3xl`
 
 **Font:** `--sn-font-sans`, `--sn-font-mono`, `--sn-font-display`,
 `--sn-font-size-xs`, `--sn-font-size-sm`, `--sn-font-size-md`,
-`--sn-font-size-lg`, `--sn-font-size-xl`,
+`--sn-font-size-lg`, `--sn-font-size-xl`, `--sn-font-size-2xl`,
+`--sn-font-size-3xl`, `--sn-font-size-4xl`,
 `--sn-font-weight-light`, `--sn-font-weight-normal`, `--sn-font-weight-medium`,
 `--sn-font-weight-semibold`, `--sn-font-weight-bold`
 
@@ -401,6 +402,13 @@ will silently fall back to a hardcoded value, breaking theme switching.
 **Border-width:** `--sn-border-none`, `--sn-border-thin`, `--sn-border-default`,
 `--sn-border-thick`
 
+**Container max-widths:** `--sn-container-xs` (20rem), `--sn-container-sm` (24rem),
+`--sn-container-md` (32rem), `--sn-container-lg` (42rem), `--sn-container-xl` (56rem),
+`--sn-container-2xl` (72rem), `--sn-container-full` (100%), `--sn-container-prose` (65ch)
+
+**Focus ring:** `--sn-ring-width` (2px), `--sn-ring-offset` (2px),
+`--sn-ring-color` (defaults to primary)
+
 **Breakpoints:** `--sn-bp-sm` (640px), `--sn-bp-md` (768px), `--sn-bp-lg` (1024px),
 `--sn-bp-xl` (1280px), `--sn-bp-2xl` (1536px)
 
@@ -415,7 +423,7 @@ will silently fall back to a hardcoded value, breaking theme switching.
 ~~`--sn-font-lg`~~ → use `--sn-font-size-lg`
 ~~`--sn-shadow-card`~~ → use `--sn-card-shadow` (component token)
 ~~`--sn-card-radius`~~ → use `--sn-radius-lg`
-~~`--sn-spacing-2xl`~~ → no token; hardcode if needed
+~~`--sn-spacing-4xl`~~ → no token; hardcode if needed
 ~~`--sn-color-muted` as text color~~ → use `--sn-color-muted-foreground`
 
 #### Color Values Must Be Valid CSS

@@ -57,6 +57,10 @@ import {
   FileUploader,
   fileUploaderConfigSchema,
 } from "./content/file-uploader/index";
+import {
+  RichTextEditor,
+  richTextEditorConfigSchema,
+} from "./content/rich-text-editor/index";
 
 registerComponent(
   "stat-card",
@@ -231,3 +235,9 @@ registerComponent(
   FileUploader as Parameters<typeof registerComponent>[1],
 );
 registerComponentSchema("file-uploader", fileUploaderConfigSchema);
+
+registerComponent(
+  "rich-text-editor",
+  RichTextEditor as Parameters<typeof registerComponent>[1],
+);
+registerComponentSchema("rich-text-editor", richTextEditorConfigSchema);
