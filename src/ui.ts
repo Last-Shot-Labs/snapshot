@@ -108,6 +108,26 @@ export type {
 // export { PageRenderer } from './ui/manifest/page-renderer'
 // export { manifestSchema } from './ui/manifest/schema'
 
+// DataTable
+export { DataTable } from "./ui/components/data/data-table/index";
+export {
+  dataTableConfigSchema,
+  columnConfigSchema,
+  rowActionSchema,
+  bulkActionSchema,
+} from "./ui/components/data/data-table/schema";
+export { useDataTable } from "./ui/components/data/data-table/hook";
+export type {
+  DataTableConfig,
+  ColumnConfig,
+  RowAction,
+  BulkAction,
+  SortState,
+  PaginationState,
+  ResolvedColumn,
+  UseDataTableResult,
+} from "./ui/components/data/data-table/types";
+
 // Headless Hooks (Level 2/3)
 // export { useDataTable } from './ui/hooks/use-data-table'
 // export { useAutoForm } from './ui/hooks/use-auto-form'
