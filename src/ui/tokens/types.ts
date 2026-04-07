@@ -4,6 +4,8 @@ import type {
   radiusSchema,
   spacingSchema,
   fontSchema,
+  shadowSchema,
+  globalTokensSchema,
   componentTokensSchema,
   themeConfigSchema,
 } from "./schema";
@@ -21,6 +23,12 @@ export type SpacingScale = z.infer<typeof spacingSchema>;
 
 /** Font configuration. */
 export type FontConfig = z.infer<typeof fontSchema>;
+
+/** Shadow scale. */
+export type ShadowScale = z.infer<typeof shadowSchema>;
+
+/** Global token overrides (shadows, durations, opacity, etc.). */
+export type GlobalTokens = z.infer<typeof globalTokensSchema>;
 
 /** Component-level token overrides. Per-component styling knobs. */
 export type ComponentTokens = z.infer<typeof componentTokensSchema>;

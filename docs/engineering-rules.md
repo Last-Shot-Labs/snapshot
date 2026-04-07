@@ -351,6 +351,159 @@ src/ui/components/{group}/{component-name}/
   `var(--sn-spacing-md)`, not `1rem`. `var(--sn-radius-lg)`, not `12px`. If a token
   doesn't exist for what you need, add it to the token system — don't inline a value.
 
+### Token Usage Rules (CRITICAL)
+
+These rules exist because violating them caused system-wide visual breakage. Every rule
+here maps to a real bug that was painful to track down. Follow them exactly.
+
+#### CSS Variable Names — The Canonical Token Names
+
+All CSS custom properties use the `--sn-` prefix. These are the ONLY valid token names.
+If you reference a variable that isn't in this list, it doesn't exist and the component
+will silently fall back to a hardcoded value, breaking theme switching.
+
+**Colors** (all generate a `-foreground` companion automatically):
+`--sn-color-primary`, `--sn-color-secondary`, `--sn-color-muted`, `--sn-color-accent`,
+`--sn-color-destructive`, `--sn-color-success`, `--sn-color-warning`, `--sn-color-info`,
+`--sn-color-background` (companion: `--sn-color-foreground`),
+`--sn-color-card`, `--sn-color-popover`, `--sn-color-sidebar`,
+`--sn-color-border`, `--sn-color-input`, `--sn-color-ring`,
+`--sn-chart-1` through `--sn-chart-5`
+
+**Aliases:** `--sn-color-surface` (= card), `--sn-color-text` (= foreground)
+
+**Radius:** `--sn-radius-none`, `--sn-radius-xs`, `--sn-radius-sm`, `--sn-radius-md`,
+`--sn-radius-lg`, `--sn-radius-xl`, `--sn-radius-full`
+
+**Spacing:** `--sn-spacing-xs`, `--sn-spacing-sm`, `--sn-spacing-md`, `--sn-spacing-lg`,
+`--sn-spacing-xl`
+
+**Font:** `--sn-font-sans`, `--sn-font-mono`, `--sn-font-display`,
+`--sn-font-size-xs`, `--sn-font-size-sm`, `--sn-font-size-md`,
+`--sn-font-size-lg`, `--sn-font-size-xl`, `--sn-font-weight-semibold`
+
+**Component-level:** `--sn-card-*`, `--sn-table-*`, `--sn-button-*`, `--sn-input-*`,
+`--sn-modal-*`, `--sn-nav-*`, `--sn-badge-*`, `--sn-toast-*`
+
+**Names that DO NOT exist** (common mistakes):
+~~`--sn-color-danger`~~ → use `--sn-color-destructive`
+~~`--sn-color-card-bg`~~ → use `--sn-color-card`
+~~`--sn-color-danger-bg`~~ → no token; use a hardcoded fallback
+~~`--sn-font-sm`~~ → use `--sn-font-size-sm`
+~~`--sn-font-lg`~~ → use `--sn-font-size-lg`
+~~`--sn-shadow-card`~~ → use `--sn-card-shadow` (component token)
+~~`--sn-card-radius`~~ → use `--sn-radius-lg`
+~~`--sn-spacing-2xl`~~ → no token; hardcode if needed
+~~`--sn-color-muted` as text color~~ → use `--sn-color-muted-foreground`
+
+#### Color Values Must Be Valid CSS
+
+Flavor definitions store colors as raw oklch strings (e.g., `"0.205 0 0"`).
+`resolveTokens()` wraps these in `oklch()` before emitting CSS. **Every function that
+produces a CSS color value must output a complete, valid CSS color** — either
+`oklch(L C H)`, `#hex`, or another CSS-parseable format. Never emit raw numbers like
+`0.5 0.1 240` as a CSS property value — browsers ignore it silently.
+
+#### `--sn-color-muted` Is a Background, Not a Text Color
+
+`muted` has very high lightness (~0.97 light, ~0.27 dark). Using it as `color:` makes
+text invisible. Always use `--sn-color-muted-foreground` for text that should appear
+"muted" or "secondary".
+
+#### Foreground Pairs — Every Semantic Color Has a Text Companion
+
+When using a semantic color as a `backgroundColor`, use its `-foreground` companion for
+`color`. Example: `backgroundColor: var(--sn-color-primary)` pairs with
+`color: var(--sn-color-primary-foreground)`. This guarantees contrast in every theme.
+
+The same applies to: `secondary`, `muted`, `accent`, `destructive`, `success`,
+`warning`, `info`, `card`, `popover`, `sidebar`.
+
+#### Every Flavor Must Define All Semantic Colors
+
+When adding a new semantic color (like `success`, `warning`, `info`), add it to:
+1. The Zod schema (`src/ui/tokens/schema.ts`) — if not already there
+2. `FOREGROUND_PAIRS` in `resolve.ts` — so foreground is auto-derived
+3. **Every flavor definition** in `flavors.ts` — both `colors` and `darkColors`
+4. The token editor UI (playground) — so users can customize it
+
+If a flavor omits a color, components using that token fall back to hardcoded values
+and stop responding to theme changes.
+
+#### Font Sizes Use `--sn-font-size-*` Tokens, Never Hardcoded Values
+
+Every `fontSize` in a component must use `var(--sn-font-size-{xs|sm|md|lg|xl}, fallback)`.
+Hardcoded `fontSize: "0.875rem"` breaks the font size control — the token var gets
+overridden by the static value. This applies to:
+- Component inline styles (`style={{ fontSize: "var(--sn-font-size-sm, 0.875rem)" }}`)
+- Playground/consumer CSS (use `font-size: var(--sn-font-size-sm, 0.875rem)`)
+- Any CSS rule that targets component elements
+
+The only exception is UI chrome that should NOT scale (e.g., the token editor sidebar).
+
+#### Badge/Pill Elements Must Have Explicit Background + Text Color
+
+A badge/pill is useless without visible background and text colors. Always set both
+`backgroundColor` and `color` using a semantic token pair. Never rely on `data-color`
+attributes without corresponding CSS rules to style them.
+
+#### Overlay Components Must Animate
+
+Modals and drawers must have enter/exit transitions. Never use bare
+`if (!isOpen) return null` — use a `mounted` + `animating` state pattern:
+1. On open: set `mounted=true`, then `animating=true` on next frame
+2. On close: set `animating=false`, then `mounted=false` after transition duration
+3. Apply CSS `transition` on opacity/transform
+
+#### Dark Mode Must Flow Through `resolveTokens()` Only
+
+Never set theme colors via `document.documentElement.style.setProperty()` for flavor
+switching — inline styles on `:root` override both `:root` and `.dark` CSS rules,
+breaking dark mode. The only correct approach for theme changes is regenerating the
+full CSS via `resolveTokens()` and injecting it into a `<style>` element.
+
+`useTokenEditor().setToken()` is for individual runtime overrides only, not bulk
+flavor switching.
+
+#### Dark Mode Color Overrides Must Derive From User Changes
+
+When a user overrides a color (e.g., changes primary), the dark mode variant must
+auto-derive from the override. Never use the flavor's hardcoded `darkColors` verbatim
+when `overrides.colors` contains changes — merge auto-derived dark variants for the
+overridden colors into the dark palette.
+
+#### `color-scheme` Property Is Required
+
+The `:root` block must include `color-scheme: light` and the `.dark` block must include
+`color-scheme: dark`. This ensures native browser elements (scrollbars, form controls,
+date pickers) match the theme. Without it, dark mode has white scrollbars.
+
+### Playground Rules
+
+The playground (`playground/`) is the visual verification environment for all
+config-driven components. It is NOT optional.
+
+- **Every component must appear in the playground.** When building a new component,
+  add it to the playground showcase with representative fixture data. A component that
+  isn't in the playground is untested visually.
+- **Showcase all states.** Each component must demonstrate: default/populated, loading,
+  error, and empty states. If the component has variants (size, color, format), show them.
+- **Token responsiveness is mandatory.** Every component in the playground must visibly
+  respond to token changes: flavor switching, color overrides, font size, radius, spacing,
+  and dark mode. If a component doesn't change when the user adjusts tokens, something is
+  hardcoded that shouldn't be.
+- **Playground CSS must use token variables for component areas.** Any `font-size`,
+  `color`, `background`, `border-radius`, `padding`, or `gap` that applies to component
+  rendering areas must use `var(--sn-*)` tokens. Hardcoded values in playground CSS
+  override component token usage and break the token editor. Only sidebar/chrome UI may
+  use hardcoded values.
+- **Fixture data lives in the showcase.** Mock API responses and config objects are defined
+  in `playground/src/showcase.tsx` (or similar). They serve as living documentation of what
+  configs look like.
+- **Compositions / page presets go in the playground too.** When building page presets
+  (CRUD page, dashboard, settings, etc.), add a playground tab/page that renders the preset
+  so the full composition can be verified visually with token changes.
+
 ### Headless Hooks (Level 2/3)
 
 For consumers who want component logic without the framework's rendering:
@@ -364,10 +517,10 @@ For consumers who want component logic without the framework's rendering:
   headless hook from it. Never build the hook first and wrap it.
 
 21. **Design tokens are the styling boundary** — Components consume tokens, not raw CSS values.
-    Token categories: color (semantic: primary, danger, muted), spacing scale, radius scale,
-    font scale, component-level tokens. Dark/light mode is a token switch, not a separate theme.
-    Breakpoint-aware tokens accept either a flat value or a breakpoint map:
-    `{ "default": 1, "md": 2, "lg": 3 }`.
+    Token categories: color (semantic: primary, destructive, muted, success, warning, info),
+    spacing scale, radius scale, font scale, component-level tokens. Dark/light mode is a
+    token switch, not a separate theme. Breakpoint-aware tokens accept either a flat value or
+    a breakpoint map: `{ "default": 1, "md": 2, "lg": 3 }`.
 
 22. **Components are higher-level abstractions** — A config-driven component (table, form,
     stat-card, chart, feed, modal) is not just a React component with props. It:

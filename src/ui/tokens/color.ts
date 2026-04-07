@@ -189,7 +189,12 @@ function round(n: number): number {
  * @returns Tuple of [lightness, chroma, hue]
  */
 export function parseOklchString(str: string): [number, number, number] {
-  const parts = str.trim().split(/\s+/);
+  let inner = str.trim();
+  // Strip oklch() wrapper if present
+  if (inner.startsWith("oklch(") && inner.endsWith(")")) {
+    inner = inner.slice(6, -1).trim();
+  }
+  const parts = inner.split(/\s+/);
   return [parseFloat(parts[0]!), parseFloat(parts[1]!), parseFloat(parts[2]!)];
 }
 
@@ -270,10 +275,10 @@ export function deriveForeground(backgroundColor: string): string {
 
   if (whiteContrast >= darkContrast) {
     // Light foreground on dark background
-    return oklchToString(0.985, 0, 0);
+    return `oklch(${oklchToString(0.985, 0, 0)})`;
   } else {
     // Dark foreground on light background
-    return oklchToString(0.145, 0, 0);
+    return `oklch(${oklchToString(0.145, 0, 0)})`;
   }
 }
 
@@ -311,7 +316,7 @@ export function deriveDarkVariant(lightColor: string): string {
     darkC = Math.min(c * 1.1, 0.35);
   }
 
-  return oklchToString(darkL, darkC, h);
+  return `oklch(${oklchToString(darkL, darkC, h)})`;
 }
 
 /**

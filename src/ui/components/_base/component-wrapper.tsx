@@ -54,10 +54,10 @@ class ComponentErrorBoundary extends Component<
           role="alert"
           style={{
             padding: "var(--sn-spacing-md, 1rem)",
-            border: "1px solid var(--sn-color-danger, #ef4444)",
+            border: "1px solid var(--sn-color-destructive, #ef4444)",
             borderRadius: "var(--sn-radius-md, 0.375rem)",
-            color: "var(--sn-color-danger, #ef4444)",
-            backgroundColor: "var(--sn-color-danger-bg, #fef2f2)",
+            color: "var(--sn-color-destructive, #ef4444)",
+            backgroundColor: "#fef2f2",
           }}
         >
           <strong>Error in {this.props.type}:</strong>{" "}

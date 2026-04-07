@@ -9,20 +9,8 @@
 import type { CSSProperties } from "react";
 import { PageContextProvider, useSubscribe } from "../context/index";
 import { getRegisteredComponent } from "./component-registry";
+import { useResponsiveValue } from "../hooks/use-breakpoint";
 import type { PageConfig, ComponentConfig } from "./types";
-
-// ── Responsive value resolution ─────────────────────────────────────────────
-
-/**
- * Resolve a responsive value to its default/flat value.
- * Full responsive CSS generation deferred to a later phase.
- */
-function resolveResponsive<T>(value: T | { default: T }): T {
-  if (value !== null && typeof value === "object" && "default" in value) {
-    return (value as { default: T }).default;
-  }
-  return value as T;
-}
 
 // ── ComponentRenderer ───────────────────────────────────────────────────────
 
@@ -61,7 +49,7 @@ export function ComponentRenderer({ config }: ComponentRendererProps) {
     return null;
   }
 
-  const span = config.span ? resolveResponsive(config.span) : undefined;
+  const span = useResponsiveValue(config.span ?? undefined);
   const style: CSSProperties | undefined = span
     ? { gridColumn: `span ${span}` }
     : undefined;

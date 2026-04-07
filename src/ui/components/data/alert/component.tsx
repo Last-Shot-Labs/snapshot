@@ -1,0 +1,176 @@
+import { useState } from "react";
+import { useSubscribe, usePublish } from "../../../context/hooks";
+import { useActionExecutor } from "../../../actions/executor";
+import type { AlertConfig } from "./types";
+
+/** Default icons per variant. */
+const DEFAULT_ICONS: Record<string, string> = {
+  info: "\u24d8",
+  success: "\u2714",
+  warning: "\u26a0",
+  destructive: "\u26d4",
+};
+
+/** Map variant to its semantic color token name. */
+function variantColor(variant: string): string {
+  switch (variant) {
+    case "info":
+      return "info";
+    case "success":
+      return "success";
+    case "warning":
+      return "warning";
+    case "destructive":
+      return "destructive";
+    default:
+      return "border";
+  }
+}
+
+/**
+ * Alert component — a config-driven notification banner with icon, title,
+ * description, and optional action button.
+ *
+ * Supports info, success, warning, destructive, and default variants.
+ * Internally manages dismissed state.
+ *
+ * @param props - Component props containing the alert configuration
+ *
+ * @example
+ * ```json
+ * {
+ *   "type": "alert",
+ *   "title": "Heads up!",
+ *   "description": "This action cannot be undone.",
+ *   "variant": "warning",
+ *   "dismissible": true
+ * }
+ * ```
+ */
+export function Alert({ config }: { config: AlertConfig }) {
+  const resolvedTitle = useSubscribe(config.title ?? "") as string;
+  const resolvedDescription = useSubscribe(config.description) as string;
+  const visible = useSubscribe(config.visible ?? true);
+  const execute = useActionExecutor();
+  const publish = config.id ? usePublish(config.id) : undefined; // eslint-disable-line react-hooks/rules-of-hooks
+
+  const [dismissed, setDismissed] = useState(false);
+
+  if (visible === false || dismissed) return null;
+
+  const variant = config.variant ?? "default";
+  const colorToken = variantColor(variant);
+  const icon = config.icon ?? DEFAULT_ICONS[variant] ?? null;
+  const dismissible = config.dismissible ?? false;
+
+  const handleAction = config.action
+    ? () => void execute(config.action!)
+    : undefined;
+
+  return (
+    <div
+      data-snapshot-component="alert"
+      data-testid="alert"
+      data-variant={variant}
+      className={config.className}
+      role="alert"
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "var(--sn-spacing-sm, 0.5rem)",
+        padding: "var(--sn-spacing-md, 0.75rem) var(--sn-spacing-lg, 1.5rem)",
+        borderRadius: "var(--sn-radius-lg, 0.75rem)",
+        border: "1px solid var(--sn-color-border, #e5e7eb)",
+        borderLeft: `4px solid var(--sn-color-${colorToken}, #e5e7eb)`,
+        backgroundColor: "var(--sn-color-card, #ffffff)",
+        position: "relative",
+      }}
+    >
+      {/* Icon */}
+      {icon && (
+        <span
+          data-testid="alert-icon"
+          aria-hidden="true"
+          style={{
+            fontSize: "var(--sn-font-size-md, 1rem)",
+            color: `var(--sn-color-${colorToken === "border" ? "muted-foreground" : colorToken})`,
+            flexShrink: 0,
+            marginTop: "var(--sn-spacing-xs, 0.25rem)",
+          }}
+        >
+          {icon}
+        </span>
+      )}
+
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {resolvedTitle && (
+          <div
+            data-testid="alert-title"
+            style={{
+              fontSize: "var(--sn-font-size-sm, 0.875rem)",
+              fontWeight: "var(--sn-font-weight-semibold, 600)" as string,
+              color: "var(--sn-color-foreground, #111827)",
+              marginBottom: "var(--sn-spacing-xs, 0.25rem)",
+            }}
+          >
+            {resolvedTitle}
+          </div>
+        )}
+        <div
+          data-testid="alert-description"
+          style={{
+            fontSize: "var(--sn-font-size-sm, 0.875rem)",
+            color: "var(--sn-color-muted-foreground, #6b7280)",
+            lineHeight: 1.5,
+          }}
+        >
+          {resolvedDescription}
+        </div>
+
+        {/* Action button */}
+        {handleAction && config.actionLabel && (
+          <button
+            data-testid="alert-action"
+            onClick={handleAction}
+            style={{
+              marginTop: "var(--sn-spacing-sm, 0.5rem)",
+              padding:
+                "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+              fontSize: "var(--sn-font-size-sm, 0.875rem)",
+              fontWeight: "var(--sn-font-weight-semibold, 600)" as string,
+              color: `var(--sn-color-${colorToken === "border" ? "primary" : colorToken})`,
+              backgroundColor: "transparent",
+              border: `1px solid var(--sn-color-${colorToken === "border" ? "primary" : colorToken})`,
+              borderRadius: "var(--sn-radius-sm, 0.25rem)",
+              cursor: "pointer",
+            }}
+          >
+            {config.actionLabel}
+          </button>
+        )}
+      </div>
+
+      {/* Dismiss button */}
+      {dismissible && (
+        <button
+          data-testid="alert-dismiss"
+          onClick={() => setDismissed(true)}
+          aria-label="Dismiss alert"
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: "var(--sn-spacing-xs, 0.25rem)",
+            color: "var(--sn-color-muted-foreground, #6b7280)",
+            fontSize: "var(--sn-font-size-md, 1rem)",
+            lineHeight: 1,
+            flexShrink: 0,
+          }}
+        >
+          \u2715
+        </button>
+      )}
+    </div>
+  );
+}

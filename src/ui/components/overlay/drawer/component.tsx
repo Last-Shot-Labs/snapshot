@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
 import { useDrawer } from "./hook";
@@ -8,12 +8,14 @@ import type { DrawerConfig } from "./schema";
  * Size to width mapping for drawer panels.
  */
 const SIZE_MAP: Record<string, string> = {
-  sm: "var(--sn-drawer-size-sm, 20rem)",
-  md: "var(--sn-drawer-size-md, 28rem)",
-  lg: "var(--sn-drawer-size-lg, 36rem)",
-  xl: "var(--sn-drawer-size-xl, 48rem)",
+  sm: "20rem",
+  md: "28rem",
+  lg: "36rem",
+  xl: "48rem",
   full: "100vw",
 };
+
+const ANIMATION_DURATION = 200;
 
 /**
  * Drawer component — renders a slide-in panel from the left or right edge.
@@ -27,17 +29,35 @@ const SIZE_MAP: Record<string, string> = {
 export function DrawerComponent({ config }: { config: DrawerConfig }) {
   const { isOpen, close, title } = useDrawer(config);
   const panelRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [animating, setAnimating] = useState(false);
 
   const side = config.side ?? "right";
   const size = config.size ?? "md";
   const width = SIZE_MAP[size] ?? SIZE_MAP.md;
 
-  // Focus the panel when it opens
+  // Handle mount/unmount with animation
   useEffect(() => {
-    if (isOpen && panelRef.current) {
-      panelRef.current.focus();
+    if (isOpen) {
+      setMounted(true);
+      // Double-rAF ensures the browser paints the initial (off-screen) state
+      // before transitioning to the final (on-screen) state
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setAnimating(true));
+      });
+    } else if (mounted) {
+      setAnimating(false);
+      const timer = setTimeout(() => setMounted(false), ANIMATION_DURATION);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
+
+  // Focus the panel when it opens
+  useEffect(() => {
+    if (isOpen && animating && panelRef.current) {
+      panelRef.current.focus();
+    }
+  }, [isOpen, animating]);
 
   // Escape key closes the drawer
   const handleKeyDown = useCallback(
@@ -60,7 +80,16 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
     [close],
   );
 
-  if (!isOpen) return null;
+  if (!mounted) return null;
+
+  const translateValue =
+    side === "left"
+      ? animating
+        ? "translateX(0)"
+        : "translateX(-100%)"
+      : animating
+        ? "translateX(0)"
+        : "translateX(100%)";
 
   return (
     <div
@@ -82,7 +111,9 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
         style={{
           position: "fixed",
           inset: 0,
-          backgroundColor: "var(--sn-modal-overlay-bg, rgba(0, 0, 0, 0.5))",
+          backgroundColor: "var(--sn-modal-overlay, rgba(0, 0, 0, 0.5))",
+          opacity: animating ? 1 : 0,
+          transition: `opacity ${ANIMATION_DURATION}ms ease`,
           zIndex: -1,
         }}
       />
@@ -108,6 +139,8 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
           flexDirection: "column",
           overflow: "hidden",
           outline: "none",
+          transform: translateValue,
+          transition: `transform ${ANIMATION_DURATION}ms cubic-bezier(0.32, 0.72, 0, 1)`,
         }}
       >
         {/* Header */}
@@ -143,7 +176,7 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
                 border: "none",
                 cursor: "pointer",
                 padding: "var(--sn-spacing-xs, 0.25rem)",
-                color: "var(--sn-color-muted, #6b7280)",
+                color: "var(--sn-color-muted-foreground, #6b7280)",
                 fontSize: "1.25rem",
                 lineHeight: 1,
               }}

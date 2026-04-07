@@ -83,12 +83,12 @@ export function useToastManager(): ToastManager {
 
 const variantStyles: Record<ToastItem["variant"], string> = {
   success:
-    "background: var(--sn-color-success, #22c55e); color: var(--sn-color-success-fg, #fff);",
+    "background: var(--sn-color-success, #22c55e); color: var(--sn-color-success-foreground, #fff);",
   error:
-    "background: var(--sn-color-danger, #ef4444); color: var(--sn-color-danger-fg, #fff);",
+    "background: var(--sn-color-destructive, #ef4444); color: var(--sn-color-destructive-foreground, #fff);",
   warning:
-    "background: var(--sn-color-warning, #f59e0b); color: var(--sn-color-warning-fg, #fff);",
-  info: "background: var(--sn-color-info, #3b82f6); color: var(--sn-color-info-fg, #fff);",
+    "background: var(--sn-color-warning, #f59e0b); color: var(--sn-color-warning-foreground, #fff);",
+  info: "background: var(--sn-color-info, #3b82f6); color: var(--sn-color-info-foreground, #fff);",
 };
 
 /**
@@ -156,7 +156,7 @@ export function ToastContainer(): ReactNode {
                   cursor: "pointer",
                   padding: "0.25rem 0.5rem",
                   borderRadius: "var(--sn-radius-sm, 0.25rem)",
-                  fontSize: "0.875rem",
+                  fontSize: "var(--sn-font-size-sm, 0.875rem)",
                 },
               },
               toast.action.label,

@@ -1,0 +1,47 @@
+import { z } from "zod";
+import { baseComponentConfigSchema } from "../../../manifest/schema";
+import { actionSchema } from "../../../actions/types";
+
+/**
+ * Schema for a single breadcrumb item.
+ */
+export const breadcrumbItemSchema = z.object({
+  /** Display label for the breadcrumb segment. */
+  label: z.string(),
+  /** Route path for navigation. Omit for the current (last) item. */
+  path: z.string().optional(),
+  /** Optional icon name displayed before the label. */
+  icon: z.string().optional(),
+});
+
+/**
+ * Zod config schema for the Breadcrumb component.
+ *
+ * Renders a navigation breadcrumb trail showing the user's
+ * location within the application hierarchy.
+ *
+ * @example
+ * ```json
+ * {
+ *   "type": "breadcrumb",
+ *   "separator": "chevron",
+ *   "items": [
+ *     { "label": "Home", "path": "/" },
+ *     { "label": "Users", "path": "/users" },
+ *     { "label": "John Doe" }
+ *   ]
+ * }
+ * ```
+ */
+export const breadcrumbConfigSchema = baseComponentConfigSchema.extend({
+  /** Component type discriminator. */
+  type: z.literal("breadcrumb"),
+  /** Array of breadcrumb items from root to current page. */
+  items: z.array(breadcrumbItemSchema).min(1),
+  /** Separator character between items. */
+  separator: z.enum(["slash", "chevron", "dot", "arrow"]).optional(),
+  /** Maximum visible items before collapsing middle items with ellipsis. */
+  maxItems: z.number().optional(),
+  /** Action dispatched on breadcrumb item click. */
+  action: actionSchema.optional(),
+});

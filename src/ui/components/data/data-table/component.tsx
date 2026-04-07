@@ -36,6 +36,22 @@ function formatCellValue(
     }
     case "badge": {
       const colorName = column.badgeColors?.[String(value)] ?? "muted";
+      const badgeColorMap: Record<string, { bg: string; fg: string }> = {
+        blue: { bg: "var(--sn-color-info, oklch(0.546 0.245 262.881))", fg: "var(--sn-color-info-foreground, #fff)" },
+        green: { bg: "var(--sn-color-success, oklch(0.586 0.209 145.071))", fg: "var(--sn-color-success-foreground, #fff)" },
+        red: { bg: "var(--sn-color-destructive, oklch(0.577 0.245 27.325))", fg: "var(--sn-color-destructive-foreground, #fff)" },
+        gray: { bg: "var(--sn-color-muted, oklch(0.97 0 0))", fg: "var(--sn-color-muted-foreground, #64748b)" },
+        yellow: { bg: "var(--sn-color-warning, oklch(0.681 0.162 75.834))", fg: "var(--sn-color-warning-foreground, #fff)" },
+        success: { bg: "var(--sn-color-success, oklch(0.586 0.209 145.071))", fg: "var(--sn-color-success-foreground, #fff)" },
+        warning: { bg: "var(--sn-color-warning, oklch(0.681 0.162 75.834))", fg: "var(--sn-color-warning-foreground, #fff)" },
+        info: { bg: "var(--sn-color-info, oklch(0.546 0.245 262.881))", fg: "var(--sn-color-info-foreground, #fff)" },
+        destructive: { bg: "var(--sn-color-destructive, oklch(0.577 0.245 27.325))", fg: "var(--sn-color-destructive-foreground, #fff)" },
+        muted: { bg: "var(--sn-color-muted, oklch(0.97 0 0))", fg: "var(--sn-color-muted-foreground, #64748b)" },
+        primary: { bg: "var(--sn-color-primary, oklch(0.205 0 0))", fg: "var(--sn-color-primary-foreground, #fff)" },
+        secondary: { bg: "var(--sn-color-secondary, oklch(0.97 0 0))", fg: "var(--sn-color-secondary-foreground, #0f172a)" },
+        accent: { bg: "var(--sn-color-accent, oklch(0.97 0 0))", fg: "var(--sn-color-accent-foreground, #0f172a)" },
+      };
+      const colors = badgeColorMap[colorName] ?? badgeColorMap.muted!;
       return (
         <span
           data-badge
@@ -45,6 +61,8 @@ function formatCellValue(
             padding: "var(--sn-spacing-xs, 2px) var(--sn-spacing-sm, 8px)",
             borderRadius: "var(--sn-radius-full, 9999px)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
+            backgroundColor: colors.bg,
+            color: colors.fg,
           }}
         >
           {String(value)}

@@ -199,8 +199,8 @@ export function StatCard({ config }: { config: StatCardConfig }) {
     trend?.sentiment === "positive"
       ? "var(--sn-color-success, #16a34a)"
       : trend?.sentiment === "negative"
-        ? "var(--sn-color-danger, #dc2626)"
-        : "var(--sn-color-muted, #6b7280)";
+        ? "var(--sn-color-destructive, #dc2626)"
+        : "var(--sn-color-muted-foreground, #6b7280)";
 
   const trendArrow =
     trend?.direction === "up"
@@ -227,9 +227,9 @@ export function StatCard({ config }: { config: StatCardConfig }) {
       style={{
         padding: "var(--sn-spacing-lg, 1.5rem)",
         borderRadius: "var(--sn-radius-lg, 0.75rem)",
-        boxShadow: "var(--sn-shadow-card, 0 1px 3px rgba(0,0,0,0.1))",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
         border: "1px solid var(--sn-color-border, #e5e7eb)",
-        backgroundColor: "var(--sn-color-card-bg, #ffffff)",
+        backgroundColor: "var(--sn-color-card, #ffffff)",
         cursor: handleClick ? "pointer" : undefined,
         display: "flex",
         flexDirection: "column",
@@ -274,9 +274,9 @@ export function StatCard({ config }: { config: StatCardConfig }) {
       {!isLoading && error && (
         <div
           data-testid="stat-card-error"
-          style={{ color: "var(--sn-color-danger, #dc2626)" }}
+          style={{ color: "var(--sn-color-destructive, #dc2626)" }}
         >
-          <span style={{ fontSize: "0.875rem" }}>Failed to load</span>
+          <span style={{ fontSize: "var(--sn-font-size-sm, 0.875rem)" }}>Failed to load</span>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -284,7 +284,7 @@ export function StatCard({ config }: { config: StatCardConfig }) {
             }}
             style={{
               marginLeft: "var(--sn-spacing-sm, 0.5rem)",
-              fontSize: "0.75rem",
+              fontSize: "var(--sn-font-size-xs, 0.75rem)",
               textDecoration: "underline",
               background: "none",
               border: "none",
@@ -315,8 +315,8 @@ export function StatCard({ config }: { config: StatCardConfig }) {
                 style={{
                   color: config.iconColor
                     ? `var(--sn-color-${config.iconColor}, ${config.iconColor})`
-                    : "var(--sn-color-muted, #6b7280)",
-                  fontSize: "1rem",
+                    : "var(--sn-color-muted-foreground, #6b7280)",
+                  fontSize: "var(--sn-font-size-md, 1rem)",
                 }}
                 aria-hidden="true"
               >
@@ -326,7 +326,7 @@ export function StatCard({ config }: { config: StatCardConfig }) {
             <span
               data-testid="stat-card-label"
               style={{
-                fontSize: "0.875rem",
+                fontSize: "var(--sn-font-size-sm, 0.875rem)",
                 color: "var(--sn-color-muted-foreground, #6b7280)",
                 fontWeight: 500,
               }}
@@ -356,7 +356,7 @@ export function StatCard({ config }: { config: StatCardConfig }) {
                 display: "flex",
                 alignItems: "center",
                 gap: "var(--sn-spacing-xs, 0.25rem)",
-                fontSize: "0.875rem",
+                fontSize: "var(--sn-font-size-sm, 0.875rem)",
                 color: trendColor,
               }}
             >
@@ -372,7 +372,7 @@ export function StatCard({ config }: { config: StatCardConfig }) {
         <div
           data-testid="stat-card-empty"
           style={{
-            fontSize: "0.875rem",
+            fontSize: "var(--sn-font-size-sm, 0.875rem)",
             color: "var(--sn-color-muted-foreground, #6b7280)",
           }}
         >

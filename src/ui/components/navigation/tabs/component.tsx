@@ -29,7 +29,7 @@ const VARIANT_STYLES: Record<
         : "2px solid transparent",
       background: "none",
       color: disabled
-        ? "var(--sn-color-muted, #9ca3af)"
+        ? "var(--sn-color-muted-foreground, #9ca3af)"
         : active
           ? "var(--sn-color-primary, #2563eb)"
           : "var(--sn-color-foreground, #111)",
@@ -57,10 +57,10 @@ const VARIANT_STYLES: Record<
         : "2px solid transparent",
       background: "none",
       color: disabled
-        ? "var(--sn-color-muted, #9ca3af)"
+        ? "var(--sn-color-muted-foreground, #9ca3af)"
         : active
           ? "var(--sn-color-primary, #2563eb)"
-          : "var(--sn-color-muted, #6b7280)",
+          : "var(--sn-color-muted-foreground, #6b7280)",
       cursor: disabled ? "not-allowed" : "pointer",
       fontWeight: active
         ? "var(--sn-font-weight-semibold, 600)"
@@ -82,7 +82,7 @@ const VARIANT_STYLES: Record<
       borderRadius: "var(--sn-radius-full, 9999px)",
       background: active ? "var(--sn-color-primary, #2563eb)" : "transparent",
       color: disabled
-        ? "var(--sn-color-muted, #9ca3af)"
+        ? "var(--sn-color-muted-foreground, #9ca3af)"
         : active
           ? "var(--sn-color-primary-foreground, #fff)"
           : "var(--sn-color-foreground, #111)",

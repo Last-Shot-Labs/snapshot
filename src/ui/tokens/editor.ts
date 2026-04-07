@@ -14,45 +14,45 @@ import { colorToOklch, oklchToString } from "./color";
 // ── Token path -> CSS variable mapping ───────────────────────────────────────
 
 const TOKEN_PATH_MAP: Record<string, string> = {
-  "colors.primary": "--primary",
-  "colors.secondary": "--secondary",
-  "colors.muted": "--muted",
-  "colors.accent": "--accent",
-  "colors.destructive": "--destructive",
-  "colors.success": "--success",
-  "colors.warning": "--warning",
-  "colors.info": "--info",
-  "colors.background": "--background",
-  "colors.card": "--card",
-  "colors.popover": "--popover",
-  "colors.sidebar": "--sidebar",
-  "colors.border": "--border",
-  "colors.input": "--input",
-  "colors.ring": "--ring",
-  radius: "--radius",
-  spacing: "--spacing-unit",
-  "font.sans": "--font-sans",
-  "font.mono": "--font-mono",
-  "font.display": "--font-display",
-  "font.baseSize": "--font-size-base",
-  "font.scale": "--font-scale",
-  "components.card.shadow": "--card-shadow",
-  "components.card.padding": "--card-padding",
-  "components.card.border": "--card-border",
-  "components.table.density": "--table-density",
-  "components.table.striped": "--table-stripe-bg",
-  "components.button.weight": "--button-weight",
-  "components.button.uppercase": "--button-transform",
-  "components.input.size": "--input-height",
-  "components.input.variant": "--input-variant",
-  "components.modal.overlay": "--modal-overlay",
-  "components.modal.animation": "--modal-animation",
-  "components.nav.variant": "--nav-variant",
-  "components.nav.activeIndicator": "--nav-active-indicator",
-  "components.badge.variant": "--badge-variant",
-  "components.badge.rounded": "--badge-radius",
-  "components.toast.position": "--toast-position",
-  "components.toast.animation": "--toast-animation",
+  "colors.primary": "--sn-color-primary",
+  "colors.secondary": "--sn-color-secondary",
+  "colors.muted": "--sn-color-muted",
+  "colors.accent": "--sn-color-accent",
+  "colors.destructive": "--sn-color-destructive",
+  "colors.success": "--sn-color-success",
+  "colors.warning": "--sn-color-warning",
+  "colors.info": "--sn-color-info",
+  "colors.background": "--sn-color-background",
+  "colors.card": "--sn-color-card",
+  "colors.popover": "--sn-color-popover",
+  "colors.sidebar": "--sn-color-sidebar",
+  "colors.border": "--sn-color-border",
+  "colors.input": "--sn-color-input",
+  "colors.ring": "--sn-color-ring",
+  radius: "--sn-radius-md",
+  spacing: "--sn-spacing-md",
+  "font.sans": "--sn-font-sans",
+  "font.mono": "--sn-font-mono",
+  "font.display": "--sn-font-display",
+  "font.baseSize": "--sn-font-size-base",
+  "font.scale": "--sn-font-scale",
+  "components.card.shadow": "--sn-card-shadow",
+  "components.card.padding": "--sn-card-padding",
+  "components.card.border": "--sn-card-border",
+  "components.table.density": "--sn-table-density",
+  "components.table.striped": "--sn-table-stripe-bg",
+  "components.button.weight": "--sn-button-weight",
+  "components.button.uppercase": "--sn-button-transform",
+  "components.input.size": "--sn-input-height",
+  "components.input.variant": "--sn-input-variant",
+  "components.modal.overlay": "--sn-modal-overlay",
+  "components.modal.animation": "--sn-modal-animation",
+  "components.nav.variant": "--sn-nav-variant",
+  "components.nav.activeIndicator": "--sn-nav-active-indicator",
+  "components.badge.variant": "--sn-badge-variant",
+  "components.badge.rounded": "--sn-badge-radius",
+  "components.toast.position": "--sn-toast-position",
+  "components.toast.animation": "--sn-toast-animation",
 };
 
 const RADIUS_MAP: Record<string, string> = {
@@ -87,10 +87,10 @@ function tokenPathToCssVar(path: string): string {
  * Radius/spacing values are mapped to their CSS equivalents.
  */
 function convertToCssValue(path: string, value: string): string {
-  // Color paths: convert to oklch
+  // Color paths: convert to oklch CSS function
   if (path.startsWith("colors.")) {
     const [l, c, h] = colorToOklch(value);
-    return oklchToString(l, c, h);
+    return `oklch(${oklchToString(l, c, h)})`;
   }
 
   // Radius: map enum to CSS value
@@ -171,12 +171,20 @@ function flavorToTokenMap(flavor: {
 
   for (const [key, value] of Object.entries(colors)) {
     if (typeof value === "string") {
-      const cssVar = `--${key}`;
-      entries.push([cssVar, value]);
+      const cssVar = `--sn-color-${key}`;
+      // Wrap raw oklch values in oklch() for valid CSS
+      const cssValue = value.startsWith("oklch(") || value.startsWith("#")
+        ? value
+        : `oklch(${value})`;
+      entries.push([cssVar, cssValue]);
     } else if (key === "chart" && Array.isArray(value)) {
       for (let i = 0; i < value.length; i++) {
         if (typeof value[i] === "string") {
-          entries.push([`--chart-${i + 1}`, value[i] as string]);
+          const v = value[i] as string;
+          const cssValue = v.startsWith("oklch(") || v.startsWith("#")
+            ? v
+            : `oklch(${v})`;
+          entries.push([`--sn-chart-${i + 1}`, cssValue]);
         }
       }
     }

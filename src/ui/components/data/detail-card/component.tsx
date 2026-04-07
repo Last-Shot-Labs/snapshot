@@ -13,7 +13,7 @@ function formatValue(field: ResolvedField): React.ReactNode {
   const { value, format } = field;
 
   if (value == null) {
-    return <span style={{ color: "var(--sn-color-muted, #94a3b8)" }}>--</span>;
+    return <span style={{ color: "var(--sn-color-muted-foreground, #64748b)" }}>--</span>;
   }
 
   switch (format) {
@@ -59,9 +59,9 @@ function formatValue(field: ResolvedField): React.ReactNode {
             padding:
               "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
             borderRadius: "var(--sn-radius-full, 9999px)",
-            backgroundColor: "var(--sn-color-primary-bg, #eff6ff)",
-            color: "var(--sn-color-primary, #3b82f6)",
-            fontSize: "var(--sn-font-sm, 0.875rem)",
+            backgroundColor: "var(--sn-color-secondary, #f1f5f9)",
+            color: "var(--sn-color-secondary-foreground, #0f172a)",
+            fontSize: "var(--sn-font-size-sm, 0.875rem)",
             fontWeight: 500,
           }}
         >
@@ -98,8 +98,8 @@ function formatValue(field: ResolvedField): React.ReactNode {
           src={String(value)}
           alt=""
           style={{
-            width: "var(--sn-spacing-2xl, 3rem)",
-            height: "var(--sn-spacing-2xl, 3rem)",
+            width: "3rem",
+            height: "3rem",
             borderRadius: "var(--sn-radius-full, 9999px)",
             objectFit: "cover",
           }}
@@ -180,7 +180,7 @@ export function DetailCard({ config }: { config: DetailCardConfig }) {
         <div
           style={{
             border: "var(--sn-card-border, 1px solid #e2e8f0)",
-            borderRadius: "var(--sn-card-radius, var(--sn-radius-lg, 0.5rem))",
+            borderRadius: "var(--sn-radius-lg, 0.5rem)",
             boxShadow: "var(--sn-card-shadow, 0 1px 3px rgba(0,0,0,0.1))",
             padding: "var(--sn-card-padding, var(--sn-spacing-lg, 1.5rem))",
             backgroundColor: "var(--sn-color-surface, #ffffff)",
@@ -202,7 +202,7 @@ export function DetailCard({ config }: { config: DetailCardConfig }) {
                 <h3
                   style={{
                     margin: 0,
-                    fontSize: "var(--sn-font-lg, 1.125rem)",
+                    fontSize: "var(--sn-font-size-lg, 1.125rem)",
                     fontWeight: 600,
                     color: "var(--sn-color-foreground, #0f172a)",
                   }}
@@ -229,7 +229,7 @@ export function DetailCard({ config }: { config: DetailCardConfig }) {
                         border: "1px solid var(--sn-color-border, #e2e8f0)",
                         background: "transparent",
                         cursor: "pointer",
-                        fontSize: "var(--sn-font-sm, 0.875rem)",
+                        fontSize: "var(--sn-font-size-sm, 0.875rem)",
                         color: "var(--sn-color-foreground, #0f172a)",
                       }}
                     >
@@ -269,8 +269,8 @@ function FieldRow({ field }: { field: ResolvedField }) {
     <>
       <dt
         style={{
-          fontSize: "var(--sn-font-sm, 0.875rem)",
-          color: "var(--sn-color-muted, #64748b)",
+          fontSize: "var(--sn-font-size-sm, 0.875rem)",
+          color: "var(--sn-color-muted-foreground, #64748b)",
           fontWeight: 500,
         }}
       >
@@ -279,7 +279,7 @@ function FieldRow({ field }: { field: ResolvedField }) {
       <dd
         style={{
           margin: 0,
-          fontSize: "var(--sn-font-sm, 0.875rem)",
+          fontSize: "var(--sn-font-size-sm, 0.875rem)",
           color: "var(--sn-color-foreground, #0f172a)",
           display: "flex",
           alignItems: "center",
@@ -298,8 +298,8 @@ function FieldRow({ field }: { field: ResolvedField }) {
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "var(--sn-color-muted, #94a3b8)",
-              fontSize: "var(--sn-font-xs, 0.75rem)",
+              color: "var(--sn-color-muted-foreground, #64748b)",
+              fontSize: "var(--sn-font-size-xs, 0.75rem)",
             }}
           >
             Copy
@@ -319,7 +319,7 @@ function DetailCardSkeleton() {
       data-testid="detail-card-skeleton"
       style={{
         border: "var(--sn-card-border, 1px solid #e2e8f0)",
-        borderRadius: "var(--sn-card-radius, var(--sn-radius-lg, 0.5rem))",
+        borderRadius: "var(--sn-radius-lg, 0.5rem)",
         padding: "var(--sn-card-padding, var(--sn-spacing-lg, 1.5rem))",
         backgroundColor: "var(--sn-color-surface, #ffffff)",
       }}
@@ -365,10 +365,10 @@ function DetailCardError({ error }: { error: Error }) {
       data-testid="detail-card-error"
       style={{
         padding: "var(--sn-spacing-md, 1rem)",
-        border: "1px solid var(--sn-color-danger, #ef4444)",
+        border: "1px solid var(--sn-color-destructive, #ef4444)",
         borderRadius: "var(--sn-radius-md, 0.375rem)",
-        color: "var(--sn-color-danger, #ef4444)",
-        backgroundColor: "var(--sn-color-danger-bg, #fef2f2)",
+        color: "var(--sn-color-destructive, #ef4444)",
+        backgroundColor: "#fef2f2",
       }}
     >
       Failed to load details: {error.message}
@@ -386,8 +386,8 @@ function DetailCardEmpty({ message }: { message: string }) {
       style={{
         padding: "var(--sn-spacing-lg, 1.5rem)",
         textAlign: "center",
-        color: "var(--sn-color-muted, #94a3b8)",
-        fontSize: "var(--sn-font-sm, 0.875rem)",
+        color: "var(--sn-color-muted-foreground, #64748b)",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
         border: "1px dashed var(--sn-color-border, #e2e8f0)",
         borderRadius: "var(--sn-radius-lg, 0.5rem)",
       }}

@@ -12,6 +12,8 @@ import {
   registerComponent,
   getRegisteredComponent,
 } from "./component-registry";
+import { useActionExecutor } from "../actions/executor";
+import { useResponsiveValue } from "../hooks/use-breakpoint";
 import type {
   RowConfig,
   HeadingConfig,
@@ -45,20 +47,6 @@ const ALIGN_MAP: Record<string, string> = {
   stretch: "stretch",
 };
 
-// ── Responsive value resolution ─────────────────────────────────────────────
-
-/**
- * Resolve a responsive value to its default/flat value.
- * For Phase 4, responsive breakpoint maps resolve to the `default` key.
- * Full responsive CSS will be added in a later phase.
- */
-function resolveResponsive<T>(value: T | { default: T }): T {
-  if (value !== null && typeof value === "object" && "default" in value) {
-    return (value as { default: T }).default;
-  }
-  return value as T;
-}
-
 // ── ComponentRenderer (inline for structural children) ──────────────────────
 
 /**
@@ -76,7 +64,7 @@ function InlineComponentRenderer({ config }: { config: ComponentConfig }) {
     return null;
   }
 
-  const span = config.span ? resolveResponsive(config.span) : undefined;
+  const span = useResponsiveValue(config.span ?? undefined);
   const style: CSSProperties | undefined = span
     ? { gridColumn: `span ${span}` }
     : undefined;
@@ -101,7 +89,7 @@ function InlineComponentRenderer({ config }: { config: ComponentConfig }) {
  */
 function Row({ config }: { config: Record<string, unknown> }) {
   const rowConfig = config as unknown as RowConfig;
-  const gap = rowConfig.gap ? resolveResponsive(rowConfig.gap) : "md";
+  const gap = useResponsiveValue(rowConfig.gap ?? "md");
   const hasSpans = rowConfig.children.some((child) => child.span !== undefined);
 
   const style: CSSProperties = hasSpans
@@ -162,6 +150,7 @@ function Button({ config }: { config: Record<string, unknown> }) {
   const disabled = useSubscribe(
     buttonConfig.disabled !== undefined ? buttonConfig.disabled : false,
   );
+  const execute = useActionExecutor();
 
   const variantStyles: Record<string, CSSProperties> = {
     default: {
@@ -198,12 +187,12 @@ function Button({ config }: { config: Record<string, unknown> }) {
   };
 
   const sizeStyles: Record<string, CSSProperties> = {
-    sm: { padding: "0.25rem 0.5rem", fontSize: "0.875rem" },
-    md: { padding: "0.5rem 1rem", fontSize: "1rem" },
-    lg: { padding: "0.75rem 1.5rem", fontSize: "1.125rem" },
+    sm: { padding: "0.25rem 0.5rem", fontSize: "var(--sn-font-size-sm, 0.875rem)" },
+    md: { padding: "0.5rem 1rem", fontSize: "var(--sn-font-size-md, 1rem)" },
+    lg: { padding: "0.75rem 1.5rem", fontSize: "var(--sn-font-size-lg, 1.125rem)" },
     icon: {
       padding: "0.5rem",
-      fontSize: "1rem",
+      fontSize: "var(--sn-font-size-md, 1rem)",
       width: "2.5rem",
       height: "2.5rem",
     },
@@ -213,17 +202,8 @@ function Button({ config }: { config: Record<string, unknown> }) {
   const size = buttonConfig.size ?? "md";
 
   const handleClick = () => {
-    if (disabled) return;
-    // Action dispatch is handled by the action executor system.
-    // For Phase 4, we dispatch a custom event that the action system can listen to.
-    const actionEvent = new CustomEvent("snapshot:action", {
-      detail: {
-        action: buttonConfig.action,
-        source: buttonConfig.id,
-      },
-      bubbles: true,
-    });
-    document.dispatchEvent(actionEvent);
+    if (disabled || !buttonConfig.action) return;
+    void execute(buttonConfig.action as Parameters<typeof execute>[0]);
   };
 
   return (
@@ -236,7 +216,7 @@ function Button({ config }: { config: Record<string, unknown> }) {
         ...sizeStyles[size],
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.5 : 1,
-        borderRadius: "var(--sn-radius, 0.375rem)",
+        borderRadius: "var(--sn-radius-md, 0.375rem)",
       }}
       data-variant={variant}
       data-size={size}
@@ -275,7 +255,7 @@ function Select({ config }: { config: Record<string, unknown> }) {
       onChange={handleChange}
       style={{
         padding: "0.5rem",
-        borderRadius: "var(--sn-radius, 0.375rem)",
+        borderRadius: "var(--sn-radius-md, 0.375rem)",
         border: "1px solid var(--sn-color-border, #e5e7eb)",
       }}
     >

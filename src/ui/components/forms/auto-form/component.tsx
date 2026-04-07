@@ -139,7 +139,15 @@ function FieldRenderer({
   return (
     <div data-sn-field={field.name}>
       {field.type === "checkbox" ? (
-        <label htmlFor={fieldId}>
+        <label
+          htmlFor={fieldId}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "var(--sn-spacing-sm, 0.5rem)",
+            cursor: "pointer",
+          }}
+        >
           {input}
           <span>{label}</span>
         </label>

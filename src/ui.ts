@@ -246,8 +246,21 @@ export {
 } from "./ui/components/navigation/tabs";
 export type { TabsConfig, TabConfig } from "./ui/components/navigation/tabs";
 
+// Icons
+export { Icon, ICON_PATHS } from "./ui/icons/index";
+export type { IconProps } from "./ui/icons/index";
+
 // Register all built-in components
 import "./ui/components/register";
+
+// Breakpoint & Responsive
+export {
+  useBreakpoint,
+  useResponsiveValue,
+  resolveResponsiveValue,
+  BREAKPOINTS as UI_BREAKPOINTS,
+} from "./ui/hooks/use-breakpoint";
+export type { Breakpoint } from "./ui/hooks/use-breakpoint";
 
 // Headless Hooks (Level 2/3)
 // export { useDataTable } from './ui/hooks/use-data-table'

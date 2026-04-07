@@ -56,6 +56,25 @@ const mockApi = {
         { id: 5, name: "Eve Brown", email: "eve@example.com", role: "Admin", status: "active", joined: "2025-04-05" },
       ];
     }
+    if (url.includes("/tasks")) {
+      return [
+        { id: 1, title: "Design token system", description: "Implement CSS custom properties", status: "done", assignee: "Alice", priority: "high" },
+        { id: 2, title: "Build icon renderer", description: "Lucide SVG integration", status: "done", assignee: "Bob", priority: "high" },
+        { id: 3, title: "Responsive breakpoints", description: "Media query generation", status: "review", assignee: "Carol", priority: "medium" },
+        { id: 4, title: "Component library", description: "30+ enterprise components", status: "in-progress", assignee: "Dave", priority: "high" },
+        { id: 5, title: "Playground update", description: "Showcase all components", status: "in-progress", assignee: "Eve", priority: "medium" },
+        { id: 6, title: "Documentation", description: "Update docs with new APIs", status: "todo", priority: "low" },
+        { id: 7, title: "Test coverage", description: "Unit + integration tests", status: "todo", priority: "medium" },
+      ];
+    }
+    if (url.includes("/audit-log")) {
+      return [
+        { id: 1, user: "Alice", action: "updated profile settings", timestamp: new Date(Date.now() - 3600000).toISOString(), details: { field: "email", old: "old@email.com", new: "new@email.com" } },
+        { id: 2, user: "Bob", action: "created new project", timestamp: new Date(Date.now() - 7200000).toISOString() },
+        { id: 3, user: "Carol", action: "deleted document report.pdf", timestamp: new Date(Date.now() - 86400000).toISOString() },
+        { id: 4, user: "Dave", action: "changed role from Editor to Admin", timestamp: new Date(Date.now() - 172800000).toISOString(), details: { role: { old: "Editor", new: "Admin" } } },
+      ];
+    }
     if (url.includes("/user/")) {
       return {
         id: 1,
@@ -102,7 +121,7 @@ export function App() {
       <JotaiProvider store={jotaiStore}>
         <SnapshotApiContext.Provider value={mockApi as any}>
           <div className="playground">
-            <TokenEditorSidebar />
+            <TokenEditorSidebar darkMode={darkMode} />
             <div className="playground__main">
               <div className="playground__header">
                 <h1>Snapshot Playground</h1>

@@ -12,6 +12,7 @@ import type {
   RadiusScale,
   SpacingScale,
   FontConfig,
+  GlobalTokens,
   ComponentTokens,
   Flavor,
 } from "./types";
@@ -44,6 +45,39 @@ const SPACING_MAP: Record<SpacingScale, string> = {
   spacious: "1.5",
 };
 
+// ── Shadow scale ────────────────────────────────────────────────────────────
+
+const SHADOW_MAP: Record<string, string> = {
+  none: "none",
+  xs: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+  sm: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
+  md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
+  lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
+  xl: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+};
+
+// ── Z-index scale ───────────────────────────────────────────────────────────
+
+const Z_INDEX_MAP: Record<string, number> = {
+  base: 0,
+  dropdown: 10,
+  sticky: 20,
+  overlay: 30,
+  modal: 40,
+  popover: 50,
+  toast: 60,
+};
+
+// ── Breakpoint constants ────────────────────────────────────────────────────
+
+const BREAKPOINTS: Record<string, number> = {
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+  "2xl": 1536,
+};
+
 // ── Semantic color keys that get foreground auto-derivation ───────────────────
 
 const FOREGROUND_PAIRS = [
@@ -70,17 +104,19 @@ const BACKGROUND_PAIR = "background" as const;
  */
 function normalizeColor(color: string): string {
   const trimmed = color.trim();
-  // Already in L C H format (3 numbers separated by spaces)
+  // Already wrapped in oklch()
+  if (trimmed.startsWith("oklch(")) return trimmed;
+  // Raw L C H format — wrap in oklch()
   const parts = trimmed.split(/\s+/);
   if (
     parts.length === 3 &&
     parts.every((p) => !isNaN(parseFloat(p))) &&
     !trimmed.startsWith("#")
   ) {
-    return trimmed;
+    return `oklch(${trimmed})`;
   }
   const [l, c, h] = colorToOklch(trimmed);
-  return oklchToString(l, c, h);
+  return `oklch(${oklchToString(l, c, h)})`;
 }
 
 // ── Deep merge helper ────────────────────────────────────────────────────────
@@ -121,9 +157,9 @@ function generateColorVars(colors: ThemeColors, deriveFg: boolean): string[] {
   // Background/foreground pair
   if (colors.background) {
     const bg = normalizeColor(colors.background);
-    lines.push(`  --background: ${bg};`);
+    lines.push(`  --sn-color-background: ${bg};`);
     if (deriveFg) {
-      lines.push(`  --foreground: ${deriveForeground(bg)};`);
+      lines.push(`  --sn-color-foreground: ${deriveForeground(bg)};`);
     }
   }
 
@@ -132,9 +168,11 @@ function generateColorVars(colors: ThemeColors, deriveFg: boolean): string[] {
     const value = colors[key];
     if (value) {
       const normalized = normalizeColor(value);
-      lines.push(`  --${key}: ${normalized};`);
+      lines.push(`  --sn-color-${key}: ${normalized};`);
       if (deriveFg) {
-        lines.push(`  --${key}-foreground: ${deriveForeground(normalized)};`);
+        lines.push(
+          `  --sn-color-${key}-foreground: ${deriveForeground(normalized)};`,
+        );
       }
     }
   }
@@ -143,7 +181,7 @@ function generateColorVars(colors: ThemeColors, deriveFg: boolean): string[] {
   for (const key of ["border", "input", "ring"] as const) {
     const value = colors[key];
     if (value) {
-      lines.push(`  --${key}: ${normalizeColor(value)};`);
+      lines.push(`  --sn-color-${key}: ${normalizeColor(value)};`);
     }
   }
 
@@ -152,7 +190,7 @@ function generateColorVars(colors: ThemeColors, deriveFg: boolean): string[] {
     for (let i = 0; i < 5; i++) {
       const chartColor = colors.chart[i];
       if (chartColor) {
-        lines.push(`  --chart-${i + 1}: ${normalizeColor(chartColor)};`);
+        lines.push(`  --sn-chart-${i + 1}: ${normalizeColor(chartColor)};`);
       }
     }
   }
@@ -204,16 +242,16 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
   if (components.card) {
     const lines: string[] = [];
     if (components.card.shadow) {
-      lines.push(`  --card-shadow: var(--shadow-${components.card.shadow});`);
+      lines.push(`  --sn-card-shadow: var(--sn-shadow-${components.card.shadow});`);
     }
     if (components.card.padding) {
       lines.push(
-        `  --card-padding: calc(var(--spacing-base, 1rem) * ${SPACING_MAP[components.card.padding]});`,
+        `  --sn-card-padding: calc(var(--sn-spacing-md, 1rem) * ${SPACING_MAP[components.card.padding]});`,
       );
     }
     if (components.card.border !== undefined) {
       lines.push(
-        `  --card-border: ${components.card.border ? "1px solid oklch(var(--border))" : "none"};`,
+        `  --sn-card-border: ${components.card.border ? "1px solid oklch(var(--sn-color-border))" : "none"};`,
       );
     }
     if (lines.length > 0) {
@@ -225,31 +263,31 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
     const lines: string[] = [];
     if (components.table.striped !== undefined) {
       lines.push(
-        `  --table-stripe-bg: ${components.table.striped ? "oklch(var(--muted))" : "transparent"};`,
+        `  --sn-table-stripe-bg: ${components.table.striped ? "oklch(var(--sn-color-muted))" : "transparent"};`,
       );
     }
     if (components.table.density) {
       const densityMap = { compact: "0.75", default: "1", comfortable: "1.25" };
-      lines.push(`  --table-density: ${densityMap[components.table.density]};`);
+      lines.push(`  --sn-table-density: ${densityMap[components.table.density]};`);
     }
     if (components.table.headerBackground !== undefined) {
       lines.push(
-        `  --table-header-bg: ${components.table.headerBackground ? "oklch(var(--muted))" : "transparent"};`,
+        `  --sn-table-header-bg: ${components.table.headerBackground ? "oklch(var(--sn-color-muted))" : "transparent"};`,
       );
     }
     if (components.table.hoverRow !== undefined) {
       lines.push(
-        `  --table-hover-bg: ${components.table.hoverRow ? "oklch(var(--accent))" : "transparent"};`,
+        `  --sn-table-hover-bg: ${components.table.hoverRow ? "oklch(var(--sn-color-accent))" : "transparent"};`,
       );
     }
     if (components.table.borderStyle) {
       const borderMap = {
         none: "none",
-        horizontal: "1px solid oklch(var(--border))",
-        grid: "1px solid oklch(var(--border))",
+        horizontal: "1px solid oklch(var(--sn-color-border))",
+        grid: "1px solid oklch(var(--sn-color-border))",
       };
       lines.push(
-        `  --table-border: ${borderMap[components.table.borderStyle]};`,
+        `  --sn-table-border: ${borderMap[components.table.borderStyle]};`,
       );
     }
     if (lines.length > 0) {
@@ -263,17 +301,17 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
     const lines: string[] = [];
     if (components.button.weight) {
       const weightMap = { light: "300", medium: "500", bold: "700" };
-      lines.push(`  --button-weight: ${weightMap[components.button.weight]};`);
+      lines.push(`  --sn-button-weight: ${weightMap[components.button.weight]};`);
     }
     if (components.button.uppercase !== undefined) {
       lines.push(
-        `  --button-transform: ${components.button.uppercase ? "uppercase" : "none"};`,
+        `  --sn-button-transform: ${components.button.uppercase ? "uppercase" : "none"};`,
       );
     }
     if (components.button.iconSize) {
       const sizeMap = { sm: "0.875rem", md: "1rem", lg: "1.25rem" };
       lines.push(
-        `  --button-icon-size: ${sizeMap[components.button.iconSize]};`,
+        `  --sn-button-icon-size: ${sizeMap[components.button.iconSize]};`,
       );
     }
     if (lines.length > 0) {
@@ -287,10 +325,10 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
     const lines: string[] = [];
     if (components.input.size) {
       const sizeMap = { sm: "2rem", md: "2.5rem", lg: "3rem" };
-      lines.push(`  --input-height: ${sizeMap[components.input.size]};`);
+      lines.push(`  --sn-input-height: ${sizeMap[components.input.size]};`);
     }
     if (components.input.variant) {
-      lines.push(`  --input-variant: ${components.input.variant};`);
+      lines.push(`  --sn-input-variant: ${components.input.variant};`);
     }
     if (lines.length > 0) {
       blocks.push(
@@ -307,13 +345,13 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
         dark: "rgba(0, 0, 0, 0.7)",
         blur: "rgba(0, 0, 0, 0.4)",
       };
-      lines.push(`  --modal-overlay: ${overlayMap[components.modal.overlay]};`);
+      lines.push(`  --sn-modal-overlay: ${overlayMap[components.modal.overlay]};`);
       if (components.modal.overlay === "blur") {
-        lines.push(`  --modal-backdrop-filter: blur(4px);`);
+        lines.push(`  --sn-modal-backdrop-filter: blur(4px);`);
       }
     }
     if (components.modal.animation) {
-      lines.push(`  --modal-animation: ${components.modal.animation};`);
+      lines.push(`  --sn-modal-animation: ${components.modal.animation};`);
     }
     if (lines.length > 0) {
       blocks.push(
@@ -325,11 +363,11 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
   if (components.nav) {
     const lines: string[] = [];
     if (components.nav.variant) {
-      lines.push(`  --nav-variant: ${components.nav.variant};`);
+      lines.push(`  --sn-nav-variant: ${components.nav.variant};`);
     }
     if (components.nav.activeIndicator) {
       lines.push(
-        `  --nav-active-indicator: ${components.nav.activeIndicator};`,
+        `  --sn-nav-active-indicator: ${components.nav.activeIndicator};`,
       );
     }
     if (lines.length > 0) {
@@ -340,11 +378,11 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
   if (components.badge) {
     const lines: string[] = [];
     if (components.badge.variant) {
-      lines.push(`  --badge-variant: ${components.badge.variant};`);
+      lines.push(`  --sn-badge-variant: ${components.badge.variant};`);
     }
     if (components.badge.rounded !== undefined) {
       lines.push(
-        `  --badge-radius: ${components.badge.rounded ? "9999px" : "var(--radius)"};`,
+        `  --sn-badge-radius: ${components.badge.rounded ? "9999px" : "var(--sn-radius-md)"};`,
       );
     }
     if (lines.length > 0) {
@@ -357,10 +395,10 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
   if (components.toast) {
     const lines: string[] = [];
     if (components.toast.position) {
-      lines.push(`  --toast-position: ${components.toast.position};`);
+      lines.push(`  --sn-toast-position: ${components.toast.position};`);
     }
     if (components.toast.animation) {
-      lines.push(`  --toast-animation: ${components.toast.animation};`);
+      lines.push(`  --sn-toast-animation: ${components.toast.animation};`);
     }
     if (lines.length > 0) {
       blocks.push(
@@ -432,38 +470,163 @@ export function resolveTokens(config: ThemeConfig = {}): string {
       overrides.darkColors as Record<string, unknown>,
     ) as ThemeColors;
   } else if (baseFlavor.darkColors) {
-    darkColors = baseFlavor.darkColors;
+    // Start with flavor's dark colors, then auto-derive dark variants
+    // for any colors the user has overridden
+    darkColors = { ...baseFlavor.darkColors };
+    if (overrides.colors) {
+      const derivedFromOverrides = autoDerivedarkenColors(
+        overrides.colors as ThemeColors,
+      );
+      darkColors = deepMerge(
+        darkColors as Record<string, unknown>,
+        derivedFromOverrides as Record<string, unknown>,
+      ) as ThemeColors;
+    }
   } else {
     darkColors = autoDerivedarkenColors(lightColors);
   }
 
   const darkVars = generateColorVars(darkColors, true);
 
-  // 6. Radius, spacing, font
-  lightVars.push(`  --radius: ${RADIUS_MAP[radius]};`);
-  lightVars.push(`  --spacing-unit: ${SPACING_MAP[spacing]};`);
+  // 6. Radius — emit all scale stops so components can reference any size
+  const spacingMultiplier = parseFloat(SPACING_MAP[spacing]);
+  lightVars.push(`  --sn-radius-none: 0;`);
+  lightVars.push(`  --sn-radius-xs: 0.125rem;`);
+  lightVars.push(`  --sn-radius-sm: 0.25rem;`);
+  lightVars.push(`  --sn-radius-md: ${RADIUS_MAP[radius]};`);
+  lightVars.push(`  --sn-radius-lg: 0.75rem;`);
+  lightVars.push(`  --sn-radius-xl: 1rem;`);
+  lightVars.push(`  --sn-radius-full: 9999px;`);
 
+  // Spacing — emit all scale stops
+  lightVars.push(
+    `  --sn-spacing-xs: ${(0.25 * spacingMultiplier).toFixed(3)}rem;`,
+  );
+  lightVars.push(
+    `  --sn-spacing-sm: ${(0.5 * spacingMultiplier).toFixed(3)}rem;`,
+  );
+  lightVars.push(
+    `  --sn-spacing-md: ${(1 * spacingMultiplier).toFixed(3)}rem;`,
+  );
+  lightVars.push(
+    `  --sn-spacing-lg: ${(1.5 * spacingMultiplier).toFixed(3)}rem;`,
+  );
+  lightVars.push(
+    `  --sn-spacing-xl: ${(2 * spacingMultiplier).toFixed(3)}rem;`,
+  );
+
+  // Font
   if (font.sans) {
-    lightVars.push(`  --font-sans: ${font.sans};`);
+    lightVars.push(`  --sn-font-sans: ${font.sans};`);
   }
   if (font.mono) {
-    lightVars.push(`  --font-mono: ${font.mono};`);
+    lightVars.push(`  --sn-font-mono: ${font.mono};`);
   }
   if (font.display) {
-    lightVars.push(`  --font-display: ${font.display};`);
+    lightVars.push(`  --sn-font-display: ${font.display};`);
   }
   if (font.baseSize) {
-    lightVars.push(`  --font-size-base: ${font.baseSize}px;`);
+    lightVars.push(`  --sn-font-size-base: ${font.baseSize}px;`);
   }
   if (font.scale) {
-    lightVars.push(`  --font-scale: ${font.scale};`);
+    lightVars.push(`  --sn-font-scale: ${font.scale};`);
   }
+  // Font size scale stops — computed from base size when overridden
+  const base = font.baseSize ?? 16;
+  lightVars.push(`  --sn-font-size-xs: ${(base * 0.75).toFixed(1)}px;`);
+  lightVars.push(`  --sn-font-size-sm: ${(base * 0.875).toFixed(1)}px;`);
+  lightVars.push(`  --sn-font-size-md: ${base}px;`);
+  lightVars.push(`  --sn-font-size-lg: ${(base * 1.125).toFixed(1)}px;`);
+  lightVars.push(`  --sn-font-size-xl: ${(base * 1.25).toFixed(1)}px;`);
+  // Font weight scale
+  lightVars.push(`  --sn-font-weight-light: 300;`);
+  lightVars.push(`  --sn-font-weight-normal: 400;`);
+  lightVars.push(`  --sn-font-weight-medium: 500;`);
+  lightVars.push(`  --sn-font-weight-semibold: 600;`);
+  lightVars.push(`  --sn-font-weight-bold: 700;`);
+
+  // Global tokens (durations, easings, opacity, etc.)
+  const tokens: GlobalTokens = deepMerge(
+    {} as Record<string, unknown>,
+    (overrides.tokens ?? {}) as Record<string, unknown>,
+  ) as GlobalTokens;
+
+  // Shadow scale
+  for (const [key, value] of Object.entries(SHADOW_MAP)) {
+    lightVars.push(`  --sn-shadow-${key}: ${value};`);
+  }
+
+  // Z-index scale
+  for (const [key, value] of Object.entries(Z_INDEX_MAP)) {
+    lightVars.push(`  --sn-z-index-${key}: ${value};`);
+  }
+
+  // Breakpoint vars (for reference in JS, not media queries)
+  for (const [key, value] of Object.entries(BREAKPOINTS)) {
+    lightVars.push(`  --sn-bp-${key}: ${value}px;`);
+  }
+
+  // Animation/transition durations
+  const durations = tokens.durations ?? {};
+  lightVars.push(`  --sn-duration-instant: ${durations.instant ?? 50}ms;`);
+  lightVars.push(`  --sn-duration-fast: ${durations.fast ?? 150}ms;`);
+  lightVars.push(`  --sn-duration-normal: ${durations.normal ?? 250}ms;`);
+  lightVars.push(`  --sn-duration-slow: ${durations.slow ?? 500}ms;`);
+
+  // Easing functions
+  const easings = tokens.easings ?? {};
+  lightVars.push(`  --sn-ease-default: ${easings.default ?? "cubic-bezier(0.4, 0, 0.2, 1)"};`);
+  lightVars.push(`  --sn-ease-in: ${easings.in ?? "cubic-bezier(0.4, 0, 1, 1)"};`);
+  lightVars.push(`  --sn-ease-out: ${easings.out ?? "cubic-bezier(0, 0, 0.2, 1)"};`);
+  lightVars.push(`  --sn-ease-in-out: ${easings.inOut ?? "cubic-bezier(0.4, 0, 0.2, 1)"};`);
+  lightVars.push(`  --sn-ease-spring: ${easings.spring ?? "cubic-bezier(0.32, 0.72, 0, 1)"};`);
+
+  // Opacity scale
+  const opacity = tokens.opacity ?? {};
+  lightVars.push(`  --sn-opacity-disabled: ${opacity.disabled ?? 0.5};`);
+  lightVars.push(`  --sn-opacity-hover: ${opacity.hover ?? 0.8};`);
+  lightVars.push(`  --sn-opacity-muted: ${opacity.muted ?? 0.6};`);
+
+  // Line-height scale
+  const lineHeight = tokens.lineHeight ?? {};
+  lightVars.push(`  --sn-leading-none: ${lineHeight.none ?? 1};`);
+  lightVars.push(`  --sn-leading-tight: ${lineHeight.tight ?? 1.25};`);
+  lightVars.push(`  --sn-leading-normal: ${lineHeight.normal ?? 1.5};`);
+  lightVars.push(`  --sn-leading-relaxed: ${lineHeight.relaxed ?? 1.75};`);
+  lightVars.push(`  --sn-leading-loose: ${lineHeight.loose ?? 2};`);
+
+  // Letter-spacing scale
+  const tracking = tokens.tracking ?? {};
+  lightVars.push(`  --sn-tracking-tight: ${tracking.tight ?? "-0.025em"};`);
+  lightVars.push(`  --sn-tracking-normal: ${tracking.normal ?? "0"};`);
+  lightVars.push(`  --sn-tracking-wide: ${tracking.wide ?? "0.05em"};`);
+
+  // Border-width scale
+  const borderWidth = tokens.borderWidth ?? {};
+  lightVars.push(`  --sn-border-none: ${borderWidth.none ?? "0"};`);
+  lightVars.push(`  --sn-border-thin: ${borderWidth.thin ?? "1px"};`);
+  lightVars.push(`  --sn-border-default: ${borderWidth.default ?? "2px"};`);
+  lightVars.push(`  --sn-border-thick: ${borderWidth.thick ?? "4px"};`);
+
+  // Color aliases
+  lightVars.push(`  --sn-color-surface: var(--sn-color-card);`);
+  lightVars.push(`  --sn-color-text: var(--sn-color-foreground);`);
+
+  // Modal sizes
+  lightVars.push(`  --sn-modal-size-sm: 24rem;`);
+  lightVars.push(`  --sn-modal-size-md: 32rem;`);
+  lightVars.push(`  --sn-modal-size-lg: 42rem;`);
+  lightVars.push(`  --sn-modal-size-xl: 56rem;`);
 
   // 7. Component tokens
   const componentBlocks = generateComponentTokenCss(components);
 
   // 8. Build CSS output
   const sections: string[] = [];
+
+  // Add color-scheme for native dark scrollbars, form controls, etc.
+  lightVars.push(`  color-scheme: light;`);
+  darkVars.push(`  color-scheme: dark;`);
 
   sections.push(`:root {\n${lightVars.join("\n")}\n}`);
   sections.push(`.dark {\n${darkVars.join("\n")}\n}`);

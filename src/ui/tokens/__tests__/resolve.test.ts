@@ -7,10 +7,10 @@ describe("resolveTokens", () => {
     const css = resolveTokens();
     expect(css).toContain(":root {");
     expect(css).toContain(".dark {");
-    expect(css).toContain("--primary:");
-    expect(css).toContain("--background:");
-    expect(css).toContain("--foreground:");
-    expect(css).toContain("--radius:");
+    expect(css).toContain("--sn-color-primary:");
+    expect(css).toContain("--sn-color-background:");
+    expect(css).toContain("--sn-color-foreground:");
+    expect(css).toContain("--sn-radius-md:");
   });
 
   it("returns valid CSS with empty config", () => {
@@ -21,22 +21,22 @@ describe("resolveTokens", () => {
 
   it("generates foreground variables automatically", () => {
     const css = resolveTokens();
-    expect(css).toContain("--primary-foreground:");
-    expect(css).toContain("--secondary-foreground:");
-    expect(css).toContain("--card-foreground:");
-    expect(css).toContain("--popover-foreground:");
-    expect(css).toContain("--muted-foreground:");
-    expect(css).toContain("--accent-foreground:");
-    expect(css).toContain("--destructive-foreground:");
+    expect(css).toContain("--sn-color-primary-foreground:");
+    expect(css).toContain("--sn-color-secondary-foreground:");
+    expect(css).toContain("--sn-color-card-foreground:");
+    expect(css).toContain("--sn-color-popover-foreground:");
+    expect(css).toContain("--sn-color-muted-foreground:");
+    expect(css).toContain("--sn-color-accent-foreground:");
+    expect(css).toContain("--sn-color-destructive-foreground:");
   });
 
   it("generates chart variables", () => {
     const css = resolveTokens();
-    expect(css).toContain("--chart-1:");
-    expect(css).toContain("--chart-2:");
-    expect(css).toContain("--chart-3:");
-    expect(css).toContain("--chart-4:");
-    expect(css).toContain("--chart-5:");
+    expect(css).toContain("--sn-chart-1:");
+    expect(css).toContain("--sn-chart-2:");
+    expect(css).toContain("--sn-chart-3:");
+    expect(css).toContain("--sn-chart-4:");
+    expect(css).toContain("--sn-chart-5:");
   });
 
   it("generates font variables", () => {
@@ -50,15 +50,15 @@ describe("resolveTokens", () => {
         },
       },
     });
-    expect(css).toContain("--font-sans: Inter;");
-    expect(css).toContain("--font-mono: JetBrains Mono;");
-    expect(css).toContain("--font-size-base: 16px;");
-    expect(css).toContain("--font-scale: 1.25;");
+    expect(css).toContain("--sn-font-sans: Inter;");
+    expect(css).toContain("--sn-font-mono: JetBrains Mono;");
+    expect(css).toContain("--sn-font-size-base: 16px;");
+    expect(css).toContain("--sn-font-scale: 1.25;");
   });
 
-  it("generates spacing-unit variable", () => {
+  it("generates spacing variables", () => {
     const css = resolveTokens();
-    expect(css).toContain("--spacing-unit:");
+    expect(css).toContain("--sn-spacing-md:");
   });
 
   it("throws for unknown flavor", () => {
@@ -85,8 +85,8 @@ describe("resolveTokens with flavors", () => {
       const css = resolveTokens({ flavor: name });
       expect(css).toContain(":root {");
       expect(css).toContain(".dark {");
-      expect(css).toContain("--primary:");
-      expect(css).toContain("--background:");
+      expect(css).toContain("--sn-color-primary:");
+      expect(css).toContain("--sn-color-background:");
     });
   }
 
@@ -117,23 +117,24 @@ describe("resolveTokens with overrides", () => {
     });
 
     // Should contain the overridden primary (converted to oklch)
-    expect(css).toContain("--primary:");
+    expect(css).toContain("--sn-color-primary:");
     // The neutral flavor's background should still be there
-    expect(css).toContain("--background:");
+    expect(css).toContain("--sn-color-background:");
   });
 
   it("overrides radius", () => {
     const css = resolveTokens({
       overrides: { radius: "full" },
     });
-    expect(css).toContain("--radius: 9999px;");
+    expect(css).toContain("--sn-radius-md: 9999px;");
   });
 
   it("overrides spacing", () => {
     const css = resolveTokens({
       overrides: { spacing: "compact" },
     });
-    expect(css).toContain("--spacing-unit: 0.75;");
+    // compact = 0.75 multiplier, so md = 1 * 0.75 = 0.750rem
+    expect(css).toContain("--sn-spacing-md: 0.750rem;");
   });
 
   it("maps radius enum values correctly", () => {
@@ -152,24 +153,25 @@ describe("resolveTokens with overrides", () => {
 
     for (const { value, expected } of radiusTests) {
       const css = resolveTokens({ overrides: { radius: value } });
-      expect(css).toContain(`--radius: ${expected};`);
+      expect(css).toContain(`--sn-radius-md: ${expected};`);
     }
   });
 
   it("maps spacing enum values correctly", () => {
     const spacingTests: Array<{
       value: "compact" | "default" | "comfortable" | "spacious";
-      expected: string;
+      multiplier: number;
     }> = [
-      { value: "compact", expected: "0.75" },
-      { value: "default", expected: "1" },
-      { value: "comfortable", expected: "1.25" },
-      { value: "spacious", expected: "1.5" },
+      { value: "compact", multiplier: 0.75 },
+      { value: "default", multiplier: 1 },
+      { value: "comfortable", multiplier: 1.25 },
+      { value: "spacious", multiplier: 1.5 },
     ];
 
-    for (const { value, expected } of spacingTests) {
+    for (const { value, multiplier } of spacingTests) {
       const css = resolveTokens({ overrides: { spacing: value } });
-      expect(css).toContain(`--spacing-unit: ${expected};`);
+      const expectedMd = (1 * multiplier).toFixed(3);
+      expect(css).toContain(`--sn-spacing-md: ${expectedMd}rem;`);
     }
   });
 
@@ -190,7 +192,7 @@ describe("resolveTokens with overrides", () => {
         font: { sans: "Custom Font" },
       },
     });
-    expect(css).toContain("--font-sans: Custom Font;");
+    expect(css).toContain("--sn-font-sans: Custom Font;");
   });
 });
 
@@ -204,9 +206,9 @@ describe("resolveTokens with component tokens", () => {
       },
     });
     expect(css).toContain('[data-snapshot-component="card"]');
-    expect(css).toContain("--card-shadow:");
-    expect(css).toContain("--card-padding:");
-    expect(css).toContain("--card-border:");
+    expect(css).toContain("--sn-card-shadow:");
+    expect(css).toContain("--sn-card-padding:");
+    expect(css).toContain("--sn-card-border:");
   });
 
   it("generates table component tokens", () => {
@@ -218,9 +220,9 @@ describe("resolveTokens with component tokens", () => {
       },
     });
     expect(css).toContain('[data-snapshot-component="table"]');
-    expect(css).toContain("--table-stripe-bg:");
-    expect(css).toContain("--table-density: 0.75;");
-    expect(css).toContain("--table-hover-bg:");
+    expect(css).toContain("--sn-table-stripe-bg:");
+    expect(css).toContain("--sn-table-density: 0.75;");
+    expect(css).toContain("--sn-table-hover-bg:");
   });
 
   it("generates button component tokens", () => {
@@ -232,8 +234,8 @@ describe("resolveTokens with component tokens", () => {
       },
     });
     expect(css).toContain('[data-snapshot-component="button"]');
-    expect(css).toContain("--button-weight: 700;");
-    expect(css).toContain("--button-transform: uppercase;");
+    expect(css).toContain("--sn-button-weight: 700;");
+    expect(css).toContain("--sn-button-transform: uppercase;");
   });
 
   it("generates input component tokens", () => {
@@ -245,8 +247,8 @@ describe("resolveTokens with component tokens", () => {
       },
     });
     expect(css).toContain('[data-snapshot-component="input"]');
-    expect(css).toContain("--input-height: 3rem;");
-    expect(css).toContain("--input-variant: filled;");
+    expect(css).toContain("--sn-input-height: 3rem;");
+    expect(css).toContain("--sn-input-variant: filled;");
   });
 
   it("generates modal component tokens", () => {
@@ -258,9 +260,9 @@ describe("resolveTokens with component tokens", () => {
       },
     });
     expect(css).toContain('[data-snapshot-component="modal"]');
-    expect(css).toContain("--modal-overlay:");
-    expect(css).toContain("--modal-backdrop-filter: blur(4px);");
-    expect(css).toContain("--modal-animation: slide-up;");
+    expect(css).toContain("--sn-modal-overlay:");
+    expect(css).toContain("--sn-modal-backdrop-filter: blur(4px);");
+    expect(css).toContain("--sn-modal-animation: slide-up;");
   });
 
   it("does not generate component blocks when no components configured", () => {
@@ -308,10 +310,10 @@ describe("resolveTokens with custom flavor", () => {
 
     const css = resolveTokens({ flavor: "test-resolve-custom" });
     expect(css).toContain(":root {");
-    expect(css).toContain("--radius: 1rem;");
-    expect(css).toContain("--spacing-unit: 1.25;");
-    expect(css).toContain("--font-sans: DM Sans;");
-    expect(css).toContain("--font-mono: Fira Code;");
+    expect(css).toContain("--sn-radius-md: 1rem;");
+    expect(css).toContain("--sn-spacing-md:");
+    expect(css).toContain("--sn-font-sans: DM Sans;");
+    expect(css).toContain("--sn-font-mono: Fira Code;");
   });
 
   it("auto-derives dark mode when flavor has no darkColors", () => {
@@ -331,6 +333,6 @@ describe("resolveTokens with custom flavor", () => {
     const css = resolveTokens({ flavor: "test-no-dark" });
     // Should still have a .dark block with auto-derived colors
     expect(css).toContain(".dark {");
-    expect(css).toContain("--primary:");
+    expect(css).toContain("--sn-color-primary:");
   });
 });

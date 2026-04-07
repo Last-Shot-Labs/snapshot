@@ -50,7 +50,7 @@ describe("useTokenEditor", () => {
       });
 
       expect(setPropertySpy).toHaveBeenCalledWith(
-        "--primary",
+        "--sn-color-primary",
         expect.stringContaining(" "),
       );
     });
@@ -62,7 +62,7 @@ describe("useTokenEditor", () => {
         result.current.setToken("radius", "lg");
       });
 
-      expect(setPropertySpy).toHaveBeenCalledWith("--radius", "0.75rem");
+      expect(setPropertySpy).toHaveBeenCalledWith("--sn-radius-md", "0.75rem");
     });
 
     it("sets a spacing token", () => {
@@ -72,7 +72,7 @@ describe("useTokenEditor", () => {
         result.current.setToken("spacing", "compact");
       });
 
-      expect(setPropertySpy).toHaveBeenCalledWith("--spacing-unit", "0.75");
+      expect(setPropertySpy).toHaveBeenCalledWith("--sn-spacing-md", "0.75");
     });
 
     it("sets a font token", () => {
@@ -82,7 +82,7 @@ describe("useTokenEditor", () => {
         result.current.setToken("font.sans", "Inter");
       });
 
-      expect(setPropertySpy).toHaveBeenCalledWith("--font-sans", "Inter");
+      expect(setPropertySpy).toHaveBeenCalledWith("--sn-font-sans", "Inter");
     });
 
     it("throws on unknown token path", () => {
@@ -148,8 +148,8 @@ describe("useTokenEditor", () => {
         result.current.resetTokens();
       });
 
-      expect(removePropertySpy).toHaveBeenCalledWith("--primary");
-      expect(removePropertySpy).toHaveBeenCalledWith("--radius");
+      expect(removePropertySpy).toHaveBeenCalledWith("--sn-color-primary");
+      expect(removePropertySpy).toHaveBeenCalledWith("--sn-radius-md");
       expect(result.current.getTokens()).toEqual({});
     });
   });

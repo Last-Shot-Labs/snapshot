@@ -75,7 +75,7 @@ describe("manifest processing", () => {
         },
       });
       expect(css).toContain(":root");
-      expect(css).toContain("--primary");
+      expect(css).toContain("--sn-color-primary");
       expect(css).toContain(".dark");
     });
 
@@ -83,8 +83,8 @@ describe("manifest processing", () => {
       const { generateThemeCss } = await import("../sync");
       const css = generateThemeCss({});
       expect(css).toContain(":root");
-      expect(css).toContain("--radius");
-      expect(css).toContain("--spacing-unit");
+      expect(css).toContain("--sn-radius-md");
+      expect(css).toContain("--sn-spacing-md");
     });
   });
 

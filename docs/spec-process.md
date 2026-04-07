@@ -227,3 +227,12 @@ Rule numbers from `docs/engineering-rules.md` with one-line descriptions.
 8. **Every phase leaves the codebase green.**
 9. **Commit each pass.**
 10. **Docs ship with the feature.** JSDoc and `docs/` pages are part of the deliverable.
+11. **Verify token usage against the canonical list.** Every spec that touches UI components
+    must reference the Token Usage Rules in `CLAUDE.md` / `docs/engineering-rules.md`. The
+    spec must list every CSS variable the new component will use and verify each one exists
+    in the canonical token list. Invented variable names are the #1 source of visual bugs.
+12. **Specs for UI components must include playground integration.** The spec must define
+    how the component appears in the playground — what config/fixture data it uses, what
+    states to showcase (loading, error, empty, populated), and how it responds to token
+    changes (colors, font sizes, radius, spacing). A component that isn't in the playground
+    is untested visually.

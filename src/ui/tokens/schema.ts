@@ -154,6 +154,81 @@ export const componentTokensSchema = z
   })
   .strict();
 
+// ── Shadow schema ───────────────────────────────────────────────────────────
+
+/** Zod schema for shadow scale. */
+export const shadowSchema = z.enum(["none", "xs", "sm", "md", "lg", "xl"]);
+
+// ── Additional global token schemas ─────────────────────────────────────────
+
+/** Zod schema for global token overrides beyond colors/radius/spacing/font. */
+export const globalTokensSchema = z
+  .object({
+    /** Shadow scale override. Default: uses flavor's shadow scale. */
+    shadow: shadowSchema.optional(),
+    /** Animation/transition duration scale. */
+    durations: z
+      .object({
+        instant: z.number().min(0).max(200).optional(),
+        fast: z.number().min(50).max(500).optional(),
+        normal: z.number().min(100).max(1000).optional(),
+        slow: z.number().min(200).max(2000).optional(),
+      })
+      .strict()
+      .optional(),
+    /** Easing functions. */
+    easings: z
+      .object({
+        default: z.string().optional(),
+        in: z.string().optional(),
+        out: z.string().optional(),
+        inOut: z.string().optional(),
+        spring: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+    /** Opacity scale overrides. */
+    opacity: z
+      .object({
+        disabled: z.number().min(0).max(1).optional(),
+        hover: z.number().min(0).max(1).optional(),
+        muted: z.number().min(0).max(1).optional(),
+      })
+      .strict()
+      .optional(),
+    /** Line-height scale overrides. */
+    lineHeight: z
+      .object({
+        none: z.number().optional(),
+        tight: z.number().optional(),
+        normal: z.number().optional(),
+        relaxed: z.number().optional(),
+        loose: z.number().optional(),
+      })
+      .strict()
+      .optional(),
+    /** Letter-spacing scale overrides. */
+    tracking: z
+      .object({
+        tight: z.string().optional(),
+        normal: z.string().optional(),
+        wide: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+    /** Border-width scale overrides. */
+    borderWidth: z
+      .object({
+        none: z.string().optional(),
+        thin: z.string().optional(),
+        default: z.string().optional(),
+        thick: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
 // ── Theme config schema ─────────────────────────────────────────────────────
 
 /** Zod schema for the full theme configuration in the manifest. */
@@ -170,6 +245,7 @@ export const themeConfigSchema = z
         spacing: spacingSchema.optional(),
         font: fontSchema.optional(),
         components: componentTokensSchema.optional(),
+        tokens: globalTokensSchema.optional(),
       })
       .strict()
       .optional(),

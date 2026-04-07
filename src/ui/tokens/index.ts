@@ -13,6 +13,8 @@ export {
   radiusSchema,
   spacingSchema,
   fontSchema,
+  shadowSchema,
+  globalTokensSchema,
   componentTokensSchema,
   themeConfigSchema,
 } from "./schema";
@@ -30,6 +32,8 @@ export type {
   ThemeConfig,
   ThemeColors,
   Flavor,
+  ShadowScale,
+  GlobalTokens,
   ComponentTokens,
   TokenEditor,
   RadiusScale,

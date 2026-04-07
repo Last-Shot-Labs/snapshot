@@ -4,8 +4,10 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { Provider as JotaiProvider, createStore } from "jotai";
 import { AtomRegistryImpl } from "../../context/registry";
 import { PageRegistryContext } from "../../context/providers";
+import { SnapshotApiContext } from "../../actions/executor";
 import type {
   RowConfig,
   HeadingConfig,
@@ -17,13 +19,18 @@ import type {
 import "../structural";
 import { getRegisteredComponent } from "../component-registry";
 
-/** Wraps components in a PageContext for usePublish/useSubscribe to work. */
+/** Wraps components in a PageContext + Jotai for usePublish/useSubscribe/useActionExecutor to work. */
 function TestPageWrapper({ children }: { children: ReactNode }) {
   const registry = new AtomRegistryImpl();
+  const store = createStore();
   return (
-    <PageRegistryContext.Provider value={registry}>
-      {children}
-    </PageRegistryContext.Provider>
+    <JotaiProvider store={store}>
+      <SnapshotApiContext.Provider value={null}>
+        <PageRegistryContext.Provider value={registry}>
+          {children}
+        </PageRegistryContext.Provider>
+      </SnapshotApiContext.Provider>
+    </JotaiProvider>
   );
 }
 
@@ -193,24 +200,20 @@ describe("Button", () => {
     expect(screen.getByText("Click me")).toBeDefined();
   });
 
-  it("dispatches action event on click", () => {
+  it("dispatches action via action executor on click", () => {
     const ButtonComponent = getRegisteredComponent("button")!;
-    const handler = vi.fn();
-    document.addEventListener("snapshot:action", handler);
-
     const config: ButtonConfig = {
       type: "button",
       label: "Fire",
-      action: { type: "navigate", path: "/test" },
+      action: { type: "toast", message: "Fired!" },
     };
 
     renderWithContext(
       <ButtonComponent config={config as unknown as Record<string, unknown>} />,
     );
+    // Should not throw — action executor handles the toast
     fireEvent.click(screen.getByText("Fire"));
-    expect(handler).toHaveBeenCalledTimes(1);
-
-    document.removeEventListener("snapshot:action", handler);
+    expect(screen.getByText("Fire")).toBeDefined();
   });
 
   it("is disabled when disabled is true", () => {

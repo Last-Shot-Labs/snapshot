@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
 import { useModal } from "./hook";
@@ -15,6 +15,8 @@ const SIZE_MAP: Record<string, string> = {
   full: "100vw",
 };
 
+const ANIMATION_DURATION = 200;
+
 /**
  * Modal component — renders an overlay dialog with child components.
  *
@@ -27,13 +29,34 @@ const SIZE_MAP: Record<string, string> = {
 export function ModalComponent({ config }: { config: ModalConfig }) {
   const { isOpen, close, title } = useModal(config);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [animating, setAnimating] = useState(false);
+
+  const size = config.size ?? "md";
+  const maxWidth = SIZE_MAP[size] ?? SIZE_MAP.md;
+
+  // Handle mount/unmount with animation
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true);
+      // Double-rAF ensures the browser paints the initial state
+      // before transitioning to the final (visible) state
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setAnimating(true));
+      });
+    } else if (mounted) {
+      setAnimating(false);
+      const timer = setTimeout(() => setMounted(false), ANIMATION_DURATION);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   // Focus trap: focus the dialog when it opens
   useEffect(() => {
-    if (isOpen && dialogRef.current) {
+    if (isOpen && animating && dialogRef.current) {
       dialogRef.current.focus();
     }
-  }, [isOpen]);
+  }, [isOpen, animating]);
 
   // Escape key closes the modal
   const handleKeyDown = useCallback(
@@ -56,10 +79,7 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
     [close],
   );
 
-  if (!isOpen) return null;
-
-  const size = config.size ?? "md";
-  const maxWidth = SIZE_MAP[size] ?? SIZE_MAP.md;
+  if (!mounted) return null;
 
   return (
     <div
@@ -83,7 +103,9 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
         style={{
           position: "fixed",
           inset: 0,
-          backgroundColor: "var(--sn-modal-overlay-bg, rgba(0, 0, 0, 0.5))",
+          backgroundColor: "var(--sn-modal-overlay, rgba(0, 0, 0, 0.5))",
+          opacity: animating ? 1 : 0,
+          transition: `opacity ${ANIMATION_DURATION}ms ease`,
           zIndex: -1,
         }}
       />
@@ -107,6 +129,9 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
           flexDirection: "column",
           overflow: "hidden",
           outline: "none",
+          opacity: animating ? 1 : 0,
+          transform: animating ? "scale(1)" : "scale(0.95)",
+          transition: `opacity ${ANIMATION_DURATION}ms ease, transform ${ANIMATION_DURATION}ms cubic-bezier(0.32, 0.72, 0, 1)`,
         }}
       >
         {/* Header */}
@@ -142,7 +167,7 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
                 border: "none",
                 cursor: "pointer",
                 padding: "var(--sn-spacing-xs, 0.25rem)",
-                color: "var(--sn-color-muted, #6b7280)",
+                color: "var(--sn-color-muted-foreground, #6b7280)",
                 fontSize: "1.25rem",
                 lineHeight: 1,
               }}
