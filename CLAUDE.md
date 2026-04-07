@@ -292,6 +292,74 @@ These govern how the SDK works internally.
 
 These govern the design token system and config-addressable component library being developed.
 
+### Component File Conventions
+
+Every config-addressable component follows the same file structure. No exceptions.
+
+```
+src/ui/components/{group}/{component-name}/
+  schema.ts           ← Zod config schema (the manifest contract)
+  component.tsx       ← React component implementation
+  types.ts            ← inferred types from schema + internal types (if needed)
+  index.ts            ← single re-export: schema + component
+  __tests__/
+    component.test.tsx  ← rendering, config variations, from-ref wiring, actions
+    schema.test.ts      ← schema validation (valid configs pass, invalid reject)
+```
+
+**Rules:**
+
+- `schema.ts` is the source of truth. The component's config type is always
+  `z.infer<typeof componentSchema>`. Never define the config type manually.
+- `component.tsx` receives a single `config` prop typed from the schema. No other
+  props. The component wrapper adds `data-snapshot-component`, error boundary, and
+  Suspense boundary.
+- `index.ts` exports exactly two things: the schema and the component. Nothing else
+  leaks out. These are re-exported from the component registry, not imported directly
+  by consumers.
+- Tests cover: valid/invalid config rejection, default rendering, all config
+  variations, `from` ref resolution, action dispatch, loading/error/empty states,
+  and responsive behavior.
+- **No snowflakes.** If a component needs something that doesn't fit this structure,
+  the structure is wrong — fix the structure for all components, don't make one special.
+
+### Component Implementation Rules
+
+- **Config schema is the only interface.** Components receive `config` (from the Zod
+  schema) and nothing else. No React props, no context consumers, no atom readers
+  that the manifest user needs to know about. The user writes JSON; the component
+  does the rest.
+- **Components fetch their own data.** If a component has a `data` field
+  (`"data": "GET /api/users"`), it calls the API client itself via the shared
+  `useComponentData` hook. Parents never fetch data and pass it down.
+- **Components own their states.** Loading, error, empty, and success states are all
+  handled internally. The user never writes loading spinners or error boundaries for
+  config-driven components.
+- **Components publish via `id`.** If a component has an `id` in its config, it
+  publishes its current value (selected row, form data, active tab, etc.) to the
+  page context. Other components subscribe via `{ "from": "that-id" }`.
+- **No direct component-to-component imports.** Components communicate through the
+  context system (`from` refs), never by importing each other. A DataTable doesn't
+  import Modal — it dispatches an `open-modal` action.
+- **Wrap with `<ComponentWrapper>`** — every component renders inside the shared
+  wrapper which provides: `data-snapshot-component` attribute for token scoping,
+  error boundary, Suspense boundary, and `id` registration.
+- **Use semantic tokens, never raw values.** `var(--sn-color-primary)`, not `#2563eb`.
+  `var(--sn-spacing-md)`, not `1rem`. `var(--sn-radius-lg)`, not `12px`. If a token
+  doesn't exist for what you need, add it to the token system — don't inline a value.
+
+### Headless Hooks (Level 2/3)
+
+For consumers who want component logic without the framework's rendering:
+
+- Headless hooks live in `src/ui/hooks/`, not inside component directories.
+- Named `use{Component}` (e.g., `useDataTable`, `useAutoForm`).
+- Return data + state + handlers, no JSX.
+- Accept the same config schema as the config-driven component (or a subset).
+- Exported from the `./ui` entry point.
+- These are secondary — build the config-driven component first, extract the
+  headless hook from it. Never build the hook first and wrap it.
+
 21. **Design tokens are the styling boundary** — Components consume tokens, not raw CSS values.
     Token categories: color (semantic: primary, danger, muted), spacing scale, radius scale,
     font scale, component-level tokens. Dark/light mode is a token switch, not a separate theme.
@@ -331,12 +399,41 @@ These govern the design token system and config-addressable component library be
     from frontend manifest + OpenAPI, auto-derived form fields / table columns / detail views,
     nav and auth flows from manifest config, theme CSS from design tokens.
 
-28. **JSDoc on public API** — Every exported function, hook, type, and class must have
+### UI Test Patterns
+
+Config-driven UI components have a different testing shape than SDK hooks. Follow these
+patterns for all UI tests.
+
+28. **Test the config, not the implementation.** Tests assert that a given config produces
+    the correct output. Don't test internal state management, atom values, or React
+    internals. Test what the user (manifest author) controls.
+
+29. **Schema tests are mandatory.** Every component has `schema.test.ts` that verifies:
+    valid configs parse, invalid configs reject with clear errors, defaults are applied,
+    and `from` ref fields accept both literal values and `{ "from": "id" }` objects.
+
+30. **Rendering tests use config fixtures.** Define config objects as test fixtures, render
+    the component with them, assert on output. Don't construct configs inline in every
+    test — define a `baseConfig` and spread overrides.
+
+31. **`from` ref tests use a test harness.** Wrap components in a `<TestPageContext>` that
+    pre-populates atom values. Assert that the component reads the correct value and
+    re-renders when it changes.
+
+32. **Action tests assert dispatch, not side effects.** When a component dispatches an
+    action (e.g., clicking a row dispatches `open-modal`), assert the action was dispatched
+    with the correct config. Don't test that the modal actually opened — that's the action
+    executor's job.
+
+33. **No network in UI tests.** Components fetch via the API client. In tests, provide a
+    mock API client that returns fixtures. Never hit a real endpoint.
+
+34. **JSDoc on public API** — Every exported function, hook, type, and class must have
     up-to-date JSDoc. When you change a signature, param, return value, or behavior, update
     the JSDoc in the same commit. Stale or missing docs on public surface area is a bug.
     Internal helpers do not require JSDoc unless the logic is non-obvious.
 
-29. **Documentation parity** — Any change to a public API, config option, behavior, or concept
+35. **Documentation parity** — Any change to a public API, config option, behavior, or concept
     documented in `docs/` must be reflected there in the same commit. Docs that describe the
     old behavior are a bug.
 

@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup'
 import pkg from './package.json' assert { type: 'json' }
 
 export default defineConfig([
-  // Library build
+  // SDK entry point
   {
     entry: ['src/index.ts'],
     format: ['esm', 'cjs'],
@@ -25,6 +25,27 @@ export default defineConfig([
       const { copyFileSync, mkdirSync } = await import('node:fs')
       mkdirSync('dist', { recursive: true })
       copyFileSync('src/push/sw.js', 'dist/sw.js')
+    },
+  },
+  // UI entry point (config-driven components, tokens, manifest)
+  {
+    entry: ['src/ui.ts'],
+    format: ['esm', 'cjs'],
+    dts: true,
+    sourcemap: true,
+    clean: false,
+    target: 'es2022',
+    external: [
+      'react',
+      'react-dom',
+      '@tanstack/react-router',
+      '@tanstack/react-query',
+      'jotai',
+      'zod',
+      '@unhead/react',
+    ],
+    esbuildOptions(options) {
+      options.jsx = 'automatic'
     },
   },
   // CLI entry point

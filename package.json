@@ -12,6 +12,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./ui": {
+      "types": "./dist/ui.d.ts",
+      "import": "./dist/ui.js",
+      "require": "./dist/ui.cjs"
+    },
     "./vite": {
       "types": "./dist/vite.d.ts",
       "import": "./dist/vite.js",
