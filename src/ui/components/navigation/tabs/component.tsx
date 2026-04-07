@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
-import type { ComponentConfig } from "../../../manifest/renderer";
+import type { ComponentConfig } from "../../../manifest/types";
 import { useTabs } from "./hook";
 import type { TabsConfig } from "./schema";
 

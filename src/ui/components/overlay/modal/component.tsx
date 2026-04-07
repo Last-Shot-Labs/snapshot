@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
-import type { ComponentConfig } from "../../../manifest/renderer";
+import type { ComponentConfig } from "../../../manifest/types";
 import { useModal } from "./hook";
 import type { ModalConfig } from "./schema";
 

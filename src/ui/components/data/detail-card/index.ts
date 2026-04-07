@@ -11,17 +11,15 @@ export { useDetailCard } from "./hook";
 
 import { DetailCard } from "./component";
 import { detailCardConfigSchema } from "./schema";
-import {
-  registerComponent,
-  registerComponentSchema,
-} from "../../../manifest/component-registry";
+import { registerComponent } from "../../../manifest/component-registry";
+import { registerComponentSchema } from "../../../manifest/schema";
 
 /**
  * Register detail-card in the component and schema registries.
  */
 registerComponent(
   "detail-card",
-  DetailCard as React.ComponentType<{ config: unknown }>,
+  DetailCard as React.ComponentType<{ config: Record<string, unknown> }>,
 );
 registerComponentSchema(
   "detail-card",
