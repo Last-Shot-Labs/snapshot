@@ -107,6 +107,37 @@ export type {
 // export { ManifestApp } from './ui/manifest/manifest-app'
 // export { PageRenderer } from './ui/manifest/page-renderer'
 // export { manifestSchema } from './ui/manifest/schema'
+export {
+  registerComponent,
+  registerComponentSchema,
+  getComponent,
+  getComponentSchema,
+  getRegisteredTypes,
+} from "./ui/manifest/component-registry";
+
+// Components — Data
+export {
+  DetailCard,
+  detailCardConfigSchema,
+  useDetailCard,
+} from "./ui/components/data/detail-card/index";
+export type {
+  DetailCardConfig,
+  DetailFieldConfig,
+  DetailCardAction,
+  DetailFieldFormat,
+  ResolvedField,
+  UseDetailCardResult,
+} from "./ui/components/data/detail-card/index";
+
+// Shared Component Utilities
+export { ComponentWrapper } from "./ui/components/_base/component-wrapper";
+export {
+  baseComponentConfigSchema,
+  fromRefSchema,
+  orFromRef,
+} from "./ui/components/_base/types";
+export type { BaseComponentConfig } from "./ui/components/_base/types";
 
 // Headless Hooks (Level 2/3)
 // export { useDataTable } from './ui/hooks/use-data-table'
