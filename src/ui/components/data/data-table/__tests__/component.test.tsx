@@ -1,0 +1,376 @@
+/**
+ * @vitest-environment happy-dom
+ */
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import React from "react";
+import { AtomRegistryImpl } from "../../../../context/registry";
+import {
+  PageRegistryContext,
+  AppRegistryContext,
+} from "../../../../context/providers";
+import { SnapshotApiContext } from "../../../../actions/executor";
+import { DataTable } from "../component";
+import type { DataTableConfig } from "../types";
+
+const testData = [
+  { id: 1, name: "Alice", email: "alice@example.com", status: "active" },
+  { id: 2, name: "Bob", email: "bob@example.com", status: "inactive" },
+  { id: 3, name: "Charlie", email: "charlie@example.com", status: "active" },
+];
+
+function createWrapper(data: unknown[] = testData) {
+  const registry = new AtomRegistryImpl();
+  const sourceAtom = registry.register("test-source");
+  registry.store.set(sourceAtom, data);
+
+  function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <AppRegistryContext.Provider value={null}>
+        <PageRegistryContext.Provider value={registry}>
+          <SnapshotApiContext.Provider value={null}>
+            {children}
+          </SnapshotApiContext.Provider>
+        </PageRegistryContext.Provider>
+      </AppRegistryContext.Provider>
+    );
+  }
+
+  return { Wrapper, registry };
+}
+
+function baseConfig(overrides: Partial<DataTableConfig> = {}): DataTableConfig {
+  return {
+    type: "data-table",
+    data: { from: "test-source" },
+    columns: "auto",
+    ...overrides,
+  };
+}
+
+describe("DataTable component", () => {
+  it("renders with data-snapshot-component attribute", () => {
+    const { Wrapper } = createWrapper();
+    const { container } = render(
+      <Wrapper>
+        <DataTable config={baseConfig()} />
+      </Wrapper>,
+    );
+
+    const el = container.querySelector(
+      '[data-snapshot-component="data-table"]',
+    );
+    expect(el).not.toBeNull();
+  });
+
+  it("renders table headers from auto-detected columns", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig()} />
+      </Wrapper>,
+    );
+
+    expect(screen.getByText("Id")).toBeDefined();
+    expect(screen.getByText("Name")).toBeDefined();
+    expect(screen.getByText("Email")).toBeDefined();
+    expect(screen.getByText("Status")).toBeDefined();
+  });
+
+  it("renders table headers from explicit columns", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable
+          config={baseConfig({
+            columns: [
+              { field: "name", label: "Full Name" },
+              { field: "email" },
+            ],
+          })}
+        />
+      </Wrapper>,
+    );
+
+    expect(screen.getByText("Full Name")).toBeDefined();
+    expect(screen.getByText("Email")).toBeDefined();
+  });
+
+  it("renders data rows", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig()} />
+      </Wrapper>,
+    );
+
+    expect(screen.getByText("Alice")).toBeDefined();
+    expect(screen.getByText("Bob")).toBeDefined();
+    expect(screen.getByText("Charlie")).toBeDefined();
+  });
+
+  it("renders empty message when no data", () => {
+    const { Wrapper } = createWrapper([]);
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig({ emptyMessage: "Nothing here" })} />
+      </Wrapper>,
+    );
+
+    expect(screen.getByText("Nothing here")).toBeDefined();
+  });
+
+  it("renders default empty message when no data and no custom message", () => {
+    const { Wrapper } = createWrapper([]);
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig()} />
+      </Wrapper>,
+    );
+
+    expect(screen.getByText("No data available")).toBeDefined();
+  });
+
+  it("renders search input when searchable", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig({ searchable: true })} />
+      </Wrapper>,
+    );
+
+    const input = screen.getByPlaceholderText("Search...");
+    expect(input).toBeDefined();
+  });
+
+  it("renders custom search placeholder", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable
+          config={baseConfig({
+            searchable: { placeholder: "Find users..." },
+          })}
+        />
+      </Wrapper>,
+    );
+
+    expect(screen.getByPlaceholderText("Find users...")).toBeDefined();
+  });
+
+  it("filters rows when searching", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig({ searchable: true })} />
+      </Wrapper>,
+    );
+
+    const input = screen.getByPlaceholderText("Search...");
+    fireEvent.change(input, { target: { value: "alice" } });
+
+    expect(screen.getByText("Alice")).toBeDefined();
+    expect(screen.queryByText("Bob")).toBeNull();
+  });
+
+  it("renders selection checkboxes when selectable", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig({ selectable: true })} />
+      </Wrapper>,
+    );
+
+    // Select all checkbox + 3 row checkboxes = 4
+    const checkboxes = screen.getAllByRole("checkbox");
+    expect(checkboxes.length).toBe(4);
+  });
+
+  it("toggles row selection on checkbox click", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig({ selectable: true })} />
+      </Wrapper>,
+    );
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    // Click the first row checkbox (index 1, index 0 is select-all)
+    fireEvent.click(checkboxes[1]!);
+
+    expect((checkboxes[1] as HTMLInputElement).checked).toBe(true);
+  });
+
+  it("sorts by column on header click", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable
+          config={baseConfig({
+            columns: [{ field: "name", sortable: true }, { field: "email" }],
+          })}
+        />
+      </Wrapper>,
+    );
+
+    const nameHeader = screen.getByText("Name");
+    fireEvent.click(nameHeader);
+
+    // Should show ascending indicator
+    const sortIndicator =
+      nameHeader.parentElement?.querySelector("[aria-label]");
+    expect(sortIndicator?.getAttribute("aria-label")).toBe("sorted ascending");
+  });
+
+  it("renders row action buttons", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable
+          config={baseConfig({
+            actions: [
+              {
+                label: "Edit",
+                action: { type: "navigate", to: "/users/{id}" },
+              },
+            ],
+          })}
+        />
+      </Wrapper>,
+    );
+
+    const editButtons = screen.getAllByText("Edit");
+    // One per row + the header "Actions"
+    expect(editButtons.length).toBe(3);
+  });
+
+  it("hides row actions with visible: false", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable
+          config={baseConfig({
+            actions: [
+              {
+                label: "Hidden Action",
+                action: { type: "navigate", to: "/test" },
+                visible: false,
+              },
+            ],
+          })}
+        />
+      </Wrapper>,
+    );
+
+    expect(screen.queryByText("Hidden Action")).toBeNull();
+  });
+
+  it("shows bulk actions toolbar when rows are selected", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <DataTable
+          config={baseConfig({
+            selectable: true,
+            bulkActions: [
+              {
+                label: "Delete {count} items",
+                action: {
+                  type: "api",
+                  method: "DELETE",
+                  endpoint: "/api/users/bulk",
+                },
+              },
+            ],
+          })}
+        />
+      </Wrapper>,
+    );
+
+    // No bulk toolbar initially
+    expect(screen.queryByRole("toolbar")).toBeNull();
+
+    // Select a row
+    const checkboxes = screen.getAllByRole("checkbox");
+    fireEvent.click(checkboxes[1]!);
+
+    // Bulk toolbar should appear with interpolated label
+    expect(screen.getByRole("toolbar")).toBeDefined();
+    expect(screen.getByText("Delete 1 items")).toBeDefined();
+  });
+
+  it("renders pagination controls for many rows", () => {
+    const manyRows = Array.from({ length: 25 }, (_, i) => ({
+      id: i + 1,
+      name: `User ${i + 1}`,
+    }));
+    const { Wrapper } = createWrapper(manyRows);
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig()} />
+      </Wrapper>,
+    );
+
+    expect(screen.getByText("Page 1 of 3")).toBeDefined();
+    expect(screen.getByText("Previous")).toBeDefined();
+    expect(screen.getByText("Next")).toBeDefined();
+  });
+
+  it("navigates pages via pagination buttons", () => {
+    const manyRows = Array.from({ length: 25 }, (_, i) => ({
+      id: i + 1,
+      name: `User ${i + 1}`,
+    }));
+    const { Wrapper } = createWrapper(manyRows);
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig()} />
+      </Wrapper>,
+    );
+
+    fireEvent.click(screen.getByText("Next"));
+    expect(screen.getByText("Page 2 of 3")).toBeDefined();
+
+    fireEvent.click(screen.getByText("Previous"));
+    expect(screen.getByText("Page 1 of 3")).toBeDefined();
+  });
+
+  it("applies className from config", () => {
+    const { Wrapper } = createWrapper();
+    const { container } = render(
+      <Wrapper>
+        <DataTable config={baseConfig({ className: "custom-class" })} />
+      </Wrapper>,
+    );
+
+    const el = container.querySelector(".custom-class");
+    expect(el).not.toBeNull();
+  });
+
+  it("does not render pagination when pagination is false", () => {
+    const manyRows = Array.from({ length: 25 }, (_, i) => ({
+      id: i + 1,
+      name: `User ${i + 1}`,
+    }));
+    const { Wrapper } = createWrapper(manyRows);
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig({ pagination: false })} />
+      </Wrapper>,
+    );
+
+    expect(screen.queryByText("Previous")).toBeNull();
+    expect(screen.queryByText("Next")).toBeNull();
+  });
+
+  it("does not render pagination when data fits on one page", () => {
+    const { Wrapper } = createWrapper(); // Only 3 rows, default pageSize 10
+    render(
+      <Wrapper>
+        <DataTable config={baseConfig()} />
+      </Wrapper>,
+    );
+
+    expect(screen.queryByText("Previous")).toBeNull();
+  });
+});
