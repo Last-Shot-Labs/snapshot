@@ -1,8 +1,8 @@
 /**
- * @vitest-environment happy-dom
+ * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AtomRegistryImpl } from "../../../../context/registry";
@@ -14,15 +14,10 @@ import { SnapshotApiContext } from "../../../../actions/executor";
 import { DetailCard } from "../component";
 import type { DetailCardConfig } from "../schema";
 
-// Mock action executor
+// Mock action executor — vi.mock is a no-op in bun test, so we instead
+// inject mockExecute via the ActionExecutorContext pattern. The mockExecute
+// spy still lets us assert dispatch calls.
 const mockExecute = vi.fn();
-vi.mock("../../../../actions/executor", async () => {
-  const actual = await vi.importActual("../../../../actions/executor");
-  return {
-    ...actual,
-    useActionExecutor: () => mockExecute,
-  };
-});
 
 /**
  * Test wrapper providing all required contexts.
@@ -413,7 +408,7 @@ describe("DetailCard", () => {
     expect(screen.getByTestId("detail-card-skeleton")).toBeTruthy();
 
     // Wait for data to load
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText("Bob")).toBeTruthy();
     });
 

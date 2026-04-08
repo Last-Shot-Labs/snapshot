@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { createElement } from "react";
@@ -173,13 +173,15 @@ describe("useActionExecutor", () => {
     const { result } = renderHook(() => useActionExecutor(), { wrapper });
 
     await expect(
-      act(async () => {
-        await result.current({
-          type: "api",
-          method: "GET",
-          endpoint: "/api/fail",
-        });
-      }),
+      Promise.resolve(
+        act(async () => {
+          await result.current({
+            type: "api",
+            method: "GET",
+            endpoint: "/api/fail",
+          });
+        }),
+      ),
     ).rejects.toThrow("Failed");
   });
 
@@ -306,13 +308,15 @@ describe("useActionExecutor", () => {
     const { result } = renderHook(() => useActionExecutor(), { wrapper });
 
     await expect(
-      act(async () => {
-        await result.current({
-          type: "api",
-          method: "GET",
-          endpoint: "/api/users",
-        });
-      }),
+      Promise.resolve(
+        act(async () => {
+          await result.current({
+            type: "api",
+            method: "GET",
+            endpoint: "/api/users",
+          });
+        }),
+      ),
     ).rejects.toThrow("SnapshotApiContext not provided");
   });
 });

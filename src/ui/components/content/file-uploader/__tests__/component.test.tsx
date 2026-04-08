@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
@@ -59,9 +60,9 @@ describe("FileUploader", () => {
     const wrapper = createTestWrapper();
     render(<FileUploader config={baseConfig} />, { wrapper });
 
-    expect(
-      screen.getByTestId("file-uploader-dropzone").textContent,
-    ).toContain("Drop files here or click to browse");
+    expect(screen.getByTestId("file-uploader-dropzone").textContent).toContain(
+      "Drop files here or click to browse",
+    );
   });
 
   it("renders custom label and description", () => {
@@ -141,9 +142,7 @@ describe("FileUploader", () => {
 
     render(<FileUploader config={config} />, { wrapper });
 
-    const input = screen.getByTestId(
-      "file-uploader-input",
-    ) as HTMLInputElement;
+    const input = screen.getByTestId("file-uploader-input") as HTMLInputElement;
     expect(input.multiple).toBe(true);
   });
 
@@ -151,9 +150,7 @@ describe("FileUploader", () => {
     const wrapper = createTestWrapper();
     render(<FileUploader config={baseConfig} />, { wrapper });
 
-    const input = screen.getByTestId(
-      "file-uploader-input",
-    ) as HTMLInputElement;
+    const input = screen.getByTestId("file-uploader-input") as HTMLInputElement;
     expect(input.multiple).toBe(false);
   });
 
@@ -161,9 +158,7 @@ describe("FileUploader", () => {
     const wrapper = createTestWrapper();
     render(<FileUploader config={baseConfig} />, { wrapper });
 
-    const input = screen.getByTestId(
-      "file-uploader-input",
-    ) as HTMLInputElement;
+    const input = screen.getByTestId("file-uploader-input") as HTMLInputElement;
     const file = new File(["hello"], "test.txt", { type: "text/plain" });
 
     fireEvent.change(input, { target: { files: [file] } });
@@ -179,9 +174,7 @@ describe("FileUploader", () => {
     const wrapper = createTestWrapper();
     render(<FileUploader config={baseConfig} />, { wrapper });
 
-    const input = screen.getByTestId(
-      "file-uploader-input",
-    ) as HTMLInputElement;
+    const input = screen.getByTestId("file-uploader-input") as HTMLInputElement;
     const file = new File(["hello"], "test.txt", { type: "text/plain" });
     fireEvent.change(input, { target: { files: [file] } });
 
@@ -192,9 +185,7 @@ describe("FileUploader", () => {
     const wrapper = createTestWrapper();
     render(<FileUploader config={baseConfig} />, { wrapper });
 
-    const input = screen.getByTestId(
-      "file-uploader-input",
-    ) as HTMLInputElement;
+    const input = screen.getByTestId("file-uploader-input") as HTMLInputElement;
     const file = new File(["hello"], "test.txt", { type: "text/plain" });
     fireEvent.change(input, { target: { files: [file] } });
 
@@ -214,9 +205,7 @@ describe("FileUploader", () => {
 
     render(<FileUploader config={config} />, { wrapper });
 
-    const input = screen.getByTestId(
-      "file-uploader-input",
-    ) as HTMLInputElement;
+    const input = screen.getByTestId("file-uploader-input") as HTMLInputElement;
     const file = new File(["this is more than 10 bytes"], "big.txt", {
       type: "text/plain",
     });
