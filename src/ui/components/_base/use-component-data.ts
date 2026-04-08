@@ -9,7 +9,10 @@ import {
   resolveEndpointTarget,
   type ResourceRef,
 } from "../../manifest/resources";
-import { useManifestRuntime } from "../../manifest/runtime";
+import {
+  useManifestResourceCache,
+  useManifestRuntime,
+} from "../../manifest/runtime";
 
 /**
  * Result returned by `useComponentData`.
@@ -47,6 +50,7 @@ export function useComponentData(
   const resolvedData = useSubscribe(dataConfig);
   const api = useContext(SnapshotApiContext);
   const runtime = useManifestRuntime();
+  const resourceCache = useManifestResourceCache();
 
   // Resolve params that may be FromRef — use useResolveFrom to handle
   // all FromRef params in one stable hook call instead of a loop.
@@ -114,30 +118,33 @@ export function useComponentData(
     setError(null);
 
     try {
-      const request = resolveEndpointTarget(
-        resourceTarget ?? dataString!,
-        runtime?.resources,
-        resolvedParams,
-      );
-      const url = buildRequestUrl(request.endpoint, request.params);
-      let result: unknown;
-
-      switch (request.method) {
-        case "POST":
-          result = await api.post(url, undefined);
-          break;
-        case "PUT":
-          result = await api.put(url, undefined);
-          break;
-        case "PATCH":
-          result = await api.patch(url, undefined);
-          break;
-        case "DELETE":
-          result = await api.delete(url);
-          break;
-        default:
-          result = await api.get(url);
-      }
+      const target = resourceTarget ?? dataString!;
+      const cachedData = resourceCache?.getData(target, resolvedParams);
+      const result =
+        cachedData !== undefined
+          ? cachedData
+          : resourceCache
+            ? await resourceCache.loadTarget(target, resolvedParams)
+            : await (async () => {
+                const request = resolveEndpointTarget(
+                  target,
+                  runtime?.resources,
+                  resolvedParams,
+                );
+                const url = buildRequestUrl(request.endpoint, request.params);
+                switch (request.method) {
+                  case "POST":
+                    return api.post(url, undefined);
+                  case "PUT":
+                    return api.put(url, undefined);
+                  case "PATCH":
+                    return api.patch(url, undefined);
+                  case "DELETE":
+                    return api.delete(url);
+                  default:
+                    return api.get(url);
+                }
+              })();
 
       setData(result as Record<string, unknown>);
     } catch (err) {
@@ -152,6 +159,7 @@ export function useComponentData(
     resourceTarget,
     api,
     runtime?.resources,
+    resourceCache,
     fetchCount,
     isInlineData,
     resolvedData,

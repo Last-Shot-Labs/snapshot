@@ -8,7 +8,10 @@ import {
   isResourceRef,
   resolveEndpointTarget,
 } from "../../../manifest/resources";
-import { useManifestRuntime } from "../../../manifest/runtime";
+import {
+  useManifestResourceCache,
+  useManifestRuntime,
+} from "../../../manifest/runtime";
 import type {
   DataTableConfig,
   ResolvedColumn,
@@ -203,6 +206,7 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
   // API client for endpoint fetching
   const api = useContext(SnapshotApiContext);
   const runtime = useManifestRuntime();
+  const resourceCache = useManifestResourceCache();
 
   // Determine if data is from a FromRef (already resolved) or needs fetching
   const isDataFromRef = isFromRef(config.data);
@@ -248,24 +252,27 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
 
     const fetchData = async () => {
       try {
-        const request = resolveEndpointTarget(
-          isResolvedResource ? resolvedData : (resolvedData as string),
-          runtime?.resources,
-          resolvedParams,
-        );
-        const url = buildRequestUrl(request.endpoint, request.params);
-
-        let result: unknown;
-        switch (request.method) {
-          case "POST":
-            result = await api.post(url, undefined);
-            break;
-          case "PUT":
-            result = await api.put(url, undefined);
-            break;
-          default:
-            result = await api.get(url);
-        }
+        const target = isResolvedResource
+          ? resolvedData
+          : (resolvedData as string);
+        const result = resourceCache
+          ? await resourceCache.loadTarget(target, resolvedParams)
+          : await (async () => {
+              const request = resolveEndpointTarget(
+                target,
+                runtime?.resources,
+                resolvedParams,
+              );
+              const url = buildRequestUrl(request.endpoint, request.params);
+              switch (request.method) {
+                case "POST":
+                  return api.post(url, undefined);
+                case "PUT":
+                  return api.put(url, undefined);
+                default:
+                  return api.get(url);
+              }
+            })();
 
         if (cancelled) return;
 
@@ -308,6 +315,7 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
     isResolvedResource,
     api,
     runtime?.resources,
+    resourceCache,
     refreshCounter,
     JSON.stringify(resolvedParams),
   ]);

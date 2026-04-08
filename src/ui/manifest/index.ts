@@ -16,6 +16,7 @@ export {
   authScreenConfigSchema,
   pageConfigSchema,
   routeConfigSchema,
+  overlayConfigSchema,
   stateValueConfigSchema,
   manifestConfigSchema,
 } from "./schema";
@@ -76,7 +77,10 @@ export { ManifestApp, injectStyleSheet } from "./app";
 export {
   ManifestRuntimeProvider,
   ManifestRuntimeContext,
+  RouteRuntimeProvider,
   useManifestRuntime,
+  useManifestResourceCache,
+  useRouteRuntime,
 } from "./runtime";
 
 // Types
@@ -91,6 +95,7 @@ export type {
   PageConfig,
   RouteConfig,
   ResourceConfigMap,
+  OverlayConfig,
   StateConfig,
   StateValueConfig,
   BaseComponentConfig,

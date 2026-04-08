@@ -188,10 +188,11 @@ export function useActionExecutor(): ActionExecuteFn {
               ),
             );
             if (builtin.replace) {
-              window.location.replace(to);
+              window.history.replaceState({}, "", to);
             } else {
-              window.location.href = to;
+              window.history.pushState({}, "", to);
             }
+            window.dispatchEvent(new PopStateEvent("popstate"));
             return;
           }
 

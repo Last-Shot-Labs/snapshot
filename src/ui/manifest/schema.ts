@@ -8,7 +8,10 @@
 
 import { z } from "zod";
 import { themeConfigSchema } from "../tokens/schema";
-import { workflowDefinitionSchema } from "../workflows/schema";
+import {
+  workflowConditionSchema,
+  workflowDefinitionSchema,
+} from "../workflows/schema";
 import {
   dataSourceSchema,
   endpointTargetSchema,
@@ -255,6 +258,18 @@ export const routeConfigSchema = pageConfigSchema
   .extend({
     id: z.string().min(1),
     path: z.string().startsWith("/"),
+    preload: z.array(z.string().min(1)).optional(),
+    enter: z.union([z.string().min(1), workflowDefinitionSchema]).optional(),
+    leave: z.union([z.string().min(1), workflowDefinitionSchema]).optional(),
+    guard: z
+      .object({
+        authenticated: z.boolean().optional(),
+        roles: z.array(z.string()).optional(),
+        condition: workflowConditionSchema.optional(),
+        redirectTo: z.string().startsWith("/").optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 
@@ -274,6 +289,53 @@ export const appConfigSchema = z
     notFound: z.string().startsWith("/").optional(),
   })
   .strict();
+
+const overlayFooterActionSchema = z
+  .object({
+    label: z.string(),
+    variant: z
+      .enum(["default", "secondary", "destructive", "ghost"])
+      .optional(),
+    action: z.union([actionConfigSchema, z.array(actionConfigSchema)]).optional(),
+    dismiss: z.boolean().optional(),
+  })
+  .strict();
+
+export const overlayConfigSchema: z.ZodType = z.union([
+  z
+    .object({
+      type: z.literal("modal"),
+      title: z.union([z.string(), fromRefSchema]).optional(),
+      size: z.enum(["sm", "md", "lg", "xl", "full"]).optional(),
+      content: z.array(componentConfigSchema).min(1),
+      className: z.string().optional(),
+      style: z.record(z.union([z.string(), z.number()])).optional(),
+      footer: z
+        .object({
+          actions: z.array(overlayFooterActionSchema).optional(),
+          align: z.enum(["left", "center", "right"]).optional(),
+        })
+        .optional(),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("drawer"),
+      title: z.union([z.string(), fromRefSchema]).optional(),
+      size: z.enum(["sm", "md", "lg", "xl", "full"]).optional(),
+      side: z.enum(["left", "right"]).optional(),
+      content: z.array(componentConfigSchema).min(1),
+      className: z.string().optional(),
+      style: z.record(z.union([z.string(), z.number()])).optional(),
+      footer: z
+        .object({
+          actions: z.array(overlayFooterActionSchema).optional(),
+          align: z.enum(["left", "center", "right"]).optional(),
+        })
+        .optional(),
+    })
+    .strict(),
+]);
 
 function collectNavPaths(items: z.infer<typeof navItemSchema>[]): string[] {
   const paths: string[] = [];
@@ -296,7 +358,7 @@ export const manifestConfigSchema = z
     auth: authScreenConfigSchema.optional(),
     resources: z.record(resourceConfigSchema).optional(),
     workflows: z.record(workflowDefinitionSchema).optional(),
-    overlays: z.record(z.unknown()).optional(),
+    overlays: z.record(overlayConfigSchema).optional(),
     presets: z.record(z.unknown()).optional(),
     policies: z.record(z.unknown()).optional(),
     i18n: z.record(z.unknown()).optional(),

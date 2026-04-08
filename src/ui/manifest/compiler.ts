@@ -23,6 +23,10 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
     id: route.id,
     path: route.path,
     page: toPageConfig(route),
+    preload: route.preload,
+    enter: route.enter,
+    leave: route.leave,
+    guard: route.guard,
   }));
 
   const routeMap = Object.fromEntries(
@@ -41,6 +45,7 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
     state: manifest.state,
     resources: manifest.resources,
     workflows: manifest.workflows,
+    overlays: manifest.overlays,
     navigation: manifest.navigation,
     auth: manifest.auth,
     routes,

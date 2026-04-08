@@ -7,6 +7,7 @@ import type {
   routeConfigSchema,
   navigationConfigSchema,
   stateValueConfigSchema,
+  overlayConfigSchema,
   baseComponentConfigSchema,
   headingConfigSchema,
   buttonConfigSchema,
@@ -27,6 +28,7 @@ export type NavigationConfig = z.infer<typeof navigationConfigSchema>;
 export type StateValueConfig = z.infer<typeof stateValueConfigSchema>;
 export type StateConfig = Record<string, StateValueConfig>;
 export type ResourceConfigMap = ResourceMap;
+export type OverlayConfig = z.infer<typeof overlayConfigSchema>;
 export type BaseComponentConfig = z.infer<typeof baseComponentConfigSchema>;
 export type HeadingConfig = z.infer<typeof headingConfigSchema>;
 export type ButtonConfig = z.infer<typeof buttonConfigSchema>;
@@ -63,6 +65,10 @@ export interface CompiledRoute {
   id: string;
   path: string;
   page: PageConfig;
+  preload?: string[];
+  enter?: RouteConfig["enter"];
+  leave?: RouteConfig["leave"];
+  guard?: RouteConfig["guard"];
 }
 
 export interface CompiledManifest {
@@ -72,6 +78,7 @@ export interface CompiledManifest {
   state?: StateConfig;
   resources?: ResourceConfigMap;
   workflows?: WorkflowMap;
+  overlays?: Record<string, OverlayConfig>;
   navigation?: NavigationConfig;
   auth?: AuthScreenConfig;
   routes: CompiledRoute[];

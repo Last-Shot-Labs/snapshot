@@ -8,7 +8,10 @@ import {
   isResourceRef,
   resolveEndpointTarget,
 } from "../../../manifest/resources";
-import { useManifestRuntime } from "../../../manifest/runtime";
+import {
+  useManifestResourceCache,
+  useManifestRuntime,
+} from "../../../manifest/runtime";
 import type { DetailCardConfig, DetailFieldConfig } from "./schema";
 import type { ResolvedField, UseDetailCardResult } from "./types";
 
@@ -113,6 +116,7 @@ export function useDetailCard(config: DetailCardConfig): UseDetailCardResult {
   const api = useContext(SnapshotApiContext);
   const queryClient = useQueryClient();
   const runtime = useManifestRuntime();
+  const resourceCache = useManifestResourceCache();
 
   // Resolve data source — could be a FromRef or an endpoint string
   const isDataFromRef = isFromRef(config.data);
@@ -154,6 +158,12 @@ export function useDetailCard(config: DetailCardConfig): UseDetailCardResult {
         throw new Error(
           "useDetailCard: SnapshotApiContext not provided. " +
             "Wrap your app in <SnapshotApiContext.Provider value={apiClient}>.",
+        );
+      }
+      if (resourceCache) {
+        return resourceCache.loadTarget(
+          resolvedTarget as string | { resource: string; params?: Record<string, unknown> },
+          resolvedParams,
         );
       }
       switch (request?.method ?? "GET") {
