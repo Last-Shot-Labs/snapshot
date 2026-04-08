@@ -126,6 +126,9 @@ export function Badge({ config }: { config: BadgeConfig }) {
           ? "var(--sn-radius-full, 9999px)"
           : "var(--sn-radius-sm, 0.25rem)",
         whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        maxWidth: "100%",
         ...variantStyles,
       }}
     >

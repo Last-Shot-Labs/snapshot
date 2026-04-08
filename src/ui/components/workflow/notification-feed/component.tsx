@@ -245,6 +245,7 @@ export function NotificationFeed({
 
   return (
     <div data-snapshot-component="notification-feed" className={config.className}>
+      <style>{`[data-notification-item]:hover { background-color: var(--sn-color-accent, #f0f9ff) !important; }`}</style>
       {/* Header */}
       <div
         data-notification-header

@@ -231,7 +231,7 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
             border: "1px solid var(--sn-color-border, #e5e7eb)",
             borderRadius: "var(--sn-radius-md, 0.375rem)",
             boxShadow:
-              "var(--sn-shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1))",
+              "var(--sn-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1))",
             padding: "var(--sn-spacing-xs, 0.25rem) 0",
             opacity: animating ? 1 : 0,
             transform: animating ? "scale(1)" : "scale(0.95)",
@@ -298,11 +298,11 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
                   backgroundColor: isFocused
                     ? "var(--sn-color-accent, #f1f5f9)"
                     : "transparent",
-                  cursor: isDisabled ? "default" : "pointer",
+                  cursor: isDisabled ? "not-allowed" : "pointer",
                   opacity: isDisabled
                     ? "var(--sn-opacity-disabled, 0.5)"
                     : undefined,
-                  pointerEvents: isDisabled ? "none" : undefined,
+                  pointerEvents: undefined,
                   display: "flex",
                   alignItems: "center",
                   gap: "var(--sn-spacing-xs, 0.25rem)",

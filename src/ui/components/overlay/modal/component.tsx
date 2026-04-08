@@ -167,6 +167,7 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
                 border: "none",
                 cursor: "pointer",
                 padding: "var(--sn-spacing-xs, 0.25rem)",
+                borderRadius: "var(--sn-radius-sm, 0.25rem)",
                 color: "var(--sn-color-muted-foreground, #6b7280)",
                 fontSize: "1.25rem",
                 lineHeight: 1,

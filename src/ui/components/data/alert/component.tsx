@@ -113,6 +113,9 @@ export function Alert({ config }: { config: AlertConfig }) {
               fontWeight: "var(--sn-font-weight-semibold, 600)" as string,
               color: "var(--sn-color-foreground, #111827)",
               marginBottom: "var(--sn-spacing-xs, 0.25rem)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
             {resolvedTitle}
@@ -169,6 +172,7 @@ export function Alert({ config }: { config: AlertConfig }) {
             flexShrink: 0,
             display: "flex",
             alignItems: "center",
+            borderRadius: "var(--sn-radius-sm, 0.25rem)",
           }}
         >
           <Icon name="x" size={16} />

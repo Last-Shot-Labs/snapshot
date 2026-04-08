@@ -242,6 +242,10 @@ export function MultiSelect({ config }: { config: MultiSelectConfig }) {
                 color: "var(--sn-color-secondary-foreground, #111827)",
                 borderRadius: "var(--sn-radius-sm, 0.25rem)",
                 lineHeight: 1.4,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: "120px",
               }}
             >
               {item.label}

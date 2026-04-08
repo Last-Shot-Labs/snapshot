@@ -40,6 +40,7 @@ const VARIANT_STYLES: Record<
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
       opacity: disabled ? 0.5 : 1,
       marginBottom: "-1px",
+      transition: "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
     }),
   },
   underline: {
@@ -68,6 +69,7 @@ const VARIANT_STYLES: Record<
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
       opacity: disabled ? 0.5 : 1,
       marginBottom: "-2px",
+      transition: "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
     }),
   },
   pills: {
@@ -92,6 +94,7 @@ const VARIANT_STYLES: Record<
         : "var(--sn-font-weight-normal, 400)",
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
       opacity: disabled ? 0.5 : 1,
+      transition: "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
     }),
   },
 };

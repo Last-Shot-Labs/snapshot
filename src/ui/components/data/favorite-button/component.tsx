@@ -63,6 +63,8 @@ export function FavoriteButton({ config }: { config: FavoriteButtonConfig }) {
   };
 
   return (
+    <>
+    <style>{`[data-snapshot-component="favorite-button"]:hover { background-color: var(--sn-color-secondary, #f3f4f6); }`}</style>
     <button
       data-snapshot-component="favorite-button"
       data-testid="favorite-button"
@@ -88,5 +90,6 @@ export function FavoriteButton({ config }: { config: FavoriteButtonConfig }) {
     >
       <Icon name="star" size={iconSize} />
     </button>
+    </>
   );
 }

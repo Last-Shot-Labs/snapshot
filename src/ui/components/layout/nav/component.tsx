@@ -63,7 +63,7 @@ function NavItem({
             {item.icon}
           </span>
         )}
-        <span data-nav-label="" style={{ flex: 1 }}>
+        <span data-nav-label="" style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {item.label}
         </span>
         {item.resolvedBadge !== null && item.resolvedBadge > 0 && (

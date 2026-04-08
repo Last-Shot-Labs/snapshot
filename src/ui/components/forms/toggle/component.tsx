@@ -112,7 +112,6 @@ export function Toggle({ config }: { config: ToggleConfig }) {
           ? "var(--sn-opacity-disabled, 0.5)"
           : undefined,
         transition: `background-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out), color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out), border-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)`,
-        outline: "none",
         userSelect: "none",
       }}
     >

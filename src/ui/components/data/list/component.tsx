@@ -154,7 +154,7 @@ function ListItem({
           aria-hidden="true"
           style={{
             color: "var(--sn-color-muted-foreground, #6b7280)",
-            fontSize: "var(--sn-font-size-md, 1rem)",
+            fontSize: "20px",
             flexShrink: 0,
           }}
         >

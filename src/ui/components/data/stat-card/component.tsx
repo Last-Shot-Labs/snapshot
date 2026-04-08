@@ -318,7 +318,7 @@ export function StatCard({ config }: { config: StatCardConfig }) {
                   color: config.iconColor
                     ? `var(--sn-color-${config.iconColor}, ${config.iconColor})`
                     : "var(--sn-color-muted-foreground, #6b7280)",
-                  fontSize: "var(--sn-font-size-md, 1rem)",
+                  fontSize: "20px",
                 }}
                 aria-hidden="true"
               >
