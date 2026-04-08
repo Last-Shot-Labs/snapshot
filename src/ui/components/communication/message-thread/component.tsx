@@ -246,6 +246,9 @@ export function MessageThread({
         display: "flex",
         flexDirection: "column",
         backgroundColor: "var(--sn-color-card, #ffffff)",
+        flex: 1,
+        minHeight: 0,
+        overflow: "hidden",
       }}
     >
       <style>{`
