@@ -48,4 +48,8 @@ export const accordionConfigSchema = baseComponentConfigSchema.extend({
   variant: z.enum(["default", "bordered", "separated"]).optional(),
   /** Position of the chevron icon. */
   iconPosition: z.enum(["left", "right"]).optional(),
+  /** Inline style overrides. */
+  style: z.record(z.union([z.string(), z.number()])).optional(),
+  /** Additional CSS class name. */
+  className: z.string().optional(),
 });

@@ -37,6 +37,8 @@ export const skeletonConfigSchema = z
     visible: z
       .union([z.boolean(), z.object({ from: z.string() })])
       .optional(),
+    /** Inline style overrides. */
+    style: z.record(z.union([z.string(), z.number()])).optional(),
     /** Additional CSS class name. */
     className: z.string().optional(),
   })

@@ -31,6 +31,10 @@ export const tabsConfigSchema = baseComponentConfigSchema.extend({
   defaultTab: z.number().default(0),
   /** Visual variant for the tab bar. */
   variant: z.enum(["default", "underline", "pills"]).default("default"),
+  /** Inline style overrides. */
+  style: z.record(z.union([z.string(), z.number()])).optional(),
+  /** Additional CSS class name. */
+  className: z.string().optional(),
 });
 
 /** Inferred type for tabs config. */

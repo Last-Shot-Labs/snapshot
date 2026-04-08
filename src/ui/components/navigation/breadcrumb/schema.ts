@@ -44,4 +44,8 @@ export const breadcrumbConfigSchema = baseComponentConfigSchema.extend({
   maxItems: z.number().optional(),
   /** Action dispatched on breadcrumb item click. */
   action: actionSchema.optional(),
+  /** Inline style overrides. */
+  style: z.record(z.union([z.string(), z.number()])).optional(),
+  /** Additional CSS class name. */
+  className: z.string().optional(),
 });

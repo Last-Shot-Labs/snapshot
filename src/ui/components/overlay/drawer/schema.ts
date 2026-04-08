@@ -21,6 +21,10 @@ export const drawerConfigSchema = baseComponentConfigSchema.extend({
   trigger: fromRefSchema.optional(),
   /** Child components rendered inside the drawer body. */
   content: z.array(z.record(z.unknown())),
+  /** Inline style overrides. */
+  style: z.record(z.union([z.string(), z.number()])).optional(),
+  /** Additional CSS class name. */
+  className: z.string().optional(),
 });
 
 /** Inferred type for drawer config. */

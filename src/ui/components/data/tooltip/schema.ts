@@ -32,4 +32,8 @@ export const tooltipConfigSchema = baseComponentConfigSchema.extend({
   placement: z.enum(["top", "bottom", "left", "right"]).optional(),
   /** Show delay in milliseconds. */
   delay: z.number().optional(),
+  /** Inline style overrides. */
+  style: z.record(z.union([z.string(), z.number()])).optional(),
+  /** Additional CSS class name. */
+  className: z.string().optional(),
 });

@@ -509,8 +509,8 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
                   pre: ({ children }) => (
                     <pre
                       style={{
-                        backgroundColor: "var(--sn-color-secondary, #1e1e2e)",
-                        color: "var(--sn-color-secondary-foreground, #cdd6f4)",
+                        backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
+                        color: "var(--sn-color-secondary-foreground, #111827)",
                         padding: "var(--sn-spacing-md, 1rem)",
                         borderRadius: "var(--sn-radius-md, 0.5rem)",
                         overflow: "auto",

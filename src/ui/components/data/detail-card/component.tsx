@@ -368,7 +368,7 @@ function DetailCardError({ error }: { error: Error }) {
         border: "1px solid var(--sn-color-destructive, #ef4444)",
         borderRadius: "var(--sn-radius-md, 0.375rem)",
         color: "var(--sn-color-destructive, #ef4444)",
-        backgroundColor: "#fef2f2",
+        backgroundColor: "color-mix(in oklch, var(--sn-color-destructive, #ef4444) 10%, var(--sn-color-card, #ffffff))",
       }}
     >
       Failed to load details: {error.message}

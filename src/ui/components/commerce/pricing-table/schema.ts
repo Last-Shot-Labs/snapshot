@@ -92,6 +92,8 @@ export const pricingTableConfigSchema = z
     // --- BaseComponentConfig fields ---
     /** Component id for publishing/subscribing. */
     id: z.string().optional(),
+    /** Inline style overrides. */
+    style: z.record(z.union([z.string(), z.number()])).optional(),
     /** Additional CSS class name. */
     className: z.string().optional(),
   })

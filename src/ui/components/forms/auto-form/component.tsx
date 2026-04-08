@@ -287,6 +287,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
   return (
     <form
       data-snapshot-component="form"
+      data-testid="form"
       onSubmit={(e) => {
         e.preventDefault();
         void handleSubmit();

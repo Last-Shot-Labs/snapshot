@@ -64,6 +64,8 @@ export const chatWindowConfigSchema = z
     id: z.string().optional(),
     /** Visibility toggle. Can be a FromRef for conditional display. */
     visible: z.union([z.boolean(), fromRefSchema]).optional(),
+    /** Inline style overrides. */
+    style: z.record(z.union([z.string(), z.number()])).optional(),
     /** Additional CSS class name. */
     className: z.string().optional(),
   })

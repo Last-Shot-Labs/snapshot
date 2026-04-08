@@ -119,8 +119,8 @@ export function Switch({ config }: { config: SwitchConfig }) {
             width: dims.thumb,
             height: dims.thumb,
             borderRadius: "var(--sn-radius-full, 9999px)",
-            backgroundColor: "#ffffff",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+            backgroundColor: "var(--sn-color-card, #ffffff)",
+            boxShadow: "var(--sn-shadow-sm, 0 1px 3px rgba(0,0,0,0.2))",
             transform: `translateX(${thumbTranslate}px)`,
             transition:
               "transform var(--sn-duration-fast, 150ms) var(--sn-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1))",

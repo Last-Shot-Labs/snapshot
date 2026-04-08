@@ -82,6 +82,8 @@ export const treeViewConfigSchema = z
     id: z.string().optional(),
     /** Visibility toggle. */
     visible: z.union([z.boolean(), fromRefSchema]).optional(),
+    /** Inline style overrides. */
+    style: z.record(z.union([z.string(), z.number()])).optional(),
     /** Additional CSS class name. */
     className: z.string().optional(),
   })

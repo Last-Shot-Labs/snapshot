@@ -307,7 +307,7 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
                   alignItems: "center",
                   gap: "var(--sn-spacing-xs, 0.25rem)",
                   userSelect: "none",
-                  transition: "background-color 100ms ease",
+                  transition: "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
                 }}
               >
                 {entry.icon && (

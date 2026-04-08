@@ -94,6 +94,14 @@ export const detailCardConfigSchema = baseComponentConfigSchema.extend({
   actions: z.array(detailCardActionSchema).optional(),
   /** Message shown when data is null/undefined (e.g. no row selected). */
   emptyState: z.string().optional(),
+  /** Component id for publishing/subscribing. */
+  id: z.string().optional(),
+  /** Visibility toggle. */
+  visible: z.union([z.boolean(), fromRefSchema]).optional(),
+  /** Inline style overrides. */
+  style: z.record(z.union([z.string(), z.number()])).optional(),
+  /** Additional CSS class name. */
+  className: z.string().optional(),
 });
 
 /** DetailCard configuration type inferred from the schema. */

@@ -176,5 +176,9 @@ export const dataTableConfigSchema = baseComponentConfigSchema
     emptyMessage: z.string().optional(),
     /** Table density. Affects row padding. */
     density: z.enum(["compact", "default", "comfortable"]).optional(),
+    /** Inline style overrides. */
+    style: z.record(z.union([z.string(), z.number()])).optional(),
+    /** Additional CSS class name. */
+    className: z.string().optional(),
   })
   .strict();

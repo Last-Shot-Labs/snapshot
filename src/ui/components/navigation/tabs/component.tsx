@@ -117,7 +117,7 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
   mountedRef.current.add(activeTab);
 
   return (
-    <div data-snapshot-component="tabs">
+    <div data-snapshot-component="tabs" data-testid="tabs">
       {/* Tab Bar */}
       <div role="tablist" data-snapshot-tabs-bar="" style={barStyle}>
         {tabs.map((tab, index) => (

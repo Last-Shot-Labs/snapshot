@@ -108,5 +108,9 @@ export const autoFormConfigSchema = z
     onSuccess: z.union([actionSchema, z.array(actionSchema)]).optional(),
     /** Actions to execute when submission fails. */
     onError: z.union([actionSchema, z.array(actionSchema)]).optional(),
+    /** Inline style overrides. */
+    style: z.record(z.union([z.string(), z.number()])).optional(),
+    /** Additional CSS class name. */
+    className: z.string().optional(),
   })
   .strict();
