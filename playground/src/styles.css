@@ -170,15 +170,19 @@ body {
   border-bottom: 2px solid var(--sn-color-border, #e5e7eb);
   margin-bottom: 2rem;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: thin;
-  scrollbar-color: var(--sn-color-muted-foreground, #9ca3af) transparent;
+  scrollbar-color: #c4c9cf transparent;
 }
 .page-tabs::-webkit-scrollbar {
-  height: 4px;
+  height: 3px;
+}
+.page-tabs::-webkit-scrollbar-track {
+  background: transparent;
 }
 .page-tabs::-webkit-scrollbar-thumb {
-  background: var(--sn-color-muted-foreground, #9ca3af);
-  border-radius: 4px;
+  background: #c4c9cf;
+  border-radius: 3px;
 }
 
 .page-tab {

@@ -68,7 +68,16 @@ function createSendOnEnterExtension(onSend: () => void) {
     name: "sendOnEnter",
     addKeyboardShortcuts() {
       return {
-        Enter: () => {
+        Enter: ({ editor }) => {
+          // Don't intercept Enter inside lists or code blocks —
+          // let TipTap handle list item creation and code newlines
+          if (
+            editor.isActive("bulletList") ||
+            editor.isActive("orderedList") ||
+            editor.isActive("codeBlock")
+          ) {
+            return false;
+          }
           onSend();
           return true;
         },
