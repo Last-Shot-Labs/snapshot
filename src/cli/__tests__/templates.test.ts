@@ -121,7 +121,7 @@ describe("scaffold favicon", () => {
     vi.resetModules();
     const writtenPaths: string[] = [];
 
-    vi.mock("node:fs/promises", () => ({
+    vi.doMock("node:fs/promises", () => ({
       default: {
         mkdir: vi.fn().mockResolvedValue(undefined),
         writeFile: vi.fn().mockImplementation((p: string) => {
@@ -142,11 +142,11 @@ describe("scaffold favicon", () => {
       access: vi.fn().mockRejectedValue(new Error("ENOENT")),
     }));
 
-    vi.mock("../utils", () => ({
+    vi.doMock("../utils", () => ({
       exec: vi.fn(),
     }));
 
-    vi.mock("@clack/prompts", () => ({
+    vi.doMock("@clack/prompts", () => ({
       spinner: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
       log: { warn: vi.fn() },
     }));

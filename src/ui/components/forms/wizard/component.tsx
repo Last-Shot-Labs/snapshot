@@ -1,5 +1,9 @@
 import React from "react";
 import { useWizard } from "./hook";
+import {
+  getButtonStyle,
+  BUTTON_INTERACTIVE_CSS,
+} from "../../_base/button-styles";
 import type { WizardConfig, WizardStepConfig } from "./types";
 import type { FieldConfig } from "../auto-form/types";
 
@@ -381,6 +385,20 @@ export function Wizard({ config }: { config: WizardConfig }) {
         >
           Your submission was successful.
         </div>
+        <button
+          type="button"
+          data-sn-button=""
+          data-variant="outline"
+          data-wizard-reset
+          onClick={wizard.resetWizard}
+          style={{
+            ...getButtonStyle("outline", "sm"),
+            marginTop: "var(--sn-spacing-md, 12px)",
+          }}
+        >
+          Reset
+        </button>
+        <style>{BUTTON_INTERACTIVE_CSS}</style>
       </div>
     );
   }
@@ -403,36 +421,7 @@ export function Wizard({ config }: { config: WizardConfig }) {
 [data-snapshot-component="wizard"] [data-wizard-step-indicator]:focus {
   outline: none;
 }
-[data-snapshot-component="wizard"] [data-wizard-back]:hover:not(:disabled) {
-  background-color: var(--sn-color-secondary, #f3f4f6);
-}
-[data-snapshot-component="wizard"] [data-wizard-back]:focus {
-  outline: none;
-}
-[data-snapshot-component="wizard"] [data-wizard-back]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-[data-snapshot-component="wizard"] [data-wizard-skip]:hover {
-  background-color: var(--sn-color-secondary, #f3f4f6);
-}
-[data-snapshot-component="wizard"] [data-wizard-skip]:focus {
-  outline: none;
-}
-[data-snapshot-component="wizard"] [data-wizard-skip]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-[data-snapshot-component="wizard"] [data-wizard-next]:hover:not(:disabled) {
-  opacity: var(--sn-opacity-hover, 0.85);
-}
-[data-snapshot-component="wizard"] [data-wizard-next]:focus {
-  outline: none;
-}
-[data-snapshot-component="wizard"] [data-wizard-next]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
+${BUTTON_INTERACTIVE_CSS}
 `}</style>
       {/* Progress bar */}
       <div
@@ -537,22 +526,16 @@ export function Wizard({ config }: { config: WizardConfig }) {
         {/* Back button */}
         <button
           type="button"
+          data-sn-button=""
+          data-variant="outline"
           data-wizard-back
           onClick={wizard.prevStep}
           disabled={wizard.isFirstStep || wizard.isAnimating}
-          style={{
-            padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
-            borderRadius: "var(--sn-radius-md, 6px)",
-            border:
-              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-            backgroundColor: "transparent",
-            color: wizard.isFirstStep
-              ? "var(--sn-color-muted-foreground, #6b7280)"
-              : "var(--sn-color-foreground, #111)",
-            cursor: wizard.isFirstStep ? "not-allowed" : "pointer",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            opacity: wizard.isFirstStep ? "var(--sn-opacity-disabled, 0.5)" : 1,
-          }}
+          style={getButtonStyle(
+            "outline",
+            "sm",
+            wizard.isFirstStep || wizard.isAnimating,
+          )}
         >
           Back
         </button>
@@ -567,19 +550,12 @@ export function Wizard({ config }: { config: WizardConfig }) {
           {isSkippable && (
             <button
               type="button"
+              data-sn-button=""
+              data-variant="ghost"
               data-wizard-skip
               onClick={wizard.skipStep}
               disabled={wizard.isAnimating}
-              style={{
-                padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
-                borderRadius: "var(--sn-radius-md, 6px)",
-                border:
-                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-                backgroundColor: "transparent",
-                color: "var(--sn-color-muted-foreground, #6b7280)",
-                cursor: "pointer",
-                fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              }}
+              style={getButtonStyle("ghost", "sm", wizard.isAnimating)}
             >
               Skip
             </button>
@@ -588,24 +564,18 @@ export function Wizard({ config }: { config: WizardConfig }) {
           {/* Next / Submit button */}
           <button
             type="button"
+            data-sn-button=""
+            data-variant="default"
             data-wizard-next
             onClick={() => wizard.nextStep()}
             disabled={wizard.isSubmitting || wizard.isAnimating}
-            style={{
-              padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
-              borderRadius: "var(--sn-radius-md, 6px)",
-              border: "none",
-              backgroundColor: "var(--sn-color-primary, oklch(0.205 0 0))",
-              color: "var(--sn-color-primary-foreground, #fff)",
-              cursor: wizard.isSubmitting ? "not-allowed" : "pointer",
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              fontWeight: "var(--sn-font-weight-medium, 500)",
-              opacity: wizard.isSubmitting
-                ? "var(--sn-opacity-disabled, 0.5)"
-                : 1,
-            }}
+            style={getButtonStyle(
+              "default",
+              "sm",
+              wizard.isSubmitting || wizard.isAnimating,
+            )}
           >
-            {wizard.isSubmitting ? "Submitting…" : submitLabel}
+            {wizard.isSubmitting ? "Submitting\u2026" : submitLabel}
           </button>
         </div>
       </div>

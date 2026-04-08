@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
+  Chart,
   ComponentRenderer,
+  Feed,
   PageContextProvider,
+  Wizard,
   crudPage,
   dashboardPage,
   settingsPage,
-  usePublish,
 } from "@lastshotlabs/snapshot/ui";
 
 type Page =
@@ -97,7 +99,7 @@ const PAGES: {
     key: "structural",
     label: "Structural",
     group: "Foundation",
-    count: 3,
+    count: 6,
     description:
       "Raw layout primitives for rows, headings, buttons, and selects before they are wrapped into product screens.",
   },
@@ -497,6 +499,123 @@ const structuralRow = {
           size: "sm",
         },
       ],
+    },
+  ],
+};
+
+// All button variants at sm size
+const buttonVariants = {
+  type: "row",
+  gap: "sm",
+  align: "center",
+  children: [
+    {
+      type: "button",
+      label: "Default",
+      variant: "default",
+      size: "sm",
+      action: { type: "toast", message: "Default clicked" },
+    },
+    {
+      type: "button",
+      label: "Secondary",
+      variant: "secondary",
+      size: "sm",
+      action: { type: "toast", message: "Secondary clicked" },
+    },
+    {
+      type: "button",
+      label: "Outline",
+      variant: "outline",
+      size: "sm",
+      action: { type: "toast", message: "Outline clicked" },
+    },
+    {
+      type: "button",
+      label: "Ghost",
+      variant: "ghost",
+      size: "sm",
+      action: { type: "toast", message: "Ghost clicked" },
+    },
+    {
+      type: "button",
+      label: "Destructive",
+      variant: "destructive",
+      size: "sm",
+      action: { type: "toast", message: "Destructive clicked" },
+    },
+    {
+      type: "button",
+      label: "Link",
+      variant: "link",
+      size: "sm",
+      action: { type: "toast", message: "Link clicked" },
+    },
+  ],
+};
+
+// All button sizes (default variant)
+const buttonSizes = {
+  type: "row",
+  gap: "sm",
+  align: "center",
+  children: [
+    {
+      type: "button",
+      label: "Small",
+      size: "sm",
+      action: { type: "toast", message: "sm" },
+    },
+    {
+      type: "button",
+      label: "Medium",
+      size: "md",
+      action: { type: "toast", message: "md" },
+    },
+    {
+      type: "button",
+      label: "Large",
+      size: "lg",
+      action: { type: "toast", message: "lg" },
+    },
+    {
+      type: "button",
+      label: "\u2605",
+      size: "icon",
+      action: { type: "toast", message: "icon" },
+    },
+  ],
+};
+
+// Disabled states
+const buttonDisabled = {
+  type: "row",
+  gap: "sm",
+  align: "center",
+  children: [
+    {
+      type: "button",
+      label: "Disabled Default",
+      variant: "default",
+      size: "sm",
+      disabled: true,
+      action: { type: "toast", message: "noop" },
+    },
+    {
+      type: "button",
+      label: "Disabled Outline",
+      variant: "outline",
+      size: "sm",
+      disabled: true,
+      action: { type: "toast", message: "noop" },
+    },
+    {
+      type: "button",
+      label: "Disabled Destructive",
+      variant: "destructive",
+      size: "sm",
+      disabled: true,
+      action: { type: "toast", message: "noop" },
     },
   ],
 };
@@ -2175,7 +2294,16 @@ function StructuralPage() {
   return (
     <PageWrapper>
       <div className="showcase">
-        <ShowcaseSection title="Row Layout + Buttons">
+        <ShowcaseSection title="Button Variants">
+          <RenderConfig config={buttonVariants} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Button Sizes">
+          <RenderConfig config={buttonSizes} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Button Disabled States">
+          <RenderConfig config={buttonDisabled} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Row Layout">
           <RenderConfig config={structuralRow} />
         </ShowcaseSection>
         <ShowcaseSection title="Headings">
@@ -2487,28 +2615,11 @@ const feedActivityItems = [
   },
 ];
 
-/** Injects fixture data into the page context for demos using from-ref */
-function FeedDataProvider({
-  id,
-  data,
-  children,
-}: {
-  id: string;
-  data: unknown[];
-  children: React.ReactNode;
-}) {
-  const publish = usePublish(id);
-  useEffect(() => {
-    publish(data);
-  }, [id, data, publish]);
-  return <>{children}</>;
-}
-
 // ── Feed configs ─────────────────────────────────────────────────────────────
 
 const feedPopulatedConfig = {
   type: "feed",
-  data: { from: "feed-demo-source" },
+  data: feedActivityItems,
   title: "message",
   description: "detail",
   timestamp: "createdAt",
@@ -2527,7 +2638,7 @@ const feedPopulatedConfig = {
 
 const feedEmptyConfig = {
   type: "feed",
-  data: { from: "feed-empty-source" },
+  data: [],
   title: "message",
   emptyMessage: "No activity yet. Events will appear here.",
 };
@@ -2553,7 +2664,7 @@ const chartPieData = [
 
 const chartBarConfig = {
   type: "chart",
-  data: { from: "chart-monthly-source" },
+  data: chartMonthlyData,
   chartType: "bar",
   xKey: "month",
   series: [
@@ -2569,7 +2680,7 @@ const chartBarConfig = {
 
 const chartLineConfig = {
   type: "chart",
-  data: { from: "chart-monthly-source" },
+  data: chartMonthlyData,
   chartType: "line",
   xKey: "month",
   series: [
@@ -2584,7 +2695,7 @@ const chartLineConfig = {
 
 const chartPieConfig = {
   type: "chart",
-  data: { from: "chart-pie-source" },
+  data: chartPieData,
   chartType: "pie",
   xKey: "category",
   series: [{ key: "headcount", label: "Headcount" }],
@@ -2596,7 +2707,7 @@ const chartPieConfig = {
 
 const chartDonutConfig = {
   type: "chart",
-  data: { from: "chart-pie-source" },
+  data: chartPieData,
   chartType: "donut",
   xKey: "category",
   series: [{ key: "headcount", label: "Headcount" }],
@@ -2608,7 +2719,7 @@ const chartDonutConfig = {
 
 const chartEmptyConfig = {
   type: "chart",
-  data: { from: "chart-empty-source" },
+  data: [],
   chartType: "bar",
   xKey: "month",
   series: [{ key: "value", label: "Value" }],
@@ -2722,99 +2833,318 @@ const wizardSkippableConfig = {
 function FeedChartWizardPage() {
   return (
     <PageWrapper>
-      <FeedDataProvider id="feed-demo-source" data={feedActivityItems}>
-        <FeedDataProvider id="feed-empty-source" data={[]}>
-          <FeedDataProvider id="chart-monthly-source" data={chartMonthlyData}>
-            <FeedDataProvider id="chart-pie-source" data={chartPieData}>
-              <FeedDataProvider id="chart-empty-source" data={[]}>
-                <div className="showcase">
-                  {/* Feed */}
-                  <ShowcaseSection title="Feed - Populated (with badges, timestamps, descriptions)">
-                    <RenderConfig config={feedPopulatedConfig} />
-                  </ShowcaseSection>
+      <div className="showcase">
+        {/* Feed */}
+        <ShowcaseSection title="Feed - Populated (with badges, timestamps, descriptions)">
+          <Feed config={feedPopulatedConfig as any} />
+        </ShowcaseSection>
 
-                  <ShowcaseSection title="Feed - Empty State">
-                    <RenderConfig config={feedEmptyConfig} />
-                  </ShowcaseSection>
+        <ShowcaseSection title="Feed - Empty State">
+          <Feed config={feedEmptyConfig as any} />
+        </ShowcaseSection>
 
-                  {/* Chart */}
-                  <ShowcaseSection title="Chart - Bar (multi-series)">
-                    <RenderConfig config={chartBarConfig} />
-                  </ShowcaseSection>
+        {/* Chart */}
+        <ShowcaseSection title="Chart - Bar (multi-series)">
+          <Chart config={chartBarConfig as any} />
+        </ShowcaseSection>
 
-                  <ShowcaseSection title="Chart - Line">
-                    <RenderConfig config={chartLineConfig} />
-                  </ShowcaseSection>
+        <ShowcaseSection title="Chart - Line">
+          <Chart config={chartLineConfig as any} />
+        </ShowcaseSection>
 
-                  <ShowcaseSection title="Chart - Pie">
-                    <RenderConfig config={chartPieConfig} />
-                  </ShowcaseSection>
+        <ShowcaseSection title="Chart - Pie">
+          <Chart config={chartPieConfig as any} />
+        </ShowcaseSection>
 
-                  <ShowcaseSection title="Chart - Donut">
-                    <RenderConfig config={chartDonutConfig} />
-                  </ShowcaseSection>
+        <ShowcaseSection title="Chart - Donut">
+          <Chart config={chartDonutConfig as any} />
+        </ShowcaseSection>
 
-                  <ShowcaseSection title="Chart - Empty State">
-                    <RenderConfig config={chartEmptyConfig} />
-                  </ShowcaseSection>
+        <ShowcaseSection title="Chart - Empty State">
+          <Chart config={chartEmptyConfig as any} />
+        </ShowcaseSection>
 
-                  {/* Wizard */}
-                  <ShowcaseSection title="Wizard - Multi-step Onboarding (2 steps)">
-                    <div style={{ maxWidth: "32rem" }}>
-                      <RenderConfig config={wizardOnboardingConfig} />
-                    </div>
-                  </ShowcaseSection>
+        {/* Wizard */}
+        <ShowcaseSection title="Wizard - Multi-step Onboarding (2 steps)">
+          <div style={{ maxWidth: "32rem" }}>
+            <Wizard config={wizardOnboardingConfig as any} />
+          </div>
+        </ShowcaseSection>
 
-                  <ShowcaseSection title="Wizard - With Skip (3 steps, step 2 optional)">
-                    <div style={{ maxWidth: "32rem" }}>
-                      <RenderConfig config={wizardSkippableConfig} />
-                    </div>
-                  </ShowcaseSection>
-                </div>
-              </FeedDataProvider>
-            </FeedDataProvider>
-          </FeedDataProvider>
-        </FeedDataProvider>
-      </FeedDataProvider>
+        <ShowcaseSection title="Wizard - With Skip (3 steps, step 2 optional)">
+          <div style={{ maxWidth: "32rem" }}>
+            <Wizard config={wizardSkippableConfig as any} />
+          </div>
+        </ShowcaseSection>
+      </div>
     </PageWrapper>
   );
 }
 
+/** Static search index: section title → page key. Built once. */
+const SECTION_INDEX: { title: string; page: Page }[] = [
+  // Dashboard
+  { title: "Stat Cards", page: "dashboard" },
+  // Data
+  { title: "Data Table", page: "data" },
+  { title: "Detail Card", page: "data" },
+  { title: "Filter Bar", page: "data" },
+  // Primitives
+  { title: "Badges", page: "primitives" },
+  { title: "Avatars", page: "primitives" },
+  { title: "Alerts", page: "primitives" },
+  { title: "Progress Bars", page: "primitives" },
+  { title: "Loading Skeletons", page: "primitives" },
+  { title: "Switches", page: "primitives" },
+  { title: "Tooltips", page: "primitives" },
+  { title: "List", page: "primitives" },
+  { title: "Sortable List (Drag & Drop)", page: "primitives" },
+  { title: "Empty State", page: "primitives" },
+  { title: "Separator", page: "primitives" },
+  { title: "Highlighted Text", page: "primitives" },
+  { title: "Favorite Button", page: "primitives" },
+  { title: "Notification Bell", page: "primitives" },
+  { title: "Save Indicator", page: "primitives" },
+  { title: "Avatar Group", page: "primitives" },
+  { title: "Entity Picker", page: "primitives" },
+  { title: "Scroll Area", page: "primitives" },
+  // Forms
+  { title: "Auto Form", page: "forms" },
+  { title: "Input", page: "forms" },
+  { title: "Textarea", page: "forms" },
+  { title: "Toggle", page: "forms" },
+  { title: "Multi-Select", page: "forms" },
+  { title: "Tag Selector", page: "forms" },
+  { title: "Inline Edit", page: "forms" },
+  { title: "Quick Add", page: "forms" },
+  { title: "Location Input", page: "forms" },
+  // Overlay
+  { title: "Modal", page: "overlay" },
+  { title: "Drawer", page: "overlay" },
+  { title: "Toast", page: "overlay" },
+  { title: "Popover", page: "overlay" },
+  { title: "Context Menu", page: "overlay" },
+  { title: "Command Palette", page: "overlay" },
+  // Navigation
+  { title: "Breadcrumb", page: "navigation" },
+  { title: "Accordion", page: "navigation" },
+  { title: "Stepper", page: "navigation" },
+  { title: "Tabs", page: "navigation" },
+  { title: "Tree View", page: "navigation" },
+  { title: "Dropdown Menu", page: "navigation" },
+  // Content
+  { title: "Rich Text Editor", page: "content" },
+  { title: "Timeline", page: "content" },
+  { title: "Code Block", page: "content" },
+  { title: "File Uploader", page: "content" },
+  { title: "Markdown Renderer", page: "content" },
+  { title: "Compare View", page: "content" },
+  // Workflow
+  { title: "Kanban Board", page: "workflow" },
+  { title: "Calendar", page: "workflow" },
+  { title: "Pricing Table", page: "workflow" },
+  { title: "Audit Log", page: "workflow" },
+  { title: "Notification Feed", page: "workflow" },
+  // Structural
+  { title: "Button Variants", page: "structural" },
+  { title: "Button Sizes", page: "structural" },
+  { title: "Button Disabled States", page: "structural" },
+  { title: "Row Layout", page: "structural" },
+  { title: "Headings", page: "structural" },
+  { title: "Select", page: "structural" },
+  // Communication
+  { title: "Rich Input", page: "communication" },
+  { title: "Emoji Picker", page: "communication" },
+  { title: "Reaction Bar", page: "communication" },
+  { title: "Presence Indicator", page: "communication" },
+  { title: "Typing Indicator", page: "communication" },
+  { title: "Message Thread", page: "communication" },
+  { title: "Chat Window", page: "communication" },
+  { title: "Comment Section", page: "communication" },
+  { title: "GIF Picker", page: "communication" },
+  // Presets
+  { title: "CRUD Page Preset", page: "presets" },
+  { title: "Dashboard Preset", page: "presets" },
+  { title: "Settings Preset", page: "presets" },
+  // Feed/Chart/Wizard
+  { title: "Feed", page: "feed-chart-wizard" },
+  { title: "Chart", page: "feed-chart-wizard" },
+  { title: "Wizard", page: "feed-chart-wizard" },
+];
+
 export function ComponentShowcase() {
   const [page, setPage] = useState<Page>("dashboard");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const searchResultsRef = useRef<HTMLUListElement>(null);
   const currentPage = PAGE_BY_KEY[page];
+
+  // Group pages by their group for the optgroups
+  const groups: { group: string; items: typeof PAGES }[] = [];
+  for (const p of PAGES) {
+    const existing = groups.find((g) => g.group === p.group);
+    if (existing) {
+      existing.items.push(p);
+    } else {
+      groups.push({ group: p.group, items: [p] });
+    }
+  }
+
+  // Search results
+  const searchResults =
+    searchQuery.length > 0
+      ? SECTION_INDEX.filter((s) =>
+          s.title.toLowerCase().includes(searchQuery.toLowerCase()),
+        ).slice(0, 8)
+      : [];
+
+  const handleSearchSelect = (result: { title: string; page: Page }) => {
+    setPage(result.page);
+    setSearchQuery("");
+    setSearchOpen(false);
+    // Scroll to the matching section after page renders
+    requestAnimationFrame(() => {
+      const headers = document.querySelectorAll(".showcase__section-header");
+      for (const header of headers) {
+        if (header.textContent?.includes(result.title)) {
+          header.scrollIntoView({ behavior: "smooth", block: "start" });
+          break;
+        }
+      }
+    });
+  };
 
   return (
     <>
-      <div className="showcase-overview" aria-live="polite">
-        <div>
-          <p className="showcase-overview__eyebrow">{currentPage.group}</p>
-          <h2>{currentPage.label}</h2>
-          <p>{currentPage.description}</p>
+      <div className="page-nav" aria-live="polite">
+        <div className="page-nav__left">
+          <div className="page-nav__search-wrap">
+            <input
+              className="page-nav__search"
+              type="search"
+              autoComplete="off"
+              placeholder="Search components..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSearchOpen(e.target.value.length > 0);
+                setHighlightedIndex(-1);
+              }}
+              onFocus={() => {
+                if (searchQuery.length > 0) setSearchOpen(true);
+              }}
+              onBlur={() => {
+                // Delay so click on result registers
+                setTimeout(() => {
+                  setSearchOpen(false);
+                  setHighlightedIndex(-1);
+                }, 200);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearchQuery("");
+                  setSearchOpen(false);
+                  setHighlightedIndex(-1);
+                  (e.target as HTMLInputElement).blur();
+                  return;
+                }
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setHighlightedIndex((prev) =>
+                    prev < searchResults.length - 1 ? prev + 1 : 0,
+                  );
+                  return;
+                }
+                if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setHighlightedIndex((prev) =>
+                    prev > 0 ? prev - 1 : searchResults.length - 1,
+                  );
+                  return;
+                }
+                if (e.key === "Enter" && searchResults.length > 0) {
+                  const idx = highlightedIndex >= 0 ? highlightedIndex : 0;
+                  handleSearchSelect(searchResults[idx]!);
+                }
+              }}
+              role="combobox"
+              aria-expanded={searchOpen && searchResults.length > 0}
+              aria-activedescendant={
+                highlightedIndex >= 0
+                  ? `search-result-${highlightedIndex}`
+                  : undefined
+              }
+              aria-label="Search components"
+            />
+            {searchOpen && searchResults.length > 0 && (
+              <ul
+                className="page-nav__search-results"
+                ref={searchResultsRef}
+                role="listbox"
+              >
+                {searchResults.map((r, i) => (
+                  <li
+                    key={`${r.page}-${r.title}`}
+                    role="option"
+                    aria-selected={i === highlightedIndex}
+                  >
+                    <button
+                      type="button"
+                      data-active={i === highlightedIndex ? "" : undefined}
+                      ref={(el) => {
+                        if (i === highlightedIndex && el) {
+                          el.scrollIntoView({ block: "nearest" });
+                        }
+                      }}
+                      onMouseEnter={() => setHighlightedIndex(i)}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleSearchSelect(r);
+                      }}
+                    >
+                      <span className="page-nav__search-title">{r.title}</span>
+                      <span className="page-nav__search-page">
+                        {PAGE_BY_KEY[r.page]?.label}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <select
+            className="page-nav__select"
+            value={page}
+            onChange={(e) => setPage(e.target.value as Page)}
+            aria-label="Select playground section"
+          >
+            {groups.map((g) => (
+              <optgroup key={g.group} label={g.group}>
+                {g.items.map(({ key, label, count }) => (
+                  <option key={key} value={key}>
+                    {label} ({count})
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+          <div className="page-nav__info">
+            <h2 className="page-nav__title">{currentPage.label}</h2>
+            <p className="page-nav__desc">{currentPage.description}</p>
+          </div>
         </div>
-        <dl className="showcase-overview__stats">
+        <dl className="page-nav__stats">
           <div>
             <dt>Demos</dt>
             <dd>{currentPage.count}</dd>
           </div>
           <div>
-            <dt>Total surface</dt>
+            <dt>Total</dt>
             <dd>{PAGES.reduce((total, item) => total + item.count, 0)}</dd>
           </div>
         </dl>
       </div>
-      <nav className="page-tabs" aria-label="Playground sections">
-        {PAGES.map(({ key, label }) => (
-          <button
-            key={key}
-            className={`page-tab ${page === key ? "page-tab--active" : ""}`}
-            aria-current={page === key ? "page" : undefined}
-            onClick={() => setPage(key)}
-          >
-            <span>{label}</span>
-          </button>
-        ))}
-      </nav>
       {page === "dashboard" && <DashboardPage />}
       {page === "data" && <DataPage />}
       {page === "primitives" && <PrimitivesPage />}

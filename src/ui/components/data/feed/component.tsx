@@ -61,6 +61,17 @@ function formatTimestamp(ts: string): string {
   }
 }
 
+function getFallbackInitials(title: string): string {
+  const initials = title
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word.match(/[a-zA-Z0-9]/)?.[0] ?? "")
+    .join("")
+    .toUpperCase();
+  return initials || "?";
+}
+
 function resolveItems(
   rawItems: Record<string, unknown>[],
   config: FeedConfig,
@@ -173,14 +184,25 @@ function FeedItemRow({
       ) : (
         <div
           aria-hidden="true"
+          data-feed-avatar-fallback
           style={{
             width: "2rem",
             height: "2rem",
             borderRadius: "var(--sn-radius-full, 9999px)",
-            backgroundColor: "var(--sn-color-muted, #e5e7eb)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             flexShrink: 0,
+            backgroundColor:
+              "color-mix(in oklch, var(--sn-color-primary, #2563eb) 14%, var(--sn-color-muted, #e5e7eb))",
+            color: "var(--sn-color-primary, #2563eb)",
+            fontSize: "var(--sn-font-size-xs, 0.75rem)",
+            fontWeight: "var(--sn-font-weight-semibold, 600)",
+            lineHeight: 1,
           }}
-        />
+        >
+          {getFallbackInitials(item.title)}
+        </div>
       )}
 
       {/* Content */}

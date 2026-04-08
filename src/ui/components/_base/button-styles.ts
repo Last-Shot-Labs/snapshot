@@ -1,0 +1,160 @@
+import type { CSSProperties } from "react";
+
+/**
+ * Shared button variant + size styles for config-driven components.
+ *
+ * Every component that renders action/CTA buttons should use these instead
+ * of defining ad-hoc inline styles. This ensures consistent appearance,
+ * hover/focus behavior, and token usage across the entire UI layer.
+ *
+ * Buttons rendered with these styles must include `data-sn-button=""` and
+ * `data-variant={variant}` attributes for hover/focus CSS to apply.
+ */
+
+/** Supported button variant names. */
+export type ButtonVariant =
+  | "default"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "destructive"
+  | "link";
+
+/** Supported button size names. */
+export type ButtonSize = "sm" | "md" | "lg" | "icon";
+
+/** Returns inline styles for a given button variant. */
+export function getButtonVariantStyle(
+  variant: ButtonVariant | string = "default",
+): CSSProperties {
+  switch (variant) {
+    case "secondary":
+      return {
+        backgroundColor: "var(--sn-color-secondary, #f1f5f9)",
+        color: "var(--sn-color-secondary-foreground, #0f172a)",
+        border: "none",
+      };
+    case "outline":
+      return {
+        backgroundColor: "transparent",
+        color: "var(--sn-color-foreground, #111827)",
+        border:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      };
+    case "ghost":
+      return {
+        backgroundColor: "transparent",
+        color: "var(--sn-color-foreground, #111827)",
+        border: "none",
+      };
+    case "destructive":
+      return {
+        backgroundColor: "var(--sn-color-destructive, #dc2626)",
+        color: "var(--sn-color-destructive-foreground, #fff)",
+        border: "none",
+      };
+    case "link":
+      return {
+        backgroundColor: "transparent",
+        color: "var(--sn-color-primary, #2563eb)",
+        border: "none",
+        textDecoration: "underline",
+        padding: "0",
+      };
+    default:
+      return {
+        backgroundColor: "var(--sn-color-primary, #2563eb)",
+        color: "var(--sn-color-primary-foreground, #fff)",
+        border: "none",
+      };
+  }
+}
+
+/** Returns inline styles for a given button size. */
+export function getButtonSizeStyle(
+  size: ButtonSize | string = "sm",
+): CSSProperties {
+  switch (size) {
+    case "md":
+      return {
+        padding: "var(--sn-spacing-xs, 0.5rem) var(--sn-spacing-md, 1rem)",
+        fontSize: "var(--sn-font-size-md, 1rem)",
+      };
+    case "lg":
+      return {
+        padding: "var(--sn-spacing-sm, 0.75rem) var(--sn-spacing-lg, 1.5rem)",
+        fontSize: "var(--sn-font-size-lg, 1.125rem)",
+      };
+    case "icon":
+      return {
+        padding: "var(--sn-spacing-xs, 0.5rem)",
+        fontSize: "var(--sn-font-size-md, 1rem)",
+        width: "2.5rem",
+        height: "2.5rem",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+      };
+    default:
+      // sm
+      return {
+        padding: "var(--sn-spacing-2xs, 0.25rem) var(--sn-spacing-sm, 0.75rem)",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+      };
+  }
+}
+
+/**
+ * Returns the full set of base inline styles for a button.
+ * Combines variant + size + shared properties (radius, font, cursor, disabled).
+ */
+export function getButtonStyle(
+  variant: ButtonVariant | string = "default",
+  size: ButtonSize | string = "sm",
+  disabled?: boolean,
+): CSSProperties {
+  return {
+    ...getButtonVariantStyle(variant),
+    ...getButtonSizeStyle(size),
+    cursor: disabled ? "not-allowed" : "pointer",
+    opacity: disabled
+      ? ("var(--sn-opacity-disabled, 0.5)" as unknown as number)
+      : undefined,
+    borderRadius: "var(--sn-radius-md, 0.375rem)",
+    fontFamily: "var(--sn-font-sans, inherit)",
+    fontWeight: "var(--sn-font-weight-medium, 500)",
+    lineHeight: "var(--sn-leading-tight, 1.25)",
+  };
+}
+
+/**
+ * CSS rules for hover/focus on `[data-sn-button]` elements.
+ * Components should include this in a `<style>` tag (deduplicated by attribute selector).
+ */
+export const BUTTON_INTERACTIVE_CSS = `
+[data-sn-button]:not(:disabled) {
+  transition: opacity var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
+              box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
+              filter var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease);
+}
+[data-sn-button]:not(:disabled):hover {
+  filter: brightness(0.92);
+}
+[data-sn-button][data-variant="outline"]:not(:disabled):hover,
+[data-sn-button][data-variant="ghost"]:not(:disabled):hover {
+  background-color: var(--sn-color-accent, #f3f4f6);
+  filter: none;
+}
+[data-sn-button][data-variant="secondary"]:not(:disabled):hover {
+  filter: brightness(0.95);
+}
+[data-sn-button][data-variant="link"]:not(:disabled):hover {
+  filter: none;
+  opacity: var(--sn-opacity-hover, 0.8);
+}
+[data-sn-button]:focus { outline: none; }
+[data-sn-button]:focus-visible {
+  outline: var(--sn-ring-width, 2px) solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+  outline-offset: var(--sn-ring-offset, 2px);
+}
+`;

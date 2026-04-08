@@ -5,6 +5,10 @@ import {
   SnapshotApiContext,
 } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
+import {
+  getButtonStyle,
+  BUTTON_INTERACTIVE_CSS,
+} from "../../_base/button-styles";
 import { useAutoForm } from "./hook";
 import type { AutoFormConfig, FieldConfig, FieldSectionConfig } from "./types";
 import type { ApiClient } from "../../../../api/client";
@@ -595,22 +599,9 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
         <button
           type="submit"
           disabled={form.isSubmitting}
-          data-sn-submit
-          style={{
-            padding:
-              "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-lg, 1.5rem)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            fontWeight:
-              "var(--sn-font-weight-medium, 500)" as React.CSSProperties["fontWeight"],
-            backgroundColor: "var(--sn-color-primary, #2563eb)",
-            color: "var(--sn-color-primary-foreground, #ffffff)",
-            border: "none",
-            borderRadius: "var(--sn-radius-md, 0.375rem)",
-            cursor: form.isSubmitting ? "not-allowed" : "pointer",
-            opacity: form.isSubmitting ? "var(--sn-opacity-disabled, 0.5)" : 1,
-            transition:
-              "opacity var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-          }}
+          data-sn-button=""
+          data-variant="default"
+          style={getButtonStyle("default", "sm", form.isSubmitting)}
         >
           {form.isSubmitting ? "Submitting..." : submitLabel}
         </button>
@@ -630,16 +621,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
           border-color: var(--sn-color-primary, #2563eb);
           box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
         }
-        [data-snapshot-component="form"] button[data-sn-submit]:hover:not(:disabled) {
-          opacity: var(--sn-opacity-hover, 0.9);
-        }
-        [data-snapshot-component="form"] button[data-sn-submit]:focus {
-          outline: none;
-        }
-        [data-snapshot-component="form"] button[data-sn-submit]:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
+        ${BUTTON_INTERACTIVE_CSS}
       `}</style>
     </form>
   );

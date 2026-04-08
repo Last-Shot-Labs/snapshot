@@ -104,6 +104,7 @@ export function useWizard(config: WizardConfig): UseWizardResult {
   const [submitError, setSubmitError] = useState<Error | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const totalSteps = config.steps.length;
   const isFirstStep = currentStep === 0;
@@ -111,15 +112,26 @@ export function useWizard(config: WizardConfig): UseWizardResult {
 
   // Transition to a new step with animation
   const transitionTo = useCallback((nextIndex: number) => {
+    if (transitionTimerRef.current) {
+      clearTimeout(transitionTimerRef.current);
+    }
     setIsAnimating(true);
-    const timer = setTimeout(() => {
+    transitionTimerRef.current = setTimeout(() => {
       setCurrentStep(nextIndex);
       setStepValues({});
       setStepErrors({});
       setStepTouched({});
       setIsAnimating(false);
+      transitionTimerRef.current = null;
     }, STEP_ANIMATION_DURATION);
-    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (transitionTimerRef.current) {
+        clearTimeout(transitionTimerRef.current);
+      }
+    };
   }, []);
 
   const setStepValue = useCallback((name: string, value: unknown) => {
@@ -208,6 +220,25 @@ export function useWizard(config: WizardConfig): UseWizardResult {
     transitionTo(currentStep + 1);
   }, [config.allowSkip, currentStep, isLastStep, transitionTo]);
 
+  const resetWizard = useCallback(() => {
+    if (transitionTimerRef.current) {
+      clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = null;
+    }
+    setCurrentStep(0);
+    setStepValues({});
+    setStepErrors({});
+    setStepTouched({});
+    setAccumulatedData({});
+    setIsSubmitting(false);
+    setSubmitError(null);
+    setIsComplete(false);
+    setIsAnimating(false);
+    if (publish) {
+      publish(null);
+    }
+  }, [publish]);
+
   return {
     currentStep,
     totalSteps,
@@ -222,6 +253,7 @@ export function useWizard(config: WizardConfig): UseWizardResult {
     nextStep,
     prevStep,
     skipStep,
+    resetWizard,
     isSubmitting,
     submitError,
     isComplete,

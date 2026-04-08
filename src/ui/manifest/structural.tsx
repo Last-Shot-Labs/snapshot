@@ -14,6 +14,10 @@ import {
 } from "./component-registry";
 import { useActionExecutor } from "../actions/executor";
 import { useResponsiveValue } from "../hooks/use-breakpoint";
+import {
+  getButtonStyle,
+  BUTTON_INTERACTIVE_CSS,
+} from "../components/_base/button-styles";
 import type {
   RowConfig,
   HeadingConfig,
@@ -50,31 +54,11 @@ const ALIGN_MAP: Record<string, string> = {
 // ── Shared interactive styles (injected once) ───────────────────────────────
 
 /**
- * CSS for hover/focus-visible states on structural buttons and selects.
- * Uses `data-snapshot-structural-*` attributes as selectors.
+ * CSS for hover/focus-visible states on structural elements.
+ * Button styles are shared via BUTTON_INTERACTIVE_CSS from _base/button-styles.
  */
 const STRUCTURAL_STYLES = `
-[data-snapshot-structural-button]:not(:disabled) {
-  transition: opacity var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
-              box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
-              filter var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease);
-}
-[data-snapshot-structural-button]:not(:disabled):hover {
-  filter: brightness(0.9);
-}
-[data-snapshot-structural-button][data-variant="outline"]:not(:disabled):hover,
-[data-snapshot-structural-button][data-variant="ghost"]:not(:disabled):hover {
-  background-color: var(--sn-color-accent, #f3f4f6);
-  filter: none;
-}
-[data-snapshot-structural-button][data-variant="link"]:not(:disabled):hover {
-  filter: none;
-  opacity: var(--sn-opacity-hover, 0.8);
-}
-[data-snapshot-structural-button]:focus-visible {
-  outline: var(--sn-ring-width, 2px) solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
+${BUTTON_INTERACTIVE_CSS}
 
 [data-snapshot-structural-select] {
   transition: border-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
@@ -254,66 +238,6 @@ function Button({ config }: { config: Record<string, unknown> }) {
 
   ensureStyles();
 
-  const variantStyles: Record<string, CSSProperties> = {
-    default: {
-      backgroundColor: "var(--sn-color-primary, #2563eb)",
-      color: "var(--sn-color-primary-foreground, #fff)",
-      border: "none",
-    },
-    secondary: {
-      backgroundColor: "var(--sn-color-secondary, #6b7280)",
-      color: "var(--sn-color-secondary-foreground, #fff)",
-      border: "none",
-    },
-    outline: {
-      backgroundColor: "transparent",
-      color: "var(--sn-color-primary, #2563eb)",
-      border:
-        "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-    },
-    ghost: {
-      backgroundColor: "transparent",
-      color: "var(--sn-color-primary, #2563eb)",
-      border: "none",
-    },
-    destructive: {
-      backgroundColor: "var(--sn-color-destructive, #dc2626)",
-      color: "var(--sn-color-destructive-foreground, #fff)",
-      border: "none",
-    },
-    link: {
-      backgroundColor: "transparent",
-      color: "var(--sn-color-primary, #2563eb)",
-      border: "none",
-      textDecoration: "underline",
-      padding: "0",
-    },
-  };
-
-  const sizeStyles: Record<string, CSSProperties> = {
-    sm: {
-      padding: "var(--sn-spacing-2xs, 0.25rem) var(--sn-spacing-xs, 0.5rem)",
-      fontSize: "var(--sn-font-size-sm, 0.875rem)",
-    },
-    md: {
-      padding: "var(--sn-spacing-xs, 0.5rem) var(--sn-spacing-md, 1rem)",
-      fontSize: "var(--sn-font-size-md, 1rem)",
-    },
-    lg: {
-      padding: "var(--sn-spacing-sm, 0.75rem) var(--sn-spacing-lg, 1.5rem)",
-      fontSize: "var(--sn-font-size-lg, 1.125rem)",
-    },
-    icon: {
-      padding: "var(--sn-spacing-xs, 0.5rem)",
-      fontSize: "var(--sn-font-size-md, 1rem)",
-      width: "2.5rem",
-      height: "2.5rem",
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-  };
-
   const variant = buttonConfig.variant ?? "default";
   const size = buttonConfig.size ?? "md";
   const configStyle = buttonConfig.style as CSSProperties | undefined;
@@ -330,18 +254,11 @@ function Button({ config }: { config: Record<string, unknown> }) {
       disabled={!!disabled}
       aria-disabled={disabled ? true : undefined}
       className={buttonConfig.className}
-      data-snapshot-structural-button=""
+      data-sn-button=""
       data-variant={variant}
       data-size={size}
       style={{
-        ...variantStyles[variant],
-        ...sizeStyles[size],
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? "var(--sn-opacity-disabled, 0.5)" : undefined,
-        borderRadius: "var(--sn-radius-md, 0.375rem)",
-        fontFamily: "var(--sn-font-sans, inherit)",
-        fontWeight: "var(--sn-font-weight-medium, 500)",
-        lineHeight: "var(--sn-leading-tight, 1.25)",
+        ...getButtonStyle(variant, size, !!disabled),
         ...configStyle,
       }}
     >

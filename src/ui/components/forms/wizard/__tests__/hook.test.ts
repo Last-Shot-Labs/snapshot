@@ -199,6 +199,38 @@ describe("useWizard", () => {
     expect(result.current.isComplete).toBe(true);
   });
 
+  it("resetWizard clears completion state and collected values", async () => {
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(
+      () =>
+        useWizard(
+          baseConfig({
+            steps: [{ title: "Only Step", fields: [] }],
+          }),
+        ),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.setStepValue("email", "user@example.com");
+      result.current.nextStep();
+    });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+    expect(result.current.isComplete).toBe(true);
+
+    act(() => {
+      result.current.resetWizard();
+    });
+
+    expect(result.current.currentStep).toBe(0);
+    expect(result.current.isComplete).toBe(false);
+    expect(result.current.stepValues).toEqual({});
+    expect(result.current.accumulatedData).toEqual({});
+    expect(result.current.submitError).toBeNull();
+  });
+
   it("accumulatedData merges values across steps", async () => {
     const { Wrapper } = createWrapper();
     const { result } = renderHook(() => useWizard(baseConfig()), {

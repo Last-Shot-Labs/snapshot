@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import React from "react";
 import { AtomRegistryImpl } from "../../../../context/registry";
 import {
@@ -48,6 +54,12 @@ function baseConfig(overrides: Partial<WizardConfig> = {}): WizardConfig {
     allowSkip: false,
     ...overrides,
   };
+}
+
+async function waitForWizardTransition() {
+  await act(async () => {
+    await new Promise((r) => setTimeout(r, 300));
+  });
 }
 
 describe("Wizard component", () => {
@@ -132,7 +144,7 @@ describe("Wizard component", () => {
     });
     fireEvent.click(screen.getByText("Next"));
     // Wait for animation transition
-    await new Promise((r) => setTimeout(r, 300));
+    await waitForWizardTransition();
     // Should now see step 2 title in heading
     const heading = container.querySelector("[data-wizard-step-title]");
     expect(heading?.textContent).toBe("Profile");
@@ -149,7 +161,7 @@ describe("Wizard component", () => {
       target: { value: "test@example.com" },
     });
     fireEvent.click(screen.getByText("Next"));
-    await new Promise((r) => setTimeout(r, 300));
+    await waitForWizardTransition();
     const backBtn = screen.getByText("Back");
     expect((backBtn as HTMLButtonElement).disabled).toBe(false);
   });
@@ -165,10 +177,10 @@ describe("Wizard component", () => {
       target: { value: "test@example.com" },
     });
     fireEvent.click(screen.getByText("Next"));
-    await new Promise((r) => setTimeout(r, 300));
+    await waitForWizardTransition();
     // Now on step 2 - click back
     fireEvent.click(screen.getByText("Back"));
-    await new Promise((r) => setTimeout(r, 300));
+    await waitForWizardTransition();
     // Back on step 1
     const heading = container.querySelector("[data-wizard-step-title]");
     expect(heading?.textContent).toBe("Account Details");
@@ -191,6 +203,34 @@ describe("Wizard component", () => {
         />
       </Wrapper>,
     );
+    expect(screen.getByText("Finish")).toBeDefined();
+  });
+
+  it("resets to the first step from the completed state", async () => {
+    const { Wrapper } = createWrapper();
+    const { container } = render(
+      <Wrapper>
+        <Wizard
+          config={baseConfig({
+            steps: [
+              {
+                title: "Only Step",
+                fields: [],
+              },
+            ],
+            submitLabel: "Finish",
+          })}
+        />
+      </Wrapper>,
+    );
+
+    fireEvent.click(screen.getByText("Finish"));
+    await waitFor(() => expect(screen.getByText("Reset")).toBeDefined());
+
+    fireEvent.click(screen.getByText("Reset"));
+
+    const heading = container.querySelector("[data-wizard-step-title]");
+    expect(heading?.textContent).toBe("Only Step");
     expect(screen.getByText("Finish")).toBeDefined();
   });
 

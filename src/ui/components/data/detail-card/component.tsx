@@ -1,6 +1,10 @@
 import { useCallback } from "react";
 import { ComponentWrapper } from "../../_base/component-wrapper";
 import { useActionExecutor } from "../../../actions/executor";
+import {
+  getButtonStyle,
+  BUTTON_INTERACTIVE_CSS,
+} from "../../_base/button-styles";
 import { useDetailCard } from "./hook";
 import type { DetailCardConfig } from "./schema";
 import type { ResolvedField } from "./types";
@@ -178,9 +182,10 @@ export function DetailCard({ config }: { config: DetailCardConfig }) {
       style={config.style}
     >
       <style>{`
-[data-snapshot-component="detail-card"] button:hover { background-color: var(--sn-color-secondary, #f3f4f6); }
-[data-snapshot-component="detail-card"] button:focus { outline: none; }
-[data-snapshot-component="detail-card"] button:focus-visible { outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb)); outline-offset: var(--sn-ring-offset, 2px); }
+${BUTTON_INTERACTIVE_CSS}
+[data-snapshot-component="detail-card"] [data-testid^="copy-"]:hover { background-color: var(--sn-color-secondary, #f3f4f6); }
+[data-snapshot-component="detail-card"] [data-testid^="copy-"]:focus { outline: none; }
+[data-snapshot-component="detail-card"] [data-testid^="copy-"]:focus-visible { outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb)); outline-offset: var(--sn-ring-offset, 2px); }
       `}</style>
       {isLoading ? (
         <DetailCardSkeleton />
@@ -237,18 +242,10 @@ export function DetailCard({ config }: { config: DetailCardConfig }) {
                     <button
                       key={i}
                       type="button"
+                      data-sn-button=""
+                      data-variant="outline"
                       onClick={() => handleAction(actionDef.action)}
-                      style={{
-                        padding:
-                          "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-                        borderRadius: "var(--sn-radius-md, 0.375rem)",
-                        border:
-                          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)",
-                        background: "transparent",
-                        cursor: "pointer",
-                        fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                        color: "var(--sn-color-foreground, #0f172a)",
-                      }}
+                      style={getButtonStyle("outline", "sm")}
                     >
                       {actionDef.label}
                     </button>

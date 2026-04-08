@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { createAuthHooks } from "../hooks";
@@ -8,35 +9,38 @@ import type { ApiClient } from "../../api/client";
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
-const mockNavigate = vi.fn();
-vi.mock("@tanstack/react-router", () => ({
-  useNavigate: () => mockNavigate,
+const mockState = vi.hoisted(() => ({
+  mockNavigate: vi.fn(),
+  mockSetAtom: vi.fn(),
+  mockMutate: vi.fn(),
+  mockUseMutation: vi.fn((_cfg?: unknown) => ({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn(),
+  })),
+  mockSetQueryData: vi.fn(),
+  mockClear: vi.fn(),
 }));
 
-const mockSetAtom = vi.fn();
+vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => mockState.mockNavigate,
+}));
+
 vi.mock("jotai", async (importOriginal) => {
   const actual = await importOriginal<typeof import("jotai")>();
   return {
     ...actual,
-    useSetAtom: () => mockSetAtom,
+    useSetAtom: () => mockState.mockSetAtom,
   };
 });
 
-const mockMutate = vi.fn();
-const mockUseMutation = vi.fn(() => ({
-  mutate: mockMutate,
-  mutateAsync: mockMutate,
-}));
-const mockSetQueryData = vi.fn();
-const mockClear = vi.fn();
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
   return {
     ...actual,
-    useMutation: mockUseMutation,
+    useMutation: mockState.mockUseMutation,
     useQueryClient: () => ({
-      setQueryData: mockSetQueryData,
-      clear: mockClear,
+      setQueryData: mockState.mockSetQueryData,
+      clear: mockState.mockClear,
     }),
     useQuery: vi.fn(() => ({ data: null, isLoading: false, isError: false })),
   };
@@ -90,39 +94,33 @@ describe("useLogout", () => {
       onUnauthenticated: vi.fn(),
       onLogoutSuccess: vi.fn(),
     };
-    (mockUseMutation as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      (cfg: typeof capturedMutationConfig) => {
-        capturedMutationConfig = cfg;
-        return { mutate: mockMutate };
-      },
-    );
+    mockState.mockUseMutation.mockImplementation((cfg: unknown) => {
+      capturedMutationConfig = cfg as typeof capturedMutationConfig;
+      return {
+        mutate: mockState.mockMutate,
+        mutateAsync: mockState.mockMutate,
+      };
+    });
 
-    createAuthHooks({
+    const hooks = createAuthHooks({
       api,
       storage,
       config,
       contract: defaultContract("http://localhost"),
       pendingMfaChallengeAtom,
     });
+    renderHook(() => hooks.useLogout());
   });
 
   it("successful logout clears storage, refresh token, query cache, MFA atom, and navigates", async () => {
-    const { useLogout } = createAuthHooks({
-      api,
-      storage,
-      config,
-      contract: defaultContract("http://localhost"),
-      pendingMfaChallengeAtom,
-    });
-
     // Simulate onSuccess
     await capturedMutationConfig.onSuccess?.(undefined, undefined);
 
-    expect(mockSetAtom).toHaveBeenCalledWith(null);
+    expect(mockState.mockSetAtom).toHaveBeenCalledWith(null);
     expect(storage.clear).toHaveBeenCalled();
     expect(storage.clearRefreshToken).toHaveBeenCalled();
-    expect(mockClear).toHaveBeenCalled();
-    expect(mockNavigate).toHaveBeenCalledWith({ to: "/login" });
+    expect(mockState.mockClear).toHaveBeenCalled();
+    expect(mockState.mockNavigate).toHaveBeenCalledWith({ to: "/login" });
   });
 
   it("failed logout does NOT clear any state", async () => {

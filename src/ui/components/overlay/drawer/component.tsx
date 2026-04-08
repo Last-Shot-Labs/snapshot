@@ -3,6 +3,10 @@ import { useActionExecutor } from "../../../actions/executor";
 import type { ActionConfig } from "../../../actions/types";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
+import {
+  getButtonStyle,
+  BUTTON_INTERACTIVE_CSS,
+} from "../../_base/button-styles";
 import { useDrawer } from "./hook";
 import type { DrawerConfig } from "./schema";
 
@@ -25,32 +29,6 @@ const ALIGN_MAP: Record<string, string> = {
   center: "center",
   right: "flex-end",
 };
-
-/** Maps button variant to background + text color tokens. */
-function getButtonStyles(variant: string = "default"): React.CSSProperties {
-  switch (variant) {
-    case "secondary":
-      return {
-        backgroundColor: "var(--sn-color-secondary, #f1f5f9)",
-        color: "var(--sn-color-secondary-foreground, #0f172a)",
-      };
-    case "destructive":
-      return {
-        backgroundColor: "var(--sn-color-destructive, #ef4444)",
-        color: "var(--sn-color-destructive-foreground, #fff)",
-      };
-    case "ghost":
-      return {
-        backgroundColor: "transparent",
-        color: "var(--sn-color-foreground, #111)",
-      };
-    default:
-      return {
-        backgroundColor: "var(--sn-color-primary, #2563eb)",
-        color: "var(--sn-color-primary-foreground, #fff)",
-      };
-  }
-}
 
 /**
  * Drawer component — renders a slide-in panel from the left or right edge.
@@ -189,6 +167,7 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
             outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
             outline-offset: var(--sn-ring-offset, 2px);
           }
+          ${BUTTON_INTERACTIVE_CSS}
         `}</style>
 
         {/* Header */}
@@ -273,6 +252,8 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
               <button
                 key={i}
                 type="button"
+                data-sn-button=""
+                data-variant={btn.variant ?? "default"}
                 onClick={() => {
                   if (btn.action) {
                     execute(btn.action as ActionConfig);
@@ -281,17 +262,7 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
                     close();
                   }
                 }}
-                style={{
-                  ...getButtonStyles(btn.variant),
-                  border: "none",
-                  cursor: "pointer",
-                  padding:
-                    "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-md, 1rem)",
-                  borderRadius: "var(--sn-radius-md, 0.375rem)",
-                  fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                  fontWeight: "var(--sn-font-weight-medium, 500)",
-                  lineHeight: "var(--sn-leading-normal, 1.5)",
-                }}
+                style={getButtonStyle(btn.variant ?? "default", "sm")}
               >
                 {btn.label}
               </button>

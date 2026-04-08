@@ -298,6 +298,9 @@ describe("StatCard", () => {
     const wrapper = createTestWrapper(api);
 
     const { container } = render(<StatCard config={config} />, { wrapper });
+    await act(async () => {
+      await Promise.resolve();
+    });
     // The component should not render anything
     expect(container.innerHTML).toBe("");
   });
@@ -354,7 +357,7 @@ describe("StatCard", () => {
   it("supports keyboard activation when action is configured", async () => {
     const config: StatCardConfig = {
       ...baseConfig,
-      action: { type: "navigate", to: "/details" },
+      action: { type: "toast", message: "Activated" },
     };
     const api = createMockApi({ total: 100 });
     const wrapper = createTestWrapper(api);

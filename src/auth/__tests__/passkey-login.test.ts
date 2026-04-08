@@ -1,4 +1,6 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { renderHook } from "@testing-library/react";
 import { createWebAuthnHooks } from "../webauthn-hooks";
 import { defaultContract } from "../contract";
 import { atom } from "jotai";
@@ -7,35 +9,37 @@ import type { ApiClient } from "../../api/client";
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
-const mockNavigate = vi.fn();
-vi.mock("@tanstack/react-router", () => ({
-  useNavigate: () => mockNavigate,
+const mockState = vi.hoisted(() => ({
+  mockNavigate: vi.fn(),
+  mockSetAtom: vi.fn(),
+  mockSetQueryData: vi.fn(),
+  mockInvalidateQueries: vi.fn(),
+  capturedMutationConfig: {} as Record<string, unknown>,
 }));
 
-const mockSetAtom = vi.fn();
+vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => mockState.mockNavigate,
+}));
+
 vi.mock("jotai", async (importOriginal) => {
   const actual = await importOriginal<typeof import("jotai")>();
   return {
     ...actual,
-    useSetAtom: () => mockSetAtom,
+    useSetAtom: () => mockState.mockSetAtom,
   };
 });
-
-const mockSetQueryData = vi.fn();
-const mockInvalidateQueries = vi.fn();
-let capturedMutationConfig: Record<string, unknown> = {};
 
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
   return {
     ...actual,
     useMutation: vi.fn((cfg) => {
-      capturedMutationConfig = cfg;
+      mockState.capturedMutationConfig = cfg;
       return { mutate: vi.fn() };
     }),
     useQueryClient: () => ({
-      setQueryData: mockSetQueryData,
-      invalidateQueries: mockInvalidateQueries,
+      setQueryData: mockState.mockSetQueryData,
+      invalidateQueries: mockState.mockInvalidateQueries,
     }),
     useQuery: vi.fn(() => ({
       data: undefined,
@@ -78,7 +82,7 @@ describe("usePasskeyLogin", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    capturedMutationConfig = {};
+    mockState.capturedMutationConfig = {};
     storage = makeStorage();
     api = makeApi();
   });
@@ -90,20 +94,21 @@ describe("usePasskeyLogin", () => {
       homePath: "/home",
       ...configOverrides,
     };
-    createWebAuthnHooks({
+    const hooks = createWebAuthnHooks({
       api,
       storage,
       config,
       contract: defaultContract("http://localhost"),
       pendingMfaChallengeAtom,
     });
+    renderHook(() => hooks.usePasskeyLogin());
     return { config };
   }
 
   it("fetches /auth/me (not fabricated user)", async () => {
     setup();
     // Access the last registered mutationFn (usePasskeyLogin is last)
-    const mutationFn = capturedMutationConfig.mutationFn as Function;
+    const mutationFn = mockState.capturedMutationConfig.mutationFn as Function;
     const result = await mutationFn({
       passkeyToken: "pt",
       assertionResponse: {},
@@ -114,28 +119,31 @@ describe("usePasskeyLogin", () => {
 
   it("uses setQueryData, not invalidateQueries", async () => {
     setup();
-    const onSuccess = capturedMutationConfig.onSuccess as Function;
+    const onSuccess = mockState.capturedMutationConfig.onSuccess as Function;
     await onSuccess(mockUser, { passkeyToken: "pt", assertionResponse: {} });
-    expect(mockSetQueryData).toHaveBeenCalledWith(["auth", "me"], mockUser);
-    expect(mockInvalidateQueries).not.toHaveBeenCalled();
+    expect(mockState.mockSetQueryData).toHaveBeenCalledWith(
+      ["auth", "me"],
+      mockUser,
+    );
+    expect(mockState.mockInvalidateQueries).not.toHaveBeenCalled();
   });
 
   it("uses router navigate, not window.location.href", async () => {
     setup();
-    const onSuccess = capturedMutationConfig.onSuccess as Function;
+    const onSuccess = mockState.capturedMutationConfig.onSuccess as Function;
     await onSuccess(mockUser, { passkeyToken: "pt", assertionResponse: {} });
-    expect(mockNavigate).toHaveBeenCalledWith({ to: "/home" });
+    expect(mockState.mockNavigate).toHaveBeenCalledWith({ to: "/home" });
   });
 
   it("redirectTo override works", async () => {
     setup();
-    const onSuccess = capturedMutationConfig.onSuccess as Function;
+    const onSuccess = mockState.capturedMutationConfig.onSuccess as Function;
     await onSuccess(mockUser, {
       passkeyToken: "pt",
       assertionResponse: {},
       redirectTo: "/dashboard",
     });
-    expect(mockNavigate).toHaveBeenCalledWith({ to: "/dashboard" });
+    expect(mockState.mockNavigate).toHaveBeenCalledWith({ to: "/dashboard" });
   });
 
   it("MFA challenge path matches useLogin", async () => {
@@ -146,25 +154,25 @@ describe("usePasskeyLogin", () => {
     };
     api = makeApi(mfaResponse as any);
     setup();
-    const mutationFn = capturedMutationConfig.mutationFn as Function;
+    const mutationFn = mockState.capturedMutationConfig.mutationFn as Function;
     const result = await mutationFn({
       passkeyToken: "pt",
       assertionResponse: {},
     });
     expect(result).toEqual({ mfaToken: "mfa-tok", mfaMethods: ["totp"] });
 
-    const onSuccess = capturedMutationConfig.onSuccess as Function;
+    const onSuccess = mockState.capturedMutationConfig.onSuccess as Function;
     await onSuccess(result, { passkeyToken: "pt", assertionResponse: {} });
-    expect(mockSetAtom).toHaveBeenCalledWith({
+    expect(mockState.mockSetAtom).toHaveBeenCalledWith({
       mfaToken: "mfa-tok",
       mfaMethods: ["totp"],
     });
-    expect(mockNavigate).toHaveBeenCalledWith({ to: "/auth/mfa" });
+    expect(mockState.mockNavigate).toHaveBeenCalledWith({ to: "/auth/mfa" });
   });
 
   it("redirectTo is stripped from request body", async () => {
     setup();
-    const mutationFn = capturedMutationConfig.mutationFn as Function;
+    const mutationFn = mockState.capturedMutationConfig.mutationFn as Function;
     await mutationFn({
       passkeyToken: "pt",
       assertionResponse: {},

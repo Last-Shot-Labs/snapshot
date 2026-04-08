@@ -94,6 +94,21 @@ describe("ComponentRenderer", () => {
     expect(wrapper?.classList.contains("my-custom-class")).toBe(true);
   });
 
+  it("applies inline style from config", () => {
+    const config: ComponentConfig = {
+      type: "heading",
+      text: "Styled",
+      style: { marginTop: "12px", opacity: 0.5 },
+    };
+
+    const { container } = render(<ComponentRenderer config={config} />);
+    const wrapper = container.querySelector(
+      '[data-snapshot-component="heading"]',
+    ) as HTMLElement | null;
+    expect(wrapper?.style.marginTop).toBe("12px");
+    expect(wrapper?.style.opacity).toBe("0.5");
+  });
+
   it("renders custom component via registry", () => {
     const MyCustom = ({ config }: { config: Record<string, unknown> }) => (
       <span>Custom Content</span>
@@ -106,6 +121,22 @@ describe("ComponentRenderer", () => {
 
     render(<ComponentRenderer config={config} />);
     expect(screen.getByText("Custom Content")).toBeDefined();
+  });
+
+  it("merges custom props into the registered component config", () => {
+    const MyCustom = ({ config }: { config: Record<string, unknown> }) => (
+      <span>{String(config["label"])}</span>
+    );
+    registerComponent("test-custom-props", MyCustom);
+
+    const config = {
+      type: "custom",
+      component: "test-custom-props",
+      props: { label: "Prop Content" },
+    } as unknown as ComponentConfig;
+
+    render(<ComponentRenderer config={config} />);
+    expect(screen.getByText("Prop Content")).toBeDefined();
   });
 });
 

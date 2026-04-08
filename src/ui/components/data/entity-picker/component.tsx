@@ -34,11 +34,14 @@ interface ResolvedEntity {
  * }
  * ```
  */
+/** Stable empty array to avoid re-render loops when config.value is unset. */
+const EMPTY_ARRAY: string[] = [];
+
 export function EntityPicker({ config }: { config: EntityPickerConfig }) {
   const visible = useSubscribe(config.visible ?? true);
-  const resolvedValue = useSubscribe(
-    config.value ?? (config.multiple ? [] : ""),
-  );
+  // Use a stable default so useSubscribe doesn't create a new ref each render
+  const externalDefault = config.multiple ? EMPTY_ARRAY : "";
+  const resolvedValue = useSubscribe(config.value ?? externalDefault);
   const executeAction = useActionExecutor();
   const publish = usePublish(config.id);
   const {
@@ -60,14 +63,15 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
   const valueField = config.valueField ?? "id";
   const maxHeight = config.maxHeight ?? "300px";
 
-  // Sync external value
+  // Sync external value — only when config.value is actually provided
   useEffect(() => {
+    if (config.value === undefined) return;
     if (Array.isArray(resolvedValue)) {
       setSelected(resolvedValue as string[]);
     } else if (typeof resolvedValue === "string" && resolvedValue) {
       setSelected([resolvedValue]);
     }
-  }, [resolvedValue]);
+  }, [resolvedValue, config.value]);
 
   // Build entities from API data
   const entities: ResolvedEntity[] = useMemo(() => {
@@ -217,6 +221,12 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
   outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
   outline-offset: var(--sn-ring-offset, 2px);
 }
+[data-snapshot-component="entity-picker"] [data-testid="entity-picker-item"]:hover {
+  background: var(--sn-color-accent, var(--sn-color-secondary, #f3f4f6)) !important;
+}
+[data-snapshot-component="entity-picker"] [data-testid="entity-picker-item"][data-selected="true"]:hover {
+  background: color-mix(in oklch, var(--sn-color-primary, #2563eb) 15%, var(--sn-color-card, #ffffff)) !important;
+}
 [data-snapshot-component="entity-picker"] [data-testid="entity-picker-item"]:focus {
   outline: none;
 }
@@ -227,6 +237,7 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
 `}</style>
       {/* Trigger button */}
       <button
+        type="button"
         data-testid="entity-picker-trigger"
         onClick={() => setIsOpen(!isOpen)}
         style={{
@@ -394,8 +405,10 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
               const isSelected = selected.includes(entity.value);
               return (
                 <button
+                  type="button"
                   key={entity.value}
                   data-testid="entity-picker-item"
+                  data-selected={isSelected ? "true" : undefined}
                   onClick={() => toggleEntity(entity.value)}
                   style={{
                     display: "flex",
@@ -406,24 +419,13 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
                       "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
                     border: "none",
                     background: isSelected
-                      ? "var(--sn-color-secondary, #f1f5f9)"
-                      : "transparent",
+                      ? "color-mix(in oklch, var(--sn-color-primary, #2563eb) 10%, var(--sn-color-card, #ffffff))"
+                      : "none",
                     cursor: "pointer",
                     textAlign: "left",
                     fontSize: "var(--sn-font-size-sm, 0.875rem)",
                     color: "var(--sn-color-foreground, #111827)",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSelected) {
-                      (e.currentTarget as HTMLElement).style.backgroundColor =
-                        "var(--sn-color-secondary, #f1f5f9)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSelected) {
-                      (e.currentTarget as HTMLElement).style.backgroundColor =
-                        "transparent";
-                    }
+                    transition: `background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)`,
                   }}
                 >
                   {/* Selection indicator */}

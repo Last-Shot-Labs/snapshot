@@ -93,6 +93,19 @@ describe("Feed component", () => {
     expect(scope.getByText("Deployment succeeded")).toBeDefined();
   });
 
+  it("renders initials when an item has no avatar", () => {
+    const { Wrapper } = createWrapper();
+    const { container } = render(
+      <Wrapper>
+        <Feed config={baseConfig()} />
+      </Wrapper>,
+    );
+
+    expect(
+      container.querySelector("[data-feed-avatar-fallback]")?.textContent,
+    ).toBe("AJ");
+  });
+
   it("renders descriptions when configured", () => {
     const { Wrapper } = createWrapper();
     render(

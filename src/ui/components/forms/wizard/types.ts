@@ -41,6 +41,8 @@ export interface UseWizardResult {
   prevStep: () => void;
   /** Skip the current step (only if allowSkip is true). */
   skipStep: () => void;
+  /** Reset the wizard to the first step and clear collected values. */
+  resetWizard: () => void;
   /** Whether submission is in progress. */
   isSubmitting: boolean;
   /** Error from the last submission attempt, or null. */
