@@ -209,14 +209,20 @@ export function RichInput({ config }: { config: RichInputConfig }) {
         editor.chain().focus().unsetLink().run();
         return;
       }
-      // Get selected text — if it looks like a URL, use it
+      // Get selected text
       const { from, to } = editor.state.selection;
-      const selectedText = editor.state.doc.textBetween(from, to, " ");
-      if (selectedText && /^https?:\/\//.test(selectedText.trim())) {
-        editor.chain().focus().setLink({ href: selectedText.trim() }).run();
+      const selectedText = editor.state.doc.textBetween(from, to, " ").trim();
+      if (selectedText && /^https?:\/\//.test(selectedText)) {
+        // Selected text is a URL — make it a link
+        editor.chain().focus().setLink({ href: selectedText }).run();
       } else if (selectedText) {
-        // Use selected text, wrap with a placeholder URL
-        editor.chain().focus().setLink({ href: `https://${selectedText.trim().replace(/\s+/g, "")}` }).run();
+        // Selected text is not a URL — insert link with selected text as display
+        editor.chain().focus().setLink({ href: "#" }).run();
+      } else {
+        // No selection — insert a placeholder link
+        editor.chain().focus()
+          .insertContent('<a href="#">link</a>')
+          .run();
       }
       return;
     }
