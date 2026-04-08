@@ -93,6 +93,9 @@ export function RichInput({ config }: { config: RichInputConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const [charCount, setCharCount] = useState(0);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const linkInputRef = useRef<HTMLInputElement>(null);
 
   const features = config.features ?? [
     "bold",
@@ -204,25 +207,13 @@ export function RichInput({ config }: { config: RichInputConfig }) {
     if (!editor) return;
 
     if (item.action === "setLink") {
-      // If already a link, unset it
       if (editor.isActive("link")) {
         editor.chain().focus().unsetLink().run();
-        return;
-      }
-      // Get selected text
-      const { from, to } = editor.state.selection;
-      const selectedText = editor.state.doc.textBetween(from, to, " ").trim();
-      if (selectedText && /^https?:\/\//.test(selectedText)) {
-        // Selected text is a URL — make it a link
-        editor.chain().focus().setLink({ href: selectedText }).run();
-      } else if (selectedText) {
-        // Selected text is not a URL — insert link with selected text as display
-        editor.chain().focus().setLink({ href: "#" }).run();
       } else {
-        // No selection — insert a placeholder link
-        editor.chain().focus()
-          .insertContent('<a href="#">link</a>')
-          .run();
+        // Show inline URL input
+        setLinkUrl("");
+        setShowLinkInput(true);
+        setTimeout(() => linkInputRef.current?.focus(), 10);
       }
       return;
     }
@@ -262,8 +253,7 @@ export function RichInput({ config }: { config: RichInputConfig }) {
       {/* Hover/focus styles */}
       <style>{`
         [data-snapshot-component="rich-input"]:focus-within {
-          border-color: var(--sn-color-primary, #2563eb);
-          box-shadow: 0 0 0 2px color-mix(in oklch, var(--sn-color-primary, #2563eb) 15%, transparent);
+          border-color: var(--sn-color-primary, #2563eb) !important;
         }
         [data-snapshot-component="rich-input"] [data-ri-btn]:hover:not(:disabled) {
           background-color: var(--sn-color-accent, #f3f4f6) !important;
@@ -305,6 +295,73 @@ export function RichInput({ config }: { config: RichInputConfig }) {
           }}
         />
       </div>
+
+      {/* Inline link URL input */}
+      {showLinkInput && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "var(--sn-spacing-xs, 0.25rem)",
+            padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+            borderTop: "1px solid var(--sn-color-border, #e5e7eb)",
+            backgroundColor: "var(--sn-color-secondary, #f9fafb)",
+          }}
+        >
+          <Icon name="link" size={14} />
+          <input
+            ref={linkInputRef}
+            type="url"
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && linkUrl.trim()) {
+                e.preventDefault();
+                const url = linkUrl.trim().startsWith("http") ? linkUrl.trim() : `https://${linkUrl.trim()}`;
+                editor?.chain().focus().setLink({ href: url }).run();
+                setShowLinkInput(false);
+                setLinkUrl("");
+              }
+              if (e.key === "Escape") {
+                setShowLinkInput(false);
+                setLinkUrl("");
+                editor?.chain().focus().run();
+              }
+            }}
+            placeholder="Paste URL and press Enter..."
+            style={{
+              flex: 1,
+              border: "none",
+              outline: "none",
+              backgroundColor: "transparent",
+              fontSize: "var(--sn-font-size-sm, 0.875rem)",
+              color: "var(--sn-color-foreground, #111827)",
+              padding: "var(--sn-spacing-xs, 0.25rem)",
+            }}
+          />
+          <button
+            onClick={() => {
+              if (linkUrl.trim()) {
+                const url = linkUrl.trim().startsWith("http") ? linkUrl.trim() : `https://${linkUrl.trim()}`;
+                editor?.chain().focus().setLink({ href: url }).run();
+              }
+              setShowLinkInput(false);
+              setLinkUrl("");
+            }}
+            style={{
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+              padding: "var(--sn-spacing-xs, 0.25rem)",
+              color: "var(--sn-color-muted-foreground, #6b7280)",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Icon name="x" size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Bottom toolbar */}
       {(toolbarItems.length > 0 || config.sendAction) && (
