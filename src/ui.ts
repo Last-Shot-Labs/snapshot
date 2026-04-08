@@ -463,6 +463,38 @@ export type {
   GifEntry,
 } from "./ui/components/communication/gif-picker/index";
 
+// Components — Feed
+export { Feed, feedSchema } from "./ui/components/data/feed/index";
+export type {
+  FeedConfig,
+  FeedItem,
+  UseFeedResult,
+} from "./ui/components/data/feed/types";
+
+// Components — Chart
+export {
+  Chart,
+  chartSchema,
+  seriesConfigSchema,
+} from "./ui/components/data/chart/index";
+export type {
+  ChartConfig,
+  SeriesConfig,
+} from "./ui/components/data/chart/types";
+
+// Components — Wizard
+export {
+  Wizard,
+  wizardSchema,
+  wizardStepSchema,
+  useWizard,
+} from "./ui/components/forms/wizard/index";
+export type {
+  WizardConfig,
+  WizardStepConfig,
+  UseWizardResult,
+} from "./ui/components/forms/wizard/types";
+
 // Custom Emoji Utilities
 export {
   parseShortcodes,

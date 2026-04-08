@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ComponentRenderer,
   PageContextProvider,
+
   crudPage,
   dashboardPage,
   settingsPage,
+  usePublish,
+
 } from "@lastshotlabs/snapshot/ui";
 
 type Page =
@@ -18,7 +21,10 @@ type Page =
   | "content"
   | "workflow"
   | "communication"
+
   | "presets";
+  | "feed-chart-wizard";
+
 
 const PAGES: { key: Page; label: string }[] = [
   { key: "dashboard", label: "Dashboard" },
@@ -31,7 +37,10 @@ const PAGES: { key: Page; label: string }[] = [
   { key: "workflow", label: "Workflow" },
   { key: "structural", label: "Structural" },
   { key: "communication", label: "Communication" },
+
   { key: "presets", label: "Presets" },
+  { key: "feed-chart-wizard", label: "Feed / Chart / Wizard" },
+
 ];
 
 // ── Dashboard page configs ──────────────────────────────────────────────
@@ -1870,6 +1879,7 @@ function StructuralPage() {
   );
 }
 
+
 // ── Preset page configs ───────────────────────────────────────────────────────
 
 const usersPresetPage = crudPage({
@@ -2103,6 +2113,357 @@ function PresetsPage() {
           ))}
         </ShowcaseSection>
       </div>
+// ── Feed data provider (injects data into page context) ───────────────────────
+
+const feedActivityItems = [
+  {
+    id: "1",
+    message: "Alice deployed v2.3.0 to production",
+    detail: "Deploy succeeded in 42s",
+    createdAt: new Date(Date.now() - 600000).toISOString(),
+    type: "success",
+  },
+  {
+    id: "2",
+    message: "Build #241 failed",
+    detail: "TypeScript error in src/ui.ts line 42",
+    createdAt: new Date(Date.now() - 1800000).toISOString(),
+    type: "error",
+  },
+  {
+    id: "3",
+    message: "Bob opened PR #88: Add Chart component",
+    detail: "3 files changed, +420 −12",
+    createdAt: new Date(Date.now() - 3600000).toISOString(),
+    type: "info",
+  },
+  {
+    id: "4",
+    message: "Security scan completed",
+    detail: "No vulnerabilities found",
+    createdAt: new Date(Date.now() - 7200000).toISOString(),
+    type: "success",
+  },
+  {
+    id: "5",
+    message: "Charlie reviewed PR #85",
+    detail: "Approved with 2 suggestions",
+    createdAt: new Date(Date.now() - 10800000).toISOString(),
+    type: "info",
+  },
+  {
+    id: "6",
+    message: "Database migration ran",
+    detail: "migration_20260407.sql applied",
+    createdAt: new Date(Date.now() - 14400000).toISOString(),
+    type: "warning",
+  },
+  {
+    id: "7",
+    message: "New user registered",
+    detail: "diana@example.com",
+    createdAt: new Date(Date.now() - 21600000).toISOString(),
+    type: "info",
+  },
+  {
+    id: "8",
+    message: "Weekly backup completed",
+    detail: "Backup size: 2.4GB",
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+    type: "success",
+  },
+];
+
+/** Injects fixture data into the page context for demos using from-ref */
+function FeedDataProvider({
+  id,
+  data,
+  children,
+}: {
+  id: string;
+  data: unknown[];
+  children: React.ReactNode;
+}) {
+  const publish = usePublish(id);
+  useEffect(() => {
+    publish(data);
+  }, [id, data, publish]);
+  return <>{children}</>;
+}
+
+// ── Feed configs ─────────────────────────────────────────────────────────────
+
+const feedPopulatedConfig = {
+  type: "feed",
+  data: { from: "feed-demo-source" },
+  title: "message",
+  description: "detail",
+  timestamp: "createdAt",
+  badge: {
+    field: "type",
+    colorMap: {
+      success: "success",
+      error: "destructive",
+      warning: "warning",
+      info: "info",
+    },
+  },
+  emptyMessage: "No activity yet",
+  pageSize: 4,
+};
+
+const feedEmptyConfig = {
+  type: "feed",
+  data: { from: "feed-empty-source" },
+  title: "message",
+  emptyMessage: "No activity yet. Events will appear here.",
+};
+
+// ── Chart data ───────────────────────────────────────────────────────────────
+
+const chartMonthlyData = [
+  { month: "Jan", revenue: 42000, expenses: 28000, profit: 14000 },
+  { month: "Feb", revenue: 38000, expenses: 25000, profit: 13000 },
+  { month: "Mar", revenue: 55000, expenses: 31000, profit: 24000 },
+  { month: "Apr", revenue: 47000, expenses: 29000, profit: 18000 },
+  { month: "May", revenue: 61000, expenses: 34000, profit: 27000 },
+  { month: "Jun", revenue: 58000, expenses: 32000, profit: 26000 },
+];
+
+const chartPieData = [
+  { category: "Engineering", headcount: 45 },
+  { category: "Sales", headcount: 22 },
+  { category: "Marketing", headcount: 15 },
+  { category: "Support", headcount: 12 },
+  { category: "Other", headcount: 6 },
+];
+
+const chartBarConfig = {
+  type: "chart",
+  data: { from: "chart-monthly-source" },
+  chartType: "bar",
+  xKey: "month",
+  series: [
+    { key: "revenue", label: "Revenue" },
+    { key: "expenses", label: "Expenses" },
+    { key: "profit", label: "Profit" },
+  ],
+  height: 300,
+  legend: true,
+  grid: true,
+  emptyMessage: "No data",
+};
+
+const chartLineConfig = {
+  type: "chart",
+  data: { from: "chart-monthly-source" },
+  chartType: "line",
+  xKey: "month",
+  series: [
+    { key: "revenue", label: "Revenue", color: "var(--sn-chart-1)" },
+    { key: "profit", label: "Profit", color: "var(--sn-chart-2)" },
+  ],
+  height: 280,
+  legend: true,
+  grid: true,
+  emptyMessage: "No data",
+};
+
+const chartPieConfig = {
+  type: "chart",
+  data: { from: "chart-pie-source" },
+  chartType: "pie",
+  xKey: "category",
+  series: [{ key: "headcount", label: "Headcount" }],
+  height: 280,
+  legend: true,
+  grid: false,
+  emptyMessage: "No data",
+};
+
+const chartDonutConfig = {
+  type: "chart",
+  data: { from: "chart-pie-source" },
+  chartType: "donut",
+  xKey: "category",
+  series: [{ key: "headcount", label: "Headcount" }],
+  height: 280,
+  legend: true,
+  grid: false,
+  emptyMessage: "No data",
+};
+
+const chartEmptyConfig = {
+  type: "chart",
+  data: { from: "chart-empty-source" },
+  chartType: "bar",
+  xKey: "month",
+  series: [{ key: "value", label: "Value" }],
+  height: 250,
+  legend: true,
+  grid: true,
+  emptyMessage: "No chart data available yet.",
+};
+
+// ── Wizard configs ────────────────────────────────────────────────────────────
+
+const wizardOnboardingConfig = {
+  type: "wizard",
+  id: "demo-wizard",
+  steps: [
+    {
+      title: "Account Details",
+      description: "Create your account credentials",
+      fields: [
+        {
+          name: "email",
+          type: "email",
+          label: "Email address",
+          required: true,
+          placeholder: "you@example.com",
+        },
+        {
+          name: "password",
+          type: "password",
+          label: "Password",
+          required: true,
+          placeholder: "Min 8 characters",
+          validation: { minLength: 8 },
+        },
+      ],
+    },
+    {
+      title: "Personal Info",
+      description: "Tell us a bit about yourself",
+      fields: [
+        {
+          name: "name",
+          type: "text",
+          label: "Full Name",
+          required: true,
+          placeholder: "Alice Smith",
+        },
+        {
+          name: "role",
+          type: "select",
+          label: "Role",
+          options: [
+            { label: "Developer", value: "developer" },
+            { label: "Designer", value: "designer" },
+            { label: "Manager", value: "manager" },
+            { label: "Other", value: "other" },
+          ],
+        },
+      ],
+      submitLabel: "Create Account",
+    },
+  ],
+  submitLabel: "Create Account",
+  onComplete: {
+    type: "toast",
+    message: "Account created successfully!",
+    variant: "success",
+  },
+  allowSkip: true,
+};
+
+const wizardSkippableConfig = {
+  type: "wizard",
+  steps: [
+    {
+      title: "Required Step",
+      fields: [
+        { name: "name", type: "text", label: "Your Name", required: true },
+      ],
+    },
+    {
+      title: "Optional Step",
+      description: "This step can be skipped",
+      fields: [
+        {
+          name: "bio",
+          type: "textarea",
+          label: "Short Bio",
+          placeholder: "Tell us about yourself...",
+        },
+      ],
+    },
+    {
+      title: "Final Step",
+      fields: [
+        {
+          name: "agree",
+          type: "checkbox",
+          label: "I agree to the terms",
+          required: true,
+        },
+      ],
+      submitLabel: "Finish",
+    },
+  ],
+  submitLabel: "Finish",
+  allowSkip: true,
+  onComplete: { type: "toast", message: "Done!", variant: "success" },
+};
+
+function FeedChartWizardPage() {
+  return (
+    <PageWrapper>
+      <FeedDataProvider id="feed-demo-source" data={feedActivityItems}>
+        <FeedDataProvider id="feed-empty-source" data={[]}>
+          <FeedDataProvider id="chart-monthly-source" data={chartMonthlyData}>
+            <FeedDataProvider id="chart-pie-source" data={chartPieData}>
+              <FeedDataProvider id="chart-empty-source" data={[]}>
+                <div className="showcase">
+                  {/* Feed */}
+                  <ShowcaseSection title="Feed — Populated (with badges, timestamps, descriptions)">
+                    <RenderConfig config={feedPopulatedConfig} />
+                  </ShowcaseSection>
+
+                  <ShowcaseSection title="Feed — Empty State">
+                    <RenderConfig config={feedEmptyConfig} />
+                  </ShowcaseSection>
+
+                  {/* Chart */}
+                  <ShowcaseSection title="Chart — Bar (multi-series)">
+                    <RenderConfig config={chartBarConfig} />
+                  </ShowcaseSection>
+
+                  <ShowcaseSection title="Chart — Line">
+                    <RenderConfig config={chartLineConfig} />
+                  </ShowcaseSection>
+
+                  <ShowcaseSection title="Chart — Pie">
+                    <RenderConfig config={chartPieConfig} />
+                  </ShowcaseSection>
+
+                  <ShowcaseSection title="Chart — Donut">
+                    <RenderConfig config={chartDonutConfig} />
+                  </ShowcaseSection>
+
+                  <ShowcaseSection title="Chart — Empty State">
+                    <RenderConfig config={chartEmptyConfig} />
+                  </ShowcaseSection>
+
+                  {/* Wizard */}
+                  <ShowcaseSection title="Wizard — Multi-step Onboarding (2 steps)">
+                    <div style={{ maxWidth: "32rem" }}>
+                      <RenderConfig config={wizardOnboardingConfig} />
+                    </div>
+                  </ShowcaseSection>
+
+                  <ShowcaseSection title="Wizard — With Skip (3 steps, step 2 optional)">
+                    <div style={{ maxWidth: "32rem" }}>
+                      <RenderConfig config={wizardSkippableConfig} />
+                    </div>
+                  </ShowcaseSection>
+                </div>
+              </FeedDataProvider>
+            </FeedDataProvider>
+          </FeedDataProvider>
+        </FeedDataProvider>
+      </FeedDataProvider>
+
     </PageWrapper>
   );
 }
@@ -2133,7 +2494,10 @@ export function ComponentShowcase() {
       {page === "workflow" && <WorkflowPage />}
       {page === "structural" && <StructuralPage />}
       {page === "communication" && <CommunicationPage />}
+
       {page === "presets" && <PresetsPage />}
+      {page === "feed-chart-wizard" && <FeedChartWizardPage />}
+
     </>
   );
 }

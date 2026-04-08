@@ -20,10 +20,7 @@ import { Alert, alertConfigSchema } from "./data/alert/index";
 import { Progress, progressConfigSchema } from "./data/progress/index";
 import { Skeleton, skeletonConfigSchema } from "./data/skeleton/index";
 import { Switch, switchConfigSchema } from "./forms/switch/index";
-import {
-  EmptyState,
-  emptyStateConfigSchema,
-} from "./data/empty-state/index";
+import { EmptyState, emptyStateConfigSchema } from "./data/empty-state/index";
 import {
   AccordionComponent,
   accordionConfigSchema,
@@ -61,10 +58,7 @@ import {
   RichTextEditor,
   richTextEditorConfigSchema,
 } from "./content/rich-text-editor/index";
-import {
-  RichInput,
-  richInputConfigSchema,
-} from "./content/rich-input/index";
+import { RichInput, richInputConfigSchema } from "./content/rich-input/index";
 import {
   EmojiPicker,
   emojiPickerConfigSchema,
@@ -112,10 +106,7 @@ import {
 } from "./overlay/context-menu/index";
 import { ScrollArea, scrollAreaConfigSchema } from "./data/scroll-area/index";
 import { FilterBar, filterBarConfigSchema } from "./data/filter-bar/index";
-import {
-  InlineEdit,
-  inlineEditConfigSchema,
-} from "./forms/inline-edit/index";
+import { InlineEdit, inlineEditConfigSchema } from "./forms/inline-edit/index";
 import { Markdown, markdownConfigSchema } from "./content/markdown/index";
 import {
   TagSelector,
@@ -146,14 +137,14 @@ import {
   compareViewConfigSchema,
 } from "./content/compare-view/index";
 import { QuickAdd, quickAddConfigSchema } from "./forms/quick-add/index";
-import {
-  LinkEmbed,
-  linkEmbedConfigSchema,
-} from "./content/link-embed/index";
+import { LinkEmbed, linkEmbedConfigSchema } from "./content/link-embed/index";
 import {
   GifPicker,
   gifPickerConfigSchema,
 } from "./communication/gif-picker/index";
+import { Feed, feedSchema } from "./data/feed/index";
+import { Chart, chartSchema } from "./data/chart/index";
+import { Wizard, wizardSchema } from "./forms/wizard/index";
 
 registerComponent(
   "stat-card",
@@ -167,10 +158,7 @@ registerComponent(
 );
 registerComponentSchema("data-table", dataTableConfigSchema);
 
-registerComponent(
-  "form",
-  AutoForm as Parameters<typeof registerComponent>[1],
-);
+registerComponent("form", AutoForm as Parameters<typeof registerComponent>[1]);
 registerComponentSchema("form", autoFormConfigSchema);
 
 registerComponent(
@@ -197,22 +185,13 @@ registerComponent(
 );
 registerComponentSchema("tabs", tabsConfigSchema);
 
-registerComponent(
-  "badge",
-  Badge as Parameters<typeof registerComponent>[1],
-);
+registerComponent("badge", Badge as Parameters<typeof registerComponent>[1]);
 registerComponentSchema("badge", badgeConfigSchema);
 
-registerComponent(
-  "avatar",
-  Avatar as Parameters<typeof registerComponent>[1],
-);
+registerComponent("avatar", Avatar as Parameters<typeof registerComponent>[1]);
 registerComponentSchema("avatar", avatarConfigSchema);
 
-registerComponent(
-  "alert",
-  Alert as Parameters<typeof registerComponent>[1],
-);
+registerComponent("alert", Alert as Parameters<typeof registerComponent>[1]);
 registerComponentSchema("alert", alertConfigSchema);
 
 registerComponent(
@@ -227,10 +206,7 @@ registerComponent(
 );
 registerComponentSchema("skeleton", skeletonConfigSchema);
 
-registerComponent(
-  "switch",
-  Switch as Parameters<typeof registerComponent>[1],
-);
+registerComponent("switch", Switch as Parameters<typeof registerComponent>[1]);
 registerComponentSchema("switch", switchConfigSchema);
 
 registerComponent(
@@ -287,10 +263,7 @@ registerComponent(
 );
 registerComponentSchema("tree-view", treeViewConfigSchema);
 
-registerComponent(
-  "kanban",
-  Kanban as Parameters<typeof registerComponent>[1],
-);
+registerComponent("kanban", Kanban as Parameters<typeof registerComponent>[1]);
 registerComponentSchema("kanban", kanbanConfigSchema);
 
 registerComponent(
@@ -401,10 +374,7 @@ registerComponent(
 );
 registerComponentSchema("command-palette", commandPaletteConfigSchema);
 
-registerComponent(
-  "input",
-  Input as Parameters<typeof registerComponent>[1],
-);
+registerComponent("input", Input as Parameters<typeof registerComponent>[1]);
 registerComponentSchema("input", inputConfigSchema);
 
 registerComponent(
@@ -413,10 +383,7 @@ registerComponent(
 );
 registerComponentSchema("textarea", textareaConfigSchema);
 
-registerComponent(
-  "toggle",
-  Toggle as Parameters<typeof registerComponent>[1],
-);
+registerComponent("toggle", Toggle as Parameters<typeof registerComponent>[1]);
 registerComponentSchema("toggle", toggleConfigSchema);
 
 registerComponent(
@@ -514,3 +481,12 @@ registerComponent(
   GifPicker as Parameters<typeof registerComponent>[1],
 );
 registerComponentSchema("gif-picker", gifPickerConfigSchema);
+
+registerComponent("feed", Feed as Parameters<typeof registerComponent>[1]);
+registerComponentSchema("feed", feedSchema);
+
+registerComponent("chart", Chart as Parameters<typeof registerComponent>[1]);
+registerComponentSchema("chart", chartSchema);
+
+registerComponent("wizard", Wizard as Parameters<typeof registerComponent>[1]);
+registerComponentSchema("wizard", wizardSchema);
