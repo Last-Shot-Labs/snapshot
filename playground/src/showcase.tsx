@@ -2131,6 +2131,10 @@ function PresetsPage() {
           ))}
         </ShowcaseSection>
       </div>
+    </PageWrapper>
+  );
+}
+
 // ── Feed data provider (injects data into page context) ───────────────────────
 
 const feedActivityItems = [
