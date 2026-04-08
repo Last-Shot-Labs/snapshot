@@ -415,7 +415,7 @@ export function RichInput({ config }: { config: RichInputConfig }) {
                     border: "none",
                     borderRadius: "var(--sn-radius-sm, 0.25rem)",
                     backgroundColor: isActive
-                      ? "color-mix(in oklch, var(--sn-color-primary, #2563eb) 15%, transparent)"
+                      ? "var(--sn-color-accent, #eff6ff)"
                       : "transparent",
                     color: isActive
                       ? "var(--sn-color-primary, #2563eb)"
