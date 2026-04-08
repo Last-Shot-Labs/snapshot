@@ -72,6 +72,10 @@ export const kanbanConfigSchema = z
     priorityField: z.string().optional(),
     /** Action dispatched when a card is clicked. */
     cardAction: actionSchema.optional(),
+    /** Enable drag-and-drop reordering of cards between columns. Default: false. */
+    sortable: z.boolean().optional(),
+    /** Action dispatched when a card is moved via drag-and-drop. */
+    reorderAction: actionSchema.optional(),
     /** Message shown when a column has no cards. */
     emptyMessage: z.string().optional(),
     // --- BaseComponentConfig fields ---

@@ -527,6 +527,24 @@ export type {
 // Register all built-in components
 import "./ui/components/register";
 
+// Drag and Drop
+export {
+  DndContext,
+  SortableContext,
+  DragOverlay,
+  closestCenter,
+  useSortable,
+  verticalListSortingStrategy,
+  horizontalListSortingStrategy,
+  arrayMove,
+  useDndSensors,
+  getSortableStyle,
+  PointerSensor,
+  KeyboardSensor,
+  CSS as DndCSS,
+} from "./ui/hooks/use-drag-drop";
+export type { DragStartEvent, DragEndEvent, DragOverEvent } from "./ui/hooks/use-drag-drop";
+
 // Breakpoint & Responsive
 export {
   useBreakpoint,

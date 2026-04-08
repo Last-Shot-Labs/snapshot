@@ -699,6 +699,20 @@ const listDemo = {
   ],
 };
 
+const sortableListDemo = {
+  type: "list",
+  variant: "card",
+  sortable: true,
+  reorderAction: { type: "toast", message: "List reordered!", variant: "success" },
+  items: [
+    { title: "1. Design tokens", description: "Set up the color, spacing, and typography system", icon: "palette" },
+    { title: "2. Component library", description: "Build all config-driven components", icon: "layout-dashboard" },
+    { title: "3. Responsive system", description: "Add breakpoint hooks and media queries", icon: "smartphone" },
+    { title: "4. Drag and drop", description: "Enable reordering with @dnd-kit", icon: "grip-vertical" },
+    { title: "5. Testing", description: "Write schema + rendering tests", icon: "check-circle" },
+  ],
+};
+
 // ── Navigation page configs ───────────────────────────────────────────
 
 const accordionDemo = {
@@ -964,6 +978,8 @@ const fileUploaderDemo = {
 const kanbanDemo = {
   type: "kanban",
   data: "GET /api/tasks",
+  sortable: true,
+  reorderAction: { type: "toast", message: "Card moved!", variant: "success" },
   columns: [
     { key: "todo", title: "To Do", color: "secondary" },
     { key: "in-progress", title: "In Progress", color: "info", limit: 3 },
@@ -1430,6 +1446,9 @@ function PrimitivesPage() {
         </ShowcaseSection>
         <ShowcaseSection title="List">
           <RenderConfig config={listDemo} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Sortable List (Drag & Drop)">
+          <RenderConfig config={sortableListDemo} />
         </ShowcaseSection>
         <ShowcaseSection title="Empty State">
           <RenderConfig config={emptyStateDemo} />

@@ -61,6 +61,10 @@ export const listConfigSchema = baseComponentConfigSchema.extend({
   divider: z.boolean().optional(),
   /** Whether items are selectable/clickable. */
   selectable: z.boolean().optional(),
+  /** Enable drag-and-drop reordering. Default: false. */
+  sortable: z.boolean().optional(),
+  /** Action dispatched when items are reordered via drag-and-drop. */
+  reorderAction: actionSchema.optional(),
   /** Message shown when no items are available. */
   emptyMessage: z.string().optional(),
   /** Custom error message. Default: "Failed to load items". */

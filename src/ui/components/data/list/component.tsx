@@ -1,8 +1,19 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { useComponentData } from "../../_base/use-component-data";
+import {
+  DndContext,
+  SortableContext,
+  closestCenter,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+  useDndSensors,
+  getSortableStyle,
+} from "../../../hooks/use-drag-drop";
+import type { DragEndEvent } from "../../../hooks/use-drag-drop";
 import type { ListConfig, ListItemConfig } from "./types";
-import type { ActionConfig } from "../../../actions/types";
+import type { ActionConfig, ActionExecuteFn } from "../../../actions/types";
 
 /**
  * Badge pill component for list items.
@@ -220,6 +231,34 @@ function ListItem({
 }
 
 /**
+ * Sortable wrapper for list items when drag-and-drop is enabled.
+ */
+function SortableListItem({
+  id,
+  children,
+}: {
+  id: string;
+  children: React.ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = getSortableStyle(transform, transition, isDragging);
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+}
+
+/**
  * List component — renders a vertical list of items with optional
  * icons, descriptions, badges, and click actions.
  *
@@ -234,6 +273,7 @@ export function ListComponent({ config }: { config: ListConfig }) {
   const variant = config.variant ?? "default";
   const showDivider = config.divider !== false && variant !== "card";
   const selectable = config.selectable ?? false;
+  const sortable = config.sortable ?? false;
   const emptyMessage = config.emptyMessage ?? "No items";
 
   // Fetch data if endpoint is provided
@@ -326,7 +366,17 @@ export function ListComponent({ config }: { config: ListConfig }) {
       )}
 
       {/* Items */}
-      {!isLoading &&
+      {!isLoading && !error && sortable ? (
+        <SortableListItems
+          items={resolvedItems}
+          selectable={selectable}
+          showDivider={showDivider}
+          isCard={variant === "card"}
+          execute={execute}
+          reorderAction={config.reorderAction}
+        />
+      ) : (
+        !isLoading &&
         !error &&
         resolvedItems.map((item, index) => (
           <ListItem
@@ -337,7 +387,80 @@ export function ListComponent({ config }: { config: ListConfig }) {
             isCard={variant === "card"}
             execute={execute}
           />
-        ))}
+        ))
+      )}
     </div>
+  );
+}
+
+/** Sortable list items wrapper with DnD context. */
+function SortableListItems({
+  items: initialItems,
+  selectable,
+  showDivider,
+  isCard,
+  execute,
+  reorderAction,
+}: {
+  items: ListItemConfig[];
+  selectable: boolean;
+  showDivider: boolean;
+  isCard: boolean;
+  execute: ActionExecuteFn;
+  reorderAction?: ActionConfig;
+}) {
+  const sensors = useDndSensors();
+  const [items, setItems] = useState(initialItems);
+
+  React.useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
+
+  const itemIds = items.map((_, i) => `list-item-${i}`);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const oldIndex = itemIds.indexOf(String(active.id));
+      const newIndex = itemIds.indexOf(String(over.id));
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const reordered = arrayMove(items, oldIndex, newIndex);
+      setItems(reordered);
+
+      if (reorderAction) {
+        void execute(reorderAction, {
+          fromIndex: oldIndex,
+          toIndex: newIndex,
+          item: items[oldIndex],
+          items: reordered.map((it) => it.title),
+        });
+      }
+    },
+    [items, itemIds, execute, reorderAction],
+  );
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+        {items.map((item, index) => (
+          <SortableListItem key={itemIds[index]} id={itemIds[index]!}>
+            <ListItem
+              item={item}
+              selectable={selectable}
+              showDivider={showDivider && index < items.length - 1}
+              isCard={isCard}
+              execute={execute}
+            />
+          </SortableListItem>
+        ))}
+      </SortableContext>
+    </DndContext>
   );
 }
