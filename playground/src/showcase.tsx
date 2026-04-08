@@ -1057,6 +1057,29 @@ const pricingDemo = {
   ],
 };
 
+const avatarGroupDemo = {
+  type: "avatar-group",
+  max: 4,
+  size: "md",
+  avatars: [
+    { name: "Alice Johnson" },
+    { name: "Bob Smith" },
+    { name: "Charlie Brown" },
+    { name: "Diana Prince" },
+    { name: "Eve Wilson" },
+    { name: "Frank Miller" },
+  ],
+};
+
+const locationInputDemo = {
+  type: "location-input",
+  id: "demo-location",
+  label: "Venue Location",
+  placeholder: "Search for a place...",
+  searchEndpoint: "GET /api/geocode",
+  helperText: "Start typing to search for locations",
+};
+
 // ── UI helpers ──────────────────────────────────────────────────────────
 
 function ShowcaseSection({
@@ -1148,6 +1171,9 @@ function FormsPage() {
         </ShowcaseSection>
         <ShowcaseSection title="Quick Add">
           <RenderConfig config={quickAddDemo} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Location Input (Geocode)">
+          <RenderConfig config={locationInputDemo} />
         </ShowcaseSection>
       </div>
     </PageWrapper>
@@ -1466,6 +1492,9 @@ function PrimitivesPage() {
         </ShowcaseSection>
         <ShowcaseSection title="Save Indicator">
           <RenderConfig config={saveIndicatorDemo} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Avatar Group">
+          <RenderConfig config={avatarGroupDemo} />
         </ShowcaseSection>
       </div>
     </PageWrapper>

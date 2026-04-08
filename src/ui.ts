@@ -439,6 +439,14 @@ export {
 } from "./ui/components/forms/quick-add/index";
 export type { QuickAddConfig } from "./ui/components/forms/quick-add/index";
 
+// Components — LocationInput
+export { LocationInput, locationInputConfigSchema } from "./ui/components/forms/location-input/index";
+export type { LocationInputConfig } from "./ui/components/forms/location-input/index";
+
+// Components — AvatarGroup
+export { AvatarGroup, avatarGroupConfigSchema } from "./ui/components/data/avatar-group/index";
+export type { AvatarGroupConfig } from "./ui/components/data/avatar-group/index";
+
 // Components — LinkEmbed
 export {
   LinkEmbed,

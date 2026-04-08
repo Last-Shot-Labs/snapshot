@@ -137,6 +137,14 @@ import {
   compareViewConfigSchema,
 } from "./content/compare-view/index";
 import { QuickAdd, quickAddConfigSchema } from "./forms/quick-add/index";
+import {
+  LocationInput,
+  locationInputConfigSchema,
+} from "./forms/location-input/index";
+import {
+  AvatarGroup,
+  avatarGroupConfigSchema,
+} from "./data/avatar-group/index";
 import { LinkEmbed, linkEmbedConfigSchema } from "./content/link-embed/index";
 import {
   GifPicker,
@@ -469,6 +477,18 @@ registerComponent(
   QuickAdd as Parameters<typeof registerComponent>[1],
 );
 registerComponentSchema("quick-add", quickAddConfigSchema);
+
+registerComponent(
+  "location-input",
+  LocationInput as Parameters<typeof registerComponent>[1],
+);
+registerComponentSchema("location-input", locationInputConfigSchema);
+
+registerComponent(
+  "avatar-group",
+  AvatarGroup as Parameters<typeof registerComponent>[1],
+);
+registerComponentSchema("avatar-group", avatarGroupConfigSchema);
 
 registerComponent(
   "link-embed",
