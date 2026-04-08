@@ -94,6 +94,8 @@ export const navConfigSchema = z
     userMenu: z.union([z.boolean(), userMenuConfigSchema]).optional(),
     /** Logo / brand element. */
     logo: logoConfigSchema.optional(),
+    /** Optional CSS class name. */
+    className: z.string().optional(),
     /** Optional inline styles applied to the root nav element. */
     style: z.record(z.union([z.string(), z.number()])).optional(),
   })

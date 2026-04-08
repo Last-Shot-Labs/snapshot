@@ -149,6 +149,21 @@ export function QuickAdd({ config }: { config: QuickAddConfig }) {
           {buttonText}
         </button>
       )}
+      <style>{`
+        [data-snapshot-component="quick-add"] input:focus {
+          outline: none;
+        }
+        [data-snapshot-component="quick-add"] button:hover:not(:disabled) {
+          opacity: var(--sn-opacity-hover, 0.9);
+        }
+        [data-snapshot-component="quick-add"] button:focus {
+          outline: none;
+        }
+        [data-snapshot-component="quick-add"] button:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </div>
   );
 }

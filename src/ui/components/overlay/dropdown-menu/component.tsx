@@ -12,22 +12,23 @@ const VARIANT_STYLES: Record<string, React.CSSProperties> = {
   default: {
     backgroundColor: "var(--sn-color-primary, #2563eb)",
     color: "var(--sn-color-primary-foreground, #fff)",
-    border: "1px solid transparent",
+    border: "var(--sn-border-default, 1px) solid transparent",
   },
   secondary: {
     backgroundColor: "var(--sn-color-secondary, #f1f5f9)",
     color: "var(--sn-color-secondary-foreground, #0f172a)",
-    border: "1px solid transparent",
+    border: "var(--sn-border-default, 1px) solid transparent",
   },
   outline: {
     backgroundColor: "transparent",
     color: "var(--sn-color-foreground, #111827)",
-    border: "1px solid var(--sn-color-border, #e5e7eb)",
+    border:
+      "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
   },
   ghost: {
     backgroundColor: "transparent",
     color: "var(--sn-color-foreground, #111827)",
-    border: "1px solid transparent",
+    border: "var(--sn-border-default, 1px) solid transparent",
   },
 };
 
@@ -72,9 +73,7 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
     setIsOpen(true);
     setMounted(true);
     setFocusedIndex(-1);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => setAnimating(true));
-    });
+    setTimeout(() => setAnimating(true), 10);
   }, []);
 
   const close = useCallback(() => {
@@ -224,7 +223,7 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
           alignItems: "center",
           gap: "var(--sn-spacing-xs, 0.25rem)",
           fontFamily: "inherit",
-          lineHeight: 1.5,
+          lineHeight: "var(--sn-leading-normal, 1.5)",
         }}
       >
         {config.trigger.icon && <Icon name={config.trigger.icon} size={16} />}
@@ -245,7 +244,8 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
             zIndex: "var(--sn-z-index-dropdown, 10)" as unknown as number,
             minWidth: "180px",
             backgroundColor: "var(--sn-color-card, #ffffff)",
-            border: "1px solid var(--sn-color-border, #e5e7eb)",
+            border:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             borderRadius: "var(--sn-radius-md, 0.375rem)",
             boxShadow:
               "var(--sn-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1))",
@@ -253,7 +253,7 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
             opacity: animating ? 1 : 0,
             transform: animating ? "scale(1)" : "scale(0.95)",
             transformOrigin: side === "top" ? "bottom" : "top",
-            transition: `opacity ${ANIMATION_DURATION}ms ease, transform ${ANIMATION_DURATION}ms ease`,
+            transition: `opacity var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease), transform var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease)`,
           }}
         >
           {config.items.map((entry, i) => {

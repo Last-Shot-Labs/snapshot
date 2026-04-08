@@ -346,7 +346,7 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
                 padding: "var(--sn-spacing-xs, 0.25rem)",
                 color: "var(--sn-color-muted-foreground, #6b7280)",
                 fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                lineHeight: 1,
+                lineHeight: "var(--sn-leading-none, 1)",
               }}
             >
               {"\u00D7"}
@@ -364,7 +364,8 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
                   width: `${entry.progress}%`,
                   backgroundColor: "var(--sn-color-primary, #2563eb)",
                   borderRadius: "var(--sn-radius-full, 9999px)",
-                  transition: "width 200ms ease",
+                  transition:
+                    "width var(--sn-duration-fast, 200ms) var(--sn-ease-default, ease)",
                 }}
               />
             )}
@@ -396,7 +397,8 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
             fontWeight: "var(--sn-font-weight-semibold, 600)",
             cursor: "pointer",
-            border: "1px solid var(--sn-color-border, #e5e7eb)",
+            border:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             backgroundColor: "var(--sn-color-card, #ffffff)",
             color: "var(--sn-color-foreground, #111827)",
             fontFamily: "inherit",
@@ -409,6 +411,25 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
           <span>{label}</span>
         </button>
         {fileList}
+        <style>{`
+          [data-snapshot-component="file-uploader"] button:hover {
+            background: var(--sn-color-accent, var(--sn-color-muted));
+          }
+          [data-snapshot-component="file-uploader"] button:focus {
+            outline: none;
+          }
+          [data-snapshot-component="file-uploader"] button:focus-visible {
+            outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+            outline-offset: var(--sn-ring-offset, 2px);
+          }
+          [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus {
+            outline: none;
+          }
+          [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus-visible {
+            outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+            outline-offset: var(--sn-ring-offset, 2px);
+          }
+        `}</style>
       </div>
     );
   }
@@ -440,7 +461,8 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
             borderRadius: "var(--sn-radius-sm, 0.25rem)",
             fontSize: "var(--sn-font-size-xs, 0.75rem)",
             cursor: "pointer",
-            border: "1px solid var(--sn-color-border, #e5e7eb)",
+            border:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             backgroundColor: "var(--sn-color-card, #ffffff)",
             color: "var(--sn-color-foreground, #111827)",
             fontFamily: "inherit",
@@ -461,6 +483,25 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
           </span>
         )}
         {fileList}
+        <style>{`
+          [data-snapshot-component="file-uploader"] button:hover {
+            background: var(--sn-color-accent, var(--sn-color-muted));
+          }
+          [data-snapshot-component="file-uploader"] button:focus {
+            outline: none;
+          }
+          [data-snapshot-component="file-uploader"] button:focus-visible {
+            outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+            outline-offset: var(--sn-ring-offset, 2px);
+          }
+          [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus {
+            outline: none;
+          }
+          [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus-visible {
+            outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+            outline-offset: var(--sn-ring-offset, 2px);
+          }
+        `}</style>
       </div>
     );
   }
@@ -493,7 +534,7 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
         tabIndex={0}
         aria-label={label}
         style={{
-          border: `2px dashed ${
+          border: `var(--sn-border-thick, 2px) dashed ${
             isDragOver
               ? "var(--sn-color-primary, #2563eb)"
               : "var(--sn-color-border, #e5e7eb)"
@@ -509,7 +550,8 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
           justifyContent: "center",
           gap: "var(--sn-spacing-xs, 0.25rem)",
           cursor: "pointer",
-          transition: "border-color 150ms ease, background-color 150ms ease",
+          transition:
+            "border-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease), background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
           textAlign: "center",
         }}
       >
@@ -517,7 +559,7 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
         <span
           aria-hidden="true"
           style={{
-            fontSize: "48px",
+            fontSize: "var(--sn-font-size-4xl, 2.25rem)",
             lineHeight: 1,
             color: "var(--sn-color-muted-foreground, #6b7280)",
           }}
@@ -549,6 +591,25 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
       </div>
 
       {fileList}
+      <style>{`
+        [data-snapshot-component="file-uploader"] button:hover {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="file-uploader"] button:focus {
+          outline: none;
+        }
+        [data-snapshot-component="file-uploader"] button:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+        [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus {
+          outline: none;
+        }
+        [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </div>
   );
 }

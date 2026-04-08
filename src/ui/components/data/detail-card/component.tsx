@@ -66,7 +66,8 @@ function formatValue(field: ResolvedField): React.ReactNode {
             backgroundColor: "var(--sn-color-secondary, #f1f5f9)",
             color: "var(--sn-color-secondary-foreground, #0f172a)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            fontWeight: 500,
+            fontWeight:
+              "var(--sn-font-weight-medium, 500)" as unknown as number,
           }}
         >
           {String(value)}
@@ -102,8 +103,8 @@ function formatValue(field: ResolvedField): React.ReactNode {
           src={String(value)}
           alt=""
           style={{
-            width: "3rem",
-            height: "3rem",
+            width: "var(--sn-spacing-3xl, 3rem)",
+            height: "var(--sn-spacing-3xl, 3rem)",
             borderRadius: "var(--sn-radius-full, 9999px)",
             objectFit: "cover",
           }}
@@ -216,7 +217,8 @@ export function DetailCard({ config }: { config: DetailCardConfig }) {
                   style={{
                     margin: 0,
                     fontSize: "var(--sn-font-size-lg, 1.125rem)",
-                    fontWeight: 600,
+                    fontWeight:
+                      "var(--sn-font-weight-semibold, 600)" as unknown as number,
                     color: "var(--sn-color-foreground, #0f172a)",
                   }}
                 >
@@ -284,7 +286,7 @@ function FieldRow({ field }: { field: ResolvedField }) {
         style={{
           fontSize: "var(--sn-font-size-sm, 0.875rem)",
           color: "var(--sn-color-muted-foreground, #64748b)",
-          fontWeight: 500,
+          fontWeight: "var(--sn-font-weight-medium, 500)" as unknown as number,
         }}
       >
         {field.label}
@@ -307,7 +309,7 @@ function FieldRow({ field }: { field: ResolvedField }) {
             title="Copy to clipboard"
             data-testid={`copy-${field.field}`}
             style={{
-              padding: "2px",
+              padding: "var(--sn-spacing-2xs, 2px)",
               border: "none",
               background: "transparent",
               cursor: "pointer",

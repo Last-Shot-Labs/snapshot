@@ -88,7 +88,7 @@ function FieldRenderer({
     backgroundColor: field.disabled
       ? "var(--sn-color-secondary, #f3f4f6)"
       : "var(--sn-color-card, #ffffff)",
-    border: `1px solid ${hasError ? "var(--sn-color-destructive, #ef4444)" : "var(--sn-color-border, #e5e7eb)"}`,
+    border: `var(--sn-border-default, 1px) solid ${hasError ? "var(--sn-color-destructive, #ef4444)" : "var(--sn-color-border, #e5e7eb)"}`,
     borderRadius: "var(--sn-radius-md, 0.375rem)",
     outline: "none",
     transition:
@@ -607,7 +607,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
             border: "none",
             borderRadius: "var(--sn-radius-md, 0.375rem)",
             cursor: form.isSubmitting ? "not-allowed" : "pointer",
-            opacity: form.isSubmitting ? 0.7 : 1,
+            opacity: form.isSubmitting ? "var(--sn-opacity-disabled, 0.5)" : 1,
             transition:
               "opacity var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
           }}
@@ -615,6 +615,32 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
           {form.isSubmitting ? "Submitting..." : submitLabel}
         </button>
       </div>
+      <style>{`
+        [data-snapshot-component="form"] input:focus,
+        [data-snapshot-component="form"] textarea:focus,
+        [data-snapshot-component="form"] select:focus {
+          outline: none;
+          border-color: var(--sn-color-primary, #2563eb);
+          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
+        }
+        [data-snapshot-component="form"] input:focus-visible,
+        [data-snapshot-component="form"] textarea:focus-visible,
+        [data-snapshot-component="form"] select:focus-visible {
+          outline: none;
+          border-color: var(--sn-color-primary, #2563eb);
+          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
+        }
+        [data-snapshot-component="form"] button[data-sn-submit]:hover:not(:disabled) {
+          opacity: var(--sn-opacity-hover, 0.9);
+        }
+        [data-snapshot-component="form"] button[data-sn-submit]:focus {
+          outline: none;
+        }
+        [data-snapshot-component="form"] button[data-sn-submit]:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </form>
   );
 }

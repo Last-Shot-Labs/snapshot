@@ -249,7 +249,7 @@ export function StatCard({ config }: { config: StatCardConfig }) {
         >
           <div
             style={{
-              height: "0.875rem",
+              height: "var(--sn-font-size-sm, 0.875rem)",
               width: "40%",
               backgroundColor: "var(--sn-color-muted, #e5e7eb)",
               borderRadius: "var(--sn-radius-sm, 0.25rem)",
@@ -262,7 +262,7 @@ export function StatCard({ config }: { config: StatCardConfig }) {
           />
           <div
             style={{
-              height: "2rem",
+              height: "var(--sn-font-size-2xl, 2rem)",
               width: "60%",
               backgroundColor: "var(--sn-color-muted, #e5e7eb)",
               borderRadius: "var(--sn-radius-sm, 0.25rem)",
@@ -356,7 +356,7 @@ export function StatCard({ config }: { config: StatCardConfig }) {
                     ? `var(--sn-color-${config.iconColor}, ${config.iconColor})`
                     : "var(--sn-color-muted-foreground, #6b7280)",
                   flexShrink: 0,
-                  opacity: 0.5,
+                  opacity: "var(--sn-opacity-muted, 0.5)" as unknown as number,
                 }}
                 aria-hidden="true"
               >
@@ -397,6 +397,28 @@ export function StatCard({ config }: { config: StatCardConfig }) {
           No data available
         </div>
       )}
+      <style>{`
+        [data-snapshot-component="stat-card"][role="button"]:hover {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="stat-card"][role="button"]:focus {
+          outline: none;
+        }
+        [data-snapshot-component="stat-card"][role="button"]:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+        [data-snapshot-component="stat-card"] button:hover {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="stat-card"] button:focus {
+          outline: none;
+        }
+        [data-snapshot-component="stat-card"] button:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </div>
   );
 }

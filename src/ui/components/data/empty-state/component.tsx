@@ -105,9 +105,9 @@ export function EmptyState({ config }: { config: EmptyStateConfig }) {
           style={{
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
             color: "var(--sn-color-muted-foreground, #6b7280)",
-            maxWidth: 400,
+            maxWidth: "var(--sn-container-md, 400px)",
             margin: 0,
-            lineHeight: 1.5,
+            lineHeight: "var(--sn-leading-normal, 1.5)",
           }}
         >
           {config.description}
@@ -135,6 +135,18 @@ export function EmptyState({ config }: { config: EmptyStateConfig }) {
           {config.actionLabel}
         </button>
       )}
+      <style>{`
+        [data-snapshot-component="empty-state"] button:hover {
+          opacity: var(--sn-opacity-hover, 0.9);
+        }
+        [data-snapshot-component="empty-state"] button:focus {
+          outline: none;
+        }
+        [data-snapshot-component="empty-state"] button:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </div>
   );
 }

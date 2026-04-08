@@ -152,7 +152,8 @@ export function Switch({ config }: { config: SwitchConfig }) {
               style={{
                 fontSize: "var(--sn-font-size-sm, 0.875rem)",
                 color: "var(--sn-color-foreground, #111827)",
-                fontWeight: 500,
+                fontWeight:
+                  "var(--sn-font-weight-medium, 500)" as unknown as number,
               }}
             >
               {resolvedLabel}

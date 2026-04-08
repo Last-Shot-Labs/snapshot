@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { NavConfig } from "./schema";
 import { useNav } from "./hook";
 import { useActionExecutor } from "../../../actions/executor";
@@ -91,7 +92,8 @@ function NavItem({
               height: "1.25rem",
               padding: "0 0.375rem",
               fontSize: "var(--sn-font-size-xs, 0.75rem)",
-              fontWeight: 600,
+              fontWeight:
+                "var(--sn-font-weight-semibold, 600)" as CSSProperties["fontWeight"],
               borderRadius: "var(--sn-radius-full, 9999px)",
               background: "var(--sn-color-primary)",
               color: "var(--sn-color-primary-foreground)",
@@ -145,7 +147,7 @@ function UserMenu({
     <div
       data-nav-user-menu=""
       style={{
-        borderTop: "1px solid var(--sn-color-border)",
+        borderTop: "var(--sn-border-default, 1px) solid var(--sn-color-border)",
       }}
     >
       <div
@@ -169,7 +171,8 @@ function UserMenu({
               background: "var(--sn-color-muted)",
               color: "var(--sn-color-muted-foreground)",
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              fontWeight: 600,
+              fontWeight:
+                "var(--sn-font-weight-semibold, 600)" as CSSProperties["fontWeight"],
               overflow: "hidden",
             }}
           >
@@ -200,7 +203,8 @@ function UserMenu({
               data-nav-user-name=""
               style={{
                 fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                fontWeight: 500,
+                fontWeight:
+                  "var(--sn-font-weight-medium, 500)" as CSSProperties["fontWeight"],
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -293,6 +297,7 @@ export function Nav({ config, pathname, onNavigate }: NavComponentProps) {
     <nav
       aria-label="Main navigation"
       data-snapshot-component="nav"
+      className={config.className}
       data-collapsed={isCollapsed ? "true" : undefined}
       style={{
         display: "flex",
@@ -310,7 +315,8 @@ export function Nav({ config, pathname, onNavigate }: NavComponentProps) {
             alignItems: "center",
             gap: "var(--sn-spacing-sm, 0.5rem)",
             padding: "var(--sn-spacing-md, 0.75rem)",
-            borderBottom: "1px solid var(--sn-color-border)",
+            borderBottom:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border)",
             cursor: config.logo.path ? "pointer" : undefined,
           }}
           onClick={() => {
@@ -342,7 +348,8 @@ export function Nav({ config, pathname, onNavigate }: NavComponentProps) {
             <span
               style={{
                 fontSize: "var(--sn-font-size-lg, 1.125rem)",
-                fontWeight: 600,
+                fontWeight:
+                  "var(--sn-font-weight-semibold, 600)" as CSSProperties["fontWeight"],
               }}
             >
               {config.logo.text}

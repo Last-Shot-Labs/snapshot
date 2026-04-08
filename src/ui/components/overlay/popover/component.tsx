@@ -168,7 +168,7 @@ export function Popover({ config }: { config: PopoverConfig }) {
           fontWeight: "var(--sn-font-weight-medium, 500)" as string,
           borderRadius: "var(--sn-radius-md, 0.375rem)",
           cursor: "pointer",
-          lineHeight: 1.5,
+          lineHeight: "var(--sn-leading-normal, 1.5)",
           fontFamily: "inherit",
           ...TRIGGER_VARIANTS[triggerVariant],
         }}
@@ -201,7 +201,7 @@ export function Popover({ config }: { config: PopoverConfig }) {
             padding: "var(--sn-spacing-md, 1rem)",
             opacity: animating ? 1 : 0,
             transform: animating ? "scale(1)" : "scale(0.95)",
-            transition: `opacity ${ANIMATION_DURATION}ms ease, transform ${ANIMATION_DURATION}ms ease`,
+            transition: `opacity var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease), transform var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease)`,
             ...PLACEMENT_STYLES[placement],
           }}
         >

@@ -260,6 +260,7 @@ export function Chart({ config }: { config: ChartConfig }) {
   return (
     <div
       data-snapshot-component="chart"
+      className={config.className}
       style={{
         backgroundColor: "var(--sn-color-card, #fff)",
         borderRadius: "var(--sn-radius-md, 6px)",

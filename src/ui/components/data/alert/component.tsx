@@ -179,6 +179,18 @@ export function Alert({ config }: { config: AlertConfig }) {
           <Icon name="x" size={16} />
         </button>
       )}
+      <style>{`
+        [data-snapshot-component="alert"] button:hover {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="alert"] button:focus {
+          outline: none;
+        }
+        [data-snapshot-component="alert"] button:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </div>
   );
 }

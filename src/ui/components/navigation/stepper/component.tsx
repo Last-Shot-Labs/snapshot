@@ -131,7 +131,7 @@ export function Stepper({ config }: { config: StepperConfig }) {
                   cursor: clickable ? "pointer" : undefined,
                   textAlign: isHorizontal ? "center" : undefined,
                   borderBottom: isHorizontal
-                    ? `2px solid ${
+                    ? `var(--sn-border-thick, 2px) solid ${
                         isActive
                           ? "var(--sn-color-primary, #2563eb)"
                           : isCompleted
@@ -140,7 +140,7 @@ export function Stepper({ config }: { config: StepperConfig }) {
                       }`
                     : undefined,
                   borderLeft: !isHorizontal
-                    ? `2px solid ${
+                    ? `var(--sn-border-thick, 2px) solid ${
                         isActive
                           ? "var(--sn-color-primary, #2563eb)"
                           : isCompleted
@@ -244,8 +244,11 @@ export function Stepper({ config }: { config: StepperConfig }) {
                     data-testid="stepper-connector"
                     style={{
                       ...(isHorizontal
-                        ? { flex: 1, height: 2 }
-                        : { width: 2, height: "var(--sn-spacing-lg, 1.5rem)" }),
+                        ? { flex: 1, height: "var(--sn-border-thick, 2px)" }
+                        : {
+                            width: "var(--sn-border-thick, 2px)",
+                            height: "var(--sn-spacing-lg, 1.5rem)",
+                          }),
                       backgroundColor: isCompleted
                         ? "var(--sn-color-success, #16a34a)"
                         : "var(--sn-color-border, #e5e7eb)",
@@ -312,8 +315,11 @@ export function Stepper({ config }: { config: StepperConfig }) {
                     data-testid="stepper-connector"
                     style={{
                       ...(isHorizontal
-                        ? { flex: 1, height: 2 }
-                        : { width: 2, height: "var(--sn-spacing-lg, 1.5rem)" }),
+                        ? { flex: 1, height: "var(--sn-border-thick, 2px)" }
+                        : {
+                            width: "var(--sn-border-thick, 2px)",
+                            height: "var(--sn-spacing-lg, 1.5rem)",
+                          }),
                       backgroundColor:
                         index < currentStep
                           ? "var(--sn-color-success, #16a34a)"

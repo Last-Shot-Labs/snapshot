@@ -226,8 +226,8 @@ export function EmojiPicker({ config }: { config: EmojiPickerConfig }) {
         style={{
           display: "flex",
           borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
-          padding: "2px var(--sn-spacing-xs, 0.25rem)",
-          gap: "1px",
+          padding: "var(--sn-spacing-2xs, 2px) var(--sn-spacing-xs, 0.25rem)",
+          gap: "var(--sn-border-thin, 1px)",
           overflowX: "auto",
         }}
       >
@@ -297,7 +297,7 @@ export function EmojiPicker({ config }: { config: EmojiPickerConfig }) {
                 style={{
                   display: "grid",
                   gridTemplateColumns: `repeat(${perRow}, 1fr)`,
-                  gap: "2px",
+                  gap: "var(--sn-spacing-2xs, 2px)",
                 }}
               >
                 {cat.emojis.map((emoji) => {
@@ -320,7 +320,7 @@ export function EmojiPicker({ config }: { config: EmojiPickerConfig }) {
                         borderRadius: "var(--sn-radius-sm, 0.25rem)",
                         backgroundColor: "transparent",
                         cursor: "pointer",
-                        fontSize: "1.25rem",
+                        fontSize: "var(--sn-font-size-lg, 1.25rem)",
                         transition:
                           "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
                       }}

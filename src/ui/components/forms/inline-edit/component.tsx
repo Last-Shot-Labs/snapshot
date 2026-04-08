@@ -129,7 +129,8 @@ export function InlineEdit({ config }: { config: InlineEditConfig }) {
             lineHeight: "var(--sn-leading-normal, 1.5)",
             color: "var(--sn-color-foreground, #111)",
             backgroundColor: "var(--sn-color-input, #fff)",
-            border: "1px solid var(--sn-color-ring, #2563eb)",
+            border:
+              "var(--sn-border-default, 1px) solid var(--sn-color-ring, #2563eb)",
             borderRadius: "var(--sn-radius-sm, 0.25rem)",
             padding:
               "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-xs, 0.25rem)",
@@ -157,7 +158,7 @@ export function InlineEdit({ config }: { config: InlineEditConfig }) {
               ? "var(--sn-color-foreground, #111)"
               : "var(--sn-color-muted-foreground, #6b7280)",
             background: "none",
-            border: "1px solid transparent",
+            border: "var(--sn-border-default, 1px) solid transparent",
             borderRadius: "var(--sn-radius-sm, 0.25rem)",
             padding:
               "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-xs, 0.25rem)",

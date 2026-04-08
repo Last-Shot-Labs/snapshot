@@ -244,6 +244,18 @@ export function Textarea({ config }: { config: TextareaConfig }) {
           </span>
         )}
       </div>
+      <style>{`
+        [data-snapshot-component="textarea"] textarea:focus {
+          outline: none;
+          border-color: var(--sn-color-primary, #2563eb);
+          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
+        }
+        [data-snapshot-component="textarea"] textarea:focus-visible {
+          outline: none;
+          border-color: var(--sn-color-primary, #2563eb);
+          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
+        }
+      `}</style>
     </div>
   );
 }

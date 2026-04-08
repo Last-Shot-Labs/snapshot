@@ -22,7 +22,7 @@ function SkeletonEntry() {
           height: "32px",
           borderRadius: "var(--sn-radius-full, 9999px)",
           backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-          opacity: 0.5,
+          opacity: "var(--sn-opacity-muted, 0.5)",
           flexShrink: 0,
         }}
       />
@@ -33,7 +33,7 @@ function SkeletonEntry() {
             width: "60%",
             borderRadius: "var(--sn-radius-xs, 2px)",
             backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-            opacity: 0.5,
+            opacity: "var(--sn-opacity-muted, 0.5)",
             marginBottom: "var(--sn-spacing-xs, 4px)",
           }}
         />
@@ -43,7 +43,7 @@ function SkeletonEntry() {
             width: "30%",
             borderRadius: "var(--sn-radius-xs, 2px)",
             backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-            opacity: 0.3,
+            opacity: "var(--sn-opacity-disabled, 0.3)",
           }}
         />
       </div>
@@ -95,7 +95,7 @@ function DetailsSection({ details }: { details: Record<string, unknown> }) {
       }}
     >
       {entries.map(([key, value]) => (
-        <div key={key} style={{ marginBottom: "2px" }}>
+        <div key={key} style={{ marginBottom: "var(--sn-spacing-2xs, 2px)" }}>
           <span
             style={{
               color: "var(--sn-color-muted-foreground, #64748b)",
@@ -232,7 +232,8 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
               style={{
                 padding: "var(--sn-spacing-xs, 4px) var(--sn-spacing-sm, 8px)",
                 borderRadius: "var(--sn-radius-sm, 4px)",
-                border: "1px solid var(--sn-color-border, #d1d5db)",
+                border:
+                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
                 backgroundColor: "var(--sn-color-card, #fff)",
                 fontSize: "var(--sn-font-size-sm, 0.875rem)",
                 color: "var(--sn-color-foreground, #0f172a)",
@@ -315,7 +316,8 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
                   display: "flex",
                   gap: "var(--sn-spacing-sm, 8px)",
                   padding: "var(--sn-spacing-md, 12px) 0",
-                  borderBottom: "1px solid var(--sn-color-border, #e2e8f0)",
+                  borderBottom:
+                    "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)",
                   transition:
                     "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
                 }}
@@ -367,7 +369,7 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
                       style={{
                         fontSize: "var(--sn-font-size-xs, 0.75rem)",
                         color: "var(--sn-color-muted-foreground, #64748b)",
-                        marginTop: "2px",
+                        marginTop: "var(--sn-spacing-2xs, 2px)",
                       }}
                       title={timestamp.toLocaleString()}
                     >
@@ -419,7 +421,8 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
             style={{
               padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-lg, 16px)",
               borderRadius: "var(--sn-radius-md, 6px)",
-              border: "1px solid var(--sn-color-border, #d1d5db)",
+              border:
+                "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
               backgroundColor: "var(--sn-color-card, #fff)",
               cursor: "pointer",
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
@@ -430,6 +433,29 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
           </button>
         </div>
       )}
+
+      <style>{`
+        [data-snapshot-component="audit-log"] select:focus {
+          outline: none;
+          border-color: var(--sn-color-primary, #2563eb);
+          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
+        }
+        [data-snapshot-component="audit-log"] select:focus-visible {
+          outline: none;
+          border-color: var(--sn-color-primary, #2563eb);
+          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
+        }
+        [data-snapshot-component="audit-log"] button:hover {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="audit-log"] button:focus {
+          outline: none;
+        }
+        [data-snapshot-component="audit-log"] button:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </div>
   );
 }

@@ -14,24 +14,24 @@ const SIZE_MAP = {
 /** Badge font sizes per size variant. */
 const BADGE_SIZE_MAP = {
   sm: {
-    fontSize: "9px",
+    fontSize: "var(--sn-font-size-xs, 0.5625rem)",
     minWidth: "14px",
     height: "14px",
-    padding: "0 3px",
+    padding: "0 var(--sn-spacing-2xs, 0.1875rem)",
     offset: "-4px",
   },
   md: {
-    fontSize: "10px",
+    fontSize: "var(--sn-font-size-xs, 0.625rem)",
     minWidth: "16px",
     height: "16px",
-    padding: "0 4px",
+    padding: "0 var(--sn-spacing-2xs, 0.25rem)",
     offset: "-5px",
   },
   lg: {
-    fontSize: "11px",
+    fontSize: "var(--sn-font-size-xs, 0.6875rem)",
     minWidth: "18px",
     height: "18px",
-    padding: "0 5px",
+    padding: "0 var(--sn-spacing-2xs, 0.3125rem)",
     offset: "-6px",
   },
 } as const;

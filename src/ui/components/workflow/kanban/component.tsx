@@ -42,7 +42,7 @@ function SkeletonCard() {
         padding: "var(--sn-spacing-sm, 8px)",
         borderRadius: "var(--sn-radius-sm, 4px)",
         backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-        opacity: 0.5,
+        opacity: "var(--sn-opacity-muted, 0.5)",
       }}
     >
       <div
@@ -51,7 +51,7 @@ function SkeletonCard() {
           width: "70%",
           borderRadius: "var(--sn-radius-xs, 2px)",
           backgroundColor: "var(--sn-color-muted-foreground, #94a3b8)",
-          opacity: 0.3,
+          opacity: "var(--sn-opacity-disabled, 0.3)",
           marginBottom: "var(--sn-spacing-xs, 4px)",
         }}
       />
@@ -61,7 +61,7 @@ function SkeletonCard() {
           width: "90%",
           borderRadius: "var(--sn-radius-xs, 2px)",
           backgroundColor: "var(--sn-color-muted-foreground, #94a3b8)",
-          opacity: 0.2,
+          opacity: "var(--sn-opacity-disabled, 0.2)",
         }}
       />
     </div>

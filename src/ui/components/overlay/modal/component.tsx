@@ -119,6 +119,7 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
   return (
     <div
       data-snapshot-component="modal"
+      className={config.className}
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -142,7 +143,7 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
           inset: 0,
           backgroundColor: "var(--sn-modal-overlay, rgba(0, 0, 0, 0.5))",
           opacity: animating ? 1 : 0,
-          transition: `opacity ${ANIMATION_DURATION}ms ease`,
+          transition: `opacity var(--sn-duration-normal, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease)`,
           zIndex: -1,
         }}
       />
@@ -168,7 +169,7 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
           outline: "none",
           opacity: animating ? 1 : 0,
           transform: animating ? "scale(1)" : "scale(0.95)",
-          transition: `opacity ${ANIMATION_DURATION}ms ease, transform ${ANIMATION_DURATION}ms cubic-bezier(0.32, 0.72, 0, 1)`,
+          transition: `opacity var(--sn-duration-normal, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease), transform var(--sn-duration-normal, ${ANIMATION_DURATION}ms) var(--sn-ease-out, cubic-bezier(0.32, 0.72, 0, 1))`,
         }}
       >
         <style>{`
@@ -200,7 +201,8 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
               justifyContent: "space-between",
               padding:
                 "var(--sn-spacing-md, 1rem) var(--sn-spacing-lg, 1.5rem)",
-              borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+              borderBottom:
+                "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             }}
           >
             <h2
@@ -227,7 +229,7 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
                 borderRadius: "var(--sn-radius-sm, 0.25rem)",
                 color: "var(--sn-color-muted-foreground, #6b7280)",
                 fontSize: "var(--sn-font-size-lg, 1.125rem)",
-                lineHeight: 1,
+                lineHeight: "var(--sn-leading-none, 1)",
               }}
             >
               {"\u00D7"}
@@ -261,7 +263,8 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
               gap: "var(--sn-spacing-sm, 0.5rem)",
               justifyContent:
                 ALIGN_MAP[config.footer.align ?? "right"] ?? "flex-end",
-              borderTop: "1px solid var(--sn-color-border, #e5e7eb)",
+              borderTop:
+                "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
               padding:
                 "var(--sn-spacing-md, 1rem) var(--sn-spacing-lg, 1.5rem)",
             }}

@@ -7,7 +7,7 @@ import type { BadgeConfig } from "./types";
 const SIZE_MAP = {
   xs: {
     fontSize: "var(--sn-font-size-xs, 0.625rem)",
-    padding: "1px var(--sn-spacing-xs, 0.25rem)",
+    padding: "var(--sn-spacing-2xs, 1px) var(--sn-spacing-xs, 0.25rem)",
   },
   sm: {
     fontSize: "var(--sn-font-size-xs, 0.75rem)",
@@ -126,7 +126,7 @@ export function Badge({ config }: { config: BadgeConfig }) {
         padding: sizeStyles.padding,
         fontSize: sizeStyles.fontSize,
         fontWeight: "var(--sn-font-weight-semibold, 600)" as string,
-        lineHeight: 1.2,
+        lineHeight: "var(--sn-leading-tight, 1.25)",
         borderRadius: rounded
           ? "var(--sn-radius-full, 9999px)"
           : "var(--sn-radius-sm, 0.25rem)",

@@ -230,7 +230,8 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
       data-testid="rich-text-editor"
       className={config.className}
       style={{
-        border: "1px solid var(--sn-color-border, #e5e7eb)",
+        border:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
         borderRadius: "var(--sn-radius-md, 0.5rem)",
         backgroundColor: "var(--sn-color-card, #ffffff)",
         overflow: "hidden",
@@ -250,7 +251,8 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
             gap: "var(--sn-spacing-xs, 0.25rem)",
             padding:
               "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-            borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+            borderBottom:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             backgroundColor: "var(--sn-color-secondary, #f9fafb)",
             flexWrap: "wrap",
           }}
@@ -304,16 +306,7 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
                       : "1",
                     padding: 0,
                   }}
-                  onMouseEnter={(e) => {
-                    if (!resolvedReadonly) {
-                      (e.currentTarget as HTMLElement).style.backgroundColor =
-                        "var(--sn-color-muted, #f3f4f6)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor =
-                      "transparent";
-                  }}
+                  data-toolbar-btn
                 >
                   <Icon name={item.icon} size={14} />
                 </button>
@@ -326,7 +319,7 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "1px",
+              gap: "var(--sn-border-default, 1px)",
               backgroundColor: "var(--sn-color-border, #e5e7eb)",
               borderRadius: "var(--sn-radius-sm, 0.25rem)",
               overflow: "hidden",
@@ -394,7 +387,7 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
               minWidth: showPreview ? "min(100%, 250px)" : 0,
               overflow: "auto",
               borderRight: showPreview
-                ? "1px solid var(--sn-color-border, #e5e7eb)"
+                ? "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)"
                 : undefined,
             }}
           />
@@ -430,7 +423,7 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
                         marginBottom: "var(--sn-spacing-md, 1rem)",
                         lineHeight: "var(--sn-leading-tight, 1.25)",
                         borderBottom:
-                          "1px solid var(--sn-color-border, #e5e7eb)",
+                          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                         paddingBottom: "var(--sn-spacing-sm, 0.5rem)",
                       }}
                     >
@@ -540,7 +533,7 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
                     <blockquote
                       style={{
                         borderLeft:
-                          "3px solid var(--sn-color-primary, #2563eb)",
+                          "var(--sn-border-thick, 3px) solid var(--sn-color-primary, #2563eb)",
                         paddingLeft: "var(--sn-spacing-md, 1rem)",
                         color: "var(--sn-color-muted-foreground, #6b7280)",
                         fontStyle: "italic",
@@ -597,7 +590,8 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
                     <hr
                       style={{
                         border: "none",
-                        borderTop: "1px solid var(--sn-color-border, #e5e7eb)",
+                        borderTop:
+                          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                         margin: "var(--sn-spacing-md, 1rem) 0",
                       }}
                     />
@@ -618,7 +612,7 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
                     <th
                       style={{
                         borderBottom:
-                          "2px solid var(--sn-color-border, #e5e7eb)",
+                          "var(--sn-border-thick, 2px) solid var(--sn-color-border, #e5e7eb)",
                         padding:
                           "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
                         textAlign: "left",
@@ -633,7 +627,7 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
                     <td
                       style={{
                         borderBottom:
-                          "1px solid var(--sn-color-border, #e5e7eb)",
+                          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                         padding:
                           "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
                       }}
@@ -656,6 +650,18 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
           </div>
         )}
       </div>
+      <style>{`
+        [data-snapshot-component="rich-text-editor"] button:hover:not(:disabled) {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="rich-text-editor"] button:focus {
+          outline: none;
+        }
+        [data-snapshot-component="rich-text-editor"] button:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </div>
   );
 }

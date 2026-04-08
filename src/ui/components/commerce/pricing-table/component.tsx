@@ -28,8 +28,8 @@ function TierCard({
         position: "relative",
         backgroundColor: "var(--sn-color-card, #ffffff)",
         border: isHighlighted
-          ? "2px solid var(--sn-color-primary, #2563eb)"
-          : "1px solid var(--sn-color-border, #e5e7eb)",
+          ? "var(--sn-border-thick, 2px) solid var(--sn-color-primary, #2563eb)"
+          : "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
         borderRadius: "var(--sn-radius-lg, 0.75rem)",
         boxShadow: isHighlighted
           ? "var(--sn-shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1))"
@@ -187,7 +187,7 @@ function TierCard({
           fontSize: "var(--sn-font-size-sm, 0.875rem)",
           fontWeight: "var(--sn-font-weight-semibold, 600)",
           cursor: tier.action ? "pointer" : "not-allowed",
-          border: "1px solid transparent",
+          border: "var(--sn-border-default, 1px) solid transparent",
           fontFamily: "inherit",
           backgroundColor: isHighlighted
             ? "var(--sn-color-primary, #2563eb)"
@@ -197,7 +197,9 @@ function TierCard({
             : "var(--sn-color-secondary-foreground, #0f172a)",
           transition:
             "opacity var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-          opacity: tier.action ? 1 : 0.6,
+          opacity: tier.action
+            ? 1
+            : ("var(--sn-opacity-disabled, 0.6)" as unknown as number),
         }}
       >
         {ctaLabel}
@@ -245,7 +247,8 @@ function TableVariant({
                 textAlign: "left",
                 padding:
                   "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
-                borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+                borderBottom:
+                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                 fontSize: "var(--sn-font-size-sm, 0.875rem)",
                 color: "var(--sn-color-muted-foreground, #6b7280)",
               }}
@@ -260,8 +263,8 @@ function TableVariant({
                   padding:
                     "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
                   borderBottom: tier.highlighted
-                    ? "2px solid var(--sn-color-primary, #2563eb)"
-                    : "1px solid var(--sn-color-border, #e5e7eb)",
+                    ? "var(--sn-border-thick, 2px) solid var(--sn-color-primary, #2563eb)"
+                    : "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                   fontSize: "var(--sn-font-size-sm, 0.875rem)",
                   fontWeight: "var(--sn-font-weight-semibold, 600)",
                 }}
@@ -281,7 +284,8 @@ function TableVariant({
                     <span
                       style={{
                         fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                        fontWeight: 400,
+                        fontWeight:
+                          "var(--sn-font-weight-normal, 400)" as React.CSSProperties["fontWeight"],
                         color: "var(--sn-color-muted-foreground, #6b7280)",
                       }}
                     >
@@ -300,7 +304,8 @@ function TableVariant({
                 style={{
                   padding:
                     "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-md, 1rem)",
-                  borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+                  borderBottom:
+                    "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                   fontSize: "var(--sn-font-size-sm, 0.875rem)",
                 }}
               >
@@ -318,7 +323,8 @@ function TableVariant({
                       textAlign: "center",
                       padding:
                         "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-md, 1rem)",
-                      borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+                      borderBottom:
+                        "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                       fontSize: "var(--sn-font-size-sm, 0.875rem)",
                       color: included
                         ? "var(--sn-color-success, #16a34a)"
@@ -362,7 +368,7 @@ function TableVariant({
                     fontSize: "var(--sn-font-size-sm, 0.875rem)",
                     fontWeight: "var(--sn-font-weight-semibold, 600)",
                     cursor: tier.action ? "pointer" : "not-allowed",
-                    border: "1px solid transparent",
+                    border: "var(--sn-border-default, 1px) solid transparent",
                     fontFamily: "inherit",
                     backgroundColor: tier.highlighted
                       ? "var(--sn-color-primary, #2563eb)"
@@ -370,7 +376,9 @@ function TableVariant({
                     color: tier.highlighted
                       ? "var(--sn-color-primary-foreground, #fff)"
                       : "var(--sn-color-secondary-foreground, #0f172a)",
-                    opacity: tier.action ? 1 : 0.6,
+                    opacity: tier.action
+                      ? 1
+                      : ("var(--sn-opacity-disabled, 0.6)" as unknown as number),
                   }}
                 >
                   {tier.actionLabel ?? "Get Started"}
@@ -443,7 +451,8 @@ export function PricingTable({ config }: { config: PricingTableConfig }) {
         style={{
           backgroundColor: "var(--sn-color-card, #ffffff)",
           borderRadius: "var(--sn-radius-lg, 0.75rem)",
-          border: "1px solid var(--sn-color-border, #e5e7eb)",
+          border:
+            "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
           overflow: "hidden",
           ...((config.style as React.CSSProperties) ?? {}),
         }}

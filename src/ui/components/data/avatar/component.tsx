@@ -160,7 +160,8 @@ export function Avatar({ config }: { config: AvatarConfig }) {
             height: `${statusDotSize}px`,
             borderRadius: "var(--sn-radius-full, 9999px)",
             backgroundColor: STATUS_COLORS[config.status],
-            border: "2px solid var(--sn-color-card, #ffffff)",
+            border:
+              "var(--sn-border-default, 2px) solid var(--sn-color-card, #ffffff)",
           }}
           aria-label={config.status}
         />

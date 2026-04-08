@@ -116,7 +116,7 @@ function EventPill({
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
         cursor: onClick ? "pointer" : "default",
-        lineHeight: 1.4,
+        lineHeight: "var(--sn-leading-tight, 1.4)",
       }}
     >
       {event.title}
@@ -312,7 +312,8 @@ export function Calendar({ config }: { config: CalendarConfig }) {
                 ? "40px repeat(7, 1fr)"
                 : "repeat(7, 1fr)",
               gap: "1px",
-              borderBottom: "1px solid var(--sn-color-border, #e2e8f0)",
+              borderBottom:
+                "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)",
             }}
           >
             {/* Week number */}
@@ -350,7 +351,7 @@ export function Calendar({ config }: { config: CalendarConfig }) {
                     cursor: config.dateAction ? "pointer" : "default",
                     borderRight:
                       dayIdx < 6
-                        ? "1px solid var(--sn-color-border, #e2e8f0)"
+                        ? "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)"
                         : undefined,
                   }}
                 >
@@ -458,7 +459,7 @@ export function Calendar({ config }: { config: CalendarConfig }) {
                   : undefined,
                 borderRight:
                   idx < 6
-                    ? "1px solid var(--sn-color-border, #e2e8f0)"
+                    ? "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)"
                     : undefined,
                 cursor: config.dateAction ? "pointer" : "default",
               }}
@@ -609,7 +610,8 @@ export function Calendar({ config }: { config: CalendarConfig }) {
             style={{
               padding: "var(--sn-spacing-xs, 4px) var(--sn-spacing-sm, 8px)",
               borderRadius: "var(--sn-radius-sm, 4px)",
-              border: "1px solid var(--sn-color-border, #d1d5db)",
+              border:
+                "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
               backgroundColor: "var(--sn-color-card, #fff)",
               cursor: "pointer",
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
@@ -623,7 +625,8 @@ export function Calendar({ config }: { config: CalendarConfig }) {
             style={{
               padding: "var(--sn-spacing-xs, 4px) var(--sn-spacing-sm, 8px)",
               borderRadius: "var(--sn-radius-sm, 4px)",
-              border: "1px solid var(--sn-color-border, #d1d5db)",
+              border:
+                "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
               backgroundColor: "var(--sn-color-card, #fff)",
               cursor: "pointer",
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
@@ -638,7 +641,8 @@ export function Calendar({ config }: { config: CalendarConfig }) {
             style={{
               padding: "var(--sn-spacing-xs, 4px) var(--sn-spacing-sm, 8px)",
               borderRadius: "var(--sn-radius-sm, 4px)",
-              border: "1px solid var(--sn-color-border, #d1d5db)",
+              border:
+                "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
               backgroundColor: "var(--sn-color-card, #fff)",
               cursor: "pointer",
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
@@ -684,7 +688,8 @@ export function Calendar({ config }: { config: CalendarConfig }) {
       {!isLoading && !error && (
         <div
           style={{
-            border: "1px solid var(--sn-color-border, #e2e8f0)",
+            border:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)",
             borderRadius: "var(--sn-radius-md, 6px)",
             overflow: "hidden",
             overflowX: "auto",

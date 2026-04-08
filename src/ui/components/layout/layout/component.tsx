@@ -20,15 +20,18 @@ function SidebarLayout({
   nav,
   children,
   style,
+  className,
 }: {
   nav?: ReactNode;
   children: ReactNode;
   style?: CSSProperties;
+  className?: string;
 }) {
   return (
     <div
       data-snapshot-component="layout"
       data-layout-variant="sidebar"
+      className={className}
       style={{
         display: "flex",
         minHeight: "100vh",
@@ -96,15 +99,18 @@ function TopNavLayout({
   nav,
   children,
   style,
+  className,
 }: {
   nav?: ReactNode;
   children: ReactNode;
   style?: CSSProperties;
+  className?: string;
 }) {
   return (
     <div
       data-snapshot-component="layout"
       data-layout-variant="top-nav"
+      className={className}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -150,14 +156,17 @@ function TopNavLayout({
 function MinimalLayout({
   children,
   style,
+  className,
 }: {
   children: ReactNode;
   style?: CSSProperties;
+  className?: string;
 }) {
   return (
     <div
       data-snapshot-component="layout"
       data-layout-variant="minimal"
+      className={className}
       style={{
         display: "flex",
         alignItems: "center",
@@ -191,14 +200,17 @@ function MinimalLayout({
 function FullWidthLayout({
   children,
   style,
+  className,
 }: {
   children: ReactNode;
   style?: CSSProperties;
+  className?: string;
 }) {
   return (
     <div
       data-snapshot-component="layout"
       data-layout-variant="full-width"
+      className={className}
       style={{
         minHeight: "100vh",
         background: "var(--sn-color-background)",
@@ -225,22 +237,31 @@ function FullWidthLayout({
  */
 export function Layout({ config, nav, children }: LayoutComponentProps) {
   const rootStyle = (config.style as CSSProperties) ?? undefined;
+  const cn = config.className;
   switch (config.variant) {
     case "sidebar":
       return (
-        <SidebarLayout nav={nav} style={rootStyle}>
+        <SidebarLayout nav={nav} style={rootStyle} className={cn}>
           {children}
         </SidebarLayout>
       );
     case "top-nav":
       return (
-        <TopNavLayout nav={nav} style={rootStyle}>
+        <TopNavLayout nav={nav} style={rootStyle} className={cn}>
           {children}
         </TopNavLayout>
       );
     case "minimal":
-      return <MinimalLayout style={rootStyle}>{children}</MinimalLayout>;
+      return (
+        <MinimalLayout style={rootStyle} className={cn}>
+          {children}
+        </MinimalLayout>
+      );
     case "full-width":
-      return <FullWidthLayout style={rootStyle}>{children}</FullWidthLayout>;
+      return (
+        <FullWidthLayout style={rootStyle} className={cn}>
+          {children}
+        </FullWidthLayout>
+      );
   }
 }

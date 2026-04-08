@@ -19,15 +19,16 @@ const VARIANT_STYLES: Record<
     bar: {
       display: "flex",
       gap: "var(--sn-spacing-xs, 0.25rem)",
-      borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+      borderBottom:
+        "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
       marginBottom: "var(--sn-spacing-md, 1rem)",
     },
     tab: (active, disabled) => ({
       padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
       border: "none",
       borderBottom: active
-        ? "2px solid var(--sn-color-primary, #2563eb)"
-        : "2px solid transparent",
+        ? "var(--sn-border-thick, 2px) solid var(--sn-color-primary, #2563eb)"
+        : "var(--sn-border-thick, 2px) solid transparent",
       background: "none",
       color: disabled
         ? "var(--sn-color-muted-foreground, #9ca3af)"
@@ -39,7 +40,7 @@ const VARIANT_STYLES: Record<
         ? "var(--sn-font-weight-semibold, 600)"
         : "var(--sn-font-weight-normal, 400)",
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
-      opacity: disabled ? 0.5 : 1,
+      opacity: disabled ? "var(--sn-opacity-disabled, 0.5)" : 1,
       marginBottom: "-1px",
       transition:
         "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
@@ -49,15 +50,16 @@ const VARIANT_STYLES: Record<
     bar: {
       display: "flex",
       gap: "var(--sn-spacing-md, 1rem)",
-      borderBottom: "2px solid var(--sn-color-border, #e5e7eb)",
+      borderBottom:
+        "var(--sn-border-thick, 2px) solid var(--sn-color-border, #e5e7eb)",
       marginBottom: "var(--sn-spacing-md, 1rem)",
     },
     tab: (active, disabled) => ({
       padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-xs, 0.25rem)",
       border: "none",
       borderBottom: active
-        ? "2px solid var(--sn-color-primary, #2563eb)"
-        : "2px solid transparent",
+        ? "var(--sn-border-thick, 2px) solid var(--sn-color-primary, #2563eb)"
+        : "var(--sn-border-thick, 2px) solid transparent",
       background: "none",
       color: disabled
         ? "var(--sn-color-muted-foreground, #9ca3af)"
@@ -69,7 +71,7 @@ const VARIANT_STYLES: Record<
         ? "var(--sn-font-weight-semibold, 600)"
         : "var(--sn-font-weight-normal, 400)",
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
-      opacity: disabled ? 0.5 : 1,
+      opacity: disabled ? "var(--sn-opacity-disabled, 0.5)" : 1,
       marginBottom: "-2px",
       transition:
         "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
@@ -96,7 +98,7 @@ const VARIANT_STYLES: Record<
         ? "var(--sn-font-weight-semibold, 600)"
         : "var(--sn-font-weight-normal, 400)",
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
-      opacity: disabled ? 0.5 : 1,
+      opacity: disabled ? "var(--sn-opacity-disabled, 0.5)" : 1,
       transition:
         "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
     }),
@@ -158,6 +160,7 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
     <div
       data-snapshot-component="tabs"
       data-testid="tabs"
+      className={config.className}
       style={{
         ...((config.style as React.CSSProperties) ?? {}),
       }}

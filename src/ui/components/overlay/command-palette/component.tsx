@@ -215,7 +215,7 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
   const animationStyle: CSSProperties = {
     opacity: animating ? 1 : 0,
     transform: animating ? "scale(1)" : "scale(0.95)",
-    transition: `opacity ${ANIMATION_DURATION}ms ease, transform ${ANIMATION_DURATION}ms ease`,
+    transition: `opacity var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease), transform var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease)`,
   };
 
   let flatIndex = 0;
@@ -292,7 +292,7 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
             color: "var(--sn-color-foreground, #111)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
             fontFamily: "inherit",
-            lineHeight: 1.5,
+            lineHeight: "var(--sn-leading-normal, 1.5)",
           }}
         />
       </div>
@@ -387,7 +387,7 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
                           fontSize: "var(--sn-font-size-sm, 0.875rem)",
                           fontWeight:
                             "var(--sn-font-weight-normal, 400)" as string,
-                          lineHeight: 1.5,
+                          lineHeight: "var(--sn-leading-normal, 1.5)",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -400,7 +400,7 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
                           style={{
                             fontSize: "var(--sn-font-size-xs, 0.75rem)",
                             color: "var(--sn-color-muted-foreground, #6b7280)",
-                            lineHeight: 1.4,
+                            lineHeight: "var(--sn-leading-tight, 1.25)",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",

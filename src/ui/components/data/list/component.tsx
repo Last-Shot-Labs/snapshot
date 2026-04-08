@@ -32,7 +32,7 @@ function ListBadge({ text, color }: { text: string; color?: string }) {
         fontWeight: "var(--sn-font-weight-semibold, 600)" as unknown as number,
         backgroundColor: `var(--sn-color-${colorToken}, #2563eb)`,
         color: `var(--sn-color-${colorToken}-foreground, #ffffff)`,
-        lineHeight: 1.5,
+        lineHeight: "var(--sn-leading-normal, 1.5)",
       }}
     >
       {text}

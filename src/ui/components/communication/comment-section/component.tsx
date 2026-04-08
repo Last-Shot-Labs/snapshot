@@ -96,7 +96,7 @@ function CommentItem({
             display: "flex",
             alignItems: "baseline",
             gap: "var(--sn-spacing-sm, 0.5rem)",
-            marginBottom: "2px",
+            marginBottom: "var(--sn-spacing-2xs, 2px)",
           }}
         >
           <span
@@ -148,7 +148,7 @@ function CommentItem({
           style={{
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
             color: "var(--sn-color-foreground, #111827)",
-            lineHeight: 1.5,
+            lineHeight: "var(--sn-leading-normal, 1.5)",
             wordBreak: "break-word",
           }}
           dangerouslySetInnerHTML={{ __html: sanitizedHtml }}

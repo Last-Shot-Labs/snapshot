@@ -39,7 +39,9 @@ export function Skeleton({ config }: { config: SkeletonConfig }) {
   const animated = config.animated ?? true;
   const lines = config.lines ?? 3;
 
-  const animationStyle = animated ? "sn-pulse 2s ease-in-out infinite" : "none";
+  const animationStyle = animated
+    ? "sn-pulse var(--sn-duration-slow, 2s) var(--sn-ease-in-out, ease-in-out) infinite"
+    : "none";
 
   const baseStyle: React.CSSProperties = {
     backgroundColor: "var(--sn-color-muted, #e5e7eb)",
@@ -152,7 +154,8 @@ export function Skeleton({ config }: { config: SkeletonConfig }) {
         height: toCss(config.height, "200px"),
         backgroundColor: "var(--sn-color-card, #ffffff)",
         borderRadius: "var(--sn-radius-lg, 0.75rem)",
-        border: "1px solid var(--sn-color-border, #e5e7eb)",
+        border:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
         padding: "var(--sn-spacing-lg, 1.5rem)",
         display: "flex",
         flexDirection: "column",

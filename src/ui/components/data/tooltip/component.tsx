@@ -178,7 +178,7 @@ export function TooltipComponent({ config }: { config: TooltipConfig }) {
         data-testid="tooltip-popup"
         style={{
           position: "absolute",
-          zIndex: 50,
+          zIndex: "var(--sn-z-index-popover, 50)" as unknown as number,
           pointerEvents: "none",
           whiteSpace: "nowrap",
           padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",

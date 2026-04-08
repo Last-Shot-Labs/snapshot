@@ -58,6 +58,8 @@ export const chartSchema = z.object({
   grid: z.boolean().default(true),
   /** Message shown when there is no data. */
   emptyMessage: z.string().default("No data"),
+  /** Optional CSS class name. */
+  className: z.string().optional(),
   /** Optional inline style overrides. */
   style: z.record(z.union([z.string(), z.number()])).optional(),
 });

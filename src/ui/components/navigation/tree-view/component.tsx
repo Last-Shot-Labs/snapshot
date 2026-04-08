@@ -84,7 +84,7 @@ function TreeNode({
           padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
           paddingLeft: `calc(${depth} * var(--sn-spacing-lg, 1.5rem) + var(--sn-spacing-sm, 0.5rem))`,
           cursor: isDisabled ? "not-allowed" : "pointer",
-          opacity: isDisabled ? 0.5 : 1,
+          opacity: isDisabled ? "var(--sn-opacity-disabled, 0.5)" : 1,
           backgroundColor: isSelected
             ? "var(--sn-color-accent, #f1f5f9)"
             : "transparent",
@@ -107,8 +107,10 @@ function TreeNode({
               top: 0,
               bottom: 0,
               width: "var(--sn-spacing-md, 1rem)",
-              borderLeft: "1px solid var(--sn-color-border, #e5e7eb)",
-              borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+              borderLeft:
+                "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
+              borderBottom:
+                "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
               borderBottomLeftRadius: "var(--sn-radius-xs, 0.125rem)",
               height: "50%",
               pointerEvents: "none",

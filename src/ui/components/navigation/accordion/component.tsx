@@ -74,7 +74,8 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
   const containerStyle: React.CSSProperties =
     variant === "bordered"
       ? {
-          border: "1px solid var(--sn-color-border, #e5e7eb)",
+          border:
+            "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
           borderRadius: "var(--sn-radius-md, 0.5rem)",
           overflow: "hidden",
         }
@@ -115,7 +116,8 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
         const itemStyle: React.CSSProperties =
           variant === "separated"
             ? {
-                border: "1px solid var(--sn-color-border, #e5e7eb)",
+                border:
+                  "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
                 borderRadius: "var(--sn-radius-md, 0.5rem)",
                 boxShadow: "var(--sn-shadow-sm, 0 1px 2px rgba(0,0,0,0.05))",
                 backgroundColor: "var(--sn-color-card, #ffffff)",

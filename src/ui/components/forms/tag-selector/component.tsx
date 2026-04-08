@@ -288,7 +288,7 @@ export function TagSelector({ config }: { config: TagSelectorConfig }) {
                 color: textColor,
                 fontSize: "var(--sn-font-size-sm, 0.875rem)",
                 fontWeight: "var(--sn-font-weight-medium, 500)" as string,
-                lineHeight: 1.4,
+                lineHeight: "var(--sn-leading-tight, 1.25)",
                 whiteSpace: "nowrap",
               }}
             >
@@ -306,7 +306,7 @@ export function TagSelector({ config }: { config: TagSelectorConfig }) {
                   cursor: "pointer",
                   padding: "0 0 0 var(--sn-spacing-2xs, 0.125rem)",
                   fontSize: "var(--sn-font-size-md, 1rem)",
-                  lineHeight: 1,
+                  lineHeight: "var(--sn-leading-none, 1)",
                   opacity: 0.7,
                 }}
                 aria-label={`Remove ${tag.label}`}
@@ -437,7 +437,7 @@ export function TagSelector({ config }: { config: TagSelectorConfig }) {
                 border: "none",
                 borderTop:
                   filteredTags.length > 0
-                    ? "1px solid var(--sn-color-border, #e5e7eb)"
+                    ? "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)"
                     : "none",
                 background: "transparent",
                 cursor: "pointer",

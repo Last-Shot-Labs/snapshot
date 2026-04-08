@@ -129,6 +129,7 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
   return (
     <div
       data-snapshot-component="drawer"
+      className={config.className}
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -149,7 +150,7 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
           inset: 0,
           backgroundColor: "var(--sn-modal-overlay, rgba(0, 0, 0, 0.5))",
           opacity: animating ? 1 : 0,
-          transition: `opacity ${ANIMATION_DURATION}ms ease`,
+          transition: `opacity var(--sn-duration-normal, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease)`,
           zIndex: -1,
         }}
       />
@@ -176,7 +177,7 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
           overflow: "hidden",
           outline: "none",
           transform: translateValue,
-          transition: `transform ${ANIMATION_DURATION}ms cubic-bezier(0.32, 0.72, 0, 1)`,
+          transition: `transform var(--sn-duration-normal, ${ANIMATION_DURATION}ms) var(--sn-ease-out, cubic-bezier(0.32, 0.72, 0, 1))`,
         }}
       >
         <style>{`
@@ -200,7 +201,8 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
               justifyContent: "space-between",
               padding:
                 "var(--sn-spacing-md, 1rem) var(--sn-spacing-lg, 1.5rem)",
-              borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+              borderBottom:
+                "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             }}
           >
             <h2
@@ -227,7 +229,7 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
                 borderRadius: "var(--sn-radius-sm, 0.25rem)",
                 color: "var(--sn-color-muted-foreground, #6b7280)",
                 fontSize: "var(--sn-font-size-lg, 1.125rem)",
-                lineHeight: 1,
+                lineHeight: "var(--sn-leading-none, 1)",
               }}
             >
               {"\u00D7"}
@@ -261,7 +263,8 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
               gap: "var(--sn-spacing-sm, 0.5rem)",
               justifyContent:
                 ALIGN_MAP[config.footer.align ?? "right"] ?? "flex-end",
-              borderTop: "1px solid var(--sn-color-border, #e5e7eb)",
+              borderTop:
+                "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
               padding:
                 "var(--sn-spacing-md, 1rem) var(--sn-spacing-lg, 1.5rem)",
             }}

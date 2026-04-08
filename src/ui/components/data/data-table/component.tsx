@@ -139,8 +139,8 @@ function formatCellValue(
               src={src}
               alt={name}
               style={{
-                width: 24,
-                height: 24,
+                width: "1.5rem",
+                height: "1.5rem",
                 borderRadius: "var(--sn-radius-full, 9999px)",
                 objectFit: "cover",
               }}
@@ -148,8 +148,8 @@ function formatCellValue(
           ) : (
             <span
               style={{
-                width: 24,
-                height: 24,
+                width: "1.5rem",
+                height: "1.5rem",
                 borderRadius: "var(--sn-radius-full, 9999px)",
                 backgroundColor: "var(--sn-color-primary, #2563eb)",
                 color: "var(--sn-color-primary-foreground, #fff)",
@@ -157,7 +157,8 @@ function formatCellValue(
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "var(--sn-font-size-xs, 0.625rem)",
-                fontWeight: 600,
+                fontWeight:
+                  "var(--sn-font-weight-semibold, 600)" as unknown as number,
               }}
             >
               {initials || "?"}
@@ -180,7 +181,7 @@ function formatCellValue(
           <div
             style={{
               flex: 1,
-              height: 6,
+              height: "var(--sn-spacing-2xs, 6px)",
               backgroundColor: "var(--sn-color-muted, #e5e7eb)",
               borderRadius: "var(--sn-radius-full, 9999px)",
               overflow: "hidden",
@@ -240,7 +241,7 @@ function formatCellValue(
             fontFamily: "var(--sn-font-mono, monospace)",
             fontSize: "var(--sn-font-size-xs, 0.75rem)",
             backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
-            padding: "1px var(--sn-spacing-xs, 0.25rem)",
+            padding: "var(--sn-spacing-2xs, 1px) var(--sn-spacing-xs, 0.25rem)",
             borderRadius: "var(--sn-radius-sm, 0.25rem)",
           }}
         >
@@ -314,7 +315,7 @@ function SkeletonRows({
                   height: "1em",
                   borderRadius: "var(--sn-radius-sm, 4px)",
                   backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-                  opacity: 0.5,
+                  opacity: "var(--sn-opacity-muted, 0.5)" as unknown as number,
                 }}
               />
             </td>

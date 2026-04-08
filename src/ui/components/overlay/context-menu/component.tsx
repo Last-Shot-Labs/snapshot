@@ -166,7 +166,7 @@ export function ContextMenu({ config }: { config: ContextMenuConfig }) {
             position: "fixed",
             top: position.y,
             left: position.x,
-            zIndex: "var(--sn-z-index-popover, 60)",
+            zIndex: "var(--sn-z-index-popover, 60)" as unknown as number,
             minWidth: "160px",
             backgroundColor: "var(--sn-color-popover, #fff)",
             color: "var(--sn-color-popover-foreground, #111)",
@@ -178,7 +178,7 @@ export function ContextMenu({ config }: { config: ContextMenuConfig }) {
             overflow: "hidden",
             opacity: animating ? 1 : 0,
             transform: animating ? "scale(1)" : "scale(0.95)",
-            transition: `opacity ${ANIMATION_DURATION}ms ease, transform ${ANIMATION_DURATION}ms ease`,
+            transition: `opacity var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease), transform var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease)`,
           }}
         >
           {items.map((item, i) => {

@@ -116,7 +116,7 @@ export function Toggle({ config }: { config: ToggleConfig }) {
           padding: dims.padding,
           fontSize: dims.fontSize,
           fontWeight: "var(--sn-font-weight-medium, 500)" as unknown as number,
-          lineHeight: 1,
+          lineHeight: "var(--sn-leading-none, 1)",
           borderRadius: "var(--sn-radius-md, 0.375rem)",
           border: isOutline
             ? `var(--sn-border-default, 1px) solid ${

@@ -175,7 +175,8 @@ const markdownComponents: Components = {
     <blockquote
       {...props}
       style={{
-        borderLeft: "4px solid var(--sn-color-border, #e5e7eb)",
+        borderLeft:
+          "var(--sn-border-thick, 4px) solid var(--sn-color-border, #e5e7eb)",
         paddingLeft: "var(--sn-spacing-md, 0.75rem)",
         marginLeft: 0,
         marginRight: 0,
@@ -193,7 +194,8 @@ const markdownComponents: Components = {
       {...props}
       style={{
         backgroundColor: "var(--sn-color-card, #ffffff)",
-        border: "1px solid var(--sn-color-border, #e5e7eb)",
+        border:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
         borderRadius: "var(--sn-radius-md, 0.5rem)",
         padding: "var(--sn-spacing-md, 0.75rem)",
         overflow: "auto",
@@ -264,7 +266,8 @@ const markdownComponents: Components = {
     <thead
       {...props}
       style={{
-        borderBottom: "2px solid var(--sn-color-border, #e5e7eb)",
+        borderBottom:
+          "var(--sn-border-thick, 2px) solid var(--sn-color-border, #e5e7eb)",
       }}
     >
       {children}
@@ -288,7 +291,8 @@ const markdownComponents: Components = {
       {...props}
       style={{
         padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
-        borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+        borderBottom:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
       }}
     >
       {children}
@@ -299,7 +303,8 @@ const markdownComponents: Components = {
       {...props}
       style={{
         border: "none",
-        borderTop: "1px solid var(--sn-color-border, #e5e7eb)",
+        borderTop:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
         marginTop: "var(--sn-spacing-lg, 1rem)",
         marginBottom: "var(--sn-spacing-lg, 1rem)",
       }}

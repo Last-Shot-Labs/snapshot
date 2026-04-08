@@ -98,7 +98,8 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
       className={config.className}
       style={{
         borderRadius: "var(--sn-radius-md, 0.5rem)",
-        border: "1px solid var(--sn-color-border, #e5e7eb)",
+        border:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
         backgroundColor: "var(--sn-color-card, #ffffff)",
         overflow: "hidden",
         ...((config.style as React.CSSProperties) ?? {}),
@@ -114,7 +115,8 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
             justifyContent: "space-between",
             padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-md, 1rem)",
             backgroundColor: "var(--sn-color-secondary, #f1f5f9)",
-            borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+            borderBottom:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             gap: "var(--sn-spacing-sm, 0.5rem)",
           }}
         >
@@ -164,7 +166,8 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
                 padding:
                   "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
                 borderRadius: "var(--sn-radius-sm, 0.25rem)",
-                border: "1px solid var(--sn-color-border, #e5e7eb)",
+                border:
+                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                 backgroundColor: "var(--sn-color-card, #ffffff)",
                 color: "var(--sn-color-foreground, #111827)",
                 cursor: "pointer",
@@ -192,7 +195,8 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
               padding:
                 "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
               borderRadius: "var(--sn-radius-sm, 0.25rem)",
-              border: "1px solid var(--sn-color-border, #e5e7eb)",
+              border:
+                "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
               backgroundColor: "var(--sn-color-card, #ffffff)",
               color: "var(--sn-color-foreground, #111827)",
               cursor: "pointer",
@@ -217,7 +221,7 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
             padding: "var(--sn-spacing-md, 1rem)",
             fontFamily: "var(--sn-font-mono, monospace)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            lineHeight: 1.6,
+            lineHeight: "var(--sn-leading-relaxed, 1.625)",
             display: "flex",
           }}
         >
@@ -228,7 +232,8 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
               aria-hidden="true"
               style={{
                 color: "var(--sn-color-muted-foreground, #6b7280)",
-                borderRight: "1px solid var(--sn-color-border, #e5e7eb)",
+                borderRight:
+                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                 paddingRight: "var(--sn-spacing-sm, 0.5rem)",
                 marginRight: "var(--sn-spacing-md, 1rem)",
                 textAlign: "right",
@@ -269,6 +274,18 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
           )}
         </pre>
       </div>
+      <style>{`
+        [data-snapshot-component="code-block"] button:hover {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="code-block"] button:focus {
+          outline: none;
+        }
+        [data-snapshot-component="code-block"] button:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </div>
   );
 }

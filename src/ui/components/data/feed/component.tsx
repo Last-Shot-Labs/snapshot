@@ -331,6 +331,7 @@ export function Feed({ config }: { config: FeedConfig }) {
   return (
     <div
       data-snapshot-component="feed"
+      className={config.className}
       style={{
         backgroundColor: "var(--sn-color-card, #fff)",
         color: "var(--sn-color-card-foreground, #111827)",
@@ -425,6 +426,21 @@ export function Feed({ config }: { config: FeedConfig }) {
           </button>
         </div>
       )}
+      <style>{`
+        [data-snapshot-component="feed"] [data-feed-item]:hover {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="feed"] button:hover {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="feed"] button:focus {
+          outline: none;
+        }
+        [data-snapshot-component="feed"] button:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </div>
   );
 }

@@ -3,7 +3,9 @@ import { useWizard } from "./hook";
 import type { WizardConfig, WizardStepConfig } from "./types";
 import type { FieldConfig } from "../auto-form/types";
 
-const ANIMATION_DURATION = 200;
+/** Animation duration token (matches --sn-duration-normal). */
+const ANIMATION_DURATION_VAR = "var(--sn-duration-normal, 200ms)";
+const ANIMATION_EASE_VAR = "var(--sn-ease-default, ease)";
 
 // ── Field renderer (same logic as AutoForm) ───────────────────────────────────
 
@@ -47,8 +49,12 @@ function WizardFieldRenderer({
             width: "100%",
             padding: "var(--sn-spacing-sm, 8px)",
             borderRadius: "var(--sn-radius-md, 6px)",
-            border: "1px solid var(--sn-color-border, #e5e7eb)",
+            border:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
+            color: "var(--sn-color-foreground, #111827)",
+            backgroundColor: "var(--sn-color-card, #ffffff)",
+            boxSizing: "border-box" as const,
           }}
         />
       );
@@ -64,8 +70,12 @@ function WizardFieldRenderer({
             width: "100%",
             padding: "var(--sn-spacing-sm, 8px)",
             borderRadius: "var(--sn-radius-md, 6px)",
-            border: "1px solid var(--sn-color-border, #e5e7eb)",
+            border:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
+            color: "var(--sn-color-foreground, #111827)",
+            backgroundColor: "var(--sn-color-card, #ffffff)",
+            boxSizing: "border-box" as const,
           }}
         >
           <option value="">{field.placeholder ?? "Select..."}</option>
@@ -109,8 +119,12 @@ function WizardFieldRenderer({
             width: "100%",
             padding: "var(--sn-spacing-sm, 8px)",
             borderRadius: "var(--sn-radius-md, 6px)",
-            border: "1px solid var(--sn-color-border, #e5e7eb)",
+            border:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
+            color: "var(--sn-color-foreground, #111827)",
+            backgroundColor: "var(--sn-color-card, #ffffff)",
+            boxSizing: "border-box" as const,
           }}
         />
       );
@@ -128,8 +142,12 @@ function WizardFieldRenderer({
             width: "100%",
             padding: "var(--sn-spacing-sm, 8px)",
             borderRadius: "var(--sn-radius-md, 6px)",
-            border: "1px solid var(--sn-color-border, #e5e7eb)",
+            border:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
+            color: "var(--sn-color-foreground, #111827)",
+            backgroundColor: "var(--sn-color-card, #ffffff)",
+            boxSizing: "border-box" as const,
           }}
         />
       );
@@ -150,6 +168,7 @@ function WizardFieldRenderer({
             gap: "var(--sn-spacing-sm, 8px)",
             cursor: "pointer",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
+            color: "var(--sn-color-foreground, #111827)",
           }}
         >
           {input}
@@ -254,7 +273,7 @@ function WizardProgress({
                   i <= currentStep
                     ? "var(--sn-color-primary-foreground, #fff)"
                     : "var(--sn-color-muted-foreground, #6b7280)",
-                transition: `background-color ${ANIMATION_DURATION}ms ease`,
+                transition: `background-color ${ANIMATION_DURATION_VAR} ${ANIMATION_EASE_VAR}`,
               }}
             >
               {i < currentStep ? "✓" : i + 1}
@@ -281,7 +300,7 @@ function WizardProgress({
                   i < currentStep
                     ? "var(--sn-color-primary, oklch(0.205 0 0))"
                     : "var(--sn-color-border, #e5e7eb)",
-                transition: `background-color ${ANIMATION_DURATION}ms ease`,
+                transition: `background-color ${ANIMATION_DURATION_VAR} ${ANIMATION_EASE_VAR}`,
               }}
             />
           )}
@@ -333,12 +352,14 @@ export function Wizard({ config }: { config: WizardConfig }) {
     return (
       <div
         data-snapshot-component="wizard"
+        className={config.className}
         data-wizard-complete
         style={{
           padding: "var(--sn-spacing-lg, 16px)",
           textAlign: "center",
           borderRadius: "var(--sn-radius-md, 6px)",
-          border: "1px solid var(--sn-color-border, #e5e7eb)",
+          border:
+            "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
           backgroundColor: "var(--sn-color-card, #fff)",
         }}
       >
@@ -367,9 +388,11 @@ export function Wizard({ config }: { config: WizardConfig }) {
   return (
     <div
       data-snapshot-component="wizard"
+      className={config.className}
       style={{
         borderRadius: "var(--sn-radius-md, 6px)",
-        border: "1px solid var(--sn-color-border, #e5e7eb)",
+        border:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
         backgroundColor: "var(--sn-color-card, #fff)",
         overflow: "hidden",
         ...((config.style as React.CSSProperties) ?? {}),
@@ -415,7 +438,8 @@ export function Wizard({ config }: { config: WizardConfig }) {
       <div
         style={{
           padding: "var(--sn-spacing-md, 12px) var(--sn-spacing-lg, 16px)",
-          borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+          borderBottom:
+            "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
         }}
       >
         <WizardProgress
@@ -432,7 +456,7 @@ export function Wizard({ config }: { config: WizardConfig }) {
           padding: "var(--sn-spacing-lg, 16px)",
           opacity: wizard.isAnimating ? 0 : 1,
           transform: wizard.isAnimating ? "translateX(8px)" : "translateX(0)",
-          transition: `opacity ${ANIMATION_DURATION}ms ease, transform ${ANIMATION_DURATION}ms ease`,
+          transition: `opacity ${ANIMATION_DURATION_VAR} ${ANIMATION_EASE_VAR}, transform ${ANIMATION_DURATION_VAR} ${ANIMATION_EASE_VAR}`,
         }}
       >
         {/* Step header */}
@@ -505,7 +529,8 @@ export function Wizard({ config }: { config: WizardConfig }) {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "var(--sn-spacing-md, 12px) var(--sn-spacing-lg, 16px)",
-          borderTop: "1px solid var(--sn-color-border, #e5e7eb)",
+          borderTop:
+            "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
           gap: "var(--sn-spacing-sm, 8px)",
         }}
       >
@@ -518,7 +543,8 @@ export function Wizard({ config }: { config: WizardConfig }) {
           style={{
             padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
             borderRadius: "var(--sn-radius-md, 6px)",
-            border: "1px solid var(--sn-color-border, #e5e7eb)",
+            border:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
             backgroundColor: "transparent",
             color: wizard.isFirstStep
               ? "var(--sn-color-muted-foreground, #6b7280)"
@@ -547,7 +573,8 @@ export function Wizard({ config }: { config: WizardConfig }) {
               style={{
                 padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
                 borderRadius: "var(--sn-radius-md, 6px)",
-                border: "1px solid var(--sn-color-border, #e5e7eb)",
+                border:
+                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                 backgroundColor: "transparent",
                 color: "var(--sn-color-muted-foreground, #6b7280)",
                 cursor: "pointer",

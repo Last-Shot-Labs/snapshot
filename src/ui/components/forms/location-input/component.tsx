@@ -378,6 +378,28 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
           {hasError ? errorText : config.helperText}
         </div>
       )}
+      <style>{`
+        [data-snapshot-component="location-input"] input:focus {
+          outline: none;
+          border-color: var(--sn-color-primary, #2563eb);
+          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
+        }
+        [data-snapshot-component="location-input"] input:focus-visible {
+          outline: none;
+          border-color: var(--sn-color-primary, #2563eb);
+          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
+        }
+        [data-snapshot-component="location-input"] button:hover {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="location-input"] button:focus {
+          outline: none;
+        }
+        [data-snapshot-component="location-input"] button:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </div>
   );
 }

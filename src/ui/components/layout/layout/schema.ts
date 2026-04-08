@@ -16,6 +16,8 @@ export const layoutConfigSchema = z
       .default("sidebar"),
     /** Custom sidebar width (CSS value). Default: 16rem. */
     sidebarWidth: z.string().optional(),
+    /** Optional CSS class name. */
+    className: z.string().optional(),
     /** Optional inline styles applied to the root layout element. */
     style: z.record(z.union([z.string(), z.number()])).optional(),
   })

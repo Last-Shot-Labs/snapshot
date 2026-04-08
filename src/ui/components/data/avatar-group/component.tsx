@@ -122,7 +122,8 @@ export function AvatarGroup({ config }: { config: AvatarGroupConfig }) {
             width: px,
             height: px,
             borderRadius: "var(--sn-radius-full, 9999px)",
-            border: "2px solid var(--sn-color-card, #ffffff)",
+            border:
+              "var(--sn-border-default, 2px) solid var(--sn-color-card, #ffffff)",
             overflow: "hidden",
             flexShrink: 0,
             marginLeft: i > 0 ? `-${overlap}px` : undefined,
@@ -171,7 +172,8 @@ export function AvatarGroup({ config }: { config: AvatarGroupConfig }) {
             width: px,
             height: px,
             borderRadius: "var(--sn-radius-full, 9999px)",
-            border: "2px solid var(--sn-color-card, #ffffff)",
+            border:
+              "var(--sn-border-default, 2px) solid var(--sn-color-card, #ffffff)",
             backgroundColor: "var(--sn-color-muted, #e5e7eb)",
             color: "var(--sn-color-muted-foreground, #6b7280)",
             display: "flex",

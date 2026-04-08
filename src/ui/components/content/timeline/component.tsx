@@ -290,7 +290,7 @@ export function Timeline({ config }: { config: TimelineConfig }) {
                 <div
                   data-testid="timeline-connector"
                   style={{
-                    width: 2,
+                    width: "var(--sn-border-thick, 2px)",
                     flex: 1,
                     backgroundColor: "var(--sn-color-border, #e5e7eb)",
                     marginTop: "var(--sn-spacing-xs, 0.25rem)",
@@ -393,6 +393,28 @@ export function Timeline({ config }: { config: TimelineConfig }) {
           </div>
         );
       })}
+      <style>{`
+        [data-snapshot-component="timeline"] button:hover {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="timeline"] button:focus {
+          outline: none;
+        }
+        [data-snapshot-component="timeline"] button:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+        [data-snapshot-component="timeline"] [data-testid="timeline-item"][role="button"]:hover {
+          background: var(--sn-color-accent, var(--sn-color-muted));
+        }
+        [data-snapshot-component="timeline"] [data-testid="timeline-item"][role="button"]:focus {
+          outline: none;
+        }
+        [data-snapshot-component="timeline"] [data-testid="timeline-item"][role="button"]:focus-visible {
+          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+          outline-offset: var(--sn-ring-offset, 2px);
+        }
+      `}</style>
     </div>
   );
 }
