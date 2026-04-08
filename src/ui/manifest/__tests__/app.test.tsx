@@ -82,10 +82,14 @@ describe("injectStyleSheet", () => {
 });
 
 describe("ManifestApp", () => {
+  const originalFetch = global.fetch;
+
   afterEach(() => {
     const el = document.getElementById("snapshot-tokens");
     if (el) el.remove();
     window.history.replaceState({}, "", "/");
+    global.fetch = originalFetch;
+    vi.restoreAllMocks();
   });
 
   it("renders page content from manifest", () => {
@@ -174,6 +178,149 @@ describe("ManifestApp", () => {
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "0" })).toBeDefined();
+    });
+  });
+
+  it("renders manifest navigation and navigates within the shell", async () => {
+    const manifest: ManifestConfig = {
+      navigation: {
+        mode: "sidebar",
+        items: [
+          { label: "Home", path: "/" },
+          { label: "About", path: "/about" },
+        ],
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Home Page" }],
+        },
+        {
+          id: "about",
+          path: "/about",
+          content: [{ type: "heading", text: "About Page" }],
+        },
+      ],
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+    fireEvent.click(screen.getByRole("button", { name: "About" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("About Page")).toBeDefined();
+    });
+  });
+
+  it("redirects guarded routes to the configured fallback", async () => {
+    window.history.replaceState({}, "", "/private");
+
+    const manifest: ManifestConfig = {
+      state: {
+        user: {
+          scope: "app",
+          default: null,
+        },
+      },
+      routes: [
+        {
+          id: "login",
+          path: "/login",
+          content: [{ type: "heading", text: "Login Page" }],
+        },
+        {
+          id: "private",
+          path: "/private",
+          guard: {
+            authenticated: true,
+            redirectTo: "/login",
+          },
+          content: [{ type: "heading", text: "Private Page" }],
+        },
+      ],
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Login Page")).toBeDefined();
+    });
+  });
+
+  it("renders named overlays opened by actions", async () => {
+    const manifest: ManifestConfig = {
+      overlays: {
+        help: {
+          type: "modal",
+          title: "Need Help?",
+          content: [{ type: "heading", text: "Overlay Content" }],
+        },
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [
+            {
+              type: "button",
+              label: "Open Help",
+              action: {
+                type: "open-modal",
+                modal: "help",
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+    fireEvent.click(screen.getByRole("button", { name: "Open Help" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Need Help?")).toBeDefined();
+      expect(screen.getByText("Overlay Content")).toBeDefined();
+    });
+  });
+
+  it("preloads route resources before rendering page content", async () => {
+    let resolveFetch: ((response: Response) => void) | null = null;
+    global.fetch = vi.fn(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolveFetch = resolve;
+        }),
+    ) as typeof fetch;
+
+    const manifest: ManifestConfig = {
+      resources: {
+        me: {
+          method: "GET",
+          endpoint: "/api/me",
+        },
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          preload: ["me"],
+          content: [{ type: "heading", text: "Ready" }],
+        },
+      ],
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+    expect(screen.getByText("Loading...")).toBeDefined();
+
+    resolveFetch?.(
+      new Response(JSON.stringify({ id: 1, name: "Ada" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Ready")).toBeDefined();
     });
   });
 });

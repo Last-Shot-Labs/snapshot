@@ -64,12 +64,24 @@ describe("manifestConfigSchema", () => {
           { type: "api", method: "DELETE", endpoint: "/api/users/{id}" },
         ],
       },
+      overlays: {
+        help: {
+          type: "modal",
+          title: "Help",
+          content: [{ type: "heading", text: "Overlay" }],
+        },
+      },
       routes: [
         {
           id: "dashboard",
           path: "/dashboard",
           title: "Dashboard",
           layout: "sidebar" as const,
+          preload: ["user.list"],
+          guard: {
+            authenticated: true,
+            redirectTo: "/dashboard",
+          },
           content: [
             {
               type: "heading",
