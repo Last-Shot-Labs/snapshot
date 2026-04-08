@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
@@ -65,9 +66,9 @@ describe("DropdownMenu", () => {
     const wrapper = createTestWrapper();
     render(<DropdownMenu config={baseConfig} />, { wrapper });
 
-    expect(
-      screen.getByTestId("dropdown-menu-trigger").textContent,
-    ).toContain("Actions");
+    expect(screen.getByTestId("dropdown-menu-trigger").textContent).toContain(
+      "Actions",
+    );
   });
 
   it("menu is not visible initially", () => {
@@ -110,9 +111,9 @@ describe("DropdownMenu", () => {
     render(<DropdownMenu config={config} />, { wrapper });
     fireEvent.click(screen.getByTestId("dropdown-menu-trigger"));
 
-    expect(
-      screen.getByTestId("dropdown-menu-label").textContent,
-    ).toContain("Options");
+    expect(screen.getByTestId("dropdown-menu-label").textContent).toContain(
+      "Options",
+    );
     expect(screen.getByTestId("dropdown-menu-separator")).toBeTruthy();
     expect(screen.getAllByTestId("dropdown-menu-item")).toHaveLength(2);
   });

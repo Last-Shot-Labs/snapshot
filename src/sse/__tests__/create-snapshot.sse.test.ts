@@ -16,59 +16,60 @@
  * no jsdom, no @testing-library/react. The test environment is node.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { SseManager } from '../manager'
-import type { SseConnectionStatus } from '../manager'
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { SseManager } from "../manager";
+import type { SseConnectionStatus } from "../manager";
 
 // ── Mock EventSource ──────────────────────────────────────────────────────────
 
 class MockEventSource {
-  static instances: MockEventSource[] = []
+  static instances: MockEventSource[] = [];
 
-  url: string
-  withCredentials: boolean
-  onopen: ((e: Event) => void) | null = null
-  onerror: ((e: Event) => void) | null = null
+  url: string;
+  withCredentials: boolean;
+  onopen: ((e: Event) => void) | null = null;
+  onerror: ((e: Event) => void) | null = null;
 
-  readonly addEventListener = vi.fn()
-  readonly removeEventListener = vi.fn()
-  readonly close = vi.fn()
+  readonly addEventListener = vi.fn();
+  readonly removeEventListener = vi.fn();
+  readonly close = vi.fn();
 
   constructor(url: string, init?: EventSourceInit) {
-    this.url = url
-    this.withCredentials = init?.withCredentials ?? false
-    MockEventSource.instances.push(this)
+    this.url = url;
+    this.withCredentials = init?.withCredentials ?? false;
+    MockEventSource.instances.push(this);
   }
 
   simulateOpen() {
-    this.onopen?.(new Event('open'))
+    this.onopen?.(new Event("open"));
   }
 
   simulateError() {
-    this.onerror?.(new Event('error'))
+    this.onerror?.(new Event("error"));
   }
 
   simulateMessage(eventName: string, data: unknown) {
-    const calls = this.addEventListener.mock.calls
+    const calls = this.addEventListener.mock.calls;
     for (const [name, handler] of calls) {
       if (name === eventName) {
         const msg = Object.assign(new Event(eventName), {
           data: JSON.stringify(data),
-        }) as MessageEvent
-        ;(handler as EventListener)(msg)
+        }) as MessageEvent;
+        (handler as EventListener)(msg);
       }
     }
   }
 }
 
+const originalEventSource = (globalThis as any).EventSource;
 beforeEach(() => {
-  MockEventSource.instances = []
-  vi.stubGlobal('EventSource', MockEventSource)
-})
+  MockEventSource.instances = [];
+  (globalThis as any).EventSource = MockEventSource;
+});
 
 afterEach(() => {
-  vi.unstubAllGlobals()
-})
+  (globalThis as any).EventSource = originalEventSource;
+});
 
 // ── Simulated factory closure helpers ────────────────────────────────────────
 //
@@ -76,46 +77,49 @@ afterEach(() => {
 // QueryClient, router), we simulate the exact SSE registry pattern the factory
 // uses and verify the per-endpoint behaviours.
 
-interface RegistryEntry { manager: SseManager; url: string }
+interface RegistryEntry {
+  manager: SseManager;
+  url: string;
+}
 
 function buildSseRegistry(
   apiUrl: string,
   endpointPaths: string[],
 ): Map<string, RegistryEntry> {
-  const registry = new Map<string, RegistryEntry>()
+  const registry = new Map<string, RegistryEntry>();
   for (const path of endpointPaths) {
-    const url = `${apiUrl}${path}`
-    const manager = new SseManager({})
-    manager.connect(url)
-    registry.set(path, { manager, url })
+    const url = `${apiUrl}${path}`;
+    const manager = new SseManager({});
+    manager.connect(url);
+    registry.set(path, { manager, url });
   }
-  return registry
+  return registry;
 }
 
 function makeUseEffect() {
-  const cleanups: Array<() => void> = []
-  const effects: Array<() => (() => void) | void> = []
+  const cleanups: Array<() => void> = [];
+  const effects: Array<() => (() => void) | void> = [];
   function useEffect(fn: () => (() => void) | void) {
-    effects.push(fn)
+    effects.push(fn);
   }
   function runEffects() {
     for (const fn of effects.splice(0)) {
-      const cleanup = fn()
-      if (typeof cleanup === 'function') cleanups.push(cleanup)
+      const cleanup = fn();
+      if (typeof cleanup === "function") cleanups.push(cleanup);
     }
   }
   function runCleanups() {
-    for (const fn of cleanups.splice(0)) fn()
+    for (const fn of cleanups.splice(0)) fn();
   }
-  return { useEffect, runEffects, runCleanups }
+  return { useEffect, runEffects, runCleanups };
 }
 
 // Simulate useSSE(endpoint) — returns { status }
 function buildUseSSE(registry: Map<string, RegistryEntry>) {
   return function useSSE(endpoint: string): { status: SseConnectionStatus } {
-    const entry = registry.get(endpoint)
-    return { status: entry ? entry.manager.state : 'closed' }
-  }
+    const entry = registry.get(endpoint);
+    return { status: entry ? entry.manager.state : "closed" };
+  };
 }
 
 // Simulate useSseEvent(endpoint, event) — attaches handler, returns { data, status }
@@ -125,233 +129,250 @@ function buildUseSseEvent(registry: Map<string, RegistryEntry>) {
     event: string,
     useEffect: (fn: () => (() => void) | void) => void,
   ): { data: T | null; status: SseConnectionStatus } {
-    const entry = registry.get(endpoint)
-    let capturedData: T | null = null
+    const entry = registry.get(endpoint);
+    let capturedData: T | null = null;
 
     useEffect(() => {
-      if (!entry) return
-      const { manager } = entry
+      if (!entry) return;
+      const { manager } = entry;
 
       const handler = (payload: unknown) => {
-        capturedData = payload as T
-      }
+        capturedData = payload as T;
+      };
 
-      manager.on(event, handler)
+      manager.on(event, handler);
       return () => {
-        manager.off(event, handler)
-      }
-    })
+        manager.off(event, handler);
+      };
+    });
 
     return {
       data: capturedData,
-      status: entry ? entry.manager.state : 'closed',
-    }
-  }
+      status: entry ? entry.manager.state : "closed",
+    };
+  };
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
-const API_URL = 'http://localhost:3000'
-const FEED_PATH = '/__sse/feed'
-const ADMIN_PATH = '/__sse/admin'
+const API_URL = "http://localhost:3000";
+const FEED_PATH = "/__sse/feed";
+const ADMIN_PATH = "/__sse/admin";
 
-describe('createSnapshot SSE — no SSE config', () => {
-  it('useSSE returns closed for any endpoint', () => {
-    const registry = new Map<string, RegistryEntry>()
-    const useSSE = buildUseSSE(registry)
-    expect(useSSE(FEED_PATH).status).toBe('closed')
-  })
+describe("createSnapshot SSE — no SSE config", () => {
+  it("useSSE returns closed for any endpoint", () => {
+    const registry = new Map<string, RegistryEntry>();
+    const useSSE = buildUseSSE(registry);
+    expect(useSSE(FEED_PATH).status).toBe("closed");
+  });
 
-  it('useSseEvent returns null data and closed status for any endpoint', () => {
-    const registry = new Map<string, RegistryEntry>()
-    const useSseEvent = buildUseSseEvent(registry)
-    const { useEffect, runEffects } = makeUseEffect()
-    const result = useSseEvent(FEED_PATH, 'community:thread.created', useEffect)
-    runEffects()
-    expect(result.data).toBeNull()
-    expect(result.status).toBe('closed')
-    expect(MockEventSource.instances).toHaveLength(0)
-  })
-})
+  it("useSseEvent returns null data and closed status for any endpoint", () => {
+    const registry = new Map<string, RegistryEntry>();
+    const useSseEvent = buildUseSseEvent(registry);
+    const { useEffect, runEffects } = makeUseEffect();
+    const result = useSseEvent(
+      FEED_PATH,
+      "community:thread.created",
+      useEffect,
+    );
+    runEffects();
+    expect(result.data).toBeNull();
+    expect(result.status).toBe("closed");
+    expect(MockEventSource.instances).toHaveLength(0);
+  });
+});
 
-describe('createSnapshot SSE — single endpoint', () => {
-  it('creates one EventSource per configured endpoint on init', () => {
-    buildSseRegistry(API_URL, [FEED_PATH])
-    expect(MockEventSource.instances).toHaveLength(1)
-    expect(MockEventSource.instances[0]!.url).toBe(`${API_URL}${FEED_PATH}`)
-  })
+describe("createSnapshot SSE — single endpoint", () => {
+  it("creates one EventSource per configured endpoint on init", () => {
+    buildSseRegistry(API_URL, [FEED_PATH]);
+    expect(MockEventSource.instances).toHaveLength(1);
+    expect(MockEventSource.instances[0]!.url).toBe(`${API_URL}${FEED_PATH}`);
+  });
 
-  it('useSSE returns connecting immediately after init', () => {
-    const registry = buildSseRegistry(API_URL, [FEED_PATH])
-    const useSSE = buildUseSSE(registry)
-    expect(useSSE(FEED_PATH).status).toBe('connecting')
-  })
+  it("useSSE returns connecting immediately after init", () => {
+    const registry = buildSseRegistry(API_URL, [FEED_PATH]);
+    const useSSE = buildUseSSE(registry);
+    expect(useSSE(FEED_PATH).status).toBe("connecting");
+  });
 
-  it('useSSE returns open after EventSource fires open', () => {
-    const registry = buildSseRegistry(API_URL, [FEED_PATH])
-    const useSSE = buildUseSSE(registry)
+  it("useSSE returns open after EventSource fires open", () => {
+    const registry = buildSseRegistry(API_URL, [FEED_PATH]);
+    const useSSE = buildUseSSE(registry);
 
-    MockEventSource.instances[0]!.simulateOpen()
+    MockEventSource.instances[0]!.simulateOpen();
 
-    expect(useSSE(FEED_PATH).status).toBe('open')
-  })
+    expect(useSSE(FEED_PATH).status).toBe("open");
+  });
 
-  it('useSseEvent attaches handler and delivers events', () => {
-    const registry = buildSseRegistry(API_URL, [FEED_PATH])
-    const useSseEvent = buildUseSseEvent(registry)
-    const { useEffect, runEffects } = makeUseEffect()
+  it("useSseEvent attaches handler and delivers events", () => {
+    const registry = buildSseRegistry(API_URL, [FEED_PATH]);
+    const useSseEvent = buildUseSseEvent(registry);
+    const { useEffect, runEffects } = makeUseEffect();
 
-    const handler = vi.fn()
+    const handler = vi.fn();
     // Simulate component behavior: effect registers the handler
-    useSseEvent(FEED_PATH, 'community:thread.created', useEffect)
-    runEffects()
+    useSseEvent(FEED_PATH, "community:thread.created", useEffect);
+    runEffects();
 
     // Simulate the event arriving — use registry directly
-    const entry = registry.get(FEED_PATH)!
-    const es = MockEventSource.instances[0]!
+    const entry = registry.get(FEED_PATH)!;
+    const es = MockEventSource.instances[0]!;
 
     // Get the wrapped handler registered via addEventListener
-    const addCalls = es.addEventListener.mock.calls
-    const wrappedEntry = addCalls.find((args: unknown[]) => args[0] === 'community:thread.created')
-    expect(wrappedEntry).toBeDefined()
+    const addCalls = es.addEventListener.mock.calls;
+    const wrappedEntry = addCalls.find(
+      (args: unknown[]) => args[0] === "community:thread.created",
+    );
+    expect(wrappedEntry).toBeDefined();
 
     // Simulate message
-    es.simulateMessage('community:thread.created', { id: 'thread-1', title: 'Hello' })
+    es.simulateMessage("community:thread.created", {
+      id: "thread-1",
+      title: "Hello",
+    });
 
     // Verify the internal handler runs via the manager directly
-    const directHandler = vi.fn()
-    entry.manager.on('community:reply.created', directHandler)
-    es.simulateMessage('community:reply.created', { id: 'reply-1' })
-    expect(directHandler).toHaveBeenCalledWith({ id: 'reply-1' })
-  })
+    const directHandler = vi.fn();
+    entry.manager.on("community:reply.created", directHandler);
+    es.simulateMessage("community:reply.created", { id: "reply-1" });
+    expect(directHandler).toHaveBeenCalledWith({ id: "reply-1" });
+  });
 
-  it('useSseEvent cleanup removes listener from EventSource', () => {
-    const registry = buildSseRegistry(API_URL, [FEED_PATH])
-    const useSseEvent = buildUseSseEvent(registry)
-    const { useEffect, runEffects, runCleanups } = makeUseEffect()
+  it("useSseEvent cleanup removes listener from EventSource", () => {
+    const registry = buildSseRegistry(API_URL, [FEED_PATH]);
+    const useSseEvent = buildUseSseEvent(registry);
+    const { useEffect, runEffects, runCleanups } = makeUseEffect();
 
-    useSseEvent(FEED_PATH, 'community:thread.created', useEffect)
-    runEffects()
-    runCleanups()
+    useSseEvent(FEED_PATH, "community:thread.created", useEffect);
+    runEffects();
+    runCleanups();
 
-    const es = MockEventSource.instances[0]!
-    expect(es.removeEventListener).toHaveBeenCalled()
-  })
+    const es = MockEventSource.instances[0]!;
+    expect(es.removeEventListener).toHaveBeenCalled();
+  });
 
-  it('useSseEvent on unknown endpoint is a no-op — no new EventSource', () => {
-    buildSseRegistry(API_URL, [FEED_PATH])
-    const registry = buildSseRegistry(API_URL, [FEED_PATH])
-    const useSseEvent = buildUseSseEvent(registry)
-    const { useEffect, runEffects } = makeUseEffect()
+  it("useSseEvent on unknown endpoint is a no-op — no new EventSource", () => {
+    buildSseRegistry(API_URL, [FEED_PATH]);
+    const registry = buildSseRegistry(API_URL, [FEED_PATH]);
+    const useSseEvent = buildUseSseEvent(registry);
+    const { useEffect, runEffects } = makeUseEffect();
 
-    const countBefore = MockEventSource.instances.length
-    useSseEvent('/__sse/nonexistent', 'some:event', useEffect)
-    runEffects()
+    const countBefore = MockEventSource.instances.length;
+    useSseEvent("/__sse/nonexistent", "some:event", useEffect);
+    runEffects();
 
-    expect(MockEventSource.instances.length).toBe(countBefore)
-  })
-})
+    expect(MockEventSource.instances.length).toBe(countBefore);
+  });
+});
 
-describe('createSnapshot SSE — multiple endpoints', () => {
-  it('creates one EventSource per endpoint', () => {
-    buildSseRegistry(API_URL, [FEED_PATH, ADMIN_PATH])
-    expect(MockEventSource.instances).toHaveLength(2)
-    const urls = MockEventSource.instances.map((es) => es.url)
-    expect(urls).toContain(`${API_URL}${FEED_PATH}`)
-    expect(urls).toContain(`${API_URL}${ADMIN_PATH}`)
-  })
+describe("createSnapshot SSE — multiple endpoints", () => {
+  it("creates one EventSource per endpoint", () => {
+    buildSseRegistry(API_URL, [FEED_PATH, ADMIN_PATH]);
+    expect(MockEventSource.instances).toHaveLength(2);
+    const urls = MockEventSource.instances.map((es) => es.url);
+    expect(urls).toContain(`${API_URL}${FEED_PATH}`);
+    expect(urls).toContain(`${API_URL}${ADMIN_PATH}`);
+  });
 
-  it('endpoints are independent — opening one does not affect the other', () => {
-    const registry = buildSseRegistry(API_URL, [FEED_PATH, ADMIN_PATH])
-    const useSSE = buildUseSSE(registry)
+  it("endpoints are independent — opening one does not affect the other", () => {
+    const registry = buildSseRegistry(API_URL, [FEED_PATH, ADMIN_PATH]);
+    const useSSE = buildUseSSE(registry);
 
-    const feedEs = MockEventSource.instances.find((es) => es.url.includes('feed'))!
-    feedEs.simulateOpen()
+    const feedEs = MockEventSource.instances.find((es) =>
+      es.url.includes("feed"),
+    )!;
+    feedEs.simulateOpen();
 
-    expect(useSSE(FEED_PATH).status).toBe('open')
-    expect(useSSE(ADMIN_PATH).status).toBe('connecting')
-  })
+    expect(useSSE(FEED_PATH).status).toBe("open");
+    expect(useSSE(ADMIN_PATH).status).toBe("connecting");
+  });
 
-  it('handlers on different endpoints do not cross-contaminate', () => {
-    const registry = buildSseRegistry(API_URL, [FEED_PATH, ADMIN_PATH])
+  it("handlers on different endpoints do not cross-contaminate", () => {
+    const registry = buildSseRegistry(API_URL, [FEED_PATH, ADMIN_PATH]);
 
-    const feedHandler = vi.fn()
-    const adminHandler = vi.fn()
+    const feedHandler = vi.fn();
+    const adminHandler = vi.fn();
 
-    registry.get(FEED_PATH)!.manager.on('community:thread.created', feedHandler)
-    registry.get(ADMIN_PATH)!.manager.on('community:thread.created', adminHandler)
+    registry
+      .get(FEED_PATH)!
+      .manager.on("community:thread.created", feedHandler);
+    registry
+      .get(ADMIN_PATH)!
+      .manager.on("community:thread.created", adminHandler);
 
-    const feedEs = MockEventSource.instances.find((es) => es.url.includes('feed'))!
-    feedEs.simulateMessage('community:thread.created', { id: 'feed-event' })
+    const feedEs = MockEventSource.instances.find((es) =>
+      es.url.includes("feed"),
+    )!;
+    feedEs.simulateMessage("community:thread.created", { id: "feed-event" });
 
-    expect(feedHandler).toHaveBeenCalledWith({ id: 'feed-event' })
-    expect(adminHandler).not.toHaveBeenCalled()
-  })
-})
+    expect(feedHandler).toHaveBeenCalledWith({ id: "feed-event" });
+    expect(adminHandler).not.toHaveBeenCalled();
+  });
+});
 
-describe('createSnapshot SSE — login/logout lifecycle', () => {
+describe("createSnapshot SSE — login/logout lifecycle", () => {
   function buildFactory(endpointPaths: string[]) {
-    const registry = buildSseRegistry(API_URL, endpointPaths)
+    const registry = buildSseRegistry(API_URL, endpointPaths);
 
     function reconnectAll() {
       for (const [, { manager, url }] of registry) {
-        manager.connect(url)
+        manager.connect(url);
       }
     }
 
     function closeAll() {
       for (const [, { manager }] of registry) {
-        manager.close()
+        manager.close();
       }
     }
 
-    return { registry, reconnectAll, closeAll }
+    return { registry, reconnectAll, closeAll };
   }
 
-  it('login success → connect() called on all endpoints (new EventSource per endpoint)', () => {
-    const { reconnectAll } = buildFactory([FEED_PATH, ADMIN_PATH])
-    const countBefore = MockEventSource.instances.length // 2
+  it("login success → connect() called on all endpoints (new EventSource per endpoint)", () => {
+    const { reconnectAll } = buildFactory([FEED_PATH, ADMIN_PATH]);
+    const countBefore = MockEventSource.instances.length; // 2
 
-    reconnectAll()
+    reconnectAll();
 
     // Each reconnect closes old and opens new EventSource
-    expect(MockEventSource.instances.length).toBeGreaterThan(countBefore)
+    expect(MockEventSource.instances.length).toBeGreaterThan(countBefore);
     // Old EventSources were closed
-    expect(MockEventSource.instances[0]!.close).toHaveBeenCalledTimes(1)
-    expect(MockEventSource.instances[1]!.close).toHaveBeenCalledTimes(1)
-  })
+    expect(MockEventSource.instances[0]!.close).toHaveBeenCalledTimes(1);
+    expect(MockEventSource.instances[1]!.close).toHaveBeenCalledTimes(1);
+  });
 
-  it('logout → close() called on all endpoints', () => {
-    const { closeAll } = buildFactory([FEED_PATH, ADMIN_PATH])
+  it("logout → close() called on all endpoints", () => {
+    const { closeAll } = buildFactory([FEED_PATH, ADMIN_PATH]);
 
-    closeAll()
+    closeAll();
 
     for (const es of MockEventSource.instances) {
-      expect(es.close).toHaveBeenCalledTimes(1)
+      expect(es.close).toHaveBeenCalledTimes(1);
     }
-  })
+  });
 
-  it('login then logout — new EventSources created then closed', () => {
-    const { reconnectAll, closeAll } = buildFactory([FEED_PATH])
+  it("login then logout — new EventSources created then closed", () => {
+    const { reconnectAll, closeAll } = buildFactory([FEED_PATH]);
 
-    reconnectAll()
+    reconnectAll();
     // Now 2 EventSource instances for FEED_PATH (old + new)
-    expect(MockEventSource.instances.length).toBe(2)
+    expect(MockEventSource.instances.length).toBe(2);
 
-    closeAll()
+    closeAll();
     // The second (current) one is closed
-    expect(MockEventSource.instances[1]!.close).toHaveBeenCalledTimes(1)
-  })
-})
+    expect(MockEventSource.instances[1]!.close).toHaveBeenCalledTimes(1);
+  });
+});
 
-describe('createSnapshot SSE — withCredentials propagation', () => {
-  it('passes withCredentials to EventSource', () => {
-    const registry = new Map<string, RegistryEntry>()
-    const url = `${API_URL}${FEED_PATH}`
-    const manager = new SseManager({ withCredentials: true })
-    manager.connect(url)
-    registry.set(FEED_PATH, { manager, url })
+describe("createSnapshot SSE — withCredentials propagation", () => {
+  it("passes withCredentials to EventSource", () => {
+    const registry = new Map<string, RegistryEntry>();
+    const url = `${API_URL}${FEED_PATH}`;
+    const manager = new SseManager({ withCredentials: true });
+    manager.connect(url);
+    registry.set(FEED_PATH, { manager, url });
 
-    expect(MockEventSource.instances[0]!.withCredentials).toBe(true)
-  })
-})
+    expect(MockEventSource.instances[0]!.withCredentials).toBe(true);
+  });
+});

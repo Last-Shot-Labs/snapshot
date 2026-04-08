@@ -1,15 +1,11 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    environment: 'node',
+    environment: "node",
     globals: true,
-    exclude: [
-      '**/node_modules/**',
-      '**/.claude/worktrees/**',
-    ],
-    environmentMatchGlobs: [
-      ['**/ui/**/*.test.{ts,tsx}', 'happy-dom'],
-    ],
+    setupFiles: ["@testing-library/jest-dom"],
+    exclude: ["**/node_modules/**", "**/.claude/worktrees/**"],
+    environmentMatchGlobs: [["**/ui/**/*.test.{ts,tsx}", "happy-dom"]],
   },
-})
+});

@@ -1,4 +1,4 @@
-import type { ScaffoldConfig } from '../../types'
+import type { ScaffoldConfig } from "../../types";
 
 export function generateRootLayoutSidebar(): string {
   return `import { useAtom } from 'jotai'
@@ -29,7 +29,7 @@ export function RootLayout({ children }: { children: React.ReactNode }) {
     </div>
   )
 }
-`
+`;
 }
 
 export function generateSidebar(): string {
@@ -55,7 +55,7 @@ export function Sidebar() {
     </aside>
   )
 }
-`
+`;
 }
 
 export function generateSidebarHeader(config: ScaffoldConfig): string {
@@ -70,7 +70,7 @@ export function SidebarHeader() {
     </div>
   )
 }
-`
+`;
 }
 
 export function generateSidebarNav(): string {
@@ -78,7 +78,6 @@ export function generateSidebarNav(): string {
 
 const navItems = [
   { to: '/', label: 'Dashboard' },
-  { to: '/settings', label: 'Settings' },
 ] as const
 
 export function SidebarNav() {
@@ -97,7 +96,7 @@ export function SidebarNav() {
     </nav>
   )
 }
-`
+`;
 }
 
 export function generateTopBar(): string {
@@ -138,5 +137,5 @@ export function TopBar() {
     </header>
   )
 }
-`
+`;
 }
