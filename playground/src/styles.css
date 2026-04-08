@@ -166,14 +166,25 @@ body {
 /* Tab nav for pages */
 .page-tabs {
   display: flex;
-  flex-wrap: wrap;
   gap: 0;
   border-bottom: 2px solid var(--sn-color-border, #e5e7eb);
   margin-bottom: 2rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sn-color-muted-foreground, #9ca3af) transparent;
+}
+.page-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+.page-tabs::-webkit-scrollbar-thumb {
+  background: var(--sn-color-muted-foreground, #9ca3af);
+  border-radius: 4px;
 }
 
 .page-tab {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
   border: none;
   background: none;
   cursor: pointer;
