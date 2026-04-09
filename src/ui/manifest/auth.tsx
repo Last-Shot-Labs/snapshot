@@ -114,13 +114,108 @@ function resolveHomePath(manifest: CompiledManifest): string {
   return manifest.app.home ?? manifest.firstRoute?.path ?? "/";
 }
 
+function getAuthScreenOptions(manifest: CompiledManifest, screen: AuthScreen) {
+  return manifest.auth?.screenOptions?.[screen];
+}
+
+function resolveConfiguredLinks(
+  manifest: CompiledManifest,
+  screen: AuthScreen,
+): Array<{ label: string; path: string }> {
+  const links = getAuthScreenOptions(manifest, screen)?.links ?? [];
+
+  return links
+    .map((link) => {
+      const path =
+        link.path ??
+        (link.screen ? inferAuthScreenPath(manifest, link.screen) : undefined);
+
+      if (!path) {
+        return null;
+      }
+
+      return {
+        label: link.label,
+        path,
+      };
+    })
+    .filter((value): value is { label: string; path: string } => value != null);
+}
+
+function resolveAuthHeading(
+  manifest: CompiledManifest,
+  screen: AuthScreen,
+): { title: string; description: string } {
+  const branding = manifest.auth?.branding;
+  const options = getAuthScreenOptions(manifest, screen);
+
+  return {
+    title:
+      options?.title ??
+      branding?.title ??
+      (
+        {
+          login: "Sign in",
+          register: "Create account",
+          "forgot-password": "Forgot password",
+          "reset-password": "Reset password",
+          "verify-email": "Verify email",
+          mfa: "Two-factor verification",
+        } as const
+      )[screen],
+    description:
+      options?.description ??
+      branding?.description ??
+      (
+        {
+          login: "Sign in to continue.",
+          register: "Create your account to get started.",
+          "forgot-password": "Enter your email and we will send a reset link.",
+          "reset-password": "Choose a new password for your account.",
+          "verify-email": "Confirm your email address to finish setup.",
+          mfa: "Enter the verification code from your authentication method.",
+        } as const
+      )[screen],
+  };
+}
+
+function resolveSubmitLabel(
+  manifest: CompiledManifest,
+  screen: AuthScreen,
+  fallback: string,
+): string {
+  return getAuthScreenOptions(manifest, screen)?.submitLabel ?? fallback;
+}
+
+function resolveSuccessMessage(
+  manifest: CompiledManifest,
+  screen: AuthScreen,
+  fallback: string,
+): string {
+  return getAuthScreenOptions(manifest, screen)?.successMessage ?? fallback;
+}
+
 function resolvePostAuthPath(
   manifest: CompiledManifest,
   search: URLSearchParams,
+  flow?: "login" | "register" | "mfa",
 ): string {
   const redirectTarget = search.get("redirect") ?? search.get("redirectTo");
   if (redirectTarget && redirectTarget.startsWith("/")) {
     return redirectTarget;
+  }
+
+  const configuredRedirect =
+    flow === "login"
+      ? manifest.auth?.redirects?.afterLogin
+      : flow === "register"
+        ? manifest.auth?.redirects?.afterRegister
+        : flow === "mfa"
+          ? manifest.auth?.redirects?.afterMfa
+          : undefined;
+
+  if (configuredRedirect) {
+    return configuredRedirect;
   }
 
   return resolveHomePath(manifest);
@@ -167,7 +262,10 @@ function useGuestRouteRedirect(
       screen === "forgot-password" ||
       screen === "reset-password"
     ) {
-      navigate(resolveHomePath(manifest), { replace: true });
+      navigate(
+        manifest.auth?.redirects?.authenticated ?? resolveHomePath(manifest),
+        { replace: true },
+      );
     }
   }, [authState?.isAuthenticated, authState?.isLoading, manifest, navigate, screen]);
 }
@@ -223,30 +321,7 @@ function AuthShell({
   children: React.ReactNode;
 }) {
   const branding = manifest.auth?.branding;
-  const title =
-    branding?.title ??
-    (
-      {
-        login: "Sign in",
-        register: "Create account",
-        "forgot-password": "Forgot password",
-        "reset-password": "Reset password",
-        "verify-email": "Verify email",
-        mfa: "Two-factor verification",
-      } as const
-    )[screen];
-  const description =
-    branding?.description ??
-    (
-      {
-        login: "Sign in to continue.",
-        register: "Create your account to get started.",
-        "forgot-password": "Enter your email and we will send a reset link.",
-        "reset-password": "Choose a new password for your account.",
-        "verify-email": "Confirm your email address to finish setup.",
-        mfa: "Enter the verification code from your authentication method.",
-      } as const
-    )[screen];
+  const { title, description } = resolveAuthHeading(manifest, screen);
 
   return (
     <main

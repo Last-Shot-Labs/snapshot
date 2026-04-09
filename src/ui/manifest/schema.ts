@@ -212,20 +212,45 @@ export const navigationConfigSchema = z
   })
   .strict();
 
+const authScreenNameSchema = z.enum([
+  "login",
+  "register",
+  "forgot-password",
+  "reset-password",
+  "verify-email",
+  "mfa",
+]);
+
+const authScreenLinkSchema = z
+  .object({
+    label: z.string(),
+    path: z.string().startsWith("/").optional(),
+    screen: authScreenNameSchema.optional(),
+  })
+  .strict()
+  .superRefine((data, ctx) => {
+    if (!data.path && !data.screen) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Auth links must define either path or screen",
+        path: [],
+      });
+    }
+  });
+
+const authScreenOptionsSchema = z
+  .object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    submitLabel: z.string().optional(),
+    successMessage: z.string().optional(),
+    links: z.array(authScreenLinkSchema).optional(),
+  })
+  .strict();
+
 export const authScreenConfigSchema = z
   .object({
-    screens: z
-      .array(
-        z.enum([
-          "login",
-          "register",
-          "forgot-password",
-          "reset-password",
-          "verify-email",
-          "mfa",
-        ]),
-      )
-      .min(1),
+    screens: z.array(authScreenNameSchema).min(1),
     providers: z
       .array(z.enum(["google", "github", "apple", "microsoft"]))
       .optional(),
@@ -236,6 +261,26 @@ export const authScreenConfigSchema = z
         title: z.string().optional(),
         description: z.string().optional(),
       })
+      .optional(),
+    redirects: z
+      .object({
+        authenticated: z.string().startsWith("/").optional(),
+        afterLogin: z.string().startsWith("/").optional(),
+        afterRegister: z.string().startsWith("/").optional(),
+        afterMfa: z.string().startsWith("/").optional(),
+      })
+      .strict()
+      .optional(),
+    screenOptions: z
+      .object({
+        login: authScreenOptionsSchema.optional(),
+        register: authScreenOptionsSchema.optional(),
+        "forgot-password": authScreenOptionsSchema.optional(),
+        "reset-password": authScreenOptionsSchema.optional(),
+        "verify-email": authScreenOptionsSchema.optional(),
+        mfa: authScreenOptionsSchema.optional(),
+      })
+      .strict()
       .optional(),
   })
   .strict();
