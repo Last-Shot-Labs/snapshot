@@ -141,6 +141,7 @@ describe("Action Zod Schemas", () => {
         type: "open-modal",
         modal: "edit-user",
         payload: { userId: "1" },
+        resultTarget: "global.editResult",
       });
       expect(result.success).toBe(true);
     });
@@ -156,6 +157,7 @@ describe("Action Zod Schemas", () => {
       const result = closeModalActionSchema.safeParse({
         type: "close-modal",
         modal: "edit-user",
+        result: { saved: true },
       });
       expect(result.success).toBe(true);
     });

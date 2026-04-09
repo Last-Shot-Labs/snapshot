@@ -28,6 +28,16 @@ describe("useModalManager", () => {
     expect(result.current.getPayload("edit-user")).toEqual({ userId: "1" });
   });
 
+  it("stores result targets for opened overlays", () => {
+    const { result } = renderHook(() => useModalManager(), { wrapper });
+    act(() =>
+      result.current.open("edit-user", { userId: "1" }, "global.editResult"),
+    );
+    expect(result.current.getResultTarget("edit-user")).toBe(
+      "global.editResult",
+    );
+  });
+
   it("opens multiple modals in stack order", () => {
     const { result } = renderHook(() => useModalManager(), { wrapper });
     act(() => {
@@ -40,13 +50,14 @@ describe("useModalManager", () => {
   it("closes a specific modal by id", () => {
     const { result } = renderHook(() => useModalManager(), { wrapper });
     act(() => {
-      result.current.open("modal-a");
+      result.current.open("modal-a", undefined, "global.result");
       result.current.open("modal-b");
     });
     act(() => result.current.close("modal-a"));
     expect(result.current.stack).toEqual(["modal-b"]);
     expect(result.current.isOpen("modal-a")).toBe(false);
     expect(result.current.getPayload("modal-a")).toBeUndefined();
+    expect(result.current.getResultTarget("modal-a")).toBeUndefined();
   });
 
   it("closes the topmost modal when no id is provided", () => {

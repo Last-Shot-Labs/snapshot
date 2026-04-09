@@ -210,6 +210,30 @@ describe("useActionExecutor", () => {
     });
   });
 
+  it("writes overlay results to the configured target on close", async () => {
+    const atom = appRegistry.register("editResult");
+    const wrapper = createWrapper({ api: mockApi, pageRegistry, appRegistry });
+    const { result } = renderHook(() => useActionExecutor(), { wrapper });
+
+    await act(async () => {
+      await result.current({
+        type: "open-modal",
+        modal: "edit",
+        resultTarget: "global.editResult",
+      });
+    });
+
+    await act(async () => {
+      await result.current({
+        type: "close-modal",
+        modal: "edit",
+        result: { saved: true, id: "42" },
+      });
+    });
+
+    expect(appRegistry.store.get(atom)).toEqual({ saved: true, id: "42" });
+  });
+
   it("executes refresh action (registers refresh atom)", async () => {
     const wrapper = createWrapper({ api: mockApi, pageRegistry });
     const { result } = renderHook(() => useActionExecutor(), { wrapper });

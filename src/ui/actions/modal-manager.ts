@@ -8,19 +8,22 @@ import { useCallback } from "react";
  */
 export const modalStackAtom = atom<string[]>([]);
 export const modalPayloadAtom = atom<Record<string, unknown>>({});
+export const modalResultTargetAtom = atom<Record<string, string>>({});
 
 /**
  * Return type of useModalManager.
  */
 export interface ModalManager {
   /** Open a modal by id. If already open, moves it to the top of the stack. */
-  open: (id: string, payload?: unknown) => void;
+  open: (id: string, payload?: unknown, resultTarget?: string) => void;
   /** Close a modal by id, or close the topmost modal if no id is provided. */
   close: (id?: string) => void;
   /** Check if a modal is currently open. */
   isOpen: (id: string) => boolean;
   /** Read the payload for a modal/drawer id. */
   getPayload: (id: string) => unknown;
+  /** Read the configured result target for a modal/drawer id. */
+  getResultTarget: (id: string) => string | undefined;
   /** The current modal stack (bottom to top). */
   stack: readonly string[];
 }
@@ -42,18 +45,31 @@ export interface ModalManager {
 export function useModalManager(): ModalManager {
   const [stack, setStack] = useAtom(modalStackAtom);
   const [payloads, setPayloads] = useAtom(modalPayloadAtom);
+  const [resultTargets, setResultTargets] = useAtom(modalResultTargetAtom);
 
   const open = useCallback(
-    (id: string, payload?: unknown) => {
+    (id: string, payload?: unknown, resultTarget?: string) => {
       setStack((prev) => [...prev.filter((m) => m !== id), id]);
-      if (payload !== undefined) {
-        setPayloads((prev) => ({
-          ...prev,
-          [id]: payload,
-        }));
-      }
+      setPayloads((prev) => {
+        const next = { ...prev };
+        if (payload !== undefined) {
+          next[id] = payload;
+        } else {
+          delete next[id];
+        }
+        return next;
+      });
+      setResultTargets((prev) => {
+        const next = { ...prev };
+        if (resultTarget) {
+          next[id] = resultTarget;
+        } else {
+          delete next[id];
+        }
+        return next;
+      });
     },
-    [setPayloads, setStack],
+    [setPayloads, setResultTargets, setStack],
   );
 
   const close = useCallback(
@@ -69,13 +85,22 @@ export function useModalManager(): ModalManager {
           delete next[removedId!];
           return next;
         });
+        setResultTargets((prev) => {
+          const next = { ...prev };
+          delete next[removedId!];
+          return next;
+        });
       }
     },
-    [setPayloads, setStack],
+    [setPayloads, setResultTargets, setStack],
   );
 
   const isOpen = useCallback((id: string) => stack.includes(id), [stack]);
   const getPayload = useCallback((id: string) => payloads[id], [payloads]);
+  const getResultTarget = useCallback(
+    (id: string) => resultTargets[id],
+    [resultTargets],
+  );
 
-  return { open, close, isOpen, getPayload, stack };
+  return { open, close, isOpen, getPayload, getResultTarget, stack };
 }

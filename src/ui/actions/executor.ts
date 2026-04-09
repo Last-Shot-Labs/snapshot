@@ -415,12 +415,40 @@ export function useActionExecutor(): ActionExecuteFn {
                     overlayRuntime,
                   )
                 : undefined,
+              builtin.resultTarget,
             );
             return;
 
-          case "close-modal":
-            modalManager.close(builtin.modal);
+          case "close-modal": {
+            const overlayId =
+              builtin.modal ?? modalManager.stack[modalManager.stack.length - 1];
+            const resultTarget = overlayId
+              ? modalManager.getResultTarget(overlayId)
+              : undefined;
+            if (resultTarget && builtin.result !== undefined) {
+              const { registry, targetId } = resolveRegistry(
+                resultTarget,
+                pageRegistry,
+                appRegistry,
+              );
+              if (registry) {
+                const targetAtom = registry.register(targetId);
+                registry.store.set(
+                  targetAtom,
+                  resolveWorkflowValue(
+                    builtin.result,
+                    builtinContext,
+                    pageRegistry,
+                    appRegistry,
+                    routeRuntime,
+                    overlayRuntime,
+                  ),
+                );
+              }
+            }
+            modalManager.close(overlayId);
             return;
+          }
 
           case "refresh": {
             const targets = builtin.target.split(",").map((target) => target.trim());

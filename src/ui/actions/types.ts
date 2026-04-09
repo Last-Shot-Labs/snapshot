@@ -62,6 +62,8 @@ export interface OpenModalAction {
   modal: string;
   /** Optional runtime payload exposed to the overlay. */
   payload?: unknown;
+  /** Optional state binding target that receives the overlay result on close. */
+  resultTarget?: string;
 }
 
 /**
@@ -71,6 +73,8 @@ export interface CloseModalAction {
   type: "close-modal";
   /** Specific modal id. Omit to close the topmost. */
   modal?: string;
+  /** Optional result written to the opener's configured result target. */
+  result?: unknown;
 }
 
 /**
@@ -187,6 +191,7 @@ export const openModalActionSchema = z
     type: z.literal("open-modal"),
     modal: z.string(),
     payload: z.unknown().optional(),
+    resultTarget: z.string().optional(),
   })
   .strict();
 
@@ -195,6 +200,7 @@ export const closeModalActionSchema = z
   .object({
     type: z.literal("close-modal"),
     modal: z.string().optional(),
+    result: z.unknown().optional(),
   })
   .strict();
 
