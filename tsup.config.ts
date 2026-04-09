@@ -110,6 +110,30 @@ export default defineConfig([
       __SNAPSHOT_VERSION__: JSON.stringify(pkg.version),
     },
   },
+  // SSR entry point — runs in Node/Bun server context, NOT in browser
+  {
+    entry: { ssr: "src/ssr/index.ts" },
+    format: ["esm", "cjs"],
+    outExtension: ({ format }) => ({ js: format === "cjs" ? ".cjs" : ".js" }),
+    dts: true,
+    sourcemap: true,
+    clean: false,
+    target: "es2022",
+    platform: "node",
+    bundle: true,
+    external: [
+      "react",
+      "react-dom",
+      "react-dom/server",
+      "@tanstack/react-query",
+      "jotai",
+      "node:fs",
+      "node:path",
+    ],
+    esbuildOptions(options) {
+      options.jsx = "automatic";
+    },
+  },
   // Vite plugin build
   {
     entry: { vite: "src/vite/index.ts" },

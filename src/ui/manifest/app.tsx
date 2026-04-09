@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createSnapshot } from "../../create-snapshot";
 import { SnapshotApiContext, useActionExecutor } from "../actions/executor";
+import { interpolate } from "../actions/interpolate";
 import { AppContextProvider, useResolveFrom, useSubscribe } from "../context/index";
 import { Nav } from "../components/layout/nav";
 import { DrawerComponent } from "../components/overlay/drawer";
@@ -94,6 +95,14 @@ function resolveRouteMatch(
     }
   }
 
+  if (manifest.app.notFound) {
+    const notFoundRoute =
+      manifest.routeMap[normalizePathname(manifest.app.notFound)];
+    if (notFoundRoute) {
+      return { route: notFoundRoute, params: {} };
+    }
+  }
+
   if (manifest.app.home) {
     const homeRoute = manifest.routeMap[normalizePathname(manifest.app.home)];
     if (homeRoute) {
@@ -105,15 +114,32 @@ function resolveRouteMatch(
     return { route: manifest.firstRoute, params: {} };
   }
 
-  if (manifest.app.notFound) {
-    const notFoundRoute =
-      manifest.routeMap[normalizePathname(manifest.app.notFound)];
-    if (notFoundRoute) {
-      return { route: notFoundRoute, params: {} };
-    }
+  return { route: null, params: {} };
+}
+
+function resolveDocumentTitle(
+  manifest: CompiledManifest,
+  route: CompiledRoute | null,
+  currentPath: string,
+  params: Record<string, string>,
+): string {
+  const appTitle = manifest.app.title?.trim();
+  const routeTitle = route?.page.title
+    ? interpolate(route.page.title, {
+        params,
+        route: {
+          id: route.id,
+          path: currentPath,
+          pattern: route.path,
+        },
+      }).trim()
+    : "";
+
+  if (routeTitle && appTitle) {
+    return `${routeTitle} | ${appTitle}`;
   }
 
-  return { route: null, params: {} };
+  return routeTitle || appTitle || "";
 }
 
 function evaluateRouteGuard(
@@ -405,6 +431,17 @@ function ManifestRouter({ manifest, api }: ManifestRouterProps) {
     () => resolveRouteMatch(manifest, currentPath),
     [currentPath, manifest],
   );
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const nextTitle = resolveDocumentTitle(manifest, route, currentPath, params);
+    if (nextTitle) {
+      document.title = nextTitle;
+    }
+  }, [currentPath, manifest, params, route]);
 
   const resolvedGuard = useResolveFrom({
     condition: route?.guard?.condition ?? null,

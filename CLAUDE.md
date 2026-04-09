@@ -29,6 +29,35 @@ Snapshot is the frontend layer of a config-driven full-stack platform. A backend
 
 `bunshot sync` bridges them: reads the backend OpenAPI spec → generates typed API client + hooks → generates page components and data bindings from the frontend manifest + OpenAPI response shapes.
 
+## Manifest-First Requirement
+
+**EVERYTHING runs in manifest mode.** The frontend manifest (`snapshot.manifest.json`)
+combined with the backend manifest (`app.manifest.json`) is the primary — and intended
+only — deployment surface. Code-only usage is not the target. If it doesn't work from a
+manifest, it is not done.
+
+This means:
+
+- Every config-driven component, page, action, and data binding must be expressible as
+  pure JSON in the snapshot manifest. If a feature requires writing React or TypeScript to
+  activate it, the feature is incomplete.
+- The manifest bootstrap layer (`ManifestApp`, `PageRenderer`, component registry) must be
+  able to wire everything — components, data sources, actions, from-ref bindings, guards,
+  auth flows, navigation — without caller-supplied function references.
+- Any feature documented as "code-driven for now" is a known gap, not a valid end state.
+  It must be tracked and closed before the feature is considered complete.
+- When writing specs: manifest wiring is a required phase, not optional, not a follow-up.
+  If the spec doesn't describe how the feature works from manifest JSON, the spec is
+  incomplete.
+- SSR integration must work from manifest config: route resolution, preloads, guards, and
+  head/meta injection must all be declarable in the manifest. The renderer contract exists
+  so the manifest can drive SSR without programmatic wiring.
+- When reviewing or writing code: ask yourself "can a user enable this feature by editing
+  their manifest JSON with no TypeScript?" If the answer is no, the design is wrong.
+
+If you implement something that doesn't work in manifest mode, flag it immediately. Do not
+call the task complete.
+
 ## Repository Structure
 
 ```

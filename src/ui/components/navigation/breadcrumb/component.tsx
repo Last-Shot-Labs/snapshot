@@ -1,5 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useActionExecutor } from "../../../actions/executor";
+import { interpolate } from "../../../actions/interpolate";
+import type { CompiledRoute } from "../../../manifest/types";
+import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
 import type { BreadcrumbConfig, BreadcrumbItemConfig } from "./types";
 
 /** Separator character lookup. */
@@ -24,6 +27,92 @@ function collapseItems(
   return [items[0]!, { label: "...", collapsed: true } as never, ...tail];
 }
 
+function normalizePath(path: string): string {
+  if (!path) return "/";
+  if (path.length > 1 && path.endsWith("/")) {
+    return path.slice(0, -1);
+  }
+  return path;
+}
+
+function routeLabel(
+  route: Pick<CompiledRoute, "id" | "path" | "page">,
+  params: Record<string, string>,
+  currentPath: string,
+): string {
+  const template = route.page.breadcrumb ?? route.page.title ?? route.id;
+  return interpolate(template, {
+    params,
+    route: {
+      id: route.id,
+      path: currentPath,
+      pattern: route.path,
+    },
+  });
+}
+
+function deriveRouteItems(
+  config: BreadcrumbConfig,
+  manifest: ReturnType<typeof useManifestRuntime>,
+  routeRuntime: ReturnType<typeof useRouteRuntime>,
+): BreadcrumbItemConfig[] {
+  if (!manifest || !routeRuntime?.currentRoute) {
+    return [];
+  }
+
+  const currentRoute = routeRuntime.currentRoute;
+  const currentPath = normalizePath(routeRuntime.currentPath);
+  const params = routeRuntime.params;
+  const items: BreadcrumbItemConfig[] = [];
+  const pushUnique = (item: BreadcrumbItemConfig) => {
+    const previous = items[items.length - 1];
+    if (previous?.path === item.path && previous?.label === item.label) {
+      return;
+    }
+    items.push(item);
+  };
+
+  if (config.includeHome !== false && manifest.app.home) {
+    const homePath = normalizePath(manifest.app.home);
+    const homeRoute = manifest.routes.find(
+      (route) => normalizePath(route.path) === homePath,
+    );
+    if (homeRoute) {
+      pushUnique({
+        label: routeLabel(homeRoute, params, homePath),
+        path: currentPath === homePath ? undefined : homePath,
+      });
+    }
+  }
+
+  const patternParts = normalizePath(currentRoute.path).split("/").filter(Boolean);
+  const currentParts = currentPath.split("/").filter(Boolean);
+
+  for (let i = 0; i < patternParts.length; i += 1) {
+    const patternPath = `/${patternParts.slice(0, i + 1).join("/")}`;
+    const actualPath = `/${currentParts.slice(0, i + 1).join("/")}`;
+    const route = manifest.routes.find(
+      (candidate) => normalizePath(candidate.path) === patternPath,
+    );
+    if (!route) {
+      continue;
+    }
+
+    pushUnique({
+      label: routeLabel(route, params, actualPath),
+      path: i === patternParts.length - 1 ? undefined : actualPath,
+    });
+  }
+
+  if (items.length === 0) {
+    pushUnique({
+      label: routeLabel(currentRoute, params, currentPath),
+    });
+  }
+
+  return items;
+}
+
 /**
  * Breadcrumb component — renders a navigation breadcrumb trail.
  *
@@ -35,12 +124,54 @@ function collapseItems(
  */
 export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
   const execute = useActionExecutor();
+  const manifest = useManifestRuntime();
+  const routeRuntime = useRouteRuntime();
   const separator = SEPARATORS[config.separator ?? "chevron"] ?? "\u203A";
+  const context = useMemo(
+    () => ({
+      params: routeRuntime?.params ?? {},
+      route: {
+        id: routeRuntime?.currentRoute?.id,
+        path: routeRuntime?.currentPath,
+        pattern: routeRuntime?.currentRoute?.path,
+      },
+    }),
+    [routeRuntime],
+  );
+
+  const resolvedItems = useMemo(() => {
+    const baseItems =
+      (config.source ?? "manual") === "route" || !config.items
+        ? deriveRouteItems(config, manifest, routeRuntime)
+        : config.items;
+
+    return baseItems.map((item) => ({
+      ...item,
+      label: interpolate(item.label, context),
+      path: item.path ? interpolate(item.path, context) : undefined,
+    }));
+  }, [config, context, manifest, routeRuntime]);
 
   const visibleItems =
     config.maxItems != null
-      ? collapseItems(config.items, config.maxItems)
-      : config.items;
+      ? collapseItems(resolvedItems, config.maxItems)
+      : resolvedItems;
+
+  const handleNavigate = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    item: BreadcrumbItemConfig,
+  ) => {
+    if (config.action) {
+      event.preventDefault();
+      void execute(config.action);
+      return;
+    }
+
+    if (item.path && routeRuntime?.navigate) {
+      event.preventDefault();
+      routeRuntime.navigate(item.path);
+    }
+  };
 
   return (
     <nav
@@ -134,12 +265,9 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                 /* Clickable breadcrumb item */
                 <a
                   href={(item as BreadcrumbItemConfig).path ?? "#"}
-                  onClick={(e) => {
-                    if (config.action) {
-                      e.preventDefault();
-                      void execute(config.action);
-                    }
-                  }}
+                  onClick={(event) =>
+                    handleNavigate(event, item as BreadcrumbItemConfig)
+                  }
                   style={{
                     color: "var(--sn-color-muted-foreground, #6b7280)",
                     textDecoration: "none",
