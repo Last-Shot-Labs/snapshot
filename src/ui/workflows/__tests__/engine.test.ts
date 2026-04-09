@@ -197,4 +197,65 @@ describe("runWorkflow", () => {
       ]),
     );
   });
+
+  it("retries a failing step until it succeeds", async () => {
+    const calls: ActionConfig[] = [];
+    const executeAction = vi.fn(async (action: ActionConfig) => {
+      calls.push(action);
+      if (calls.length < 3) {
+        throw new Error("temporary");
+      }
+    });
+
+    await runWorkflow(
+      {
+        type: "retry",
+        attempts: 3,
+        step: { type: "toast", message: "retry-me" },
+      },
+      {
+        executeAction,
+        resolveValue: (value) => value,
+      },
+    );
+
+    expect(executeAction).toHaveBeenCalledTimes(3);
+    expect(calls).toEqual([
+      { type: "toast", message: "retry-me" },
+      { type: "toast", message: "retry-me" },
+      { type: "toast", message: "retry-me" },
+    ]);
+  });
+
+  it("runs onFailure after exhausting retries", async () => {
+    const calls: Array<{
+      action: ActionConfig;
+      context: Record<string, unknown>;
+    }> = [];
+    const executeAction = vi.fn(
+      async (action: ActionConfig, context: Record<string, unknown>) => {
+        calls.push({ action, context });
+        if (action.type === "toast" && action.message === "retry-me") {
+          throw new Error("still failing");
+        }
+      },
+    );
+
+    await runWorkflow(
+      {
+        type: "retry",
+        attempts: 2,
+        step: { type: "toast", message: "retry-me" },
+        onFailure: { type: "toast", message: "fallback" },
+      },
+      {
+        executeAction,
+        resolveValue: (value) => value,
+      },
+    );
+
+    expect(executeAction).toHaveBeenCalledTimes(3);
+    expect(calls[2]?.action).toEqual({ type: "toast", message: "fallback" });
+    expect(calls[2]?.context.error).toBeInstanceOf(Error);
+  });
 });

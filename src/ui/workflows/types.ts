@@ -35,11 +35,21 @@ export interface ParallelWorkflowNode extends WorkflowBaseNode {
   branches: WorkflowDefinition[];
 }
 
+export interface RetryWorkflowNode extends WorkflowBaseNode {
+  type: "retry";
+  attempts: number;
+  delayMs?: number;
+  backoffMultiplier?: number;
+  step: WorkflowDefinition;
+  onFailure?: WorkflowDefinition;
+}
+
 export type WorkflowNode =
   | ActionConfig
   | IfWorkflowNode
   | WaitWorkflowNode
-  | ParallelWorkflowNode;
+  | ParallelWorkflowNode
+  | RetryWorkflowNode;
 export type WorkflowDefinition = WorkflowNode | WorkflowNode[];
 export type WorkflowMap = Record<string, WorkflowDefinition>;
 

@@ -3,6 +3,7 @@ import { getRegisteredWorkflowAction } from "./registry";
 import {
   isParallelWorkflowNode,
   isIfWorkflowNode,
+  isRetryWorkflowNode,
   isRunWorkflowAction,
   isWaitWorkflowNode,
   normalizeWorkflowDefinition,
@@ -102,6 +103,45 @@ export async function runWorkflow(
         await Promise.all(
           node.branches.map((branch) => runDefinition(branch, nextContext)),
         );
+        continue;
+      }
+
+      if (isRetryWorkflowNode(node)) {
+        const delayMs = node.delayMs ?? 0;
+        const backoffMultiplier = node.backoffMultiplier ?? 1;
+        let lastError: unknown;
+
+        for (let attempt = 0; attempt < node.attempts; attempt += 1) {
+          try {
+            await runDefinition(node.step, nextContext);
+            lastError = undefined;
+            break;
+          } catch (error) {
+            lastError = error;
+            if (attempt >= node.attempts - 1) {
+              break;
+            }
+
+            const waitTime = Math.round(
+              delayMs * Math.pow(backoffMultiplier, attempt),
+            );
+            if (waitTime > 0) {
+              await delay(waitTime);
+            }
+          }
+        }
+
+        if (lastError !== undefined) {
+          if (node.onFailure) {
+            await runDefinition(node.onFailure, {
+              ...nextContext,
+              error: lastError,
+            });
+            continue;
+          }
+          throw lastError;
+        }
+
         continue;
       }
 

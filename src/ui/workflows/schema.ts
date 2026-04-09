@@ -44,6 +44,20 @@ export const workflowNodeSchema: z.ZodType = z.lazy(() =>
           .min(1),
       })
       .strict(),
+    z
+      .object({
+        type: z.literal("retry"),
+        id: z.string().optional(),
+        when: workflowConditionSchema.optional(),
+        attempts: z.number().int().min(1),
+        delayMs: z.number().int().min(0).optional(),
+        backoffMultiplier: z.number().positive().optional(),
+        step: z.union([workflowNodeSchema, z.array(workflowNodeSchema)]),
+        onFailure: z
+          .union([workflowNodeSchema, z.array(workflowNodeSchema)])
+          .optional(),
+      })
+      .strict(),
   ]),
 );
 
