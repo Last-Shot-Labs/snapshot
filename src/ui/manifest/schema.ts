@@ -311,6 +311,8 @@ export const overlayConfigSchema: z.ZodType = z.union([
       title: z.union([z.string(), fromRefSchema]).optional(),
       size: z.enum(["sm", "md", "lg", "xl", "full"]).optional(),
       content: z.array(componentConfigSchema).min(1),
+      onOpen: z.union([z.string().min(1), workflowDefinitionSchema]).optional(),
+      onClose: z.union([z.string().min(1), workflowDefinitionSchema]).optional(),
       className: z.string().optional(),
       style: z.record(z.union([z.string(), z.number()])).optional(),
       footer: z
@@ -328,6 +330,8 @@ export const overlayConfigSchema: z.ZodType = z.union([
       size: z.enum(["sm", "md", "lg", "xl", "full"]).optional(),
       side: z.enum(["left", "right"]).optional(),
       content: z.array(componentConfigSchema).min(1),
+      onOpen: z.union([z.string().min(1), workflowDefinitionSchema]).optional(),
+      onClose: z.union([z.string().min(1), workflowDefinitionSchema]).optional(),
       className: z.string().optional(),
       style: z.record(z.union([z.string(), z.number()])).optional(),
       footer: z

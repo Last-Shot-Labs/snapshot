@@ -101,7 +101,14 @@ function resolveFromRef(
         params?: Record<string, string>;
       }
     | null,
-  overlayRuntime: { id?: string; kind?: string; payload?: unknown } | null,
+  overlayRuntime:
+    | {
+        id?: string;
+        kind?: string;
+        payload?: unknown;
+        result?: unknown;
+      }
+    | null,
 ): unknown {
   const refPath = ref.from;
 
@@ -132,6 +139,7 @@ function resolveFromRef(
       id: overlayRuntime?.id,
       kind: overlayRuntime?.kind,
       payload: overlayRuntime?.payload,
+      result: overlayRuntime?.result,
     };
     return applyTransform(
       getNestedValue(overlayValue, refPath.slice(8)),
@@ -187,7 +195,14 @@ function resolveWorkflowValue(
         params?: Record<string, string>;
       }
     | null,
-  overlayRuntime: { id?: string; kind?: string; payload?: unknown } | null,
+  overlayRuntime:
+    | {
+        id?: string;
+        kind?: string;
+        payload?: unknown;
+        result?: unknown;
+      }
+    | null,
 ): unknown {
   if (isFromRef(value)) {
     return resolveFromRef(
@@ -425,6 +440,17 @@ export function useActionExecutor(): ActionExecuteFn {
             const resultTarget = overlayId
               ? modalManager.getResultTarget(overlayId)
               : undefined;
+            const resolvedResult =
+              builtin.result !== undefined
+                ? resolveWorkflowValue(
+                    builtin.result,
+                    builtinContext,
+                    pageRegistry,
+                    appRegistry,
+                    routeRuntime,
+                    overlayRuntime,
+                  )
+                : undefined;
             if (resultTarget && builtin.result !== undefined) {
               const { registry, targetId } = resolveRegistry(
                 resultTarget,
@@ -433,20 +459,10 @@ export function useActionExecutor(): ActionExecuteFn {
               );
               if (registry) {
                 const targetAtom = registry.register(targetId);
-                registry.store.set(
-                  targetAtom,
-                  resolveWorkflowValue(
-                    builtin.result,
-                    builtinContext,
-                    pageRegistry,
-                    appRegistry,
-                    routeRuntime,
-                    overlayRuntime,
-                  ),
-                );
+                registry.store.set(targetAtom, resolvedResult);
               }
             }
-            modalManager.close(overlayId);
+            modalManager.close(overlayId, resolvedResult);
             return;
           }
 

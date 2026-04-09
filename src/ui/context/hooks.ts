@@ -125,6 +125,7 @@ export function useSubscribe(ref: FromRef | unknown): unknown {
       id: overlayRuntime?.id,
       kind: overlayRuntime?.kind,
       payload: overlayRuntime?.payload,
+      result: overlayRuntime?.result,
     };
     const resolved = getNestedValue(overlayValue, refPath.slice(8));
     return applyTransform(

@@ -42,7 +42,7 @@ const ALIGN_MAP: Record<string, string> = {
  * @param props.config - The drawer config from the manifest
  */
 export function DrawerComponent({ config }: { config: DrawerConfig }) {
-  const { isOpen, close, payload } = useDrawer(config);
+  const { isOpen, close, payload, result } = useDrawer(config);
   const panelRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const [animating, setAnimating] = useState(false);
@@ -108,10 +108,11 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
 
   return (
     <OverlayRuntimeProvider
-      value={{ id: overlayId, kind: "drawer", payload }}
+      value={{ id: overlayId, kind: "drawer", payload, result }}
     >
       <DrawerSurface
         config={config}
+        isOpen={isOpen}
         panelRef={panelRef}
         side={side}
         width={width}
@@ -127,6 +128,7 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
 
 function DrawerSurface({
   config,
+  isOpen,
   panelRef,
   side,
   width,
@@ -137,6 +139,7 @@ function DrawerSurface({
   handleOverlayClick,
 }: {
   config: DrawerConfig;
+  isOpen: boolean;
   panelRef: React.RefObject<HTMLDivElement | null>;
   side: string;
   width: string;
@@ -148,6 +151,43 @@ function DrawerSurface({
 }) {
   const execute = useActionExecutor();
   const title = useSubscribe(config.title) as string | undefined;
+  const payload = useSubscribe({ from: "overlay.payload" });
+  const result = useSubscribe({ from: "overlay.result" });
+  const previousOpenRef = useRef<boolean | undefined>(undefined);
+
+  useEffect(() => {
+    const previousOpen = previousOpenRef.current;
+    previousOpenRef.current = isOpen;
+
+    const lifecycleContext = {
+      overlay: {
+        payload,
+        result,
+      },
+    };
+
+    if (isOpen && previousOpen !== true && config.onOpen) {
+      if (typeof config.onOpen === "string") {
+        void execute(
+          { type: "run-workflow", workflow: config.onOpen },
+          lifecycleContext,
+        );
+      } else {
+        void execute(config.onOpen as never, lifecycleContext);
+      }
+    }
+
+    if (!isOpen && previousOpen === true && config.onClose) {
+      if (typeof config.onClose === "string") {
+        void execute(
+          { type: "run-workflow", workflow: config.onClose },
+          lifecycleContext,
+        );
+      } else {
+        void execute(config.onClose as never, lifecycleContext);
+      }
+    }
+  }, [config.onClose, config.onOpen, execute, isOpen, payload, result]);
 
   return (
     <div

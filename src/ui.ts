@@ -598,6 +598,13 @@ export type {
   SettingsSectionDef,
 } from "./ui/presets/types";
 
+// Components — SnapshotImage
+export {
+  SnapshotImage,
+  snapshotImageSchema,
+} from "./ui/components/media/image/index";
+export type { SnapshotImageConfig } from "./ui/components/media/image/index";
+
 // Register all built-in components
 import "./ui/components/register";
 

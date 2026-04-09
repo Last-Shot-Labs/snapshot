@@ -5,8 +5,16 @@ import { createElement } from "react";
 import { Provider } from "jotai/react";
 import { ModalComponent } from "../component";
 import { registerComponent } from "../../../../manifest/component-registry";
-import { modalStackAtom } from "../../../../actions/modal-manager";
+import {
+  modalPayloadAtom,
+  modalStackAtom,
+} from "../../../../actions/modal-manager";
 import { createStore } from "jotai/vanilla";
+import {
+  AppRegistryContext,
+  PageRegistryContext,
+} from "../../../../context/providers";
+import { AtomRegistryImpl } from "../../../../state/registry";
 import type { ModalConfig } from "../schema";
 
 /** A simple child component for testing recursive rendering. */
@@ -152,5 +160,67 @@ describe("ModalComponent", () => {
     });
     const dialog = container.querySelector("[data-snapshot-modal-dialog]");
     expect(dialog).not.toBeNull();
+  });
+
+  it("runs lifecycle actions with overlay payload and result context", async () => {
+    const appRegistry = new AtomRegistryImpl();
+    const pageRegistry = new AtomRegistryImpl();
+    store.set(modalStackAtom, ["test-modal"]);
+    store.set(modalPayloadAtom, {
+      "test-modal": { userId: "42" },
+    });
+
+    const config: ModalConfig = {
+      ...baseConfig,
+      onOpen: {
+        type: "set-value",
+        target: "global.overlayOpened",
+        value: "{overlay.payload.userId}",
+      },
+      onClose: {
+        type: "set-value",
+        target: "global.overlayClosed",
+        value: "{overlay.result.saved}",
+      },
+      footer: {
+        actions: [
+          {
+            label: "Save",
+            action: {
+              type: "close-modal",
+              modal: "test-modal",
+              result: { saved: true },
+            },
+          },
+        ],
+      },
+    };
+
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      createElement(
+        Provider,
+        { store },
+        createElement(
+          AppRegistryContext.Provider,
+          { value: appRegistry },
+          createElement(
+            PageRegistryContext.Provider,
+            { value: pageRegistry },
+            children,
+          ),
+        ),
+      );
+
+    render(createElement(ModalComponent, { config }), { wrapper });
+
+    expect(
+      appRegistry.store.get(appRegistry.register("overlayOpened")),
+    ).toBe("42");
+
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(
+      appRegistry.store.get(appRegistry.register("overlayClosed")),
+    ).toBe("true");
   });
 });

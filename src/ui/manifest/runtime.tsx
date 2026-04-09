@@ -66,6 +66,7 @@ interface OverlayRuntimeValue {
   id: string;
   kind: "modal" | "drawer";
   payload: unknown;
+  result?: unknown;
 }
 
 const ManifestResourceCacheContext =

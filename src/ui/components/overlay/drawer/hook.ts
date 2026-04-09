@@ -13,10 +13,11 @@ import type { UseDrawerReturn } from "./types";
  * @returns Drawer state and controls
  */
 export function useDrawer(config: DrawerConfig): UseDrawerReturn {
-  const { open, close, isOpen, getPayload } = useModalManager();
+  const { open, close, isOpen, getPayload, getResult } = useModalManager();
   const id = config.id ?? "";
   const currentlyOpen = isOpen(id);
   const payload = getPayload(id);
+  const result = getResult(id);
 
   // Resolve trigger from ref
   const triggerValue = useSubscribe(config.trigger);
@@ -45,5 +46,6 @@ export function useDrawer(config: DrawerConfig): UseDrawerReturn {
     open: () => open(id),
     close: () => close(id),
     payload,
+    result,
   };
 }

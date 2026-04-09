@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
+import { workflowDefinitionSchema } from "../../../workflows/schema";
 import {
   baseComponentConfigSchema,
   fromRefSchema,
@@ -22,6 +23,10 @@ export const drawerConfigSchema = baseComponentConfigSchema.extend({
   trigger: fromRefSchema.optional(),
   /** Child components rendered inside the drawer body. */
   content: z.array(z.record(z.unknown())),
+  /** Workflow or action(s) run when the drawer opens. */
+  onOpen: z.union([z.string().min(1), workflowDefinitionSchema]).optional(),
+  /** Workflow or action(s) run when the drawer closes. */
+  onClose: z.union([z.string().min(1), workflowDefinitionSchema]).optional(),
   /** Inline style overrides. */
   style: z.record(z.union([z.string(), z.number()])).optional(),
   /** Additional CSS class name. */

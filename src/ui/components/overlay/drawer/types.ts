@@ -10,4 +10,6 @@ export interface UseDrawerReturn {
   close: () => void;
   /** Current overlay payload. */
   payload: unknown;
+  /** Most recent overlay close result. */
+  result: unknown;
 }

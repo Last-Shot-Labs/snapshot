@@ -69,6 +69,15 @@ describe("modalConfigSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts overlay lifecycle actions", () => {
+    const result = modalConfigSchema.safeParse({
+      ...baseConfig,
+      onOpen: { type: "toast", message: "opened" },
+      onClose: { type: "close-modal", result: { saved: true } },
+    });
+    expect(result.success).toBe(true);
+  });
+
   it("rejects missing type", () => {
     const result = modalConfigSchema.safeParse({
       id: "test-modal",

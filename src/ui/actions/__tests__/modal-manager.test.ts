@@ -38,6 +38,13 @@ describe("useModalManager", () => {
     );
   });
 
+  it("stores close results for overlays", () => {
+    const { result } = renderHook(() => useModalManager(), { wrapper });
+    act(() => result.current.open("edit-user"));
+    act(() => result.current.close("edit-user", { saved: true }));
+    expect(result.current.getResult("edit-user")).toEqual({ saved: true });
+  });
+
   it("opens multiple modals in stack order", () => {
     const { result } = renderHook(() => useModalManager(), { wrapper });
     act(() => {
