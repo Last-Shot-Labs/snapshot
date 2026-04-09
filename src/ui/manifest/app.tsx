@@ -129,6 +129,16 @@ function inferAuthScreenPath(
   return candidates[screen].find((path) => manifest.routeMap[path] != null);
 }
 
+function withRedirectParam(path: string, redirectTo: string): string {
+  if (typeof window === "undefined") {
+    return path;
+  }
+
+  const url = new URL(path, window.location.origin);
+  url.searchParams.set("redirect", redirectTo);
+  return `${url.pathname}${url.search}`;
+}
+
 function AuthRuntimeBridge({
   manifest,
   useUser,
@@ -346,12 +356,14 @@ function ManifestRouter({
 
   const navigate = useCallback(
     (to: string, options?: { replace?: boolean }) => {
+      const url = new URL(to, window.location.origin);
+      const nextLocation = `${url.pathname}${url.search}${url.hash}`;
       if (options?.replace) {
-        window.history.replaceState({}, "", to);
+        window.history.replaceState({}, "", nextLocation);
       } else {
-        window.history.pushState({}, "", to);
+        window.history.pushState({}, "", nextLocation);
       }
-      setCurrentPath(to);
+      setCurrentPath(url.pathname);
       window.dispatchEvent(new PopStateEvent("popstate"));
     },
     [],
@@ -404,7 +416,7 @@ function ManifestRouter({
       return;
     }
 
-    const fallback =
+    const baseFallback =
       route.guard?.redirectTo ??
       (route.guard?.authenticated
         ? inferAuthScreenPath(manifest, "login")
@@ -412,6 +424,13 @@ function ManifestRouter({
       manifest.app.home ??
       manifest.firstRoute?.path ??
       "/";
+    const fallback =
+      route.guard?.authenticated && !route.guard?.redirectTo
+        ? withRedirectParam(
+            baseFallback,
+            `${window.location.pathname}${window.location.search}`,
+          )
+        : baseFallback;
     if (fallback !== currentPath) {
       navigate(fallback, { replace: true });
     }

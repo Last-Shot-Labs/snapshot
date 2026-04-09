@@ -25,9 +25,30 @@ export interface ServerRouteMatchShape {
 }
 
 /**
+ * Structural equivalent of `IsrSink` from `@lastshotlabs/bunshot-ssr`.
+ *
+ * Mutable — written to by `renderPage()` after render completes.
+ * The middleware reads these fields to decide whether to cache the response.
+ *
+ * @internal
+ */
+export interface IsrSinkShape {
+  /** The `revalidate` value from `load()`. */
+  revalidate?: number | false;
+  /** The `tags` array from `load()`. */
+  tags?: readonly string[];
+  /**
+   * Set to `true` when the loader called `unstable_noStore()`.
+   * When `true`, the middleware skips the ISR cache write.
+   */
+  noStore?: boolean;
+}
+
+/**
  * Structural equivalent of `SsrShell` from `@lastshotlabs/bunshot-ssr`.
  *
  * Contains the HTML tag strings injected into the document `<head>` by bunshot-ssr.
+ * Also carries the `_isr` sink which the renderer populates after calling `load()`.
  */
 export interface SsrShellShape {
   /** HTML tags for title, meta, OG, Twitter, JSON-LD. */
@@ -36,6 +57,13 @@ export interface SsrShellShape {
   readonly assetTags: string;
   /** Optional CSP nonce for inline scripts. */
   readonly nonce?: string;
+  /**
+   * Framework-internal ISR sink. Populated by the renderer after calling `load()`.
+   * The ISR middleware reads this to decide whether to cache the response.
+   *
+   * @internal Do not use in application code.
+   */
+  readonly _isr?: IsrSinkShape;
 }
 
 // ─── Per-request isolation ────────────────────────────────────────────────────

@@ -31,7 +31,14 @@ function buildAuthManifest(): ManifestConfig {
       home: "/dashboard",
     },
     auth: {
-      screens: ["login", "register", "forgot-password", "verify-email", "mfa"],
+      screens: [
+        "login",
+        "register",
+        "forgot-password",
+        "reset-password",
+        "verify-email",
+        "mfa",
+      ],
       providers: ["google"],
       branding: {
         title: "Snapshot Auth",
@@ -60,6 +67,11 @@ function buildAuthManifest(): ManifestConfig {
         content: [{ type: "heading", text: "placeholder verify" }],
       },
       {
+        id: "reset-password",
+        path: "/reset-password",
+        content: [{ type: "heading", text: "placeholder reset" }],
+      },
+      {
         id: "mfa",
         path: "/mfa",
         content: [{ type: "heading", text: "placeholder mfa" }],
@@ -71,6 +83,14 @@ function buildAuthManifest(): ManifestConfig {
           authenticated: true,
         },
         content: [{ type: "heading", text: "Dashboard" }],
+      },
+      {
+        id: "reports",
+        path: "/reports",
+        guard: {
+          authenticated: true,
+        },
+        content: [{ type: "heading", text: "Reports" }],
       },
     ],
   };
@@ -219,6 +239,141 @@ describe("Manifest auth runtime", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Email verified.")).toBeDefined();
+    });
+  });
+
+  it("resends verification when the verify-email route has no token", async () => {
+    window.history.replaceState({}, "", "/verify-email");
+
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.endsWith("/auth/me")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      if (url.endsWith("/auth/resend-verification")) {
+        return new Response(JSON.stringify({ message: "Verification resent." }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    render(
+      <ManifestApp manifest={buildAuthManifest()} apiUrl="http://localhost" />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "ada@example.com" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Resend verification email" }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Verification resent.")).toBeDefined();
+    });
+  });
+
+  it("redirects authenticated users away from the login screen", async () => {
+    window.history.replaceState({}, "", "/login");
+
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.endsWith("/auth/me")) {
+        return new Response(JSON.stringify({ id: "1", email: "ada@example.com" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    render(
+      <ManifestApp manifest={buildAuthManifest()} apiUrl="http://localhost" />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Dashboard")).toBeDefined();
+    });
+  });
+
+  it("returns to the original protected route after signing in", async () => {
+    window.history.replaceState({}, "", "/reports");
+
+    let meRequestCount = 0;
+    global.fetch = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+
+        if (url.endsWith("/auth/me")) {
+          meRequestCount += 1;
+          if (meRequestCount === 1) {
+            return new Response(JSON.stringify({ error: "Unauthorized" }), {
+              status: 401,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
+
+          return new Response(
+            JSON.stringify({ id: "1", email: "ada@example.com" }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        }
+
+        if (url.endsWith("/auth/login")) {
+          expect(init?.method).toBe("POST");
+          return new Response(
+            JSON.stringify({ token: "token-1", userId: "1" }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        }
+
+        return new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      },
+    ) as typeof fetch;
+
+    render(
+      <ManifestApp manifest={buildAuthManifest()} apiUrl="http://localhost" />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Email")).toBeDefined();
+    });
+
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "ada@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Password"), {
+      target: { value: "secret" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Reports")).toBeDefined();
     });
   });
 

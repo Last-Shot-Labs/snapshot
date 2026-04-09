@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import React from "react";
 import { renderToReadableStream } from "react-dom/server";
+import { getNoStore, withRequestStore } from "./cache";
 import { serializeQueryState } from "./state";
 import type { SsrRequestContext, SsrShellShape } from "./types";
 
@@ -63,6 +64,11 @@ const POSTAMBLE = "\n</div>\n</body>\n</html>";
  * stream rejects. The caller (bunshot-ssr middleware) catches this and falls
  * through to the SPA.
  *
+ * **ISR opt-out:** The entire render executes within a `withRequestStore()` async
+ * context (from `./cache`). If any loader calls `unstable_noStore()` during the
+ * render, `getNoStore()` returns `true` after the render completes and
+ * `shell._isr.noStore` is set to signal the ISR middleware to skip the cache write.
+ *
  * @param element - The React element to render (already constructed with props).
  * @param context - Per-request context containing a fresh `QueryClient`.
  * @param shell - Asset and head tags from bunshot-ssr. `headTags` should already
@@ -72,58 +78,68 @@ const POSTAMBLE = "\n</div>\n</body>\n</html>";
  *
  * @internal — called by `createReactRenderer` and `createManifestRenderer`.
  */
-export async function renderPage(
+export function renderPage(
   element: React.ReactElement,
   context: SsrRequestContext,
   shell: SsrShellShape,
   timeoutMs = 5000,
 ): Promise<Response> {
-  const { queryClient } = context;
+  return withRequestStore(async () => {
+    const { queryClient } = context;
 
-  // Serialize dehydrated QueryClient cache for client hydration
-  const dehydratedState = serializeQueryState(queryClient, shell.nonce);
+    // Serialize dehydrated QueryClient cache for client hydration
+    const dehydratedState = serializeQueryState(queryClient, shell.nonce);
 
-  // Build preamble (everything before the React stream)
-  const preamble = buildPreamble(shell, dehydratedState);
+    // Build preamble (everything before the React stream)
+    const preamble = buildPreamble(shell, dehydratedState);
 
-  // Wrap the element with providers
-  const wrappedElement = React.createElement(
-    QueryClientProvider,
-    { client: queryClient },
-    React.createElement(
-      HydrationBoundary,
-      { state: dehydrate(queryClient) },
-      element,
-    ),
-  );
+    // Wrap the element with providers
+    const wrappedElement = React.createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      React.createElement(
+        HydrationBoundary,
+        { state: dehydrate(queryClient) },
+        element,
+      ),
+    );
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  let stream: ReadableStream<Uint8Array>;
-  try {
-    stream = await renderToReadableStream(wrappedElement, {
-      signal: controller.signal,
-      onError(error: unknown) {
-        console.error("[snapshot-ssr] renderToReadableStream error:", error);
+    let stream: ReadableStream<Uint8Array>;
+    try {
+      stream = await renderToReadableStream(wrappedElement, {
+        signal: controller.signal,
+        onError(error: unknown) {
+          console.error("[snapshot-ssr] renderToReadableStream error:", error);
+        },
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    // After the render (and therefore after any loaders have run), check whether
+    // unstable_noStore() was called. If so, signal the ISR middleware to skip the
+    // cache write by setting noStore on the ISR sink. The _isr object is mutable
+    // by contract — the middleware creates it and the renderer writes to it.
+    if (shell._isr && getNoStore()) {
+      shell._isr.noStore = true;
+    }
+
+    const encoder = new TextEncoder();
+    const preambleBytes = encoder.encode(preamble);
+    const postambleBytes = encoder.encode(POSTAMBLE);
+
+    const body = buildConcatenatedStream(preambleBytes, stream, postambleBytes);
+
+    return new Response(body, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Transfer-Encoding": "chunked",
       },
     });
-  } finally {
-    clearTimeout(timeoutId);
-  }
-
-  const encoder = new TextEncoder();
-  const preambleBytes = encoder.encode(preamble);
-  const postambleBytes = encoder.encode(POSTAMBLE);
-
-  const body = buildConcatenatedStream(preambleBytes, stream, postambleBytes);
-
-  return new Response(body, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Transfer-Encoding": "chunked",
-    },
   });
 }
 

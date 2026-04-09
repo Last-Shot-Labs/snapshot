@@ -2,6 +2,27 @@
 // Public exports for @lastshotlabs/snapshot/ssr
 // Server-side only — not for browser bundles.
 
+// ─── Cache primitives ─────────────────────────────────────────────────────────
+
+/**
+ * Per-request memoization (React 19's `cache()`).
+ * Call with any async function to deduplicate identical calls within a render.
+ * Cache resets automatically per request — no manual invalidation needed.
+ */
+export { cache } from './cache';
+
+/**
+ * Opt the current request out of ISR caching.
+ * Call inside a `load()` function when the response must never be stored in
+ * the ISR cache (personalised data, real-time feeds, etc.).
+ */
+export { unstable_noStore } from './cache';
+
+// ─── Server actions (Phase 20) ────────────────────────────────────────────────
+// Phase 20 creates action-client.ts; this export resolves when that phase lands.
+// Both phases complete before either is used in production.
+export { __callServerAction__ } from './action-client';
+
 // ─── Core render function ─────────────────────────────────────────────────────
 
 /**

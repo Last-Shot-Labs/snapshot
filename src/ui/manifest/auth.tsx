@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ApiError } from "../../api/error";
 import { mergeContract, type AuthContract } from "../../auth/contract";
-import { useSetStateValue } from "../state";
+import { useSetStateValue, useStateValue } from "../state";
 import type {
   AuthErrorContext,
   AuthUser,
@@ -19,6 +19,7 @@ import type {
 import type { CompiledManifest, CompiledRoute } from "./types";
 
 const AUTH_QUERY_KEY = ["auth", "me"] as const;
+const MANIFEST_AUTH_MFA_STATE_KEY = "__manifestAuth.pendingMfaChallenge";
 
 export type AuthScreen =
   | "login"
@@ -111,6 +112,64 @@ function useLocationSearch(): URLSearchParams {
 
 function resolveHomePath(manifest: CompiledManifest): string {
   return manifest.app.home ?? manifest.firstRoute?.path ?? "/";
+}
+
+function resolvePostAuthPath(
+  manifest: CompiledManifest,
+  search: URLSearchParams,
+): string {
+  const redirectTarget = search.get("redirect") ?? search.get("redirectTo");
+  if (redirectTarget && redirectTarget.startsWith("/")) {
+    return redirectTarget;
+  }
+
+  return resolveHomePath(manifest);
+}
+
+function usePendingMfaChallengeState(): [
+  MfaChallenge | null,
+  (challenge: MfaChallenge | null) => void,
+] {
+  const challenge = useStateValue(MANIFEST_AUTH_MFA_STATE_KEY, {
+    scope: "app",
+  }) as MfaChallenge | null | undefined;
+  const setChallenge = useSetStateValue(MANIFEST_AUTH_MFA_STATE_KEY, {
+    scope: "app",
+  });
+
+  return [challenge ?? null, (nextChallenge) => setChallenge(nextChallenge)];
+}
+
+function useGuestRouteRedirect(
+  manifest: CompiledManifest,
+  screen: AuthScreen,
+  navigate: (to: string, options?: { replace?: boolean }) => void,
+): void {
+  const authState = useStateValue("auth", { scope: "app" }) as
+    | {
+        isAuthenticated?: boolean;
+        isLoading?: boolean;
+      }
+    | null;
+
+  useEffect(() => {
+    if (authState?.isLoading) {
+      return;
+    }
+
+    if (!authState?.isAuthenticated) {
+      return;
+    }
+
+    if (
+      screen === "login" ||
+      screen === "register" ||
+      screen === "forgot-password" ||
+      screen === "reset-password"
+    ) {
+      navigate(resolveHomePath(manifest), { replace: true });
+    }
+  }, [authState?.isAuthenticated, authState?.isLoading, manifest, navigate, screen]);
 }
 
 function useApplyAuthenticatedUser(manifest: CompiledManifest) {
@@ -501,6 +560,7 @@ function LoginScreen({
   setPendingChallenge: (challenge: MfaChallenge | null) => void;
 }) {
   const applyAuthenticatedUser = useApplyAuthenticatedUser(manifest);
+  const search = useLocationSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const loginPath = inferAuthScreenPath(manifest, "login");
@@ -546,7 +606,7 @@ function LoginScreen({
       setPendingChallenge(null);
       applyAuthenticatedUser(result.user);
       snapshot.queryClient.setQueryData(AUTH_QUERY_KEY, result.user);
-      navigate(resolveHomePath(manifest));
+      navigate(resolvePostAuthPath(manifest, search));
     },
   });
 
@@ -622,6 +682,7 @@ function RegisterScreen({
   navigate: (to: string) => void;
 }) {
   const applyAuthenticatedUser = useApplyAuthenticatedUser(manifest);
+  const search = useLocationSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -638,7 +699,7 @@ function RegisterScreen({
     onSuccess: (user) => {
       applyAuthenticatedUser(user);
       snapshot.queryClient.setQueryData(AUTH_QUERY_KEY, user);
-      navigate(resolveHomePath(manifest));
+      navigate(resolvePostAuthPath(manifest, search));
     },
   });
 
@@ -859,6 +920,7 @@ function VerifyEmailScreen({
   navigate: (to: string) => void;
 }) {
   const search = useLocationSearch();
+  const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const token = search.get("token") ?? "";
   const loginPath = inferAuthScreenPath(manifest, "login");
@@ -875,6 +937,20 @@ function VerifyEmailScreen({
       },
     },
   );
+  const resendMutation = useMutation<
+    { message?: string },
+    ApiError,
+    { email: string }
+  >({
+    mutationFn: (body) =>
+      snapshot.api.post<{ message?: string }>(
+        runtimeConfig.contract.endpoints.resendVerification,
+        body,
+      ),
+    onSuccess: (data) => {
+      setMessage(data.message ?? "Verification email sent.");
+    },
+  });
 
   useEffect(() => {
     if (!token || hasTriggeredRef.current) {
@@ -888,13 +964,38 @@ function VerifyEmailScreen({
   return (
     <AuthShell manifest={manifest} screen="verify-email">
       {!token ? (
-        <p role="alert" style={{ color: "#b91c1c", marginTop: 0 }}>
-          This verification link is missing a token.
-        </p>
+        <>
+          <p role="alert" style={{ color: "#b91c1c", marginTop: 0 }}>
+            This verification link is missing a token.
+          </p>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              setMessage(null);
+              resendMutation.mutate({ email });
+            }}
+          >
+            <Field
+              label="Email"
+              type="email"
+              value={email}
+              onChange={setEmail}
+              placeholder="you@example.com"
+            />
+            <PrimaryButton
+              type="submit"
+              disabled={resendMutation.isPending || email.length === 0}
+            >
+              {resendMutation.isPending
+                ? "Sending verification..."
+                : "Resend verification email"}
+            </PrimaryButton>
+          </form>
+        </>
       ) : null}
       <SuccessMessage message={message} />
       <ErrorMessage
-        error={mutation.error ?? null}
+        error={(mutation.error ?? resendMutation.error) ?? null}
         formatError={snapshot.formatAuthError}
         context="verify-email"
       />
@@ -925,6 +1026,7 @@ function MfaScreen({
   setPendingChallenge: (challenge: MfaChallenge | null) => void;
 }) {
   const applyAuthenticatedUser = useApplyAuthenticatedUser(manifest);
+  const search = useLocationSearch();
   const [code, setCode] = useState("");
   const [method, setMethod] = useState<MfaMethod>(
     pendingChallenge?.mfaMethods[0] ?? ("totp" as const),
@@ -957,7 +1059,7 @@ function MfaScreen({
       setPendingChallenge(null);
       applyAuthenticatedUser(user);
       snapshot.queryClient.setQueryData(AUTH_QUERY_KEY, user);
-      navigate(resolveHomePath(manifest));
+      navigate(resolvePostAuthPath(manifest, search));
     },
   });
   const resendMutation = useMutation<{ message?: string }, ApiError, void>({
@@ -1084,9 +1186,9 @@ export function ManifestAuthScreen({
   runtimeConfig,
   navigate,
 }: ManifestAuthScreenProps) {
-  const [pendingChallenge, setPendingChallenge] = useState<MfaChallenge | null>(
-    null,
-  );
+  const [pendingChallenge, setPendingChallenge] = usePendingMfaChallengeState();
+
+  useGuestRouteRedirect(manifest, screen, navigate);
 
   switch (screen) {
     case "login":

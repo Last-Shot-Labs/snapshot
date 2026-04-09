@@ -2,6 +2,7 @@ import path from "node:path";
 import type { Plugin, UserConfig } from "vite";
 import { runSync, consoleLogger, type SyncOptions } from "../cli/sync";
 import { buildPrefetchManifest, type ViteManifestEntry } from "./prefetch";
+import { serverActionsTransform } from "./server-actions";
 
 export interface SnapshotSyncOptions {
   /** URL of the bunshot backend. Falls back to VITE_API_URL env var. */
@@ -125,6 +126,19 @@ export interface SnapshotSsrOptions {
    * @default 'src/routes'
    */
   clientRoutesDir?: string;
+  /**
+   * Enable the `'use server'` directive transform.
+   *
+   * When `true` (the default), files with a top-level `'use server'` directive
+   * are automatically transformed: server builds keep the original code, client
+   * builds replace each exported function with a `__callServerAction__` stub.
+   *
+   * Set to `false` only if you are handling the `'use server'` transform yourself
+   * via a separate plugin.
+   *
+   * @default true
+   */
+  serverActions?: boolean;
 }
 
 /**
@@ -171,7 +185,7 @@ export interface SnapshotSsrOptions {
  * })
  * ```
  */
-export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin {
+export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin[] {
   // Track whether this invocation is a client (non-SSR) build so we only
   // run post-build steps after the client build (not after the server bundle build).
   let isClientBuild = false;
@@ -180,7 +194,7 @@ export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin {
   // The Vite manifest captured during the build.
   let capturedViteManifest: Record<string, ViteManifestEntry> | null = null;
 
-  return {
+  const ssrPlugin: Plugin = {
     name: "snapshot-ssr",
 
     config(
@@ -361,4 +375,13 @@ export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin {
       }
     },
   };
+
+  const plugins: Plugin[] = [ssrPlugin];
+
+  // Prepend the server actions transform unless explicitly disabled.
+  if (opts.serverActions !== false) {
+    plugins.unshift(serverActionsTransform());
+  }
+
+  return plugins;
 }

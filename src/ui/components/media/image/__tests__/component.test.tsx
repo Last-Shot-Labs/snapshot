@@ -63,20 +63,20 @@ describe("SnapshotImage component", () => {
 
   it("sets loading=lazy by default", () => {
     render(<SnapshotImage config={baseConfig({ priority: false })} />);
-    const img = screen.getByTestId("snapshot-image") as HTMLImageElement;
-    expect(img.loading).toBe("lazy");
+    const img = screen.getByTestId("snapshot-image");
+    expect(img.getAttribute("loading")).toBe("lazy");
   });
 
   it("sets loading=eager when priority=true", () => {
     render(<SnapshotImage config={baseConfig({ priority: true })} />);
-    const img = screen.getByTestId("snapshot-image") as HTMLImageElement;
-    expect(img.loading).toBe("eager");
+    const img = screen.getByTestId("snapshot-image");
+    expect(img.getAttribute("loading")).toBe("eager");
   });
 
   it("sets alt attribute", () => {
     render(<SnapshotImage config={baseConfig({ alt: "My image" })} />);
-    const img = screen.getByTestId("snapshot-image") as HTMLImageElement;
-    expect(img.alt).toBe("My image");
+    const img = screen.getByTestId("snapshot-image");
+    expect(img.getAttribute("alt")).toBe("My image");
   });
 
   it("sets sizes attribute when provided", () => {
@@ -85,27 +85,29 @@ describe("SnapshotImage component", () => {
         config={baseConfig({ sizes: "(max-width: 768px) 100vw, 50vw" })}
       />,
     );
-    const img = screen.getByTestId("snapshot-image") as HTMLImageElement;
-    expect(img.sizes).toBe("(max-width: 768px) 100vw, 50vw");
+    const img = screen.getByTestId("snapshot-image");
+    expect(img.getAttribute("sizes")).toBe("(max-width: 768px) 100vw, 50vw");
   });
 
   it("generates srcset with 0.5x, 1x, and 2x widths", () => {
     render(<SnapshotImage config={baseConfig({ width: 800 })} />);
-    const img = screen.getByTestId("snapshot-image") as HTMLImageElement;
+    const img = screen.getByTestId("snapshot-image");
+    const srcset = img.getAttribute("srcset") ?? "";
     // Should contain three entries
-    const entries = img.srcset.split(",").map((s) => s.trim());
+    const entries = srcset.split(",").map((s) => s.trim());
     expect(entries.length).toBe(3);
     // Should contain w=400 (0.5x), w=800 (1x), w=1600 (2x)
-    expect(img.srcset).toContain("w=400");
-    expect(img.srcset).toContain("w=800");
-    expect(img.srcset).toContain("w=1600");
+    expect(srcset).toContain("w=400");
+    expect(srcset).toContain("w=800");
+    expect(srcset).toContain("w=1600");
   });
 
   it("caps srcset double-width at 4096", () => {
     render(<SnapshotImage config={baseConfig({ width: 3000 })} />);
-    const img = screen.getByTestId("snapshot-image") as HTMLImageElement;
+    const img = screen.getByTestId("snapshot-image");
+    const srcset = img.getAttribute("srcset") ?? "";
     // 3000 * 2 = 6000 → capped at 4096
-    expect(img.srcset).toContain("w=4096");
+    expect(srcset).toContain("w=4096");
   });
 
   it("applies className to wrapper div", () => {
