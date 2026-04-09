@@ -22,6 +22,27 @@ export interface ServerRouteMatchShape {
   readonly query: Readonly<Record<string, string>>;
   /** The full request URL. */
   readonly url: URL;
+  /**
+   * Absolute path to a co-located `loading.ts` file (Phase 28).
+   * When present, the renderer wraps the page in a `React.Suspense` boundary
+   * whose fallback is the component exported from this file.
+   * `null` when no loading convention file is co-located.
+   */
+  readonly loadingFilePath?: string | null;
+  /**
+   * Absolute path to a co-located `error.ts` file (Phase 28).
+   * When present, the renderer wraps the page in an `SsrErrorBoundary`
+   * whose fallback is the component exported from this file.
+   * `null` when no error convention file is co-located.
+   */
+  readonly errorFilePath?: string | null;
+  /**
+   * Absolute path to a co-located `not-found.ts` file (Phase 28).
+   * When `load()` returns `{ notFound: true }`, this component is rendered
+   * with a 404 HTTP status instead of the SPA shell fallback.
+   * `null` when no not-found convention file is co-located.
+   */
+  readonly notFoundFilePath?: string | null;
 }
 
 /**

@@ -1,5 +1,6 @@
 // src/ssr/renderer.ts
 import { QueryClient } from "@tanstack/react-query";
+import type { QueryKey } from "@tanstack/react-query";
 import React from "react";
 import { buildHeadTags } from "./head";
 import { renderPage } from "./render";
@@ -10,6 +11,25 @@ import type {
   SsrRequestContext,
   SsrShellShape,
 } from "./types";
+
+// ─── Route chain shape (structural — avoids cross-repo import) ─────────────────
+
+/**
+ * Structural equivalent of `SsrRouteChain` from `@lastshotlabs/bunshot-ssr`.
+ * Defined here to avoid cross-repo coupling (Rule 9: structural typing).
+ *
+ * @internal
+ */
+interface SsrRouteChainShape {
+  readonly layouts: readonly ServerRouteMatchShape[];
+  readonly page: ServerRouteMatchShape;
+  readonly slots?: ReadonlyArray<{
+    readonly name: string;
+    readonly match: ServerRouteMatchShape | null;
+  }>;
+  readonly intercepted?: boolean;
+  readonly middlewareFilePath: string | null;
+}
 
 // ─── Internal type guards ─────────────────────────────────────────────────────
 
@@ -27,6 +47,107 @@ function isLoadResult(
   r: unknown,
 ): r is { data: Record<string, unknown>; queryCache?: unknown[] } {
   return typeof r === "object" && r !== null && "data" in r;
+}
+
+// ─── SSR Error Boundary (Phase 28) ───────────────────────────────────────────
+
+/**
+ * React class component error boundary for SSR use.
+ *
+ * Wraps page components when an `error.ts` file is co-located with the route.
+ * In production, caught errors render the `FallbackComponent`. The `reset`
+ * callback is a no-op during SSR (state cannot be mutated after the stream ends),
+ * but is provided for client-side hydration compatibility.
+ *
+ * @internal
+ */
+class SsrErrorBoundary extends React.Component<
+  {
+    FallbackComponent: React.ComponentType<{
+      error: Error;
+      reset: () => void;
+    }>;
+    children: React.ReactNode;
+  },
+  { error: Error | null }
+> {
+  state: { error: Error | null } = { error: null };
+
+  static getDerivedStateFromError(error: Error): { error: Error } {
+    return { error };
+  }
+
+  render(): React.ReactNode {
+    if (this.state.error) {
+      const err = this.state.error;
+      return React.createElement(this.props.FallbackComponent, {
+        error: err,
+        reset: () => this.setState({ error: null }),
+      });
+    }
+    return this.props.children;
+  }
+}
+
+// ─── Convention component loader (Phase 28) ──────────────────────────────────
+
+/**
+ * Dynamically import a convention component (loading.ts, error.ts, not-found.ts).
+ * Returns `null` when the file path is null or the import fails.
+ *
+ * @internal
+ */
+async function importConventionComponent(
+  filePath: string | null,
+): Promise<React.ComponentType<Record<string, unknown>> | null> {
+  if (!filePath) return null;
+  try {
+    const mod = (await import(filePath)) as Record<string, unknown>;
+    const component = mod["default"] ?? mod["component"];
+    if (typeof component === "function") {
+      return component as React.ComponentType<Record<string, unknown>>;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Wrap an element in a Suspense boundary when a loading component is available.
+ *
+ * @internal
+ */
+function wrapWithSuspense(
+  element: React.ReactElement,
+  LoadingComponent: React.ComponentType<Record<string, unknown>> | null,
+): React.ReactElement {
+  if (!LoadingComponent) return element;
+  return React.createElement(
+    React.Suspense,
+    { fallback: React.createElement(LoadingComponent, {}) },
+    element,
+  );
+}
+
+/**
+ * Wrap an element in an error boundary when an error component is available.
+ *
+ * @internal
+ */
+function wrapWithErrorBoundary(
+  element: React.ReactElement,
+  ErrorComponent: React.ComponentType<{
+    error: Error;
+    reset: () => void;
+  }> | null,
+): React.ReactElement {
+  if (!ErrorComponent) return element;
+  return React.createElement(
+    SsrErrorBoundary,
+    { FallbackComponent: ErrorComponent },
+    element,
+  );
 }
 
 // ─── Load context builder ─────────────────────────────────────────────────────
@@ -145,6 +266,11 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
   resolve(url: URL, bsCtx: unknown): Promise<ServerRouteMatchShape | null>;
   render(
     match: ServerRouteMatchShape,
+    shell: SsrShellShape,
+    bsCtx: unknown,
+  ): Promise<Response>;
+  renderChain(
+    chain: SsrRouteChainShape,
     shell: SsrShellShape,
     bsCtx: unknown,
   ): Promise<Response>;
@@ -313,6 +439,318 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
       });
 
       return renderPage(element, requestContext, fullShell, timeoutMs);
+    },
+
+    /**
+     * Render a full layout chain to a streaming HTML Response.
+     *
+     * Executes all layout `load()` functions in parallel (they are independent),
+     * then executes the page `load()`. Meta is merged child-overrides-parent.
+     * Builds the nested React tree outermost-layout → ... → page, then renders.
+     *
+     * When `chain.slots` is present, each slot's `load()` is also executed and
+     * slot components are passed to the outermost layout as a `slots` prop.
+     *
+     * When `chain.intercepted` is true, adds `X-Snapshot-Interception: modal`
+     * to the response.
+     *
+     * @param chain - Fully resolved route chain from bunshot-ssr's resolver.
+     * @param shell - Shell from bunshot-ssr (asset tags, nonce, ISR sink).
+     * @param bsCtx - Bunshot context for DB access and auth.
+     */
+    async renderChain(
+      chain: SsrRouteChainShape,
+      shell: SsrShellShape,
+      bsCtx: unknown,
+    ): Promise<Response> {
+      const fakeRequest = new Request(chain.page.url.toString());
+      const pageLoadContext = buildLoadContext(chain.page, fakeRequest, bsCtx);
+
+      // 1. Import all route modules in parallel (layouts + page)
+      const [layoutModules, pageModule] = await Promise.all([
+        Promise.all(
+          chain.layouts.map(async (layout) => {
+            try {
+              return (await import(layout.filePath)) as Record<string, unknown>;
+            } catch (err) {
+              throw new Error(
+                `[snapshot-ssr] Failed to import layout module ${layout.filePath}: ${String(err)}`,
+              );
+            }
+          }),
+        ),
+        (async () => {
+          try {
+            return (await import(chain.page.filePath)) as Record<string, unknown>;
+          } catch (err) {
+            throw new Error(
+              `[snapshot-ssr] Failed to import page module ${chain.page.filePath}: ${String(err)}`,
+            );
+          }
+        })(),
+      ]);
+
+      // 2. Execute load() for all layouts in parallel, then page
+      const layoutLoadContexts = chain.layouts.map((layout) =>
+        buildLoadContext(layout, fakeRequest, bsCtx),
+      );
+
+      const [layoutResults, pageResult] = await Promise.all([
+        Promise.all(
+          layoutModules.map(async (mod, i) => {
+            const loadFn = mod["load"] as
+              | ((ctx: unknown) => Promise<unknown>)
+              | undefined;
+            if (!loadFn) return { data: {} }; // layouts without load() are valid
+            return loadFn(layoutLoadContexts[i]);
+          }),
+        ),
+        (async () => {
+          const loadFn = pageModule["load"] as
+            | ((ctx: unknown) => Promise<unknown>)
+            | undefined;
+          if (!loadFn) {
+            throw new Error(
+              `[snapshot-ssr] Page module ${chain.page.filePath} has no exported 'load' function`,
+            );
+          }
+          return loadFn(pageLoadContext);
+        })(),
+      ]);
+
+      // 3. Page result takes precedence for redirect / not-found
+      if (isRedirectResult(pageResult)) {
+        return new Response(null, {
+          status: pageResult.status ?? 302,
+          headers: { Location: pageResult.redirect },
+        });
+      }
+
+      if (isNotFoundResult(pageResult)) {
+        // Phase 28: use co-located not-found.ts when available
+        const NotFoundComponent = await importConventionComponent(
+          chain.page.notFoundFilePath,
+        );
+        if (NotFoundComponent) {
+          const element = React.createElement(NotFoundComponent, {});
+          const requestContext: SsrRequestContext = {
+            queryClient: new QueryClient({
+              defaultOptions: { queries: { staleTime: Infinity, retry: false } },
+            }),
+            match: chain.page,
+          };
+          const resp = await renderPage(element, requestContext, shell, timeoutMs);
+          return new Response(resp.body, {
+            status: 404,
+            headers: resp.headers,
+          });
+        }
+        return new Response("Not Found", { status: 404 });
+      }
+
+      // Layout redirects (any layout can redirect)
+      for (const layoutResult of layoutResults) {
+        if (isRedirectResult(layoutResult)) {
+          return new Response(null, {
+            status: layoutResult.status ?? 302,
+            headers: { Location: layoutResult.redirect },
+          });
+        }
+      }
+
+      if (!isLoadResult(pageResult)) {
+        throw new Error(
+          `[snapshot-ssr] load() in ${chain.page.filePath} returned an unexpected value`,
+        );
+      }
+
+      const ssrPageResult = pageResult as SsrLoadResult;
+
+      // 4. Seed QueryClient with all cache entries (layouts + page)
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { staleTime: Infinity, retry: false } },
+      });
+
+      for (const result of layoutResults) {
+        if (isLoadResult(result)) {
+          const lr = result as SsrLoadResult;
+          for (const entry of lr.queryCache ?? []) {
+            queryClient.setQueryData(entry.queryKey as QueryKey, entry.data);
+          }
+        }
+      }
+      for (const entry of ssrPageResult.queryCache ?? []) {
+        queryClient.setQueryData(entry.queryKey as QueryKey, entry.data);
+      }
+
+      // 5. Write ISR metadata — page revalidate takes precedence
+      if (shell._isr) {
+        shell._isr.revalidate = ssrPageResult.revalidate;
+        shell._isr.tags = ssrPageResult.tags;
+      }
+
+      // 6. Merge meta() — child overrides parent for same keys
+      let headTags = "";
+      const allMeta: Record<string, unknown> = {};
+
+      for (let i = 0; i < chain.layouts.length; i++) {
+        const layoutMod = layoutModules[i]!;
+        const layoutResult = layoutResults[i];
+        const metaFn = layoutMod["meta"] as
+          | ((ctx: unknown, result: unknown) => Promise<unknown>)
+          | undefined;
+        if (metaFn && isLoadResult(layoutResult)) {
+          try {
+            const meta = await metaFn(layoutLoadContexts[i], layoutResult);
+            if (meta && typeof meta === "object") {
+              Object.assign(allMeta, meta);
+            }
+          } catch (err) {
+            console.warn(
+              `[snapshot-ssr] meta() in layout ${chain.layouts[i]!.filePath} threw:`,
+              err,
+            );
+          }
+        }
+      }
+
+      // Page meta overrides layout meta
+      const pageMeta = pageModule["meta"] as
+        | ((ctx: unknown, result: unknown) => Promise<unknown>)
+        | undefined;
+      if (pageMeta) {
+        try {
+          const meta = await pageMeta(pageLoadContext, ssrPageResult);
+          if (meta && typeof meta === "object") {
+            Object.assign(allMeta, meta);
+          }
+        } catch (err) {
+          console.warn(
+            `[snapshot-ssr] meta() in ${chain.page.filePath} threw:`,
+            err,
+          );
+        }
+      }
+
+      if (Object.keys(allMeta).length > 0) {
+        headTags = buildHeadTags(
+          allMeta as Parameters<typeof buildHeadTags>[0],
+        );
+      }
+
+      // 7. Resolve all layout and page components
+      const [layoutComponents, PageComponent] = await Promise.all([
+        Promise.all(chain.layouts.map((l) => frozen.resolveComponent(l))),
+        frozen.resolveComponent(chain.page),
+      ]);
+
+      // 8. Load convention components for the page (Phase 28)
+      const [LoadingComponent, ErrorComponent] = await Promise.all([
+        importConventionComponent(chain.page.loadingFilePath ?? null),
+        importConventionComponent(chain.page.errorFilePath ?? null),
+      ]);
+
+      // 9. Resolve slot components when parallel slots are present (Phase 26)
+      const slotsMap: Record<string, React.ReactNode> = {};
+      if (chain.slots && chain.slots.length > 0) {
+        await Promise.all(
+          chain.slots.map(async (slot) => {
+            if (!slot.match) {
+              slotsMap[slot.name] = null;
+              return;
+            }
+            try {
+              const slotMod = (await import(slot.match.filePath)) as Record<string, unknown>;
+              const slotLoadFn = slotMod["load"] as
+                | ((ctx: unknown) => Promise<unknown>)
+                | undefined;
+              const slotLoadCtx = buildLoadContext(slot.match, fakeRequest, bsCtx);
+              const slotResult = slotLoadFn ? await slotLoadFn(slotLoadCtx) : { data: {} };
+
+              if (!isLoadResult(slotResult)) {
+                slotsMap[slot.name] = null;
+                return;
+              }
+              const slotResultTyped = slotResult as SsrLoadResult;
+
+              for (const entry of slotResultTyped.queryCache ?? []) {
+                queryClient.setQueryData(entry.queryKey as QueryKey, entry.data);
+              }
+
+              const SlotComponent = await frozen.resolveComponent(slot.match);
+              slotsMap[slot.name] = React.createElement(SlotComponent, {
+                loaderData: slotResultTyped.data,
+                params: slot.match.params,
+                query: slot.match.query,
+              });
+            } catch (err) {
+              console.warn(
+                `[snapshot-ssr] Failed to render slot @${slot.name}:`,
+                err,
+              );
+              slotsMap[slot.name] = null;
+            }
+          }),
+        );
+      }
+
+      // 10. Build nested React tree from leaf to root
+      //     Page is innermost; layouts wrap outward
+      let element: React.ReactElement = React.createElement(PageComponent, {
+        loaderData: ssrPageResult.data,
+        params: chain.page.params,
+        query: chain.page.query,
+      });
+
+      // Apply convention wrappers (innermost first, so suspense is outermost of page)
+      element = wrapWithErrorBoundary(
+        element,
+        ErrorComponent as React.ComponentType<{ error: Error; reset: () => void }> | null,
+      );
+      element = wrapWithSuspense(element, LoadingComponent);
+
+      // Wrap with layouts from innermost to outermost
+      for (let i = layoutComponents.length - 1; i >= 0; i--) {
+        const LayoutComponent = layoutComponents[i]!;
+        const layoutResultForProps = layoutResults[i];
+        const layoutData = isLoadResult(layoutResultForProps)
+          ? (layoutResultForProps as SsrLoadResult).data
+          : {};
+        const layoutParams = chain.layouts[i]!.params;
+
+        // The outermost layout (i === 0) receives the slots map (Phase 26)
+        const extraProps: Record<string, unknown> =
+          i === 0 && Object.keys(slotsMap).length > 0 ? { slots: slotsMap } : {};
+
+        element = React.createElement(LayoutComponent, {
+          loaderData: layoutData,
+          params: layoutParams,
+          children: element,
+          ...extraProps,
+        });
+      }
+
+      // 11. Render via renderPage()
+      const fullShell: SsrShellShape = { ...shell, headTags };
+      const requestContext: SsrRequestContext = {
+        queryClient,
+        match: chain.page,
+      };
+
+      const response = await renderPage(element, requestContext, fullShell, timeoutMs);
+
+      // Phase 27: add interception header
+      if (chain.intercepted) {
+        const newHeaders = new Headers(response.headers);
+        newHeaders.set("x-snapshot-interception", "modal");
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: newHeaders,
+        });
+      }
+
+      return response;
     },
   };
 }

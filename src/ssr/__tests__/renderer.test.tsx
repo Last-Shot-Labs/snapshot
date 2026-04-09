@@ -84,13 +84,14 @@ describe("createReactRenderer — render() returns Response", () => {
 });
 
 describe("createReactRenderer — renders structural contract", () => {
-  it("exports resolve and render functions", () => {
+  it("exports resolve, render, and renderChain functions", () => {
     const renderer = createReactRenderer({
       resolveComponent: async () =>
         (() => null) as React.ComponentType<Record<string, unknown>>,
     });
     expect(typeof renderer.resolve).toBe("function");
     expect(typeof renderer.render).toBe("function");
+    expect(typeof renderer.renderChain).toBe("function");
   });
 
   it("uses renderTimeoutMs from config (defaults to 5000)", () => {
@@ -102,5 +103,56 @@ describe("createReactRenderer — renders structural contract", () => {
     });
     // If the factory ran without error, config was frozen correctly
     expect(renderer).toBeDefined();
+  });
+});
+
+// ─── renderChain structural contract tests (Phase 25-28) ─────────────────────
+// Dynamic import mocking isn't available in this test environment.
+// These tests verify the structural shape and dispatch logic.
+
+describe("createReactRenderer — renderChain structural contract", () => {
+  it("renderChain is defined on the returned renderer", () => {
+    const renderer = createReactRenderer({
+      resolveComponent: async () =>
+        (() => null) as React.ComponentType<Record<string, unknown>>,
+    });
+    expect(typeof renderer.renderChain).toBe("function");
+  });
+
+  it("renderChain accepts a chain with empty layouts and returns a Promise", () => {
+    const renderer = createReactRenderer({
+      resolveComponent: async () =>
+        (() =>
+          React.createElement(
+            "div",
+            null,
+            "page",
+          )) as React.ComponentType<Record<string, unknown>>,
+    });
+
+    const chain = {
+      layouts: [] as typeof fakeMatch[],
+      page: fakeMatch,
+      slots: undefined,
+      intercepted: undefined,
+      middlewareFilePath: null,
+    };
+
+    // renderChain with no layouts is similar to render() — returns a Promise
+    const result = renderer.renderChain(chain, emptyShell, {});
+    expect(result).toBeInstanceOf(Promise);
+  });
+
+  it("renderer satisfies BunshotSsrRenderer structural shape with renderChain", () => {
+    const renderer = createReactRenderer({
+      resolveComponent: async () =>
+        (() => null) as React.ComponentType<Record<string, unknown>>,
+    });
+    // Structural check: all three methods present
+    expect(renderer).toMatchObject({
+      resolve: expect.any(Function) as unknown,
+      render: expect.any(Function) as unknown,
+      renderChain: expect.any(Function) as unknown,
+    });
   });
 });

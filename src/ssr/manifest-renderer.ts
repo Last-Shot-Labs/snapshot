@@ -13,7 +13,7 @@ import type {
   SsrShellShape,
 } from "./types";
 
-// ─── Internal structural shape ────────────────────────────────────────────────
+// ─── Internal structural shapes ───────────────────────────────────────────────
 
 /** Structural equivalent of SsrRouteMatch — avoids importing from bunshot-ssr. */
 interface SsrRouteMatchShape {
@@ -22,6 +22,26 @@ interface SsrRouteMatchShape {
   readonly params: Readonly<Record<string, string>>;
   readonly query: Readonly<Record<string, string>>;
   readonly url: URL;
+  readonly loadingFilePath?: string | null;
+  readonly errorFilePath?: string | null;
+  readonly notFoundFilePath?: string | null;
+}
+
+/**
+ * Structural equivalent of `SsrRouteChain` from `@lastshotlabs/bunshot-ssr`.
+ * Defined structurally to avoid cross-repo coupling.
+ *
+ * @internal
+ */
+interface SsrRouteChainShape {
+  readonly layouts: readonly SsrRouteMatchShape[];
+  readonly page: SsrRouteMatchShape;
+  readonly slots?: ReadonlyArray<{
+    readonly name: string;
+    readonly match: SsrRouteMatchShape | null;
+  }>;
+  readonly intercepted?: boolean;
+  readonly middlewareFilePath: string | null;
 }
 
 // ─── Route matcher entry ──────────────────────────────────────────────────────
@@ -85,6 +105,11 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
     shell: SsrShellShape,
     bsCtx: unknown,
   ): Promise<Response>;
+  renderChain(
+    chain: SsrRouteChainShape,
+    shell: SsrShellShape,
+    bsCtx: unknown,
+  ): Promise<Response>;
 } {
   const frozen = Object.freeze({ ...rawConfig });
   const compiled = compileManifest(frozen.manifest);
@@ -98,7 +123,12 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
     compiled.routes.map((r) => [r.id, r]),
   );
 
-  return {
+  // Declare as a variable so renderChain can reference render() without `this`
+  const manifestRenderer: {
+    resolve(url: URL, bsCtx: unknown): Promise<SsrRouteMatchShape | null>;
+    render(match: SsrRouteMatchShape, shell: SsrShellShape, bsCtx: unknown): Promise<Response>;
+    renderChain(chain: SsrRouteChainShape, shell: SsrShellShape, bsCtx: unknown): Promise<Response>;
+  } = {
     /**
      * Resolve a URL to a manifest route match.
      *
@@ -252,7 +282,48 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
 
       return renderPage(element, requestContext, populatedShell);
     },
+
+    /**
+     * Render a layout chain for manifest-based routes.
+     *
+     * Manifest routes do not have file-based `layout.ts` conventions — layouts are
+     * declared in the manifest's page composition. However, this method is required
+     * by the `BunshotSsrRenderer` contract so that the manifest renderer can be used
+     * when the file resolver detects layout files for manifest-routed pages.
+     *
+     * Implementation: delegates to `render()` using the leaf page match.
+     * Manifest page composition already encodes layout nesting in the `PageRenderer`.
+     *
+     * @param chain - Route chain from bunshot-ssr (layouts are manifest-defined, ignored here).
+     * @param shell - Shell from bunshot-ssr.
+     * @param bsCtx - Bunshot context.
+     */
+    async renderChain(
+      chain: SsrRouteChainShape,
+      shell: SsrShellShape,
+      bsCtx: unknown,
+    ): Promise<Response> {
+      // Manifest renderer delegates chain rendering to render() with the leaf page.
+      // Manifest layout composition is handled by PageRenderer, not file-based layouts.
+      // Use the local render reference (not this.render) since this is a plain object.
+      const response = await manifestRenderer.render(chain.page, shell, bsCtx);
+
+      // Phase 27: propagate interception header
+      if (chain.intercepted) {
+        const newHeaders = new Headers(response.headers);
+        newHeaders.set("x-snapshot-interception", "modal");
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: newHeaders,
+        });
+      }
+
+      return response;
+    },
   };
+
+  return manifestRenderer;
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────

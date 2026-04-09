@@ -180,6 +180,23 @@ export interface SnapshotSsrOptions {
    * @default false
    */
   rsc?: boolean;
+
+  /**
+   * Open an interactive bundle size visualizer after the client build completes.
+   *
+   * When `true`, the `rollup-plugin-visualizer` is added to the Vite plugin array
+   * and will write `dist/stats.html` after the build, then open it in the browser.
+   * If `rollup-plugin-visualizer` is not installed, a warning is logged with the
+   * install command.
+   *
+   * Install the optional dependency:
+   * ```sh
+   * bun add -d rollup-plugin-visualizer
+   * ```
+   *
+   * @default false
+   */
+  analyze?: boolean;
 }
 
 /**
@@ -482,6 +499,57 @@ export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin[] {
   // files are stubbed out before 'use server' detection runs on the same file.
   if (opts.rsc) {
     plugins.unshift(rscTransform());
+  }
+
+  // Phase 30: bundle analyzer via rollup-plugin-visualizer.
+  // The visualizer is an optional peer dep — if not installed, log a helpful message.
+  if (opts.analyze) {
+    const analyzePlugin: Plugin = {
+      name: "snapshot-analyze",
+      async closeBundle() {
+        // Only run after the client build.
+        if (!isClientBuild) return;
+        try {
+          // Dynamic import — optional peer dep. Cast at the opaque boundary (Rule 5).
+          type VisualizerModule = {
+            visualizer: (opts?: {
+              open?: boolean;
+              filename?: string;
+              template?: string;
+              gzipSize?: boolean;
+              brotliSize?: boolean;
+            }) => Plugin;
+          };
+          const { visualizer } = (await import(
+            // @ts-ignore — optional peer dep not in devDependencies
+            "rollup-plugin-visualizer"
+          )) as unknown as VisualizerModule;
+
+          // Build the visualizer plugin and call its generateBundle/closeBundle hooks
+          // manually. We can't add it to the plugin array at config time because the
+          // analyze option is not known until after the plugin array is constructed.
+          const vizPlugin = visualizer({
+            open: true,
+            filename: path.join(clientOutDir, "stats.html"),
+            gzipSize: true,
+            brotliSize: true,
+          });
+
+          if (typeof vizPlugin.closeBundle === "function") {
+            // Call closeBundle to trigger file write + browser open.
+            // eslint-disable-next-line @typescript-eslint/await-thenable
+            await (vizPlugin.closeBundle as () => void | Promise<void>)();
+          }
+        } catch {
+          console.warn(
+            "[snapshot-ssr] Bundle analyzer not available. Install the optional dependency:\n" +
+              "  bun add -d rollup-plugin-visualizer\n" +
+              "Then re-run the build.",
+          );
+        }
+      },
+    };
+    plugins.push(analyzePlugin);
   }
 
   return plugins;
