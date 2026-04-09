@@ -338,6 +338,101 @@ describe("runWorkflow", () => {
     });
   });
 
+  it("captures action results into workflow context", async () => {
+    const calls: Array<{
+      action: ActionConfig;
+      context: Record<string, unknown>;
+    }> = [];
+    const executeAction = vi.fn(
+      async (action: ActionConfig, context: Record<string, unknown>) => {
+        calls.push({ action, context });
+        if (action.type === "api") {
+          return {
+            ok: true,
+            user: {
+              id: "1",
+              role: "admin",
+            },
+          };
+        }
+        return undefined;
+      },
+    );
+
+    await runWorkflow(
+      [
+        {
+          type: "capture",
+          action: {
+            type: "api",
+            method: "GET",
+            endpoint: "/api/me",
+          },
+          as: "auth.result",
+        },
+        {
+          type: "if",
+          condition: {
+            left: { from: "auth.result.user.role" },
+            operator: "equals",
+            right: "admin",
+          },
+          then: { type: "toast", message: "{auth.result.user.id}" },
+        },
+      ],
+      {
+        executeAction,
+        resolveValue: (value, context) => {
+          if (
+            value &&
+            typeof value === "object" &&
+            "from" in (value as Record<string, unknown>)
+          ) {
+            return (
+              (
+                (
+                  (context["auth"] as Record<string, unknown> | undefined)
+                    ?.result as Record<string, unknown> | undefined
+                )?.user as Record<string, unknown> | undefined
+              )?.role
+            );
+          }
+
+          if (typeof value === "string") {
+            return value.replace(
+              "{auth.result.user.id}",
+              String(
+                (
+                  (
+                    (
+                      (context["auth"] as Record<string, unknown> | undefined)
+                        ?.result as Record<string, unknown> | undefined
+                    )?.user as Record<string, unknown> | undefined
+                  )?.id ?? ""
+                ),
+              ),
+            );
+          }
+
+          return value;
+        },
+      },
+    );
+
+    expect(executeAction).toHaveBeenCalledTimes(2);
+    expect(calls[1]?.context).toMatchObject({
+      auth: {
+        result: {
+          ok: true,
+          user: {
+            id: "1",
+            role: "admin",
+          },
+        },
+      },
+    });
+  });
+
   it("supports try/catch branches with error context", async () => {
     const calls: Array<{
       action: ActionConfig;

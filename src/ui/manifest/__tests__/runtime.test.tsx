@@ -8,6 +8,7 @@ import { createElement } from "react";
 import { Provider } from "jotai/react";
 import {
   useManifestResourceFocusRefetch,
+  useManifestResourceMountRefetch,
   ManifestRuntimeProvider,
   useManifestResourceCache,
   useManifestResourcePolling,
@@ -52,6 +53,11 @@ function createWrapper(options?: { api?: ApiClient }) {
               endpoint: "/api/flaky-users",
               retry: 2,
               retryDelayMs: 10,
+            },
+            mountUsers: {
+              method: "GET",
+              endpoint: "/api/mount-users",
+              refetchOnMount: true,
             },
           },
           routes: [],
@@ -162,5 +168,17 @@ describe("ManifestRuntimeProvider", () => {
     });
 
     expect(result.current?.getResourceVersion("users")).toBe(1);
+  });
+
+  it("invalidates resources on mount when configured", () => {
+    const { result } = renderHook(
+      () => {
+        useManifestResourceMountRefetch("mountUsers", true);
+        return useManifestResourceCache();
+      },
+      { wrapper: createWrapper() },
+    );
+
+    expect(result.current?.getResourceVersion("mountUsers")).toBe(1);
   });
 });

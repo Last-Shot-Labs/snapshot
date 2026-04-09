@@ -22,6 +22,7 @@ describe("compiler", () => {
         "users.list": {
           method: "GET",
           endpoint: "/api/users",
+          refetchOnMount: true,
           refetchOnWindowFocus: true,
         },
       },
@@ -55,6 +56,15 @@ describe("compiler", () => {
             message: "Reconcile failed",
           },
         },
+        "users.fetch-current": {
+          type: "capture",
+          action: {
+            type: "api",
+            method: "GET",
+            endpoint: { resource: "users.list" },
+          },
+          as: "current.users",
+        },
       },
       routes: [
         {
@@ -69,6 +79,8 @@ describe("compiler", () => {
               },
             },
           ],
+          refreshOnEnter: ["users.list"],
+          invalidateOnLeave: ["users.list"],
           content: [{ type: "heading", text: "Dashboard" }],
         },
       ],
@@ -97,6 +109,11 @@ describe("compiler", () => {
         message: "Reconcile failed",
       },
     });
+    expect(compiled.workflows?.["users.fetch-current"]).toMatchObject({
+      type: "capture",
+      as: "current.users",
+    });
+    expect(compiled.resources?.["users.list"]?.refetchOnMount).toBe(true);
     expect(compiled.resources?.["users.list"]?.refetchOnWindowFocus).toBe(true);
     expect(compiled.routes[0]?.preload).toEqual([
       {
@@ -106,6 +123,8 @@ describe("compiler", () => {
         },
       },
     ]);
+    expect(compiled.routes[0]?.refreshOnEnter).toEqual(["users.list"]);
+    expect(compiled.routes[0]?.invalidateOnLeave).toEqual(["users.list"]);
     expect(compiled.firstRoute?.id).toBe("dashboard");
     expect(compiled.routeMap["/dashboard"]?.page.title).toBe("Dashboard");
   });
@@ -126,8 +145,14 @@ describe("compiler", () => {
               {
                 provider: "google",
                 label: "Use Google Workspace",
+                autoRedirect: true,
               },
             ],
+            providerMode: "auto",
+            passkey: {
+              enabled: true,
+              autoPrompt: true,
+            },
           },
         },
       },
@@ -150,8 +175,14 @@ describe("compiler", () => {
       {
         provider: "google",
         label: "Use Google Workspace",
+        autoRedirect: true,
       },
     ]);
+    expect(compiled.auth?.screenOptions?.login?.providerMode).toBe("auto");
+    expect(compiled.auth?.screenOptions?.login?.passkey).toEqual({
+      enabled: true,
+      autoPrompt: true,
+    });
   });
 
   it("defaults app.home to the first route when omitted", () => {

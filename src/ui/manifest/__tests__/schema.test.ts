@@ -36,6 +36,7 @@ describe("manifestConfigSchema", () => {
           endpoint: "/api/users",
           cacheMs: 30000,
           pollMs: 60000,
+          refetchOnMount: true,
           refetchOnWindowFocus: true,
           invalidates: ["user.stats"],
         },
@@ -59,7 +60,18 @@ describe("manifestConfigSchema", () => {
       },
       auth: {
         screens: ["login", "register"] as const,
-        providers: ["google", "github"] as const,
+        providers: [
+          "google",
+          {
+            provider: "github",
+            autoRedirect: true,
+          },
+        ] as const,
+        providerMode: "auto" as const,
+        passkey: {
+          enabled: true,
+          autoPrompt: true,
+        },
         redirects: {
           authenticated: "/dashboard",
           afterLogin: "/users",
@@ -74,7 +86,10 @@ describe("manifestConfigSchema", () => {
               passkeyButton: "Use a passkey",
             },
             providers: false,
-            passkey: false,
+            providerMode: "buttons" as const,
+            passkey: {
+              enabled: false,
+            },
             fields: {
               email: {
                 label: "Work email",
@@ -129,6 +144,15 @@ describe("manifestConfigSchema", () => {
             message: "Decorated",
           },
         ],
+        "users.fetch-current": {
+          type: "capture",
+          action: {
+            type: "api",
+            method: "GET",
+            endpoint: { resource: "user.list" },
+          },
+          as: "current.users",
+        },
         "users.reconcile": {
           type: "try",
           step: {
@@ -166,6 +190,8 @@ describe("manifestConfigSchema", () => {
               params: { range: "30d" },
             },
           ],
+          refreshOnEnter: ["user.list"],
+          invalidateOnLeave: ["user.stats"],
           guard: {
             authenticated: true,
             redirectTo: "/dashboard",
@@ -380,6 +406,8 @@ describe("routeConfigSchema", () => {
           params: { page: 1 },
         },
       ],
+      refreshOnEnter: ["users"],
+      invalidateOnLeave: ["stats"],
       title: "Dashboard",
       content: [{ type: "heading", text: "Hello" }],
     });
@@ -529,9 +557,14 @@ describe("authScreenConfigSchema", () => {
           provider: "github",
           label: "Continue with GitHub Enterprise",
           description: "Use your engineering identity",
+          autoRedirect: true,
         },
       ],
-      passkey: true,
+      providerMode: "auto",
+      passkey: {
+        enabled: true,
+        autoPrompt: true,
+      },
       branding: {
         logo: "/logo.svg",
         title: "My App",
@@ -552,7 +585,10 @@ describe("authScreenConfigSchema", () => {
             passkeyButton: "Use a passkey",
           },
           providers: false,
-          passkey: false,
+          providerMode: "buttons",
+          passkey: {
+            enabled: false,
+          },
           fields: {
             email: {
               label: "Work email",
@@ -591,8 +627,14 @@ describe("authScreenConfigSchema", () => {
               provider: "google",
               label: "Use Google Workspace",
               description: "Recommended for internal users",
+              autoRedirect: true,
             },
           ],
+          providerMode: "auto",
+          passkey: {
+            enabled: true,
+            autoPrompt: true,
+          },
         },
       },
     });

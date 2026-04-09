@@ -54,6 +54,7 @@ export {
 } from "../workflows/index";
 export type {
   AssignWorkflowNode,
+  CaptureWorkflowNode,
   ParallelWorkflowNode,
   RetryWorkflowNode,
   TryWorkflowNode,
@@ -86,6 +87,7 @@ export {
   RouteRuntimeProvider,
   OverlayRuntimeContext,
   useManifestResourceFocusRefetch,
+  useManifestResourceMountRefetch,
   useManifestRuntime,
   useManifestResourceCache,
   useOverlayRuntime,

@@ -1,4 +1,5 @@
 export {
+  isCaptureWorkflowNode,
   isAssignWorkflowNode,
   isIfWorkflowNode,
   isParallelWorkflowNode,
@@ -20,6 +21,7 @@ export {
 } from "./schema";
 export type {
   AssignWorkflowNode,
+  CaptureWorkflowNode,
   CustomWorkflowNode,
   IfWorkflowNode,
   ParallelWorkflowNode,

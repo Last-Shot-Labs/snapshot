@@ -85,7 +85,7 @@ export async function runWorkflow(
     executeAction: (
       action: ActionConfig,
       context: Record<string, unknown>,
-    ) => Promise<void>;
+    ) => Promise<unknown>;
   },
 ): Promise<void> {
   const workflows = options.workflows ?? {};

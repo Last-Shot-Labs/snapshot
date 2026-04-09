@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ApiError } from "../../api/error";
 import { mergeContract, type AuthContract } from "../../auth/contract";
 import { useSetStateValue, useStateValue } from "../state";
@@ -34,6 +34,12 @@ interface AuthProviderConfig {
   provider: OAuthProvider;
   label?: string;
   description?: string;
+  autoRedirect?: boolean;
+}
+
+interface AuthPasskeyConfig {
+  enabled: boolean;
+  autoPrompt: boolean;
 }
 
 interface ManifestAuthRuntimeConfig {
@@ -156,9 +162,32 @@ function normalizeProviderConfig(
         provider: OAuthProvider;
         label?: string;
         description?: string;
+        autoRedirect?: boolean;
       },
 ): AuthProviderConfig {
   return typeof provider === "string" ? { provider } : provider;
+}
+
+function normalizePasskeyConfig(
+  value:
+    | boolean
+    | {
+        enabled?: boolean;
+        autoPrompt?: boolean;
+      }
+    | undefined,
+): AuthPasskeyConfig {
+  if (typeof value === "boolean") {
+    return {
+      enabled: value,
+      autoPrompt: false,
+    };
+  }
+
+  return {
+    enabled: value?.enabled ?? false,
+    autoPrompt: value?.autoPrompt ?? false,
+  };
 }
 
 function resolveAuthHeading(
@@ -243,11 +272,27 @@ function resolveScreenProviders(
   return (providers ?? manifest.auth?.providers ?? []).map(normalizeProviderConfig);
 }
 
-function resolvePasskeyEnabled(
+function resolveProviderMode(
   manifest: CompiledManifest,
   screen: AuthScreen,
-): boolean {
-  return getAuthScreenOptions(manifest, screen)?.passkey ?? Boolean(manifest.auth?.passkey);
+): "buttons" | "auto" {
+  return (
+    getAuthScreenOptions(manifest, screen)?.providerMode ??
+    manifest.auth?.providerMode ??
+    "buttons"
+  );
+}
+
+function resolvePasskeyConfig(
+  manifest: CompiledManifest,
+  screen: AuthScreen,
+): AuthPasskeyConfig {
+  const screenPasskey = getAuthScreenOptions(manifest, screen)?.passkey;
+  if (screenPasskey !== undefined) {
+    return normalizePasskeyConfig(screenPasskey);
+  }
+
+  return normalizePasskeyConfig(manifest.auth?.passkey);
 }
 
 function resolveFieldMeta(
@@ -668,6 +713,26 @@ function renderScreenSections(
   });
 }
 
+function redirectToAuthProvider(
+  provider: OAuthProvider,
+  getOAuthUrl: (provider: OAuthProvider) => string,
+): void {
+  const url = getOAuthUrl(provider);
+  window.dispatchEvent(
+    new CustomEvent("snapshot:auth-provider-redirect", {
+      detail: {
+        provider,
+        url,
+      },
+    }),
+  );
+  if (typeof window.location.assign === "function") {
+    window.location.assign(url);
+    return;
+  }
+  window.location.href = url;
+}
+
 function OAuthButtons({
   providers,
   getOAuthUrl,
@@ -699,7 +764,7 @@ function OAuthButtons({
           <SecondaryButton
             key={providerConfig.provider}
             onClick={() => {
-              window.location.href = getOAuthUrl(providerConfig.provider);
+              redirectToAuthProvider(providerConfig.provider, getOAuthUrl);
             }}
           >
             <span
@@ -755,7 +820,8 @@ function LoginScreen({
   const forgotPasswordPath = inferAuthScreenPath(manifest, "forgot-password");
   const mfaPath = inferAuthScreenPath(manifest, "mfa");
   const providers = resolveScreenProviders(manifest, "login");
-  const passkeyEnabled = resolvePasskeyEnabled(manifest, "login");
+  const providerMode = resolveProviderMode(manifest, "login");
+  const passkeyConfig = resolvePasskeyConfig(manifest, "login");
   const sectionOrder = resolveSectionOrder(manifest, "login", [
     "form",
     "providers",
@@ -876,7 +942,53 @@ function LoginScreen({
       navigate(resolvePostAuthPath(manifest, search, "login"));
     },
   });
-  const showPasskey = passkeyEnabled && isPasskeySupported();
+  const showPasskey = passkeyConfig.enabled && isPasskeySupported();
+  const autoFlowRef = useRef(false);
+  const runPasskeyPrompt = useCallback(() => {
+    void passkeyMutation
+      .mutateAsync()
+      .catch((error: unknown) => {
+        if (
+          error instanceof DOMException &&
+          error.name === "NotAllowedError"
+        ) {
+          passkeyMutation.reset();
+        }
+      });
+  }, [passkeyMutation]);
+
+  useEffect(() => {
+    if (autoFlowRef.current) {
+      return;
+    }
+
+    if (showPasskey && passkeyConfig.autoPrompt) {
+      autoFlowRef.current = true;
+      runPasskeyPrompt();
+      return;
+    }
+
+    const autoRedirectProvider =
+      providers.length === 1
+        ? providers[0]
+        : providers.find((provider) => provider.autoRedirect);
+
+    if (
+      !passkeyConfig.autoPrompt &&
+      autoRedirectProvider &&
+      (providerMode === "auto" || autoRedirectProvider.autoRedirect)
+    ) {
+      autoFlowRef.current = true;
+      redirectToAuthProvider(autoRedirectProvider.provider, snapshot.getOAuthUrl);
+    }
+  }, [
+    passkeyConfig.autoPrompt,
+    providerMode,
+    providers,
+    runPasskeyPrompt,
+    showPasskey,
+    snapshot,
+  ]);
   const formBlock = (
     <form
       onSubmit={(event) => {
@@ -939,18 +1051,7 @@ function LoginScreen({
       />
       <SecondaryButton
         disabled={passkeyMutation.isPending}
-        onClick={() => {
-          void passkeyMutation
-            .mutateAsync()
-            .catch((error: unknown) => {
-              if (
-                error instanceof DOMException &&
-                error.name === "NotAllowedError"
-              ) {
-                passkeyMutation.reset();
-              }
-            });
-        }}
+        onClick={runPasskeyPrompt}
       >
         {passkeyMutation.isPending
           ? "Signing in..."
@@ -995,6 +1096,7 @@ function RegisterScreen({
   const [name, setName] = useState("");
   const loginPath = inferAuthScreenPath(manifest, "login");
   const providers = resolveScreenProviders(manifest, "register");
+  const providerMode = resolveProviderMode(manifest, "register");
   const sectionOrder = resolveSectionOrder(manifest, "register", [
     "form",
     "providers",
@@ -1013,6 +1115,7 @@ function RegisterScreen({
     placeholder: "Create a password",
   });
   const configuredLinks = resolveConfiguredLinks(manifest, "register");
+  const autoFlowRef = useRef(false);
   const mutation = useMutation<AuthUser, ApiError, RegisterVars>({
     mutationFn: async (body) => {
       const response = await snapshot.api.post<Record<string, unknown>>(
@@ -1028,6 +1131,26 @@ function RegisterScreen({
       navigate(resolvePostAuthPath(manifest, search, "register"));
     },
   });
+
+  useEffect(() => {
+    if (autoFlowRef.current) {
+      return;
+    }
+
+    const autoRedirectProvider =
+      providers.length === 1
+        ? providers[0]
+        : providers.find((provider) => provider.autoRedirect);
+
+    if (
+      autoRedirectProvider &&
+      (providerMode === "auto" || autoRedirectProvider.autoRedirect)
+    ) {
+      autoFlowRef.current = true;
+      redirectToAuthProvider(autoRedirectProvider.provider, snapshot.getOAuthUrl);
+    }
+  }, [providerMode, providers, snapshot]);
+
   const formBlock = (
     <form
       onSubmit={(event) => {

@@ -559,6 +559,184 @@ describe("Manifest auth runtime", () => {
     });
   });
 
+  it("auto-prompts passkey sign-in when the manifest enables it", async () => {
+    window.history.replaceState({}, "", "/login");
+    installPasskeyMocks();
+
+    let meRequestCount = 0;
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.endsWith("/auth/me")) {
+        meRequestCount += 1;
+        if (meRequestCount === 1) {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            status: 401,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        return new Response(
+          JSON.stringify({ id: "1", email: "ada@example.com" }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      if (url.endsWith("/auth/passkey/login-options")) {
+        return new Response(
+          JSON.stringify({
+            passkeyToken: "passkey-token",
+            options: {
+              challenge: "AQID",
+              rpId: "localhost",
+              userVerification: "preferred",
+            },
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      if (url.endsWith("/auth/passkey/login")) {
+        return new Response(
+          JSON.stringify({ token: "token-1", userId: "1" }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    const manifest = buildAuthManifest();
+    manifest.auth = {
+      ...manifest.auth!,
+      redirects: {
+        afterLogin: "/reports",
+      },
+      passkey: {
+        enabled: true,
+        autoPrompt: true,
+      },
+      screenOptions: {
+        login: {
+          sections: ["passkey", "form", "links"],
+        },
+      },
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Reports")).toBeDefined();
+    });
+  });
+
+  it("auto-redirects auth providers when the manifest enables provider auto mode", async () => {
+    window.history.replaceState({}, "", "/register");
+
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.endsWith("/auth/me")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    const redirectListener = vi.fn();
+    window.addEventListener(
+      "snapshot:auth-provider-redirect",
+      redirectListener as EventListener,
+    );
+
+    const manifest = buildAuthManifest();
+    manifest.auth = {
+      ...manifest.auth!,
+      providerMode: "auto",
+      providers: [
+        {
+          provider: "google",
+          label: "Continue with Google Workspace",
+          autoRedirect: true,
+        },
+      ],
+      screenOptions: {
+        register: {
+          providerMode: "auto",
+          providers: [
+            {
+              provider: "google",
+              label: "Continue with Google Workspace",
+              autoRedirect: true,
+            },
+          ],
+          sections: ["providers", "form", "links"],
+        },
+      },
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+
+    await waitFor(() => {
+      expect(redirectListener).toHaveBeenCalledTimes(1);
+    });
+
+    const event = redirectListener.mock.calls[0]?.[0] as
+      | CustomEvent<{ provider: string; url: string }>
+      | undefined;
+    expect(event?.detail.provider).toBe("google");
+    expect(event?.detail.url).toContain("/auth/google");
+
+    window.removeEventListener(
+      "snapshot:auth-provider-redirect",
+      redirectListener as EventListener,
+    );
+  });
+
+  it("cleans up auth redirects without redefining browser location internals", async () => {
+    window.history.replaceState({}, "", "/login");
+
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.endsWith("/auth/me")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+
+    render(<ManifestApp manifest={buildAuthManifest()} apiUrl="http://localhost" />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Email")).toBeDefined();
+    });
+  });
+
   it("returns to the original protected route after signing in", async () => {
     window.history.replaceState({}, "", "/reports");
 

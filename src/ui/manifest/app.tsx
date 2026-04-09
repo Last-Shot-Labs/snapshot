@@ -496,7 +496,7 @@ function ManifestRouter({
       if (
         previousMatch &&
         (previousMatch.currentPath !== currentPath ||
-          previousMatch.route?.id !== route.id) &&
+          previousMatch.route?.id !== route.id)
       ) {
         applyRouteResourceInvalidations(
           resourceCache,

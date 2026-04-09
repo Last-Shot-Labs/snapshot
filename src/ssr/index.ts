@@ -110,6 +110,10 @@ export type {
   SsrRedirectResult,
   /** Not-found signal from `load()`. */
   SsrNotFoundResult,
+  /** Forbidden signal from `load()` — triggers a 403 response. */
+  SsrForbiddenResult,
+  /** Unauthorized signal from `load()` — triggers a 401 response. */
+  SsrUnauthorizedResult,
   /** A TanStack Query cache entry to pre-seed during SSR. */
   SsrQueryCacheEntry,
 } from "./types";

@@ -44,6 +44,25 @@ export interface ServerRouteMatchShape {
    */
   readonly notFoundFilePath?: string | null;
   /**
+   * Absolute path to a co-located `forbidden.ts` file.
+   * When `load()` returns `{ forbidden: true }`, this component is rendered
+   * with a 403 HTTP status. `null` when no such file is co-located.
+   */
+  readonly forbiddenFilePath?: string | null;
+  /**
+   * Absolute path to a co-located `unauthorized.ts` file.
+   * When `load()` returns `{ unauthorized: true }`, this component is rendered
+   * with a 401 HTTP status. `null` when no such file is co-located.
+   */
+  readonly unauthorizedFilePath?: string | null;
+  /**
+   * Absolute path to a `template.ts` convention file co-located with a layout.
+   * Renders identically to a layout during SSR; the client router remounts it on
+   * every navigation by giving it a navigation-keyed `key` prop.
+   * Always `null` on the leaf page match.
+   */
+  readonly templateFilePath?: string | null;
+  /**
    * The `generateStaticParams` function exported from this route module, if any.
    *
    * Populated by the renderer after dynamically importing the route file.
@@ -107,6 +126,18 @@ export interface SsrShellShape {
    * @internal Do not use in application code outside of renderer implementations.
    */
   readonly _draftMode?: boolean;
+  /**
+   * Inject the `after()` scheduler for this request.
+   *
+   * Set by the SSR middleware to a function that enqueues callbacks in the
+   * per-request after-queue. The renderer passes this into every load context
+   * as `ctx.after()`. Callbacks are drained after the response stream flushes.
+   *
+   * `undefined` when after-callback support is not wired up (e.g. in tests).
+   *
+   * @internal Do not use in application code outside of renderer implementations.
+   */
+  readonly _after?: (callback: () => void | Promise<void>) => void;
 }
 
 // ─── Per-request isolation ────────────────────────────────────────────────────
@@ -236,12 +267,53 @@ export interface SsrNotFoundResult {
 }
 
 /**
+ * Signal from a server route's `load()` that the user lacks permission.
+ *
+ * `bunshot-ssr` responds with `403 Forbidden`. Co-locate a `forbidden.ts`
+ * convention file to render a custom UI instead of a plain-text fallback.
+ *
+ * @example
+ * ```ts
+ * export async function load(ctx: SsrLoadContext) {
+ *   const user = await ctx.getUser()
+ *   if (!user) return { unauthorized: true }
+ *   if (!user.roles.includes('admin')) return { forbidden: true }
+ *   return { data: { ... } }
+ * }
+ * ```
+ */
+export interface SsrForbiddenResult {
+  readonly forbidden: true;
+}
+
+/**
+ * Signal from a server route's `load()` that the user is not authenticated.
+ *
+ * `bunshot-ssr` responds with `401 Unauthorized`. Co-locate an `unauthorized.ts`
+ * convention file to render a custom UI instead of a plain-text fallback.
+ *
+ * @example
+ * ```ts
+ * export async function load(ctx: SsrLoadContext) {
+ *   const user = await ctx.getUser()
+ *   if (!user) return { unauthorized: true }
+ *   return { data: { ... } }
+ * }
+ * ```
+ */
+export interface SsrUnauthorizedResult {
+  readonly unauthorized: true;
+}
+
+/**
  * All valid return types from a server route's `load()` function.
  */
 export type SsrLoaderReturn =
   | SsrLoadResult
   | SsrRedirectResult
-  | SsrNotFoundResult;
+  | SsrNotFoundResult
+  | SsrForbiddenResult
+  | SsrUnauthorizedResult;
 
 /**
  * The context object passed to every server route `load()` and `meta()` function.
@@ -307,6 +379,31 @@ export interface SsrLoadContext {
    * ```
    */
   draftMode(): { isEnabled: boolean };
+  /**
+   * Schedule a callback to run after the HTTP response has been fully sent.
+   *
+   * Use this for work that should not delay the response — analytics events,
+   * audit logging, cache warming, or webhook calls. The callback runs after
+   * the response stream is flushed; errors in callbacks are caught and logged
+   * without affecting the response.
+   *
+   * Callbacks are executed in registration order. All callbacks from a single
+   * request run before the next request's callbacks start.
+   *
+   * @param callback - The async function to execute after the response is sent.
+   *
+   * @example
+   * ```ts
+   * export async function load(ctx: SsrLoadContext) {
+   *   const post = await getPost(ctx.params.slug, ctx.bsCtx)
+   *   ctx.after(async () => {
+   *     await analytics.track('page_view', { path: ctx.url.pathname })
+   *   })
+   *   return { data: { post } }
+   * }
+   * ```
+   */
+  after(callback: () => void | Promise<void>): void;
 }
 
 // ─── Manifest renderer config ─────────────────────────────────────────────────

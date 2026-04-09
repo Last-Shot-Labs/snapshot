@@ -26,6 +26,7 @@ interface SsrRouteChainShape {
   readonly slots?: ReadonlyArray<{
     readonly name: string;
     readonly match: ServerRouteMatchShape | null;
+    readonly defaultFilePath?: string | null;
   }>;
   readonly intercepted?: boolean;
   readonly middlewareFilePath: string | null;
@@ -41,6 +42,14 @@ function isRedirectResult(
 
 function isNotFoundResult(r: unknown): r is { notFound: true } {
   return typeof r === "object" && r !== null && "notFound" in r;
+}
+
+function isForbiddenResult(r: unknown): r is { forbidden: true } {
+  return typeof r === "object" && r !== null && "forbidden" in r;
+}
+
+function isUnauthorizedResult(r: unknown): r is { unauthorized: true } {
+  return typeof r === "object" && r !== null && "unauthorized" in r;
 }
 
 function isLoadResult(
@@ -159,7 +168,14 @@ function wrapWithErrorBoundary(
  * Auth resolution via `getUser()` calls into bunshot-auth's plugin state.
  * Draft mode status is forwarded from the shell's `_draftMode` flag, which the
  * bunshot-ssr middleware sets based on the incoming request cookie.
+ * The `afterFn` parameter, when provided, is exposed as `ctx.after()` so load
+ * functions can schedule post-response callbacks without importing from bunshot-ssr.
  *
+ * @param match - The resolved route match for this request.
+ * @param request - The raw HTTP request (used to read cookies for auth).
+ * @param bsCtx - The bunshot context for direct DB/adapter access.
+ * @param draftModeEnabled - Whether the request is in draft mode.
+ * @param afterFn - Optional scheduler from `shell._after` for post-response callbacks.
  * @internal
  */
 function buildLoadContext(
@@ -167,6 +183,7 @@ function buildLoadContext(
   request: Request,
   bsCtx: unknown,
   draftModeEnabled = false,
+  afterFn?: (cb: () => void | Promise<void>) => void,
 ) {
   const cookieHeader = request.headers.get("cookie");
 
@@ -207,6 +224,17 @@ function buildLoadContext(
      */
     draftMode(): { isEnabled: boolean } {
       return { isEnabled: draftModeEnabled };
+    },
+    /**
+     * Schedule a callback to run after the HTTP response has been fully sent.
+     *
+     * Proxies to `shell._after` injected by the bunshot-ssr middleware.
+     * When `_after` is not set (e.g. in tests), this is a no-op.
+     *
+     * @param callback - The async function to execute after the response is sent.
+     */
+    after(callback: () => void | Promise<void>): void {
+      if (afterFn) afterFn(callback);
     },
   };
 }
@@ -334,7 +362,13 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
       // are not available here — bunshot-ssr doesn't forward the raw Request yet).
       // TODO: forward raw Request when Track A Phase 4 is updated to pass it.
       const fakeRequest = new Request(match.url.toString());
-      const loadContext = buildLoadContext(match, fakeRequest, bsCtx, shell._draftMode ?? false);
+      const loadContext = buildLoadContext(
+        match,
+        fakeRequest,
+        bsCtx,
+        shell._draftMode ?? false,
+        shell._after,
+      );
 
       // 1. Dynamic import the route module
       let routeModule: Record<string, unknown>;
@@ -387,6 +421,50 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
         });
       }
 
+      // Handle forbidden (403)
+      if (isForbiddenResult(loadResult)) {
+        const ForbiddenComponent = await importConventionComponent(
+          match.forbiddenFilePath ?? null,
+        );
+        if (ForbiddenComponent) {
+          const element = React.createElement(ForbiddenComponent, {});
+          const requestContext: SsrRequestContext = {
+            queryClient: new QueryClient({
+              defaultOptions: { queries: { staleTime: Infinity, retry: false } },
+            }),
+            match,
+          };
+          const resp = await renderPage(element, requestContext, shell, timeoutMs);
+          return new Response(resp.body, { status: 403, headers: resp.headers });
+        }
+        return new Response("Forbidden", {
+          status: 403,
+          headers: { "Content-Type": "text/plain" },
+        });
+      }
+
+      // Handle unauthorized (401)
+      if (isUnauthorizedResult(loadResult)) {
+        const UnauthorizedComponent = await importConventionComponent(
+          match.unauthorizedFilePath ?? null,
+        );
+        if (UnauthorizedComponent) {
+          const element = React.createElement(UnauthorizedComponent, {});
+          const requestContext: SsrRequestContext = {
+            queryClient: new QueryClient({
+              defaultOptions: { queries: { staleTime: Infinity, retry: false } },
+            }),
+            match,
+          };
+          const resp = await renderPage(element, requestContext, shell, timeoutMs);
+          return new Response(resp.body, { status: 401, headers: resp.headers });
+        }
+        return new Response("Unauthorized", {
+          status: 401,
+          headers: { "Content-Type": "text/plain" },
+        });
+      }
+
       if (!isLoadResult(loadResult)) {
         throw new Error(
           `[snapshot-ssr] load() in ${match.filePath} returned an unexpected value`,
@@ -407,6 +485,34 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
           entry.queryKey as readonly unknown[],
           entry.data,
         );
+      }
+
+      // 5b. Write ISR metadata — route segment config takes highest precedence.
+      //
+      // Resolution order (highest → lowest):
+      //   a. `export const dynamic = 'force-dynamic'` → noStore (no caching)
+      //   b. `export const dynamic = 'force-static'`  → revalidate = Infinity
+      //   c. `export const revalidate = N`            → overrides load() revalidate
+      //   d. `load()` return `.revalidate`            → default
+      if (shell._isr) {
+        const segmentRevalidate = routeModule["revalidate"];
+        const segmentDynamic = routeModule["dynamic"];
+
+        let effectiveRevalidate = ssrLoadResult.revalidate;
+
+        if (segmentDynamic === "force-dynamic") {
+          shell._isr.noStore = true;
+          effectiveRevalidate = undefined;
+        } else if (segmentDynamic === "force-static") {
+          effectiveRevalidate = Infinity;
+        } else if (typeof segmentRevalidate === "number") {
+          effectiveRevalidate = segmentRevalidate;
+        } else if (segmentRevalidate === false) {
+          effectiveRevalidate = Infinity;
+        }
+
+        shell._isr.revalidate = effectiveRevalidate;
+        shell._isr.tags = ssrLoadResult.tags;
       }
 
       // 6. Call meta() — from directory meta.ts or from the same route module
@@ -491,7 +597,13 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
       bsCtx: unknown,
     ): Promise<Response> {
       const fakeRequest = new Request(chain.page.url.toString());
-      const pageLoadContext = buildLoadContext(chain.page, fakeRequest, bsCtx, shell._draftMode ?? false);
+      const pageLoadContext = buildLoadContext(
+        chain.page,
+        fakeRequest,
+        bsCtx,
+        shell._draftMode ?? false,
+        shell._after,
+      );
 
       // 1. Import all route modules in parallel (layouts + page)
       const [layoutModules, pageModule] = await Promise.all([
@@ -533,7 +645,7 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
 
       // 2. Execute load() for all layouts in parallel, then page
       const layoutLoadContexts = chain.layouts.map((layout) =>
-        buildLoadContext(layout, fakeRequest, bsCtx, shell._draftMode ?? false),
+        buildLoadContext(layout, fakeRequest, bsCtx, shell._draftMode ?? false, shell._after),
       );
 
       const [layoutResults, pageResult] = await Promise.all([
@@ -570,7 +682,7 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
       if (isNotFoundResult(pageResult)) {
         // Phase 28: use co-located not-found.ts when available
         const NotFoundComponent = await importConventionComponent(
-          chain.page.notFoundFilePath,
+          chain.page.notFoundFilePath ?? null,
         );
         if (NotFoundComponent) {
           const element = React.createElement(NotFoundComponent, {});
@@ -587,6 +699,50 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
           });
         }
         return new Response("Not Found", { status: 404 });
+      }
+
+      // Handle forbidden (403) — use co-located forbidden.ts when available
+      if (isForbiddenResult(pageResult)) {
+        const ForbiddenComponent = await importConventionComponent(
+          chain.page.forbiddenFilePath ?? null,
+        );
+        if (ForbiddenComponent) {
+          const element = React.createElement(ForbiddenComponent, {});
+          const requestContext: SsrRequestContext = {
+            queryClient: new QueryClient({
+              defaultOptions: { queries: { staleTime: Infinity, retry: false } },
+            }),
+            match: chain.page,
+          };
+          const resp = await renderPage(element, requestContext, shell, timeoutMs);
+          return new Response(resp.body, { status: 403, headers: resp.headers });
+        }
+        return new Response("Forbidden", {
+          status: 403,
+          headers: { "Content-Type": "text/plain" },
+        });
+      }
+
+      // Handle unauthorized (401) — use co-located unauthorized.ts when available
+      if (isUnauthorizedResult(pageResult)) {
+        const UnauthorizedComponent = await importConventionComponent(
+          chain.page.unauthorizedFilePath ?? null,
+        );
+        if (UnauthorizedComponent) {
+          const element = React.createElement(UnauthorizedComponent, {});
+          const requestContext: SsrRequestContext = {
+            queryClient: new QueryClient({
+              defaultOptions: { queries: { staleTime: Infinity, retry: false } },
+            }),
+            match: chain.page,
+          };
+          const resp = await renderPage(element, requestContext, shell, timeoutMs);
+          return new Response(resp.body, { status: 401, headers: resp.headers });
+        }
+        return new Response("Unauthorized", {
+          status: 401,
+          headers: { "Content-Type": "text/plain" },
+        });
       }
 
       // Layout redirects (any layout can redirect)
@@ -624,9 +780,35 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
         queryClient.setQueryData(entry.queryKey as QueryKey, entry.data);
       }
 
-      // 5. Write ISR metadata — page revalidate takes precedence
+      // 5. Write ISR metadata — route segment config takes highest precedence.
+      //
+      // Resolution order (highest → lowest):
+      //   a. `export const dynamic = 'force-dynamic'` → noStore (no caching)
+      //   b. `export const dynamic = 'force-static'`  → revalidate = Infinity
+      //   c. `export const revalidate = N`            → overrides load() revalidate
+      //   d. `load()` return `.revalidate`            → default
       if (shell._isr) {
-        shell._isr.revalidate = ssrPageResult.revalidate;
+        const segmentRevalidate = pageModule["revalidate"];
+        const segmentDynamic = pageModule["dynamic"];
+
+        let effectiveRevalidate = ssrPageResult.revalidate;
+
+        if (segmentDynamic === "force-dynamic") {
+          // Mark as no-store — ISR middleware will not cache this response.
+          shell._isr.noStore = true;
+          effectiveRevalidate = undefined;
+        } else if (segmentDynamic === "force-static") {
+          // Treat as fully static — never revalidate.
+          effectiveRevalidate = Infinity;
+        } else if (typeof segmentRevalidate === "number") {
+          // Module-level revalidate overrides load() return value.
+          effectiveRevalidate = segmentRevalidate;
+        } else if (segmentRevalidate === false) {
+          // `export const revalidate = false` → static, equivalent to Infinity.
+          effectiveRevalidate = Infinity;
+        }
+
+        shell._isr.revalidate = effectiveRevalidate;
         shell._isr.tags = ssrPageResult.tags;
       }
 
@@ -697,7 +879,21 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
         await Promise.all(
           chain.slots.map(async (slot) => {
             if (!slot.match) {
-              slotsMap[slot.name] = null;
+              // Check for a default.ts fallback in this slot directory
+              if (slot.defaultFilePath) {
+                try {
+                  const DefaultComponent = await importConventionComponent(slot.defaultFilePath);
+                  if (DefaultComponent) {
+                    slotsMap[slot.name] = React.createElement(DefaultComponent, {});
+                  } else {
+                    slotsMap[slot.name] = null;
+                  }
+                } catch {
+                  slotsMap[slot.name] = null;
+                }
+              } else {
+                slotsMap[slot.name] = null;
+              }
               return;
             }
             try {
@@ -705,7 +901,7 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
               const slotLoadFn = slotMod["load"] as
                 | ((ctx: unknown) => Promise<unknown>)
                 | undefined;
-              const slotLoadCtx = buildLoadContext(slot.match, fakeRequest, bsCtx, shell._draftMode ?? false);
+              const slotLoadCtx = buildLoadContext(slot.match, fakeRequest, bsCtx, shell._draftMode ?? false, shell._after);
               const slotResult = slotLoadFn ? await slotLoadFn(slotLoadCtx) : { data: {} };
 
               if (!isLoadResult(slotResult)) {
@@ -762,6 +958,22 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
         // The outermost layout (i === 0) receives the slots map (Phase 26)
         const extraProps: Record<string, unknown> =
           i === 0 && Object.keys(slotsMap).length > 0 ? { slots: slotsMap } : {};
+
+        // If this layout level has a co-located template.ts, wrap element in the
+        // template first. Templates render identically to layouts during SSR;
+        // client-side remounting is enforced by the router giving the template
+        // wrapper a navigation-keyed `key` prop.
+        const templateFilePath = chain.layouts[i]?.templateFilePath;
+        if (templateFilePath) {
+          const TemplateComponent = await importConventionComponent(templateFilePath);
+          if (TemplateComponent) {
+            element = React.createElement(TemplateComponent, {
+              loaderData: layoutData, // same data as the parent layout
+              params: layoutParams,
+              children: element,
+            });
+          }
+        }
 
         element = React.createElement(LayoutComponent, {
           loaderData: layoutData,
