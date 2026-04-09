@@ -35,7 +35,9 @@ export const snapshotImageSchema = z.object({
    * Output format.
    * @default 'original'
    */
-  format: z.enum(["avif", "webp", "jpeg", "png", "original"]).default("original"),
+  format: z
+    .enum(["avif", "webp", "jpeg", "png", "original"])
+    .default("original"),
   /** `sizes` attribute passed directly to the `<img>` element. */
   sizes: z.string().optional(),
   /**

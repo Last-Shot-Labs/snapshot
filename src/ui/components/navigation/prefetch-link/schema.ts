@@ -30,5 +30,15 @@ export const prefetchLinkSchema = z.object({
   rel: z.string().optional(),
 });
 
-/** Inferred type for `<PrefetchLink>` config. */
+/**
+ * The output type of `prefetchLinkSchema` — all fields fully resolved with
+ * defaults applied. This is the type received by the component implementation.
+ */
 export type PrefetchLinkConfig = z.infer<typeof prefetchLinkSchema>;
+
+/**
+ * The input type of `prefetchLinkSchema` — mirrors what callers pass before
+ * Zod applies defaults. Use this as the component's public prop type so that
+ * `prefetch` and other defaulted fields are optional at the call site.
+ */
+export type PrefetchLinkProps = z.input<typeof prefetchLinkSchema>;

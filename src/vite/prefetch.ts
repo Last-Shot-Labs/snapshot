@@ -108,7 +108,8 @@ function collectCss(
   if (!entry) return;
 
   for (const css of entry.css ?? []) result.add(css);
-  for (const imp of entry.imports ?? []) collectCss(manifest, imp, result, visited);
+  for (const imp of entry.imports ?? [])
+    collectCss(manifest, imp, result, visited);
 }
 
 /**
@@ -170,13 +171,18 @@ function findManifestKey(
   const serverTokens = serverNorm.split("/").filter(Boolean);
 
   // Normalise the client routes dir prefix for comparison
-  const normalizedClientDir = clientRoutesDir.replace(/\\/g, "/").replace(/\/$/, "");
+  const normalizedClientDir = clientRoutesDir
+    .replace(/\\/g, "/")
+    .replace(/\/$/, "");
 
   for (const key of Object.keys(manifest)) {
     const normalizedKey = key.replace(/\\/g, "/");
 
     // Key must be under the client routes dir
-    if (!normalizedKey.startsWith(normalizedClientDir + "/") && normalizedKey !== normalizedClientDir) {
+    if (
+      !normalizedKey.startsWith(normalizedClientDir + "/") &&
+      normalizedKey !== normalizedClientDir
+    ) {
       continue;
     }
 
@@ -193,7 +199,8 @@ function findManifestKey(
 
     // The last N tokens of keyTokens should match serverTokens
     const keyRouteTokens = keyTokens.slice(
-      keyTokens.findIndex((t) => t !== normalizedClientDir.split("/").pop()) + 1,
+      keyTokens.findIndex((t) => t !== normalizedClientDir.split("/").pop()) +
+        1,
     );
 
     // Simpler: just check if the final segment count matches and tokens match

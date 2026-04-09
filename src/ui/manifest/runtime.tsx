@@ -42,7 +42,10 @@ interface ManifestResourceCacheValue {
     target: EndpointTarget,
     params?: Record<string, unknown>,
   ) => ResourceCacheEntry | undefined;
-  getData: (target: EndpointTarget, params?: Record<string, unknown>) => unknown;
+  getData: (
+    target: EndpointTarget,
+    params?: Record<string, unknown>,
+  ) => unknown;
   loadTarget: (
     target: EndpointTarget,
     params?: Record<string, unknown>,
@@ -72,8 +75,9 @@ interface OverlayRuntimeValue {
 const ManifestResourceCacheContext =
   createContext<ManifestResourceCacheValue | null>(null);
 const RouteRuntimeContext = createContext<RouteRuntimeValue | null>(null);
-export const OverlayRuntimeContext =
-  createContext<OverlayRuntimeValue | null>(null);
+export const OverlayRuntimeContext = createContext<OverlayRuntimeValue | null>(
+  null,
+);
 
 export function ManifestRuntimeProvider({
   manifest,
@@ -84,8 +88,12 @@ export function ManifestRuntimeProvider({
   api?: ApiClient;
   children: ReactNode;
 }) {
-  const [entries, setEntries] = useState<Record<string, ResourceCacheEntry>>({});
-  const [resourceVersions, setResourceVersions] = useState<Record<string, number>>({});
+  const [entries, setEntries] = useState<Record<string, ResourceCacheEntry>>(
+    {},
+  );
+  const [resourceVersions, setResourceVersions] = useState<
+    Record<string, number>
+  >({});
 
   const isEntryFresh = useCallback(
     (entry: ResourceCacheEntry | undefined) => {
@@ -116,7 +124,11 @@ export function ManifestRuntimeProvider({
   const getCacheKey = useCallback(
     (target: EndpointTarget, params: Record<string, unknown> = {}) => {
       try {
-        const request = resolveEndpointTarget(target, manifest.resources, params);
+        const request = resolveEndpointTarget(
+          target,
+          manifest.resources,
+          params,
+        );
         const url = buildRequestUrl(request.endpoint, request.params);
         return `${request.method} ${url}`;
       } catch {
@@ -147,7 +159,9 @@ export function ManifestRuntimeProvider({
         [key]: {
           status: "loading",
           data: current[key]?.data,
-          resourceName: isResourceRef(target) ? target.resource : current[key]?.resourceName,
+          resourceName: isResourceRef(target)
+            ? target.resource
+            : current[key]?.resourceName,
         },
       }));
 
@@ -189,7 +203,9 @@ export function ManifestRuntimeProvider({
           [key]: {
             status: "error",
             error: resolvedError,
-            resourceName: isResourceRef(target) ? target.resource : current[key]?.resourceName,
+            resourceName: isResourceRef(target)
+              ? target.resource
+              : current[key]?.resourceName,
           },
         }));
         throw resolvedError;

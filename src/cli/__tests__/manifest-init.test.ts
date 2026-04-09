@@ -103,14 +103,23 @@ describe("generateManifestJson", () => {
         includeSidebar: false,
       }),
     );
-    expect(parsed.routes.find((route: { path: string }) => route.path === "/dashboard")).toBeDefined();
-    expect(parsed.routes.find((route: { path: string }) => route.path === "/settings")).toBeDefined();
+    expect(
+      parsed.routes.find(
+        (route: { path: string }) => route.path === "/dashboard",
+      ),
+    ).toBeDefined();
+    expect(
+      parsed.routes.find(
+        (route: { path: string }) => route.path === "/settings",
+      ),
+    ).toBeDefined();
   });
 
   it("includes heading and row components in dashboard", () => {
     const parsed = JSON.parse(generateManifestJson(baseOptions));
     const dashboard = parsed.routes.find(
-      (route: { path: string; content: unknown[] }) => route.path === "/dashboard",
+      (route: { path: string; content: unknown[] }) =>
+        route.path === "/dashboard",
     );
     const content = dashboard.content;
     expect(content.some((c: { type: string }) => c.type === "heading")).toBe(

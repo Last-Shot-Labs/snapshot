@@ -213,14 +213,14 @@ describe("ModalComponent", () => {
 
     render(createElement(ModalComponent, { config }), { wrapper });
 
-    expect(
-      appRegistry.store.get(appRegistry.register("overlayOpened")),
-    ).toBe("42");
+    expect(appRegistry.store.get(appRegistry.register("overlayOpened"))).toBe(
+      "42",
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(
-      appRegistry.store.get(appRegistry.register("overlayClosed")),
-    ).toBe("true");
+    expect(appRegistry.store.get(appRegistry.register("overlayClosed"))).toBe(
+      "true",
+    );
   });
 });

@@ -2,7 +2,13 @@ import { z } from "zod";
 import type { FromRef } from "../context/types";
 import { parseDataString } from "../context/utils";
 
-export const httpMethodSchema = z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]);
+export const httpMethodSchema = z.enum([
+  "GET",
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE",
+]);
 
 export const resourceParamSchema: z.ZodType<unknown | FromRef> = z.lazy(() =>
   z.union([

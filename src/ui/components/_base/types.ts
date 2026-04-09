@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { dataSourceSchema, endpointTargetSchema, resourceRefSchema } from "../../manifest/resources";
+import {
+  dataSourceSchema,
+  endpointTargetSchema,
+  resourceRefSchema,
+} from "../../manifest/resources";
 
 /**
  * Schema for a FromRef value — a reference to another component's published data.

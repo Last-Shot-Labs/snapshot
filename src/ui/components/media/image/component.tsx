@@ -85,8 +85,10 @@ export function SnapshotImage({ config }: { config: SnapshotImageConfig }) {
   // Build responsive srcset at 0.5×, 1×, 2×
   const halfWidth = Math.max(1, Math.round(width / 2));
   const doubleWidth = Math.min(4096, width * 2);
-  const halfHeight = height !== undefined ? Math.max(1, Math.round(height / 2)) : undefined;
-  const doubleHeight = height !== undefined ? Math.min(4096, height * 2) : undefined;
+  const halfHeight =
+    height !== undefined ? Math.max(1, Math.round(height / 2)) : undefined;
+  const doubleHeight =
+    height !== undefined ? Math.min(4096, height * 2) : undefined;
 
   const srcset = [
     `${buildImageUrl(src, halfWidth, halfHeight, format, quality)} ${halfWidth}w`,

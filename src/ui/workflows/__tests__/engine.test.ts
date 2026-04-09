@@ -76,7 +76,10 @@ describe("runWorkflow", () => {
   });
 
   it("runs named workflows with merged input context", async () => {
-    const calls: Array<{ action: ActionConfig; context: Record<string, unknown> }> = [];
+    const calls: Array<{
+      action: ActionConfig;
+      context: Record<string, unknown>;
+    }> = [];
     const executeAction = vi.fn(
       async (action: ActionConfig, context: Record<string, unknown>) => {
         calls.push({ action, context });
@@ -102,10 +105,9 @@ describe("runWorkflow", () => {
         executeAction,
         resolveValue: (value, context) => {
           if (typeof value === "string") {
-            return value.replace("{name}", String(context["name"] ?? "")).replace(
-              "{label}",
-              String(context["label"] ?? ""),
-            );
+            return value
+              .replace("{name}", String(context["name"] ?? ""))
+              .replace("{label}", String(context["label"] ?? ""));
           }
           if (value && typeof value === "object") {
             return Object.fromEntries(

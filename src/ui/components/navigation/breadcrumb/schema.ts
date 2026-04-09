@@ -33,31 +33,33 @@ export const breadcrumbItemSchema = z.object({
  * }
  * ```
  */
-export const breadcrumbConfigSchema = baseComponentConfigSchema.extend({
-  /** Component type discriminator. */
-  type: z.literal("breadcrumb"),
-  /** Source for breadcrumb items. */
-  source: z.enum(["manual", "route"]).optional(),
-  /** Array of breadcrumb items from root to current page. */
-  items: z.array(breadcrumbItemSchema).min(1).optional(),
-  /** Include the app home route when deriving breadcrumbs from the current route. */
-  includeHome: z.boolean().optional(),
-  /** Separator character between items. */
-  separator: z.enum(["slash", "chevron", "dot", "arrow"]).optional(),
-  /** Maximum visible items before collapsing middle items with ellipsis. */
-  maxItems: z.number().optional(),
-  /** Action dispatched on breadcrumb item click. */
-  action: actionSchema.optional(),
-  /** Inline style overrides. */
-  style: z.record(z.union([z.string(), z.number()])).optional(),
-  /** Additional CSS class name. */
-  className: z.string().optional(),
-}).superRefine((config, ctx) => {
-  if ((config.source ?? "manual") === "manual" && !config.items?.length) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["items"],
-      message: "Breadcrumb items are required when source is \"manual\".",
-    });
-  }
-});
+export const breadcrumbConfigSchema = baseComponentConfigSchema
+  .extend({
+    /** Component type discriminator. */
+    type: z.literal("breadcrumb"),
+    /** Source for breadcrumb items. */
+    source: z.enum(["manual", "route"]).optional(),
+    /** Array of breadcrumb items from root to current page. */
+    items: z.array(breadcrumbItemSchema).min(1).optional(),
+    /** Include the app home route when deriving breadcrumbs from the current route. */
+    includeHome: z.boolean().optional(),
+    /** Separator character between items. */
+    separator: z.enum(["slash", "chevron", "dot", "arrow"]).optional(),
+    /** Maximum visible items before collapsing middle items with ellipsis. */
+    maxItems: z.number().optional(),
+    /** Action dispatched on breadcrumb item click. */
+    action: actionSchema.optional(),
+    /** Inline style overrides. */
+    style: z.record(z.union([z.string(), z.number()])).optional(),
+    /** Additional CSS class name. */
+    className: z.string().optional(),
+  })
+  .superRefine((config, ctx) => {
+    if ((config.source ?? "manual") === "manual" && !config.items?.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["items"],
+        message: 'Breadcrumb items are required when source is "manual".',
+      });
+    }
+  });

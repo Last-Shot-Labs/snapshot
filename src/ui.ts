@@ -302,6 +302,13 @@ export {
 } from "./ui/components/navigation/tabs";
 export type { TabsConfig, TabConfig } from "./ui/components/navigation/tabs";
 
+// Components — PrefetchLink
+export {
+  PrefetchLink,
+  prefetchLinkSchema,
+} from "./ui/components/navigation/prefetch-link/index";
+export type { PrefetchLinkConfig } from "./ui/components/navigation/prefetch-link/index";
+
 // Components — RichTextEditor
 export {
   RichTextEditor,

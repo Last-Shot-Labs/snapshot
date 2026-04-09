@@ -41,10 +41,16 @@ function toFieldOptions(data: unknown) {
         if (label == null || value == null) return null;
         return { label: String(label), value: String(value) };
       })
-      .filter((item): item is { label: string; value: string } => item !== null);
+      .filter(
+        (item): item is { label: string; value: string } => item !== null,
+      );
   }
 
-  if (data && typeof data === "object" && Array.isArray((data as Record<string, unknown>)["data"])) {
+  if (
+    data &&
+    typeof data === "object" &&
+    Array.isArray((data as Record<string, unknown>)["data"])
+  ) {
     return toFieldOptions((data as Record<string, unknown>)["data"]);
   }
 
@@ -174,10 +180,10 @@ function FieldRenderer({
             ? field.options
             : toFieldOptions(optionsResult.data)
           ).map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
         </select>
       );
       break;

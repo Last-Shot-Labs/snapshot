@@ -5,7 +5,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createSnapshot } from "../../create-snapshot";
 import { SnapshotApiContext, useActionExecutor } from "../actions/executor";
-import { AppContextProvider, useResolveFrom, useSubscribe } from "../context/index";
+import {
+  AppContextProvider,
+  useResolveFrom,
+  useSubscribe,
+} from "../context/index";
 import { Nav } from "../components/layout/nav";
 import { DrawerComponent } from "../components/overlay/drawer";
 import { ModalComponent } from "../components/overlay/modal";
@@ -95,7 +99,13 @@ function evaluateRouteGuard(
 
 function inferAuthScreenPath(
   manifest: CompiledManifest,
-  screen: "login" | "register" | "forgot-password" | "reset-password" | "verify-email" | "mfa",
+  screen:
+    | "login"
+    | "register"
+    | "forgot-password"
+    | "reset-password"
+    | "verify-email"
+    | "mfa",
 ): string | undefined {
   const routeById = manifest.routes.find((route) => route.id === screen);
   if (routeById) {
@@ -159,7 +169,11 @@ function OverlayHost({
           return (
             <DrawerComponent
               key={id}
-              config={{ ...overlay, id } as Parameters<typeof DrawerComponent>[0]["config"]}
+              config={
+                { ...overlay, id } as Parameters<
+                  typeof DrawerComponent
+                >[0]["config"]
+              }
             />
           );
         }
@@ -167,7 +181,11 @@ function OverlayHost({
         return (
           <ModalComponent
             key={id}
-            config={{ ...overlay, id } as Parameters<typeof ModalComponent>[0]["config"]}
+            config={
+              { ...overlay, id } as Parameters<
+                typeof ModalComponent
+              >[0]["config"]
+            }
           />
         );
       })}
@@ -245,7 +263,11 @@ function AppShell({
             borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
           }}
         >
-          <Nav config={navConfig} pathname={currentPath} onNavigate={(path) => navigate(path)} />
+          <Nav
+            config={navConfig}
+            pathname={currentPath}
+            onNavigate={(path) => navigate(path)}
+          />
         </div>
         {page}
       </div>
@@ -266,7 +288,11 @@ function AppShell({
           flexShrink: 0,
         }}
       >
-        <Nav config={navConfig} pathname={currentPath} onNavigate={(path) => navigate(path)} />
+        <Nav
+          config={navConfig}
+          pathname={currentPath}
+          onNavigate={(path) => navigate(path)}
+        />
       </aside>
       {page}
     </div>
@@ -291,28 +317,33 @@ function ManifestRouter({ manifest, api }: ManifestRouterProps) {
     currentPath: string;
     params: Record<string, string>;
   } | null>(null);
-  const authState = useSubscribe({ from: "global.auth" }) as
-    | {
-        user?: Record<string, unknown> | null;
-        isAuthenticated?: boolean;
-        isLoading?: boolean;
-      }
-    | null;
-  const rawUser = useSubscribe({ from: "global.user" }) as
-    | Record<string, unknown>
-    | null;
-  const user = (authState?.user as Record<string, unknown> | null | undefined) ?? rawUser;
-  const authLoading = manifest.auth ? Boolean(authState?.isLoading ?? true) : false;
+  const authState = useSubscribe({ from: "global.auth" }) as {
+    user?: Record<string, unknown> | null;
+    isAuthenticated?: boolean;
+    isLoading?: boolean;
+  } | null;
+  const rawUser = useSubscribe({ from: "global.user" }) as Record<
+    string,
+    unknown
+  > | null;
+  const user =
+    (authState?.user as Record<string, unknown> | null | undefined) ?? rawUser;
+  const authLoading = manifest.auth
+    ? Boolean(authState?.isLoading ?? true)
+    : false;
 
-  const navigate = useCallback((to: string, options?: { replace?: boolean }) => {
-    if (options?.replace) {
-      window.history.replaceState({}, "", to);
-    } else {
-      window.history.pushState({}, "", to);
-    }
-    setCurrentPath(to);
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  }, []);
+  const navigate = useCallback(
+    (to: string, options?: { replace?: boolean }) => {
+      if (options?.replace) {
+        window.history.replaceState({}, "", to);
+      } else {
+        window.history.pushState({}, "", to);
+      }
+      setCurrentPath(to);
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    },
+    [],
+  );
 
   useEffect(() => {
     const handlePopState = () => {
@@ -332,7 +363,12 @@ function ManifestRouter({ manifest, api }: ManifestRouterProps) {
       return;
     }
 
-    const nextTitle = resolveDocumentTitle(manifest, route, currentPath, params);
+    const nextTitle = resolveDocumentTitle(
+      manifest,
+      route,
+      currentPath,
+      params,
+    );
     if (nextTitle) {
       document.title = nextTitle;
     }

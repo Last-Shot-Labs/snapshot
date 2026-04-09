@@ -102,7 +102,9 @@ export function AppStateProvider({
   return (
     <AppStateDefinitionsContext.Provider value={scopedState}>
       <AppStateRegistryContext.Provider value={registryRef.current}>
-        <JotaiProvider store={registryRef.current.store}>{children}</JotaiProvider>
+        <JotaiProvider store={registryRef.current.store}>
+          {children}
+        </JotaiProvider>
       </AppStateRegistryContext.Provider>
     </AppStateDefinitionsContext.Provider>
   );
@@ -119,7 +121,10 @@ export function RouteStateProvider({
     registryRef.current = new AtomRegistryImpl();
   }
 
-  const scopedState = useMemo(() => filterStateByScope(state, "route"), [state]);
+  const scopedState = useMemo(
+    () => filterStateByScope(state, "route"),
+    [state],
+  );
 
   useEffect(() => {
     initializeRegistryState(registryRef.current!, scopedState, resources, api);

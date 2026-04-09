@@ -137,7 +137,8 @@ export function useDetailCard(config: DetailCardConfig): UseDetailCardResult {
   // Determine the endpoint for fetching (only used when data is a string)
   const resolvedTarget = !isDataFromRef ? resolvedDataSource : null;
   const request =
-    resolvedTarget && (typeof resolvedTarget === "string" || isResourceRef(resolvedTarget))
+    resolvedTarget &&
+    (typeof resolvedTarget === "string" || isResourceRef(resolvedTarget))
       ? resolveEndpointTarget(
           resolvedTarget,
           runtime?.resources,
@@ -173,7 +174,9 @@ export function useDetailCard(config: DetailCardConfig): UseDetailCardResult {
       }
       if (resourceCache) {
         return resourceCache.loadTarget(
-          resolvedTarget as string | { resource: string; params?: Record<string, unknown> },
+          resolvedTarget as
+            | string
+            | { resource: string; params?: Record<string, unknown> },
           resolvedParams,
         );
       }

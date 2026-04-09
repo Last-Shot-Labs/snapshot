@@ -18,7 +18,9 @@ export function matchRoutePath(
   currentPath: string,
 ): Record<string, string> | null {
   const patternParts = normalizePathname(routePath).split("/").filter(Boolean);
-  const currentParts = normalizePathname(currentPath).split("/").filter(Boolean);
+  const currentParts = normalizePathname(currentPath)
+    .split("/")
+    .filter(Boolean);
 
   if (patternParts.length !== currentParts.length) {
     return null;

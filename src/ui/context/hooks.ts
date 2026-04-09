@@ -43,7 +43,7 @@ function resolveSubscriptionTarget(
           ? pageRegistry
           : appRegistry?.get(stateId) != null
             ? appRegistry
-            : pageRegistry ?? appRegistry,
+            : (pageRegistry ?? appRegistry),
       cleanPath,
     };
   }

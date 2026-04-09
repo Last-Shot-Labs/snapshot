@@ -41,7 +41,9 @@ describe("BreadcrumbComponent", () => {
         },
       ],
     });
-    const route = manifest.routes.find((candidate) => candidate.id === "user-detail");
+    const route = manifest.routes.find(
+      (candidate) => candidate.id === "user-detail",
+    );
     expect(route).toBeDefined();
 
     render(
@@ -56,7 +58,9 @@ describe("BreadcrumbComponent", () => {
               isPreloading: false,
             }}
           >
-            <BreadcrumbComponent config={{ type: "breadcrumb", source: "route" }} />
+            <BreadcrumbComponent
+              config={{ type: "breadcrumb", source: "route" }}
+            />
           </RouteRuntimeProvider>
         </ManifestRuntimeProvider>
       </Provider>,

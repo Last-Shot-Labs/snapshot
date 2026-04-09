@@ -116,7 +116,10 @@ export async function runWorkflow(
         throw new Error(`Unknown workflow node type "${node.type}"`);
       }
 
-      await customHandler(node as unknown as import("./types").CustomWorkflowNode, runtime);
+      await customHandler(
+        node as unknown as import("./types").CustomWorkflowNode,
+        runtime,
+      );
     }
   };
 

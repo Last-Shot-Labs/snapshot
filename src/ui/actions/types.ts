@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { endpointTargetSchema, type EndpointTarget } from "../manifest/resources";
+import {
+  endpointTargetSchema,
+  type EndpointTarget,
+} from "../manifest/resources";
 
 export const ACTION_TYPES = [
   "navigate",

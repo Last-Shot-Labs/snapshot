@@ -4,7 +4,10 @@ import {
   RouteStateProvider,
   RouteStateRegistryContext,
 } from "../state/index";
-import type { AppContextProviderProps, PageContextProviderProps } from "./types";
+import type {
+  AppContextProviderProps,
+  PageContextProviderProps,
+} from "./types";
 
 /**
  * React context for the page-level atom registry.

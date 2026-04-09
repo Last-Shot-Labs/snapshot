@@ -7,11 +7,7 @@ export {
   RouteStateProvider,
   RouteStateRegistryContext,
 } from "./providers";
-export {
-  useResetStateValue,
-  useSetStateValue,
-  useStateValue,
-} from "./hooks";
+export { useResetStateValue, useSetStateValue, useStateValue } from "./hooks";
 export type {
   AtomRegistry,
   JotaiStore,

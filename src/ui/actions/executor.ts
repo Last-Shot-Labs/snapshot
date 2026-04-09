@@ -94,21 +94,17 @@ function resolveFromRef(
   context: Record<string, unknown>,
   pageRegistry: AtomRegistry | null,
   appRegistry: AtomRegistry | null,
-  routeRuntime:
-    | {
-        currentPath?: string;
-        currentRoute?: { id?: string; path?: string } | null;
-        params?: Record<string, string>;
-      }
-    | null,
-  overlayRuntime:
-    | {
-        id?: string;
-        kind?: string;
-        payload?: unknown;
-        result?: unknown;
-      }
-    | null,
+  routeRuntime: {
+    currentPath?: string;
+    currentRoute?: { id?: string; path?: string } | null;
+    params?: Record<string, string>;
+  } | null,
+  overlayRuntime: {
+    id?: string;
+    kind?: string;
+    payload?: unknown;
+    result?: unknown;
+  } | null,
 ): unknown {
   const refPath = ref.from;
 
@@ -168,7 +164,9 @@ function resolveFromRef(
 
   if (targetId in context) {
     const contextValue = context[targetId];
-    const resolved = subPath ? getNestedValue(contextValue, subPath) : contextValue;
+    const resolved = subPath
+      ? getNestedValue(contextValue, subPath)
+      : contextValue;
     return applyTransform(resolved, ref.transform, ref.transformArg);
   }
 
@@ -188,21 +186,17 @@ function resolveWorkflowValue(
   context: Record<string, unknown>,
   pageRegistry: AtomRegistry | null,
   appRegistry: AtomRegistry | null,
-  routeRuntime:
-    | {
-        currentPath?: string;
-        currentRoute?: { id?: string; path?: string } | null;
-        params?: Record<string, string>;
-      }
-    | null,
-  overlayRuntime:
-    | {
-        id?: string;
-        kind?: string;
-        payload?: unknown;
-        result?: unknown;
-      }
-    | null,
+  routeRuntime: {
+    currentPath?: string;
+    currentRoute?: { id?: string; path?: string } | null;
+    params?: Record<string, string>;
+  } | null,
+  overlayRuntime: {
+    id?: string;
+    kind?: string;
+    payload?: unknown;
+    result?: unknown;
+  } | null,
 ): unknown {
   if (isFromRef(value)) {
     return resolveFromRef(
@@ -268,26 +262,25 @@ export function useActionExecutor(): ActionExecuteFn {
       action: ActionConfig | ActionConfig[],
       context: Record<string, unknown> = {},
     ): Promise<void> => {
-      const executionContext =
-        {
-          ...context,
-          ...(context.route === undefined && routeRuntime
-            ? {
-                route: {
-                  id: routeRuntime.currentRoute?.id,
-                  path: routeRuntime.currentPath,
-                  pattern: routeRuntime.currentRoute?.path,
-                  params: routeRuntime.params,
-                },
-              }
-            : null),
-          ...(context.params === undefined && routeRuntime
-            ? { params: routeRuntime.params }
-            : null),
-          ...(context.overlay === undefined && overlayRuntime
-            ? { overlay: overlayRuntime }
-            : null),
-        };
+      const executionContext = {
+        ...context,
+        ...(context.route === undefined && routeRuntime
+          ? {
+              route: {
+                id: routeRuntime.currentRoute?.id,
+                path: routeRuntime.currentPath,
+                pattern: routeRuntime.currentRoute?.path,
+                params: routeRuntime.params,
+              },
+            }
+          : null),
+        ...(context.params === undefined && routeRuntime
+          ? { params: routeRuntime.params }
+          : null),
+        ...(context.overlay === undefined && overlayRuntime
+          ? { overlay: overlayRuntime }
+          : null),
+      };
       const executeBuiltinAction = async (
         builtin: ActionConfig,
         builtinContext: Record<string, unknown>,
@@ -396,8 +389,8 @@ export function useActionExecutor(): ActionExecuteFn {
                 builtin.invalidates ?? [],
               );
               if (isResourceRef(target)) {
-                for (const resourceName of
-                  runtime?.resources?.[target.resource]?.invalidates ?? []) {
+                for (const resourceName of runtime?.resources?.[target.resource]
+                  ?.invalidates ?? []) {
                   configuredInvalidations.add(resourceName);
                 }
               }
@@ -436,7 +429,8 @@ export function useActionExecutor(): ActionExecuteFn {
 
           case "close-modal": {
             const overlayId =
-              builtin.modal ?? modalManager.stack[modalManager.stack.length - 1];
+              builtin.modal ??
+              modalManager.stack[modalManager.stack.length - 1];
             const resultTarget = overlayId
               ? modalManager.getResultTarget(overlayId)
               : undefined;
@@ -467,7 +461,9 @@ export function useActionExecutor(): ActionExecuteFn {
           }
 
           case "refresh": {
-            const targets = builtin.target.split(",").map((target) => target.trim());
+            const targets = builtin.target
+              .split(",")
+              .map((target) => target.trim());
             for (const target of targets) {
               if (target.startsWith("resource:")) {
                 const resourceName = target.slice(9);
@@ -590,7 +586,8 @@ export function useActionExecutor(): ActionExecuteFn {
               action: builtin.action
                 ? {
                     label: builtin.action.label,
-                    onClick: () => void execute(builtin.action!.action, builtinContext),
+                    onClick: () =>
+                      void execute(builtin.action!.action, builtinContext),
                   }
                 : undefined,
             });

@@ -85,7 +85,9 @@ function deriveRouteItems(
     }
   }
 
-  const patternParts = normalizePath(currentRoute.path).split("/").filter(Boolean);
+  const patternParts = normalizePath(currentRoute.path)
+    .split("/")
+    .filter(Boolean);
   const currentParts = currentPath.split("/").filter(Boolean);
 
   for (let i = 0; i < patternParts.length; i += 1) {

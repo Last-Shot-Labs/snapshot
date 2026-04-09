@@ -53,7 +53,10 @@ describe("snapshotImageSchema", () => {
   });
 
   it("accepts optional height", () => {
-    const result = snapshotImageSchema.safeParse({ ...baseConfig, height: 630 });
+    const result = snapshotImageSchema.safeParse({
+      ...baseConfig,
+      height: 630,
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.height).toBe(630);
@@ -77,7 +80,10 @@ describe("snapshotImageSchema", () => {
   });
 
   it("accepts priority = true", () => {
-    const result = snapshotImageSchema.safeParse({ ...baseConfig, priority: true });
+    const result = snapshotImageSchema.safeParse({
+      ...baseConfig,
+      priority: true,
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.priority).toBe(true);
@@ -117,22 +123,35 @@ describe("snapshotImageSchema", () => {
   });
 
   it("rejects empty src", () => {
-    const result = snapshotImageSchema.safeParse({ src: "", width: 100, alt: "img" });
+    const result = snapshotImageSchema.safeParse({
+      src: "",
+      width: 100,
+      alt: "img",
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects missing width", () => {
-    const result = snapshotImageSchema.safeParse({ src: "/img.jpg", alt: "img" });
+    const result = snapshotImageSchema.safeParse({
+      src: "/img.jpg",
+      alt: "img",
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects missing alt", () => {
-    const result = snapshotImageSchema.safeParse({ src: "/img.jpg", width: 100 });
+    const result = snapshotImageSchema.safeParse({
+      src: "/img.jpg",
+      width: 100,
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects non-integer width", () => {
-    const result = snapshotImageSchema.safeParse({ ...baseConfig, width: 100.5 });
+    const result = snapshotImageSchema.safeParse({
+      ...baseConfig,
+      width: 100.5,
+    });
     expect(result.success).toBe(false);
   });
 
@@ -142,12 +161,18 @@ describe("snapshotImageSchema", () => {
   });
 
   it("rejects width > 4096", () => {
-    const result = snapshotImageSchema.safeParse({ ...baseConfig, width: 5000 });
+    const result = snapshotImageSchema.safeParse({
+      ...baseConfig,
+      width: 5000,
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects invalid format", () => {
-    const result = snapshotImageSchema.safeParse({ ...baseConfig, format: "tiff" });
+    const result = snapshotImageSchema.safeParse({
+      ...baseConfig,
+      format: "tiff",
+    });
     expect(result.success).toBe(false);
   });
 
@@ -157,7 +182,10 @@ describe("snapshotImageSchema", () => {
   });
 
   it("rejects quality > 100", () => {
-    const result = snapshotImageSchema.safeParse({ ...baseConfig, quality: 101 });
+    const result = snapshotImageSchema.safeParse({
+      ...baseConfig,
+      quality: 101,
+    });
     expect(result.success).toBe(false);
   });
 
@@ -167,12 +195,18 @@ describe("snapshotImageSchema", () => {
   });
 
   it("rejects height > 4096", () => {
-    const result = snapshotImageSchema.safeParse({ ...baseConfig, height: 5000 });
+    const result = snapshotImageSchema.safeParse({
+      ...baseConfig,
+      height: 5000,
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects invalid placeholder", () => {
-    const result = snapshotImageSchema.safeParse({ ...baseConfig, placeholder: "pixelate" });
+    const result = snapshotImageSchema.safeParse({
+      ...baseConfig,
+      placeholder: "pixelate",
+    });
     expect(result.success).toBe(false);
   });
 });

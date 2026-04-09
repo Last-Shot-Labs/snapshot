@@ -5,7 +5,9 @@ import React from "react";
 import { SnapshotImage } from "../component";
 import type { SnapshotImageConfig } from "../types";
 
-function baseConfig(overrides: Partial<SnapshotImageConfig> = {}): SnapshotImageConfig {
+function baseConfig(
+  overrides: Partial<SnapshotImageConfig> = {},
+): SnapshotImageConfig {
   return {
     src: "/uploads/cover.jpg",
     width: 1200,
@@ -34,7 +36,11 @@ describe("SnapshotImage component", () => {
   });
 
   it("constructs src URL with correct query params", () => {
-    render(<SnapshotImage config={baseConfig({ width: 800, format: "webp", quality: 80 })} />);
+    render(
+      <SnapshotImage
+        config={baseConfig({ width: 800, format: "webp", quality: 80 })}
+      />,
+    );
     const img = screen.getByTestId("snapshot-image") as HTMLImageElement;
     expect(img.src).toContain("/_snapshot/image");
     expect(img.src).toContain("url=%2Fuploads%2Fcover.jpg");
@@ -106,7 +112,9 @@ describe("SnapshotImage component", () => {
     const { container } = render(
       <SnapshotImage config={baseConfig({ className: "my-image-wrapper" })} />,
     );
-    const wrapper = container.querySelector('[data-snapshot-component="snapshot-image"]');
+    const wrapper = container.querySelector(
+      '[data-snapshot-component="snapshot-image"]',
+    );
     expect(wrapper?.className).toContain("my-image-wrapper");
   });
 

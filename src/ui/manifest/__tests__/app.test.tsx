@@ -19,7 +19,13 @@ vi.hoisted(() => {
   });
 });
 
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { z } from "zod";
 import { ManifestApp, injectStyleSheet } from "../app";
 import { registerComponent } from "../component-registry";
@@ -54,14 +60,13 @@ registerComponentSchema(
     key: z.string(),
   }),
 );
-registerComponent("app-state-probe", function AppStateProbe({
-  config,
-}: {
-  config: Record<string, unknown>;
-}) {
-  const value = useStateValue(String(config.key ?? ""), { scope: "app" });
-  return <div>{String(value ?? "")}</div>;
-});
+registerComponent(
+  "app-state-probe",
+  function AppStateProbe({ config }: { config: Record<string, unknown> }) {
+    const value = useStateValue(String(config.key ?? ""), { scope: "app" });
+    return <div>{String(value ?? "")}</div>;
+  },
+);
 
 registerComponentSchema(
   "auth-value-probe",
@@ -70,14 +75,13 @@ registerComponentSchema(
     from: z.string(),
   }),
 );
-registerComponent("auth-value-probe", function AuthValueProbe({
-  config,
-}: {
-  config: Record<string, unknown>;
-}) {
-  const value = useSubscribe({ from: String(config.from ?? "") });
-  return <div>{typeof value === "string" ? value : String(value ?? "")}</div>;
-});
+registerComponent(
+  "auth-value-probe",
+  function AuthValueProbe({ config }: { config: Record<string, unknown> }) {
+    const value = useSubscribe({ from: String(config.from ?? "") });
+    return <div>{typeof value === "string" ? value : String(value ?? "")}</div>;
+  },
+);
 
 registerComponentSchema(
   "params-probe",
@@ -86,14 +90,13 @@ registerComponentSchema(
     from: z.string(),
   }),
 );
-registerComponent("params-probe", function ParamsProbe({
-  config,
-}: {
-  config: Record<string, unknown>;
-}) {
-  const value = useSubscribe({ from: String(config.from ?? "") });
-  return <div>{typeof value === "string" ? value : String(value ?? "")}</div>;
-});
+registerComponent(
+  "params-probe",
+  function ParamsProbe({ config }: { config: Record<string, unknown> }) {
+    const value = useSubscribe({ from: String(config.from ?? "") });
+    return <div>{typeof value === "string" ? value : String(value ?? "")}</div>;
+  },
+);
 
 const minimalManifest: ManifestConfig = {
   app: {
@@ -414,14 +417,12 @@ describe("ManifestApp", () => {
 
     let requestedUrl = "";
     let resolveFetch!: (response: Response) => void;
-    global.fetch = vi.fn(
-      (input: RequestInfo | URL) => {
-        requestedUrl = String(input);
-        return new Promise<Response>((resolve) => {
-          resolveFetch = resolve;
-        });
-      },
-    ) as typeof fetch;
+    global.fetch = vi.fn((input: RequestInfo | URL) => {
+      requestedUrl = String(input);
+      return new Promise<Response>((resolve) => {
+        resolveFetch = resolve;
+      });
+    }) as typeof fetch;
 
     const manifest: ManifestConfig = {
       resources: {

@@ -245,7 +245,10 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
 
   // Handle data from endpoint string — fetch via API client
   useEffect(() => {
-    if (isDataFromRef || (typeof resolvedData !== "string" && !isResolvedResource)) {
+    if (
+      isDataFromRef ||
+      (typeof resolvedData !== "string" && !isResolvedResource)
+    ) {
       return;
     }
     if (!api) {

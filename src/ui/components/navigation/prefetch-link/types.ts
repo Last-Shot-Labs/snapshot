@@ -1,1 +1,1 @@
-export type { PrefetchLinkConfig } from "./schema";
+export type { PrefetchLinkConfig, PrefetchLinkProps } from "./schema";

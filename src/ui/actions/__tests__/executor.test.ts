@@ -294,7 +294,10 @@ describe("useActionExecutor", () => {
     expect(result.current.resourceCache?.getResourceVersion("users")).toBe(0);
 
     await act(async () => {
-      await result.current.execute({ type: "refresh", target: "resource:users" });
+      await result.current.execute({
+        type: "refresh",
+        target: "resource:users",
+      });
     });
 
     expect(result.current.resourceCache?.getResourceVersion("users")).toBe(1);
@@ -411,8 +414,12 @@ describe("useActionExecutor", () => {
       });
     });
 
-    expect(result.current.resourceCache?.getResourceVersion("users.list")).toBe(1);
-    expect(result.current.resourceCache?.getResourceVersion("dashboard")).toBe(1);
+    expect(result.current.resourceCache?.getResourceVersion("users.list")).toBe(
+      1,
+    );
+    expect(result.current.resourceCache?.getResourceVersion("dashboard")).toBe(
+      1,
+    );
   });
 
   it("executes set-value action", async () => {

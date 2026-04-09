@@ -235,9 +235,15 @@ export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin {
             imports: chunk.imports.map((imp) => {
               // Map import file names back to their keys where possible
               for (const [k, c] of Object.entries(bundle)) {
-                if (c.type === "chunk" && c.fileName === imp && c.facadeModuleId) {
+                if (
+                  c.type === "chunk" &&
+                  c.fileName === imp &&
+                  c.facadeModuleId
+                ) {
                   const ik = c.facadeModuleId.replace(/\\/g, "/");
-                  return ik.includes("/src/") ? ik.slice(ik.indexOf("/src/") + 1) : ik;
+                  return ik.includes("/src/")
+                    ? ik.slice(ik.indexOf("/src/") + 1)
+                    : ik;
                 }
               }
               return imp;

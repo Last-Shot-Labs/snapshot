@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { usePrefetchRoute } from "../../../../ssr/prefetch";
-import type { PrefetchLinkConfig } from "./schema";
+import type { PrefetchLinkProps } from "./schema";
 
 /**
  * `<PrefetchLink>` — a prefetch primitive that renders a plain `<a>` anchor and
@@ -25,7 +25,7 @@ export function PrefetchLink({
   className,
   target,
   rel,
-}: PrefetchLinkConfig) {
+}: PrefetchLinkProps) {
   const prefetchRoute = usePrefetchRoute();
   const ref = useRef<HTMLAnchorElement>(null);
 

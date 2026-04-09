@@ -44,7 +44,7 @@ function loadManifest(): Promise<PrefetchManifestShape> {
       }
       return res.json() as Promise<PrefetchManifestShape>;
     })
-    .catch(() => ({ routes: [] } as PrefetchManifestShape));
+    .catch(() => ({ routes: [] }) as PrefetchManifestShape);
 
   return manifestPromise;
 }

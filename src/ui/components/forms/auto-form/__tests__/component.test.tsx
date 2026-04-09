@@ -36,7 +36,10 @@ function createMockApi() {
 function createWrapper(options: {
   api?: ReturnType<typeof createMockApi>;
   pageRegistry?: AtomRegistry;
-  resources?: Record<string, { method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"; endpoint: string }>;
+  resources?: Record<
+    string,
+    { method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"; endpoint: string }
+  >;
 }) {
   const { api, pageRegistry, resources } = options;
   return function Wrapper({ children }: { children: React.ReactNode }) {
@@ -44,8 +47,7 @@ function createWrapper(options: {
       Provider,
       null,
       createElement(ManifestRuntimeProvider, {
-        api:
-          api as unknown as import("../../../../../api/client").ApiClient,
+        api: api as unknown as import("../../../../../api/client").ApiClient,
         manifest: {
           raw: { routes: [{ id: "test", path: "/", content: [] }], resources },
           app: {},
@@ -63,7 +65,11 @@ function createWrapper(options: {
           createElement(
             PageRegistryContext.Provider,
             { value: pageRegistry ?? null },
-            createElement(AppRegistryContext.Provider, { value: null }, children),
+            createElement(
+              AppRegistryContext.Provider,
+              { value: null },
+              children,
+            ),
           ),
         ),
       }),
@@ -589,7 +595,9 @@ describe("AutoForm", () => {
     const config: AutoFormConfig = {
       type: "form",
       submit: { resource: "users.update" },
-      fields: [{ name: "email", type: "email", label: "Email", required: true }],
+      fields: [
+        { name: "email", type: "email", label: "Email", required: true },
+      ],
     };
     render(createElement(AutoForm, { config }), { wrapper });
 

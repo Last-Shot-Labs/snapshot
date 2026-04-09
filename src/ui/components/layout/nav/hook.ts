@@ -159,10 +159,18 @@ export function useNav(config: NavConfig, pathname: string): UseNavResult {
   const v7 = useSubscribe(visibilityRef(7));
   const v8 = useSubscribe(visibilityRef(8));
   const v9 = useSubscribe(visibilityRef(9));
-  const visibilityValues: unknown[] = [v0, v1, v2, v3, v4, v5, v6, v7, v8, v9].slice(
-    0,
-    config.items.length,
-  );
+  const visibilityValues: unknown[] = [
+    v0,
+    v1,
+    v2,
+    v3,
+    v4,
+    v5,
+    v6,
+    v7,
+    v8,
+    v9,
+  ].slice(0, config.items.length);
   const disabledRef = (index: number) => {
     const item = config.items[index];
     if (
@@ -185,10 +193,18 @@ export function useNav(config: NavConfig, pathname: string): UseNavResult {
   const d7 = useSubscribe(disabledRef(7));
   const d8 = useSubscribe(disabledRef(8));
   const d9 = useSubscribe(disabledRef(9));
-  const disabledValues: unknown[] = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9].slice(
-    0,
-    config.items.length,
-  );
+  const disabledValues: unknown[] = [
+    d0,
+    d1,
+    d2,
+    d3,
+    d4,
+    d5,
+    d6,
+    d7,
+    d8,
+    d9,
+  ].slice(0, config.items.length);
 
   const items = useMemo(() => {
     return config.items.map((item, index) =>
