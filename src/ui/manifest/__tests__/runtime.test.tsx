@@ -72,7 +72,9 @@ function createWrapper(options?: { api?: ApiClient }) {
 
 describe("ManifestRuntimeProvider", () => {
   afterEach(() => {
+    vi.clearAllTimers();
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it("invalidates dependent resources when a base resource is invalidated", async () => {
