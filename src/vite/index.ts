@@ -2,6 +2,7 @@ import path from "node:path";
 import type { Plugin, UserConfig } from "vite";
 import { runSync, consoleLogger, type SyncOptions } from "../cli/sync";
 import { buildPrefetchManifest, type ViteManifestEntry } from "./prefetch";
+import { rscTransform } from "./rsc-transform";
 import { serverActionsTransform } from "./server-actions";
 
 export interface SnapshotSyncOptions {
@@ -139,6 +140,46 @@ export interface SnapshotSsrOptions {
    * @default true
    */
   serverActions?: boolean;
+
+  /**
+   * Target runtime for the server bundle.
+   *
+   * Controls how Vite configures the server build. Affects the build target,
+   * SSR format, and which Node.js built-ins are externalized.
+   *
+   * - `'node'` (default) — Standard Node.js/Bun server. Node built-ins are
+   *   externalized; `react` and `react-dom` are externalized.
+   * - `'edge-cloudflare'` — Cloudflare Workers. Build target is `es2022`,
+   *   SSR target is `webworker` (Service Worker format). Node built-ins are
+   *   **not** externalized — they must be polyfilled or avoided entirely.
+   *   Asset manifest should be inlined at build time via a Vite plugin.
+   * - `'edge-deno'` — Deno Deploy. Build target is `es2022`. Deno supports
+   *   most Node.js built-ins via its compatibility layer, so they are still
+   *   externalized.
+   *
+   * @default 'node'
+   */
+  target?: "node" | "edge-cloudflare" | "edge-deno";
+
+  /**
+   * Enable React Server Components (RSC) support.
+   *
+   * When `true`:
+   * - The `rscTransform()` Vite plugin is added to the build pipeline. Files
+   *   with a `'use client'` directive are replaced with client reference stubs
+   *   in the server bundle and left unchanged in the client bundle.
+   * - The server build config gains `resolve.conditions: ['react-server']` so
+   *   RSC-aware packages (like `react-server-dom-webpack`) resolve their
+   *   server-side entry points.
+   * - After the server bundle is assembled, `rsc-manifest.json` is written to
+   *   the server output directory. Load this manifest and pass it to
+   *   `renderPage()` via `rscOptions` to enable RSC rendering at runtime.
+   *
+   * Requires `react-server-dom-webpack >=18.3.0` as an optional peer dependency.
+   *
+   * @default false
+   */
+  rsc?: boolean;
 }
 
 /**
@@ -214,7 +255,57 @@ export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin[] {
           };
         }
         isClientBuild = false;
-        // SSR build: set server output directory and externalize React
+
+        const target = opts.target ?? "node";
+
+        // When RSC is enabled, the server build must use the 'react-server' export
+        // condition so that RSC-aware packages (react-server-dom-webpack, react) resolve
+        // their server entry points (which export renderToPipeableStream for RSC flight).
+        const rscConditions: string[] = opts.rsc ? ["react-server"] : [];
+
+        if (target === "edge-cloudflare") {
+          // Cloudflare Workers — Service Worker format, ES2022 target.
+          // Node built-ins are NOT available and must not be externalized.
+          // react/react-dom are still externalized (bundled via import map or
+          // inlined depending on the consumer's wrangler.toml config).
+          return {
+            build: {
+              target: "es2022",
+              outDir: opts.serverOutDir ?? "dist/server",
+              rollupOptions: {
+                external: ["react", "react-dom", "react-dom/server"],
+              },
+            },
+            ssr: {
+              target: "webworker",
+              // Do not externalize Node built-ins — they are not available on
+              // Cloudflare Workers. The consumer must avoid or polyfill them.
+              noExternal: /^node:/,
+            },
+            ...(rscConditions.length > 0
+              ? { resolve: { conditions: rscConditions } }
+              : {}),
+          };
+        }
+
+        if (target === "edge-deno") {
+          // Deno Deploy — ES2022 target. Deno supports most Node built-ins via
+          // its compatibility layer, so they can remain external.
+          return {
+            build: {
+              target: "es2022",
+              outDir: opts.serverOutDir ?? "dist/server",
+              rollupOptions: {
+                external: ["react", "react-dom", "react-dom/server"],
+              },
+            },
+            ...(rscConditions.length > 0
+              ? { resolve: { conditions: rscConditions } }
+              : {}),
+          };
+        }
+
+        // Default: Node.js / Bun server
         return {
           build: {
             outDir: opts.serverOutDir ?? "dist/server",
@@ -222,6 +313,9 @@ export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin[] {
               external: ["react", "react-dom", "react-dom/server"],
             },
           },
+          ...(rscConditions.length > 0
+            ? { resolve: { conditions: rscConditions } }
+            : {}),
         };
       }
       return null;
@@ -381,6 +475,13 @@ export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin[] {
   // Prepend the server actions transform unless explicitly disabled.
   if (opts.serverActions !== false) {
     plugins.unshift(serverActionsTransform());
+  }
+
+  // Prepend the RSC transform when RSC is opted in.
+  // rscTransform() must run before serverActionsTransform() so that 'use client'
+  // files are stubbed out before 'use server' detection runs on the same file.
+  if (opts.rsc) {
+    plugins.unshift(rscTransform());
   }
 
   return plugins;

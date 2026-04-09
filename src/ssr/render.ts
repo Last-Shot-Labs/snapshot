@@ -7,6 +7,7 @@ import {
 import React from "react";
 import { renderToReadableStream } from "react-dom/server";
 import { getNoStore, withRequestStore } from "./cache";
+import type { RscOptions } from "./rsc";
 import { serializeQueryState } from "./state";
 import type { SsrRequestContext, SsrShellShape } from "./types";
 
@@ -69,11 +70,20 @@ const POSTAMBLE = "\n</div>\n</body>\n</html>";
  * render, `getNoStore()` returns `true` after the render completes and
  * `shell._isr.noStore` is set to signal the ISR middleware to skip the cache write.
  *
+ * **RSC mode:** When `rscOptions` is provided, the function performs a two-pass
+ * React Server Components render instead of the standard single-pass render:
+ * 1. The React tree is rendered to the RSC flight format via
+ *    `react-server-dom-webpack/server`.
+ * 2. The RSC flight stream is piped through `react-dom/server` to produce HTML.
+ * When `rscOptions` is omitted, the existing single-pass render is used unchanged.
+ *
  * @param element - The React element to render (already constructed with props).
  * @param context - Per-request context containing a fresh `QueryClient`.
  * @param shell - Asset and head tags from bunshot-ssr. `headTags` should already
  *   be populated by the renderer before calling this function.
  * @param timeoutMs - Abort timeout in milliseconds. Default: 5000.
+ * @param rscOptions - Optional RSC manifest. When provided, enables RSC two-pass
+ *   rendering. When omitted, standard SSR is used (no RSC).
  * @returns A streaming `Response` with `Content-Type: text/html; charset=utf-8`.
  *
  * @internal — called by `createReactRenderer` and `createManifestRenderer`.
@@ -83,6 +93,7 @@ export function renderPage(
   context: SsrRequestContext,
   shell: SsrShellShape,
   timeoutMs = 5000,
+  rscOptions?: RscOptions,
 ): Promise<Response> {
   return withRequestStore(async () => {
     const { queryClient } = context;
@@ -109,12 +120,87 @@ export function renderPage(
 
     let stream: ReadableStream<Uint8Array>;
     try {
-      stream = await renderToReadableStream(wrappedElement, {
-        signal: controller.signal,
-        onError(error: unknown) {
-          console.error("[snapshot-ssr] renderToReadableStream error:", error);
-        },
-      });
+      if (rscOptions) {
+        // ── RSC two-pass render ──────────────────────────────────────────────
+        // Pass 1: Render the React tree to the RSC flight format.
+        //   `react-server-dom-webpack/server` is an optional peer dep; we import
+        //   it dynamically to avoid bundling it when RSC is not in use.
+        //
+        // Pass 2: Pipe the RSC flight stream through React DOM's server renderer
+        //   to produce an HTML response the browser can display immediately.
+        //
+        // The `components` map from the RSC manifest resolves client references
+        // (files marked with 'use client') to their browser chunk URLs so the
+        // server flight encoder can embed the correct asset URLs in the payload.
+        //
+        // NOTE: The exact `react-server-dom-webpack` API shape depends on the
+        // installed version (>=18.3). We use `as unknown as T` at the import
+        // boundary per Rule 5 — the dep is optional and not in devDependencies.
+        type RsdwServer = {
+          renderToReadableStream: (
+            element: React.ReactElement,
+            clientManifest: Readonly<Record<string, string>>,
+            options?: { signal?: AbortSignal; onError?: (err: unknown) => void },
+          ) => ReadableStream<Uint8Array>;
+        };
+
+        const rsdwServer = (await import(
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore — optional peer dep, not in devDependencies
+          'react-server-dom-webpack/server'
+        )) as unknown as RsdwServer;
+
+        // Pass 1: RSC flight stream
+        const rscStream = rsdwServer.renderToReadableStream(
+          wrappedElement,
+          rscOptions.manifest.components,
+          {
+            signal: controller.signal,
+            onError(error: unknown) {
+              console.error('[snapshot-ssr] RSC flight render error:', error);
+            },
+          },
+        );
+
+        // Pass 2: HTML stream from RSC flight payload.
+        // We pass the RSC stream as the bootstrap data for the client reference
+        // resolver so React DOM can emit the full HTML with embedded RSC payload.
+        //
+        // The stream produced here is a standard ReadableStream<Uint8Array> that
+        // can be concatenated with the preamble and postamble below.
+        type RsdwClient = {
+          createFromReadableStream: (
+            stream: ReadableStream<Uint8Array>,
+            options?: { serverConsumerManifest?: Readonly<Record<string, string>> },
+          ) => Promise<React.ReactElement>;
+        };
+
+        const rsdwClient = (await import(
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore — optional peer dep, not in devDependencies
+          'react-server-dom-webpack/client'
+        )) as unknown as RsdwClient;
+
+        const reconstructedElement = await rsdwClient.createFromReadableStream(
+          rscStream,
+          { serverConsumerManifest: rscOptions.manifest.components },
+        );
+
+        stream = await renderToReadableStream(reconstructedElement, {
+          signal: controller.signal,
+          onError(error: unknown) {
+            console.error('[snapshot-ssr] RSC HTML render error:', error);
+          },
+        });
+      } else {
+        // ── Standard single-pass SSR ─────────────────────────────────────────
+        stream = await renderToReadableStream(wrappedElement, {
+          signal: controller.signal,
+          onError(error: unknown) {
+            console.error("[snapshot-ssr] renderToReadableStream error:", error);
+          },
+        });
+      }
     } finally {
       clearTimeout(timeoutId);
     }
