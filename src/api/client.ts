@@ -4,6 +4,61 @@ import type { RequestOptions } from "../types";
 import type { TokenStorage } from "../auth/storage";
 import type { AuthContract } from "../auth/contract";
 
+/**
+ * API client surface required by manifest runtime resources.
+ */
+export interface ApiClientLike {
+  request<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    options?: RequestOptions,
+  ): Promise<T>;
+  get<T>(path: string, options?: RequestOptions): Promise<T>;
+  post<T>(path: string, body: unknown, options?: RequestOptions): Promise<T>;
+  put<T>(path: string, body: unknown, options?: RequestOptions): Promise<T>;
+  patch<T>(path: string, body: unknown, options?: RequestOptions): Promise<T>;
+  delete<T>(path: string, body?: unknown, options?: RequestOptions): Promise<T>;
+}
+
+/**
+ * Bootstrap values exposed to custom client factories.
+ */
+export interface CustomClientBootstrap {
+  env?: Record<string, string | undefined>;
+  bearerToken?: string;
+}
+
+/**
+ * Factory contract for manifest-declared custom clients.
+ */
+export type ClientFactory = (
+  apiUrl: string,
+  bootstrap: CustomClientBootstrap,
+) => ApiClientLike;
+
+const clientFactories = new Map<string, ClientFactory>();
+
+/**
+ * Register a named custom client factory.
+ *
+ * @param name - Manifest-facing client factory name
+ * @param factory - Factory that creates an ApiClient-like instance
+ */
+export function registerClient(name: string, factory: ClientFactory): void {
+  clientFactories.set(name, factory);
+}
+
+/**
+ * Look up a previously registered custom client factory.
+ *
+ * @param name - Registered client factory name
+ * @returns The registered factory when found
+ */
+export function getRegisteredClient(name: string): ClientFactory | undefined {
+  return clientFactories.get(name);
+}
+
 interface ApiClientConfig {
   apiUrl: string;
   auth?: "cookie" | "token";
@@ -16,7 +71,7 @@ interface ApiClientConfig {
 /**
  * Per-instance API client bound to a single snapshot bootstrap.
  */
-export class ApiClient {
+export class ApiClient implements ApiClientLike {
   private readonly baseUrl: string;
   private readonly authMode: "cookie" | "token";
   private readonly bearerToken: string | undefined;
@@ -133,7 +188,7 @@ export class ApiClient {
     return response.json() as Promise<T>;
   }
 
-  private async request<T>(
+  private async executeRequest<T>(
     method: string,
     path: string,
     body?: unknown,
@@ -189,20 +244,29 @@ export class ApiClient {
     return this.handleResponse<T>(response);
   }
 
+  request<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    options?: RequestOptions,
+  ): Promise<T> {
+    return this.executeRequest<T>(method, path, body, options);
+  }
+
   get<T>(path: string, options?: RequestOptions): Promise<T> {
-    return this.request<T>("GET", path, undefined, options);
+    return this.executeRequest<T>("GET", path, undefined, options);
   }
 
   post<T>(path: string, body: unknown, options?: RequestOptions): Promise<T> {
-    return this.request<T>("POST", path, body, options);
+    return this.executeRequest<T>("POST", path, body, options);
   }
 
   put<T>(path: string, body: unknown, options?: RequestOptions): Promise<T> {
-    return this.request<T>("PUT", path, body, options);
+    return this.executeRequest<T>("PUT", path, body, options);
   }
 
   patch<T>(path: string, body: unknown, options?: RequestOptions): Promise<T> {
-    return this.request<T>("PATCH", path, body, options);
+    return this.executeRequest<T>("PATCH", path, body, options);
   }
 
   delete<T>(
@@ -210,6 +274,6 @@ export class ApiClient {
     body?: unknown,
     options?: RequestOptions,
   ): Promise<T> {
-    return this.request<T>("DELETE", path, body, options);
+    return this.executeRequest<T>("DELETE", path, body, options);
   }
 }

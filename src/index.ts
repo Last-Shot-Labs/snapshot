@@ -1,5 +1,6 @@
 export { createSnapshot } from "./create-snapshot";
 export { ApiError } from "./api/error";
+export { registerClient, getRegisteredClient } from "./api/client";
 export { isMfaChallenge } from "./types";
 export { formatAuthError, createAuthErrorFormatter } from "./auth/error-format";
 

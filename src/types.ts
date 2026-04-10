@@ -151,7 +151,15 @@ export interface Session {
 
 // ── OAuth types ───────────────────────────────────────────────────────────────
 
-export type OAuthProvider = "google" | "apple" | "microsoft" | "github";
+/** OAuth provider identifier used by auth URL helpers and OAuth hooks. */
+export type OAuthProvider =
+  | "google"
+  | "apple"
+  | "microsoft"
+  | "github"
+  | "facebook"
+  | "discord"
+  | (string & {});
 export interface OAuthExchangeBody {
   code: string;
 }
@@ -320,6 +328,11 @@ export interface SnapshotConfig {
 export interface SnapshotInstance<
   TWSEvents extends Record<string, unknown> = Record<string, unknown>,
 > {
+  /** Bootstrap values used to create this snapshot instance. */
+  bootstrap: {
+    env?: Record<string, string | undefined>;
+    bearerToken?: string;
+  };
   // High-level hooks
   useUser: () => {
     user: AuthUser | null;

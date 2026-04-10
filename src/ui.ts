@@ -42,6 +42,13 @@ export type {
   FontConfig,
   Responsive,
 } from "./ui/tokens/types";
+export { registerAnalyticsProvider } from "./ui/analytics/registry";
+export { registerClient, getRegisteredClient } from "./api/client";
+export type {
+  AnalyticsProvider,
+  AnalyticsProviderFactory,
+  AnalyticsProviderInitConfig,
+} from "./ui/analytics/types";
 
 // Context & Data Binding
 export {
@@ -95,6 +102,7 @@ export {
   downloadActionSchema,
   confirmActionSchema,
   toastActionSchema,
+  trackActionSchema,
   runWorkflowActionSchema,
 } from "./ui/actions/index";
 export type {
@@ -109,6 +117,7 @@ export type {
   DownloadAction,
   ConfirmAction,
   ToastAction,
+  TrackAction,
   RunWorkflowAction,
   ModalManager,
   ToastItem,
@@ -165,6 +174,10 @@ export {
   useRouteRuntime,
   manifestConfigSchema,
   appConfigSchema,
+  toastConfigSchema,
+  analyticsConfigSchema,
+  analyticsProviderSchema,
+  pushConfigSchema,
   pageConfigSchema,
   routeConfigSchema,
   overlayConfigSchema,
@@ -172,6 +185,7 @@ export {
   navItemSchema,
   navigationConfigSchema,
   authScreenConfigSchema,
+  authProviderSchema,
   resourceConfigSchema,
   resourceRefSchema,
   stateValueConfigSchema,
@@ -190,12 +204,16 @@ export {
 } from "./ui/manifest/index";
 export type {
   AppConfig,
+  ToastConfig,
+  AnalyticsConfig,
+  PushConfig,
   CompiledManifest,
   CompiledRoute,
   ManifestConfig,
   NavItem,
   NavigationConfig,
   AuthScreenConfig,
+  AuthProviderConfig,
   PageConfig,
   RouteConfig,
   ResourceConfigMap,

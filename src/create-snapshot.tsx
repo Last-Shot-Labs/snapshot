@@ -43,18 +43,13 @@ const MANIFEST_REALTIME_WORKFLOW_EVENT =
 
 type ManifestAuthWorkflowKind = "unauthenticated" | "forbidden" | "logout";
 type ManifestRealtimeWorkflowChannel = "ws" | "sse";
-type ManifestRealtimeWorkflowKind =
-  | "connected"
-  | "disconnected"
-  | "reconnecting"
-  | "reconnectFailed"
-  | "error"
-  | "closed";
 
 interface ManifestRealtimeWorkflowDetail {
   channel: ManifestRealtimeWorkflowChannel;
-  kind: ManifestRealtimeWorkflowKind;
+  kind: string;
   endpoint?: string;
+  event?: string;
+  payload?: unknown;
 }
 
 function dispatchManifestAuthWorkflow(kind: ManifestAuthWorkflowKind): void {
@@ -99,10 +94,13 @@ function createManifestRealtimeCallback(
   detail: ManifestRealtimeWorkflowDetail,
   workflow: string | undefined,
   fallback?: () => void,
-): () => void {
-  return () => {
+): (payload?: unknown) => void {
+  return (payload) => {
     if (workflow && typeof window !== "undefined") {
-      dispatchManifestRealtimeWorkflow(detail);
+      dispatchManifestRealtimeWorkflow({
+        ...detail,
+        payload,
+      });
       return;
     }
 
@@ -113,6 +111,9 @@ function createManifestRealtimeCallback(
 /**
  * Create a per-instance snapshot runtime from bootstrap config and a manifest.
  *
+ * Resolves manifest env refs, builds per-instance runtime managers, and wires
+ * manifest-driven auth/realtime workflow dispatch events.
+ *
  * @param config - Four-field bootstrap config
  * @returns A fully initialized snapshot instance
  */
@@ -120,9 +121,10 @@ export function createSnapshot<
   TWSEvents extends Record<string, unknown> = Record<string, unknown>,
 >(config: SnapshotConfig): SnapshotInstance<TWSEvents> {
   bootBuiltins();
+  const env = config.env ?? getDefaultEnvSource();
   const compiledManifest = compileManifestWithEnv(
     config.manifest,
-    config.env ?? getDefaultEnvSource(),
+    env,
   );
   const runtimeApiUrl = compiledManifest.app.apiUrl ?? config.apiUrl;
   const runtimeRealtime = compiledManifest.realtime;
@@ -141,6 +143,7 @@ export function createSnapshot<
         maxReconnectAttempts: runtimeRealtime.ws.maxReconnectAttempts,
         reconnectBaseDelay: runtimeRealtime.ws.reconnectBaseDelay,
         reconnectMaxDelay: runtimeRealtime.ws.reconnectMaxDelay,
+        events: runtimeRealtime.ws.events,
         onConnected: createManifestRealtimeCallback(
           { channel: "ws", kind: "connected" },
           runtimeRealtime.ws.on?.connected,
@@ -169,6 +172,7 @@ export function createSnapshot<
                 path,
                 {
                   withCredentials: manifestEndpoint.withCredentials,
+                  events: manifestEndpoint.events,
                   onConnected: createManifestRealtimeCallback(
                     { channel: "sse", kind: "connected", endpoint: path },
                     manifestEndpoint.on?.connected,
@@ -269,7 +273,24 @@ export function createSnapshot<
         onClosed: endpointCfg.onClosed,
       });
       manager.connect(url);
+      for (const [event, workflow] of Object.entries(endpointCfg.events ?? {})) {
+        const dispatch = createManifestRealtimeCallback(
+          { channel: "sse", kind: event, event, endpoint: path },
+          workflow,
+        );
+        manager.on(event, (payload) => dispatch(payload));
+      }
       sseRegistry.set(path, { manager, url });
+    }
+  }
+
+  if (wsManager && runtimeRealtime?.ws?.events) {
+    for (const [event, workflow] of Object.entries(runtimeRealtime.ws.events)) {
+      const dispatch = createManifestRealtimeCallback(
+        { channel: "ws", kind: event, event },
+        workflow,
+      );
+      wsManager.on(event as keyof TWSEvents, (payload) => dispatch(payload));
     }
   }
 
@@ -550,6 +571,7 @@ export function createSnapshot<
       auth: runtimeAuthMode,
       homePath: homeScreenPath,
       staleTime: compiledManifest.app.cache?.staleTime,
+      mfa: compiledManifest.auth?.mfa,
     },
     contract,
     pendingMfaChallengeAtom,
@@ -578,6 +600,7 @@ export function createSnapshot<
     config: {
       auth: runtimeAuthMode,
       homePath: homeScreenPath,
+      providers: compiledManifest.auth?.providers,
     },
     contract,
     onLoginSuccess: () => {
@@ -594,6 +617,7 @@ export function createSnapshot<
       auth: runtimeAuthMode,
       homePath: homeScreenPath,
       mfaPath: mfaScreenPath,
+      webauthn: compiledManifest.auth?.webauthn,
     },
     contract,
     pendingMfaChallengeAtom,
@@ -643,6 +667,10 @@ export function createSnapshot<
   }
 
   return {
+    bootstrap: {
+      env,
+      bearerToken: config.bearerToken,
+    },
     // High-level hooks
     useUser,
     useLogin,

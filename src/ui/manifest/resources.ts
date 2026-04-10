@@ -50,6 +50,59 @@ export const resourceRefSchema = z
   })
   .strict();
 
+/**
+ * Invalidation target declaration for mutation-side cache refresh.
+ *
+ * A target can either reference another manifest resource by name or
+ * an explicit query key tuple.
+ */
+export const resourceInvalidationTargetSchema = z.union([
+  z.string().min(1),
+  z
+    .object({
+      key: z.array(z.string().min(1)).min(1),
+    })
+    .strict(),
+]);
+
+/**
+ * A reference to the cache entry an optimistic mutation should mutate.
+ */
+export const optimisticTargetSchema = z.union([
+  z.string().min(1),
+  z
+    .object({
+      resource: z.string().min(1),
+      params: z.record(z.unknown()).optional(),
+    })
+    .strict(),
+]);
+
+/**
+ * Optimistic update strategy for a mutation resource.
+ */
+export const optimisticConfigSchema = z
+  .object({
+    target: optimisticTargetSchema,
+    merge: z.enum(["append", "prepend", "replace", "patch", "remove"]),
+    idField: z.string().optional(),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    if (
+      (value.merge === "replace" ||
+        value.merge === "patch" ||
+        value.merge === "remove") &&
+      !value.idField
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["idField"],
+        message: `optimistic.idField is required when merge is "${value.merge}"`,
+      });
+    }
+  });
+
 export const endpointTargetSchema = z.union([z.string(), resourceRefSchema]);
 export const dataSourceSchema = z.union([
   z.string(),
@@ -83,10 +136,14 @@ export const dataSourceSchema = z.union([
   resourceRefSchema,
 ]);
 
+/**
+ * Schema for a manifest resource declaration.
+ */
 export const resourceConfigSchema = z
   .object({
     method: httpMethodSchema.optional(),
     endpoint: z.string().min(1),
+    client: z.string().min(1).optional(),
     params: z.record(z.unknown()).optional(),
     cacheMs: z.number().int().min(0).optional(),
     pollMs: z.number().int().positive().optional(),
@@ -95,12 +152,21 @@ export const resourceConfigSchema = z
     retry: z.number().int().min(0).optional(),
     retryDelayMs: z.number().int().min(0).optional(),
     dependsOn: z.array(z.string().min(1)).optional(),
-    invalidates: z.array(z.string().min(1)).optional(),
+    invalidates: z.array(resourceInvalidationTargetSchema).optional(),
+    optimistic: optimisticConfigSchema.optional(),
   })
   .strict();
 
 export type HttpMethod = z.infer<typeof httpMethodSchema>;
 export type ResourceRef = z.infer<typeof resourceRefSchema>;
+/** Invalidation target entry declared on a resource. */
+export type ResourceInvalidationTarget = z.infer<
+  typeof resourceInvalidationTargetSchema
+>;
+/** Optimistic mutation target declaration. */
+export type OptimisticTarget = z.infer<typeof optimisticTargetSchema>;
+/** Optimistic mutation strategy declaration. */
+export type OptimisticConfig = z.infer<typeof optimisticConfigSchema>;
 export type ResourceConfig = z.infer<typeof resourceConfigSchema>;
 export type ResourceMap = Record<string, ResourceConfig>;
 export type EndpointTarget = z.infer<typeof endpointTargetSchema>;
@@ -109,6 +175,8 @@ export interface ResolvedRequest {
   method: HttpMethod;
   endpoint: string;
   params: Record<string, unknown>;
+  /** Name of the manifest client used to execute this request. */
+  client: string;
 }
 
 export function isResourceRef(value: unknown): value is ResourceRef {
@@ -120,6 +188,36 @@ export function isResourceRef(value: unknown): value is ResourceRef {
   );
 }
 
+/**
+ * Returns true when an invalidation target is an explicit query key object.
+ *
+ * @param value - Candidate invalidation target
+ */
+export function isQueryKeyInvalidationTarget(
+  value: ResourceInvalidationTarget,
+): value is Extract<ResourceInvalidationTarget, { key: string[] }> {
+  return typeof value !== "string";
+}
+
+/**
+ * Returns true when an optimistic target is a structured resource descriptor.
+ *
+ * @param value - Candidate optimistic target
+ */
+export function isOptimisticResourceTarget(
+  value: OptimisticTarget,
+): value is Extract<OptimisticTarget, { resource: string }> {
+  return typeof value !== "string";
+}
+
+/**
+ * Resolve an endpoint target into request details and a selected client name.
+ *
+ * @param target - String endpoint or resource reference
+ * @param resources - Resource map used to resolve resource references
+ * @param params - Runtime params merged into resolved request params
+ * @param fallbackMethod - Method used when a string target omits an explicit method
+ */
 export function resolveEndpointTarget(
   target: EndpointTarget,
   resources?: ResourceMap,
@@ -135,6 +233,7 @@ export function resolveEndpointTarget(
         : fallbackMethod,
       endpoint,
       params: params ?? {},
+      client: "main",
     };
   }
 
@@ -151,6 +250,7 @@ export function resolveEndpointTarget(
       ...(target.params ?? {}),
       ...(params ?? {}),
     },
+    client: resource.client ?? "main",
   };
 }
 
@@ -230,6 +330,16 @@ export function collectDependentResources(
   return dependents;
 }
 
+/**
+ * Returns string-based invalidation targets for a resource, including dependent
+ * resources that should also be invalidated transitively.
+ *
+ * Query-key invalidation targets are intentionally omitted because they are
+ * resolved at runtime against concrete cached entries.
+ *
+ * @param resourceName - Source resource name
+ * @param resources - Optional manifest resource map
+ */
 export function getResourceInvalidationTargets(
   resourceName: string,
   resources?: ResourceMap,
@@ -241,6 +351,10 @@ export function getResourceInvalidationTargets(
 
   const targets = new Set<string>();
   for (const target of resource.invalidates ?? []) {
+    if (typeof target !== "string") {
+      continue;
+    }
+
     targets.add(target);
     for (const dependent of collectDependentResources(target, resources)) {
       targets.add(dependent);
