@@ -22,6 +22,7 @@ import { useTheme } from "./theme/hook";
 import { createLoaders } from "./routing/loaders";
 import { QueryProviderInner } from "./providers/QueryProvider";
 import { createAuthErrorFormatter } from "./auth/error-format";
+import { createManifestAuthRuntimeConfig } from "./ui/manifest/auth";
 import { getAuthScreenPath } from "./ui/manifest/auth-routes";
 import type {
   SnapshotConfig,
@@ -38,8 +39,7 @@ import { compileManifestWithEnv } from "./ui/manifest/compiler";
 import { getDefaultEnvSource } from "./ui/manifest/env";
 
 const MANIFEST_AUTH_WORKFLOW_EVENT = "snapshot:manifest-auth-workflow";
-const MANIFEST_REALTIME_WORKFLOW_EVENT =
-  "snapshot:manifest-realtime-workflow";
+const MANIFEST_REALTIME_WORKFLOW_EVENT = "snapshot:manifest-realtime-workflow";
 
 type ManifestAuthWorkflowKind = "unauthenticated" | "forbidden" | "logout";
 type ManifestRealtimeWorkflowChannel = "ws" | "sse";
@@ -122,10 +122,7 @@ export function createSnapshot<
 >(config: SnapshotConfig): SnapshotInstance<TWSEvents> {
   bootBuiltins();
   const env = config.env ?? getDefaultEnvSource();
-  const compiledManifest = compileManifestWithEnv(
-    config.manifest,
-    env,
-  );
+  const compiledManifest = compileManifestWithEnv(config.manifest, env);
   const runtimeApiUrl = compiledManifest.app.apiUrl ?? config.apiUrl;
   const runtimeRealtime = compiledManifest.realtime;
   const runtimeAuthMode = compiledManifest.auth?.session?.mode ?? "cookie";
@@ -197,11 +194,14 @@ export function createSnapshot<
   const mfaScreenPath = compiledManifest.auth
     ? getAuthScreenPath(compiledManifest, "mfa")
     : undefined;
-  const homeScreenPath = compiledManifest.app.home ?? compiledManifest.firstRoute?.path;
+  const homeScreenPath =
+    compiledManifest.app.home ?? compiledManifest.firstRoute?.path;
   const loaderLoginPath =
     compiledManifest.auth?.redirects?.unauthenticated ?? loginScreenPath;
 
-  function createManifestAuthCallback(kind: ManifestAuthWorkflowKind): () => void {
+  function createManifestAuthCallback(
+    kind: ManifestAuthWorkflowKind,
+  ): () => void {
     return () => {
       if (compiledManifest.auth?.on?.[kind] && typeof window !== "undefined") {
         dispatchManifestAuthWorkflow(kind);
@@ -218,12 +218,8 @@ export function createSnapshot<
     apiUrl: runtimeApiUrl,
     auth: runtimeAuthMode,
     bearerToken: config.bearerToken,
-    onUnauthenticated: createManifestAuthCallback(
-      "unauthenticated",
-    ),
-    onForbidden: createManifestAuthCallback(
-      "forbidden",
-    ),
+    onUnauthenticated: createManifestAuthCallback("unauthenticated"),
+    onForbidden: createManifestAuthCallback("forbidden"),
     contract,
   });
 
@@ -248,7 +244,7 @@ export function createSnapshot<
 
   // ── Security posture warnings ─────────────────────────────────────────────
   // Warning 4: verbose auth errors enabled on non-localhost
-  
+
   if (false) {
   }
 
@@ -273,7 +269,9 @@ export function createSnapshot<
         onClosed: endpointCfg.onClosed,
       });
       manager.connect(url);
-      for (const [event, workflow] of Object.entries(endpointCfg.events ?? {})) {
+      for (const [event, workflow] of Object.entries(
+        endpointCfg.events ?? {},
+      )) {
         const dispatch = createManifestRealtimeCallback(
           { channel: "sse", kind: event, event, endpoint: path },
           workflow,
@@ -556,8 +554,7 @@ export function createSnapshot<
       contract,
       pendingMfaChallengeAtom,
       onLoginSuccess: () => {
-        if (runtimeWsConfig?.reconnectOnLogin !== false)
-          wsManager?.reconnect();
+        if (runtimeWsConfig?.reconnectOnLogin !== false) wsManager?.reconnect();
         if (runtimeSseConfig?.reconnectOnLogin !== false) reconnectAllSse();
       },
       onLogoutSuccess: () => closeAllSse(),
@@ -662,7 +659,9 @@ export function createSnapshot<
           apiUrl: string;
         }>;
       };
-      return <ManifestAppImpl manifest={capturedManifest} apiUrl={capturedApiUrl} />;
+      return (
+        <ManifestAppImpl manifest={capturedManifest} apiUrl={capturedApiUrl} />
+      );
     };
   }
 

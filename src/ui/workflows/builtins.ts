@@ -1,4 +1,5 @@
 import type { RunWorkflowAction } from "../actions/types";
+import type { SSRMiddlewareContext } from "../../ssr/middleware-context";
 import {
   halt as haltSsrMiddleware,
   redirect as redirectSsrMiddleware,
@@ -38,7 +39,7 @@ export function registerSsrMiddlewareWorkflowActions(): void {
       {
         status: Number(runtime.resolveValue(node["status"], runtime.context)),
       },
-      { input: runtime.context as { ssr?: unknown } },
+      { input: runtime.context as { ssr?: SSRMiddlewareContext } },
     );
   });
   registerWorkflowAction("redirect", async (node, runtime) => {
@@ -49,13 +50,13 @@ export function registerSsrMiddlewareWorkflowActions(): void {
           runtime.resolveValue(node["permanent"], runtime.context),
         ),
       },
-      { input: runtime.context as { ssr?: unknown } },
+      { input: runtime.context as { ssr?: SSRMiddlewareContext } },
     );
   });
   registerWorkflowAction("rewrite", async (node, runtime) => {
     rewriteSsrMiddleware(
       { url: String(runtime.resolveValue(node["url"], runtime.context)) },
-      { input: runtime.context as { ssr?: unknown } },
+      { input: runtime.context as { ssr?: SSRMiddlewareContext } },
     );
   });
   registerWorkflowAction("set-header", async (node, runtime) => {
@@ -64,11 +65,14 @@ export function registerSsrMiddlewareWorkflowActions(): void {
         name: String(runtime.resolveValue(node["name"], runtime.context)),
         value: String(runtime.resolveValue(node["value"], runtime.context)),
       },
-      { input: runtime.context as { ssr?: unknown } },
+      { input: runtime.context as { ssr?: SSRMiddlewareContext } },
     );
   });
   registerWorkflowAction("halt", async (_node, runtime) => {
-    haltSsrMiddleware({}, { input: runtime.context as { ssr?: unknown } });
+    haltSsrMiddleware(
+      {},
+      { input: runtime.context as { ssr?: SSRMiddlewareContext } },
+    );
   });
 }
 
@@ -88,7 +92,9 @@ export function isRunWorkflowAction(
   return node.type === "run-workflow";
 }
 
-export function isWaitWorkflowNode(node: WorkflowNode): node is WaitWorkflowNode {
+export function isWaitWorkflowNode(
+  node: WorkflowNode,
+): node is WaitWorkflowNode {
   return node.type === "wait";
 }
 

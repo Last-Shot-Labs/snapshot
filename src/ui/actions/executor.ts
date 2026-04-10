@@ -22,6 +22,7 @@ import { runWorkflow } from "../workflows/engine";
 import type { ActionConfig, ActionExecuteFn } from "./types";
 import type { AtomRegistry } from "../context/types";
 import type { ApiClient } from "../../api/client";
+import type { WorkflowDefinition, WorkflowMap } from "../workflows/types";
 
 const WORKFLOW_CANCELLED = Symbol("snapshot.workflow.cancelled");
 
@@ -101,6 +102,25 @@ function readRegistryValue(
   }
 
   return registry.store.get(stateAtom);
+}
+
+function normalizeWorkflowMap(
+  workflows: Record<string, unknown> | undefined,
+): WorkflowMap | undefined {
+  if (!workflows) {
+    return undefined;
+  }
+
+  const result: WorkflowMap = {};
+  for (const [name, definition] of Object.entries(workflows)) {
+    if (name === "actions") {
+      continue;
+    }
+
+    result[name] = definition as WorkflowDefinition;
+  }
+
+  return result;
 }
 
 function resolveFromRef(
@@ -403,13 +423,19 @@ export function useActionExecutor(): ActionExecuteFn {
                   result = await api.delete(endpoint, body);
                   break;
               }
-              const configuredInvalidations = new Set<string>(
-                builtin.invalidates ?? [],
-              );
+              const configuredInvalidations = new Set<string>();
+              for (const targetName of builtin.invalidates ?? []) {
+                configuredInvalidations.add(targetName);
+              }
               if (isResourceRef(target)) {
-                for (const resourceName of runtime?.resources?.[target.resource]
+                for (const invalidation of runtime?.resources?.[target.resource]
                   ?.invalidates ?? []) {
-                  configuredInvalidations.add(resourceName);
+                  if (typeof invalidation === "string") {
+                    configuredInvalidations.add(invalidation);
+                    continue;
+                  }
+
+                  resourceCache?.invalidateQueryKey(invalidation.key);
                 }
               }
               for (const resourceName of configuredInvalidations) {
@@ -645,7 +671,7 @@ export function useActionExecutor(): ActionExecuteFn {
 
       try {
         await runWorkflow(action, {
-          workflows: runtime?.raw.workflows,
+          workflows: normalizeWorkflowMap(runtime?.raw.workflows),
           context: executionContext,
           resolveValue: (value, nextContext) =>
             resolveWorkflowValue(

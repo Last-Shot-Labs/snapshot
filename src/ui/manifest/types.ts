@@ -23,9 +23,36 @@ import type {
 import type { FromRef } from "../context/types";
 import type { Responsive, ThemeConfig } from "../tokens/types";
 import type { EndpointTarget, ResourceConfig, ResourceMap } from "./resources";
-import type { WorkflowMap } from "../workflows/types";
+import type {
+  CustomWorkflowActionDeclarationMap,
+  WorkflowDefinition,
+  WorkflowMap,
+} from "../workflows/types";
 
-export type ManifestConfig = z.infer<typeof manifestConfigSchema>;
+/**
+ * Raw manifest input shape accepted by `parseManifest()` before defaults are
+ * applied during compilation.
+ */
+export type ManifestConfig = Omit<
+  z.input<typeof manifestConfigSchema>,
+  "workflows"
+> & {
+  workflows?: {
+    actions?: {
+      custom?: CustomWorkflowActionDeclarationMap;
+    };
+    [name: string]:
+      | WorkflowDefinition
+      | {
+          custom?: CustomWorkflowActionDeclarationMap;
+        }
+      | undefined;
+  };
+};
+/**
+ * Parsed manifest shape after Zod defaults are applied.
+ */
+export type ParsedManifestConfig = z.infer<typeof manifestConfigSchema>;
 /** Resolved runtime view of `appConfigSchema`. */
 export type AppConfig = Resolved<z.infer<typeof appConfigSchema>>;
 /** Resolved runtime view of `toastConfigSchema`. */
@@ -58,7 +85,9 @@ export type ResourceConfigMap = ResourceMap;
 /** Resolved runtime view of `overlayConfigSchema`. */
 export type OverlayConfig = Resolved<z.infer<typeof overlayConfigSchema>>;
 /** Resolved runtime view of `baseComponentConfigSchema`. */
-export type BaseComponentConfig = Resolved<z.infer<typeof baseComponentConfigSchema>>;
+export type BaseComponentConfig = Resolved<
+  z.infer<typeof baseComponentConfigSchema>
+>;
 /** Resolved runtime view of `headingConfigSchema`. */
 export type HeadingConfig = Resolved<z.infer<typeof headingConfigSchema>>;
 /** Resolved runtime view of `buttonConfigSchema`. */
@@ -71,6 +100,11 @@ type EnvRefLike = {
   default?: string;
 };
 
+type TRefLike = {
+  t: string;
+  vars?: Record<string, unknown>;
+};
+
 /**
  * Recursively resolve env-reference-shaped values to plain strings.
  *
@@ -78,15 +112,17 @@ type EnvRefLike = {
  */
 export type Resolved<T> = T extends EnvRefLike
   ? string
-  : T extends ReadonlyArray<infer U>
-    ? Resolved<U>[]
-    : T extends Array<infer U>
+  : T extends TRefLike
+    ? string
+    : T extends ReadonlyArray<infer U>
       ? Resolved<U>[]
-      : T extends object
-        ? {
-            [K in keyof T]: Resolved<T[K]>;
-          }
-        : T;
+      : T extends Array<infer U>
+        ? Resolved<U>[]
+        : T extends object
+          ? {
+              [K in keyof T]: Resolved<T[K]>;
+            }
+          : T;
 
 export interface NavItem {
   label: string;
@@ -135,7 +171,7 @@ export interface CompiledRoute {
  * Runtime manifest shape produced by `compileManifest()`.
  */
 export interface CompiledManifest {
-  raw: ManifestConfig;
+  raw: ParsedManifestConfig;
   app: AppConfig;
   toast?: ToastConfig;
   analytics?: AnalyticsConfig;

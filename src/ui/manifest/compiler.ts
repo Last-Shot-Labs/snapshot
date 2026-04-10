@@ -14,11 +14,16 @@ import { manifestConfigSchema, withManifestCustomComponents } from "./schema";
 import { setDeclaredCustomActionSchemas } from "../workflows/registry";
 import type {
   AppConfig,
+  AnalyticsConfig,
   AuthScreenConfig,
   CompiledManifest,
   CompiledRoute,
   ManifestConfig,
+  ParsedManifestConfig,
   PageConfig,
+  PushConfig,
+  RealtimeConfig,
+  ToastConfig,
   RouteConfig,
 } from "./types";
 import type {
@@ -28,9 +33,16 @@ import type {
 } from "../workflows/types";
 import type { ThemeConfig } from "../tokens/types";
 
-type EnvResolvedManifest = Omit<ManifestConfig, "app" | "auth" | "routes"> & {
+type EnvResolvedManifest = Omit<
+  ParsedManifestConfig,
+  "app" | "auth" | "routes" | "analytics" | "push" | "realtime" | "toast"
+> & {
   app?: AppConfig;
+  analytics?: AnalyticsConfig;
   auth?: AuthScreenConfig;
+  push?: PushConfig;
+  realtime?: RealtimeConfig;
+  toast?: ToastConfig;
   routes: RouteConfig[];
 };
 
@@ -136,7 +148,7 @@ function resolveThemeFlavors(theme: ThemeConfig | undefined): void {
 }
 
 function resolveWorkflowMap(
-  manifestWorkflows: ManifestConfig["workflows"],
+  manifestWorkflows: ParsedManifestConfig["workflows"],
 ): WorkflowMap {
   const result: WorkflowMap = {};
   for (const [name, definition] of Object.entries(manifestWorkflows ?? {})) {
@@ -165,23 +177,33 @@ function isWorkflowNodeObject(value: unknown): value is {
 function collectWorkflowDefinitions(
   manifest: EnvResolvedManifest,
 ): Array<{ location: string; definition: WorkflowDefinition }> {
-  const result: Array<{ location: string; definition: WorkflowDefinition }> = [];
+  const result: Array<{ location: string; definition: WorkflowDefinition }> =
+    [];
 
   for (const [name, definition] of Object.entries(manifest.workflows ?? {})) {
     if (name === "actions") {
       continue;
     }
 
-    result.push({ location: `workflows.${name}`, definition });
+    result.push({
+      location: `workflows.${name}`,
+      definition: definition as WorkflowDefinition,
+    });
   }
 
   for (const route of manifest.routes) {
     if (route.enter && typeof route.enter !== "string") {
-      result.push({ location: `routes.${route.id}.enter`, definition: route.enter });
+      result.push({
+        location: `routes.${route.id}.enter`,
+        definition: route.enter,
+      });
     }
 
     if (route.leave && typeof route.leave !== "string") {
-      result.push({ location: `routes.${route.id}.leave`, definition: route.leave });
+      result.push({
+        location: `routes.${route.id}.leave`,
+        definition: route.leave,
+      });
     }
   }
 
@@ -313,7 +335,9 @@ function validateWorkflowDefinition(
         }
         break;
       case "parallel":
-        for (const [branchIndex, branch] of (node.branches as WorkflowDefinition[]).entries()) {
+        for (const [branchIndex, branch] of (
+          node.branches as WorkflowDefinition[]
+        ).entries()) {
           validateWorkflowDefinition(
             branch,
             `${nodeLocation}.branches[${branchIndex}]`,
@@ -360,7 +384,10 @@ function validateWorkflowDefinition(
   }
 }
 
-function collectPolicyRefNames(value: unknown, refs = new Set<string>()): Set<string> {
+function collectPolicyRefNames(
+  value: unknown,
+  refs = new Set<string>(),
+): Set<string> {
   if (Array.isArray(value)) {
     for (const item of value) {
       collectPolicyRefNames(item, refs);
@@ -422,7 +449,11 @@ function validateRouteSlots(route: RouteConfig): void {
   const declaredSlots = new Set<string>();
   for (const layout of route.layouts ?? []) {
     if (typeof layout === "string") {
-      if (layout === "sidebar" || layout === "top-nav" || layout === "stacked") {
+      if (
+        layout === "sidebar" ||
+        layout === "top-nav" ||
+        layout === "stacked"
+      ) {
         declaredSlots.add("header");
         declaredSlots.add("sidebar");
         declaredSlots.add("main");
@@ -431,7 +462,11 @@ function validateRouteSlots(route: RouteConfig): void {
       continue;
     }
 
-    if (layout.type === "sidebar" || layout.type === "top-nav" || layout.type === "stacked") {
+    if (
+      layout.type === "sidebar" ||
+      layout.type === "top-nav" ||
+      layout.type === "stacked"
+    ) {
       declaredSlots.add("header");
       declaredSlots.add("sidebar");
       declaredSlots.add("main");
@@ -459,7 +494,9 @@ function validateRouteSlots(route: RouteConfig): void {
 function validateResourceClients(manifest: EnvResolvedManifest): void {
   const clients = new Set(["main", ...Object.keys(manifest.clients ?? {})]);
 
-  for (const [resourceName, resource] of Object.entries(manifest.resources ?? {})) {
+  for (const [resourceName, resource] of Object.entries(
+    manifest.resources ?? {},
+  )) {
     if (!resource.client) {
       continue;
     }
@@ -487,7 +524,7 @@ function validateCustomClients(manifest: EnvResolvedManifest): void {
 }
 
 function buildCompiledManifest(
-  manifest: ManifestConfig,
+  manifest: ParsedManifestConfig,
   env: Record<string, string | undefined>,
 ): CompiledManifest {
   const resolvedManifest = resolveManifestEnvRefs(
@@ -508,9 +545,13 @@ function buildCompiledManifest(
   validateResourceClients(resolvedManifest);
 
   const customActionDeclarations =
-    (resolvedManifest.workflows as {
-      actions?: { custom?: CustomWorkflowActionDeclarationMap };
-    } | undefined)?.actions?.custom ?? {};
+    (
+      resolvedManifest.workflows as
+        | {
+            actions?: { custom?: CustomWorkflowActionDeclarationMap };
+          }
+        | undefined
+    )?.actions?.custom ?? {};
   setDeclaredCustomActionSchemas(customActionDeclarations);
 
   for (const { location, definition } of collectWorkflowDefinitions(
@@ -636,7 +677,7 @@ export function defineManifest<TManifest extends ManifestConfig>(
  * @param manifest - Unknown input value
  * @returns The parsed manifest
  */
-export function parseManifest(manifest: unknown): ManifestConfig {
+export function parseManifest(manifest: unknown): ParsedManifestConfig {
   return withManifestCustomComponents(manifest, () =>
     manifestConfigSchema.parse(manifest),
   );
@@ -650,7 +691,7 @@ export function parseManifest(manifest: unknown): ManifestConfig {
  */
 export function safeParseManifest(
   manifest: unknown,
-): SafeParseReturnType<unknown, ManifestConfig> {
+): SafeParseReturnType<unknown, ParsedManifestConfig> {
   return withManifestCustomComponents(manifest, () =>
     manifestConfigSchema.safeParse(manifest),
   );
@@ -687,7 +728,11 @@ export function compileManifestWithEnv(
  * @returns The parsed manifest and compiled runtime model, or validation errors
  */
 export function safeCompileManifest(manifest: unknown):
-  | { success: true; manifest: ManifestConfig; compiled: CompiledManifest }
+  | {
+      success: true;
+      manifest: ParsedManifestConfig;
+      compiled: CompiledManifest;
+    }
   | {
       success: false;
       error: ZodError<unknown>;

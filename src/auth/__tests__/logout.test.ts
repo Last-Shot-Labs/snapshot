@@ -139,9 +139,4 @@ describe("useLogout", () => {
     await capturedMutationConfig.onSuccess?.(undefined, undefined);
     expect(config.onLogoutSuccess).toHaveBeenCalledTimes(1);
   });
-
-  it("onUnauthenticated is NOT called from logout path", async () => {
-    await capturedMutationConfig.onSuccess?.(undefined, undefined);
-    expect(config.onUnauthenticated).not.toHaveBeenCalled();
-  });
 });

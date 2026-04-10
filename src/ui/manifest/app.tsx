@@ -13,14 +13,15 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
-import { ApiClient, getRegisteredClient, type ApiClientLike } from "../../api/client";
+import {
+  ApiClient,
+  getRegisteredClient,
+  type ApiClientLike,
+} from "../../api/client";
 import { mergeContract } from "../../auth/contract";
 import { createSnapshot } from "../../create-snapshot";
-import {
-  SnapshotApiContext,
-  ToastContainer,
-  useActionExecutor,
-} from "../actions/executor";
+import { SnapshotApiContext, useActionExecutor } from "../actions/executor";
+import { ToastContainer } from "../actions/toast";
 import {
   AppContextProvider,
   useResolveFrom,
@@ -47,10 +48,7 @@ import {
   RouteRuntimeProvider,
   useManifestResourceCache,
 } from "./runtime";
-import {
-  normalizePathname,
-  resolveRouteMatch,
-} from "./router";
+import { normalizePathname, resolveRouteMatch } from "./router";
 import { ComponentRenderer, PageRenderer } from "./renderer";
 import type { EndpointTarget } from "./resources";
 import type {
@@ -254,10 +252,7 @@ function resolveSubAppMatch(
       inherit,
     };
 
-    if (
-      !bestMatch ||
-      candidate.mountPath.length > bestMatch.mountPath.length
-    ) {
+    if (!bestMatch || candidate.mountPath.length > bestMatch.mountPath.length) {
       bestMatch = candidate;
     }
   }
@@ -276,9 +271,7 @@ function buildManifestClientMap(
 
   for (const [name, config] of Object.entries(manifest.raw.clients ?? {})) {
     const apiUrl =
-      typeof config.apiUrl === "string"
-        ? config.apiUrl
-        : config.apiUrl.default;
+      typeof config.apiUrl === "string" ? config.apiUrl : config.apiUrl.default;
     if (!apiUrl) {
       throw new Error(
         `Manifest client "${name}" has an unresolved apiUrl. Use a literal string or provide a default for its env ref.`,
@@ -502,7 +495,9 @@ function getLayoutType(layout: RouteLayoutDeclaration): string {
   return layout.type;
 }
 
-function getLayoutProps(layout: RouteLayoutDeclaration): Record<string, unknown> {
+function getLayoutProps(
+  layout: RouteLayoutDeclaration,
+): Record<string, unknown> {
   if (typeof layout === "string") {
     return {};
   }
@@ -603,8 +598,7 @@ function AuthRuntimeBridge({
 }
 
 const MANIFEST_AUTH_WORKFLOW_EVENT = "snapshot:manifest-auth-workflow";
-const MANIFEST_REALTIME_WORKFLOW_EVENT =
-  "snapshot:manifest-realtime-workflow";
+const MANIFEST_REALTIME_WORKFLOW_EVENT = "snapshot:manifest-realtime-workflow";
 const useManifestLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
@@ -680,7 +674,9 @@ function resolveManifestRealtimeWorkflow(
 ): string | undefined {
   if (detail.channel === "ws") {
     return (
-      manifest.realtime?.ws?.on as Record<string, string | undefined> | undefined
+      manifest.realtime?.ws?.on as
+        | Record<string, string | undefined>
+        | undefined
     )?.[detail.kind];
   }
 
@@ -708,9 +704,8 @@ function ManifestRealtimeWorkflowBridge({
     }
 
     const onRealtimeWorkflowEvent = (event: Event) => {
-      const detail = (
-        event as CustomEvent<ManifestRealtimeWorkflowDetail>
-      ).detail;
+      const detail = (event as CustomEvent<ManifestRealtimeWorkflowDetail>)
+        .detail;
       if (!detail) {
         return;
       }
@@ -872,7 +867,7 @@ function AppShell({
     ) : declaration?.fallback ? (
       <ComponentRenderer config={declaration.fallback} />
     ) : (
-      defaultContent ?? null
+      (defaultContent ?? null)
     );
 
     if (!content) {
@@ -900,68 +895,71 @@ function AppShell({
     );
   };
 
-  return layoutDeclarations.reduceRight<ReactNode>((children, layout, index) => {
-    const layoutType = getLayoutType(layout);
-    if (!BUILT_IN_LAYOUT_TYPES.has(layoutType)) {
-      return children;
-    }
+  return layoutDeclarations.reduceRight<ReactNode>(
+    (children, layout, index) => {
+      const layoutType = getLayoutType(layout);
+      if (!BUILT_IN_LAYOUT_TYPES.has(layoutType)) {
+        return children;
+      }
 
-    const declaredSlots = new Map<string, RouteLayoutSlotDeclaration>();
-    for (const slot of getBuiltInLayoutSlots(layoutType)) {
-      declaredSlots.set(slot.name, slot);
-    }
-    for (const slot of getLayoutSlots(layout)) {
-      declaredSlots.set(slot.name, slot);
-    }
+      const declaredSlots = new Map<string, RouteLayoutSlotDeclaration>();
+      for (const slot of getBuiltInLayoutSlots(layoutType)) {
+        declaredSlots.set(slot.name, slot);
+      }
+      for (const slot of getLayoutSlots(layout)) {
+        declaredSlots.set(slot.name, slot);
+      }
 
-    const slotContent = SLOT_ENABLED_LAYOUT_TYPES.has(layoutType)
-      ? {
-          header: renderSlot(
-            layoutType,
-            declaredSlots.get("header") ?? { name: "header" },
-          ),
-          sidebar: renderSlot(
-            layoutType,
-            declaredSlots.get("sidebar") ?? { name: "sidebar" },
-          ),
-          main: renderSlot(
-            layoutType,
-            declaredSlots.get("main") ?? { name: "main", required: true },
-            children,
-          ),
-          footer: renderSlot(
-            layoutType,
-            declaredSlots.get("footer") ?? { name: "footer" },
-          ),
-        }
-      : undefined;
+      const slotContent = SLOT_ENABLED_LAYOUT_TYPES.has(layoutType)
+        ? {
+            header: renderSlot(
+              layoutType,
+              declaredSlots.get("header") ?? { name: "header" },
+            ),
+            sidebar: renderSlot(
+              layoutType,
+              declaredSlots.get("sidebar") ?? { name: "sidebar" },
+            ),
+            main: renderSlot(
+              layoutType,
+              declaredSlots.get("main") ?? { name: "main", required: true },
+              children,
+            ),
+            footer: renderSlot(
+              layoutType,
+              declaredSlots.get("footer") ?? { name: "footer" },
+            ),
+          }
+        : undefined;
 
-    const navNode =
-      navConfig && (layoutType === "sidebar" || layoutType === "top-nav") ? (
-        <Nav
-          config={navConfig}
-          pathname={currentPath}
-          onNavigate={(path) => navigate(path)}
-        />
-      ) : undefined;
+      const navNode =
+        navConfig && (layoutType === "sidebar" || layoutType === "top-nav") ? (
+          <Nav
+            config={navConfig}
+            pathname={currentPath}
+            onNavigate={(path) => navigate(path)}
+          />
+        ) : undefined;
 
-    return (
-      <Layout
-        key={`layout:${layoutType}:${index}`}
-        config={
-          {
-            type: "layout",
-            variant: layoutType,
-            ...getLayoutProps(layout),
-          } as Parameters<typeof Layout>[0]["config"]
-        }
-        nav={navNode}
-        slots={slotContent}
-      >
-        {children}
-      </Layout>
-    );
-  }, page);
+      return (
+        <Layout
+          key={`layout:${layoutType}:${index}`}
+          config={
+            {
+              type: "layout",
+              variant: layoutType,
+              ...getLayoutProps(layout),
+            } as Parameters<typeof Layout>[0]["config"]
+          }
+          nav={navNode}
+          slots={slotContent}
+        >
+          {children}
+        </Layout>
+      );
+    },
+    page,
+  );
 }
 
 interface ManifestRouterProps {
@@ -1021,8 +1019,10 @@ function ManifestRouter({
     undefined,
   );
 
-  const policyDefinitions = (manifest.raw.policies ??
-    EMPTY_OBJECT) as Record<string, unknown>;
+  const policyDefinitions = (manifest.raw.policies ?? EMPTY_OBJECT) as Record<
+    string,
+    unknown
+  >;
   const resolvedPolicies = useResolveFrom(policyDefinitions) as Record<
     string,
     unknown
@@ -1110,7 +1110,12 @@ function ManifestRouter({
     if (localeFromState !== activeLocale) {
       setLocaleState(activeLocale);
     }
-  }, [activeLocale, localeFromState, manifest.raw.i18n?.detect, setLocaleState]);
+  }, [
+    activeLocale,
+    localeFromState,
+    manifest.raw.i18n?.detect,
+    setLocaleState,
+  ]);
 
   const scopedCurrentPath = useMemo(
     () => stripMountPath(currentPath, basePath ?? "/"),
@@ -1180,7 +1185,10 @@ function ManifestRouter({
       return;
     }
 
-    injectStyleSheet("snapshot-tokens", resolveTokens(subAppMatch.subManifest.theme));
+    injectStyleSheet(
+      "snapshot-tokens",
+      resolveTokens(subAppMatch.subManifest.theme),
+    );
     return () => {
       const fallbackTheme = parentTheme ?? manifest.theme;
       if (fallbackTheme) {
@@ -1365,7 +1373,11 @@ function ManifestRouter({
       return (
         <Suspense
           fallback={
-            <AppFallback manifest={localizedManifest} name="loading" api={api} />
+            <AppFallback
+              manifest={localizedManifest}
+              name="loading"
+              api={api}
+            />
           }
         >
           <AppFallback manifest={localizedManifest} name="loading" api={api} />
@@ -1412,7 +1424,9 @@ function ManifestRouter({
   }
 
   if (!route) {
-    return <AppFallback manifest={localizedManifest} name="notFound" api={api} />;
+    return (
+      <AppFallback manifest={localizedManifest} name="notFound" api={api} />
+    );
   }
 
   if (runtimeError) {
@@ -1420,7 +1434,9 @@ function ManifestRouter({
   }
 
   if (isOffline) {
-    return <AppFallback manifest={localizedManifest} name="offline" api={api} />;
+    return (
+      <AppFallback manifest={localizedManifest} name="offline" api={api} />
+    );
   }
 
   if (route.guard?.authenticated && authLoading) {
@@ -1483,10 +1499,7 @@ function ManifestRouter({
  * @param props - Manifest runtime props
  * @returns A fully rendered manifest application
  */
-export function ManifestApp({
-  manifest,
-  apiUrl,
-}: ManifestAppProps) {
+export function ManifestApp({ manifest, apiUrl }: ManifestAppProps) {
   const compiledManifest = useMemo(() => compileManifest(manifest), [manifest]);
   const runtimeApiUrl = compiledManifest.app.apiUrl ?? apiUrl;
   const snapshot = useMemo(

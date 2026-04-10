@@ -185,9 +185,9 @@ function getRawRouteRecord(
     return undefined;
   }
 
-  return rawRoutes.find((route) => isRecord(route) && route["id"] === routeId) as
-    | Record<string, unknown>
-    | undefined;
+  return rawRoutes.find(
+    (route) => isRecord(route) && route["id"] === routeId,
+  ) as Record<string, unknown> | undefined;
 }
 
 function readRouteLayouts(
@@ -240,7 +240,9 @@ function getLayoutType(layout: RouteLayoutDeclaration): string {
   return layout.type;
 }
 
-function getLayoutProps(layout: RouteLayoutDeclaration): Record<string, unknown> {
+function getLayoutProps(
+  layout: RouteLayoutDeclaration,
+): Record<string, unknown> {
   if (typeof layout === "string") {
     return {};
   }
@@ -533,7 +535,7 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
           ? React.createElement(ComponentRenderer, {
               config: declaration.fallback as never,
             })
-          : defaultContent ?? null;
+          : (defaultContent ?? null);
 
       if (!content) {
         if (declaration?.required) {
@@ -608,20 +610,17 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
               })
             : undefined;
 
-        return React.createElement(
-          Layout,
-          {
-            key: `layout:${layoutType}:${index}`,
-            config: {
-              type: "layout",
-              variant: layoutType,
-              ...getLayoutProps(layout),
-            } as Parameters<typeof Layout>[0]["config"],
-            nav: navNode,
-            slots,
-          },
+        return React.createElement(Layout, {
+          key: `layout:${layoutType}:${index}`,
+          config: {
+            type: "layout",
+            variant: layoutType,
+            ...getLayoutProps(layout),
+          } as Parameters<typeof Layout>[0]["config"],
+          nav: navNode,
+          slots,
           children,
-        );
+        });
       },
       pageNode,
     );
@@ -844,9 +843,11 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
           workflows: compiled.workflows,
         });
 
-        middlewareResult.response.headers.forEach((value, name) => {
-          responseHeaders.set(name, value);
-        });
+        Object.entries(middlewareResult.response.headers).forEach(
+          ([name, value]) => {
+            responseHeaders.set(name, value);
+          },
+        );
         responseStatus = middlewareResult.response.status ?? responseStatus;
 
         if (middlewareResult.response.redirect) {
@@ -865,10 +866,14 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
         }
 
         if (middlewareResult.response.rewrite) {
-          const rewritten = resolveRouteByPath(middlewareResult.response.rewrite);
+          const rewritten = resolveRouteByPath(
+            middlewareResult.response.rewrite,
+          );
           if (!rewritten) {
             responseStatus = responseStatus ?? 404;
             const fallback = buildManifestFallbackElement(
+              compiled,
+              routeById,
               "notFound",
               middlewareResult.response.rewrite,
             );
@@ -894,6 +899,8 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
         if (!activeRoute) {
           responseStatus = responseStatus ?? 404;
           const fallback = buildManifestFallbackElement(
+            compiled,
+            routeById,
             "notFound",
             activeMatch.url.pathname,
           );
@@ -954,6 +961,7 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
         }
 
         const pageElement = buildManifestRouteElement(
+          compiled,
           activeRoute,
           activeMatch.url.pathname,
           false,
@@ -963,11 +971,18 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
           ? `<title>${escapeHtml(activeRoute.page.title)}</title>`
           : shell.headTags;
 
-        return renderWithProviders(pageElement, activeMatch, headTags, queryCache);
+        return renderWithProviders(
+          pageElement,
+          activeMatch,
+          headTags,
+          queryCache,
+        );
       } catch (error) {
         console.error("[snapshot-ssr] manifest route render failed:", error);
         responseStatus = responseStatus ?? 500;
         const fallback = buildManifestFallbackElement(
+          compiled,
+          routeById,
           "error",
           activeMatch.url.pathname,
         );
