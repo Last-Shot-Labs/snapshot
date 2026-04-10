@@ -222,6 +222,70 @@ describe("compiler", () => {
     expect(compiled.app.home).toBe("/");
   });
 
+  it("resolves env refs at compile time", () => {
+    const original = process.env["SNAPSHOT_APP_TITLE"];
+    process.env["SNAPSHOT_APP_TITLE"] = "Env Snapshot";
+
+    try {
+      const compiled = compileManifest({
+        app: {
+          title: { env: "SNAPSHOT_APP_TITLE" },
+        },
+        routes: [
+          {
+            id: "home",
+            path: "/",
+            content: [{ type: "heading", text: "Home" }],
+          },
+        ],
+      });
+
+      expect(compiled.app.title).toBe("Env Snapshot");
+    } finally {
+      if (original === undefined) {
+        delete process.env["SNAPSHOT_APP_TITLE"];
+      } else {
+        process.env["SNAPSHOT_APP_TITLE"] = original;
+      }
+    }
+  });
+
+  it("uses env ref defaults when the env var is missing", () => {
+    const compiled = compileManifest({
+      app: {
+        title: { env: "SNAPSHOT_MISSING_TITLE", default: "Fallback Title" },
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Home" }],
+        },
+      ],
+    });
+
+    expect(compiled.app.title).toBe("Fallback Title");
+  });
+
+  it("throws a clear error when an env ref is missing without a default", () => {
+    expect(() =>
+      compileManifest({
+        app: {
+          title: { env: "SNAPSHOT_MISSING_TITLE" },
+        },
+        routes: [
+          {
+            id: "home",
+            path: "/",
+            content: [{ type: "heading", text: "Home" }],
+          },
+        ],
+      }),
+    ).toThrow(
+      'Unable to resolve env ref at "app.title": env "SNAPSHOT_MISSING_TITLE" is not defined and no default was provided.',
+    );
+  });
+
   it("returns zod errors from safeCompileManifest", () => {
     const result = safeCompileManifest({
       routes: [

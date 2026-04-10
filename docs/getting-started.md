@@ -41,6 +41,22 @@ Use the CLI or write one by hand:
 npx snapshot manifest init
 ```
 
+## Environment Values
+
+Manifest fields that depend on deployment-specific values can use an environment
+reference instead of a literal string:
+
+```json
+{ "env": "API_URL" }
+```
+
+Snapshot resolves these references at compile time. The default env source reads
+`import.meta.env` first and then falls back to `process.env`. If the variable is
+missing, you can provide a `default` value in the manifest reference.
+
+See [bootstrap and env refs](./manifest/bootstrap.md) for the bootstrap contract
+and the resolution rules.
+
 ### Complete Example
 
 ```json

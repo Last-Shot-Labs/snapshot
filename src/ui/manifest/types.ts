@@ -19,19 +19,51 @@ import type { EndpointTarget, ResourceConfig, ResourceMap } from "./resources";
 import type { WorkflowMap } from "../workflows/types";
 
 export type ManifestConfig = z.infer<typeof manifestConfigSchema>;
-export type AppConfig = z.infer<typeof appConfigSchema>;
-export type AuthScreenConfig = z.infer<typeof authScreenConfigSchema>;
-export type PageConfig = z.infer<typeof pageConfigSchema>;
-export type RouteConfig = z.infer<typeof routeConfigSchema>;
-export type NavigationConfig = z.infer<typeof navigationConfigSchema>;
+/** Resolved runtime view of `appConfigSchema`. */
+export type AppConfig = Resolved<z.infer<typeof appConfigSchema>>;
+/** Resolved runtime view of `authScreenConfigSchema`. */
+export type AuthScreenConfig = Resolved<z.infer<typeof authScreenConfigSchema>>;
+/** Resolved runtime view of `pageConfigSchema`. */
+export type PageConfig = Resolved<z.infer<typeof pageConfigSchema>>;
+/** Resolved runtime view of `routeConfigSchema`. */
+export type RouteConfig = Resolved<z.infer<typeof routeConfigSchema>>;
+/** Resolved runtime view of `navigationConfigSchema`. */
+export type NavigationConfig = Resolved<z.infer<typeof navigationConfigSchema>>;
 export type StateValueConfig = z.infer<typeof stateValueConfigSchema>;
 export type StateConfig = Record<string, StateValueConfig>;
 export type ResourceConfigMap = ResourceMap;
-export type OverlayConfig = z.infer<typeof overlayConfigSchema>;
-export type BaseComponentConfig = z.infer<typeof baseComponentConfigSchema>;
-export type HeadingConfig = z.infer<typeof headingConfigSchema>;
-export type ButtonConfig = z.infer<typeof buttonConfigSchema>;
-export type SelectConfig = z.infer<typeof selectConfigSchema>;
+/** Resolved runtime view of `overlayConfigSchema`. */
+export type OverlayConfig = Resolved<z.infer<typeof overlayConfigSchema>>;
+/** Resolved runtime view of `baseComponentConfigSchema`. */
+export type BaseComponentConfig = Resolved<z.infer<typeof baseComponentConfigSchema>>;
+/** Resolved runtime view of `headingConfigSchema`. */
+export type HeadingConfig = Resolved<z.infer<typeof headingConfigSchema>>;
+/** Resolved runtime view of `buttonConfigSchema`. */
+export type ButtonConfig = Resolved<z.infer<typeof buttonConfigSchema>>;
+/** Resolved runtime view of `selectConfigSchema`. */
+export type SelectConfig = Resolved<z.infer<typeof selectConfigSchema>>;
+
+type EnvRefLike = {
+  env: string;
+  default?: string;
+};
+
+/**
+ * Recursively resolve env-reference-shaped values to plain strings.
+ *
+ * @template T - Input type
+ */
+export type Resolved<T> = T extends EnvRefLike
+  ? string
+  : T extends ReadonlyArray<infer U>
+    ? Resolved<U>[]
+    : T extends Array<infer U>
+      ? Resolved<U>[]
+      : T extends object
+        ? {
+            [K in keyof T]: Resolved<T[K]>;
+          }
+        : T;
 
 export interface NavItem {
   label: string;
@@ -61,6 +93,9 @@ export type ComponentConfig =
   | SelectConfig
   | (BaseComponentConfig & Record<string, unknown>);
 
+/**
+ * Runtime route shape produced by `compileManifest()`.
+ */
 export interface CompiledRoute {
   id: string;
   path: string;
@@ -73,6 +108,9 @@ export interface CompiledRoute {
   guard?: RouteConfig["guard"];
 }
 
+/**
+ * Runtime manifest shape produced by `compileManifest()`.
+ */
 export interface CompiledManifest {
   raw: ManifestConfig;
   app: AppConfig;

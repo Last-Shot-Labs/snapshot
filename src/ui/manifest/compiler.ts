@@ -1,13 +1,22 @@
 import type { SafeParseReturnType, ZodError } from "zod";
 import { getMissingAuthScreenIds } from "./auth-routes";
+import { getDefaultEnvSource, isEnvRef, resolveEnvRef } from "./env";
 import { manifestConfigSchema, withManifestCustomComponents } from "./schema";
 import type {
+  AppConfig,
+  AuthScreenConfig,
   CompiledManifest,
   CompiledRoute,
   ManifestConfig,
   PageConfig,
   RouteConfig,
 } from "./types";
+
+type EnvResolvedManifest = Omit<ManifestConfig, "app" | "auth" | "routes"> & {
+  app?: AppConfig;
+  auth?: AuthScreenConfig;
+  routes: RouteConfig[];
+};
 
 function toPageConfig(route: RouteConfig): PageConfig {
   return {
@@ -19,8 +28,48 @@ function toPageConfig(route: RouteConfig): PageConfig {
   };
 }
 
+function resolveManifestEnvRefs<T>(value: T, path: string[] = []): T {
+  const env = getDefaultEnvSource();
+
+  const resolve = (input: unknown, currentPath: string[]): unknown => {
+    if (isEnvRef(input)) {
+      const resolved = resolveEnvRef(input, env);
+      if (resolved === undefined) {
+        const location = currentPath.length > 0 ? currentPath.join(".") : "<root>";
+        throw new Error(
+          `Unable to resolve env ref at "${location}": env "${input.env}" is not defined and no default was provided.`,
+        );
+      }
+
+      return resolved;
+    }
+
+    if (Array.isArray(input)) {
+      return input.map((item, index) =>
+        resolve(item, [...currentPath, String(index)]),
+      );
+    }
+
+    if (input && typeof input === "object") {
+      return Object.fromEntries(
+        Object.entries(input as Record<string, unknown>).map(([key, nested]) => [
+          key,
+          resolve(nested, [...currentPath, key]),
+        ]),
+      );
+    }
+
+    return input;
+  };
+
+  return resolve(value, path) as T;
+}
+
 function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
-  const missingAuthScreens = getMissingAuthScreenIds(manifest);
+  const resolvedManifest = resolveManifestEnvRefs(
+    manifest,
+  ) as EnvResolvedManifest;
+  const missingAuthScreens = getMissingAuthScreenIds(resolvedManifest);
   if (missingAuthScreens.length > 0) {
     const screen = missingAuthScreens[0];
     throw new Error(
@@ -28,7 +77,7 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
     );
   }
 
-  const routes: CompiledRoute[] = manifest.routes.map((route) => ({
+  const routes: CompiledRoute[] = resolvedManifest.routes.map((route) => ({
     id: route.id,
     path: route.path,
     page: toPageConfig(route),
@@ -45,23 +94,23 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
   ) as Record<string, CompiledRoute>;
 
   return {
-    raw: manifest,
+    raw: resolvedManifest,
     app: {
-      shell: manifest.app?.shell ?? "full-width",
-      title: manifest.app?.title,
-      home: manifest.app?.home ?? routes[0]?.path,
-      loading: manifest.app?.loading,
-      error: manifest.app?.error,
-      notFound: manifest.app?.notFound,
-      offline: manifest.app?.offline,
+      shell: resolvedManifest.app?.shell ?? "full-width",
+      title: resolvedManifest.app?.title,
+      home: resolvedManifest.app?.home ?? routes[0]?.path,
+      loading: resolvedManifest.app?.loading,
+      error: resolvedManifest.app?.error,
+      notFound: resolvedManifest.app?.notFound,
+      offline: resolvedManifest.app?.offline,
     },
-    theme: manifest.theme,
-    state: manifest.state,
-    resources: manifest.resources,
-    workflows: manifest.workflows,
-    overlays: manifest.overlays,
-    navigation: manifest.navigation,
-    auth: manifest.auth,
+    theme: resolvedManifest.theme,
+    state: resolvedManifest.state,
+    resources: resolvedManifest.resources,
+    workflows: resolvedManifest.workflows,
+    overlays: resolvedManifest.overlays,
+    navigation: resolvedManifest.navigation,
+    auth: resolvedManifest.auth,
     routes,
     routeMap,
     firstRoute: routes[0] ?? null,

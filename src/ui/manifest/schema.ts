@@ -23,6 +23,7 @@ import { spinnerConfigSchema } from "../components/feedback/default-loading";
 import { errorPageConfigSchema } from "../components/feedback/default-error";
 import { notFoundConfigSchema } from "../components/feedback/default-not-found";
 import { offlineBannerConfigSchema } from "../components/feedback/default-offline";
+import { envRefSchema } from "./env";
 
 /** Zod schema for a FromRef value. */
 export const fromRefSchema = z
@@ -52,6 +53,8 @@ export const fromRefSchema = z
     transformArg: z.union([z.string(), z.number()]).optional(),
   })
   .strict();
+
+const stringOrEnvRef = z.union([z.string(), envRefSchema]);
 
 function responsiveSchema<T extends z.ZodTypeAny>(
   valueSchema: T,
@@ -115,7 +118,7 @@ export const rowConfigSchema: z.ZodType = z.lazy(() =>
 
 export const headingConfigSchema = baseComponentConfigSchema.extend({
   type: z.literal("heading"),
-  text: z.union([z.string(), fromRefSchema]),
+  text: z.union([stringOrEnvRef, fromRefSchema]),
   level: z
     .union([
       z.literal(1),
@@ -138,7 +141,7 @@ const actionConfigSchema: z.ZodType = z.lazy(() =>
 
 export const buttonConfigSchema = baseComponentConfigSchema.extend({
   type: z.literal("button"),
-  label: z.string(),
+  label: stringOrEnvRef,
   icon: z.string().optional(),
   variant: z
     .enum(["default", "secondary", "outline", "ghost", "destructive", "link"])
@@ -149,7 +152,7 @@ export const buttonConfigSchema = baseComponentConfigSchema.extend({
 });
 
 const selectOptionSchema = z.object({
-  label: z.string(),
+  label: stringOrEnvRef,
   value: z.string(),
 });
 
@@ -158,8 +161,8 @@ export const selectConfigSchema = baseComponentConfigSchema.extend({
   options: z.union([z.array(selectOptionSchema), dataSourceSchema]),
   valueField: z.string().optional(),
   labelField: z.string().optional(),
-  default: z.string().optional(),
-  placeholder: z.string().optional(),
+  default: stringOrEnvRef.optional(),
+  placeholder: stringOrEnvRef.optional(),
 });
 
 const customComponentPropTypeSchema = z.enum(["string", "number", "boolean"]);
@@ -312,7 +315,7 @@ const authScreenNameSchema = z.enum([
 
 const authScreenLinkSchema = z
   .object({
-    label: z.string(),
+    label: stringOrEnvRef,
     path: z.string().startsWith("/").optional(),
     screen: authScreenNameSchema.optional(),
   })
@@ -329,8 +332,8 @@ const authScreenLinkSchema = z
 
 const authFieldConfigSchema = z
   .object({
-    label: z.string().optional(),
-    placeholder: z.string().optional(),
+    label: stringOrEnvRef.optional(),
+    placeholder: stringOrEnvRef.optional(),
   })
   .strict();
 
@@ -344,8 +347,8 @@ const authProviderNameSchema = z.enum([
 const authProviderConfigSchema = z
   .object({
     provider: authProviderNameSchema,
-    label: z.string().optional(),
-    description: z.string().optional(),
+    label: stringOrEnvRef.optional(),
+    description: stringOrEnvRef.optional(),
     autoRedirect: z.boolean().optional(),
   })
   .strict();
@@ -363,17 +366,17 @@ const authScreenSectionSchema = z.enum([
 
 const authScreenOptionsSchema = z
   .object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-    submitLabel: z.string().optional(),
-    successMessage: z.string().optional(),
+    title: stringOrEnvRef.optional(),
+    description: stringOrEnvRef.optional(),
+    submitLabel: stringOrEnvRef.optional(),
+    successMessage: stringOrEnvRef.optional(),
     sections: z.array(authScreenSectionSchema).min(1).optional(),
     labels: z
       .object({
-        providersHeading: z.string().optional(),
-        passkeyButton: z.string().optional(),
-        method: z.string().optional(),
-        resend: z.string().optional(),
+        providersHeading: stringOrEnvRef.optional(),
+        passkeyButton: stringOrEnvRef.optional(),
+        method: stringOrEnvRef.optional(),
+        resend: stringOrEnvRef.optional(),
       })
       .strict()
       .optional(),
@@ -422,17 +425,17 @@ export const authScreenConfigSchema = z
       .optional(),
     branding: z
       .object({
-        logo: z.string().optional(),
-        title: z.string().optional(),
-        description: z.string().optional(),
+        logo: stringOrEnvRef.optional(),
+        title: stringOrEnvRef.optional(),
+        description: stringOrEnvRef.optional(),
       })
       .optional(),
     redirects: z
       .object({
-        authenticated: z.string().startsWith("/").optional(),
-        afterLogin: z.string().startsWith("/").optional(),
-        afterRegister: z.string().startsWith("/").optional(),
-        afterMfa: z.string().startsWith("/").optional(),
+        authenticated: stringOrEnvRef.optional(),
+        afterLogin: stringOrEnvRef.optional(),
+        afterRegister: stringOrEnvRef.optional(),
+        afterMfa: stringOrEnvRef.optional(),
       })
       .strict()
       .optional(),
@@ -460,7 +463,7 @@ export const layoutSchema = z.enum([
 export const pageConfigSchema = z
   .object({
     layout: layoutSchema.optional(),
-    title: z.string().optional(),
+    title: stringOrEnvRef.optional(),
     content: z.array(componentConfigSchema).min(1),
     roles: z.array(z.string()).optional(),
     breadcrumb: z.string().optional(),
@@ -498,13 +501,13 @@ export const stateValueConfigSchema = z
 
 export const appConfigSchema = z
   .object({
-    title: z.string().optional(),
+    title: stringOrEnvRef.optional(),
     shell: layoutSchema.default("full-width"),
     home: z.string().startsWith("/").optional(),
-    loading: z.union([componentConfigSchema, z.string().min(1)]).optional(),
-    error: z.union([componentConfigSchema, z.string().min(1)]).optional(),
-    notFound: z.string().min(1).optional(),
-    offline: z.union([componentConfigSchema, z.string().min(1)]).optional(),
+    loading: z.union([componentConfigSchema, stringOrEnvRef]).optional(),
+    error: z.union([componentConfigSchema, stringOrEnvRef]).optional(),
+    notFound: stringOrEnvRef.optional(),
+    offline: z.union([componentConfigSchema, stringOrEnvRef]).optional(),
   })
   .strict();
 
@@ -526,7 +529,7 @@ export const manifestSsrConfigSchema = z
 
 const overlayFooterActionSchema = z
   .object({
-    label: z.string(),
+    label: stringOrEnvRef,
     variant: z
       .enum(["default", "secondary", "destructive", "ghost"])
       .optional(),
@@ -661,7 +664,10 @@ export const manifestConfigSchema = z
       });
     }
 
-    if (data.app?.notFound && !routeIds.has(data.app.notFound)) {
+    if (
+      typeof data.app?.notFound === "string" &&
+      !routeIds.has(data.app.notFound)
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["app", "notFound"],

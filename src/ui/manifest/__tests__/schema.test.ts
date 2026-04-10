@@ -238,6 +238,23 @@ describe("manifestConfigSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts env refs on string-valued manifest fields", () => {
+    const result = manifestConfigSchema.safeParse({
+      app: {
+        title: { env: "SNAPSHOT_APP_TITLE", default: "Snapshot App" },
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Hello" }],
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it("rejects manifest missing routes", () => {
     const result = manifestConfigSchema.safeParse({
       theme: { flavor: "neutral" },
