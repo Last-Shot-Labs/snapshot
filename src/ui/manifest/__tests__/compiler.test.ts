@@ -196,6 +196,84 @@ describe("compiler", () => {
     });
   });
 
+  it("preserves auth contract overrides and workflow handlers", () => {
+    const compiled = compileManifest({
+      auth: {
+        screens: ["login"],
+        contract: {
+          endpoints: {
+            me: "/custom/auth/me",
+          },
+          headers: {
+            csrf: "x-custom-csrf",
+          },
+          csrfCookieName: "custom_csrf",
+        },
+        on: {
+          unauthenticated: "redirect-to-login",
+          forbidden: "show-forbidden",
+          logout: "clear-session",
+        },
+      },
+      workflows: {
+        "redirect-to-login": {
+          type: "navigate",
+          to: "/login",
+        },
+        "show-forbidden": {
+          type: "toast",
+          message: "Forbidden",
+        },
+        "clear-session": {
+          type: "toast",
+          message: "Logged out",
+        },
+      },
+      routes: [
+        {
+          id: "login",
+          path: "/login",
+          content: [{ type: "heading", text: "Login" }],
+        },
+      ],
+    });
+
+    expect(compiled.auth?.contract).toEqual({
+      endpoints: {
+        me: "/custom/auth/me",
+      },
+      headers: {
+        csrf: "x-custom-csrf",
+      },
+      csrfCookieName: "custom_csrf",
+    });
+    expect(compiled.auth?.on?.unauthenticated).toBe("redirect-to-login");
+    expect(compiled.auth?.on?.forbidden).toBe("show-forbidden");
+    expect(compiled.auth?.on?.logout).toBe("clear-session");
+  });
+
+  it("rejects auth handlers that reference missing workflows", () => {
+    expect(() =>
+      compileManifest({
+        auth: {
+          screens: ["login"],
+          on: {
+            unauthenticated: "missing-workflow",
+          },
+        },
+        routes: [
+          {
+            id: "login",
+            path: "/login",
+            content: [{ type: "heading", text: "Login" }],
+          },
+        ],
+      }),
+    ).toThrow(
+      'Auth handler "unauthenticated" references missing workflow "missing-workflow". Add it to manifest.workflows.',
+    );
+  });
+
   it("defaults auth.session when omitted", () => {
     const compiled = compileManifest({
       auth: {

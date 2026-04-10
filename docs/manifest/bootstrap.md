@@ -52,3 +52,6 @@ If omitted, Snapshot uses the current factory defaults:
 - `staleTime`: `300000`
 - `gcTime`: `600000`
 - `retry`: `1`
+
+For auth-specific manifest fields such as `session`, `contract`, `redirects`,
+and `on`, see [manifest auth](./auth.md).

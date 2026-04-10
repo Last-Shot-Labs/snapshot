@@ -57,6 +57,10 @@ missing, you can provide a `default` value in the manifest reference.
 See [bootstrap and env refs](./manifest/bootstrap.md) for the bootstrap contract
 and the resolution rules.
 
+Auth-specific bootstrap overrides now live in the manifest too. See
+[manifest auth](./manifest/auth.md) for session, contract, redirect, and
+workflow-handler settings.
+
 ### Complete Example
 
 ```json

@@ -24,6 +24,19 @@ import type { ApiClient } from "../../api/client";
 
 const WORKFLOW_CANCELLED = Symbol("snapshot.workflow.cancelled");
 
+function dispatchPopStateEvent(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (typeof PopStateEvent === "function") {
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    return;
+  }
+
+  window.dispatchEvent(new Event("popstate"));
+}
+
 export const SnapshotApiContext = createContext<ApiClient | null>(null);
 SnapshotApiContext.displayName = "SnapshotApiContext";
 
@@ -302,7 +315,7 @@ export function useActionExecutor(): ActionExecuteFn {
             } else {
               window.history.pushState({}, "", to);
             }
-            window.dispatchEvent(new PopStateEvent("popstate"));
+            dispatchPopStateEvent();
             return to;
           }
 

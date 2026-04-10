@@ -56,6 +56,48 @@ export const fromRefSchema = z
 
 const stringOrEnvRef = z.union([z.string(), envRefSchema]);
 
+const authEndpointConfigSchema = z
+  .object({
+    me: stringOrEnvRef.optional(),
+    login: stringOrEnvRef.optional(),
+    logout: stringOrEnvRef.optional(),
+    register: stringOrEnvRef.optional(),
+    forgotPassword: stringOrEnvRef.optional(),
+    refresh: stringOrEnvRef.optional(),
+    resetPassword: stringOrEnvRef.optional(),
+    verifyEmail: stringOrEnvRef.optional(),
+    resendVerification: stringOrEnvRef.optional(),
+    setPassword: stringOrEnvRef.optional(),
+    deleteAccount: stringOrEnvRef.optional(),
+    cancelDeletion: stringOrEnvRef.optional(),
+    sessions: stringOrEnvRef.optional(),
+    mfaVerify: stringOrEnvRef.optional(),
+    mfaSetup: stringOrEnvRef.optional(),
+    mfaVerifySetup: stringOrEnvRef.optional(),
+    mfaDisable: stringOrEnvRef.optional(),
+    mfaRecoveryCodes: stringOrEnvRef.optional(),
+    mfaEmailOtpEnable: stringOrEnvRef.optional(),
+    mfaEmailOtpVerifySetup: stringOrEnvRef.optional(),
+    mfaEmailOtpDisable: stringOrEnvRef.optional(),
+    mfaResend: stringOrEnvRef.optional(),
+    mfaMethods: stringOrEnvRef.optional(),
+    webauthnRegisterOptions: stringOrEnvRef.optional(),
+    webauthnRegister: stringOrEnvRef.optional(),
+    webauthnCredentials: stringOrEnvRef.optional(),
+    webauthnDisable: stringOrEnvRef.optional(),
+    passkeyLoginOptions: stringOrEnvRef.optional(),
+    passkeyLogin: stringOrEnvRef.optional(),
+    oauthExchange: stringOrEnvRef.optional(),
+  })
+  .strict();
+
+const authHeadersConfigSchema = z
+  .object({
+    userToken: stringOrEnvRef.optional(),
+    csrf: stringOrEnvRef.optional(),
+  })
+  .strict();
+
 function responsiveSchema<T extends z.ZodTypeAny>(
   valueSchema: T,
 ): z.ZodUnion<
@@ -180,6 +222,17 @@ export const customComponentPropSchema = z
 export const customComponentDeclarationSchema = z
   .object({
     props: z.record(customComponentPropSchema).optional(),
+  })
+  .strict();
+
+/**
+ * Manifest auth contract overrides.
+ */
+export const authContractSchema = z
+  .object({
+    endpoints: authEndpointConfigSchema.optional(),
+    headers: authHeadersConfigSchema.optional(),
+    csrfCookieName: stringOrEnvRef.optional(),
   })
   .strict();
 
@@ -420,10 +473,21 @@ const authScreenOptionsSchema = z
   })
   .strict();
 
+const authWorkflowNameSchema = stringOrEnvRef;
+
+const authWorkflowHooksSchema = z
+  .object({
+    unauthenticated: authWorkflowNameSchema.optional(),
+    forbidden: authWorkflowNameSchema.optional(),
+    logout: authWorkflowNameSchema.optional(),
+  })
+  .strict();
+
 export const authScreenConfigSchema = z
   .object({
     screens: z.array(authScreenNameSchema).min(1),
     session: authSessionSchema.optional(),
+    contract: authContractSchema.optional(),
     providers: authProviderListSchema.optional(),
     providerMode: z.enum(["buttons", "auto"]).optional(),
     passkey: z
@@ -450,9 +514,12 @@ export const authScreenConfigSchema = z
         afterLogin: stringOrEnvRef.optional(),
         afterRegister: stringOrEnvRef.optional(),
         afterMfa: stringOrEnvRef.optional(),
+        unauthenticated: stringOrEnvRef.optional(),
+        forbidden: stringOrEnvRef.optional(),
       })
       .strict()
       .optional(),
+    on: authWorkflowHooksSchema.optional(),
     screenOptions: z
       .object({
         login: authScreenOptionsSchema.optional(),
@@ -518,8 +585,16 @@ export const stateValueConfigSchema = z
  */
 export const appCacheSchema = z
   .object({
-    staleTime: z.number().int().nonnegative().default(5 * 60 * 1000),
-    gcTime: z.number().int().nonnegative().default(10 * 60 * 1000),
+    staleTime: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(5 * 60 * 1000),
+    gcTime: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(10 * 60 * 1000),
     retry: z.number().int().nonnegative().default(1),
   })
   .strict();
@@ -674,7 +749,10 @@ export const manifestConfigSchema = z
       });
     }
 
-    if (typeof data.app?.loading === "string" && !routeIds.has(data.app.loading)) {
+    if (
+      typeof data.app?.loading === "string" &&
+      !routeIds.has(data.app.loading)
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["app", "loading"],

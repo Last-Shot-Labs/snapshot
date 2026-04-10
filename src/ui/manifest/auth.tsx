@@ -1845,19 +1845,37 @@ export function ManifestAuthScreen({
 }
 
 /**
- * Build the runtime auth config from bootstrap config.
+ * Build the runtime auth config from bootstrap config and manifest overrides.
  *
  * @param apiUrl - Backend API base URL
+ * @param manifest - Compiled manifest, used for auth contract overrides
  * @param snapshotConfig - Optional snapshot bootstrap config
  * @returns Runtime auth configuration derived from bootstrap settings
  */
 export function createManifestAuthRuntimeConfig(
   apiUrl: string,
+  manifest: CompiledManifest,
   snapshotConfig?: Record<string, unknown>,
 ): ManifestAuthRuntimeConfig {
   const typedConfig = (snapshotConfig ?? {}) as Partial<SnapshotConfig>;
+  const manifestContract = manifest.auth?.contract
+    ? {
+        ...typedConfig.contract,
+        endpoints: {
+          ...typedConfig.contract?.endpoints,
+          ...manifest.auth.contract.endpoints,
+        },
+        headers: {
+          ...typedConfig.contract?.headers,
+          ...manifest.auth.contract.headers,
+        },
+        csrfCookieName:
+          manifest.auth.contract.csrfCookieName ??
+          typedConfig.contract?.csrfCookieName,
+      }
+    : typedConfig.contract;
   return {
     authMode: typedConfig.auth ?? "cookie",
-    contract: mergeContract(apiUrl, typedConfig.contract),
+    contract: mergeContract(apiUrl, manifestContract),
   };
 }

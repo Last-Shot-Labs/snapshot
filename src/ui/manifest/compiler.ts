@@ -35,7 +35,8 @@ function resolveManifestEnvRefs<T>(value: T, path: string[] = []): T {
     if (isEnvRef(input)) {
       const resolved = resolveEnvRef(input, env);
       if (resolved === undefined) {
-        const location = currentPath.length > 0 ? currentPath.join(".") : "<root>";
+        const location =
+          currentPath.length > 0 ? currentPath.join(".") : "<root>";
         throw new Error(
           `Unable to resolve env ref at "${location}": env "${input.env}" is not defined and no default was provided.`,
         );
@@ -52,10 +53,9 @@ function resolveManifestEnvRefs<T>(value: T, path: string[] = []): T {
 
     if (input && typeof input === "object") {
       return Object.fromEntries(
-        Object.entries(input as Record<string, unknown>).map(([key, nested]) => [
-          key,
-          resolve(nested, [...currentPath, key]),
-        ]),
+        Object.entries(input as Record<string, unknown>).map(
+          ([key, nested]) => [key, resolve(nested, [...currentPath, key])],
+        ),
       );
     }
 
@@ -75,6 +75,17 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
     throw new Error(
       `Auth screen "${screen}" is enabled but no route has id "${screen}". Add { "id": "${screen}", "path": "/your-path", ... } to routes.`,
     );
+  }
+
+  const workflowNames = new Set(Object.keys(resolvedManifest.workflows ?? {}));
+  for (const [kind, workflow] of Object.entries(
+    resolvedManifest.auth?.on ?? {},
+  )) {
+    if (!workflowNames.has(workflow)) {
+      throw new Error(
+        `Auth handler "${kind}" references missing workflow "${workflow}". Add it to manifest.workflows.`,
+      );
+    }
   }
 
   const routes: CompiledRoute[] = resolvedManifest.routes.map((route) => ({
@@ -110,8 +121,7 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
       shell: resolvedManifest.app?.shell ?? "full-width",
       title: resolvedManifest.app?.title,
       cache: {
-        staleTime:
-          resolvedManifest.app?.cache?.staleTime ?? 5 * 60 * 1000,
+        staleTime: resolvedManifest.app?.cache?.staleTime ?? 5 * 60 * 1000,
         gcTime: resolvedManifest.app?.cache?.gcTime ?? 10 * 60 * 1000,
         retry: resolvedManifest.app?.cache?.retry ?? 1,
       },

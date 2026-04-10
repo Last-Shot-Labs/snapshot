@@ -63,6 +63,15 @@ describe("manifestConfigSchema", () => {
       },
       auth: {
         screens: ["login", "register"] as const,
+        contract: {
+          endpoints: {
+            me: "/custom/auth/me",
+          },
+          headers: {
+            csrf: "x-custom-csrf",
+          },
+          csrfCookieName: "custom_csrf",
+        },
         providers: [
           "google",
           {
@@ -78,6 +87,13 @@ describe("manifestConfigSchema", () => {
         redirects: {
           authenticated: "/dashboard",
           afterLogin: "/users",
+          unauthenticated: "/login",
+          forbidden: "/forbidden",
+        },
+        on: {
+          unauthenticated: "redirect-to-login",
+          forbidden: "show-forbidden",
+          logout: "clear-session",
         },
         screenOptions: {
           login: {

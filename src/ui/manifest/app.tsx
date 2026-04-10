@@ -6,6 +6,7 @@ import {
   Component,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -124,9 +125,26 @@ function withRedirectParam(path: string, redirectTo: string): string {
     return path;
   }
 
-  const url = new URL(path, window.location.origin);
+  const origin =
+    window.location.origin && window.location.origin !== "null"
+      ? window.location.origin
+      : "http://localhost";
+  const url = new URL(path, origin);
   url.searchParams.set("redirect", redirectTo);
   return `${url.pathname}${url.search}`;
+}
+
+function dispatchPopState(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (typeof PopStateEvent === "function") {
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    return;
+  }
+
+  window.dispatchEvent(new Event("popstate"));
 }
 
 /**
@@ -284,6 +302,61 @@ function AuthRuntimeBridge({
       screens: manifest.auth.screens,
     });
   }, [isError, isLoading, manifest.auth, setAuth, setUser, user]);
+
+  return null;
+}
+
+const MANIFEST_AUTH_WORKFLOW_EVENT = "snapshot:manifest-auth-workflow";
+const useManifestLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+function ManifestAuthWorkflowBridge({
+  manifest,
+}: {
+  manifest: CompiledManifest;
+}) {
+  const execute = useActionExecutor();
+
+  useManifestLayoutEffect(() => {
+    const authWorkflows = manifest.auth?.on;
+    if (!authWorkflows) {
+      return;
+    }
+
+    const onAuthWorkflowEvent = (event: Event) => {
+      const detail = (event as CustomEvent<{ kind?: string }>).detail;
+      const kind = detail?.kind;
+      if (!kind) {
+        return;
+      }
+
+      const workflow = authWorkflows[kind as keyof typeof authWorkflows];
+      if (!workflow) {
+        return;
+      }
+
+      void execute(
+        { type: "run-workflow", workflow },
+        {
+          auth: {
+            kind,
+          },
+        },
+      );
+    };
+
+    window.addEventListener(
+      MANIFEST_AUTH_WORKFLOW_EVENT,
+      onAuthWorkflowEvent as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        MANIFEST_AUTH_WORKFLOW_EVENT,
+        onAuthWorkflowEvent as EventListener,
+      );
+    };
+  }, [execute, manifest.auth?.on]);
 
   return null;
 }
@@ -477,7 +550,11 @@ function ManifestRouter({
 
   const navigate = useCallback(
     (to: string, options?: { replace?: boolean }) => {
-      const url = new URL(to, window.location.origin);
+      const origin =
+        window.location.origin && window.location.origin !== "null"
+          ? window.location.origin
+          : "http://localhost";
+      const url = new URL(to, origin);
       const nextLocation = `${url.pathname}${url.search}${url.hash}`;
       if (options?.replace) {
         window.history.replaceState({}, "", nextLocation);
@@ -485,7 +562,7 @@ function ManifestRouter({
         window.history.pushState({}, "", nextLocation);
       }
       setCurrentPath(url.pathname);
-      window.dispatchEvent(new PopStateEvent("popstate"));
+      dispatchPopState();
     },
     [],
   );
@@ -800,8 +877,9 @@ export function ManifestApp({
     [apiUrl],
   );
   const authRuntimeConfig = useMemo(
-    () => createManifestAuthRuntimeConfig(apiUrl, snapshotConfig),
-    [apiUrl, snapshotConfig],
+    () =>
+      createManifestAuthRuntimeConfig(apiUrl, compiledManifest, snapshotConfig),
+    [apiUrl, compiledManifest, snapshotConfig],
   );
 
   useEffect(() => {
@@ -821,10 +899,13 @@ export function ManifestApp({
             api={snapshot.api}
           >
             {compiledManifest.auth ? (
-              <AuthRuntimeBridge
-                manifest={compiledManifest}
-                useUser={snapshot.useUser}
-              />
+              <>
+                <AuthRuntimeBridge
+                  manifest={compiledManifest}
+                  useUser={snapshot.useUser}
+                />
+                <ManifestAuthWorkflowBridge manifest={compiledManifest} />
+              </>
             ) : null}
             <ManifestRouter
               manifest={compiledManifest}

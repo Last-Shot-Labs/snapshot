@@ -3,22 +3,6 @@
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 
-vi.hoisted(() => {
-  Object.defineProperty(window, "matchMedia", {
-    writable: true,
-    value: (query: string) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: () => {},
-      removeListener: () => {},
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      dispatchEvent: () => false,
-    }),
-  });
-});
-
 import {
   act,
   fireEvent,
@@ -35,6 +19,15 @@ import { useSubscribe } from "../../context";
 import { useSetStateValue, useStateValue } from "../../state";
 
 import "../structural";
+
+function dispatchPopStateEvent(): void {
+  if (typeof PopStateEvent === "function") {
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    return;
+  }
+
+  window.dispatchEvent(new Event("popstate"));
+}
 
 registerComponentSchema(
   "route-state-probe",
@@ -241,7 +234,7 @@ describe("ManifestApp", () => {
 
     await act(async () => {
       window.history.replaceState({}, "", "/about");
-      window.dispatchEvent(new PopStateEvent("popstate"));
+      dispatchPopStateEvent();
     });
 
     await waitFor(() => {
@@ -370,6 +363,65 @@ describe("ManifestApp", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Login Page")).toBeDefined();
+    });
+  });
+
+  it("renders auth screens with manifest workflow bindings", async () => {
+    window.history.replaceState({}, "", "/");
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/auth/me")) {
+        return new Response(
+          JSON.stringify({ id: "1", email: "ada@example.com" }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    const manifest: ManifestConfig = {
+      auth: {
+        screens: ["login"],
+        on: {
+          unauthenticated: "auth-401",
+        },
+      },
+      workflows: {
+        "auth-401": [
+          {
+            type: "navigate",
+            to: "/handled",
+          },
+        ],
+      },
+      routes: [
+        {
+          id: "login",
+          path: "/login",
+          content: [{ type: "heading", text: "Login Page" }],
+        },
+      ],
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Sign in" })).toBeDefined();
+    });
+
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent("snapshot:manifest-auth-workflow", {
+          detail: { kind: "unauthenticated" },
+        }),
+      );
     });
   });
 
@@ -698,7 +750,7 @@ describe("ManifestApp", () => {
 
     await act(async () => {
       window.history.replaceState({}, "", "/users/84");
-      window.dispatchEvent(new PopStateEvent("popstate"));
+      dispatchPopStateEvent();
     });
 
     await waitFor(() => {

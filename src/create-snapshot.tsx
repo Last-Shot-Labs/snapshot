@@ -23,6 +23,7 @@ import { createLoaders } from "./routing/loaders";
 import { QueryProviderInner } from "./providers/QueryProvider";
 import { createAuthErrorFormatter } from "./auth/error-format";
 import { warnOnce } from "./auth/warnings";
+import { getAuthScreenPath } from "./ui/manifest/auth-routes";
 import type {
   SnapshotConfig,
   SnapshotInstance,
@@ -36,6 +37,22 @@ import type { ManifestConfig } from "./ui/manifest/types";
 import { bootBuiltins } from "./ui/manifest/boot-builtins";
 import { compileManifest } from "./ui/manifest/compiler";
 import { mergeContract } from "./auth/contract";
+
+const MANIFEST_AUTH_WORKFLOW_EVENT = "snapshot:manifest-auth-workflow";
+
+type ManifestAuthWorkflowKind = "unauthenticated" | "forbidden" | "logout";
+
+function dispatchManifestAuthWorkflow(kind: ManifestAuthWorkflowKind): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent(MANIFEST_AUTH_WORKFLOW_EVENT, {
+      detail: { kind },
+    }),
+  );
+}
 
 export function createSnapshot<
   TWSEvents extends Record<string, unknown> = Record<string, unknown>,
@@ -56,17 +73,62 @@ export function createSnapshot<
   };
   const { manifest: _manifest, ...snapshotConfigForManifestApp } =
     runtimeConfig;
+  const loginScreenPath = compiledManifest?.auth
+    ? (getAuthScreenPath(compiledManifest, "login") ?? runtimeConfig.loginPath)
+    : runtimeConfig.loginPath;
+  const mfaScreenPath = compiledManifest?.auth
+    ? (getAuthScreenPath(compiledManifest, "mfa") ?? runtimeConfig.mfaPath)
+    : runtimeConfig.mfaPath;
+  const homeScreenPath = compiledManifest?.app?.home ?? runtimeConfig.homePath;
+  const loaderLoginPath =
+    compiledManifest?.auth?.redirects?.unauthenticated ?? loginScreenPath;
+  const manifestContract = compiledManifest?.auth?.contract
+    ? {
+        ...runtimeConfig.contract,
+        endpoints: {
+          ...runtimeConfig.contract?.endpoints,
+          ...compiledManifest.auth.contract.endpoints,
+        },
+        headers: {
+          ...runtimeConfig.contract?.headers,
+          ...compiledManifest.auth.contract.headers,
+        },
+        csrfCookieName:
+          compiledManifest.auth.contract.csrfCookieName ??
+          runtimeConfig.contract?.csrfCookieName,
+      }
+    : runtimeConfig.contract;
+
+  function createManifestAuthCallback(
+    kind: ManifestAuthWorkflowKind,
+    fallback?: () => void,
+  ): () => void {
+    return () => {
+      if (compiledManifest?.auth?.on?.[kind] && typeof window !== "undefined") {
+        dispatchManifestAuthWorkflow(kind);
+        return;
+      }
+
+      fallback?.();
+    };
+  }
 
   // ── Auth contract ────────────────────────────────────────────────────────────
-  const contract = mergeContract(runtimeConfig.apiUrl, runtimeConfig.contract);
+  const contract = mergeContract(runtimeConfig.apiUrl, manifestContract);
 
   // ── API client ──────────────────────────────────────────────────────────────
   const api = new ApiClient({
     apiUrl: runtimeConfig.apiUrl,
     auth: runtimeConfig.auth,
     bearerToken: runtimeConfig.bearerToken,
-    onUnauthenticated: runtimeConfig.onUnauthenticated,
-    onForbidden: runtimeConfig.onForbidden,
+    onUnauthenticated: createManifestAuthCallback(
+      "unauthenticated",
+      runtimeConfig.onUnauthenticated,
+    ),
+    onForbidden: createManifestAuthCallback(
+      "forbidden",
+      runtimeConfig.onForbidden,
+    ),
     onMfaSetupRequired: runtimeConfig.mfaSetupPath
       ? () => {
           window.location.href = runtimeConfig.mfaSetupPath!;
@@ -389,11 +451,21 @@ export function createSnapshot<
     createAuthHooks({
       api,
       storage: tokenStorage,
-      config: runtimeConfig,
+      config: {
+        ...runtimeConfig,
+        loginPath: loginScreenPath,
+        homePath: homeScreenPath,
+        mfaPath: mfaScreenPath,
+        onLogoutSuccess: createManifestAuthCallback(
+          "logout",
+          runtimeConfig.onLogoutSuccess,
+        ),
+      },
       contract,
       pendingMfaChallengeAtom,
       onLoginSuccess: () => {
-        if (runtimeConfig.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
+        if (runtimeConfig.ws?.reconnectOnLogin !== false)
+          wsManager?.reconnect();
         if (runtimeConfig.sse?.reconnectOnLogin !== false) reconnectAllSse();
       },
       onLogoutSuccess: () => closeAllSse(),
@@ -416,9 +488,15 @@ export function createSnapshot<
   const accountHooks = createAccountHooks({
     api,
     storage: tokenStorage,
-    config: runtimeConfig,
+    config: {
+      ...runtimeConfig,
+      loginPath: loginScreenPath,
+    },
     contract,
-    onUnauthenticated: runtimeConfig.onUnauthenticated,
+    onUnauthenticated: createManifestAuthCallback(
+      "unauthenticated",
+      runtimeConfig.onUnauthenticated,
+    ),
     queryClient,
   });
 
@@ -426,7 +504,10 @@ export function createSnapshot<
   const oauthHooks = createOAuthHooks({
     api,
     storage: tokenStorage,
-    config: runtimeConfig,
+    config: {
+      ...runtimeConfig,
+      homePath: homeScreenPath,
+    },
     contract,
     onLoginSuccess: () => {
       if (runtimeConfig.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
@@ -438,7 +519,11 @@ export function createSnapshot<
   const webAuthnHooks = createWebAuthnHooks({
     api,
     storage: tokenStorage,
-    config: runtimeConfig,
+    config: {
+      ...runtimeConfig,
+      homePath: homeScreenPath,
+      mfaPath: mfaScreenPath,
+    },
     contract,
     pendingMfaChallengeAtom,
     onLoginSuccess: () => {
@@ -449,13 +534,23 @@ export function createSnapshot<
 
   // ── Routing ─────────────────────────────────────────────────────────────────
   const { protectedBeforeLoad, guestBeforeLoad } = createLoaders(
-    runtimeConfig,
+    {
+      ...runtimeConfig,
+      loginPath: loaderLoginPath,
+      homePath: homeScreenPath,
+      onUnauthenticated: createManifestAuthCallback(
+        "unauthenticated",
+        runtimeConfig.onUnauthenticated,
+      ),
+    },
     api,
     contract,
   );
 
   // ── Auth error formatter ────────────────────────────────────────────────────
-  const boundFormatAuthError = createAuthErrorFormatter(runtimeConfig.authErrors);
+  const boundFormatAuthError = createAuthErrorFormatter(
+    runtimeConfig.authErrors,
+  );
 
   // ── QueryProvider pre-bound to this instance's queryClient ─────────────────
   function QueryProvider({ children }: { children: ReactNode }) {
@@ -468,17 +563,17 @@ export function createSnapshot<
   let ManifestAppComponent: React.ComponentType | undefined;
   if (runtimeConfig.manifest) {
     const manifestConfig = runtimeConfig.manifest as unknown as ManifestConfig;
-    // Lazy import to avoid pulling UI code into SDK-only consumers
-    const { ManifestApp: ManifestAppImpl } = require("./ui/manifest/app") as {
-      ManifestApp: React.ComponentType<{
-        manifest: ManifestConfig;
-        apiUrl: string;
-        snapshotConfig?: Record<string, unknown>;
-      }>;
-    };
     const capturedApiUrl = runtimeConfig.apiUrl;
     const capturedManifest = manifestConfig;
     ManifestAppComponent = function SnapshotManifestApp() {
+      // Lazy import to avoid pulling UI code into SDK-only consumers.
+      const { ManifestApp: ManifestAppImpl } = require("./ui/manifest/app") as {
+        ManifestApp: React.ComponentType<{
+          manifest: ManifestConfig;
+          apiUrl: string;
+          snapshotConfig?: Record<string, unknown>;
+        }>;
+      };
       return (
         <ManifestAppImpl
           manifest={capturedManifest}

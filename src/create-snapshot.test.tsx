@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { createSnapshot } from "./create-snapshot";
 
 afterEach(() => {
-  sessionStorage.clear();
+  if (typeof sessionStorage !== "undefined") {
+    sessionStorage.clear();
+  }
 });
 
 describe("createSnapshot", () => {
@@ -82,5 +85,62 @@ describe("createSnapshot", () => {
 
     snapshot.tokenStorage.set("abc123");
     expect(snapshot.tokenStorage.get()).toBeNull();
+  });
+
+  it("dispatches a manifest auth workflow event on 401", async () => {
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/protected")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(
+        JSON.stringify({ id: "1", email: "ada@example.com" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }) as typeof fetch;
+
+    const snapshot = createSnapshot({
+      apiUrl: "https://api.example.com",
+      manifest: {
+        auth: {
+          screens: ["login"],
+          on: {
+            unauthenticated: "auth-401",
+          },
+        },
+        workflows: {
+          "auth-401": {
+            type: "toast",
+            message: "Handled",
+          },
+        },
+        routes: [
+          {
+            id: "login",
+            path: "/login",
+            content: [{ type: "heading", text: "Login" }],
+          },
+        ],
+      },
+    });
+
+    await expect(snapshot.api.get("/protected")).rejects.toMatchObject({
+      status: 401,
+    });
+
+    expect(dispatchSpy).toHaveBeenCalled();
+    const event = dispatchSpy.mock.calls[0]?.[0] as CustomEvent<{
+      kind?: string;
+    }>;
+    expect(event.type).toBe("snapshot:manifest-auth-workflow");
+    expect(event.detail.kind).toBe("unauthenticated");
   });
 });

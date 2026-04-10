@@ -6,8 +6,12 @@ type Theme = "light" | "dark";
 
 const getInitialTheme = (): Theme => {
   if (typeof window === "undefined") return "light";
-  const stored = localStorage.getItem("snapshot-theme") as Theme | null;
+  const stored =
+    typeof localStorage !== "undefined"
+      ? (localStorage.getItem("snapshot-theme") as Theme | null)
+      : null;
   if (stored === "light" || stored === "dark") return stored;
+  if (typeof window.matchMedia !== "function") return "light";
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
@@ -15,7 +19,7 @@ const getInitialTheme = (): Theme => {
 
 const themeAtom = atomWithStorage<Theme>("snapshot-theme", getInitialTheme());
 
-// Inject a one-time style rule so we can suppress transitions during theme swap
+// Inject a one-time style rule so we can suppress transitions during theme swap.
 let styleInjected = false;
 function ensureNoTransitionStyle() {
   if (styleInjected || typeof document === "undefined") return;
@@ -26,6 +30,11 @@ function ensureNoTransitionStyle() {
   styleInjected = true;
 }
 
+/**
+ * Bind the persisted theme to the document root.
+ *
+ * @returns Theme state and setters for the current app instance
+ */
 export function useTheme() {
   const [theme, setTheme] = useAtom(themeAtom);
 

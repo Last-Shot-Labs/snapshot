@@ -1,5 +1,8 @@
 import type { SnapshotConfig } from "../types";
 
+/**
+ * Per-instance token storage used by Snapshot auth flows.
+ */
 export interface TokenStorage {
   get: () => string | null;
   set: (token: string) => void;
@@ -10,6 +13,9 @@ export interface TokenStorage {
 }
 
 function createLocalStorageStorage(key: string): TokenStorage {
+  if (typeof window === "undefined" || typeof localStorage === "undefined") {
+    return createMemoryStorage();
+  }
   const refreshKey = `${key}-refresh`;
   return {
     get: () => localStorage.getItem(key),
@@ -22,6 +28,9 @@ function createLocalStorageStorage(key: string): TokenStorage {
 }
 
 function createSessionStorageStorage(key: string): TokenStorage {
+  if (typeof window === "undefined" || typeof sessionStorage === "undefined") {
+    return createMemoryStorage();
+  }
   const refreshKey = `${key}-refresh`;
   return {
     get: () => sessionStorage.getItem(key),
@@ -65,6 +74,12 @@ function createNoopStorage(): TokenStorage {
   };
 }
 
+/**
+ * Create the token storage implementation for the current auth mode.
+ *
+ * @param config - Auth/bootstrap token storage options
+ * @returns A per-instance token storage backend
+ */
 export function createTokenStorage(
   config: Pick<SnapshotConfig, "auth" | "tokenStorage" | "tokenKey">,
 ): TokenStorage {

@@ -51,6 +51,9 @@ export interface AuthContract {
   csrfCookieName: string;
 }
 
+/**
+ * Partial auth contract overrides.
+ */
 export interface AuthContractConfig {
   endpoints?: Partial<AuthEndpoints>;
   sessionRevoke?: (id: string) => string;
@@ -112,6 +115,13 @@ export function defaultContract(apiUrl: string): AuthContract {
   };
 }
 
+/**
+ * Merge a partial auth contract override with the built-in defaults.
+ *
+ * @param apiUrl - Base API URL used to derive absolute auth URLs
+ * @param partial - Partial contract override from bootstrap or manifest config
+ * @returns The merged auth contract
+ */
 export function mergeContract(
   apiUrl: string,
   partial?: AuthContractConfig,
