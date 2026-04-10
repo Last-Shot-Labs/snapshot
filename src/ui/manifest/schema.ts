@@ -513,10 +513,22 @@ export const stateValueConfigSchema = z
   })
   .strict();
 
+/**
+ * Manifest cache defaults for TanStack Query.
+ */
+export const appCacheSchema = z
+  .object({
+    staleTime: z.number().int().nonnegative().default(5 * 60 * 1000),
+    gcTime: z.number().int().nonnegative().default(10 * 60 * 1000),
+    retry: z.number().int().nonnegative().default(1),
+  })
+  .strict();
+
 export const appConfigSchema = z
   .object({
     title: stringOrEnvRef.optional(),
     shell: layoutSchema.default("full-width"),
+    cache: appCacheSchema.optional(),
     home: z.string().startsWith("/").optional(),
     loading: z.union([componentConfigSchema, stringOrEnvRef]).optional(),
     error: z.union([componentConfigSchema, stringOrEnvRef]).optional(),

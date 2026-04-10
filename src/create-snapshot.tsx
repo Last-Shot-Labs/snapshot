@@ -50,6 +50,9 @@ export function createSnapshot<
     auth: manifestSession?.mode ?? config.auth,
     tokenStorage: manifestSession?.storage ?? config.tokenStorage,
     tokenKey: manifestSession?.key ?? config.tokenKey,
+    staleTime: compiledManifest?.app?.cache?.staleTime ?? config.staleTime,
+    gcTime: compiledManifest?.app?.cache?.gcTime ?? config.gcTime,
+    retry: compiledManifest?.app?.cache?.retry ?? config.retry,
   };
   const { manifest: _manifest, ...snapshotConfigForManifestApp } =
     runtimeConfig;
@@ -84,9 +87,9 @@ export function createSnapshot<
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: config.staleTime ?? 5 * 60 * 1000,
-        gcTime: config.gcTime ?? 10 * 60 * 1000,
-        retry: config.retry ?? 1,
+        staleTime: runtimeConfig.staleTime ?? 5 * 60 * 1000,
+        gcTime: runtimeConfig.gcTime ?? 10 * 60 * 1000,
+        retry: runtimeConfig.retry ?? 1,
       },
     },
   });

@@ -253,6 +253,49 @@ describe("compiler", () => {
     expect(compiled.app.home).toBe("/");
   });
 
+  it("defaults app.cache to the current QueryClient settings", () => {
+    const compiled = compileManifest({
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Home" }],
+        },
+      ],
+    });
+
+    expect(compiled.app.cache).toEqual({
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      retry: 1,
+    });
+  });
+
+  it("preserves app.cache overrides", () => {
+    const compiled = compileManifest({
+      app: {
+        cache: {
+          staleTime: 60_000,
+          gcTime: 120_000,
+          retry: 3,
+        },
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Home" }],
+        },
+      ],
+    });
+
+    expect(compiled.app.cache).toEqual({
+      staleTime: 60_000,
+      gcTime: 120_000,
+      retry: 3,
+    });
+  });
+
   it("resolves env refs at compile time", () => {
     const original = process.env["SNAPSHOT_APP_TITLE"];
     process.env["SNAPSHOT_APP_TITLE"] = "Env Snapshot";

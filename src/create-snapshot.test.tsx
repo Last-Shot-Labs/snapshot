@@ -7,6 +7,36 @@ afterEach(() => {
 });
 
 describe("createSnapshot", () => {
+  it("uses the manifest app cache for QueryClient defaults", () => {
+    const snapshot = createSnapshot({
+      apiUrl: "https://api.example.com",
+      manifest: {
+        app: {
+          cache: {
+            staleTime: 60_000,
+            gcTime: 120_000,
+            retry: 3,
+          },
+        },
+        routes: [
+          {
+            id: "home",
+            path: "/",
+            content: [{ type: "heading", text: "Home" }],
+          },
+        ],
+      },
+    });
+
+    expect(snapshot.queryClient.getDefaultOptions().queries?.staleTime).toBe(
+      60_000,
+    );
+    expect(snapshot.queryClient.getDefaultOptions().queries?.gcTime).toBe(
+      120_000,
+    );
+    expect(snapshot.queryClient.getDefaultOptions().queries?.retry).toBe(3);
+  });
+
   it("uses the manifest auth session for token storage", () => {
     const snapshot = createSnapshot({
       apiUrl: "https://api.example.com",

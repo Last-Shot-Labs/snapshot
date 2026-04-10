@@ -29,3 +29,26 @@ with a clear error.
 This keeps deployment-specific values out of application code. The manifest can
 stay portable while still adapting to different environments without manual
 rewiring.
+
+## App Cache
+
+The manifest also controls Snapshot's default query cache behavior through
+`manifest.app.cache`.
+
+```json
+{
+  "app": {
+    "cache": {
+      "staleTime": 60000,
+      "gcTime": 120000,
+      "retry": 3
+    }
+  }
+}
+```
+
+If omitted, Snapshot uses the current factory defaults:
+
+- `staleTime`: `300000`
+- `gcTime`: `600000`
+- `retry`: `1`

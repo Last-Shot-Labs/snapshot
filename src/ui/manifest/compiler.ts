@@ -109,6 +109,12 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
     app: {
       shell: resolvedManifest.app?.shell ?? "full-width",
       title: resolvedManifest.app?.title,
+      cache: {
+        staleTime:
+          resolvedManifest.app?.cache?.staleTime ?? 5 * 60 * 1000,
+        gcTime: resolvedManifest.app?.cache?.gcTime ?? 10 * 60 * 1000,
+        retry: resolvedManifest.app?.cache?.retry ?? 1,
+      },
       home: resolvedManifest.app?.home ?? routes[0]?.path,
       loading: resolvedManifest.app?.loading,
       error: resolvedManifest.app?.error,
