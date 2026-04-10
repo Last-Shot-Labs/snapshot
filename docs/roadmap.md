@@ -1,6 +1,6 @@
 # Roadmap
 
-> **Last updated:** 2026-04-10 — manifest-only spec drafted, vision rewritten
+> **Last updated:** 2026-04-10 — manifest-only completion shipped
 >
 > Modeled on [`bunshot/docs/roadmap.md`](../../bunshot/docs/roadmap.md). Specs progress
 > from `docs/specs/<name>.md` (active) → `docs/specs/completed/<name>.md` (done) and
@@ -90,24 +90,30 @@ Specs moved to [`docs/specs/completed/`](./specs/completed/).
 - `<PrefetchLink>` component (hover/viewport prefetch)
 - `<SnapshotImage>` — sharp, responsive srcset, blur placeholder
 
+**Manifest-only completion (`manifest-only.md`) — Done 2026-04-10:**
+
+The drive to 100% manifest capability. 35 phases across 8 file-disjoint tracks, all on
+`main`. The acceptance test — *"can a user enable this feature by editing
+`snapshot.manifest.json` with no TypeScript?"* — now passes for every feature in the
+spec.
+
+| Track | Shipped |
+|---|---|
+| **A** | Hardcoded behavior removed — auth path inference, layout fallback, `"custom"` magic, side-effect registration, hardcoded loading/error/404/offline UI — all gone. Boot-time `bootBuiltins()` replaces module side effects. |
+| **B** | `SnapshotConfig` collapsed to four fields (`apiUrl`, `env`, `bearerToken`, `manifest`). `{ "env": "..." }` resolver. `manifest.auth.{session,contract,on}`, `manifest.app.cache`, `manifest.realtime.{ws,sse}`. |
+| **C** | Declarative custom-action declarations. Manifest-declarable flavors with `extends` + shared dark-variant derivation. |
+| **D** | `policies` schema + resolver + route guard + component `visible` integration (and `guard.condition` deleted). `i18n` schema + `{ "t": "..." }` ref + locale detection + persistence. |
+| **E** | `clients` block with per-resource selection + `registerClient` factory. `subApps` block with sub-manifest mounting, theme/i18n/policy inheritance, child-wins client collision, client-only SSR fallback. |
+| **F** | SSR convention routes, nested layouts (replacing single `page.layout`), parallel route slots on built-in layouts, SSR middleware as workflows with `SSRMiddlewareContext`. |
+| **G** | WS/SSE event → workflow mapping, per-resource invalidation rules, per-resource optimistic updates with snapshot-then-restore rollback, form submission lifecycle workflows. |
+| **H** | `manifest.toast`, `manifest.analytics` + `track` action + `registerAnalyticsProvider`, `manifest.push`, `manifest.theme.editor.persist`, and full OAuth/MFA/WebAuthn config (with top-level `auth.providers` map and screen-level name refs). |
+
+Spec at [`docs/specs/completed/manifest-only.md`](./specs/completed/manifest-only.md).
+
 ## Now — Active Specs
 
-**Manifest-only completion (`manifest-only.md`) — In progress:**
-
-The drive to 100% manifest capability. Eight tracks, file-disjoint, parallel branches:
-
-| Track | Goal |
-|---|---|
-| **A** | Remove hardcoded behavior — auth path inference, layout fallback, magic `"custom"` type, side-effect component/workflow registration, hardcoded loading divs |
-| **B** | Collapse `SnapshotConfig` into the manifest. Bootstrap shrinks to four fields. Adds `{ "env": "..." }` resolver. |
-| **C** | Declarative registries — components, workflow actions, flavors, custom-component schemas, all declarable from the manifest with code as one source. |
-| **D** | Activate `policies` and `i18n` — both currently exist as schema placeholders with no runtime. |
-| **E** | Multi-app — `clients` block (per-resource backend selection) and `subApps` block (sub-manifest mounting). |
-| **F** | Manifest-driven SSR + routing — close the gaps so nested layouts, parallel routes, error/loading/404/500/offline, and middleware are all manifest-declarable. |
-| **G** | Realtime + cache + optimistic — WS/SSE event → workflow mapping, per-resource invalidation/optimistic, form submission lifecycle. |
-| **H** | App-level services — toast, analytics, push notifications, token editor persistence, OAuth/MFA/WebAuthn full config. |
-
-Spec at [`docs/specs/manifest-only.md`](./specs/manifest-only.md).
+_Nothing active. The manifest-only completion was the drive to 100% manifest capability
+and has shipped. Next spec will be picked from **Later** below when the queue is ready._
 
 ## Later — Needs Its Own Spec
 

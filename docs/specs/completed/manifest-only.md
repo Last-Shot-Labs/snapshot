@@ -1,44 +1,47 @@
 # Manifest-Only Completion — Canonical Spec
 
-> **Status**
+> **Status: Done 2026-04-10.** All 35 phases landed on `main`. C1 and C4 were
+> satisfied by A3 and A4 respectively and do not have their own commits. Three
+> follow-up commits after F3 handled workflow refactoring, ManifestApp test
+> updates for `pushState`, and happy-dom route test fixes.
 >
 > | Phase | Title | Status | Track |
 > | --- | --- | --- | --- |
-> | A1 | Remove auth path inference (route ids only) | Not started | A — Hardcoded removal |
-> | A2 | Remove layout fallback (manifest required) | Not started | A — Hardcoded removal |
-> | A3 | Replace `"custom"` magic with declared schema | Not started | A — Hardcoded removal |
-> | A4 | Replace side-effect registration with explicit boot | Not started | A — Hardcoded removal |
-> | A5 | Move hardcoded loading/error UI into manifest | Not started | A — Hardcoded removal |
-> | B1 | `{ "env": "..." }` resolver | Not started | B — Config collapse |
-> | B2 | `manifest.auth.session` (mode/storage/key) | Not started | B — Config collapse |
-> | B3 | `manifest.app.cache` (stale/gc/retry) | Not started | B — Config collapse |
-> | B4 | `manifest.auth.contract` + redirects + handlers | Not started | B — Config collapse |
-> | B5 | `manifest.realtime.{ws,sse}` (replaces `config.ws`/`config.sse`) | Not started | B — Config collapse |
-> | B6 | Collapse `SnapshotConfig` to four fields | Not started | B — Config collapse |
-> | C1 | Manifest-side custom-component declarations | Not started | C — Declarative registries |
-> | C2 | Manifest-side custom-action declarations | Not started | C — Declarative registries |
-> | C3 | Manifest-declarable flavors (no `defineFlavor()` required) | Not started | C — Declarative registries |
-> | C4 | Boot-time registry construction (no module side-effects) | Not started | C — Declarative registries |
-> | D1 | `policies` schema, resolver, route guard integration | Not started | D — Policies + i18n |
-> | D2 | Component `visible` policy support | Not started | D — Policies + i18n |
-> | D3 | `i18n` schema, resolver, `{ "t": "..." }` ref | Not started | D — Policies + i18n |
-> | D4 | i18n locale detection + persistence | Not started | D — Policies + i18n |
-> | E1 | `clients` block + per-resource client selection | Not started | E — Multi-app |
-> | E2 | `subApps` block + sub-manifest mounting | Not started | E — Multi-app |
-> | E3 | Sub-manifest theme/i18n/policy inheritance | Not started | E — Multi-app |
-> | F1 | Manifest convention routes (loading/error/notFound/offline) | Not started | F — Manifest SSR/routing |
-> | F2 | Nested layout declarations in manifest routes | Not started | F — Manifest SSR/routing |
-> | F3 | Parallel route slots in manifest | Not started | F — Manifest SSR/routing |
-> | F4 | SSR middleware as manifest workflows | Not started | F — Manifest SSR/routing |
-> | G1 | WS/SSE event → workflow mapping | Not started | G — Realtime + cache |
-> | G2 | Per-resource invalidation rules | Not started | G — Realtime + cache |
-> | G3 | Per-resource optimistic update rules | Not started | G — Realtime + cache |
-> | G4 | Form submission lifecycle workflows | Not started | G — Realtime + cache |
-> | H1 | `manifest.toast` config | Not started | H — App-level services |
-> | H2 | `manifest.analytics` + `track` action | Not started | H — App-level services |
-> | H3 | `manifest.push` (VAPID, SW path) | Not started | H — App-level services |
-> | H4 | `manifest.theme.editor.persist` | Not started | H — App-level services |
-> | H5 | OAuth/MFA/WebAuthn full config in `manifest.auth` | Not started | H — App-level services |
+> | A1 | Remove auth path inference (route ids only) | Done | A — Hardcoded removal |
+> | A2 | Remove layout fallback (manifest required) | Done | A — Hardcoded removal |
+> | A3 | Replace `"custom"` magic with declared schema | Done | A — Hardcoded removal |
+> | A4 | Replace side-effect registration with explicit boot | Done | A — Hardcoded removal |
+> | A5 | Move hardcoded loading/error UI into manifest | Done | A — Hardcoded removal |
+> | B1 | `{ "env": "..." }` resolver | Done | B — Config collapse |
+> | B2 | `manifest.auth.session` (mode/storage/key) | Done | B — Config collapse |
+> | B3 | `manifest.app.cache` (stale/gc/retry) | Done | B — Config collapse |
+> | B4 | `manifest.auth.contract` + redirects + handlers | Done | B — Config collapse |
+> | B5 | `manifest.realtime.{ws,sse}` (replaces `config.ws`/`config.sse`) | Done | B — Config collapse |
+> | B6 | Collapse `SnapshotConfig` to four fields | Done | B — Config collapse |
+> | C1 | Manifest-side custom-component declarations | Done (via A3) | C — Declarative registries |
+> | C2 | Manifest-side custom-action declarations | Done | C — Declarative registries |
+> | C3 | Manifest-declarable flavors (no `defineFlavor()` required) | Done | C — Declarative registries |
+> | C4 | Boot-time registry construction (no module side-effects) | Done (via A4) | C — Declarative registries |
+> | D1 | `policies` schema, resolver, route guard integration | Done | D — Policies + i18n |
+> | D2 | Component `visible` policy support | Done | D — Policies + i18n |
+> | D3 | `i18n` schema, resolver, `{ "t": "..." }` ref | Done | D — Policies + i18n |
+> | D4 | i18n locale detection + persistence | Done | D — Policies + i18n |
+> | E1 | `clients` block + per-resource client selection | Done | E — Multi-app |
+> | E2 | `subApps` block + sub-manifest mounting | Done | E — Multi-app |
+> | E3 | Sub-manifest theme/i18n/policy inheritance | Done | E — Multi-app |
+> | F1 | Manifest convention routes (loading/error/notFound/offline) | Done | F — Manifest SSR/routing |
+> | F2 | Nested layout declarations in manifest routes | Done | F — Manifest SSR/routing |
+> | F3 | Parallel route slots in manifest | Done | F — Manifest SSR/routing |
+> | F4 | SSR middleware as manifest workflows | Done | F — Manifest SSR/routing |
+> | G1 | WS/SSE event → workflow mapping | Done | G — Realtime + cache |
+> | G2 | Per-resource invalidation rules | Done | G — Realtime + cache |
+> | G3 | Per-resource optimistic update rules | Done | G — Realtime + cache |
+> | G4 | Form submission lifecycle workflows | Done | G — Realtime + cache |
+> | H1 | `manifest.toast` config | Done | H — App-level services |
+> | H2 | `manifest.analytics` + `track` action | Done | H — App-level services |
+> | H3 | `manifest.push` (VAPID, SW path) | Done | H — App-level services |
+> | H4 | `manifest.theme.editor.persist` | Done | H — App-level services |
+> | H5 | OAuth/MFA/WebAuthn full config in `manifest.auth` | Done | H — App-level services |
 
 ---
 
