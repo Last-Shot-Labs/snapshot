@@ -164,6 +164,18 @@ export const autoFormConfigSchema = z
     onSuccess: z.union([actionSchema, z.array(actionSchema)]).optional(),
     /** Actions to execute when submission fails. */
     onError: z.union([actionSchema, z.array(actionSchema)]).optional(),
+    /** Workflow lifecycle hooks for submit execution. */
+    on: z
+      .object({
+        /** Runs before submit; may return a halt signal to cancel submission. */
+        beforeSubmit: z.string().optional(),
+        /** Runs after a successful submit. */
+        afterSubmit: z.string().optional(),
+        /** Runs when submit fails. */
+        error: z.string().optional(),
+      })
+      .strict()
+      .optional(),
     /** Inline style overrides. */
     style: z.record(z.union([z.string(), z.number()])).optional(),
     /** Additional CSS class name. */

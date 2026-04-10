@@ -10,11 +10,15 @@ import { useComponentData } from "../../_base/use-component-data";
 import { Icon } from "../../../icons/index";
 import {
   buildRequestUrl,
+  isResourceRef,
   resolveEndpointTarget,
   type EndpointTarget,
   type ResourceMap,
 } from "../../../manifest/resources";
-import { useManifestRuntime } from "../../../manifest/runtime";
+import {
+  useManifestResourceCache,
+  useManifestRuntime,
+} from "../../../manifest/runtime";
 import {
   getButtonStyle,
   BUTTON_INTERACTIVE_CSS,
@@ -31,6 +35,18 @@ const GAP_MAP: Record<string, string> = {
   md: "var(--sn-spacing-md, 1rem)",
   lg: "var(--sn-spacing-lg, 1.5rem)",
 };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isHaltSignal(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return value["halt"] === true;
+}
 
 function toFieldOptions(data: unknown) {
   if (Array.isArray(data)) {
@@ -526,8 +542,10 @@ async function submitToApi(
  * field visibility, and section grouping.
  *
  * Supports client-side validation, submission to an API endpoint,
- * and action chaining on success/error. Publishes form state to
- * the page context when an `id` is configured.
+ * manifest-aware resource mutation (invalidation + optimistic handling),
+ * workflow lifecycle hooks (`beforeSubmit`, `afterSubmit`, `error`),
+ * and action chaining on success/error. Publishes form state to the
+ * page context when an `id` is configured.
  *
  * @param props - Component props containing the form config
  */
@@ -537,6 +555,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
   const publish = usePublish(config.id);
   const visible = useSubscribe(config.visible ?? true);
   const runtime = useManifestRuntime();
+  const resourceCache = useManifestResourceCache();
   const initialData = useComponentData(config.data ?? "");
 
   const allFields = resolveFields(config);
@@ -554,22 +573,70 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
         );
       }
 
+      const runWorkflow = async (
+        workflow: string,
+        context: Record<string, unknown>,
+      ): Promise<unknown> =>
+        (
+          executeAction as unknown as (
+            action: { type: "run-workflow"; workflow: string },
+            context?: Record<string, unknown>,
+          ) => Promise<unknown>
+        )({ type: "run-workflow", workflow }, context);
+
       try {
-        const result = await submitToApi(
-          api,
-          config.submit,
-          runtime?.resources,
-          method,
-          values,
-        );
+        if (config.on?.beforeSubmit) {
+          const beforeSubmitResult = await runWorkflow(config.on.beforeSubmit, {
+            form: {
+              values,
+            },
+          });
+          if (isHaltSignal(beforeSubmitResult)) {
+            return;
+          }
+        }
+
+        const result =
+          resourceCache && isResourceRef(config.submit)
+            ? await resourceCache.mutateTarget(config.submit, {
+                method,
+                payload: values,
+              })
+            : await submitToApi(
+                api,
+                config.submit,
+                runtime?.resources,
+                method,
+                values,
+              );
 
         if (config.onSuccess) {
           await executeAction(config.onSuccess, { result });
         }
+        if (config.on?.afterSubmit) {
+          await runWorkflow(config.on.afterSubmit, {
+            form: {
+              values,
+            },
+            result,
+          });
+        }
       } catch (error) {
+        let handled = false;
         if (config.onError) {
           await executeAction(config.onError, { error });
-        } else {
+          handled = true;
+        }
+        if (config.on?.error) {
+          await runWorkflow(config.on.error, {
+            form: {
+              values,
+            },
+            error,
+          });
+          handled = true;
+        }
+        if (!handled) {
           throw error;
         }
       }
@@ -579,8 +646,12 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
       config.submit,
       config.onSuccess,
       config.onError,
+      config.on?.afterSubmit,
+      config.on?.beforeSubmit,
+      config.on?.error,
       method,
       executeAction,
+      resourceCache,
       runtime?.resources,
     ],
   );
