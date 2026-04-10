@@ -1848,7 +1848,7 @@ export function ManifestAuthScreen({
  *
  * @param apiUrl - Backend API base URL
  * @param manifest - Compiled manifest, used for auth contract overrides
- * @returns Runtime auth configuration derived from bootstrap settings
+ * @returns Runtime auth configuration derived from manifest auth settings
  */
 export function createManifestAuthRuntimeConfig(
   apiUrl: string,

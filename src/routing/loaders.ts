@@ -66,7 +66,7 @@ export function createLoaders(
       if (!config.loginPath) {
         warnOnce(
           "protectedBeforeLoad:no-loginPath",
-          "[snapshot] protectedBeforeLoad: no loginPath configured. Set loginPath in createSnapshot config.",
+          "[snapshot] protectedBeforeLoad: no login route configured. Add an auth screen route with id \"login\" or a manifest auth redirect.",
         );
         return;
       }
@@ -82,7 +82,7 @@ export function createLoaders(
       if (!config.homePath) {
         warnOnce(
           "guestBeforeLoad:no-homePath",
-          "[snapshot] guestBeforeLoad: no homePath configured. Set homePath in createSnapshot config.",
+          "[snapshot] guestBeforeLoad: no home route configured. Set manifest.app.home or add a fallback route.",
         );
         return;
       }

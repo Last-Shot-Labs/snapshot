@@ -91,7 +91,6 @@ describe("useLogout", () => {
       auth: "cookie",
       staleTime: 0,
       mfaPath: undefined,
-      onUnauthenticated: vi.fn(),
       onLogoutSuccess: vi.fn(),
     };
     mockState.mockUseMutation.mockImplementation((cfg: unknown) => {

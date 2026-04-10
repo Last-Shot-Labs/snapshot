@@ -25,7 +25,6 @@ const AUTH_QUERY_KEY = ["auth", "me"] as const;
 interface AuthHooksConfig {
   auth?: "cookie" | "token";
   staleTime?: number;
-  onUnauthenticated?: () => void;
   loginPath?: string;
   homePath?: string;
   mfaPath?: string;
