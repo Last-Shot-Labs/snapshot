@@ -8,7 +8,9 @@ export {
   headingConfigSchema,
   buttonConfigSchema,
   selectConfigSchema,
-  customComponentConfigSchema,
+  componentsConfigSchema,
+  customComponentDeclarationSchema,
+  customComponentPropSchema,
   componentConfigSchema,
   appConfigSchema,
   navItemSchema,
@@ -114,11 +116,7 @@ export type {
   HeadingConfig,
   ButtonConfig,
   SelectConfig,
-  CustomComponentConfig,
   ComponentConfig,
   ManifestAppProps,
   ConfigDrivenComponent,
 } from "./types";
-
-// Structural component side-effect registration
-import "./structural";

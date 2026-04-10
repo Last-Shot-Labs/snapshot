@@ -8,10 +8,7 @@
 
 import { useState, useId, type CSSProperties } from "react";
 import { useSubscribe, usePublish } from "../context/index";
-import {
-  registerComponent,
-  getRegisteredComponent,
-} from "./component-registry";
+import { getRegisteredComponent } from "./component-registry";
 import { useActionExecutor } from "../actions/executor";
 import { useResponsiveValue } from "../hooks/use-breakpoint";
 import {
@@ -333,7 +330,15 @@ function Select({ config }: { config: Record<string, unknown> }) {
 
 // ── Register all structural components ──────────────────────────────────────
 
-registerComponent("row", Row);
-registerComponent("heading", Heading);
-registerComponent("button", Button);
-registerComponent("select", Select);
+/**
+ * Built-in structural component implementations.
+ *
+ * The boot layer registers these components explicitly so importing the UI
+ * package remains side-effect free.
+ */
+export const STRUCTURAL_COMPONENTS = {
+  row: Row,
+  heading: Heading,
+  button: Button,
+  select: Select,
+} as const;

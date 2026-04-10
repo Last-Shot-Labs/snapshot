@@ -98,8 +98,19 @@ registerComponent(
   },
 );
 
+registerComponentSchema(
+  "crash-probe",
+  z.object({
+    type: z.literal("crash-probe"),
+  }),
+);
+registerComponent("crash-probe", function CrashProbe() {
+  throw new Error("boom");
+});
+
 const minimalManifest: ManifestConfig = {
   app: {
+    shell: "full-width",
     title: "Snapshot App",
     home: "/",
   },
@@ -141,6 +152,10 @@ describe("ManifestApp", () => {
     if (el) el.remove();
     window.history.replaceState({}, "", "/");
     global.fetch = originalFetch;
+    Object.defineProperty(window.navigator, "onLine", {
+      configurable: true,
+      value: true,
+    });
     vi.restoreAllMocks();
   });
 
@@ -176,6 +191,7 @@ describe("ManifestApp", () => {
 
     const manifest: ManifestConfig = {
       app: {
+        shell: "full-width",
         home: "/",
       },
       routes: [
@@ -262,6 +278,64 @@ describe("ManifestApp", () => {
     await waitFor(() => {
       expect(screen.getByText("About Page")).toBeDefined();
     });
+  });
+
+  it("defaults to full-width even when navigation mode is top-nav", () => {
+    const manifest: ManifestConfig = {
+      navigation: {
+        mode: "top-nav",
+        items: [
+          { label: "Home", path: "/" },
+          { label: "About", path: "/about" },
+        ],
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Home Page" }],
+        },
+        {
+          id: "about",
+          path: "/about",
+          content: [{ type: "heading", text: "About Page" }],
+        },
+      ],
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+    expect(screen.getByText("Home Page")).toBeDefined();
+    expect(screen.queryByRole("button", { name: "About" })).toBeNull();
+  });
+
+  it("uses manifest.app.shell when explicitly configured", () => {
+    const manifest: ManifestConfig = {
+      app: {
+        shell: "top-nav",
+      },
+      navigation: {
+        mode: "sidebar",
+        items: [
+          { label: "Home", path: "/" },
+          { label: "About", path: "/about" },
+        ],
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Home Page" }],
+        },
+        {
+          id: "about",
+          path: "/about",
+          content: [{ type: "heading", text: "About Page" }],
+        },
+      ],
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+    expect(screen.getByRole("button", { name: "About" })).toBeDefined();
   });
 
   it("redirects guarded routes to the configured fallback", async () => {
@@ -381,6 +455,13 @@ describe("ManifestApp", () => {
     ) as typeof fetch;
 
     const manifest: ManifestConfig = {
+      app: {
+        shell: "full-width",
+        loading: {
+          type: "spinner",
+          label: "Please wait",
+        },
+      },
       resources: {
         me: {
           method: "GET",
@@ -398,7 +479,7 @@ describe("ManifestApp", () => {
     };
 
     render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
-    expect(screen.getByText("Loading...")).toBeDefined();
+    expect(screen.getByText("Please wait")).toBeDefined();
 
     resolveFetch(
       new Response(JSON.stringify({ id: 1, name: "Ada" }), {
@@ -425,6 +506,13 @@ describe("ManifestApp", () => {
     }) as typeof fetch;
 
     const manifest: ManifestConfig = {
+      app: {
+        shell: "full-width",
+        loading: {
+          type: "spinner",
+          label: "Please wait",
+        },
+      },
       resources: {
         user: {
           method: "GET",
@@ -442,7 +530,7 @@ describe("ManifestApp", () => {
     };
 
     render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
-    expect(screen.getByText("Loading...")).toBeDefined();
+    expect(screen.getByText("Please wait")).toBeDefined();
     expect(requestedUrl).toContain("/api/users/42");
 
     resolveFetch(
@@ -639,6 +727,7 @@ describe("ManifestApp", () => {
 
     const manifest: ManifestConfig = {
       app: {
+        shell: "full-width",
         home: "/private",
       },
       auth: {
@@ -716,6 +805,62 @@ describe("ManifestApp", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Login Page")).toBeDefined();
+    });
+  });
+
+  it("renders the configured error feedback when route rendering fails", async () => {
+    const manifest: ManifestConfig = {
+      app: {
+        shell: "full-width",
+        error: {
+          type: "error-page",
+          title: "Manifest error",
+          showRetry: false,
+        },
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "crash-probe" }],
+        },
+      ],
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Manifest error")).toBeDefined();
+    });
+  });
+
+  it("renders the configured offline feedback when the browser is offline", async () => {
+    Object.defineProperty(window.navigator, "onLine", {
+      configurable: true,
+      value: false,
+    });
+
+    const manifest: ManifestConfig = {
+      app: {
+        shell: "full-width",
+        offline: {
+          type: "offline-banner",
+          title: "No connection",
+        },
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Home Page" }],
+        },
+      ],
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("No connection")).toBeDefined();
     });
   });
 });

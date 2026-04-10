@@ -183,7 +183,9 @@ export {
   headingConfigSchema,
   buttonConfigSchema,
   selectConfigSchema,
-  customComponentConfigSchema,
+  componentsConfigSchema,
+  customComponentDeclarationSchema,
+  customComponentPropSchema,
   fromRefSchema,
 } from "./ui/manifest/index";
 export type {
@@ -218,7 +220,6 @@ export type {
   HeadingConfig,
   ButtonConfig,
   SelectConfig,
-  CustomComponentConfig,
   ComponentConfig,
   ManifestAppProps,
   ConfigDrivenComponent,
@@ -619,9 +620,6 @@ export {
   snapshotImageSchema,
 } from "./ui/components/media/image/index";
 export type { SnapshotImageConfig } from "./ui/components/media/image/index";
-
-// Register all built-in components
-import "./ui/components/register";
 
 // Drag and Drop
 export {

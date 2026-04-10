@@ -97,7 +97,7 @@ describe("entity page SSR rendering", () => {
   it("createManifestRenderer.renderPage() augments the manifest and renders HTML", async () => {
     const renderer = createManifestRenderer({
       manifest: {
-        app: { title: "Snapshot App", home: "/home" },
+        app: { shell: "full-width", title: "Snapshot App", home: "/home" },
         navigation: {
           mode: "sidebar",
           items: [{ label: "Home", path: "/home" }],

@@ -1,5 +1,6 @@
 import type { SafeParseReturnType, ZodError } from "zod";
-import { manifestConfigSchema } from "./schema";
+import { getMissingAuthScreenIds } from "./auth-routes";
+import { manifestConfigSchema, withManifestCustomComponents } from "./schema";
 import type {
   CompiledManifest,
   CompiledRoute,
@@ -19,6 +20,14 @@ function toPageConfig(route: RouteConfig): PageConfig {
 }
 
 function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
+  const missingAuthScreens = getMissingAuthScreenIds(manifest);
+  if (missingAuthScreens.length > 0) {
+    const screen = missingAuthScreens[0];
+    throw new Error(
+      `Auth screen "${screen}" is enabled but no route has id "${screen}". Add { "id": "${screen}", "path": "/your-path", ... } to routes.`,
+    );
+  }
+
   const routes: CompiledRoute[] = manifest.routes.map((route) => ({
     id: route.id,
     path: route.path,
@@ -38,10 +47,13 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
   return {
     raw: manifest,
     app: {
-      shell: manifest.app?.shell,
+      shell: manifest.app?.shell ?? "full-width",
       title: manifest.app?.title,
       home: manifest.app?.home ?? routes[0]?.path,
+      loading: manifest.app?.loading,
+      error: manifest.app?.error,
       notFound: manifest.app?.notFound,
+      offline: manifest.app?.offline,
     },
     theme: manifest.theme,
     state: manifest.state,
@@ -56,26 +68,60 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
   };
 }
 
+/**
+ * Define a manifest without compiling it.
+ *
+ * @param manifest - Manifest object to return unchanged
+ * @returns The same manifest object, typed as `ManifestConfig`
+ */
 export function defineManifest<TManifest extends ManifestConfig>(
   manifest: TManifest,
 ): TManifest {
   return manifest;
 }
 
+/**
+ * Parse an unknown value into a validated manifest.
+ *
+ * @param manifest - Unknown input value
+ * @returns The parsed manifest
+ */
 export function parseManifest(manifest: unknown): ManifestConfig {
-  return manifestConfigSchema.parse(manifest);
+  return withManifestCustomComponents(manifest, () =>
+    manifestConfigSchema.parse(manifest),
+  );
 }
 
+/**
+ * Parse an unknown value into a validated manifest without throwing.
+ *
+ * @param manifest - Unknown input value
+ * @returns A Zod safe-parse result for the manifest
+ */
 export function safeParseManifest(
   manifest: unknown,
 ): SafeParseReturnType<unknown, ManifestConfig> {
-  return manifestConfigSchema.safeParse(manifest);
+  return withManifestCustomComponents(manifest, () =>
+    manifestConfigSchema.safeParse(manifest),
+  );
 }
 
+/**
+ * Parse and compile a manifest into the runtime shape.
+ *
+ * @param manifest - Manifest JSON or object
+ * @returns The compiled manifest runtime model
+ */
 export function compileManifest(manifest: unknown): CompiledManifest {
   return buildCompiledManifest(parseManifest(manifest));
 }
 
+/**
+ * Parse and compile a manifest without throwing.
+ *
+ * @param manifest - Manifest JSON or object
+ * @returns The parsed manifest and compiled runtime model, or validation errors
+ */
 export function safeCompileManifest(manifest: unknown):
   | { success: true; manifest: ManifestConfig; compiled: CompiledManifest }
   | {

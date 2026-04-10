@@ -10,12 +10,15 @@ import {
   headingConfigSchema,
   buttonConfigSchema,
   selectConfigSchema,
-  customComponentConfigSchema,
+  componentsConfigSchema,
+  customComponentDeclarationSchema,
+  customComponentPropSchema,
   componentConfigSchema,
   navItemSchema,
   navigationConfigSchema,
   authScreenConfigSchema,
 } from "../schema";
+import { safeParseManifest } from "../compiler";
 
 describe("manifestConfigSchema", () => {
   it("validates a full valid manifest", () => {
@@ -178,6 +181,16 @@ describe("manifestConfigSchema", () => {
         },
       },
       routes: [
+        {
+          id: "login",
+          path: "/login",
+          content: [{ type: "heading", text: "Login" }],
+        },
+        {
+          id: "register",
+          path: "/register",
+          content: [{ type: "heading", text: "Register" }],
+        },
         {
           id: "dashboard",
           path: "/dashboard",
@@ -445,11 +458,39 @@ describe("componentConfigSchema", () => {
     }
   });
 
-  it("allows custom type without registry lookup", () => {
+  it("rejects undeclared custom component types", () => {
     const result = componentConfigSchema.safeParse({
-      type: "custom",
-      component: "MyWidget",
+      type: "order-timeline",
     });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts declared custom component types from the manifest", () => {
+    const result = safeParseManifest({
+      components: {
+        custom: {
+          "order-timeline": {
+            props: {
+              orderId: { type: "string", required: true },
+              highlight: { type: "boolean" },
+            },
+          },
+        },
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [
+            {
+              type: "order-timeline",
+              orderId: "abc-123",
+            },
+          ],
+        },
+      ],
+    });
+
     expect(result.success).toBe(true);
   });
 });
@@ -505,14 +546,36 @@ describe("selectConfigSchema", () => {
   });
 });
 
-describe("customComponentConfigSchema", () => {
-  it("validates custom component with name", () => {
-    const result = customComponentConfigSchema.safeParse({
-      type: "custom",
-      component: "MyWidget",
-      props: { currency: "EUR" },
+describe("componentsConfigSchema", () => {
+  it("validates declared custom component schemas", () => {
+    const result = componentsConfigSchema.safeParse({
+      custom: {
+        "order-timeline": {
+          props: {
+            orderId: { type: "string", required: true },
+            highlight: { type: "boolean", default: false },
+          },
+        },
+      },
     });
+
     expect(result.success).toBe(true);
+  });
+
+  it("validates custom prop declarations", () => {
+    expect(
+      customComponentPropSchema.safeParse({
+        type: "string",
+        required: true,
+      }).success,
+    ).toBe(true);
+    expect(
+      customComponentDeclarationSchema.safeParse({
+        props: {
+          title: { type: "string", default: "Untitled" },
+        },
+      }).success,
+    ).toBe(true);
   });
 });
 

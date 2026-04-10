@@ -12,15 +12,10 @@ import type {
   headingConfigSchema,
   buttonConfigSchema,
   selectConfigSchema,
-  customComponentConfigSchema,
 } from "./schema";
 import type { FromRef } from "../context/types";
 import type { Responsive, ThemeConfig } from "../tokens/types";
-import type {
-  EndpointTarget,
-  ResourceConfig,
-  ResourceMap,
-} from "./resources";
+import type { EndpointTarget, ResourceConfig, ResourceMap } from "./resources";
 import type { WorkflowMap } from "../workflows/types";
 
 export type ManifestConfig = z.infer<typeof manifestConfigSchema>;
@@ -37,7 +32,6 @@ export type BaseComponentConfig = z.infer<typeof baseComponentConfigSchema>;
 export type HeadingConfig = z.infer<typeof headingConfigSchema>;
 export type ButtonConfig = z.infer<typeof buttonConfigSchema>;
 export type SelectConfig = z.infer<typeof selectConfigSchema>;
-export type CustomComponentConfig = z.infer<typeof customComponentConfigSchema>;
 
 export interface NavItem {
   label: string;
@@ -65,7 +59,6 @@ export type ComponentConfig =
   | HeadingConfig
   | ButtonConfig
   | SelectConfig
-  | CustomComponentConfig
   | (BaseComponentConfig & Record<string, unknown>);
 
 export interface CompiledRoute {

@@ -385,38 +385,52 @@ registerComponent("stat-card", function MyStatCard({ config }) {
 The manifest stays unchanged. Only the rendering changes. A dev warning is emitted when
 overriding an existing registration.
 
-## Custom Components (Escape Hatch)
+## Custom Components (Manifest Declaration)
 
-For components that have no config-driven equivalent, use the `custom` type to reference
-a React component by name:
+Custom components are still the escape hatch, but the manifest now declares their
+props schema so the validator can understand them before the runtime loads any code.
+
+Declare the custom type in the manifest:
+
+```json
+{
+  "components": {
+    "custom": {
+      "my-chart": {
+        "props": {
+          "chartType": { "type": "string", "required": true },
+          "height": { "type": "number", "required": false, "default": 300 }
+        }
+      }
+    }
+  }
+}
+```
+
+Reference the custom type directly in page content:
+
+```json
+{
+  "type": "my-chart",
+  "chartType": "bar",
+  "height": 300
+}
+```
+
+Register the implementation in code:
 
 ```tsx
-// Register your component
 import { registerComponent } from "@lastshotlabs/snapshot/ui";
 
 function MyChart({ config }: { config: Record<string, unknown> }) {
   return <canvas data-chart-type={config.chartType as string} />;
 }
 
-registerComponent("MyChart", MyChart);
+registerComponent("my-chart", MyChart);
 ```
 
-Reference in the manifest:
-
-```json
-{
-  "type": "custom",
-  "component": "MyChart",
-  "props": {
-    "chartType": "bar",
-    "height": 300
-  }
-}
-```
-
-The `props` object is merged into the config and forwarded to your component. Custom
-components can use `useSubscribe`, `usePublish`, `useActionExecutor`, and all other
-context hooks.
+The manifest declaration is what makes the component valid. The runtime
+registration only supplies the React implementation.
 
 ## Responsive Values
 

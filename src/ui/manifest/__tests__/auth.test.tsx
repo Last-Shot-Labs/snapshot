@@ -58,6 +58,7 @@ function installPasskeyMocks() {
 function buildAuthManifest(): ManifestConfig {
   return {
     app: {
+      shell: "full-width",
       home: "/dashboard",
     },
     auth: {
@@ -347,6 +348,62 @@ describe("Manifest auth runtime", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Dashboard")).toBeDefined();
+    });
+  });
+
+  it("resolves auth screens from route ids even when the route path is custom", async () => {
+    window.history.replaceState({}, "", "/sign-in");
+
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.endsWith("/auth/me")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    const manifest = buildAuthManifest();
+    manifest.app = {
+      shell: "full-width",
+      home: "/sign-in",
+    };
+    manifest.auth = {
+      ...manifest.auth!,
+      screens: ["login", "register"],
+      screenOptions: {
+        login: {
+          links: [{ label: "Create an account", screen: "register" }],
+        },
+      },
+    };
+    manifest.routes = [
+      {
+        id: "login",
+        path: "/sign-in",
+        content: [{ type: "heading", text: "placeholder login" }],
+      },
+      {
+        id: "register",
+        path: "/create-account",
+        content: [{ type: "heading", text: "placeholder register" }],
+      },
+    ];
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+
+    expect(screen.getByLabelText("Email")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "Create an account" }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Name")).toBeDefined();
     });
   });
 

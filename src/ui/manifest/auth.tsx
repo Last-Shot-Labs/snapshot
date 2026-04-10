@@ -16,19 +16,12 @@ import type {
   SnapshotInstance,
   VerifyEmailBody,
 } from "../../types";
+import { getAuthScreenPath, type AuthScreen } from "./auth-routes";
 import { isPasskeySupported, startPasskeyAuthentication } from "./passkey";
 import type { CompiledManifest, CompiledRoute } from "./types";
 
 const AUTH_QUERY_KEY = ["auth", "me"] as const;
 const MANIFEST_AUTH_MFA_STATE_KEY = "__manifestAuth.pendingMfaChallenge";
-
-export type AuthScreen =
-  | "login"
-  | "register"
-  | "forgot-password"
-  | "reset-password"
-  | "verify-email"
-  | "mfa";
 
 interface AuthProviderConfig {
   provider: OAuthProvider;
@@ -59,27 +52,15 @@ interface ManifestAuthScreenProps {
   navigate: (to: string, options?: { replace?: boolean }) => void;
 }
 
-function inferAuthScreenPath(
-  manifest: CompiledManifest,
-  screen: AuthScreen,
-): string | undefined {
-  const routeById = manifest.routes.find((route) => route.id === screen);
-  if (routeById) {
-    return routeById.path;
-  }
-
-  const candidates: Record<AuthScreen, string[]> = {
-    login: ["/login", "/auth/login"],
-    register: ["/register", "/auth/register"],
-    "forgot-password": ["/forgot-password", "/auth/forgot-password"],
-    "reset-password": ["/reset-password", "/auth/reset-password"],
-    "verify-email": ["/verify-email", "/auth/verify-email"],
-    mfa: ["/mfa", "/auth/mfa"],
-  };
-
-  return candidates[screen].find((path) => manifest.routeMap[path] != null);
-}
-
+/**
+ * Resolve the auth screen id for the current route.
+ *
+ * Auth screens are addressed by route id only; the route path is irrelevant.
+ *
+ * @param manifest - Compiled manifest
+ * @param route - Active route
+ * @returns The matching auth screen, or null when the route is not an auth screen
+ */
 export function resolveAuthScreen(
   manifest: CompiledManifest,
   route: CompiledRoute | null,
@@ -90,11 +71,6 @@ export function resolveAuthScreen(
 
   for (const screen of manifest.auth.screens) {
     if (route.id === screen) {
-      return screen;
-    }
-
-    const inferredPath = inferAuthScreenPath(manifest, screen);
-    if (inferredPath && route.path === inferredPath) {
       return screen;
     }
   }
@@ -141,7 +117,7 @@ function resolveConfiguredLinks(
     .map((link) => {
       const path =
         link.path ??
-        (link.screen ? inferAuthScreenPath(manifest, link.screen) : undefined);
+        (link.screen ? getAuthScreenPath(manifest, link.screen) : undefined);
 
       if (!path) {
         return null;
@@ -269,7 +245,9 @@ function resolveScreenProviders(
     return [];
   }
 
-  return (providers ?? manifest.auth?.providers ?? []).map(normalizeProviderConfig);
+  return (providers ?? manifest.auth?.providers ?? []).map(
+    normalizeProviderConfig,
+  );
 }
 
 function resolveProviderMode(
@@ -359,12 +337,10 @@ function useGuestRouteRedirect(
   screen: AuthScreen,
   navigate: (to: string, options?: { replace?: boolean }) => void,
 ): void {
-  const authState = useStateValue("auth", { scope: "app" }) as
-    | {
-        isAuthenticated?: boolean;
-        isLoading?: boolean;
-      }
-    | null;
+  const authState = useStateValue("auth", { scope: "app" }) as {
+    isAuthenticated?: boolean;
+    isLoading?: boolean;
+  } | null;
 
   useEffect(() => {
     if (authState?.isLoading) {
@@ -386,7 +362,13 @@ function useGuestRouteRedirect(
         { replace: true },
       );
     }
-  }, [authState?.isAuthenticated, authState?.isLoading, manifest, navigate, screen]);
+  }, [
+    authState?.isAuthenticated,
+    authState?.isLoading,
+    manifest,
+    navigate,
+    screen,
+  ]);
 }
 
 function useApplyAuthenticatedUser(manifest: CompiledManifest) {
@@ -701,7 +683,9 @@ function LinksRow({
 
 function renderScreenSections(
   sections: Array<"form" | "providers" | "passkey" | "links">,
-  blocks: Partial<Record<"form" | "providers" | "passkey" | "links", React.ReactNode>>,
+  blocks: Partial<
+    Record<"form" | "providers" | "passkey" | "links", React.ReactNode>
+  >,
 ) {
   return sections.map((section) => {
     const content = blocks[section];
@@ -815,10 +799,10 @@ function LoginScreen({
   const search = useLocationSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const loginPath = inferAuthScreenPath(manifest, "login");
-  const registerPath = inferAuthScreenPath(manifest, "register");
-  const forgotPasswordPath = inferAuthScreenPath(manifest, "forgot-password");
-  const mfaPath = inferAuthScreenPath(manifest, "mfa");
+  const loginPath = getAuthScreenPath(manifest, "login");
+  const registerPath = getAuthScreenPath(manifest, "register");
+  const forgotPasswordPath = getAuthScreenPath(manifest, "forgot-password");
+  const mfaPath = getAuthScreenPath(manifest, "mfa");
   const providers = resolveScreenProviders(manifest, "login");
   const providerMode = resolveProviderMode(manifest, "login");
   const passkeyConfig = resolvePasskeyConfig(manifest, "login");
@@ -945,16 +929,11 @@ function LoginScreen({
   const showPasskey = passkeyConfig.enabled && isPasskeySupported();
   const autoFlowRef = useRef(false);
   const runPasskeyPrompt = useCallback(() => {
-    void passkeyMutation
-      .mutateAsync()
-      .catch((error: unknown) => {
-        if (
-          error instanceof DOMException &&
-          error.name === "NotAllowedError"
-        ) {
-          passkeyMutation.reset();
-        }
-      });
+    void passkeyMutation.mutateAsync().catch((error: unknown) => {
+      if (error instanceof DOMException && error.name === "NotAllowedError") {
+        passkeyMutation.reset();
+      }
+    });
   }, [passkeyMutation]);
 
   useEffect(() => {
@@ -979,7 +958,10 @@ function LoginScreen({
       (providerMode === "auto" || autoRedirectProvider.autoRedirect)
     ) {
       autoFlowRef.current = true;
-      redirectToAuthProvider(autoRedirectProvider.provider, snapshot.getOAuthUrl);
+      redirectToAuthProvider(
+        autoRedirectProvider.provider,
+        snapshot.getOAuthUrl,
+      );
     }
   }, [
     passkeyConfig.autoPrompt,
@@ -1017,7 +999,9 @@ function LoginScreen({
       />
       <PrimaryButton
         type="submit"
-        disabled={mutation.isPending || email.length === 0 || password.length === 0}
+        disabled={
+          mutation.isPending || email.length === 0 || password.length === 0
+        }
       >
         {mutation.isPending
           ? "Signing in..."
@@ -1094,7 +1078,7 @@ function RegisterScreen({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const loginPath = inferAuthScreenPath(manifest, "login");
+  const loginPath = getAuthScreenPath(manifest, "login");
   const providers = resolveScreenProviders(manifest, "register");
   const providerMode = resolveProviderMode(manifest, "register");
   const sectionOrder = resolveSectionOrder(manifest, "register", [
@@ -1147,7 +1131,10 @@ function RegisterScreen({
       (providerMode === "auto" || autoRedirectProvider.autoRedirect)
     ) {
       autoFlowRef.current = true;
-      redirectToAuthProvider(autoRedirectProvider.provider, snapshot.getOAuthUrl);
+      redirectToAuthProvider(
+        autoRedirectProvider.provider,
+        snapshot.getOAuthUrl,
+      );
     }
   }, [providerMode, providers, snapshot]);
 
@@ -1185,7 +1172,9 @@ function RegisterScreen({
       />
       <PrimaryButton
         type="submit"
-        disabled={mutation.isPending || email.length === 0 || password.length === 0}
+        disabled={
+          mutation.isPending || email.length === 0 || password.length === 0
+        }
       >
         {mutation.isPending
           ? "Creating account..."
@@ -1242,7 +1231,7 @@ function ForgotPasswordScreen({
 }) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
-  const loginPath = inferAuthScreenPath(manifest, "login");
+  const loginPath = getAuthScreenPath(manifest, "login");
   const sectionOrder = resolveSectionOrder(manifest, "forgot-password", [
     "form",
     "links",
@@ -1343,15 +1332,20 @@ function ResetPasswordScreen({
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const token = search.get("token") ?? "";
-  const loginPath = inferAuthScreenPath(manifest, "login");
+  const loginPath = getAuthScreenPath(manifest, "login");
   const sectionOrder = resolveSectionOrder(manifest, "reset-password", [
     "form",
     "links",
   ]);
-  const passwordField = resolveFieldMeta(manifest, "reset-password", "password", {
-    label: "New password",
-    placeholder: "Create a new password",
-  });
+  const passwordField = resolveFieldMeta(
+    manifest,
+    "reset-password",
+    "password",
+    {
+      label: "New password",
+      placeholder: "Create a new password",
+    },
+  );
   const configuredLinks = resolveConfiguredLinks(manifest, "reset-password");
   const mutation = useMutation<
     { message?: string },
@@ -1405,7 +1399,9 @@ function ResetPasswordScreen({
       />
       <PrimaryButton
         type="submit"
-        disabled={mutation.isPending || password.length === 0 || token.length === 0}
+        disabled={
+          mutation.isPending || password.length === 0 || token.length === 0
+        }
       >
         {mutation.isPending
           ? "Resetting password..."
@@ -1449,7 +1445,7 @@ function VerifyEmailScreen({
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const token = search.get("token") ?? "";
-  const loginPath = inferAuthScreenPath(manifest, "login");
+  const loginPath = getAuthScreenPath(manifest, "login");
   const sectionOrder = resolveSectionOrder(manifest, "verify-email", [
     "form",
     "links",
@@ -1547,7 +1543,7 @@ function VerifyEmailScreen({
       ) : null}
       <SuccessMessage message={message} />
       <ErrorMessage
-        error={(mutation.error ?? resendMutation.error) ?? null}
+        error={mutation.error ?? resendMutation.error ?? null}
         formatError={snapshot.formatAuthError}
         context="verify-email"
       />
@@ -1596,11 +1592,8 @@ function MfaScreen({
     pendingChallenge?.mfaMethods[0] ?? ("totp" as const),
   );
   const [message, setMessage] = useState<string | null>(null);
-  const loginPath = inferAuthScreenPath(manifest, "login");
-  const sectionOrder = resolveSectionOrder(manifest, "mfa", [
-    "form",
-    "links",
-  ]);
+  const loginPath = getAuthScreenPath(manifest, "login");
+  const sectionOrder = resolveSectionOrder(manifest, "mfa", ["form", "links"]);
   const codeField = resolveFieldMeta(manifest, "mfa", "code", {
     label: "Verification code",
     placeholder: "Enter the code",
@@ -1700,7 +1693,9 @@ function MfaScreen({
           </span>
           <select
             value={method}
-            onChange={(event) => setMethod(event.currentTarget.value as MfaMethod)}
+            onChange={(event) =>
+              setMethod(event.currentTarget.value as MfaMethod)
+            }
             style={{
               border: "1px solid rgba(15,23,42,0.14)",
               borderRadius: "0.75rem",
@@ -1768,6 +1763,12 @@ function MfaScreen({
   );
 }
 
+/**
+ * Render the configured auth screen for the active route.
+ *
+ * @param props - Auth screen runtime props
+ * @returns The auth screen content for the route
+ */
 export function ManifestAuthScreen({
   manifest,
   route,
@@ -1843,6 +1844,13 @@ export function ManifestAuthScreen({
   }
 }
 
+/**
+ * Build the runtime auth config from bootstrap config.
+ *
+ * @param apiUrl - Backend API base URL
+ * @param snapshotConfig - Optional snapshot bootstrap config
+ * @returns Runtime auth configuration derived from bootstrap settings
+ */
 export function createManifestAuthRuntimeConfig(
   apiUrl: string,
   snapshotConfig?: Record<string, unknown>,

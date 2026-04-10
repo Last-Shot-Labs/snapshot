@@ -9,6 +9,7 @@ describe("compiler", () => {
   it("compiles routes into a route map and page configs", () => {
     const manifest = defineManifest({
       app: {
+        shell: "full-width",
         title: "Snapshot App",
         home: "/dashboard",
       },
@@ -183,6 +184,28 @@ describe("compiler", () => {
       enabled: true,
       autoPrompt: true,
     });
+  });
+
+  it("rejects auth screens without matching route ids", () => {
+    const result = safeCompileManifest({
+      auth: {
+        screens: ["login"],
+      },
+      routes: [
+        {
+          id: "sign-in",
+          path: "/sign-in",
+          content: [{ type: "heading", text: "Login" }],
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe(
+        'Auth screen "login" is enabled but no route has id "login". Add { "id": "login", "path": "/your-path", ... } to routes.',
+      );
+    }
   });
 
   it("defaults app.home to the first route when omitted", () => {

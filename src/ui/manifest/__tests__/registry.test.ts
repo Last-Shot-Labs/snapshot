@@ -22,10 +22,9 @@ describe("registerComponent", () => {
     expect(result).toBeUndefined();
   });
 
-  it("returns CustomComponentWrapper for 'custom' type", () => {
+  it("returns undefined for undeclared custom component types", () => {
     const result = getRegisteredComponent("custom");
-    expect(result).toBeDefined();
-    expect(result).not.toBeUndefined();
+    expect(result).toBeUndefined();
   });
 
   it("allows overriding a registered component", () => {

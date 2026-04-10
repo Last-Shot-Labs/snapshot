@@ -119,23 +119,37 @@ A dropdown selector that publishes its selected value via `id`.
 
 ### custom
 
-Escape hatch for rendering a consumer-registered React component.
+Custom components are declared in `manifest.components.custom` so the manifest can
+validate their props before any runtime code is loaded.
 
-| Field       | Type                      | Default | Description                                |
-| ----------- | ------------------------- | ------- | ------------------------------------------ |
-| `type`      | `"custom"`                | --      | Required                                   |
-| `component` | `string`                  | --      | Required. Name of the registered component |
-| `props`     | `Record<string, unknown>` | --      | Props forwarded to the component           |
+| Field   | Type                                            | Default | Description                                 |
+| ------- | ----------------------------------------------- | ------- | ------------------------------------------- |
+| `type`  | custom component type string                    | --      | Required. Must match a declared custom type |
+| `props` | `Record<string, { type, required?, default? }>` | --      | Prop schema declared in the manifest        |
 
 ```json
-{ "type": "custom", "component": "MyWidget", "props": { "color": "blue" } }
+{
+  "components": {
+    "custom": {
+      "my-widget": {
+        "props": {
+          "color": { "type": "string", "required": true }
+        }
+      }
+    }
+  }
+}
 ```
 
-Register the component in code:
+```json
+{ "type": "my-widget", "color": "blue" }
+```
+
+Register the implementation in code:
 
 ```tsx
 import { registerComponent } from "@lastshotlabs/snapshot/ui";
-registerComponent("MyWidget", MyWidgetComponent);
+registerComponent("my-widget", MyWidgetComponent);
 ```
 
 ---

@@ -6,7 +6,7 @@
  * Framework registers built-in components; consumers register custom ones.
  */
 
-import type { ConfigDrivenComponent, CustomComponentConfig } from "./types";
+import type { ConfigDrivenComponent } from "./types";
 
 const runtimeComponentRegistry = new Map<string, ConfigDrivenComponent>();
 
@@ -35,7 +35,6 @@ export function registerComponent(
 
 /**
  * Retrieve the registered React component for a type string.
- * Returns the CustomComponentWrapper for `"custom"` type.
  * Returns undefined if no component is registered for the given type.
  *
  * @param type - The component type string
@@ -44,32 +43,5 @@ export function registerComponent(
 export function getRegisteredComponent(
   type: string,
 ): ConfigDrivenComponent | undefined {
-  if (type === "custom") return CustomComponentWrapper;
   return runtimeComponentRegistry.get(type);
-}
-
-/**
- * Wrapper component for the `{ "type": "custom", "component": "Name" }` escape hatch.
- * Looks up the named component from the registry and renders it with the config's props.
- */
-function CustomComponentWrapper({
-  config,
-}: {
-  config: Record<string, unknown>;
-}) {
-  const typedConfig = config as unknown as CustomComponentConfig;
-  const Component = runtimeComponentRegistry.get(typedConfig.component);
-  if (!Component) {
-    if (
-      typeof process !== "undefined" &&
-      process.env?.["NODE_ENV"] === "development"
-    ) {
-      console.warn(
-        `[snapshot] Custom component "${typedConfig.component}" not registered`,
-      );
-    }
-    return null;
-  }
-  const props = typedConfig.props ?? {};
-  return <Component config={{ ...config, ...props }} />;
 }

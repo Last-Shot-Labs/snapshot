@@ -8,7 +8,7 @@ describe("manifest router helpers", () => {
       app: {
         title: "Snapshot App",
         home: "/",
-        notFound: "/404",
+        notFound: "not-found",
       },
       routes: [
         {

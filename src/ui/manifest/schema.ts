@@ -7,6 +7,7 @@
  */
 
 import { z } from "zod";
+import { getMissingAuthScreenIds } from "./auth-routes";
 import { themeConfigSchema } from "../tokens/schema";
 import {
   workflowConditionSchema,
@@ -18,6 +19,10 @@ import {
   extractResourceRefs,
   resourceConfigSchema,
 } from "./resources";
+import { spinnerConfigSchema } from "../components/feedback/default-loading";
+import { errorPageConfigSchema } from "../components/feedback/default-error";
+import { notFoundConfigSchema } from "../components/feedback/default-not-found";
+import { offlineBannerConfigSchema } from "../components/feedback/default-offline";
 
 /** Zod schema for a FromRef value. */
 export const fromRefSchema = z
@@ -157,11 +162,92 @@ export const selectConfigSchema = baseComponentConfigSchema.extend({
   placeholder: z.string().optional(),
 });
 
-export const customComponentConfigSchema = baseComponentConfigSchema.extend({
-  type: z.literal("custom"),
-  component: z.string(),
-  props: z.record(z.unknown()).optional(),
-});
+const customComponentPropTypeSchema = z.enum(["string", "number", "boolean"]);
+
+export const customComponentPropSchema = z
+  .object({
+    type: customComponentPropTypeSchema,
+    required: z.boolean().optional(),
+    default: z
+      .union([z.string(), z.number(), z.boolean(), z.null()])
+      .optional(),
+  })
+  .strict();
+
+export const customComponentDeclarationSchema = z
+  .object({
+    props: z.record(customComponentPropSchema).optional(),
+  })
+  .strict();
+
+export const componentsConfigSchema = z
+  .object({
+    custom: z.record(customComponentDeclarationSchema).optional(),
+  })
+  .strict();
+
+function buildCustomComponentSchema(
+  type: string,
+  declaration: z.infer<typeof customComponentDeclarationSchema>,
+): z.ZodType {
+  const shape: Record<string, z.ZodTypeAny> = {};
+  for (const [propName, propSchema] of Object.entries(
+    declaration.props ?? {},
+  )) {
+    let propType: z.ZodTypeAny;
+    switch (propSchema.type) {
+      case "string":
+        propType = z.string();
+        break;
+      case "number":
+        propType = z.number();
+        break;
+      case "boolean":
+        propType = z.boolean();
+        break;
+    }
+
+    if (propSchema.default !== undefined) {
+      propType = propType.default(propSchema.default as never);
+    } else if (!propSchema.required) {
+      propType = propType.optional();
+    }
+
+    shape[propName] = propType;
+  }
+
+  return baseComponentConfigSchema
+    .extend({
+      type: z.literal(type),
+    })
+    .extend(shape)
+    .strict();
+}
+
+function registerManifestCustomComponentSchemas(
+  customComponents: Record<
+    string,
+    z.infer<typeof customComponentDeclarationSchema>
+  >,
+): Map<string, z.ZodType> {
+  const previousSchemas = new Map(componentSchemaRegistry);
+  for (const [type, declaration] of Object.entries(customComponents)) {
+    registerComponentSchema(
+      type,
+      buildCustomComponentSchema(type, declaration),
+    );
+  }
+  return previousSchemas;
+}
+
+function restoreComponentSchemaRegistry(
+  previousSchemas: Map<string, z.ZodType>,
+): void {
+  componentSchemaRegistry.clear();
+  for (const [type, schema] of previousSchemas) {
+    componentSchemaRegistry.set(type, schema);
+  }
+}
 
 export const componentConfigSchema: z.ZodType = z
   .object({ type: z.string() })
@@ -175,7 +261,7 @@ export const componentConfigSchema: z.ZodType = z
           ctx.addIssue(issue);
         }
       }
-    } else if (data.type !== "custom") {
+    } else {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: `Unknown component type "${data.type}". Available types: ${[...componentSchemaRegistry.keys()].join(", ")}`,
@@ -187,7 +273,10 @@ registerComponentSchema("row", rowConfigSchema);
 registerComponentSchema("heading", headingConfigSchema);
 registerComponentSchema("button", buttonConfigSchema);
 registerComponentSchema("select", selectConfigSchema);
-registerComponentSchema("custom", customComponentConfigSchema);
+registerComponentSchema("spinner", spinnerConfigSchema);
+registerComponentSchema("error-page", errorPageConfigSchema);
+registerComponentSchema("not-found", notFoundConfigSchema);
+registerComponentSchema("offline-banner", offlineBannerConfigSchema);
 
 export const navItemSchema: z.ZodType = z.lazy(() =>
   z
@@ -288,12 +377,7 @@ const authScreenOptionsSchema = z
       })
       .strict()
       .optional(),
-    providers: z
-      .union([
-        authProviderListSchema,
-        z.literal(false),
-      ])
-      .optional(),
+    providers: z.union([authProviderListSchema, z.literal(false)]).optional(),
     providerMode: z.enum(["buttons", "auto"]).optional(),
     passkey: z
       .union([
@@ -415,9 +499,12 @@ export const stateValueConfigSchema = z
 export const appConfigSchema = z
   .object({
     title: z.string().optional(),
-    shell: layoutSchema.optional(),
+    shell: layoutSchema.default("full-width"),
     home: z.string().startsWith("/").optional(),
-    notFound: z.string().startsWith("/").optional(),
+    loading: z.union([componentConfigSchema, z.string().min(1)]).optional(),
+    error: z.union([componentConfigSchema, z.string().min(1)]).optional(),
+    notFound: z.string().min(1).optional(),
+    offline: z.union([componentConfigSchema, z.string().min(1)]).optional(),
   })
   .strict();
 
@@ -505,10 +592,19 @@ function collectNavPaths(items: z.infer<typeof navItemSchema>[]): string[] {
   return paths;
 }
 
+function hasRouteTarget(
+  routeIds: Set<string>,
+  routePaths: Set<string>,
+  target: string,
+): boolean {
+  return routeIds.has(target) || routePaths.has(target);
+}
+
 export const manifestConfigSchema = z
   .object({
     $schema: z.string().optional(),
     app: appConfigSchema.optional(),
+    components: componentsConfigSchema.optional(),
     theme: themeConfigSchema.optional(),
     ssr: manifestSsrConfigSchema.optional(),
     state: z.record(stateValueConfigSchema).optional(),
@@ -557,11 +653,14 @@ export const manifestConfigSchema = z
       });
     }
 
-    if (data.app?.notFound && !routePaths.has(data.app.notFound)) {
+    if (
+      data.app?.notFound &&
+      !hasRouteTarget(routeIds, routePaths, data.app.notFound)
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["app", "notFound"],
-        message: `App notFound route "${data.app.notFound}" does not exist`,
+        message: `App notFound target "${data.app.notFound}" does not exist`,
       });
     }
 
@@ -577,6 +676,19 @@ export const manifestConfigSchema = z
         }
       });
     }
+
+    const missingAuthScreens = getMissingAuthScreenIds({
+      auth: data.auth,
+      routes: data.routes,
+    });
+    missingAuthScreens.forEach((screen) => {
+      const screenIndex = data.auth?.screens.indexOf(screen) ?? -1;
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["auth", "screens", screenIndex >= 0 ? screenIndex : 0],
+        message: `Auth screen "${screen}" is enabled but no route has id "${screen}". Add { "id": "${screen}", "path": "/your-path", ... } to routes.`,
+      });
+    });
 
     const resourceNames = new Set(Object.keys(data.resources ?? {}));
     Object.entries(data.resources ?? {}).forEach(([name, resource]) => {
@@ -610,3 +722,50 @@ export const manifestConfigSchema = z
       }
     });
   });
+
+function extractDeclaredCustomComponents(
+  manifest: unknown,
+): Record<string, z.infer<typeof customComponentDeclarationSchema>> {
+  if (!manifest || typeof manifest !== "object") {
+    return {};
+  }
+
+  const components = (manifest as { components?: unknown }).components;
+  if (!components || typeof components !== "object") {
+    return {};
+  }
+
+  const custom = (components as { custom?: unknown }).custom;
+  if (!custom || typeof custom !== "object") {
+    return {};
+  }
+
+  const result: Record<
+    string,
+    z.infer<typeof customComponentDeclarationSchema>
+  > = {};
+
+  for (const [type, declaration] of Object.entries(custom)) {
+    const parsed = customComponentDeclarationSchema.safeParse(declaration);
+    if (parsed.success) {
+      result[type] = parsed.data;
+    }
+  }
+
+  return result;
+}
+
+export function withManifestCustomComponents<T>(
+  manifest: unknown,
+  callback: () => T,
+): T {
+  const previousSchemas = registerManifestCustomComponentSchemas(
+    extractDeclaredCustomComponents(manifest),
+  );
+
+  try {
+    return callback();
+  } finally {
+    restoreComponentSchemaRegistry(previousSchemas);
+  }
+}

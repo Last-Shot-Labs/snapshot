@@ -29,7 +29,7 @@ function createTestWrapper(options?: {
         api={undefined}
         manifest={{
           raw: { routes: [] },
-          app: {},
+          app: { shell: "full-width" },
           resources: options?.resources,
           routes: [],
           routeMap: {},

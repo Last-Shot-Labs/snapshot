@@ -33,11 +33,14 @@ import type {
   SseEventHookResult,
 } from "./types";
 import type { ManifestConfig } from "./ui/manifest/types";
+import { bootBuiltins } from "./ui/manifest/boot-builtins";
 import { mergeContract } from "./auth/contract";
 
 export function createSnapshot<
   TWSEvents extends Record<string, unknown> = Record<string, unknown>,
 >(config: SnapshotConfig): SnapshotInstance<TWSEvents> {
+  bootBuiltins();
+
   // ── Auth contract ────────────────────────────────────────────────────────────
   const contract = mergeContract(config.apiUrl, config.contract);
 

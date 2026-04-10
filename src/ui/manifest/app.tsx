@@ -2,7 +2,15 @@
  * ManifestApp — renders an entire application from a manifest config.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Component,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import type { ReactNode } from "react";
 import { createSnapshot } from "../../create-snapshot";
 import { SnapshotApiContext, useActionExecutor } from "../actions/executor";
 import {
@@ -20,6 +28,7 @@ import {
   ManifestAuthScreen,
   resolveAuthScreen,
 } from "./auth";
+import { getAuthScreenPath } from "./auth-routes";
 import { compileManifest } from "./compiler";
 import {
   ManifestRuntimeProvider,
@@ -27,15 +36,22 @@ import {
   useManifestResourceCache,
 } from "./runtime";
 import { resolveDocumentTitle, resolveRouteMatch } from "./router";
-import { PageRenderer } from "./renderer";
+import { ComponentRenderer, PageRenderer } from "./renderer";
 import type { EndpointTarget } from "./resources";
 import type {
+  ComponentConfig,
   CompiledManifest,
   CompiledRoute,
   ManifestAppProps,
   OverlayConfig,
 } from "./types";
 
+/**
+ * Inject or update a stylesheet in the document head.
+ *
+ * @param id - Stable style element id
+ * @param css - CSS text to inject
+ */
 export function injectStyleSheet(id: string, css: string): void {
   if (typeof document === "undefined") return;
   let el = document.getElementById(id) as HTMLStyleElement | null;
@@ -103,33 +119,6 @@ function evaluateRouteGuard(
   return true;
 }
 
-function inferAuthScreenPath(
-  manifest: CompiledManifest,
-  screen:
-    | "login"
-    | "register"
-    | "forgot-password"
-    | "reset-password"
-    | "verify-email"
-    | "mfa",
-): string | undefined {
-  const routeById = manifest.routes.find((route) => route.id === screen);
-  if (routeById) {
-    return routeById.path;
-  }
-
-  const candidates: Record<typeof screen, string[]> = {
-    login: ["/login", "/auth/login"],
-    register: ["/register", "/auth/register"],
-    "forgot-password": ["/forgot-password", "/auth/forgot-password"],
-    "reset-password": ["/reset-password", "/auth/reset-password"],
-    "verify-email": ["/verify-email", "/auth/verify-email"],
-    mfa: ["/mfa", "/auth/mfa"],
-  };
-
-  return candidates[screen].find((path) => manifest.routeMap[path] != null);
-}
-
 function withRedirectParam(path: string, redirectTo: string): string {
   if (typeof window === "undefined") {
     return path;
@@ -140,6 +129,13 @@ function withRedirectParam(path: string, redirectTo: string): string {
   return `${url.pathname}${url.search}`;
 }
 
+/**
+ * Merge route preload params with explicit override params.
+ *
+ * @param target - Resource target or target descriptor
+ * @param params - Route params to merge into the target
+ * @returns The resolved preload target
+ */
 export function resolveRoutePreloadTarget(
   target: EndpointTarget,
   params: Record<string, string>,
@@ -163,6 +159,94 @@ export function resolveRoutePreloadTarget(
       },
     },
   };
+}
+
+type AppFallbackName = "loading" | "error" | "notFound" | "offline";
+
+const FALLBACK_COMPONENT_TYPES: Record<AppFallbackName, string> = {
+  loading: "spinner",
+  error: "error-page",
+  notFound: "not-found",
+  offline: "offline-banner",
+};
+
+function resolveRouteByTarget(
+  manifest: CompiledManifest,
+  target: string,
+): CompiledRoute | null {
+  const byId = manifest.routes.find((route) => route.id === target);
+  if (byId) {
+    return byId;
+  }
+
+  const normalizedTarget =
+    target.length > 1 && target.endsWith("/") ? target.slice(0, -1) : target;
+
+  return manifest.routeMap[normalizedTarget] ?? null;
+}
+
+function AppFallback({
+  manifest,
+  name,
+  api,
+}: {
+  manifest: CompiledManifest;
+  name: AppFallbackName;
+  api?: ReturnType<typeof createSnapshot>["api"];
+}) {
+  const configured = manifest.app[name];
+
+  if (typeof configured === "string") {
+    const targetRoute = resolveRouteByTarget(manifest, configured);
+    if (targetRoute) {
+      return (
+        <PageRenderer
+          page={targetRoute.page}
+          routeId={targetRoute.id}
+          state={manifest.state}
+          resources={manifest.resources}
+          api={api}
+        />
+      );
+    }
+  }
+
+  if (configured && typeof configured === "object" && "type" in configured) {
+    return <ComponentRenderer config={configured as ComponentConfig} />;
+  }
+
+  return (
+    <ComponentRenderer
+      config={{ type: FALLBACK_COMPONENT_TYPES[name] } as ComponentConfig}
+    />
+  );
+}
+
+class ManifestErrorBoundary extends Component<
+  {
+    fallback: ReactNode;
+    onError: (error: Error) => void;
+    children: ReactNode;
+  },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError(): { hasError: boolean } {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error): void {
+    this.props.onError(error);
+  }
+
+  override render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
 }
 
 function applyRouteResourceInvalidations(
@@ -262,10 +346,7 @@ function AppShell({
   isPreloading: boolean;
   api: ReturnType<typeof createSnapshot>["api"];
 }) {
-  const shell =
-    route.page.layout ??
-    manifest.app.shell ??
-    (manifest.navigation?.mode === "top-nav" ? "top-nav" : "full-width");
+  const shell = route.page.layout ?? manifest.app.shell ?? "full-width";
   const navConfig = manifest.navigation
     ? ({
         type: "nav",
@@ -285,7 +366,7 @@ function AppShell({
     >
       {isPreloading ? (
         <div data-snapshot-route-loading="" style={{ padding: "1rem" }}>
-          Loading...
+          <AppFallback manifest={manifest} name="loading" api={api} />
         </div>
       ) : (
         <PageRenderer
@@ -371,6 +452,10 @@ function ManifestRouter({
     return window.location.pathname;
   });
   const [isPreloading, setIsPreloading] = useState(false);
+  const [runtimeError, setRuntimeError] = useState<Error | null>(null);
+  const [isOffline, setIsOffline] = useState(() =>
+    typeof navigator !== "undefined" ? navigator.onLine === false : false,
+  );
   const execute = useActionExecutor();
   const resourceCache = useManifestResourceCache();
   const previousMatchRef = useRef<{
@@ -416,6 +501,25 @@ function ManifestRouter({
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const updateOfflineState = () => {
+      setIsOffline(window.navigator.onLine === false);
+    };
+
+    window.addEventListener("online", updateOfflineState);
+    window.addEventListener("offline", updateOfflineState);
+    updateOfflineState();
+
+    return () => {
+      window.removeEventListener("online", updateOfflineState);
+      window.removeEventListener("offline", updateOfflineState);
+    };
+  }, []);
+
   const { route, params } = useMemo(
     () => resolveRouteMatch(manifest, currentPath),
     [currentPath, manifest],
@@ -441,6 +545,10 @@ function ManifestRouter({
     }
   }, [currentPath, manifest, params, route]);
 
+  useEffect(() => {
+    setRuntimeError(null);
+  }, [currentPath, route?.id]);
+
   const resolvedGuard = useResolveFrom({
     condition: route?.guard?.condition ?? null,
   }).condition;
@@ -458,7 +566,7 @@ function ManifestRouter({
     const baseFallback =
       route.guard?.redirectTo ??
       (route.guard?.authenticated
-        ? inferAuthScreenPath(manifest, "login")
+        ? getAuthScreenPath(manifest, "login")
         : undefined) ??
       manifest.app.home ??
       manifest.firstRoute?.path ??
@@ -595,7 +703,15 @@ function ManifestRouter({
       }
     };
 
-    void runLifecycle();
+    void runLifecycle().catch((error: unknown) => {
+      if (cancelled) {
+        return;
+      }
+
+      setRuntimeError(
+        error instanceof Error ? error : new Error("Manifest route failed"),
+      );
+    });
 
     return () => {
       cancelled = true;
@@ -603,13 +719,21 @@ function ManifestRouter({
   }, [currentPath, execute, params, resourceCache, route, routeAllowed]);
 
   if (!route) {
-    return null;
+    return <AppFallback manifest={manifest} name="notFound" api={api} />;
+  }
+
+  if (runtimeError) {
+    return <AppFallback manifest={manifest} name="error" api={api} />;
+  }
+
+  if (isOffline) {
+    return <AppFallback manifest={manifest} name="offline" api={api} />;
   }
 
   if (route.guard?.authenticated && authLoading) {
     return (
       <div data-snapshot-auth-loading="" style={{ padding: "1rem" }}>
-        Loading...
+        <AppFallback manifest={manifest} name="loading" api={api} />
       </div>
     );
   }
@@ -628,29 +752,41 @@ function ManifestRouter({
         isPreloading,
       }}
     >
-      {authScreen ? (
-        <ManifestAuthScreen
-          manifest={manifest}
-          route={route}
-          screen={authScreen}
-          snapshot={snapshot}
-          runtimeConfig={authRuntimeConfig}
-          navigate={(to, options) => navigate(to, options)}
-        />
-      ) : (
-        <AppShell
-          manifest={manifest}
-          route={route}
-          currentPath={currentPath}
-          navigate={navigate}
-          isPreloading={isPreloading}
-          api={api}
-        />
-      )}
+      <ManifestErrorBoundary
+        key={`${currentPath}:${route.id}`}
+        fallback={<AppFallback manifest={manifest} name="error" api={api} />}
+        onError={setRuntimeError}
+      >
+        {authScreen ? (
+          <ManifestAuthScreen
+            manifest={manifest}
+            route={route}
+            screen={authScreen}
+            snapshot={snapshot}
+            runtimeConfig={authRuntimeConfig}
+            navigate={(to, options) => navigate(to, options)}
+          />
+        ) : (
+          <AppShell
+            manifest={manifest}
+            route={route}
+            currentPath={currentPath}
+            navigate={navigate}
+            isPreloading={isPreloading}
+            api={api}
+          />
+        )}
+      </ManifestErrorBoundary>
     </RouteRuntimeProvider>
   );
 }
 
+/**
+ * Render the manifest-driven application shell.
+ *
+ * @param props - Manifest runtime props
+ * @returns A fully rendered manifest application
+ */
 export function ManifestApp({
   manifest,
   apiUrl,
