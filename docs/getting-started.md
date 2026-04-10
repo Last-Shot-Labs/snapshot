@@ -61,6 +61,10 @@ Auth-specific bootstrap overrides now live in the manifest too. See
 [manifest auth](./manifest/auth.md) for session, contract, redirect, and
 workflow-handler settings.
 
+Realtime connection settings also live in the manifest. See
+[manifest realtime](./manifest/realtime.md) for WebSocket and SSE setup,
+including env-driven URLs and lifecycle workflows.
+
 ### Complete Example
 
 ```json

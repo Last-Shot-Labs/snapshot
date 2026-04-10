@@ -3,6 +3,9 @@ import type {
   appConfigSchema,
   manifestConfigSchema,
   authScreenConfigSchema,
+  realtimeConfigSchema,
+  realtimeSseEndpointSchema,
+  realtimeWsSchema,
   pageConfigSchema,
   routeConfigSchema,
   navigationConfigSchema,
@@ -23,6 +26,14 @@ export type ManifestConfig = z.infer<typeof manifestConfigSchema>;
 export type AppConfig = Resolved<z.infer<typeof appConfigSchema>>;
 /** Resolved runtime view of `authScreenConfigSchema`. */
 export type AuthScreenConfig = Resolved<z.infer<typeof authScreenConfigSchema>>;
+/** Resolved runtime view of `realtimeWsSchema`. */
+export type RealtimeWsConfig = Resolved<z.infer<typeof realtimeWsSchema>>;
+/** Resolved runtime view of `realtimeSseEndpointSchema`. */
+export type RealtimeSseEndpointConfig = Resolved<
+  z.infer<typeof realtimeSseEndpointSchema>
+>;
+/** Resolved runtime view of `realtimeConfigSchema`. */
+export type RealtimeConfig = Resolved<z.infer<typeof realtimeConfigSchema>>;
 /** Resolved runtime view of `pageConfigSchema`. */
 export type PageConfig = Resolved<z.infer<typeof pageConfigSchema>>;
 /** Resolved runtime view of `routeConfigSchema`. */
@@ -121,6 +132,7 @@ export interface CompiledManifest {
   overlays?: Record<string, OverlayConfig>;
   navigation?: NavigationConfig;
   auth?: AuthScreenConfig;
+  realtime?: RealtimeConfig;
   routes: CompiledRoute[];
   routeMap: Record<string, CompiledRoute>;
   firstRoute: CompiledRoute | null;

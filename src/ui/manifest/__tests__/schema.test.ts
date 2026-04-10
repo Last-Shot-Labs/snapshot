@@ -17,6 +17,9 @@ import {
   navItemSchema,
   navigationConfigSchema,
   authScreenConfigSchema,
+  realtimeConfigSchema,
+  realtimeSseEndpointSchema,
+  realtimeWsSchema,
 } from "../schema";
 import { safeParseManifest } from "../compiler";
 
@@ -639,6 +642,52 @@ describe("nav schemas", () => {
         },
       ],
     });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("realtime schemas", () => {
+  it("validates realtime websocket config", () => {
+    const result = realtimeWsSchema.safeParse({
+      url: { env: "WS_URL" },
+      on: {
+        connected: "ws-connected",
+        disconnected: "ws-disconnected",
+        reconnecting: "ws-reconnecting",
+        reconnectFailed: "ws-reconnect-failed",
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("validates realtime sse endpoint config", () => {
+    const result = realtimeSseEndpointSchema.safeParse({
+      withCredentials: true,
+      on: {
+        connected: "sse-connected",
+        error: "sse-error",
+        closed: "sse-closed",
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("validates realtime config", () => {
+    const result = realtimeConfigSchema.safeParse({
+      ws: {
+        reconnectOnLogin: false,
+      },
+      sse: {
+        endpoints: {
+          "/__sse/notifications": {
+            withCredentials: true,
+          },
+        },
+      },
+    });
+
     expect(result.success).toBe(true);
   });
 });

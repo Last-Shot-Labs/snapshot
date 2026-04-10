@@ -307,6 +307,8 @@ function AuthRuntimeBridge({
 }
 
 const MANIFEST_AUTH_WORKFLOW_EVENT = "snapshot:manifest-auth-workflow";
+const MANIFEST_REALTIME_WORKFLOW_EVENT =
+  "snapshot:manifest-realtime-workflow";
 const useManifestLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
@@ -357,6 +359,91 @@ function ManifestAuthWorkflowBridge({
       );
     };
   }, [execute, manifest.auth?.on]);
+
+  return null;
+}
+
+type ManifestRealtimeWorkflowChannel = "ws" | "sse";
+type ManifestRealtimeWorkflowKind =
+  | "connected"
+  | "disconnected"
+  | "reconnecting"
+  | "reconnectFailed"
+  | "error"
+  | "closed";
+
+interface ManifestRealtimeWorkflowDetail {
+  channel: ManifestRealtimeWorkflowChannel;
+  kind: ManifestRealtimeWorkflowKind;
+  endpoint?: string;
+}
+
+function resolveManifestRealtimeWorkflow(
+  manifest: CompiledManifest,
+  detail: ManifestRealtimeWorkflowDetail,
+): string | undefined {
+  if (detail.channel === "ws") {
+    return (
+      manifest.realtime?.ws?.on as Record<string, string | undefined> | undefined
+    )?.[detail.kind];
+  }
+
+  if (!detail.endpoint) {
+    return undefined;
+  }
+
+  return (
+    manifest.realtime?.sse?.endpoints?.[detail.endpoint]?.on as
+      | Record<string, string | undefined>
+      | undefined
+  )?.[detail.kind];
+}
+
+function ManifestRealtimeWorkflowBridge({
+  manifest,
+}: {
+  manifest: CompiledManifest;
+}) {
+  const execute = useActionExecutor();
+
+  useManifestLayoutEffect(() => {
+    if (!manifest.realtime) {
+      return;
+    }
+
+    const onRealtimeWorkflowEvent = (event: Event) => {
+      const detail = (
+        event as CustomEvent<ManifestRealtimeWorkflowDetail>
+      ).detail;
+      if (!detail) {
+        return;
+      }
+
+      const workflow = resolveManifestRealtimeWorkflow(manifest, detail);
+      if (!workflow) {
+        return;
+      }
+
+      void execute(
+        { type: "run-workflow", workflow },
+        {
+          realtime: detail,
+        },
+      );
+    };
+
+    window.addEventListener(
+      MANIFEST_REALTIME_WORKFLOW_EVENT,
+      onRealtimeWorkflowEvent as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        MANIFEST_REALTIME_WORKFLOW_EVENT,
+        onRealtimeWorkflowEvent as EventListener,
+      );
+    };
+  }, [execute, manifest]);
 
   return null;
 }
@@ -898,13 +985,14 @@ export function ManifestApp({
             resources={compiledManifest.resources}
             api={snapshot.api}
           >
-            {compiledManifest.auth ? (
+            {compiledManifest.auth || compiledManifest.realtime ? (
               <>
                 <AuthRuntimeBridge
                   manifest={compiledManifest}
                   useUser={snapshot.useUser}
                 />
                 <ManifestAuthWorkflowBridge manifest={compiledManifest} />
+                <ManifestRealtimeWorkflowBridge manifest={compiledManifest} />
               </>
             ) : null}
             <ManifestRouter

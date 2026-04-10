@@ -3,10 +3,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createSnapshot } from "./create-snapshot";
 
+const originalWebSocket = global.WebSocket;
+
 afterEach(() => {
   if (typeof sessionStorage !== "undefined") {
     sessionStorage.clear();
   }
+  global.WebSocket = originalWebSocket;
 });
 
 describe("createSnapshot", () => {
@@ -142,5 +145,49 @@ describe("createSnapshot", () => {
     }>;
     expect(event.type).toBe("snapshot:manifest-auth-workflow");
     expect(event.detail.kind).toBe("unauthenticated");
+  });
+
+  it("derives the websocket url from apiUrl when manifest.realtime.ws.url is omitted", () => {
+    const createdUrls: string[] = [];
+    class MockWebSocket {
+      static OPEN = 1;
+      readyState = 0;
+      url: string;
+      onopen: (() => void) | null = null;
+      onclose: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      onmessage: ((event: MessageEvent) => void) | null = null;
+
+      constructor(url: string) {
+        this.url = url;
+        createdUrls.push(url);
+      }
+
+      send(): void {}
+
+      close(): void {}
+    }
+
+    global.WebSocket = MockWebSocket as unknown as typeof WebSocket;
+
+    createSnapshot({
+      apiUrl: "https://api.example.com",
+      manifest: {
+        realtime: {
+          ws: {
+            reconnectOnLogin: false,
+          },
+        },
+        routes: [
+          {
+            id: "home",
+            path: "/",
+            content: [{ type: "heading", text: "Home" }],
+          },
+        ],
+      },
+    });
+
+    expect(createdUrls).toEqual(["wss://api.example.com"]);
   });
 });

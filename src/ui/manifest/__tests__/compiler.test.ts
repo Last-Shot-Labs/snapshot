@@ -252,6 +252,95 @@ describe("compiler", () => {
     expect(compiled.auth?.on?.logout).toBe("clear-session");
   });
 
+  it("preserves realtime config and workflow handlers", () => {
+    const compiled = compileManifest({
+      realtime: {
+        ws: {
+          url: { env: "WS_URL", default: "wss://example.com/ws" },
+          reconnectOnLogin: false,
+          on: {
+            connected: "ws-connected",
+            disconnected: "ws-disconnected",
+          },
+        },
+        sse: {
+          endpoints: {
+            "/__sse/updates": {
+              withCredentials: true,
+              on: {
+                connected: "sse-connected",
+                error: "sse-error",
+                closed: "sse-closed",
+              },
+            },
+          },
+        },
+      },
+      workflows: {
+        "ws-connected": {
+          type: "toast",
+          message: "WS connected",
+        },
+        "ws-disconnected": {
+          type: "toast",
+          message: "WS disconnected",
+        },
+        "sse-connected": {
+          type: "toast",
+          message: "SSE connected",
+        },
+        "sse-error": {
+          type: "toast",
+          message: "SSE error",
+        },
+        "sse-closed": {
+          type: "toast",
+          message: "SSE closed",
+        },
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Home" }],
+        },
+      ],
+    });
+
+    expect(compiled.realtime?.ws?.reconnectOnLogin).toBe(false);
+    expect(compiled.realtime?.ws?.url).toBe("wss://example.com/ws");
+    expect(compiled.realtime?.ws?.on?.connected).toBe("ws-connected");
+    expect(compiled.realtime?.sse?.endpoints["/__sse/updates"]?.withCredentials).toBe(
+      true,
+    );
+    expect(
+      compiled.realtime?.sse?.endpoints["/__sse/updates"]?.on?.closed,
+    ).toBe("sse-closed");
+  });
+
+  it("rejects realtime handlers that reference missing workflows", () => {
+    expect(() =>
+      compileManifest({
+        realtime: {
+          ws: {
+            on: {
+              connected: "missing-workflow",
+            },
+          },
+        },
+        routes: [
+          {
+            id: "home",
+            path: "/",
+            content: [{ type: "heading", text: "Home" }],
+          },
+        ],
+      }),
+    ).toThrow(
+      'Realtime WS handler "connected" references missing workflow "missing-workflow". Add it to manifest.workflows.',
+    );
+  });
+
   it("rejects auth handlers that reference missing workflows", () => {
     expect(() =>
       compileManifest({

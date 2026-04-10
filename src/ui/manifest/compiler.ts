@@ -88,6 +88,28 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
     }
   }
 
+  for (const [kind, workflow] of Object.entries(
+    resolvedManifest.realtime?.ws?.on ?? {},
+  )) {
+    if (!workflowNames.has(workflow)) {
+      throw new Error(
+        `Realtime WS handler "${kind}" references missing workflow "${workflow}". Add it to manifest.workflows.`,
+      );
+    }
+  }
+
+  for (const [path, endpoint] of Object.entries(
+    resolvedManifest.realtime?.sse?.endpoints ?? {},
+  )) {
+    for (const [kind, workflow] of Object.entries(endpoint.on ?? {})) {
+      if (!workflowNames.has(workflow)) {
+        throw new Error(
+          `Realtime SSE handler "${path}.${kind}" references missing workflow "${workflow}". Add it to manifest.workflows.`,
+        );
+      }
+    }
+  }
+
   const routes: CompiledRoute[] = resolvedManifest.routes.map((route) => ({
     id: route.id,
     path: route.path,
@@ -138,6 +160,7 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
     overlays: resolvedManifest.overlays,
     navigation: resolvedManifest.navigation,
     auth,
+    realtime: resolvedManifest.realtime,
     routes,
     routeMap,
     firstRoute: routes[0] ?? null,

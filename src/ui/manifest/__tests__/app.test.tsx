@@ -29,6 +29,8 @@ function dispatchPopStateEvent(): void {
   window.dispatchEvent(new Event("popstate"));
 }
 
+const originalWebSocket = global.WebSocket;
+
 registerComponentSchema(
   "route-state-probe",
   z.object({
@@ -145,6 +147,7 @@ describe("ManifestApp", () => {
     if (el) el.remove();
     window.history.replaceState({}, "", "/");
     global.fetch = originalFetch;
+    global.WebSocket = originalWebSocket;
     Object.defineProperty(window.navigator, "onLine", {
       configurable: true,
       value: true,
@@ -422,6 +425,81 @@ describe("ManifestApp", () => {
           detail: { kind: "unauthenticated" },
         }),
       );
+    });
+  });
+
+  it("runs realtime workflow bindings", async () => {
+    const createdUrls: string[] = [];
+    class MockWebSocket {
+      static OPEN = 1;
+      readyState = 0;
+      url: string;
+      onopen: (() => void) | null = null;
+      onclose: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      onmessage: ((event: MessageEvent) => void) | null = null;
+
+      constructor(url: string) {
+        this.url = url;
+        createdUrls.push(url);
+      }
+
+      send(): void {}
+
+      close(): void {}
+    }
+
+    global.WebSocket = MockWebSocket as unknown as typeof WebSocket;
+    window.history.replaceState({}, "", "/");
+
+    const manifest: ManifestConfig = {
+      state: {
+        realtimeResult: {
+          scope: "app",
+          default: "",
+        },
+      },
+      realtime: {
+        ws: {
+          on: {
+            connected: "ws-connected",
+          },
+        },
+      },
+      workflows: {
+        "ws-connected": [
+          {
+            type: "set-value",
+            target: "global.realtimeResult",
+            value: "connected",
+          },
+        ],
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "app-state-probe", key: "realtimeResult" }],
+        },
+      ],
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="https://api.example.com" />);
+
+    await waitFor(() => {
+      expect(createdUrls).toEqual(["wss://api.example.com"]);
+    });
+
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent("snapshot:manifest-realtime-workflow", {
+          detail: { channel: "ws", kind: "connected" },
+        }),
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("connected")).toBeDefined();
     });
   });
 

@@ -236,6 +236,63 @@ export const authContractSchema = z
   })
   .strict();
 
+/**
+ * Manifest realtime WebSocket configuration.
+ */
+export const realtimeWsSchema = z
+  .object({
+    url: stringOrEnvRef.optional(),
+    autoReconnect: z.boolean().default(true),
+    reconnectOnLogin: z.boolean().default(true),
+    reconnectOnFocus: z.boolean().default(true),
+    maxReconnectAttempts: z.number().int().nonnegative().optional(),
+    reconnectBaseDelay: z.number().int().nonnegative().optional(),
+    reconnectMaxDelay: z.number().int().nonnegative().optional(),
+    on: z
+      .object({
+        connected: z.string().optional(),
+        disconnected: z.string().optional(),
+        reconnecting: z.string().optional(),
+        reconnectFailed: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+/**
+ * Manifest realtime SSE endpoint configuration.
+ */
+export const realtimeSseEndpointSchema = z
+  .object({
+    withCredentials: z.boolean().optional(),
+    on: z
+      .object({
+        connected: z.string().optional(),
+        error: z.string().optional(),
+        closed: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+/**
+ * Manifest realtime configuration.
+ */
+export const realtimeConfigSchema = z
+  .object({
+    ws: realtimeWsSchema.optional(),
+    sse: z
+      .object({
+        endpoints: z.record(realtimeSseEndpointSchema),
+        reconnectOnLogin: z.boolean().default(true),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
 export const componentsConfigSchema = z
   .object({
     custom: z.record(customComponentDeclarationSchema).optional(),
@@ -706,6 +763,7 @@ export const manifestConfigSchema = z
     state: z.record(stateValueConfigSchema).optional(),
     navigation: navigationConfigSchema.optional(),
     auth: authScreenConfigSchema.optional(),
+    realtime: realtimeConfigSchema.optional(),
     resources: z.record(resourceConfigSchema).optional(),
     workflows: z.record(workflowDefinitionSchema).optional(),
     overlays: z.record(overlayConfigSchema).optional(),

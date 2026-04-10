@@ -39,8 +39,24 @@ import { compileManifest } from "./ui/manifest/compiler";
 import { mergeContract } from "./auth/contract";
 
 const MANIFEST_AUTH_WORKFLOW_EVENT = "snapshot:manifest-auth-workflow";
+const MANIFEST_REALTIME_WORKFLOW_EVENT =
+  "snapshot:manifest-realtime-workflow";
 
 type ManifestAuthWorkflowKind = "unauthenticated" | "forbidden" | "logout";
+type ManifestRealtimeWorkflowChannel = "ws" | "sse";
+type ManifestRealtimeWorkflowKind =
+  | "connected"
+  | "disconnected"
+  | "reconnecting"
+  | "reconnectFailed"
+  | "error"
+  | "closed";
+
+interface ManifestRealtimeWorkflowDetail {
+  channel: ManifestRealtimeWorkflowChannel;
+  kind: ManifestRealtimeWorkflowKind;
+  endpoint?: string;
+}
 
 function dispatchManifestAuthWorkflow(kind: ManifestAuthWorkflowKind): void {
   if (typeof window === "undefined") {
@@ -52,6 +68,47 @@ function dispatchManifestAuthWorkflow(kind: ManifestAuthWorkflowKind): void {
       detail: { kind },
     }),
   );
+}
+
+function dispatchManifestRealtimeWorkflow(
+  detail: ManifestRealtimeWorkflowDetail,
+): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent(MANIFEST_REALTIME_WORKFLOW_EVENT, {
+      detail,
+    }),
+  );
+}
+
+function resolveWebSocketUrl(apiUrl: string): string {
+  if (apiUrl.startsWith("https:")) {
+    return apiUrl.replace(/^https:/, "wss:");
+  }
+
+  if (apiUrl.startsWith("http:")) {
+    return apiUrl.replace(/^http:/, "ws:");
+  }
+
+  return apiUrl;
+}
+
+function createManifestRealtimeCallback(
+  detail: ManifestRealtimeWorkflowDetail,
+  workflow: string | undefined,
+  fallback?: () => void,
+): () => void {
+  return () => {
+    if (workflow && typeof window !== "undefined") {
+      dispatchManifestRealtimeWorkflow(detail);
+      return;
+    }
+
+    fallback?.();
+  };
 }
 
 export function createSnapshot<
@@ -71,6 +128,77 @@ export function createSnapshot<
     gcTime: compiledManifest?.app?.cache?.gcTime ?? config.gcTime,
     retry: compiledManifest?.app?.cache?.retry ?? config.retry,
   };
+  const runtimeRealtime = compiledManifest?.realtime;
+  const runtimeWsConfig = runtimeRealtime?.ws
+    ? {
+        url: runtimeRealtime.ws.url ?? resolveWebSocketUrl(config.apiUrl),
+        autoReconnect: runtimeRealtime.ws.autoReconnect,
+        reconnectOnLogin: runtimeRealtime.ws.reconnectOnLogin,
+        reconnectOnFocus: runtimeRealtime.ws.reconnectOnFocus,
+        maxReconnectAttempts: runtimeRealtime.ws.maxReconnectAttempts,
+        reconnectBaseDelay: runtimeRealtime.ws.reconnectBaseDelay,
+        reconnectMaxDelay: runtimeRealtime.ws.reconnectMaxDelay,
+        onConnected: createManifestRealtimeCallback(
+          { channel: "ws", kind: "connected" },
+          runtimeRealtime.ws.on?.connected,
+          config.ws?.onConnected,
+        ),
+        onDisconnected: createManifestRealtimeCallback(
+          { channel: "ws", kind: "disconnected" },
+          runtimeRealtime.ws.on?.disconnected,
+          config.ws?.onDisconnected,
+        ),
+        onReconnecting: createManifestRealtimeCallback(
+          { channel: "ws", kind: "reconnecting" },
+          runtimeRealtime.ws.on?.reconnecting,
+          config.ws?.onReconnecting,
+        ),
+        onReconnectFailed: createManifestRealtimeCallback(
+          { channel: "ws", kind: "reconnectFailed" },
+          runtimeRealtime.ws.on?.reconnectFailed,
+          config.ws?.onReconnectFailed,
+        ),
+      }
+    : config.ws;
+  const runtimeSseConfig = runtimeRealtime?.sse
+    ? {
+        reconnectOnLogin: runtimeRealtime.sse.reconnectOnLogin,
+        endpoints: Object.fromEntries(
+          Array.from(
+            new Set([
+              ...Object.keys(config.sse?.endpoints ?? {}),
+              ...Object.keys(runtimeRealtime.sse.endpoints),
+            ]),
+          ).map((path) => {
+            const bootstrapEndpoint = config.sse?.endpoints[path];
+            const manifestEndpoint = runtimeRealtime.sse.endpoints[path];
+            return [
+              path,
+              {
+                withCredentials:
+                  manifestEndpoint?.withCredentials ??
+                  bootstrapEndpoint?.withCredentials,
+                onConnected: createManifestRealtimeCallback(
+                  { channel: "sse", kind: "connected", endpoint: path },
+                  manifestEndpoint?.on?.connected,
+                  bootstrapEndpoint?.onConnected,
+                ),
+                onError: createManifestRealtimeCallback(
+                  { channel: "sse", kind: "error", endpoint: path },
+                  manifestEndpoint?.on?.error,
+                  bootstrapEndpoint?.onError,
+                ),
+                onClosed: createManifestRealtimeCallback(
+                  { channel: "sse", kind: "closed", endpoint: path },
+                  manifestEndpoint?.on?.closed,
+                  bootstrapEndpoint?.onClosed,
+                ),
+              },
+            ] as const;
+          }),
+        ),
+      }
+    : config.sse;
   const { manifest: _manifest, ...snapshotConfigForManifestApp } =
     runtimeConfig;
   const loginScreenPath = compiledManifest?.auth
@@ -177,16 +305,16 @@ export function createSnapshot<
 
   // ── WebSocket manager (created once if ws config present) ──────────────────
   let wsManager: WebSocketManager<TWSEvents> | null = null;
-  if (runtimeConfig.ws) {
-    wsManager = new WebSocketManager<TWSEvents>(runtimeConfig.ws);
+  if (runtimeWsConfig) {
+    wsManager = new WebSocketManager<TWSEvents>(runtimeWsConfig);
   }
 
   // ── SSE registry — one SseManager per configured endpoint ─────────────────
   // Key: endpoint path (e.g. '/__sse/feed'), Value: { manager, url }
   const sseRegistry = new Map<string, { manager: SseManager; url: string }>();
 
-  if (runtimeConfig.sse) {
-    const { endpoints } = runtimeConfig.sse;
+  if (runtimeSseConfig) {
+    const { endpoints } = runtimeSseConfig;
     for (const [path, endpointCfg] of Object.entries(endpoints)) {
       const url = `${runtimeConfig.apiUrl}${path}`;
       const manager = new SseManager({
@@ -464,9 +592,9 @@ export function createSnapshot<
       contract,
       pendingMfaChallengeAtom,
       onLoginSuccess: () => {
-        if (runtimeConfig.ws?.reconnectOnLogin !== false)
+        if (runtimeWsConfig?.reconnectOnLogin !== false)
           wsManager?.reconnect();
-        if (runtimeConfig.sse?.reconnectOnLogin !== false) reconnectAllSse();
+        if (runtimeSseConfig?.reconnectOnLogin !== false) reconnectAllSse();
       },
       onLogoutSuccess: () => closeAllSse(),
     });
@@ -479,8 +607,8 @@ export function createSnapshot<
     contract,
     pendingMfaChallengeAtom,
     onLoginSuccess: () => {
-      if (runtimeConfig.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
-      if (runtimeConfig.sse?.reconnectOnLogin !== false) reconnectAllSse();
+      if (runtimeWsConfig?.reconnectOnLogin !== false) wsManager?.reconnect();
+      if (runtimeSseConfig?.reconnectOnLogin !== false) reconnectAllSse();
     },
   });
 
@@ -510,8 +638,8 @@ export function createSnapshot<
     },
     contract,
     onLoginSuccess: () => {
-      if (runtimeConfig.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
-      if (runtimeConfig.sse?.reconnectOnLogin !== false) reconnectAllSse();
+      if (runtimeWsConfig?.reconnectOnLogin !== false) wsManager?.reconnect();
+      if (runtimeSseConfig?.reconnectOnLogin !== false) reconnectAllSse();
     },
   });
 
@@ -527,8 +655,8 @@ export function createSnapshot<
     contract,
     pendingMfaChallengeAtom,
     onLoginSuccess: () => {
-      if (runtimeConfig.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
-      if (runtimeConfig.sse?.reconnectOnLogin !== false) reconnectAllSse();
+      if (runtimeWsConfig?.reconnectOnLogin !== false) wsManager?.reconnect();
+      if (runtimeSseConfig?.reconnectOnLogin !== false) reconnectAllSse();
     },
   });
 
