@@ -5,6 +5,9 @@ import React from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { SnapshotApiContext } from "../ui/actions/executor";
 import { AppContextProvider } from "../ui/context/providers";
+import { Layout } from "../ui/components/layout/layout";
+import { Nav } from "../ui/components/layout/nav";
+import { resolveDetectedLocale, resolveI18nRefs } from "../ui/i18n/resolve";
 import "../ui/components/register";
 import {
   AppShellWrapper,
@@ -16,7 +19,7 @@ import {
 } from "../ui/entity-pages";
 import "../ui/manifest/structural";
 import { compileManifest } from "../ui/manifest/compiler";
-import { PageRenderer } from "../ui/manifest/renderer";
+import { ComponentRenderer, PageRenderer } from "../ui/manifest/renderer";
 import type {
   CompiledManifest,
   CompiledRoute,
@@ -27,6 +30,7 @@ import {
   RouteRuntimeProvider,
 } from "../ui/manifest/runtime";
 import { buildHeadTags, escapeHtml } from "./head";
+import { runManifestSsrMiddleware } from "./middleware-runner";
 import { renderPage } from "./render";
 import type { RscManifest } from "./rsc";
 import type {
@@ -140,6 +144,181 @@ function buildManifestNavConfig(
   };
 }
 
+interface RouteLayoutSlotDeclaration {
+  name: string;
+  required?: boolean;
+  fallback?: Record<string, unknown>;
+}
+
+type RouteLayoutDeclaration =
+  | string
+  | {
+      type: string;
+      props?: Record<string, unknown>;
+      slots?: RouteLayoutSlotDeclaration[];
+    };
+
+type RouteSlotsDeclaration = Record<string, Record<string, unknown>[]>;
+
+const BUILT_IN_LAYOUT_TYPES = new Set([
+  "sidebar",
+  "top-nav",
+  "stacked",
+  "minimal",
+  "full-width",
+]);
+
+const SLOT_ENABLED_LAYOUT_TYPES = new Set(["sidebar", "top-nav", "stacked"]);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function getRawRouteRecord(
+  manifest: CompiledManifest,
+  routeId: string,
+): Record<string, unknown> | undefined {
+  const rawRoutes = isRecord(manifest.raw)
+    ? ((manifest.raw as Record<string, unknown>)["routes"] as unknown)
+    : undefined;
+  if (!Array.isArray(rawRoutes)) {
+    return undefined;
+  }
+
+  return rawRoutes.find((route) => isRecord(route) && route["id"] === routeId) as
+    | Record<string, unknown>
+    | undefined;
+}
+
+function readRouteLayouts(
+  manifest: CompiledManifest,
+  routeId: string,
+): RouteLayoutDeclaration[] {
+  const rawRoute = getRawRouteRecord(manifest, routeId);
+  const layouts = rawRoute?.["layouts"];
+  if (!Array.isArray(layouts) || layouts.length === 0) {
+    return [manifest.app.shell ?? "full-width"];
+  }
+
+  return layouts.filter(
+    (layout): layout is RouteLayoutDeclaration =>
+      typeof layout === "string" || isRecord(layout),
+  );
+}
+
+function readRouteSlots(
+  manifest: CompiledManifest,
+  routeId: string,
+): RouteSlotsDeclaration {
+  const rawRoute = getRawRouteRecord(manifest, routeId);
+  const slots = rawRoute?.["slots"];
+  if (!isRecord(slots)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(slots).map(([slotName, slotValue]) => {
+      if (!Array.isArray(slotValue)) {
+        return [slotName, []];
+      }
+
+      return [
+        slotName,
+        slotValue.filter((entry): entry is Record<string, unknown> =>
+          isRecord(entry),
+        ),
+      ];
+    }),
+  );
+}
+
+function getLayoutType(layout: RouteLayoutDeclaration): string {
+  if (typeof layout === "string") {
+    return layout;
+  }
+
+  return layout.type;
+}
+
+function getLayoutProps(layout: RouteLayoutDeclaration): Record<string, unknown> {
+  if (typeof layout === "string") {
+    return {};
+  }
+
+  return layout.props ?? {};
+}
+
+function getLayoutSlots(
+  layout: RouteLayoutDeclaration,
+): RouteLayoutSlotDeclaration[] {
+  if (typeof layout === "string") {
+    return [];
+  }
+
+  return Array.isArray(layout.slots) ? layout.slots : [];
+}
+
+function getBuiltInLayoutSlots(type: string): RouteLayoutSlotDeclaration[] {
+  if (!SLOT_ENABLED_LAYOUT_TYPES.has(type)) {
+    return [];
+  }
+
+  return [
+    { name: "header" },
+    { name: "sidebar" },
+    { name: "main", required: true },
+    { name: "footer" },
+  ];
+}
+
+function extractRequestHeaders(bsCtx: unknown): Record<string, string> {
+  if (!bsCtx || typeof bsCtx !== "object") {
+    return {};
+  }
+
+  const candidate = bsCtx as Record<string, unknown>;
+  const request = candidate["request"];
+  if (request instanceof Request) {
+    const headers: Record<string, string> = {};
+    request.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return headers;
+  }
+
+  const req = candidate["req"];
+  const rawHeaders =
+    req && typeof req === "object"
+      ? (req as Record<string, unknown>)["headers"]
+      : undefined;
+  if (rawHeaders && typeof rawHeaders === "object") {
+    return Object.fromEntries(
+      Object.entries(rawHeaders as Record<string, unknown>).map(
+        ([key, value]) => [key, String(value)],
+      ),
+    );
+  }
+
+  return {};
+}
+
+function resolveLocalizedManifest(
+  manifest: CompiledManifest,
+  requestHeaders: Record<string, string>,
+): CompiledManifest {
+  const locale = resolveDetectedLocale(manifest.raw.i18n, {
+    acceptLanguageHeader: requestHeaders["accept-language"],
+  });
+  if (!locale) {
+    return manifest;
+  }
+
+  return resolveI18nRefs(manifest, {
+    locale,
+    i18n: manifest.raw.i18n,
+  });
+}
+
 // ─── Factory ──────────────────────────────────────────────────────────────────
 
 /**
@@ -237,6 +416,271 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
     compiled.routes.map((r) => [r.id, r]),
   );
 
+  const resolveRouteByPath = (
+    pathname: string,
+  ): { route: CompiledRoute; params: Record<string, string> } | null => {
+    const normalized =
+      pathname.length > 1 ? pathname.replace(/\/$/, "") : pathname;
+    const exact = compiled.routeMap[normalized];
+    if (exact) {
+      return { route: exact, params: {} };
+    }
+
+    for (const entry of routeEntries) {
+      const match = entry.pattern.exec(normalized);
+      if (!match) {
+        continue;
+      }
+
+      const params: Record<string, string> = {};
+      for (const name of entry.paramNames) {
+        const value = match.groups?.[name];
+        if (value !== undefined) {
+          params[name] = decodeURIComponent(value);
+        }
+      }
+
+      return { route: entry.route, params };
+    }
+
+    return null;
+  };
+
+  const buildManifestRouteElement = (
+    runtimeManifest: CompiledManifest,
+    route: CompiledRoute,
+    currentPath: string,
+    isLoading: boolean,
+    routeParams: Record<string, string>,
+  ): React.ReactElement => {
+    const navConfig = runtimeManifest.navigation
+      ? ({
+          type: "nav",
+          items: runtimeManifest.navigation.items,
+          collapsible: true,
+          userMenu: true,
+        } as const)
+      : null;
+    const routeLayouts = readRouteLayouts(runtimeManifest, route.id);
+    const routeSlots = readRouteSlots(runtimeManifest, route.id);
+    const slotLayout = routeLayouts.find((layout) =>
+      SLOT_ENABLED_LAYOUT_TYPES.has(getLayoutType(layout)),
+    );
+    if (Object.keys(routeSlots).length > 0) {
+      const layoutType = slotLayout
+        ? getLayoutType(slotLayout)
+        : getLayoutType(routeLayouts[0] ?? "full-width");
+      const declaredSlots = new Map<string, RouteLayoutSlotDeclaration>();
+      for (const slot of getBuiltInLayoutSlots(layoutType)) {
+        declaredSlots.set(slot.name, slot);
+      }
+      if (slotLayout) {
+        for (const slot of getLayoutSlots(slotLayout)) {
+          declaredSlots.set(slot.name, slot);
+        }
+      }
+      const availableSlots = [...declaredSlots.keys()];
+      for (const slotName of Object.keys(routeSlots)) {
+        if (!declaredSlots.has(slotName)) {
+          throw new Error(
+            `Layout "${layoutType}" does not declare slot "${slotName}". Available slots: ${availableSlots.join(", ")}.`,
+          );
+        }
+      }
+    }
+
+    const loadingFallback = React.createElement(ComponentRenderer, {
+      config: { type: "spinner" },
+    });
+
+    const pageNode = isLoading
+      ? React.createElement(
+          "div",
+          {
+            "data-snapshot-route-loading": "",
+            style: { padding: "1rem" },
+          },
+          loadingFallback,
+        )
+      : React.createElement(PageRenderer, {
+          page: route.page,
+          routeId: currentPath,
+          state: runtimeManifest.state,
+          resources: runtimeManifest.resources,
+        });
+
+    const renderSlot = (
+      layoutType: string,
+      declaration: RouteLayoutSlotDeclaration | undefined,
+      defaultContent?: React.ReactNode,
+    ): React.ReactNode => {
+      const slotName = declaration?.name ?? "";
+      const slotItems = routeSlots[slotName] ?? [];
+      const hasRouteContent = slotItems.length > 0;
+
+      const content = hasRouteContent
+        ? React.createElement(
+            React.Fragment,
+            null,
+            ...slotItems.map((slotConfig, index) =>
+              React.createElement(ComponentRenderer, {
+                key: `slot:${slotName}:${index}`,
+                config: slotConfig as never,
+              }),
+            ),
+          )
+        : declaration?.fallback
+          ? React.createElement(ComponentRenderer, {
+              config: declaration.fallback as never,
+            })
+          : defaultContent ?? null;
+
+      if (!content) {
+        if (declaration?.required) {
+          throw new Error(
+            `Layout "${layoutType}" requires slot "${declaration.name}" but no content was provided.`,
+          );
+        }
+        return null;
+      }
+
+      const suspenseFallback = declaration?.fallback
+        ? React.createElement(ComponentRenderer, {
+            config: declaration.fallback as never,
+          })
+        : loadingFallback;
+
+      return React.createElement(
+        React.Suspense,
+        {
+          key: `slot-boundary:${layoutType}:${slotName || "main"}`,
+          fallback: suspenseFallback,
+        },
+        content,
+      );
+    };
+
+    const composedNode = routeLayouts.reduceRight<React.ReactNode>(
+      (children, layout, index) => {
+        const layoutType = getLayoutType(layout);
+        if (!BUILT_IN_LAYOUT_TYPES.has(layoutType)) {
+          return children;
+        }
+
+        const slotDeclarations = new Map<string, RouteLayoutSlotDeclaration>();
+        for (const slot of getBuiltInLayoutSlots(layoutType)) {
+          slotDeclarations.set(slot.name, slot);
+        }
+        for (const slot of getLayoutSlots(layout)) {
+          slotDeclarations.set(slot.name, slot);
+        }
+
+        const slots = SLOT_ENABLED_LAYOUT_TYPES.has(layoutType)
+          ? {
+              header: renderSlot(
+                layoutType,
+                slotDeclarations.get("header") ?? { name: "header" },
+              ),
+              sidebar: renderSlot(
+                layoutType,
+                slotDeclarations.get("sidebar") ?? { name: "sidebar" },
+              ),
+              main: renderSlot(
+                layoutType,
+                slotDeclarations.get("main") ?? {
+                  name: "main",
+                  required: true,
+                },
+                children,
+              ),
+              footer: renderSlot(
+                layoutType,
+                slotDeclarations.get("footer") ?? { name: "footer" },
+              ),
+            }
+          : undefined;
+
+        const navNode =
+          navConfig && (layoutType === "sidebar" || layoutType === "top-nav")
+            ? React.createElement(Nav, {
+                config: navConfig,
+                pathname: currentPath,
+              })
+            : undefined;
+
+        return React.createElement(
+          Layout,
+          {
+            key: `layout:${layoutType}:${index}`,
+            config: {
+              type: "layout",
+              variant: layoutType,
+              ...getLayoutProps(layout),
+            } as Parameters<typeof Layout>[0]["config"],
+            nav: navNode,
+            slots,
+          },
+          children,
+        );
+      },
+      pageNode,
+    );
+
+    return React.createElement(RouteRuntimeProvider, {
+      value: {
+        currentPath,
+        currentRoute: route,
+        params: routeParams,
+        navigate: () => {},
+        isPreloading: isLoading,
+      },
+      children: composedNode,
+    });
+  };
+
+  const buildManifestFallbackElement = (
+    runtimeManifest: CompiledManifest,
+    runtimeRouteById: Record<string, CompiledRoute>,
+    kind: "error" | "notFound",
+    currentPath: string,
+  ): React.ReactElement => {
+    if (kind === "notFound" && runtimeManifest.app.notFound) {
+      const route = runtimeRouteById[runtimeManifest.app.notFound];
+      if (route) {
+        return buildManifestRouteElement(
+          runtimeManifest,
+          route,
+          currentPath,
+          false,
+          {},
+        );
+      }
+    }
+
+    if (kind === "error" && runtimeManifest.app.error) {
+      if (typeof runtimeManifest.app.error === "string") {
+        const route = runtimeRouteById[runtimeManifest.app.error];
+        if (route) {
+          return buildManifestRouteElement(
+            runtimeManifest,
+            route,
+            currentPath,
+            false,
+            {},
+          );
+        }
+      } else if (isRecord(runtimeManifest.app.error)) {
+        return React.createElement(ComponentRenderer, {
+          config: runtimeManifest.app.error as never,
+        });
+      }
+    }
+
+    return React.createElement(ComponentRenderer, {
+      config: { type: kind === "notFound" ? "not-found" : "error-page" },
+    });
+  };
+
   // Declare as a variable so renderChain can reference render() without `this`
   const manifestRenderer: {
     resolve(url: URL, bsCtx: unknown): Promise<SsrRouteMatchShape | null>;
@@ -324,100 +768,211 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
         ? match.filePath.slice("manifest:".length)
         : null;
 
-      if (!routeId) return buildSpaFallback(shell);
+      let activeRoute = routeId ? routeById[routeId] : undefined;
+      let activeMatch = match;
+      const responseHeaders = new Headers();
+      let responseStatus: number | undefined;
 
-      const route = routeById[routeId];
-      if (!route) return buildSpaFallback(shell);
+      const applyResponseOverrides = (response: Response): Response => {
+        const nextHeaders = new Headers(response.headers);
+        responseHeaders.forEach((value, name) => {
+          nextHeaders.set(name, value);
+        });
 
-      // Auth guard check
-      if (route.guard) {
-        const redirectTo = route.guard.redirectTo ?? "/login";
-        if (route.guard.authenticated) {
-          const user = frozen.getUser
-            ? await frozen.getUser(new Headers()).catch((): null => null)
-            : null;
-          if (!user) {
-            return Response.redirect(redirectTo, 302);
+        return new Response(response.body, {
+          status: responseStatus ?? response.status,
+          statusText: response.statusText,
+          headers: nextHeaders,
+        });
+      };
+
+      const renderWithProviders = async (
+        element: React.ReactElement,
+        requestMatch: SsrRouteMatchShape,
+        headTags: string,
+        queryCache: readonly SsrQueryCacheEntry[] = [],
+      ): Promise<Response> => {
+        const queryClient = new QueryClient({
+          defaultOptions: {
+            queries: { staleTime: Infinity, retry: false },
+          },
+        });
+        for (const entry of queryCache) {
+          queryClient.setQueryData(
+            entry.queryKey as readonly unknown[],
+            entry.data,
+          );
+        }
+        const requestContext: SsrRequestContext = {
+          queryClient,
+          match: requestMatch,
+        };
+
+        const wrapped = React.createElement(
+          SnapshotApiContext.Provider,
+          { value: null },
+          React.createElement(ManifestRuntimeProvider, {
+            manifest: compiled,
+            children: React.createElement(AppContextProvider, {
+              globals: compiled.state,
+              resources: compiled.resources,
+              children: element,
+            }),
+          }),
+        );
+
+        const rendered = await renderPage(
+          wrapped,
+          requestContext,
+          { ...shell, headTags },
+          undefined,
+          rscOptions,
+        );
+
+        return applyResponseOverrides(rendered);
+      };
+
+      try {
+        const middlewareResult = await runManifestSsrMiddleware({
+          manifest: compiled,
+          pathname: match.url.pathname,
+          url: match.url.toString(),
+          method: "GET",
+          params: { ...match.params },
+          query: { ...match.query },
+          requestHeaders: extractRequestHeaders(bsCtx),
+          workflows: compiled.workflows,
+        });
+
+        middlewareResult.response.headers.forEach((value, name) => {
+          responseHeaders.set(name, value);
+        });
+        responseStatus = middlewareResult.response.status ?? responseStatus;
+
+        if (middlewareResult.response.redirect) {
+          const redirectResponse = Response.redirect(
+            middlewareResult.response.redirect.url,
+            middlewareResult.response.redirect.permanent ? 308 : 302,
+          );
+          return applyResponseOverrides(redirectResponse);
+        }
+
+        if (middlewareResult.response.halt) {
+          const halted = new Response(null, {
+            status: middlewareResult.response.status ?? 204,
+          });
+          return applyResponseOverrides(halted);
+        }
+
+        if (middlewareResult.response.rewrite) {
+          const rewritten = resolveRouteByPath(middlewareResult.response.rewrite);
+          if (!rewritten) {
+            responseStatus = responseStatus ?? 404;
+            const fallback = buildManifestFallbackElement(
+              "notFound",
+              middlewareResult.response.rewrite,
+            );
+            return renderWithProviders(
+              fallback,
+              {
+                ...match,
+                url: new URL(middlewareResult.response.rewrite, match.url),
+                params: {},
+              },
+              shell.headTags,
+            );
           }
 
-          if (route.guard.roles?.length) {
-            const hasRole = route.guard.roles.some((r: string) =>
-              user.roles.includes(r),
-            );
-            if (!hasRole) {
-              return Response.redirect(route.guard.redirectTo ?? "/", 302);
+          activeRoute = rewritten.route;
+          activeMatch = {
+            ...match,
+            url: new URL(middlewareResult.response.rewrite, match.url),
+            params: rewritten.params,
+          };
+        }
+
+        if (!activeRoute) {
+          responseStatus = responseStatus ?? 404;
+          const fallback = buildManifestFallbackElement(
+            "notFound",
+            activeMatch.url.pathname,
+          );
+          return renderWithProviders(fallback, activeMatch, shell.headTags);
+        }
+
+        if (activeRoute.guard) {
+          const redirectTo = activeRoute.guard.redirectTo ?? "/login";
+          if (activeRoute.guard.authenticated) {
+            const user = frozen.getUser
+              ? await frozen.getUser(new Headers()).catch((): null => null)
+              : null;
+            if (!user) {
+              const redirectResponse = Response.redirect(redirectTo, 302);
+              return applyResponseOverrides(redirectResponse);
+            }
+
+            if (activeRoute.guard.roles?.length) {
+              const hasRole = activeRoute.guard.roles.some((r: string) =>
+                user.roles.includes(r),
+              );
+              if (!hasRole) {
+                const redirectResponse = Response.redirect(
+                  activeRoute.guard.redirectTo ?? "/",
+                  302,
+                );
+                return applyResponseOverrides(redirectResponse);
+              }
             }
           }
         }
-      }
 
-      // Preload resources via caller-provided resolvers
-      const queryCache: SsrQueryCacheEntry[] = [];
-      if (route.preload?.length && frozen.preloadResolvers) {
-        for (const preloadTarget of route.preload) {
-          const resourceKey =
-            typeof preloadTarget === "string"
-              ? preloadTarget
-              : preloadTarget.resource;
-          const resolver = frozen.preloadResolvers[resourceKey];
-          if (!resolver) continue; // Not provided — client fetches after hydration
+        const queryCache: SsrQueryCacheEntry[] = [];
+        if (activeRoute.preload?.length && frozen.preloadResolvers) {
+          for (const preloadTarget of activeRoute.preload) {
+            const resourceKey =
+              typeof preloadTarget === "string"
+                ? preloadTarget
+                : preloadTarget.resource;
+            const resolver = frozen.preloadResolvers[resourceKey];
+            if (!resolver) {
+              continue;
+            }
 
-          try {
-            const data = await resolver(match.params, bsCtx);
-            queryCache.push({
-              queryKey: [resourceKey, match.params] as const,
-              data,
-            });
-          } catch (err) {
-            // Non-fatal: preload failure degrades to client-side fetch
-            console.warn(
-              `[snapshot-ssr] Preload resolver '${resourceKey}' failed:`,
-              err,
-            );
+            try {
+              const data = await resolver(activeMatch.params, bsCtx);
+              queryCache.push({
+                queryKey: [resourceKey, activeMatch.params] as const,
+                data,
+              });
+            } catch (err) {
+              console.warn(
+                `[snapshot-ssr] Preload resolver '${resourceKey}' failed:`,
+                err,
+              );
+            }
           }
         }
-      }
 
-      // Create per-request QueryClient and seed cache
-      const queryClient = new QueryClient({
-        defaultOptions: {
-          queries: { staleTime: Infinity, retry: false },
-        },
-      });
-      for (const entry of queryCache) {
-        queryClient.setQueryData(
-          entry.queryKey as readonly unknown[],
-          entry.data,
+        const pageElement = buildManifestRouteElement(
+          activeRoute,
+          activeMatch.url.pathname,
+          false,
+          activeMatch.params,
         );
+        const headTags = activeRoute.page.title
+          ? `<title>${escapeHtml(activeRoute.page.title)}</title>`
+          : shell.headTags;
+
+        return renderWithProviders(pageElement, activeMatch, headTags, queryCache);
+      } catch (error) {
+        console.error("[snapshot-ssr] manifest route render failed:", error);
+        responseStatus = responseStatus ?? 500;
+        const fallback = buildManifestFallbackElement(
+          "error",
+          activeMatch.url.pathname,
+        );
+        return renderWithProviders(fallback, activeMatch, shell.headTags);
       }
-
-      // Head tags from page title
-      const headTags = route.page.title
-        ? `<title>${escapeHtml(route.page.title)}</title>`
-        : "";
-
-      const populatedShell: SsrShellShape = { ...shell, headTags };
-
-      const requestContext: SsrRequestContext = {
-        queryClient,
-        match,
-      };
-
-      // Render PageRenderer with the fresh QueryClient
-      const element = React.createElement(PageRenderer, {
-        page: route.page,
-        routeId: route.id,
-        state: compiled.state,
-        resources: compiled.resources,
-      });
-
-      return renderPage(
-        element,
-        requestContext,
-        populatedShell,
-        undefined,
-        rscOptions,
-      );
     },
 
     /**
@@ -429,7 +984,7 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
      * when the file resolver detects layout files for manifest-routed pages.
      *
      * Implementation: delegates to `render()` using the leaf page match.
-     * Manifest page composition already encodes layout nesting in the `PageRenderer`.
+     * Layout composition, slots, middleware, and fallbacks are all handled in `render()`.
      *
      * @param chain - Route chain from bunshot-ssr (layouts are manifest-defined, ignored here).
      * @param shell - Shell from bunshot-ssr.

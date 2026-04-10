@@ -85,6 +85,7 @@ const POSTAMBLE = "\n</div>\n</body>\n</html>";
  * @param timeoutMs - Abort timeout in milliseconds. Default: 5000.
  * @param rscOptions - Optional RSC manifest. When provided, enables RSC two-pass
  *   rendering. When omitted, standard SSR is used (no RSC).
+ * @param responseInit - Optional response overrides (status/headers).
  * @returns A streaming `Response` with `Content-Type: text/html; charset=utf-8`.
  *
  * @internal — called by `createReactRenderer` and `createManifestRenderer`.
@@ -95,6 +96,10 @@ export function renderPage(
   shell: SsrShellShape,
   timeoutMs = 5000,
   rscOptions?: RscOptions,
+  responseInit?: {
+    status?: number;
+    headers?: HeadersInit;
+  },
 ): Promise<Response> {
   return withRequestStore(async () => {
     const { queryClient } = context;
@@ -221,10 +226,13 @@ export function renderPage(
     const body = buildConcatenatedStream(preambleBytes, stream, postambleBytes);
 
     return new Response(body, {
-      status: 200,
+      status: responseInit?.status ?? 200,
       headers: {
         "Content-Type": "text/html; charset=utf-8",
         "Transfer-Encoding": "chunked",
+        ...(responseInit?.headers
+          ? Object.fromEntries(new Headers(responseInit.headers).entries())
+          : null),
       },
     });
   });
