@@ -34,26 +34,39 @@ import type {
 } from "./types";
 import type { ManifestConfig } from "./ui/manifest/types";
 import { bootBuiltins } from "./ui/manifest/boot-builtins";
+import { compileManifest } from "./ui/manifest/compiler";
 import { mergeContract } from "./auth/contract";
 
 export function createSnapshot<
   TWSEvents extends Record<string, unknown> = Record<string, unknown>,
 >(config: SnapshotConfig): SnapshotInstance<TWSEvents> {
   bootBuiltins();
+  const compiledManifest = config.manifest
+    ? compileManifest(config.manifest as ManifestConfig)
+    : null;
+  const manifestSession = compiledManifest?.auth?.session;
+  const runtimeConfig: SnapshotConfig = {
+    ...config,
+    auth: manifestSession?.mode ?? config.auth,
+    tokenStorage: manifestSession?.storage ?? config.tokenStorage,
+    tokenKey: manifestSession?.key ?? config.tokenKey,
+  };
+  const { manifest: _manifest, ...snapshotConfigForManifestApp } =
+    runtimeConfig;
 
   // ── Auth contract ────────────────────────────────────────────────────────────
-  const contract = mergeContract(config.apiUrl, config.contract);
+  const contract = mergeContract(runtimeConfig.apiUrl, runtimeConfig.contract);
 
   // ── API client ──────────────────────────────────────────────────────────────
   const api = new ApiClient({
-    apiUrl: config.apiUrl,
-    auth: config.auth,
-    bearerToken: config.bearerToken,
-    onUnauthenticated: config.onUnauthenticated,
-    onForbidden: config.onForbidden,
-    onMfaSetupRequired: config.mfaSetupPath
+    apiUrl: runtimeConfig.apiUrl,
+    auth: runtimeConfig.auth,
+    bearerToken: runtimeConfig.bearerToken,
+    onUnauthenticated: runtimeConfig.onUnauthenticated,
+    onForbidden: runtimeConfig.onForbidden,
+    onMfaSetupRequired: runtimeConfig.mfaSetupPath
       ? () => {
-          window.location.href = config.mfaSetupPath!;
+          window.location.href = runtimeConfig.mfaSetupPath!;
         }
       : undefined,
     contract,
@@ -61,9 +74,9 @@ export function createSnapshot<
 
   // ── Token storage ───────────────────────────────────────────────────────────
   const tokenStorage = createTokenStorage({
-    auth: config.auth,
-    tokenStorage: config.tokenStorage,
-    tokenKey: config.tokenKey,
+    auth: runtimeConfig.auth,
+    tokenStorage: runtimeConfig.tokenStorage,
+    tokenKey: runtimeConfig.tokenKey,
   });
   api.setStorage(tokenStorage);
 
@@ -80,7 +93,7 @@ export function createSnapshot<
 
   // ── Security posture warnings ─────────────────────────────────────────────
   // Warning 4: verbose auth errors enabled on non-localhost
-  const authErrorsConfig = (config as unknown as Record<string, unknown>)
+  const authErrorsConfig = (runtimeConfig as unknown as Record<string, unknown>)
     .authErrors as { verbose?: boolean } | undefined;
   if (authErrorsConfig?.verbose === true && typeof window !== "undefined") {
     const hostname = window.location.hostname;
@@ -99,18 +112,18 @@ export function createSnapshot<
 
   // ── WebSocket manager (created once if ws config present) ──────────────────
   let wsManager: WebSocketManager<TWSEvents> | null = null;
-  if (config.ws) {
-    wsManager = new WebSocketManager<TWSEvents>(config.ws);
+  if (runtimeConfig.ws) {
+    wsManager = new WebSocketManager<TWSEvents>(runtimeConfig.ws);
   }
 
   // ── SSE registry — one SseManager per configured endpoint ─────────────────
   // Key: endpoint path (e.g. '/__sse/feed'), Value: { manager, url }
   const sseRegistry = new Map<string, { manager: SseManager; url: string }>();
 
-  if (config.sse) {
-    const { endpoints } = config.sse;
+  if (runtimeConfig.sse) {
+    const { endpoints } = runtimeConfig.sse;
     for (const [path, endpointCfg] of Object.entries(endpoints)) {
-      const url = `${config.apiUrl}${path}`;
+      const url = `${runtimeConfig.apiUrl}${path}`;
       const manager = new SseManager({
         withCredentials: endpointCfg.withCredentials,
         onConnected: endpointCfg.onConnected,
@@ -373,12 +386,12 @@ export function createSnapshot<
     createAuthHooks({
       api,
       storage: tokenStorage,
-      config,
+      config: runtimeConfig,
       contract,
       pendingMfaChallengeAtom,
       onLoginSuccess: () => {
-        if (config.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
-        if (config.sse?.reconnectOnLogin !== false) reconnectAllSse();
+        if (runtimeConfig.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
+        if (runtimeConfig.sse?.reconnectOnLogin !== false) reconnectAllSse();
       },
       onLogoutSuccess: () => closeAllSse(),
     });
@@ -387,12 +400,12 @@ export function createSnapshot<
   const mfaHooks = createMfaHooks({
     api,
     storage: tokenStorage,
-    config,
+    config: runtimeConfig,
     contract,
     pendingMfaChallengeAtom,
     onLoginSuccess: () => {
-      if (config.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
-      if (config.sse?.reconnectOnLogin !== false) reconnectAllSse();
+      if (runtimeConfig.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
+      if (runtimeConfig.sse?.reconnectOnLogin !== false) reconnectAllSse();
     },
   });
 
@@ -400,9 +413,9 @@ export function createSnapshot<
   const accountHooks = createAccountHooks({
     api,
     storage: tokenStorage,
-    config,
+    config: runtimeConfig,
     contract,
-    onUnauthenticated: config.onUnauthenticated,
+    onUnauthenticated: runtimeConfig.onUnauthenticated,
     queryClient,
   });
 
@@ -410,11 +423,11 @@ export function createSnapshot<
   const oauthHooks = createOAuthHooks({
     api,
     storage: tokenStorage,
-    config,
+    config: runtimeConfig,
     contract,
     onLoginSuccess: () => {
-      if (config.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
-      if (config.sse?.reconnectOnLogin !== false) reconnectAllSse();
+      if (runtimeConfig.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
+      if (runtimeConfig.sse?.reconnectOnLogin !== false) reconnectAllSse();
     },
   });
 
@@ -422,24 +435,24 @@ export function createSnapshot<
   const webAuthnHooks = createWebAuthnHooks({
     api,
     storage: tokenStorage,
-    config,
+    config: runtimeConfig,
     contract,
     pendingMfaChallengeAtom,
     onLoginSuccess: () => {
-      if (config.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
-      if (config.sse?.reconnectOnLogin !== false) reconnectAllSse();
+      if (runtimeConfig.ws?.reconnectOnLogin !== false) wsManager?.reconnect();
+      if (runtimeConfig.sse?.reconnectOnLogin !== false) reconnectAllSse();
     },
   });
 
   // ── Routing ─────────────────────────────────────────────────────────────────
   const { protectedBeforeLoad, guestBeforeLoad } = createLoaders(
-    config,
+    runtimeConfig,
     api,
     contract,
   );
 
   // ── Auth error formatter ────────────────────────────────────────────────────
-  const boundFormatAuthError = createAuthErrorFormatter(config.authErrors);
+  const boundFormatAuthError = createAuthErrorFormatter(runtimeConfig.authErrors);
 
   // ── QueryProvider pre-bound to this instance's queryClient ─────────────────
   function QueryProvider({ children }: { children: ReactNode }) {
@@ -450,20 +463,25 @@ export function createSnapshot<
 
   // ── ManifestApp (created when manifest config is provided) ──────────────────
   let ManifestAppComponent: React.ComponentType | undefined;
-  if (config.manifest) {
-    const manifestConfig = config.manifest as unknown as ManifestConfig;
+  if (runtimeConfig.manifest) {
+    const manifestConfig = runtimeConfig.manifest as unknown as ManifestConfig;
     // Lazy import to avoid pulling UI code into SDK-only consumers
     const { ManifestApp: ManifestAppImpl } = require("./ui/manifest/app") as {
       ManifestApp: React.ComponentType<{
         manifest: ManifestConfig;
         apiUrl: string;
+        snapshotConfig?: Record<string, unknown>;
       }>;
     };
-    const capturedApiUrl = config.apiUrl;
+    const capturedApiUrl = runtimeConfig.apiUrl;
     const capturedManifest = manifestConfig;
     ManifestAppComponent = function SnapshotManifestApp() {
       return (
-        <ManifestAppImpl manifest={capturedManifest} apiUrl={capturedApiUrl} />
+        <ManifestAppImpl
+          manifest={capturedManifest}
+          apiUrl={capturedApiUrl}
+          snapshotConfig={snapshotConfigForManifestApp}
+        />
       );
     };
   }

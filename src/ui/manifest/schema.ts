@@ -357,6 +357,19 @@ const authProviderListSchema = z.array(
   z.union([authProviderNameSchema, authProviderConfigSchema]),
 );
 
+/**
+ * Manifest auth session settings.
+ */
+export const authSessionSchema = z
+  .object({
+    mode: z.enum(["cookie", "token"]).default("cookie"),
+    storage: z
+      .enum(["localStorage", "sessionStorage", "memory"])
+      .default("sessionStorage"),
+    key: z.string().default("snapshot.token"),
+  })
+  .strict();
+
 const authScreenSectionSchema = z.enum([
   "form",
   "providers",
@@ -410,6 +423,7 @@ const authScreenOptionsSchema = z
 export const authScreenConfigSchema = z
   .object({
     screens: z.array(authScreenNameSchema).min(1),
+    session: authSessionSchema.optional(),
     providers: authProviderListSchema.optional(),
     providerMode: z.enum(["buttons", "auto"]).optional(),
     passkey: z

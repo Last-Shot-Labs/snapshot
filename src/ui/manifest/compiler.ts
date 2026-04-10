@@ -93,6 +93,17 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
     routes.map((route) => [route.path, route]),
   ) as Record<string, CompiledRoute>;
 
+  const auth = resolvedManifest.auth
+    ? {
+        ...resolvedManifest.auth,
+        session: resolvedManifest.auth.session ?? {
+          mode: "cookie" as const,
+          storage: "sessionStorage" as const,
+          key: "snapshot.token",
+        },
+      }
+    : undefined;
+
   return {
     raw: resolvedManifest,
     app: {
@@ -110,7 +121,7 @@ function buildCompiledManifest(manifest: ManifestConfig): CompiledManifest {
     workflows: resolvedManifest.workflows,
     overlays: resolvedManifest.overlays,
     navigation: resolvedManifest.navigation,
-    auth: resolvedManifest.auth,
+    auth,
     routes,
     routeMap,
     firstRoute: routes[0] ?? null,

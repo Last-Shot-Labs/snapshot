@@ -134,6 +134,11 @@ describe("compiler", () => {
     const compiled = compileManifest({
       auth: {
         screens: ["login"],
+        session: {
+          mode: "token",
+          storage: "memory",
+          key: "auth.token",
+        },
         redirects: {
           afterLogin: "/reports",
         },
@@ -167,6 +172,11 @@ describe("compiler", () => {
     });
 
     expect(compiled.auth?.redirects?.afterLogin).toBe("/reports");
+    expect(compiled.auth?.session).toEqual({
+      mode: "token",
+      storage: "memory",
+      key: "auth.token",
+    });
     expect(compiled.auth?.screenOptions?.login?.title).toBe("Welcome back");
     expect(compiled.auth?.screenOptions?.login?.sections).toEqual([
       "providers",
@@ -183,6 +193,27 @@ describe("compiler", () => {
     expect(compiled.auth?.screenOptions?.login?.passkey).toEqual({
       enabled: true,
       autoPrompt: true,
+    });
+  });
+
+  it("defaults auth.session when omitted", () => {
+    const compiled = compileManifest({
+      auth: {
+        screens: ["login"],
+      },
+      routes: [
+        {
+          id: "login",
+          path: "/login",
+          content: [{ type: "heading", text: "Login" }],
+        },
+      ],
+    });
+
+    expect(compiled.auth?.session).toEqual({
+      mode: "cookie",
+      storage: "sessionStorage",
+      key: "snapshot.token",
     });
   });
 
