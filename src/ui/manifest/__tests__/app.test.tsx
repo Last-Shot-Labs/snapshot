@@ -20,6 +20,14 @@ import { useSetStateValue, useStateValue } from "../../state";
 
 import "../structural";
 
+declare global {
+  interface Window {
+    happyDOM: {
+      setURL(url: string): void;
+    };
+  }
+}
+
 function dispatchPopStateEvent(): void {
   if (typeof PopStateEvent === "function") {
     window.dispatchEvent(new PopStateEvent("popstate"));
@@ -27,6 +35,10 @@ function dispatchPopStateEvent(): void {
   }
 
   window.dispatchEvent(new Event("popstate"));
+}
+
+function setTestUrl(url: string): void {
+  window.happyDOM.setURL(url);
 }
 
 const originalWebSocket = global.WebSocket;
@@ -183,7 +195,7 @@ describe("ManifestApp", () => {
   });
 
   it("renders the current route when multiple routes exist", async () => {
-    window.history.pushState({}, "", "/about");
+    setTestUrl("http://localhost/about");
 
     const manifest: ManifestConfig = {
       app: {
@@ -238,7 +250,7 @@ describe("ManifestApp", () => {
     expect(screen.getByRole("button", { name: "1" })).toBeDefined();
 
     await act(async () => {
-      window.history.pushState({}, "", "/about");
+      setTestUrl("http://localhost/about");
       dispatchPopStateEvent();
     });
 
