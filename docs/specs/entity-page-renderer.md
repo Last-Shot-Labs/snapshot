@@ -9,20 +9,57 @@
 > The bunshot spec defines the manifest schema, page resolution, data loading,
 > and renderer contract. This spec implements that contract.
 >
-> | Phase                                                     | Status  | Track |
-> | --------------------------------------------------------- | ------- | ----- |
-> | Phase 1: Page declaration mapper                          | Pending | A     |
-> | Phase 2: Field type mapping tables                        | Pending | A     |
-> | Phase 3: Entity-list page rendering                       | Pending | A     |
-> | Phase 4: Entity-detail page rendering                     | Pending | A     |
-> | Phase 5: Entity-form page rendering                       | Pending | A     |
-> | Phase 6: Entity-dashboard page rendering                  | Pending | A     |
-> | Phase 7: Navigation & app shell rendering                 | Pending | A     |
-> | Phase 8: Custom page handler ref rendering                | Pending | A     |
-> | Phase 9: `renderPage()` on `createReactRenderer`          | Pending | B     |
-> | Phase 10: `renderPage()` on `createManifestRenderer`      | Pending | B     |
-> | Phase 11: Tests                                           | Pending | C     |
-> | Phase 12: Documentation                                   | Pending | C     |
+> | Phase                                                | Status | Track |
+> | ---------------------------------------------------- | ------ | ----- |
+> | Phase 1: Page declaration mapper                     | Done   | A     |
+> | Phase 2: Field type mapping tables                   | Done   | A     |
+> | Phase 3: Entity-list page rendering                  | Done   | A     |
+> | Phase 4: Entity-detail page rendering                | Done   | A     |
+> | Phase 5: Entity-form page rendering                  | Done   | A     |
+> | Phase 6: Entity-dashboard page rendering             | Done   | A     |
+> | Phase 7: Navigation & app shell rendering            | Done   | A     |
+> | Phase 8: Custom page handler ref rendering           | Done   | A     |
+> | Phase 9: `renderPage()` on `createReactRenderer`     | Done   | B     |
+> | Phase 10: `renderPage()` on `createManifestRenderer` | Done   | B     |
+> | Phase 11: Tests                                      | Done   | C     |
+> | Phase 12: Documentation                              | Done   | C     |
+
+## Implementation Status (2026-04-09)
+
+This spec is now implemented in the Snapshot repo.
+
+Primary implementation files:
+
+- `src/ui/entity-pages/`
+- `src/ssr/renderer.ts`
+- `src/ssr/manifest-renderer.ts`
+- `src/ssr/__tests__/render-page.test.tsx`
+- `docs/ssr/entity-pages.md`
+
+Important runtime notes:
+
+- The live Snapshot component contracts differ slightly from some of the illustrative
+  snippets below. The implementation follows the current runtime, not the older examples.
+- In particular, `row` uses `children`, not `content`, and the real `data-table`,
+  `detail-card`, `form`, `chart`, `feed`, and `filter-bar` configs were mapped to their
+  current schemas.
+- SSR required two runtime fixes beyond the original phase plan:
+  1. structural component registration is explicitly loaded in the SSR entity-page path
+  2. route/app state defaults and inline `from` data are seeded synchronously so
+     preloaded bunshot data appears in the first server render
+- Bunshot bridge types currently live in `src/ui/entity-pages/bunshot-types.ts` until the
+  public `@lastshotlabs/bunshot-ssr` types are imported directly.
+
+Validation status for this implementation:
+
+- `bun run typecheck` passes
+- `bun run build` passes
+- focused entity-page mapper and SSR tests pass
+- repo-wide `bun run format:check` still fails because the repository already contains many
+  unrelated unformatted files
+- full `bun test` was attempted but timed out before completion, so this spec should be
+  considered implemented with feature-level verification complete, not repo-wide green
+  verification
 
 ---
 
@@ -92,6 +129,7 @@ manifest-driven end-to-end. The user declares entities and pages in
 code anywhere.
 
 **Before:** A developer who wants a Post list page writes:
+
 - Entity definition in bunshot manifest
 - A Snapshot manifest JSON with a `data-table`, `resources`, column config,
   filter config, pagination config, actions, and a navigation section
@@ -108,49 +146,49 @@ JSON. Zero TypeScript.
 
 ### Rendering pipeline (fully implemented)
 
-| File | What | Lines |
-|------|------|-------|
-| `src/ssr/renderer.ts` | `createReactRenderer()` — `render()`, `renderChain()`, component resolution | ~1050 |
-| `src/ssr/manifest-renderer.ts` | `createManifestRenderer()` — manifest-mode SSR rendering | ~350 |
-| `src/ssr/render.ts` | `renderPage()` — streams React to HTML via `renderToReadableStream` | ~200 |
-| `src/ssr/types.ts` | `SnapshotSsrConfig`, `ManifestSsrConfig`, `ServerRouteMatchShape`, `SsrShellShape` | ~500 |
+| File                           | What                                                                               | Lines |
+| ------------------------------ | ---------------------------------------------------------------------------------- | ----- |
+| `src/ssr/renderer.ts`          | `createReactRenderer()` — `render()`, `renderChain()`, component resolution        | ~1050 |
+| `src/ssr/manifest-renderer.ts` | `createManifestRenderer()` — manifest-mode SSR rendering                           | ~350  |
+| `src/ssr/render.ts`            | `renderPage()` — streams React to HTML via `renderToReadableStream`                | ~200  |
+| `src/ssr/types.ts`             | `SnapshotSsrConfig`, `ManifestSsrConfig`, `ServerRouteMatchShape`, `SsrShellShape` | ~500  |
 
 ### Manifest system (fully implemented)
 
-| File | What |
-|------|------|
-| `src/ui/manifest/app.tsx` | `ManifestApp` — full app from JSON (L654) |
-| `src/ui/manifest/renderer.tsx` | `PageRenderer` + `ComponentRenderer` |
-| `src/ui/manifest/compiler.ts` | `compileManifest()` — Zod validation + route compilation |
-| `src/ui/manifest/types.ts` | `ManifestConfig`, `PageConfig`, `RouteConfig`, `ComponentConfig`, `CompiledManifest` |
-| `src/ui/manifest/schema.ts` | Zod schemas, component schema registry |
-| `src/ui/manifest/component-registry.tsx` | Runtime component registry (`registerComponent()`) |
-| `src/ui/manifest/structural.tsx` | Built-in structural components (`row`, `heading`, `button`, `select`) |
-| `src/ui/manifest/resources.ts` | `ResourceConfig`, endpoint resolution, cache invalidation |
-| `src/ui/manifest/runtime.tsx` | `ManifestRuntimeProvider`, resource cache, route context |
+| File                                     | What                                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------ |
+| `src/ui/manifest/app.tsx`                | `ManifestApp` — full app from JSON (L654)                                            |
+| `src/ui/manifest/renderer.tsx`           | `PageRenderer` + `ComponentRenderer`                                                 |
+| `src/ui/manifest/compiler.ts`            | `compileManifest()` — Zod validation + route compilation                             |
+| `src/ui/manifest/types.ts`               | `ManifestConfig`, `PageConfig`, `RouteConfig`, `ComponentConfig`, `CompiledManifest` |
+| `src/ui/manifest/schema.ts`              | Zod schemas, component schema registry                                               |
+| `src/ui/manifest/component-registry.tsx` | Runtime component registry (`registerComponent()`)                                   |
+| `src/ui/manifest/structural.tsx`         | Built-in structural components (`row`, `heading`, `button`, `select`)                |
+| `src/ui/manifest/resources.ts`           | `ResourceConfig`, endpoint resolution, cache invalidation                            |
+| `src/ui/manifest/runtime.tsx`            | `ManifestRuntimeProvider`, resource cache, route context                             |
 
 ### Components (65+ registered)
 
-| Category | Components |
-|----------|------------|
-| Data display | `data-table`, `detail-card`, `stat-card`, `badge`, `list`, `feed`, `chart` |
-| Forms | `form` (AutoForm), `input`, `textarea`, `toggle`, `switch`, `multi-select`, `inline-edit`, `tag-selector`, `entity-picker`, `wizard` |
-| Layout | `row`, `heading`, `tabs`, `accordion`, `stepper`, `separator` |
-| Navigation | `breadcrumb`, `tree-view` |
-| Overlay | `modal`, `drawer`, `popover`, `dropdown-menu`, `command-palette`, `context-menu` |
-| Feedback | `alert`, `progress`, `skeleton`, `empty-state`, `tooltip` |
-| Filter | `filter-bar` |
-| Content | `timeline`, `code-block`, `rich-text-editor`, `markdown`, `compare-view` |
-| Chat | `emoji-picker`, `reaction-bar`, `presence-indicator`, `typing-indicator`, `message-thread`, `chat-window` |
-| Workflow | `kanban`, `calendar`, `audit-log`, `notification-feed` |
+| Category     | Components                                                                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Data display | `data-table`, `detail-card`, `stat-card`, `badge`, `list`, `feed`, `chart`                                                           |
+| Forms        | `form` (AutoForm), `input`, `textarea`, `toggle`, `switch`, `multi-select`, `inline-edit`, `tag-selector`, `entity-picker`, `wizard` |
+| Layout       | `row`, `heading`, `tabs`, `accordion`, `stepper`, `separator`                                                                        |
+| Navigation   | `breadcrumb`, `tree-view`                                                                                                            |
+| Overlay      | `modal`, `drawer`, `popover`, `dropdown-menu`, `command-palette`, `context-menu`                                                     |
+| Feedback     | `alert`, `progress`, `skeleton`, `empty-state`, `tooltip`                                                                            |
+| Filter       | `filter-bar`                                                                                                                         |
+| Content      | `timeline`, `code-block`, `rich-text-editor`, `markdown`, `compare-view`                                                             |
+| Chat         | `emoji-picker`, `reaction-bar`, `presence-indicator`, `typing-indicator`, `message-thread`, `chat-window`                            |
+| Workflow     | `kanban`, `calendar`, `audit-log`, `notification-feed`                                                                               |
 
 ### Presets (the pattern we follow)
 
-| File | What |
-|------|------|
-| `src/ui/presets/crud-page.ts` | `crudPage(options)` → heading + data-table + create modal + edit drawer |
-| `src/ui/presets/dashboard-page.ts` | `dashboardPage(options)` → heading + stat-cards + activity feed |
-| `src/ui/presets/settings-page.ts` | `settingsPage(options)` → heading + tabbed forms |
+| File                               | What                                                                    |
+| ---------------------------------- | ----------------------------------------------------------------------- |
+| `src/ui/presets/crud-page.ts`      | `crudPage(options)` → heading + data-table + create modal + edit drawer |
+| `src/ui/presets/dashboard-page.ts` | `dashboardPage(options)` → heading + stat-cards + activity feed         |
+| `src/ui/presets/settings-page.ts`  | `settingsPage(options)` → heading + tabbed forms                        |
 
 These are the closest existing pattern to what we're building. The difference:
 presets take TypeScript options objects and return `PageConfig`. We take
@@ -187,12 +225,32 @@ interface PageLoaderResult {
 }
 
 type PageData =
-  | { readonly type: 'list'; readonly items: readonly Record<string, unknown>[]; readonly total: number; readonly page: number; readonly pageSize: number }
-  | { readonly type: 'detail'; readonly item: Readonly<Record<string, unknown>> }
-  | { readonly type: 'form-create'; readonly defaults: Readonly<Record<string, unknown>> }
-  | { readonly type: 'form-edit'; readonly item: Readonly<Record<string, unknown>> }
-  | { readonly type: 'dashboard'; readonly stats: readonly { label: string; value: number }[]; readonly activity?: readonly Record<string, unknown>[]; readonly chart?: readonly Record<string, unknown>[] }
-  | { readonly type: 'custom' };
+  | {
+      readonly type: "list";
+      readonly items: readonly Record<string, unknown>[];
+      readonly total: number;
+      readonly page: number;
+      readonly pageSize: number;
+    }
+  | {
+      readonly type: "detail";
+      readonly item: Readonly<Record<string, unknown>>;
+    }
+  | {
+      readonly type: "form-create";
+      readonly defaults: Readonly<Record<string, unknown>>;
+    }
+  | {
+      readonly type: "form-edit";
+      readonly item: Readonly<Record<string, unknown>>;
+    }
+  | {
+      readonly type: "dashboard";
+      readonly stats: readonly { label: string; value: number }[];
+      readonly activity?: readonly Record<string, unknown>[];
+      readonly chart?: readonly Record<string, unknown>[];
+    }
+  | { readonly type: "custom" };
 
 interface EntityMeta {
   readonly name: string;
@@ -203,7 +261,15 @@ interface EntityMeta {
 
 interface EntityFieldMeta {
   readonly name: string;
-  readonly type: 'string' | 'number' | 'integer' | 'boolean' | 'date' | 'enum' | 'json' | 'string[]';
+  readonly type:
+    | "string"
+    | "number"
+    | "integer"
+    | "boolean"
+    | "date"
+    | "enum"
+    | "json"
+    | "string[]";
   readonly optional: boolean;
   readonly primary: boolean;
   readonly immutable: boolean;
@@ -220,9 +286,11 @@ type PageDeclaration =
 
 // NavigationConfig (renderer-agnostic)
 interface NavigationConfig {
-  readonly shell: 'sidebar' | 'top-nav' | 'none';
+  readonly shell: "sidebar" | "top-nav" | "none";
   readonly title?: string;
-  readonly logo?: string | { handler: string; params?: Record<string, unknown> };
+  readonly logo?:
+    | string
+    | { handler: string; params?: Record<string, unknown> };
   readonly items: readonly NavigationItem[];
   readonly userMenu?: readonly NavigationItem[];
 }
@@ -239,29 +307,36 @@ export function crudPage(options: CrudPageOptions): PageConfig {
 
   // 1. Heading row with title + create button
   content.push({
-    type: 'row',
-    justify: 'between',
-    align: 'center',
+    type: "row",
+    justify: "between",
+    align: "center",
     content: [
-      { type: 'heading', level: 1, text: options.title },
-      ...(options.createEndpoint ? [{
-        type: 'button',
-        label: 'Create',
-        variant: 'primary',
-        action: { type: 'open-modal', modal: `${options.id ?? 'crud'}-create` },
-      }] : []),
+      { type: "heading", level: 1, text: options.title },
+      ...(options.createEndpoint
+        ? [
+            {
+              type: "button",
+              label: "Create",
+              variant: "primary",
+              action: {
+                type: "open-modal",
+                modal: `${options.id ?? "crud"}-create`,
+              },
+            },
+          ]
+        : []),
     ],
   });
 
   // 2. Data table
   content.push({
-    type: 'data-table',
-    id: `${options.id ?? 'crud'}-table`,
-    resource: { resource: `${options.id ?? 'crud'}-list` },
-    columns: options.columns.map(col => ({
+    type: "data-table",
+    id: `${options.id ?? "crud"}-table`,
+    resource: { resource: `${options.id ?? "crud"}-list` },
+    columns: options.columns.map((col) => ({
       key: col.key,
       label: col.label,
-      type: col.type ?? 'text',
+      type: col.type ?? "text",
       sortable: col.sortable ?? true,
     })),
     // ... actions, filters, pagination
@@ -272,6 +347,7 @@ export function crudPage(options: CrudPageOptions): PageConfig {
 ```
 
 **The pattern:**
+
 1. Accept high-level options
 2. Build a `content: ComponentConfig[]` array
 3. Use existing registered component types (`row`, `heading`, `data-table`, etc.)
@@ -284,16 +360,16 @@ Our mappers do the exact same thing, but the "high-level options" come from
 
 ## Non-Negotiable Engineering Constraints
 
-| Rule | Constraint |
-|------|------------|
-| Manifest-First | Output must be valid Snapshot `PageConfig` — same JSON that `ManifestApp` renders |
-| `src/ui/` boundary | All mapper code goes under `src/ui/`. Never import bunshot internals. |
-| Components fetch own data | Pre-fetched data injected via Snapshot state, not prop drilling |
-| No direct component imports | Components communicate via context system (publish/subscribe) |
-| Fixed action vocabulary | Only use the 10 defined action types |
-| Token rules | All generated styles use `var(--sn-*)` tokens |
-| SSR rules | All output must be serializable across server/client boundary |
-| Component conventions | New files follow directory structure: `schema.ts`, `component.tsx`, `types.ts`, `index.ts` |
+| Rule                        | Constraint                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| Manifest-First              | Output must be valid Snapshot `PageConfig` — same JSON that `ManifestApp` renders          |
+| `src/ui/` boundary          | All mapper code goes under `src/ui/`. Never import bunshot internals.                      |
+| Components fetch own data   | Pre-fetched data injected via Snapshot state, not prop drilling                            |
+| No direct component imports | Components communicate via context system (publish/subscribe)                              |
+| Fixed action vocabulary     | Only use the 10 defined action types                                                       |
+| Token rules                 | All generated styles use `var(--sn-*)` tokens                                              |
+| SSR rules                   | All output must be serializable across server/client boundary                              |
+| Component conventions       | New files follow directory structure: `schema.ts`, `component.tsx`, `types.ts`, `index.ts` |
 
 ---
 
@@ -310,7 +386,7 @@ mappers are implemented in Phases 3-6.
 New file: `src/ui/entity-pages/mapper.ts`
 
 ```ts
-import type { PageConfig } from '../manifest/types';
+import type { PageConfig } from "../manifest/types";
 
 /**
  * Result of mapping a page declaration to Snapshot's manifest format.
@@ -346,22 +422,24 @@ export interface EntityPageMapResult {
  * @param result - The page loader result from bunshot-ssr
  * @returns Snapshot-compatible page config, resources, state, and overlays
  */
-export function mapPageDeclaration(result: PageLoaderResult): EntityPageMapResult {
+export function mapPageDeclaration(
+  result: PageLoaderResult,
+): EntityPageMapResult {
   const d = result.declaration.declaration;
 
   switch (d.type) {
-    case 'entity-list':
+    case "entity-list":
       return mapEntityListPage(result);
-    case 'entity-detail':
+    case "entity-detail":
       return mapEntityDetailPage(result);
-    case 'entity-form':
+    case "entity-form":
       return mapEntityFormPage(result);
-    case 'entity-dashboard':
+    case "entity-dashboard":
       return mapEntityDashboardPage(result);
-    case 'custom':
+    case "custom":
       throw new Error(
-        'Custom pages are rendered via handler ref, not the entity page mapper. ' +
-        'The caller should handle custom pages before calling mapPageDeclaration().',
+        "Custom pages are rendered via handler ref, not the entity page mapper. " +
+          "The caller should handle custom pages before calling mapPageDeclaration().",
       );
   }
 }
@@ -370,19 +448,23 @@ export function mapPageDeclaration(result: PageLoaderResult): EntityPageMapResul
 New file: `src/ui/entity-pages/index.ts`
 
 ```ts
-export { mapPageDeclaration } from './mapper';
-export type { EntityPageMapResult } from './mapper';
-export { mapFieldToDisplay, mapFieldToInput, mapFieldToColumn } from './field-mappers';
-export { formatFieldLabel } from './utils';
+export { mapPageDeclaration } from "./mapper";
+export type { EntityPageMapResult } from "./mapper";
+export {
+  mapFieldToDisplay,
+  mapFieldToInput,
+  mapFieldToColumn,
+} from "./field-mappers";
+export { formatFieldLabel } from "./utils";
 ```
 
 ### Files to Create
 
-| File | Action |
-|------|--------|
-| `src/ui/entity-pages/mapper.ts` | **Create** — main mapper dispatch |
-| `src/ui/entity-pages/index.ts` | **Create** — barrel export for entity-pages module |
-| `src/ui/entity-pages/utils.ts` | **Create** — shared utilities (formatFieldLabel, buildEntityApiPath, etc.) |
+| File                            | Action                                                                     |
+| ------------------------------- | -------------------------------------------------------------------------- |
+| `src/ui/entity-pages/mapper.ts` | **Create** — main mapper dispatch                                          |
+| `src/ui/entity-pages/index.ts`  | **Create** — barrel export for entity-pages module                         |
+| `src/ui/entity-pages/utils.ts`  | **Create** — shared utilities (formatFieldLabel, buildEntityApiPath, etc.) |
 
 ### Exit Criteria
 
@@ -406,13 +488,20 @@ column (data-table).
 New file: `src/ui/entity-pages/field-mappers.ts`
 
 ```ts
-import type { EntityFieldMeta } from '@lastshotlabs/bunshot-ssr';
+import type { EntityFieldMeta } from "@lastshotlabs/bunshot-ssr";
 
 // ─── Display mapping (detail-card, read-only views) ─────────────
 
 export interface FieldDisplayConfig {
   /** Snapshot component type for displaying this field's value. */
-  readonly type: 'text' | 'number' | 'badge' | 'date' | 'code' | 'tags' | 'boolean';
+  readonly type:
+    | "text"
+    | "number"
+    | "badge"
+    | "date"
+    | "code"
+    | "tags"
+    | "boolean";
   /** For enum fields: map of value → badge variant. */
   readonly variants?: Readonly<Record<string, string>>;
 }
@@ -433,27 +522,32 @@ export interface FieldDisplayConfig {
  */
 export function mapFieldToDisplay(field: EntityFieldMeta): FieldDisplayConfig {
   switch (field.type) {
-    case 'string':
-      return { type: 'text' };
-    case 'number':
-      return { type: 'number' };
-    case 'integer':
-      return { type: 'number' };
-    case 'boolean':
-      return { type: 'boolean' };
-    case 'date':
-      return { type: 'date' };
-    case 'enum':
+    case "string":
+      return { type: "text" };
+    case "number":
+      return { type: "number" };
+    case "integer":
+      return { type: "number" };
+    case "boolean":
+      return { type: "boolean" };
+    case "date":
+      return { type: "date" };
+    case "enum":
       return {
-        type: 'badge',
+        type: "badge",
         variants: field.enumValues
-          ? Object.fromEntries(field.enumValues.map((v, i) => [v, BADGE_VARIANT_CYCLE[i % BADGE_VARIANT_CYCLE.length]]))
+          ? Object.fromEntries(
+              field.enumValues.map((v, i) => [
+                v,
+                BADGE_VARIANT_CYCLE[i % BADGE_VARIANT_CYCLE.length],
+              ]),
+            )
           : undefined,
       };
-    case 'json':
-      return { type: 'code' };
-    case 'string[]':
-      return { type: 'tags' };
+    case "json":
+      return { type: "code" };
+    case "string[]":
+      return { type: "tags" };
   }
 }
 
@@ -461,11 +555,21 @@ export function mapFieldToDisplay(field: EntityFieldMeta): FieldDisplayConfig {
 
 export interface FieldInputConfig {
   /** Snapshot form field input type. */
-  readonly inputType: 'input' | 'number' | 'switch' | 'datetime' | 'select' | 'textarea' | 'tag-selector';
+  readonly inputType:
+    | "input"
+    | "number"
+    | "switch"
+    | "datetime"
+    | "select"
+    | "textarea"
+    | "tag-selector";
   /** HTML input type attribute (for `input` inputType). */
-  readonly htmlType?: 'text' | 'number' | 'email' | 'url' | 'tel';
+  readonly htmlType?: "text" | "number" | "email" | "url" | "tel";
   /** For enum fields: select options. */
-  readonly options?: readonly { readonly label: string; readonly value: string }[];
+  readonly options?: readonly {
+    readonly label: string;
+    readonly value: string;
+  }[];
 }
 
 /**
@@ -484,28 +588,28 @@ export interface FieldInputConfig {
  */
 export function mapFieldToInput(field: EntityFieldMeta): FieldInputConfig {
   switch (field.type) {
-    case 'string':
-      return { inputType: 'input', htmlType: 'text' };
-    case 'number':
-      return { inputType: 'number', htmlType: 'number' };
-    case 'integer':
-      return { inputType: 'number', htmlType: 'number' };
-    case 'boolean':
-      return { inputType: 'switch' };
-    case 'date':
-      return { inputType: 'datetime' };
-    case 'enum':
+    case "string":
+      return { inputType: "input", htmlType: "text" };
+    case "number":
+      return { inputType: "number", htmlType: "number" };
+    case "integer":
+      return { inputType: "number", htmlType: "number" };
+    case "boolean":
+      return { inputType: "switch" };
+    case "date":
+      return { inputType: "datetime" };
+    case "enum":
       return {
-        inputType: 'select',
-        options: field.enumValues?.map(v => ({
+        inputType: "select",
+        options: field.enumValues?.map((v) => ({
           label: formatEnumLabel(v),
           value: v,
         })),
       };
-    case 'json':
-      return { inputType: 'textarea' };
-    case 'string[]':
-      return { inputType: 'tag-selector' };
+    case "json":
+      return { inputType: "textarea" };
+    case "string[]":
+      return { inputType: "tag-selector" };
   }
 }
 
@@ -513,7 +617,13 @@ export function mapFieldToInput(field: EntityFieldMeta): FieldInputConfig {
 
 export interface FieldColumnConfig {
   /** Snapshot data-table column type. */
-  readonly columnType: 'text' | 'number' | 'boolean' | 'date' | 'badge' | 'tags';
+  readonly columnType:
+    | "text"
+    | "number"
+    | "boolean"
+    | "date"
+    | "badge"
+    | "tags";
   /** For enum fields: badge variant map. */
   readonly variants?: Readonly<Record<string, string>>;
 }
@@ -534,26 +644,31 @@ export interface FieldColumnConfig {
  */
 export function mapFieldToColumn(field: EntityFieldMeta): FieldColumnConfig {
   switch (field.type) {
-    case 'string':
-      return { columnType: 'text' };
-    case 'number':
-    case 'integer':
-      return { columnType: 'number' };
-    case 'boolean':
-      return { columnType: 'boolean' };
-    case 'date':
-      return { columnType: 'date' };
-    case 'enum':
+    case "string":
+      return { columnType: "text" };
+    case "number":
+    case "integer":
+      return { columnType: "number" };
+    case "boolean":
+      return { columnType: "boolean" };
+    case "date":
+      return { columnType: "date" };
+    case "enum":
       return {
-        columnType: 'badge',
+        columnType: "badge",
         variants: field.enumValues
-          ? Object.fromEntries(field.enumValues.map((v, i) => [v, BADGE_VARIANT_CYCLE[i % BADGE_VARIANT_CYCLE.length]]))
+          ? Object.fromEntries(
+              field.enumValues.map((v, i) => [
+                v,
+                BADGE_VARIANT_CYCLE[i % BADGE_VARIANT_CYCLE.length],
+              ]),
+            )
           : undefined,
       };
-    case 'json':
-      return { columnType: 'text' };
-    case 'string[]':
-      return { columnType: 'tags' };
+    case "json":
+      return { columnType: "text" };
+    case "string[]":
+      return { columnType: "tags" };
   }
 }
 
@@ -564,8 +679,13 @@ export function mapFieldToColumn(field: EntityFieldMeta): FieldColumnConfig {
  * Ensures consistent coloring across renders.
  */
 const BADGE_VARIANT_CYCLE = [
-  'default', 'secondary', 'success', 'warning', 'destructive',
-  'info', 'outline',
+  "default",
+  "secondary",
+  "success",
+  "warning",
+  "destructive",
+  "info",
+  "outline",
 ] as const;
 
 /**
@@ -575,10 +695,10 @@ const BADGE_VARIANT_CYCLE = [
  */
 function formatEnumLabel(value: string): string {
   return value
-    .replace(/[-_]/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/[-_]/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
     .toLowerCase()
-    .replace(/\b\w/g, c => c.toUpperCase());
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 ```
 
@@ -593,9 +713,9 @@ New file: `src/ui/entity-pages/utils.ts`
  */
 export function formatFieldLabel(name: string): string {
   return name
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/[_-]/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /**
@@ -643,22 +763,24 @@ export function resolvePageTitle(
   title: string | { field: string } | { template: string },
   item: Readonly<Record<string, unknown>> | null,
 ): string {
-  if (typeof title === 'string') return title;
-  if ('field' in title) return item ? String(item[title.field] ?? '') : '';
-  if ('template' in title) {
-    if (!item) return title.template.replace(/\{(\w+)\}/g, '');
-    return title.template.replace(/\{(\w+)\}/g, (_, key) => String(item[key] ?? ''));
+  if (typeof title === "string") return title;
+  if ("field" in title) return item ? String(item[title.field] ?? "") : "";
+  if ("template" in title) {
+    if (!item) return title.template.replace(/\{(\w+)\}/g, "");
+    return title.template.replace(/\{(\w+)\}/g, (_, key) =>
+      String(item[key] ?? ""),
+    );
   }
-  return '';
+  return "";
 }
 ```
 
 ### Files to Create
 
-| File | Action |
-|------|--------|
+| File                                   | Action                                 |
+| -------------------------------------- | -------------------------------------- |
 | `src/ui/entity-pages/field-mappers.ts` | **Create** — field type mapping tables |
-| `src/ui/entity-pages/utils.ts` | **Create** — shared utilities |
+| `src/ui/entity-pages/utils.ts`         | **Create** — shared utilities          |
 
 ### Exit Criteria
 
@@ -673,6 +795,7 @@ export function resolvePageTitle(
 File: `src/ui/entity-pages/__tests__/field-mappers.test.ts`
 
 Test cases:
+
 - `mapFieldToDisplay` maps all 8 field types correctly
 - `mapFieldToDisplay` generates badge variants for enum fields
 - `mapFieldToInput` maps all 8 field types correctly
@@ -703,12 +826,20 @@ heading row, optional filter-bar, data-table, and optional create button.
 
 New file: `src/ui/entity-pages/list-mapper.ts`
 
-```ts
-import type { PageConfig } from '../manifest/types';
-import type { PageLoaderResult, EntityListPageDeclaration, PageData } from '@lastshotlabs/bunshot-ssr';
-import type { EntityPageMapResult } from './mapper';
-import { mapFieldToColumn } from './field-mappers';
-import { formatFieldLabel, buildEntityApiPath, resolvePageTitle } from './utils';
+````ts
+import type { PageConfig } from "../manifest/types";
+import type {
+  PageLoaderResult,
+  EntityListPageDeclaration,
+  PageData,
+} from "@lastshotlabs/bunshot-ssr";
+import type { EntityPageMapResult } from "./mapper";
+import { mapFieldToColumn } from "./field-mappers";
+import {
+  formatFieldLabel,
+  buildEntityApiPath,
+  resolvePageTitle,
+} from "./utils";
 
 /**
  * Maps an entity-list page declaration to a Snapshot PageConfig.
@@ -729,62 +860,71 @@ import { formatFieldLabel, buildEntityApiPath, resolvePageTitle } from './utils'
  * └─────────────────────────────────────┘
  * ```
  */
-export function mapEntityListPage(result: PageLoaderResult): EntityPageMapResult {
+export function mapEntityListPage(
+  result: PageLoaderResult,
+): EntityPageMapResult {
   const d = result.declaration.declaration as EntityListPageDeclaration;
   const meta = result.entityMeta[d.entity];
-  const data = result.data as Extract<PageData, { type: 'list' }>;
+  const data = result.data as Extract<PageData, { type: "list" }>;
   const apiPath = buildEntityApiPath(d.entity);
 
   const content: Record<string, unknown>[] = [];
 
   // ─── Heading row ──────────────────────────────────────────
   const headingContent: Record<string, unknown>[] = [
-    { type: 'heading', level: 1, text: resolvePageTitle(d.title, null) },
+    { type: "heading", level: 1, text: resolvePageTitle(d.title, null) },
   ];
   if (d.actions?.create) {
     headingContent.push({
-      type: 'button',
-      label: 'Create',
-      variant: 'primary',
-      action: { type: 'navigate', to: d.actions.create },
+      type: "button",
+      label: "Create",
+      variant: "primary",
+      action: { type: "navigate", to: d.actions.create },
     });
   }
   content.push({
-    type: 'row',
-    justify: 'between',
-    align: 'center',
+    type: "row",
+    justify: "between",
+    align: "center",
     content: headingContent,
   });
 
   // ─── Filter bar ───────────────────────────────────────────
   if (d.filters && d.filters.length > 0) {
     content.push({
-      type: 'filter-bar',
+      type: "filter-bar",
       id: `${d.entity.toLowerCase()}-filters`,
-      filters: d.filters.map(f => {
+      filters: d.filters.map((f) => {
         const fieldMeta = meta?.fields[f.field];
         return {
           field: f.field,
           label: f.label ?? formatFieldLabel(f.field),
-          type: fieldMeta?.type === 'enum'
-            ? 'select'
-            : fieldMeta?.type === 'boolean'
-              ? 'boolean'
-              : fieldMeta?.type === 'date'
-                ? 'date-range'
-                : fieldMeta?.type === 'number' || fieldMeta?.type === 'integer'
-                  ? 'number-range'
-                  : 'text',
-          options: fieldMeta?.enumValues?.map(v => ({ label: formatFieldLabel(v), value: v })),
+          type:
+            fieldMeta?.type === "enum"
+              ? "select"
+              : fieldMeta?.type === "boolean"
+                ? "boolean"
+                : fieldMeta?.type === "date"
+                  ? "date-range"
+                  : fieldMeta?.type === "number" ||
+                      fieldMeta?.type === "integer"
+                    ? "number-range"
+                    : "text",
+          options: fieldMeta?.enumValues?.map((v) => ({
+            label: formatFieldLabel(v),
+            value: v,
+          })),
         };
       }),
     });
   }
 
   // ─── Data table ───────────────────────────────────────────
-  const columns = d.fields.map(fieldName => {
+  const columns = d.fields.map((fieldName) => {
     const fieldMeta = meta?.fields[fieldName];
-    const colConfig = fieldMeta ? mapFieldToColumn(fieldMeta) : { columnType: 'text' as const };
+    const colConfig = fieldMeta
+      ? mapFieldToColumn(fieldMeta)
+      : { columnType: "text" as const };
     return {
       key: fieldName,
       label: formatFieldLabel(fieldName),
@@ -795,17 +935,17 @@ export function mapEntityListPage(result: PageLoaderResult): EntityPageMapResult
   });
 
   const tableConfig: Record<string, unknown> = {
-    type: 'data-table',
+    type: "data-table",
     id: `${d.entity.toLowerCase()}-table`,
     columns,
-    data: { from: 'entityPageData.items' },
+    data: { from: "entityPageData.items" },
     pagination: {
-      total: { from: 'entityPageData.total' },
-      page: { from: 'entityPageData.page' },
-      pageSize: { from: 'entityPageData.pageSize' },
+      total: { from: "entityPageData.total" },
+      page: { from: "entityPageData.page" },
+      pageSize: { from: "entityPageData.pageSize" },
       onChange: {
-        type: 'api',
-        method: 'GET',
+        type: "api",
+        method: "GET",
         endpoint: apiPath,
       },
     },
@@ -819,26 +959,28 @@ export function mapEntityListPage(result: PageLoaderResult): EntityPageMapResult
 
   if (d.rowClick) {
     tableConfig.onRowClick = {
-      type: 'navigate',
+      type: "navigate",
       to: d.rowClick,
     };
   }
 
   if (d.actions?.bulkDelete) {
-    tableConfig.bulkActions = [{
-      label: 'Delete',
-      variant: 'destructive',
-      action: {
-        type: 'confirm',
-        title: `Delete selected ${d.entity} records?`,
-        message: 'This action cannot be undone.',
-        onConfirm: {
-          type: 'api',
-          method: 'DELETE',
-          endpoint: `${apiPath}/batch`,
+    tableConfig.bulkActions = [
+      {
+        label: "Delete",
+        variant: "destructive",
+        action: {
+          type: "confirm",
+          title: `Delete selected ${d.entity} records?`,
+          message: "This action cannot be undone.",
+          onConfirm: {
+            type: "api",
+            method: "DELETE",
+            endpoint: `${apiPath}/batch`,
+          },
         },
       },
-    }];
+    ];
   }
 
   content.push(tableConfig);
@@ -847,12 +989,14 @@ export function mapEntityListPage(result: PageLoaderResult): EntityPageMapResult
   // Client-side resource for pagination, sorting, filtering
   const resources: Record<string, Record<string, unknown>> = {
     [`${d.entity.toLowerCase()}-list`]: {
-      method: 'GET',
+      method: "GET",
       endpoint: apiPath,
       params: {
         page: 1,
         pageSize: d.pageSize ?? 20,
-        ...(d.defaultSort ? { sort: d.defaultSort.field, order: d.defaultSort.order } : {}),
+        ...(d.defaultSort
+          ? { sort: d.defaultSort.field, order: d.defaultSort.order }
+          : {}),
       },
     },
   };
@@ -861,7 +1005,7 @@ export function mapEntityListPage(result: PageLoaderResult): EntityPageMapResult
   // Pre-fetched data injected as route-scoped state
   const state: Record<string, Record<string, unknown>> = {
     entityPageData: {
-      scope: 'route',
+      scope: "route",
       initial: {
         items: data.items,
         total: data.total,
@@ -881,12 +1025,12 @@ export function mapEntityListPage(result: PageLoaderResult): EntityPageMapResult
     overlays: {},
   };
 }
-```
+````
 
 ### Files to Create
 
-| File | Action |
-|------|--------|
+| File                                 | Action                               |
+| ------------------------------------ | ------------------------------------ |
 | `src/ui/entity-pages/list-mapper.ts` | **Create** — entity-list page mapper |
 
 ### Exit Criteria
@@ -906,6 +1050,7 @@ export function mapEntityListPage(result: PageLoaderResult): EntityPageMapResult
 File: `src/ui/entity-pages/__tests__/list-mapper.test.ts`
 
 Test cases:
+
 - Generates heading with entity title
 - Generates data-table with columns for each declared field
 - Column types match field metadata (string→text, enum→badge, date→date, etc.)
@@ -933,11 +1078,20 @@ related entity tables.
 
 New file: `src/ui/entity-pages/detail-mapper.ts`
 
-```ts
-import type { PageLoaderResult, EntityDetailPageDeclaration, PageData } from '@lastshotlabs/bunshot-ssr';
-import type { EntityPageMapResult } from './mapper';
-import { mapFieldToDisplay } from './field-mappers';
-import { formatFieldLabel, buildEntityApiPath, buildEntityRecordApiPath, resolvePageTitle } from './utils';
+````ts
+import type {
+  PageLoaderResult,
+  EntityDetailPageDeclaration,
+  PageData,
+} from "@lastshotlabs/bunshot-ssr";
+import type { EntityPageMapResult } from "./mapper";
+import { mapFieldToDisplay } from "./field-mappers";
+import {
+  formatFieldLabel,
+  buildEntityApiPath,
+  buildEntityRecordApiPath,
+  resolvePageTitle,
+} from "./utils";
 
 /**
  * Maps an entity-detail page declaration to a Snapshot PageConfig.
@@ -959,10 +1113,12 @@ import { formatFieldLabel, buildEntityApiPath, buildEntityRecordApiPath, resolve
  * └──────────────────────────────────────────┘
  * ```
  */
-export function mapEntityDetailPage(result: PageLoaderResult): EntityPageMapResult {
+export function mapEntityDetailPage(
+  result: PageLoaderResult,
+): EntityPageMapResult {
   const d = result.declaration.declaration as EntityDetailPageDeclaration;
   const meta = result.entityMeta[d.entity];
-  const data = result.data as Extract<PageData, { type: 'detail' }>;
+  const data = result.data as Extract<PageData, { type: "detail" }>;
   const item = data.item;
   const apiPath = buildEntityApiPath(d.entity);
 
@@ -974,37 +1130,37 @@ export function mapEntityDetailPage(result: PageLoaderResult): EntityPageMapResu
   const actionButtons: Record<string, unknown>[] = [];
   if (d.actions?.back) {
     actionButtons.push({
-      type: 'button',
-      label: 'Back',
-      variant: 'ghost',
-      action: { type: 'navigate', to: d.actions.back },
+      type: "button",
+      label: "Back",
+      variant: "ghost",
+      action: { type: "navigate", to: d.actions.back },
     });
   }
   if (d.actions?.edit) {
     actionButtons.push({
-      type: 'button',
-      label: 'Edit',
-      variant: 'secondary',
-      action: { type: 'navigate', to: d.actions.edit },
+      type: "button",
+      label: "Edit",
+      variant: "secondary",
+      action: { type: "navigate", to: d.actions.edit },
     });
   }
   if (d.actions?.delete) {
     actionButtons.push({
-      type: 'button',
-      label: 'Delete',
-      variant: 'destructive',
+      type: "button",
+      label: "Delete",
+      variant: "destructive",
       action: {
-        type: 'confirm',
+        type: "confirm",
         title: `Delete this ${d.entity}?`,
-        message: 'This action cannot be undone.',
-        variant: 'destructive',
+        message: "This action cannot be undone.",
+        variant: "destructive",
         onConfirm: {
-          type: 'api',
-          method: 'DELETE',
+          type: "api",
+          method: "DELETE",
           endpoint: buildEntityRecordApiPath(d.entity, item),
           onSuccess: {
-            type: 'navigate',
-            to: d.actions.back ?? '/',
+            type: "navigate",
+            to: d.actions.back ?? "/",
           },
         },
       },
@@ -1012,38 +1168,49 @@ export function mapEntityDetailPage(result: PageLoaderResult): EntityPageMapResu
   }
 
   content.push({
-    type: 'row',
-    justify: 'between',
-    align: 'center',
+    type: "row",
+    justify: "between",
+    align: "center",
     content: [
-      { type: 'heading', level: 1, text: resolvePageTitle(d.title, item) },
-      ...(actionButtons.length > 0 ? [{
-        type: 'row',
-        gap: 2,
-        content: actionButtons,
-      }] : []),
+      { type: "heading", level: 1, text: resolvePageTitle(d.title, item) },
+      ...(actionButtons.length > 0
+        ? [
+            {
+              type: "row",
+              gap: 2,
+              content: actionButtons,
+            },
+          ]
+        : []),
     ],
   });
 
   // ─── Detail card sections ─────────────────────────────────
   // Determine sections: explicit sections, flat fields, or all non-primary fields
-  const sections = d.sections
-    ?? (d.fields ? [{ fields: d.fields }] : [{
-      fields: meta
-        ? Object.entries(meta.fields)
-          .filter(([_, f]) => !f.primary)
-          .map(([name]) => name)
-        : [],
-    }]);
+  const sections =
+    d.sections ??
+    (d.fields
+      ? [{ fields: d.fields }]
+      : [
+          {
+            fields: meta
+              ? Object.entries(meta.fields)
+                  .filter(([_, f]) => !f.primary)
+                  .map(([name]) => name)
+              : [],
+          },
+        ]);
 
   for (const section of sections) {
     if (section.label) {
-      content.push({ type: 'heading', level: 2, text: section.label });
+      content.push({ type: "heading", level: 2, text: section.label });
     }
 
-    const fields = section.fields.map(fieldName => {
+    const fields = section.fields.map((fieldName) => {
       const fieldMeta = meta?.fields[fieldName];
-      const displayConfig = fieldMeta ? mapFieldToDisplay(fieldMeta) : { type: 'text' as const };
+      const displayConfig = fieldMeta
+        ? mapFieldToDisplay(fieldMeta)
+        : { type: "text" as const };
       return {
         key: fieldName,
         label: formatFieldLabel(fieldName),
@@ -1054,9 +1221,9 @@ export function mapEntityDetailPage(result: PageLoaderResult): EntityPageMapResu
     });
 
     content.push({
-      type: 'detail-card',
+      type: "detail-card",
       fields,
-      layout: section.layout ?? 'grid',
+      layout: section.layout ?? "grid",
     });
   }
 
@@ -1068,17 +1235,19 @@ export function mapEntityDetailPage(result: PageLoaderResult): EntityPageMapResu
       const resourceKey = `related-${rel.entity.toLowerCase()}`;
 
       content.push({
-        type: 'heading',
+        type: "heading",
         level: 2,
         text: rel.label ?? formatFieldLabel(rel.entity),
       });
 
       content.push({
-        type: 'data-table',
+        type: "data-table",
         resource: { resource: resourceKey },
-        columns: rel.fields.map(fieldName => {
+        columns: rel.fields.map((fieldName) => {
           const fieldMeta = relMeta?.fields[fieldName];
-          const colConfig = fieldMeta ? mapFieldToDisplay(fieldMeta) : { type: 'text' as const };
+          const colConfig = fieldMeta
+            ? mapFieldToDisplay(fieldMeta)
+            : { type: "text" as const };
           return {
             key: fieldName,
             label: formatFieldLabel(fieldName),
@@ -1089,7 +1258,7 @@ export function mapEntityDetailPage(result: PageLoaderResult): EntityPageMapResu
       });
 
       resources[resourceKey] = {
-        method: 'GET',
+        method: "GET",
         endpoint: relApiPath,
         params: {
           [rel.foreignKey]: String(item.id),
@@ -1102,7 +1271,7 @@ export function mapEntityDetailPage(result: PageLoaderResult): EntityPageMapResu
   // ─── State ────────────────────────────────────────────────
   const state: Record<string, Record<string, unknown>> = {
     entityPageData: {
-      scope: 'route',
+      scope: "route",
       initial: { item },
     },
   };
@@ -1117,12 +1286,12 @@ export function mapEntityDetailPage(result: PageLoaderResult): EntityPageMapResu
     overlays,
   };
 }
-```
+````
 
 ### Files to Create
 
-| File | Action |
-|------|--------|
+| File                                   | Action                                 |
+| -------------------------------------- | -------------------------------------- |
 | `src/ui/entity-pages/detail-mapper.ts` | **Create** — entity-detail page mapper |
 
 ### Exit Criteria
@@ -1142,6 +1311,7 @@ export function mapEntityDetailPage(result: PageLoaderResult): EntityPageMapResu
 File: `src/ui/entity-pages/__tests__/detail-mapper.test.ts`
 
 Test cases:
+
 - Generates heading with static title
 - Generates heading with field reference title
 - Generates heading with template title
@@ -1173,11 +1343,20 @@ heading, AutoForm, and submit/cancel actions.
 
 New file: `src/ui/entity-pages/form-mapper.ts`
 
-```ts
-import type { PageLoaderResult, EntityFormPageDeclaration, PageData } from '@lastshotlabs/bunshot-ssr';
-import type { EntityPageMapResult } from './mapper';
-import { mapFieldToInput } from './field-mappers';
-import { formatFieldLabel, buildEntityApiPath, buildEntityRecordApiPath, resolvePageTitle } from './utils';
+````ts
+import type {
+  PageLoaderResult,
+  EntityFormPageDeclaration,
+  PageData,
+} from "@lastshotlabs/bunshot-ssr";
+import type { EntityPageMapResult } from "./mapper";
+import { mapFieldToInput } from "./field-mappers";
+import {
+  formatFieldLabel,
+  buildEntityApiPath,
+  buildEntityRecordApiPath,
+  resolvePageTitle,
+} from "./utils";
 
 /**
  * Maps an entity-form page declaration to a Snapshot PageConfig.
@@ -1198,33 +1377,37 @@ import { formatFieldLabel, buildEntityApiPath, buildEntityRecordApiPath, resolve
  * └───────────────────────────────────┘
  * ```
  */
-export function mapEntityFormPage(result: PageLoaderResult): EntityPageMapResult {
+export function mapEntityFormPage(
+  result: PageLoaderResult,
+): EntityPageMapResult {
   const d = result.declaration.declaration as EntityFormPageDeclaration;
   const meta = result.entityMeta[d.entity];
-  const isEdit = d.operation === 'update';
+  const isEdit = d.operation === "update";
   const apiPath = buildEntityApiPath(d.entity);
 
   const existingItem = isEdit
-    ? (result.data as Extract<PageData, { type: 'form-edit' }>).item
+    ? (result.data as Extract<PageData, { type: "form-edit" }>).item
     : null;
   const defaults = !isEdit
-    ? (result.data as Extract<PageData, { type: 'form-create' }>).defaults
+    ? (result.data as Extract<PageData, { type: "form-create" }>).defaults
     : {};
 
   const content: Record<string, unknown>[] = [];
 
   // ─── Heading ──────────────────────────────────────────────
   content.push({
-    type: 'heading',
+    type: "heading",
     level: 1,
     text: resolvePageTitle(d.title, existingItem),
   });
 
   // ─── Form ─────────────────────────────────────────────────
-  const fields = d.fields.map(fieldName => {
+  const fields = d.fields.map((fieldName) => {
     const fieldMeta = meta?.fields[fieldName];
     const override = d.fieldConfig?.[fieldName];
-    const inputConfig = fieldMeta ? mapFieldToInput(fieldMeta) : { inputType: 'input' as const };
+    const inputConfig = fieldMeta
+      ? mapFieldToInput(fieldMeta)
+      : { inputType: "input" as const };
 
     const fieldConfig: Record<string, unknown> = {
       name: fieldName,
@@ -1273,28 +1456,35 @@ export function mapEntityFormPage(result: PageLoaderResult): EntityPageMapResult
 
   const onSuccessAction: Record<string, unknown> = d.redirect
     ? {
-      type: 'navigate',
-      to: d.redirect.to.replace(/\{(\w+)\}/g, (_, key) => `{result.${key}}`),
-    }
-    : { type: 'toast', message: `${d.entity} ${isEdit ? 'updated' : 'created'} successfully` };
+        type: "navigate",
+        to: d.redirect.to.replace(/\{(\w+)\}/g, (_, key) => `{result.${key}}`),
+      }
+    : {
+        type: "toast",
+        message: `${d.entity} ${isEdit ? "updated" : "created"} successfully`,
+      };
 
   const formConfig: Record<string, unknown> = {
-    type: 'form',
+    type: "form",
     id: `${d.entity.toLowerCase()}-form`,
     fields,
     action: {
-      type: 'api',
-      method: isEdit ? 'PATCH' : 'POST',
+      type: "api",
+      method: isEdit ? "PATCH" : "POST",
       endpoint: submitEndpoint,
       onSuccess: onSuccessAction,
-      onError: { type: 'toast', message: `Failed to ${isEdit ? 'update' : 'create'} ${d.entity}`, variant: 'destructive' },
+      onError: {
+        type: "toast",
+        message: `Failed to ${isEdit ? "update" : "create"} ${d.entity}`,
+        variant: "destructive",
+      },
     },
     submitLabel: isEdit ? `Update ${d.entity}` : `Create ${d.entity}`,
   };
 
   if (d.cancel) {
-    formConfig.cancelLabel = 'Cancel';
-    formConfig.cancelAction = { type: 'navigate', to: d.cancel.to };
+    formConfig.cancelLabel = "Cancel";
+    formConfig.cancelAction = { type: "navigate", to: d.cancel.to };
   }
 
   content.push(formConfig);
@@ -1303,7 +1493,7 @@ export function mapEntityFormPage(result: PageLoaderResult): EntityPageMapResult
   const state: Record<string, Record<string, unknown>> = {};
   if (isEdit && existingItem) {
     state.entityPageData = {
-      scope: 'route',
+      scope: "route",
       initial: { item: existingItem },
     };
   }
@@ -1318,12 +1508,12 @@ export function mapEntityFormPage(result: PageLoaderResult): EntityPageMapResult
     overlays: {},
   };
 }
-```
+````
 
 ### Files to Create
 
-| File | Action |
-|------|--------|
+| File                                 | Action                               |
+| ------------------------------------ | ------------------------------------ |
 | `src/ui/entity-pages/form-mapper.ts` | **Create** — entity-form page mapper |
 
 ### Exit Criteria
@@ -1345,6 +1535,7 @@ export function mapEntityFormPage(result: PageLoaderResult): EntityPageMapResult
 File: `src/ui/entity-pages/__tests__/form-mapper.test.ts`
 
 Test cases:
+
 - Create form generates heading + form component
 - Create form fields have no default values (when none configured)
 - Create form applies `defaultValue` from `fieldConfig`
@@ -1374,10 +1565,14 @@ stat cards, optional chart, optional activity feed.
 
 New file: `src/ui/entity-pages/dashboard-mapper.ts`
 
-```ts
-import type { PageLoaderResult, EntityDashboardPageDeclaration, PageData } from '@lastshotlabs/bunshot-ssr';
-import type { EntityPageMapResult } from './mapper';
-import { formatFieldLabel, resolvePageTitle } from './utils';
+````ts
+import type {
+  PageLoaderResult,
+  EntityDashboardPageDeclaration,
+  PageData,
+} from "@lastshotlabs/bunshot-ssr";
+import type { EntityPageMapResult } from "./mapper";
+import { formatFieldLabel, resolvePageTitle } from "./utils";
 
 /**
  * Maps an entity-dashboard page declaration to a Snapshot PageConfig.
@@ -1402,15 +1597,17 @@ import { formatFieldLabel, resolvePageTitle } from './utils';
  * └───────────────────────────────────────────┘
  * ```
  */
-export function mapEntityDashboardPage(result: PageLoaderResult): EntityPageMapResult {
+export function mapEntityDashboardPage(
+  result: PageLoaderResult,
+): EntityPageMapResult {
   const d = result.declaration.declaration as EntityDashboardPageDeclaration;
-  const data = result.data as Extract<PageData, { type: 'dashboard' }>;
+  const data = result.data as Extract<PageData, { type: "dashboard" }>;
 
   const content: Record<string, unknown>[] = [];
 
   // ─── Heading ──────────────────────────────────────────────
   content.push({
-    type: 'heading',
+    type: "heading",
     level: 1,
     text: resolvePageTitle(d.title, null),
   });
@@ -1418,7 +1615,7 @@ export function mapEntityDashboardPage(result: PageLoaderResult): EntityPageMapR
   // ─── Stat cards row ───────────────────────────────────────
   // Each stat card gets span 3 in a 12-column grid (4 per row)
   const statCards = data.stats.map((stat, i) => ({
-    type: 'stat-card',
+    type: "stat-card",
     label: stat.label,
     value: stat.value,
     icon: d.stats[i]?.icon,
@@ -1426,7 +1623,7 @@ export function mapEntityDashboardPage(result: PageLoaderResult): EntityPageMapR
   }));
 
   content.push({
-    type: 'row',
+    type: "row",
     gap: 4,
     content: statCards,
   });
@@ -1434,7 +1631,7 @@ export function mapEntityDashboardPage(result: PageLoaderResult): EntityPageMapR
   // ─── Chart ────────────────────────────────────────────────
   if (d.chart && data.chart) {
     content.push({
-      type: 'chart',
+      type: "chart",
       chartType: d.chart.chartType,
       data: data.chart,
       categoryField: d.chart.categoryField,
@@ -1445,17 +1642,17 @@ export function mapEntityDashboardPage(result: PageLoaderResult): EntityPageMapR
 
   // ─── Activity feed ────────────────────────────────────────
   if (d.activity && data.activity) {
-    content.push({ type: 'heading', level: 2, text: 'Recent Activity' });
+    content.push({ type: "heading", level: 2, text: "Recent Activity" });
     content.push({
-      type: 'feed',
-      items: data.activity.map(item => ({
-        fields: d.activity!.fields.map(fieldName => ({
+      type: "feed",
+      items: data.activity.map((item) => ({
+        fields: d.activity!.fields.map((fieldName) => ({
           key: fieldName,
           label: formatFieldLabel(fieldName),
           value: item[fieldName],
         })),
-        sortField: d.activity!.sortField ?? 'createdAt',
-        sortValue: item[d.activity!.sortField ?? 'createdAt'],
+        sortField: d.activity!.sortField ?? "createdAt",
+        sortValue: item[d.activity!.sortField ?? "createdAt"],
       })),
     });
   }
@@ -1463,7 +1660,7 @@ export function mapEntityDashboardPage(result: PageLoaderResult): EntityPageMapR
   // ─── State ────────────────────────────────────────────────
   const state: Record<string, Record<string, unknown>> = {
     entityPageData: {
-      scope: 'route',
+      scope: "route",
       initial: {
         stats: data.stats,
         activity: data.activity,
@@ -1482,12 +1679,12 @@ export function mapEntityDashboardPage(result: PageLoaderResult): EntityPageMapR
     overlays: {},
   };
 }
-```
+````
 
 ### Files to Create
 
-| File | Action |
-|------|--------|
+| File                                      | Action                                    |
+| ----------------------------------------- | ----------------------------------------- |
 | `src/ui/entity-pages/dashboard-mapper.ts` | **Create** — entity-dashboard page mapper |
 
 ### Exit Criteria
@@ -1505,6 +1702,7 @@ export function mapEntityDashboardPage(result: PageLoaderResult): EntityPageMapR
 File: `src/ui/entity-pages/__tests__/dashboard-mapper.test.ts`
 
 Test cases:
+
 - Generates heading with title
 - Generates stat-card for each stat
 - Stat card span is 12/n (3 for 4 stats, 4 for 3 stats, 6 for 2 stats)
@@ -1529,8 +1727,8 @@ navigation manifest format for the app shell.
 New file: `src/ui/entity-pages/navigation-mapper.ts`
 
 ```ts
-import type { NavigationConfig as BunshotNavigationConfig } from '@lastshotlabs/bunshot-ssr';
-import type { NavigationConfig as SnapshotNavigationConfig } from '../manifest/types';
+import type { NavigationConfig as BunshotNavigationConfig } from "@lastshotlabs/bunshot-ssr";
+import type { NavigationConfig as SnapshotNavigationConfig } from "../manifest/types";
 
 /**
  * Maps bunshot's renderer-agnostic NavigationConfig to Snapshot's
@@ -1547,11 +1745,11 @@ import type { NavigationConfig as SnapshotNavigationConfig } from '../manifest/t
 export function mapNavigation(
   config: BunshotNavigationConfig,
 ): SnapshotNavigationConfig | undefined {
-  if (config.shell === 'none') return undefined;
+  if (config.shell === "none") return undefined;
 
   return {
     mode: config.shell,
-    items: config.items.map(item => mapNavigationItem(item)),
+    items: config.items.map((item) => mapNavigationItem(item)),
   };
 }
 
@@ -1563,24 +1761,27 @@ export function mapAppConfig(
 ): Record<string, unknown> {
   return {
     title: config.title,
-    shell: config.shell === 'none' ? 'full-width' : config.shell,
-    logo: typeof config.logo === 'string' ? config.logo : undefined,
+    shell: config.shell === "none" ? "full-width" : config.shell,
+    logo: typeof config.logo === "string" ? config.logo : undefined,
   };
 }
 
-function mapNavigationItem(item: BunshotNavigationConfig['items'][number]): Record<string, unknown> {
+function mapNavigationItem(
+  item: BunshotNavigationConfig["items"][number],
+): Record<string, unknown> {
   const mapped: Record<string, unknown> = {
     label: item.label,
     path: item.path,
   };
   if (item.icon) mapped.icon = item.icon;
   if (item.children?.length) {
-    mapped.children = item.children.map(child => mapNavigationItem(child));
+    mapped.children = item.children.map((child) => mapNavigationItem(child));
   }
   if (item.badge) {
-    mapped.badge = typeof item.badge === 'string'
-      ? item.badge
-      : { from: `badge-${item.path.replace(/\//g, '-')}` };
+    mapped.badge =
+      typeof item.badge === "string"
+        ? item.badge
+        : { from: `badge-${item.path.replace(/\//g, "-")}` };
   }
   return mapped;
 }
@@ -1588,8 +1789,8 @@ function mapNavigationItem(item: BunshotNavigationConfig['items'][number]): Reco
 
 ### Files to Create
 
-| File | Action |
-|------|--------|
+| File                                       | Action                                |
+| ------------------------------------------ | ------------------------------------- |
 | `src/ui/entity-pages/navigation-mapper.ts` | **Create** — navigation config mapper |
 
 ### Exit Criteria
@@ -1607,6 +1808,7 @@ function mapNavigationItem(item: BunshotNavigationConfig['items'][number]): Reco
 File: `src/ui/entity-pages/__tests__/navigation-mapper.test.ts`
 
 Test cases:
+
 - Maps sidebar shell to `mode: 'sidebar'`
 - Maps top-nav shell to `mode: 'top-nav'`
 - Returns undefined for shell `'none'`
@@ -1641,7 +1843,7 @@ returns `null` to signal the caller should fall through to the standard
  * @returns null — signals the caller to use the standard render path
  */
 export function isCustomPage(declaration: PageDeclaration): boolean {
-  return declaration.type === 'custom';
+  return declaration.type === "custom";
 }
 ```
 
@@ -1812,9 +2014,9 @@ A thin wrapper that renders the app shell (sidebar/top-nav) around page
 content during SSR. Reuses Snapshot's existing `Nav` component.
 
 ```tsx
-'use client';
+"use client";
 
-import { Nav } from '../manifest/nav';
+import { Nav } from "../manifest/nav";
 
 export interface AppShellWrapperProps {
   navigation: SnapshotNavigationConfig | undefined;
@@ -1822,10 +2024,14 @@ export interface AppShellWrapperProps {
   content: React.ReactElement;
 }
 
-export function AppShellWrapper({ navigation, appConfig, content }: AppShellWrapperProps) {
+export function AppShellWrapper({
+  navigation,
+  appConfig,
+  content,
+}: AppShellWrapperProps) {
   if (!navigation) return content;
 
-  const isSidebar = navigation.mode === 'sidebar';
+  const isSidebar = navigation.mode === "sidebar";
 
   return (
     <div className="sn-app-shell" data-layout={navigation.mode}>
@@ -1841,13 +2047,13 @@ export function AppShellWrapper({ navigation, appConfig, content }: AppShellWrap
       )}
       {!isSidebar && (
         <header className="sn-top-nav">
-          {appConfig?.title && <span className="sn-app-title">{String(appConfig.title)}</span>}
+          {appConfig?.title && (
+            <span className="sn-app-title">{String(appConfig.title)}</span>
+          )}
           <Nav items={navigation.items} mode="top-nav" />
         </header>
       )}
-      <main className="sn-main-content">
-        {content}
-      </main>
+      <main className="sn-main-content">{content}</main>
     </div>
   );
 }
@@ -1855,9 +2061,9 @@ export function AppShellWrapper({ navigation, appConfig, content }: AppShellWrap
 
 ### Files to Create/Modify
 
-| File | Action |
-|------|--------|
-| `src/ssr/renderer.ts` | **Modify** — add `renderPage()` method |
+| File                                      | Action                                 |
+| ----------------------------------------- | -------------------------------------- |
+| `src/ssr/renderer.ts`                     | **Modify** — add `renderPage()` method |
 | `src/ui/entity-pages/AppShellWrapper.tsx` | **Create** — app shell wrapper for SSR |
 
 ### Exit Criteria
@@ -1875,6 +2081,7 @@ export function AppShellWrapper({ navigation, appConfig, content }: AppShellWrap
 File: `src/ssr/__tests__/render-page.test.ts`
 
 Test cases:
+
 - `renderPage()` returns HTML response for entity-list page
 - `renderPage()` returns HTML response for entity-detail page
 - `renderPage()` returns HTML response for entity-form page
@@ -1980,8 +2187,8 @@ async renderPage(
 
 ### Files to Create/Modify
 
-| File | Action |
-|------|--------|
+| File                           | Action                                 |
+| ------------------------------ | -------------------------------------- |
 | `src/ssr/manifest-renderer.ts` | **Modify** — add `renderPage()` method |
 
 ### Exit Criteria
@@ -2001,15 +2208,15 @@ Comprehensive test coverage across all mappers and the renderer integration.
 
 ### Test Files Summary
 
-| File | Phase | Test Count |
-|------|-------|------------|
-| `src/ui/entity-pages/__tests__/field-mappers.test.ts` | 2 | 15 |
-| `src/ui/entity-pages/__tests__/list-mapper.test.ts` | 3 | 12 |
-| `src/ui/entity-pages/__tests__/detail-mapper.test.ts` | 4 | 17 |
-| `src/ui/entity-pages/__tests__/form-mapper.test.ts` | 5 | 14 |
-| `src/ui/entity-pages/__tests__/dashboard-mapper.test.ts` | 6 | 9 |
-| `src/ui/entity-pages/__tests__/navigation-mapper.test.ts` | 7 | 8 |
-| `src/ssr/__tests__/render-page.test.ts` | 9 | 11 |
+| File                                                      | Phase | Test Count |
+| --------------------------------------------------------- | ----- | ---------- |
+| `src/ui/entity-pages/__tests__/field-mappers.test.ts`     | 2     | 15         |
+| `src/ui/entity-pages/__tests__/list-mapper.test.ts`       | 3     | 12         |
+| `src/ui/entity-pages/__tests__/detail-mapper.test.ts`     | 4     | 17         |
+| `src/ui/entity-pages/__tests__/form-mapper.test.ts`       | 5     | 14         |
+| `src/ui/entity-pages/__tests__/dashboard-mapper.test.ts`  | 6     | 9          |
+| `src/ui/entity-pages/__tests__/navigation-mapper.test.ts` | 7     | 8          |
+| `src/ssr/__tests__/render-page.test.ts`                   | 9     | 11         |
 
 **Total: ~86 test cases**
 
@@ -2018,34 +2225,123 @@ Comprehensive test coverage across all mappers and the renderer integration.
 Create shared test fixtures at `src/ui/entity-pages/__tests__/fixtures.ts`:
 
 ```ts
-import type { PageLoaderResult, EntityMeta, EntityFieldMeta } from '@lastshotlabs/bunshot-ssr';
+import type {
+  PageLoaderResult,
+  EntityMeta,
+  EntityFieldMeta,
+} from "@lastshotlabs/bunshot-ssr";
 
 export const postEntityMeta: EntityMeta = {
-  name: 'Post',
+  name: "Post",
   fields: {
-    id: { name: 'id', type: 'string', optional: false, primary: true, immutable: true },
-    title: { name: 'title', type: 'string', optional: false, primary: false, immutable: false },
-    slug: { name: 'slug', type: 'string', optional: false, primary: false, immutable: false },
-    body: { name: 'body', type: 'string', optional: false, primary: false, immutable: false },
-    status: { name: 'status', type: 'enum', optional: false, primary: false, immutable: false, enumValues: ['draft', 'published', 'archived'] },
-    viewCount: { name: 'viewCount', type: 'integer', optional: true, primary: false, immutable: false },
-    tags: { name: 'tags', type: 'string[]', optional: true, primary: false, immutable: false },
-    metadata: { name: 'metadata', type: 'json', optional: true, primary: false, immutable: false },
-    featured: { name: 'featured', type: 'boolean', optional: false, primary: false, immutable: false },
-    createdAt: { name: 'createdAt', type: 'date', optional: false, primary: false, immutable: true },
+    id: {
+      name: "id",
+      type: "string",
+      optional: false,
+      primary: true,
+      immutable: true,
+    },
+    title: {
+      name: "title",
+      type: "string",
+      optional: false,
+      primary: false,
+      immutable: false,
+    },
+    slug: {
+      name: "slug",
+      type: "string",
+      optional: false,
+      primary: false,
+      immutable: false,
+    },
+    body: {
+      name: "body",
+      type: "string",
+      optional: false,
+      primary: false,
+      immutable: false,
+    },
+    status: {
+      name: "status",
+      type: "enum",
+      optional: false,
+      primary: false,
+      immutable: false,
+      enumValues: ["draft", "published", "archived"],
+    },
+    viewCount: {
+      name: "viewCount",
+      type: "integer",
+      optional: true,
+      primary: false,
+      immutable: false,
+    },
+    tags: {
+      name: "tags",
+      type: "string[]",
+      optional: true,
+      primary: false,
+      immutable: false,
+    },
+    metadata: {
+      name: "metadata",
+      type: "json",
+      optional: true,
+      primary: false,
+      immutable: false,
+    },
+    featured: {
+      name: "featured",
+      type: "boolean",
+      optional: false,
+      primary: false,
+      immutable: false,
+    },
+    createdAt: {
+      name: "createdAt",
+      type: "date",
+      optional: false,
+      primary: false,
+      immutable: true,
+    },
   },
 };
 
 export const samplePosts = [
-  { id: '1', title: 'First Post', slug: 'first-post', body: 'Content...', status: 'published', viewCount: 42, tags: ['intro'], featured: true, createdAt: '2026-04-01T00:00:00Z' },
-  { id: '2', title: 'Second Post', slug: 'second-post', body: 'More...', status: 'draft', viewCount: 0, tags: [], featured: false, createdAt: '2026-04-02T00:00:00Z' },
+  {
+    id: "1",
+    title: "First Post",
+    slug: "first-post",
+    body: "Content...",
+    status: "published",
+    viewCount: 42,
+    tags: ["intro"],
+    featured: true,
+    createdAt: "2026-04-01T00:00:00Z",
+  },
+  {
+    id: "2",
+    title: "Second Post",
+    slug: "second-post",
+    body: "More...",
+    status: "draft",
+    viewCount: 0,
+    tags: [],
+    featured: false,
+    createdAt: "2026-04-02T00:00:00Z",
+  },
 ];
 
-export function buildListResult(overrides?: Partial<PageLoaderResult>): PageLoaderResult {
+export function buildListResult(
+  overrides?: Partial<PageLoaderResult>,
+): PageLoaderResult {
   // ... builds a complete PageLoaderResult for entity-list
 }
 
-export function buildDetailResult(overrides?: Partial<PageLoaderResult>): PageLoaderResult {
+export function buildDetailResult(
+  overrides?: Partial<PageLoaderResult>,
+): PageLoaderResult {
   // ... builds a complete PageLoaderResult for entity-detail
 }
 
@@ -2098,11 +2394,11 @@ Document the renderer-side entity page implementation in snapshot's docs.
 
 ### Files to Create/Modify
 
-| File | Action |
-|------|--------|
+| File                       | Action                                       |
+| -------------------------- | -------------------------------------------- |
 | `docs/ssr/entity-pages.md` | **Create** — renderer-side entity pages docs |
-| `docs/components.md` | **Modify** — note entity page usage |
-| `docs/getting-started.md` | **Modify** — add entity-driven pages path |
+| `docs/components.md`       | **Modify** — note entity page usage          |
+| `docs/getting-started.md`  | **Modify** — add entity-driven pages path    |
 
 ---
 
@@ -2116,35 +2412,36 @@ Track A (Mappers)                Track B (Renderers)         Track C (Tests+Docs
 Phase 1 (infrastructure)
 Phase 2 (field mappers)
 Phase 3 (list mapper)
-Phase 4 (detail mapper)          
-Phase 5 (form mapper)           
-Phase 6 (dashboard mapper)      Phase 9 (react renderer)    
+Phase 4 (detail mapper)
+Phase 5 (form mapper)
+Phase 6 (dashboard mapper)      Phase 9 (react renderer)
 Phase 7 (navigation mapper)     Phase 10 (manifest renderer) Phase 11 (tests)
 Phase 8 (custom page)                                        Phase 12 (docs)
 ```
 
 ### Dependencies
 
-| Phase | Depends On | Why |
-|-------|------------|-----|
-| Phase 1 | bunshot Phase 5 | Needs `PageLoaderResult` types published |
-| Phase 2 | bunshot Phase 5 | Needs `EntityFieldMeta` type |
-| Phase 3 | Phases 1, 2 | Needs mapper infrastructure + field mappers |
-| Phase 4 | Phases 1, 2 | Needs mapper infrastructure + field mappers |
-| Phase 5 | Phases 1, 2 | Needs mapper infrastructure + field mappers |
-| Phase 6 | Phases 1, 2 | Needs mapper infrastructure |
-| Phase 7 | Phase 1 | Needs mapper infrastructure |
-| Phase 8 | Phase 1 | Needs mapper infrastructure |
-| Phase 9 | Phases 3-8 | Needs all mappers |
-| Phase 10 | Phases 3-8 | Needs all mappers |
-| Phase 11 | Phases 1-10 | Tests everything |
-| Phase 12 | Phases 1-10 | Documents everything |
+| Phase    | Depends On      | Why                                         |
+| -------- | --------------- | ------------------------------------------- |
+| Phase 1  | bunshot Phase 5 | Needs `PageLoaderResult` types published    |
+| Phase 2  | bunshot Phase 5 | Needs `EntityFieldMeta` type                |
+| Phase 3  | Phases 1, 2     | Needs mapper infrastructure + field mappers |
+| Phase 4  | Phases 1, 2     | Needs mapper infrastructure + field mappers |
+| Phase 5  | Phases 1, 2     | Needs mapper infrastructure + field mappers |
+| Phase 6  | Phases 1, 2     | Needs mapper infrastructure                 |
+| Phase 7  | Phase 1         | Needs mapper infrastructure                 |
+| Phase 8  | Phase 1         | Needs mapper infrastructure                 |
+| Phase 9  | Phases 3-8      | Needs all mappers                           |
+| Phase 10 | Phases 3-8      | Needs all mappers                           |
+| Phase 11 | Phases 1-10     | Tests everything                            |
+| Phase 12 | Phases 1-10     | Documents everything                        |
 
 ### File Ownership
 
 All files in the `snapshot` repo. No bunshot files are modified.
 
 **Track A owns:**
+
 - `src/ui/entity-pages/mapper.ts`
 - `src/ui/entity-pages/index.ts`
 - `src/ui/entity-pages/utils.ts`
@@ -2157,10 +2454,12 @@ All files in the `snapshot` repo. No bunshot files are modified.
 - `src/ui/entity-pages/AppShellWrapper.tsx`
 
 **Track B owns:**
+
 - `src/ssr/renderer.ts` (`renderPage` method only)
 - `src/ssr/manifest-renderer.ts` (`renderPage` method only)
 
 **Track C owns:**
+
 - `src/ui/entity-pages/__tests__/` (all test files)
 - `src/ssr/__tests__/render-page.test.ts`
 - `docs/ssr/entity-pages.md`
