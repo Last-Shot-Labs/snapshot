@@ -229,6 +229,25 @@ export const globalTokensSchema = z
   })
   .strict();
 
+/**
+ * Zod schema for manifest-declared flavor extensions.
+ *
+ * All flavor fields are optional except `extends`, which points to the parent
+ * flavor that this declaration inherits from.
+ */
+export const flavorOverrideSchema = z
+  .object({
+    extends: z.string().min(1),
+    displayName: z.string().optional(),
+    colors: themeColorsSchema.optional(),
+    darkColors: themeColorsSchema.optional(),
+    radius: radiusSchema.optional(),
+    spacing: spacingSchema.optional(),
+    font: fontSchema.optional(),
+    components: componentTokensSchema.optional(),
+  })
+  .strict();
+
 // ── Theme config schema ─────────────────────────────────────────────────────
 
 /** Zod schema for the full theme configuration in the manifest. */
@@ -236,6 +255,8 @@ export const themeConfigSchema = z
   .object({
     /** Named flavor preset. Provides all base tokens. */
     flavor: z.string().optional(),
+    /** Manifest-declared flavors keyed by flavor name. */
+    flavors: z.record(flavorOverrideSchema).optional(),
     /** Token overrides applied on top of the flavor. */
     overrides: z
       .object({
@@ -251,5 +272,19 @@ export const themeConfigSchema = z
       .optional(),
     /** Initial color mode. 'system' follows prefers-color-scheme. */
     mode: z.enum(["light", "dark", "system"]).optional(),
+    /** Token editor runtime persistence target. */
+    editor: z
+      .object({
+        persist: z
+          .union([
+            z.literal("none"),
+            z.literal("localStorage"),
+            z.literal("sessionStorage"),
+            z.object({ resource: z.string() }).strict(),
+          ])
+          .default("localStorage"),
+      })
+      .strict()
+      .optional(),
   })
   .strict();

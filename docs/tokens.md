@@ -57,6 +57,27 @@ function ThemeEditor() {
 }
 ```
 
+### Editor persistence target
+
+Runtime editor persistence is configured in the manifest:
+
+```json
+{
+  "theme": {
+    "editor": {
+      "persist": "localStorage"
+    }
+  }
+}
+```
+
+`persist` values:
+
+- `"none"`
+- `"localStorage"` (default)
+- `"sessionStorage"`
+- `{ "resource": "user-prefs" }`
+
 ## Built-in Flavors
 
 | Flavor     | Description                   | Primary     | Default Radius |
@@ -74,6 +95,38 @@ Each flavor includes light and dark mode colors, a default border radius, spacin
 and font configuration.
 
 ## Custom Flavors
+
+### Manifest-declared flavor extension
+
+You can declare new flavors directly in the manifest with `theme.flavors`:
+
+```json
+{
+  "theme": {
+    "flavor": "my-brand",
+    "flavors": {
+      "my-brand": {
+        "extends": "neutral",
+        "displayName": "My Brand",
+        "colors": {
+          "primary": "0.55 0.18 25",
+          "accent": "0.60 0.15 280"
+        }
+      }
+    }
+  }
+}
+```
+
+Merge semantics for dark colors:
+
+1. `darkColors[key]` override wins when provided.
+2. Otherwise, `colors[key]` overrides derive dark variants automatically.
+3. Otherwise, parent flavor dark values are inherited.
+
+Circular `extends` chains are rejected at compile time.
+
+### Code-side registration
 
 ```ts
 import { defineFlavor, resolveTokens } from "@lastshotlabs/snapshot/ui";
@@ -103,8 +156,8 @@ defineFlavor("my-brand", {
 const css = resolveTokens({ flavor: "my-brand" });
 ```
 
-If `darkColors` is omitted, dark mode variants are automatically derived from the light
-colors with adjusted lightness and chroma.
+Code-side `defineFlavor()` remains supported, but manifest declaration is enough to
+create and activate a flavor.
 
 ## Theme Config Schema
 

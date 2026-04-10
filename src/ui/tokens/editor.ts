@@ -6,11 +6,14 @@
  * and take priority over CSS file declarations (inline > class specificity).
  */
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { ThemeConfig, TokenEditor } from "./types";
 import { getFlavor } from "./flavors";
 import { colorToOklch, oklchToString } from "./color";
+import { deriveDarkVariant } from "./derive-dark";
 import { resolveTokens } from "./resolve";
+import { useManifestRuntime } from "../manifest/runtime";
+import { buildRequestUrl, resolveEndpointTarget } from "../manifest/resources";
 
 // ── Token path -> CSS variable mapping ───────────────────────────────────────
 
@@ -73,6 +76,8 @@ const SPACING_MAP: Record<string, string> = {
   spacious: "1.5",
 };
 
+const TOKEN_EDITOR_STORAGE_KEY = "snapshot.token-editor.overrides";
+
 /**
  * Map a token path to its CSS variable name.
  */
@@ -114,6 +119,8 @@ function convertToCssValue(path: string, value: string): string {
 
 type Overrides = Partial<NonNullable<ThemeConfig["overrides"]>>;
 type Listener = (overrides: Overrides) => void;
+
+type PersistTarget = NonNullable<NonNullable<ThemeConfig["editor"]>["persist"]>;
 
 /**
  * Convert the internal overrides map to a manifest-compatible config object.
@@ -160,6 +167,36 @@ function mapToThemeConfig(overrides: Map<string, string>): Overrides {
   return result;
 }
 
+function mapToPersistedOverrides(
+  overrides: Map<string, string>,
+): Record<string, string> {
+  return Object.fromEntries(overrides.entries());
+}
+
+function parsePersistedOverrides(value: string | null): Record<string, string> | null {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!parsed || typeof parsed !== "object") {
+      return null;
+    }
+
+    const next: Record<string, string> = {};
+    for (const [key, entry] of Object.entries(parsed)) {
+      if (typeof entry === "string") {
+        next[key] = entry;
+      }
+    }
+
+    return next;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * React hook for runtime token editing.
  *
@@ -170,10 +207,13 @@ function mapToThemeConfig(overrides: Map<string, string>): Overrides {
  * @returns TokenEditor interface for runtime token manipulation
  */
 export function useTokenEditor(): TokenEditor {
+  const manifestRuntime = useManifestRuntime();
   const overridesRef = useRef<Map<string, string>>(new Map());
   const currentFlavorRef = useRef<string>("neutral");
   const listenersRef = useRef<Set<Listener>>(new Set());
   const appliedFlavorVarsRef = useRef<string[]>([]);
+  const persistTarget: PersistTarget =
+    manifestRuntime?.theme?.editor?.persist ?? "localStorage";
 
   const notifyListeners = useCallback(() => {
     const current = mapToThemeConfig(overridesRef.current);
@@ -182,15 +222,152 @@ export function useTokenEditor(): TokenEditor {
     }
   }, []);
 
+  const persistOverrides = useCallback(
+    (next: Record<string, string>) => {
+      if (persistTarget === "none") {
+        return;
+      }
+
+      if (persistTarget === "localStorage" || persistTarget === "sessionStorage") {
+        if (typeof window === "undefined") {
+          return;
+        }
+        const storage =
+          persistTarget === "localStorage"
+            ? window.localStorage
+            : window.sessionStorage;
+        if (Object.keys(next).length === 0) {
+          storage.removeItem(TOKEN_EDITOR_STORAGE_KEY);
+          return;
+        }
+        storage.setItem(TOKEN_EDITOR_STORAGE_KEY, JSON.stringify(next));
+        return;
+      }
+
+      if (!manifestRuntime?.resources?.[persistTarget.resource]) {
+        return;
+      }
+
+      const request = resolveEndpointTarget(
+        { resource: persistTarget.resource },
+        manifestRuntime.resources,
+      );
+      const endpoint = buildRequestUrl(request.endpoint, request.params);
+      void fetch(endpoint, {
+        method: request.method,
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ overrides: next }),
+      });
+    },
+    [manifestRuntime?.resources, persistTarget],
+  );
+
+  const persistCurrentOverrides = useCallback(() => {
+    persistOverrides(mapToPersistedOverrides(overridesRef.current));
+  }, [persistOverrides]);
+
+  const applyOverride = useCallback((path: string, value: string) => {
+    const cssVar = tokenPathToCssVar(path);
+    const cssValue = convertToCssValue(path, value);
+    document.documentElement.style.setProperty(cssVar, cssValue);
+    overridesRef.current.set(path, value);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const hydrate = async () => {
+      let restored: Record<string, string> | null = null;
+
+      if (persistTarget === "localStorage" || persistTarget === "sessionStorage") {
+        if (typeof window !== "undefined") {
+          const storage =
+            persistTarget === "localStorage"
+              ? window.localStorage
+              : window.sessionStorage;
+          restored = parsePersistedOverrides(
+            storage.getItem(TOKEN_EDITOR_STORAGE_KEY),
+          );
+        }
+      } else if (typeof persistTarget === "object") {
+        if (!manifestRuntime?.resources?.[persistTarget.resource]) {
+          return;
+        }
+
+        const request = resolveEndpointTarget(
+          { resource: persistTarget.resource },
+          manifestRuntime.resources,
+          undefined,
+          "GET",
+        );
+        const endpoint = buildRequestUrl(request.endpoint, request.params);
+        const response = await fetch(endpoint, {
+          method: request.method,
+          credentials: "include",
+        });
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = (await response.json()) as {
+          overrides?: Record<string, unknown>;
+        };
+        if (payload.overrides && typeof payload.overrides === "object") {
+          restored = Object.fromEntries(
+            Object.entries(payload.overrides).filter(
+              (entry): entry is [string, string] =>
+                typeof entry[1] === "string",
+            ),
+          );
+        }
+      }
+
+      if (cancelled || !restored) {
+        return;
+      }
+
+      for (const path of overridesRef.current.keys()) {
+        try {
+          const cssVar = tokenPathToCssVar(path);
+          document.documentElement.style.removeProperty(cssVar);
+        } catch {
+          // Ignore unknown paths during cleanup
+        }
+      }
+      overridesRef.current.clear();
+
+      for (const [path, value] of Object.entries(restored)) {
+        applyOverride(path, value);
+      }
+      notifyListeners();
+    };
+
+    void hydrate();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [applyOverride, manifestRuntime?.resources, notifyListeners, persistTarget]);
+
   const setToken = useCallback(
     (path: string, value: string) => {
-      const cssVar = tokenPathToCssVar(path);
-      const cssValue = convertToCssValue(path, value);
-      document.documentElement.style.setProperty(cssVar, cssValue);
-      overridesRef.current.set(path, value);
+      applyOverride(path, value);
+
+      // Keep dark overrides aligned with light color changes unless explicitly set.
+      if (path.startsWith("colors.")) {
+        const darkPath = `darkColors.${path.slice("colors.".length)}`;
+        if (!overridesRef.current.has(darkPath)) {
+          applyOverride(darkPath, deriveDarkVariant(value));
+        }
+      }
+
       notifyListeners();
+      persistCurrentOverrides();
     },
-    [notifyListeners],
+    [applyOverride, notifyListeners, persistCurrentOverrides],
   );
 
   const resetTokens = useCallback(() => {
@@ -212,7 +389,8 @@ export function useTokenEditor(): TokenEditor {
     appliedFlavorVarsRef.current = [];
 
     notifyListeners();
-  }, [notifyListeners]);
+    persistCurrentOverrides();
+  }, [notifyListeners, persistCurrentOverrides]);
 
   const setFlavor = useCallback(
     (flavorName: string) => {
@@ -240,8 +418,9 @@ export function useTokenEditor(): TokenEditor {
 
       currentFlavorRef.current = flavorName;
       notifyListeners();
+      persistCurrentOverrides();
     },
-    [resetTokens, notifyListeners],
+    [notifyListeners, persistCurrentOverrides, resetTokens],
   );
 
   const getTokens = useCallback((): Overrides => {

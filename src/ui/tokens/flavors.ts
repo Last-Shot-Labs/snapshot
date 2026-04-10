@@ -7,10 +7,14 @@
  */
 
 import type { Flavor } from "./types";
+import { deriveDarkColors } from "./derive-dark";
+
+type FlavorConfig = Omit<Flavor, "name">;
 
 // ── Registry ─────────────────────────────────────────────────────────────────
 
 const flavorRegistry = new Map<string, Flavor>();
+const builtInFlavorNames = new Set<string>();
 
 /**
  * Define and register a new flavor. If a flavor with the same name already exists,
@@ -22,11 +26,63 @@ const flavorRegistry = new Map<string, Flavor>();
  */
 export function defineFlavor(
   name: string,
-  config: Omit<Flavor, "name">,
+  config: FlavorConfig,
 ): Flavor {
   const flavor: Flavor = { name, ...config };
   flavorRegistry.set(name, flavor);
   return flavor;
+}
+
+/**
+ * Remove all non-built-in flavors from the registry.
+ *
+ * Used by manifest compilation so per-manifest flavor declarations do not
+ * leak across snapshot instances.
+ */
+export function clearCustomFlavors(): void {
+  for (const name of [...flavorRegistry.keys()]) {
+    if (!builtInFlavorNames.has(name)) {
+      flavorRegistry.delete(name);
+    }
+  }
+}
+
+/**
+ * Define and register a flavor by extending an existing parent flavor.
+ *
+ * The child flavor inherits unspecified fields from the parent and derives
+ * dark color variants from light-color overrides when explicit dark overrides
+ * are not provided.
+ *
+ * @param name - Unique child flavor identifier
+ * @param extendsName - Parent flavor identifier to inherit from
+ * @param overrides - Partial flavor overrides applied to the parent
+ * @returns The registered merged flavor
+ */
+export function defineFlavorWithExtension(
+  name: string,
+  extendsName: string,
+  overrides: Partial<FlavorConfig>,
+): Flavor {
+  const parent = getFlavor(extendsName);
+  if (!parent) {
+    throw new Error(`Cannot extend unknown flavor "${extendsName}"`);
+  }
+
+  const merged: FlavorConfig = {
+    displayName: overrides.displayName ?? parent.displayName,
+    colors: { ...parent.colors, ...overrides.colors },
+    darkColors: deriveDarkColors(parent, overrides),
+    radius: overrides.radius ?? parent.radius,
+    spacing: overrides.spacing ?? parent.spacing,
+    font: { ...parent.font, ...overrides.font },
+    components:
+      parent.components || overrides.components
+        ? { ...(parent.components ?? {}), ...(overrides.components ?? {}) }
+        : undefined,
+  };
+
+  return defineFlavor(name, merged);
 }
 
 /**
@@ -125,6 +181,7 @@ export function registerBuiltInFlavors(): void {
     spacing: "default",
     font: {},
   });
+  builtInFlavorNames.add("neutral");
 
   /** Softer neutral with a slate undertone. Extracted from "minimal" palette. */
   registerFlavor("slate", {
@@ -181,6 +238,7 @@ export function registerBuiltInFlavors(): void {
     spacing: "default",
     font: {},
   });
+  builtInFlavorNames.add("slate");
 
   /** Dark-first. Deep backgrounds with high-contrast text. */
   registerFlavor("midnight", {
@@ -237,6 +295,7 @@ export function registerBuiltInFlavors(): void {
     spacing: "default",
     font: {},
   });
+  builtInFlavorNames.add("midnight");
 
   /** Vibrant purple. Extracted from "vibrant" palette. */
   registerFlavor("violet", {
@@ -293,6 +352,7 @@ export function registerBuiltInFlavors(): void {
     spacing: "default",
     font: {},
   });
+  builtInFlavorNames.add("violet");
 
   /** Warm pink-red tones. */
   registerFlavor("rose", {
@@ -349,6 +409,7 @@ export function registerBuiltInFlavors(): void {
     spacing: "default",
     font: {},
   });
+  builtInFlavorNames.add("rose");
 
   /** Nature-inspired greens. */
   registerFlavor("emerald", {
@@ -405,6 +466,7 @@ export function registerBuiltInFlavors(): void {
     spacing: "default",
     font: {},
   });
+  builtInFlavorNames.add("emerald");
 
   /** Deep blues with teal accents. */
   registerFlavor("ocean", {
@@ -461,6 +523,7 @@ export function registerBuiltInFlavors(): void {
     spacing: "default",
     font: {},
   });
+  builtInFlavorNames.add("ocean");
 
   /** Warm orange-amber tones. */
   registerFlavor("sunset", {
@@ -517,4 +580,5 @@ export function registerBuiltInFlavors(): void {
     spacing: "default",
     font: {},
   });
+  builtInFlavorNames.add("sunset");
 }
