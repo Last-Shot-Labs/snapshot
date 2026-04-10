@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import type { ActionConfig } from "../../../actions/types";

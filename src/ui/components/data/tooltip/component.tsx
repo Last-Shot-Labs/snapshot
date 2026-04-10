@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { useSubscribe } from "../../../context/hooks";

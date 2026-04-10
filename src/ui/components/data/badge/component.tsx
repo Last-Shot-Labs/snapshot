@@ -1,3 +1,5 @@
+'use client';
+
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useEffect } from "react";
 import { Icon } from "../../../icons/index";

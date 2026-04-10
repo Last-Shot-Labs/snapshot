@@ -1,3 +1,5 @@
+'use client';
+
 import { useSubscribe } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";

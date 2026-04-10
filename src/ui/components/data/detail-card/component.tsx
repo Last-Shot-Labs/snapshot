@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback } from "react";
 import { ComponentWrapper } from "../../_base/component-wrapper";
 import { useActionExecutor } from "../../../actions/executor";

@@ -1,5 +1,6 @@
 // src/ssr/types.ts
 import type { QueryClient } from "@tanstack/react-query";
+import type { RscOptions } from "./rsc";
 import type { SnapshotInstance } from "../types";
 import type { ManifestConfig } from "../ui/manifest/types";
 
@@ -204,6 +205,14 @@ export interface SnapshotSsrConfig {
    * @default 5000
    */
   renderTimeoutMs?: number;
+
+  /**
+   * Optional React Server Components manifest configuration.
+   *
+   * When provided, every render executed by `createReactRenderer()` uses the
+   * RSC two-pass render path instead of standard single-pass SSR.
+   */
+  rscOptions?: RscOptions;
 }
 
 // ─── Consumer-facing server route types ───────────────────────────────────────
@@ -235,6 +244,14 @@ export interface SsrLoadResult {
   readonly data: Record<string, unknown>;
   /** TanStack Query cache entries to pre-seed. Prevents client-side refetch. */
   readonly queryCache?: ReadonlyArray<SsrQueryCacheEntry>;
+  /**
+   * Optional ISR revalidation window in seconds.
+   *
+   * `false` disables background revalidation and treats the response as static.
+   */
+  readonly revalidate?: number | false;
+  /** Optional ISR cache tags written to the middleware sink. */
+  readonly tags?: readonly string[];
 }
 
 /**
@@ -466,4 +483,11 @@ export interface ManifestSsrConfig {
   getUser?: (
     headers: Headers,
   ) => Promise<{ id: string; roles: string[] } | null>;
+  /**
+   * Optional React Server Components manifest configuration.
+   *
+   * When omitted, `createManifestRenderer()` may still enable RSC automatically
+   * from `manifest.ssr` by loading `rsc-manifest.json` at construction time.
+   */
+  rscOptions?: RscOptions;
 }

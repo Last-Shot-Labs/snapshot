@@ -1,4 +1,6 @@
 // src/ssr/manifest-renderer.ts
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import React from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { compileManifest } from "../ui/manifest/compiler";
@@ -6,6 +8,7 @@ import { PageRenderer } from "../ui/manifest/renderer";
 import type { CompiledRoute } from "../ui/manifest/types";
 import { escapeHtml } from "./head";
 import { renderPage } from "./render";
+import type { RscManifest } from "./rsc";
 import type {
   ManifestSsrConfig,
   SsrQueryCacheEntry,
@@ -112,6 +115,27 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
   ): Promise<Response>;
 } {
   const frozen = Object.freeze({ ...rawConfig });
+  let rscOptions = frozen.rscOptions;
+
+  if (!rscOptions && frozen.manifest.ssr?.rsc) {
+    const manifestPath = path.resolve(
+      process.cwd(),
+      frozen.manifest.ssr.rscManifestPath ?? "./dist/server/rsc-manifest.json",
+    );
+
+    try {
+      const rscManifest = JSON.parse(
+        readFileSync(manifestPath, "utf-8"),
+      ) as RscManifest;
+      rscOptions = Object.freeze({ manifest: rscManifest });
+    } catch (error) {
+      console.error(
+        `[snapshot-ssr] Failed to load rsc-manifest.json from ${manifestPath}:`,
+        String(error),
+      );
+    }
+  }
+
   const compiled = compileManifest(frozen.manifest);
 
   // Build route matchers once at construction time — not per request
@@ -227,7 +251,11 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
       // Preload resources via caller-provided resolvers
       const queryCache: SsrQueryCacheEntry[] = [];
       if (route.preload?.length && frozen.preloadResolvers) {
-        for (const resourceKey of route.preload) {
+        for (const preloadTarget of route.preload) {
+          const resourceKey =
+            typeof preloadTarget === "string"
+              ? preloadTarget
+              : preloadTarget.resource;
           const resolver = frozen.preloadResolvers[resourceKey];
           if (!resolver) continue; // Not provided — client fetches after hydration
 
@@ -280,7 +308,13 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
         resources: compiled.resources,
       });
 
-      return renderPage(element, requestContext, populatedShell);
+      return renderPage(
+        element,
+        requestContext,
+        populatedShell,
+        undefined,
+        rscOptions,
+      );
     },
 
     /**

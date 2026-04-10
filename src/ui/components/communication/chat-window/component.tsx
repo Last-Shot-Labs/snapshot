@@ -1,3 +1,5 @@
+'use client';
+
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
 import { MessageThread } from "../message-thread/component";

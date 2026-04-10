@@ -297,8 +297,10 @@ export function staticParamsPlugin(opts: StaticParamsPluginOptions): Plugin {
           writeStaticParamsManifest: (routes: unknown[], outDir: string) => Promise<void>;
         };
 
+        const staticParamsModuleSpecifier =
+          "@lastshotlabs/bunshot-ssr/static-params";
         const { scanStaticParams, writeStaticParamsManifest } = (await import(
-          "@lastshotlabs/bunshot-ssr/static-params"
+          staticParamsModuleSpecifier
         )) as unknown as StaticParamsModule;
 
         const routes = await scanStaticParams(serverRoutesDir);
@@ -366,6 +368,24 @@ export function staticParamsPlugin(opts: StaticParamsPluginOptions): Plugin {
  * ```
  */
 export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin[] {
+  if (opts.rsc && opts.ppr) {
+    console.warn(
+      "[snapshot-ssr] Warning: rsc: true and ppr: true are set simultaneously. " +
+        "RSC two-pass rendering is not composed with PPR shells. " +
+        "RSC will apply to non-PPR routes only. " +
+        "See docs/specs/ssr-rsc-ui-compatibility.md for details.",
+    );
+  }
+
+  if (opts.rsc && opts.target === "edge-cloudflare") {
+    console.warn(
+      "[snapshot-ssr] Warning: rsc: true with target: edge-cloudflare is not supported. " +
+        "Cloudflare Workers do not support AsyncLocalStorage, which is required by the " +
+        "Snapshot cache() primitive used inside server components. " +
+        "RSC will be disabled at runtime. Use target: node or target: edge-deno instead.",
+    );
+  }
+
   // Track whether this invocation is a client (non-SSR) build so we only
   // run post-build steps after the client build (not after the server bundle build).
   let isClientBuild = false;

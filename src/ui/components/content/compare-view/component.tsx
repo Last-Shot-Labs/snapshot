@@ -1,3 +1,5 @@
+'use client';
+
 import { useRef, useCallback, useMemo } from "react";
 import { useSubscribe } from "../../../context/hooks";
 import type { CompareViewConfig, DiffLine } from "./types";

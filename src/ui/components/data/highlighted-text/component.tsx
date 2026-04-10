@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo, useEffect } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import type { HighlightedTextConfig } from "./types";

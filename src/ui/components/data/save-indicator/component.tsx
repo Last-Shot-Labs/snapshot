@@ -1,3 +1,5 @@
+'use client';
+
 import { useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
 import type { SaveIndicatorConfig } from "./types";

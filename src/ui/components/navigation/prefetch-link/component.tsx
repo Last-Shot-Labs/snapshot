@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useRef, useEffect } from "react";
 import { usePrefetchRoute } from "../../../../ssr/prefetch";
 import type { PrefetchLinkProps } from "./schema";

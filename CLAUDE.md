@@ -380,6 +380,130 @@ src/ui/components/{group}/{component-name}/
   `var(--sn-spacing-md)`, not `1rem`. `var(--sn-radius-lg)`, not `12px`. If a token
   doesn't exist for what you need, add it to the token system — don't inline a value.
 
+### SSR and RSC Component Rules
+
+These rules exist because Snapshot's UI library renders on the server. Violating them
+causes crashes during SSR pre-rendering or RSC two-pass rendering.
+
+1. **Every component file must declare its execution context.** Either `'use client'` as
+   the literal first line of the file, or a comment `// Server Component — no hooks, no
+   browser APIs, no event handlers` as the literal first line. No exceptions. A component
+   without a context declaration is ambiguous — an ambiguous component is a bug.
+
+2. **The `'use client'` rule — any component that uses hooks gets the directive.** If a
+   component calls `useState`, `useEffect`, `useRef`, `useCallback`, `useMemo`, or any other
+   React hook, it must start with `'use client'`. This covers virtually every UI component in
+   the library. When in doubt, add `'use client'`.
+
+   ```tsx
+   // CORRECT — directive is line 1, before any imports
+   'use client';
+
+   import { useState } from 'react';
+   export function MyComponent({ config }: { config: MyConfig }) { ... }
+   ```
+
+   ```tsx
+   // WRONG — missing directive
+   import { useState } from 'react';
+   export function MyComponent({ config }: { config: MyConfig }) { ... }
+   ```
+
+3. **`'use client'` does NOT skip SSR pre-rendering.** Client components still pre-render on
+   the server via `react-dom/server`. The `'use client'` directive only marks the hydration
+   boundary — it tells the RSC runtime "this component needs client JS." It does not opt the
+   component out of server rendering. Never assume a client component is browser-only.
+
+4. **Render body must be pure — no browser APIs in synchronous render code.** `document`,
+   `window`, `localStorage`, `navigator`, and any other browser global must never appear in
+   the component's return path or in any code that runs synchronously during render. This
+   applies to both client components and server components.
+
+   ```tsx
+   // WRONG — document access in render body crashes on the server
+   'use client';
+   export function SaveIndicator({ config }) {
+     ensureStyles(); // calls document.createElement inside — crashes on server
+     return <div>...</div>;
+   }
+
+   // CORRECT — browser API moved to useEffect
+   'use client';
+   export function SaveIndicator({ config }) {
+     useEffect(() => {
+       ensureStyles(); // runs client-only, after mount
+     }, []);
+     return <div>...</div>;
+   }
+   ```
+
+   ```tsx
+   // WRONG — window access in render body causes server/client mismatch
+   'use client';
+   export function Nav({ config, pathname }) {
+     const currentPath = pathname ?? window.location.pathname; // crashes on server
+     ...
+   }
+
+   // WRONG — typeof guard avoids crash but causes hydration mismatch
+   'use client';
+   export function Nav({ config, pathname }) {
+     const currentPath = pathname ??
+       (typeof window !== 'undefined' ? window.location.pathname : '/');
+     // Server renders '/', client re-renders with real path → React hydration warning
+   }
+
+   // CORRECT — browser value initialized via useEffect
+   'use client';
+   export function Nav({ config, pathname }) {
+     const [currentPath, setCurrentPath] = useState(pathname ?? '/');
+     useEffect(() => {
+       if (!pathname) setCurrentPath(window.location.pathname);
+     }, [pathname]);
+     ...
+   }
+   ```
+
+5. **`useEffect` is client-only and SSR-safe.** Effects do not run during server pre-render.
+   Browser API calls inside `useEffect` do not need `typeof window !== 'undefined'` guards —
+   the effect itself is the guard. Move all browser API access into effects.
+
+6. **Props across the server/client boundary must be serializable.** Data passed from a
+   server component to a client component must be JSON-serializable: plain objects, strings,
+   numbers, arrays. Never pass functions, class instances, `Map`, `Set`, `Date` objects, or
+   `undefined` across this boundary. Use `null` instead of `undefined` for optional data.
+
+7. **Context providers are Client Components.** `AppContextProvider` and `PageContextProvider`
+   must start with `'use client'`. They wrap Jotai state providers which use hooks internally.
+   They must have no browser API access in their render body — only in effects.
+
+8. **`ComponentWrapper` gets `'use client'`.** It contains a `React.Component` class error
+   boundary and manages `Suspense` boundaries. Class components are always client components.
+   The wrapper file `src/ui/components/_base/component-wrapper.tsx` must start with `'use client'`.
+
+9. **Test SSR compatibility with `renderToStaticMarkup`.** Every component test suite must
+   include a test that renders the component with `react-dom/server`'s `renderToStaticMarkup`.
+   If the component throws, there is a render-body browser API call that was missed. This test
+   is the canonical way to verify SSR safety:
+
+   ```ts
+   import { renderToStaticMarkup } from 'react-dom/server';
+   it('renders to static markup without throwing', () => {
+     expect(() =>
+       renderToStaticMarkup(
+         <TestPageContext>
+           <MyComponent config={baseConfig} />
+         </TestPageContext>
+       )
+     ).not.toThrow();
+   });
+   ```
+
+10. **The playground is client-only — but the component library is not.** Playground
+    components (`playground/src/`) run only in the browser and do not need SSR guards. The
+    components in `src/ui/components/` are library code and must be SSR-safe. Never copy a
+    "works in playground" pattern into library code without verifying it is SSR-safe.
+
 ### Token Usage Rules (CRITICAL)
 
 These rules exist because violating them caused system-wide visual breakage. Every rule

@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useCallback } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { useComponentData } from "../../_base/use-component-data";

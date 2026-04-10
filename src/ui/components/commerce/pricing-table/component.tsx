@@ -1,3 +1,5 @@
+'use client';
+
 import React from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { useSubscribe } from "../../../context/hooks";

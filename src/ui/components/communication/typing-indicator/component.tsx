@@ -1,3 +1,5 @@
+'use client';
+
 import { useSubscribe } from "../../../context/hooks";
 import type { TypingIndicatorConfig } from "./types";
 

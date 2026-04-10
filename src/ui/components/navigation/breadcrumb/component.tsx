@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useMemo } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { interpolate } from "../../../actions/interpolate";

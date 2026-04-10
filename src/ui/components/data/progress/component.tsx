@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useId } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import type { ProgressConfig } from "./types";

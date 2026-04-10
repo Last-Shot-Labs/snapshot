@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useCallback, useEffect, useRef, useContext } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import {

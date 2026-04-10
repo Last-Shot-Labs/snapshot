@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import type { SeparatorConfig } from "./types";

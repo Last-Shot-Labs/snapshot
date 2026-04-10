@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";

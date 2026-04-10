@@ -1,3 +1,5 @@
+'use client';
+
 import { Component, Suspense } from "react";
 import type { CSSProperties, ErrorInfo, ReactNode } from "react";
 

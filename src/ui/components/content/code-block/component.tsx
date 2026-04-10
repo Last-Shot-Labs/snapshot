@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useCallback, useMemo } from "react";
 import hljs from "highlight.js/lib/core";
 import typescript from "highlight.js/lib/languages/typescript";

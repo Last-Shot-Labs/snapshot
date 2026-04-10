@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useMemo, useEffect, useRef, useCallback } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useComponentData } from "../../_base/use-component-data";

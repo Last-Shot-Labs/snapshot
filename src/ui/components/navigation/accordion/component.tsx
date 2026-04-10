@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useCallback } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";

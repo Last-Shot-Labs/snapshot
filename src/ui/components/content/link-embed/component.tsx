@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo } from "react";
 import { useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";

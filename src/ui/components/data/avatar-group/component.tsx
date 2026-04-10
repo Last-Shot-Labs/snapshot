@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useComponentData } from "../../_base/use-component-data";

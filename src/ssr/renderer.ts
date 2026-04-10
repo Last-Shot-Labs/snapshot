@@ -76,7 +76,7 @@ class SsrErrorBoundary extends React.Component<
       error: Error;
       reset: () => void;
     }>;
-    children: React.ReactNode;
+    children?: React.ReactNode;
   },
   { error: Error | null }
 > {
@@ -319,6 +319,7 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
 } {
   const frozen = Object.freeze({ ...config });
   const timeoutMs = frozen.renderTimeoutMs ?? 5000;
+  const rscOptions = frozen.rscOptions;
 
   return {
     /**
@@ -434,7 +435,13 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
             }),
             match,
           };
-          const resp = await renderPage(element, requestContext, shell, timeoutMs);
+          const resp = await renderPage(
+            element,
+            requestContext,
+            shell,
+            timeoutMs,
+            rscOptions,
+          );
           return new Response(resp.body, { status: 403, headers: resp.headers });
         }
         return new Response("Forbidden", {
@@ -456,7 +463,13 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
             }),
             match,
           };
-          const resp = await renderPage(element, requestContext, shell, timeoutMs);
+          const resp = await renderPage(
+            element,
+            requestContext,
+            shell,
+            timeoutMs,
+            rscOptions,
+          );
           return new Response(resp.body, { status: 401, headers: resp.headers });
         }
         return new Response("Unauthorized", {
@@ -571,7 +584,13 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
         query: match.query,
       });
 
-      return renderPage(element, requestContext, fullShell, timeoutMs);
+      return renderPage(
+        element,
+        requestContext,
+        fullShell,
+        timeoutMs,
+        rscOptions,
+      );
     },
 
     /**
@@ -692,7 +711,13 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
             }),
             match: chain.page,
           };
-          const resp = await renderPage(element, requestContext, shell, timeoutMs);
+          const resp = await renderPage(
+            element,
+            requestContext,
+            shell,
+            timeoutMs,
+            rscOptions,
+          );
           return new Response(resp.body, {
             status: 404,
             headers: resp.headers,
@@ -714,7 +739,13 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
             }),
             match: chain.page,
           };
-          const resp = await renderPage(element, requestContext, shell, timeoutMs);
+          const resp = await renderPage(
+            element,
+            requestContext,
+            shell,
+            timeoutMs,
+            rscOptions,
+          );
           return new Response(resp.body, { status: 403, headers: resp.headers });
         }
         return new Response("Forbidden", {
@@ -736,7 +767,13 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
             }),
             match: chain.page,
           };
-          const resp = await renderPage(element, requestContext, shell, timeoutMs);
+          const resp = await renderPage(
+            element,
+            requestContext,
+            shell,
+            timeoutMs,
+            rscOptions,
+          );
           return new Response(resp.body, { status: 401, headers: resp.headers });
         }
         return new Response("Unauthorized", {
@@ -990,7 +1027,13 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
         match: chain.page,
       };
 
-      const response = await renderPage(element, requestContext, fullShell, timeoutMs);
+      const response = await renderPage(
+        element,
+        requestContext,
+        fullShell,
+        timeoutMs,
+        rscOptions,
+      );
 
       // Phase 27: add interception header
       if (chain.intercepted) {
