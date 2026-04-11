@@ -196,7 +196,7 @@ function ModalSurface({
       }}
     >
       <div
-        data-snapshot-modal-overlay=""
+        data-modal-overlay=""
         data-testid="modal-overlay"
         onClick={handleOverlayClick}
         style={{
@@ -213,7 +213,7 @@ function ModalSurface({
         ref={dialogRef}
         tabIndex={-1}
         onKeyDown={handleKeyDown}
-        data-snapshot-modal-dialog=""
+        data-modal-content=""
         style={{
           position: "relative",
           maxWidth,
@@ -233,11 +233,11 @@ function ModalSurface({
         }}
       >
         <style>{`
-          [data-snapshot-component="modal"] [data-snapshot-modal-close]:focus { outline: none; }
-          [data-snapshot-component="modal"] [data-snapshot-modal-close]:hover {
+          [data-snapshot-component="modal"] [data-modal-close]:focus { outline: none; }
+          [data-snapshot-component="modal"] [data-modal-close]:hover {
             background-color: var(--sn-color-secondary, #f3f4f6);
           }
-          [data-snapshot-component="modal"] [data-snapshot-modal-close]:focus-visible {
+          [data-snapshot-component="modal"] [data-modal-close]:focus-visible {
             outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
             outline-offset: var(--sn-ring-offset, 2px);
           }
@@ -247,7 +247,7 @@ function ModalSurface({
         {/* Header */}
         {title && (
           <div
-            data-snapshot-modal-header=""
+            data-modal-header=""
             style={{
               display: "flex",
               alignItems: "center",
@@ -272,7 +272,7 @@ function ModalSurface({
               type="button"
               onClick={close}
               aria-label="Close"
-              data-snapshot-modal-close=""
+              data-modal-close=""
               data-testid="modal-close"
               style={{
                 background: "none",
@@ -292,7 +292,7 @@ function ModalSurface({
 
         {/* Content */}
         <div
-          data-snapshot-modal-content=""
+          data-modal-body=""
           style={{
             padding: "var(--sn-spacing-lg, 1.5rem)",
             overflow: "auto",
@@ -310,7 +310,7 @@ function ModalSurface({
         {/* Footer */}
         {config.footer?.actions && config.footer.actions.length > 0 && (
           <div
-            data-snapshot-modal-footer=""
+            data-modal-footer=""
             style={{
               display: "flex",
               gap: "var(--sn-spacing-sm, 0.5rem)",

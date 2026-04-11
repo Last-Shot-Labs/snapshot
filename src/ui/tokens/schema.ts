@@ -65,21 +65,43 @@ export const spacingSchema = z.enum([
 
 // ── Font schema ──────────────────────────────────────────────────────────────
 
+const fontSourceSchema = z
+  .object({
+    /** Font family name exposed through the token role. */
+    family: z.string().min(1),
+    /** Font source type. */
+    source: z.enum(["google", "url"]),
+    /** Source URL for self-hosted fonts. Required when source is "url". */
+    url: z.string().min(1).optional(),
+    /** Weight list for Google Fonts or self-hosted variants. */
+    weights: z.array(z.number().int().positive()).min(1).optional(),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.source === "url" && !value.url) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "url is required when source is \"url\"",
+        path: ["url"],
+      });
+    }
+  });
+
+const fontRoleSchema = z.union([z.string(), fontSourceSchema]);
+
 /** Zod schema for font configuration. */
 export const fontSchema = z
   .object({
     /** Primary font family (body text, headings). */
-    sans: z.string().optional(),
+    sans: fontRoleSchema.optional(),
     /** Monospace font family (code, pre). */
-    mono: z.string().optional(),
+    mono: fontRoleSchema.optional(),
     /** Display font (large headings, hero text). */
-    display: z.string().optional(),
+    display: fontRoleSchema.optional(),
     /** Base font size in px. Default: 16. */
     baseSize: z.number().min(10).max(24).optional(),
     /** Type scale ratio. Default: 1.25 (major third). */
     scale: z.number().min(1.1).max(1.5).optional(),
-    /** Custom font URL (e.g. Google Fonts @import URL). */
-    url: z.string().url().optional(),
   })
   .strict();
 

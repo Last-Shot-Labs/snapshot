@@ -24,8 +24,9 @@ function TierCard({
 
   return (
     <div
+      data-pricing-card=""
+      data-featured={isHighlighted || undefined}
       data-testid="pricing-tier-card"
-      data-highlighted={isHighlighted || undefined}
       style={{
         position: "relative",
         backgroundColor: "var(--sn-color-card, #ffffff)",
@@ -424,11 +425,11 @@ export function PricingTable({ config }: { config: PricingTableConfig }) {
   if (visible === false) return null;
 
   const focusStyles = `
-[data-snapshot-component="pricing-table"] [data-testid="pricing-tier-card"]:hover {
+[data-snapshot-component="pricing-table"] [data-pricing-card]:hover {
   box-shadow: var(--sn-shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1));
   transform: translateY(-2px);
 }
-[data-snapshot-component="pricing-table"] [data-testid="pricing-tier-card"][data-highlighted]:hover {
+[data-snapshot-component="pricing-table"] [data-pricing-card][data-featured]:hover {
   transform: scale(1.02) translateY(-2px);
 }
 [data-snapshot-component="pricing-table"] [data-testid="pricing-tier-cta"]:hover:not(:disabled) {

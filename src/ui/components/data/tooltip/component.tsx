@@ -177,6 +177,7 @@ export function TooltipComponent({ config }: { config: TooltipConfig }) {
       <div
         id={tooltipId}
         role="tooltip"
+        data-tooltip-content=""
         data-testid="tooltip-popup"
         style={{
           position: "absolute",

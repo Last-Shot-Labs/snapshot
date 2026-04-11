@@ -206,6 +206,7 @@ export function Progress({ config }: { config: ProgressConfig }) {
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label={resolvedLabel ?? "Progress"}
+        data-progress-bar=""
         style={{
           width: "100%",
           height: barHeight,

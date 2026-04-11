@@ -1,9 +1,12 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { resolveTokens } from "../resolve";
+import { registerBuiltInComponents } from "../../components/register";
+import { getRegisteredSchemaTypes } from "../../manifest/schema";
+import { resolveFrameworkStyles, resolveTokens } from "../resolve";
 import { defineFlavor, getFlavor, registerBuiltInFlavors } from "../flavors";
 
 beforeAll(() => {
   registerBuiltInFlavors();
+  registerBuiltInComponents();
 });
 
 describe("resolveTokens", () => {
@@ -60,6 +63,44 @@ describe("resolveTokens", () => {
     expect(css).toContain("--sn-font-scale: 1.25;");
   });
 
+  it("generates Google font imports from structured font config", () => {
+    const css = resolveTokens({
+      overrides: {
+        font: {
+          sans: {
+            family: "Inter",
+            source: "google",
+            weights: [400, 500, 700],
+          },
+        },
+      },
+    });
+
+    expect(css).toContain(
+      "@import url(https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap);",
+    );
+    expect(css).toContain("--sn-font-sans: Inter;");
+  });
+
+  it("generates @font-face rules for self-hosted fonts", () => {
+    const css = resolveTokens({
+      overrides: {
+        font: {
+          display: {
+            family: "Cal Sans",
+            source: "url",
+            url: "/fonts/cal-sans.woff2",
+          },
+        },
+      },
+    });
+
+    expect(css).toContain("@font-face {");
+    expect(css).toContain("font-family: 'Cal Sans';");
+    expect(css).toContain("src: url('/fonts/cal-sans.woff2');");
+    expect(css).toContain("--sn-font-display: Cal Sans;");
+  });
+
   it("generates spacing variables", () => {
     const css = resolveTokens();
     expect(css).toContain("--sn-spacing-md:");
@@ -69,6 +110,16 @@ describe("resolveTokens", () => {
     expect(() => resolveTokens({ flavor: "nonexistent" })).toThrow(
       "Unknown flavor",
     );
+  });
+});
+
+describe("resolveFrameworkStyles", () => {
+  it("covers every registered component type", () => {
+    const css = resolveFrameworkStyles();
+
+    for (const type of getRegisteredSchemaTypes()) {
+      expect(css).toContain(`[data-snapshot-component="${type}"]`);
+    }
   });
 });
 

@@ -437,10 +437,10 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
             outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
             outline-offset: var(--sn-ring-offset, 2px);
           }
-          [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus {
+          [data-snapshot-component="file-uploader"] [data-dropzone]:focus {
             outline: none;
           }
-          [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus-visible {
+          [data-snapshot-component="file-uploader"] [data-dropzone]:focus-visible {
             outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
             outline-offset: var(--sn-ring-offset, 2px);
           }
@@ -509,10 +509,10 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
             outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
             outline-offset: var(--sn-ring-offset, 2px);
           }
-          [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus {
+          [data-snapshot-component="file-uploader"] [data-dropzone]:focus {
             outline: none;
           }
-          [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus-visible {
+          [data-snapshot-component="file-uploader"] [data-dropzone]:focus-visible {
             outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
             outline-offset: var(--sn-ring-offset, 2px);
           }
@@ -534,6 +534,8 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
     >
       {hiddenInput}
       <div
+        data-dropzone=""
+        data-drag-active={isDragOver ? "" : undefined}
         data-testid="file-uploader-dropzone"
         onClick={openPicker}
         onKeyDown={(e) => {
@@ -617,10 +619,10 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
           outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
           outline-offset: var(--sn-ring-offset, 2px);
         }
-        [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus {
+        [data-snapshot-component="file-uploader"] [data-dropzone]:focus {
           outline: none;
         }
-        [data-snapshot-component="file-uploader"] [data-testid="file-uploader-dropzone"]:focus-visible {
+        [data-snapshot-component="file-uploader"] [data-dropzone]:focus-visible {
           outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
           outline-offset: var(--sn-ring-offset, 2px);
         }

@@ -111,6 +111,43 @@ describe("fontSchema", () => {
     expect(result.baseSize).toBe(16);
   });
 
+  it("accepts structured Google and self-hosted font sources", () => {
+    const result = fontSchema.parse({
+      sans: {
+        family: "Inter",
+        source: "google",
+        weights: [400, 500, 600, 700],
+      },
+      display: {
+        family: "Cal Sans",
+        source: "url",
+        url: "/fonts/cal-sans.woff2",
+      },
+    });
+
+    expect(result.sans).toEqual({
+      family: "Inter",
+      source: "google",
+      weights: [400, 500, 600, 700],
+    });
+    expect(result.display).toEqual({
+      family: "Cal Sans",
+      source: "url",
+      url: "/fonts/cal-sans.woff2",
+    });
+  });
+
+  it("rejects self-hosted font sources without a url", () => {
+    expect(() =>
+      fontSchema.parse({
+        sans: {
+          family: "Cal Sans",
+          source: "url",
+        },
+      }),
+    ).toThrow();
+  });
+
   it("rejects baseSize below 10", () => {
     expect(() => fontSchema.parse({ baseSize: 8 })).toThrow();
   });

@@ -207,7 +207,7 @@ function DrawerSurface({
       }}
     >
       <div
-        data-snapshot-drawer-overlay=""
+        data-drawer-overlay=""
         onClick={handleOverlayClick}
         style={{
           position: "fixed",
@@ -223,7 +223,7 @@ function DrawerSurface({
         ref={panelRef}
         tabIndex={-1}
         onKeyDown={handleKeyDown}
-        data-snapshot-drawer-panel=""
+        data-drawer-content=""
         data-side={side}
         style={{
           position: "fixed",
@@ -244,11 +244,11 @@ function DrawerSurface({
         }}
       >
         <style>{`
-          [data-snapshot-component="drawer"] [data-snapshot-drawer-close]:focus { outline: none; }
-          [data-snapshot-component="drawer"] [data-snapshot-drawer-close]:hover {
+          [data-snapshot-component="drawer"] [data-drawer-close]:focus { outline: none; }
+          [data-snapshot-component="drawer"] [data-drawer-close]:hover {
             background-color: var(--sn-color-secondary, #f3f4f6);
           }
-          [data-snapshot-component="drawer"] [data-snapshot-drawer-close]:focus-visible {
+          [data-snapshot-component="drawer"] [data-drawer-close]:focus-visible {
             outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
             outline-offset: var(--sn-ring-offset, 2px);
           }
@@ -258,7 +258,7 @@ function DrawerSurface({
         {/* Header */}
         {title && (
           <div
-            data-snapshot-drawer-header=""
+            data-drawer-header=""
             style={{
               display: "flex",
               alignItems: "center",
@@ -283,7 +283,7 @@ function DrawerSurface({
               type="button"
               onClick={close}
               aria-label="Close"
-              data-snapshot-drawer-close=""
+              data-drawer-close=""
               data-testid="drawer-close"
               style={{
                 background: "none",
@@ -303,7 +303,7 @@ function DrawerSurface({
 
         {/* Content */}
         <div
-          data-snapshot-drawer-content=""
+          data-drawer-body=""
           style={{
             padding: "var(--sn-spacing-lg, 1.5rem)",
             overflow: "auto",
@@ -321,7 +321,7 @@ function DrawerSurface({
         {/* Footer */}
         {config.footer?.actions && config.footer.actions.length > 0 && (
           <div
-            data-snapshot-drawer-footer=""
+            data-drawer-footer=""
             style={{
               display: "flex",
               gap: "var(--sn-spacing-sm, 0.5rem)",

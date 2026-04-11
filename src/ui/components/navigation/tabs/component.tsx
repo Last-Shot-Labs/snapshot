@@ -182,7 +182,7 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
       {/* Tab Bar */}
       <div
         role="tablist"
-        data-snapshot-tabs-bar=""
+        data-tab-list=""
         style={barStyle}
         onKeyDown={handleTablistKeyDown}
       >
@@ -196,13 +196,13 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
             disabled={tab.disabled}
             tabIndex={index === activeTab ? 0 : -1}
             onClick={() => setActiveTab(index)}
-            data-snapshot-tab=""
+            data-tab-trigger=""
             data-active={index === activeTab ? "" : undefined}
             style={tabStyle(index === activeTab, !!tab.disabled)}
           >
             {tab.icon && (
               <span
-                data-snapshot-tab-icon=""
+                data-tab-icon=""
                 style={{
                   marginRight: "var(--sn-spacing-xs, 0.25rem)",
                   display: "inline-flex",
@@ -225,7 +225,7 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
           <div
             key={index}
             role="tabpanel"
-            data-snapshot-tab-panel=""
+            data-tab-content=""
             aria-hidden={index !== activeTab}
             style={{
               display: index === activeTab ? "block" : "none",

@@ -112,6 +112,7 @@ function ListItem({
 
   const content = (
     <div
+      data-list-item=""
       data-testid="list-item"
       onClick={isClickable ? handleClick : undefined}
       onKeyDown={
@@ -329,8 +330,8 @@ export function ListComponent({ config }: { config: ListConfig }) {
       style={{ ...containerStyle, ...(config.style as React.CSSProperties) }}
     >
       <style>{`
-[data-snapshot-component="list"] [data-testid="list-item"][role="button"]:focus { outline: none; }
-[data-snapshot-component="list"] [data-testid="list-item"][role="button"]:focus-visible { outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb)); outline-offset: var(--sn-ring-offset, 2px); border-radius: var(--sn-radius-md, 0.5rem); }
+[data-snapshot-component="list"] [data-list-item][role="button"]:focus { outline: none; }
+[data-snapshot-component="list"] [data-list-item][role="button"]:focus-visible { outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb)); outline-offset: var(--sn-ring-offset, 2px); border-radius: var(--sn-radius-md, 0.5rem); }
       `}</style>
       {/* Loading state */}
       {isLoading && (

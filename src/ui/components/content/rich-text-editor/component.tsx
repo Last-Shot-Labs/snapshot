@@ -245,6 +245,7 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
       {/* Toolbar */}
       {config.toolbar !== false && (
         <div
+          data-editor-toolbar=""
           data-testid="rich-text-editor-toolbar"
           role="toolbar"
           style={{
@@ -370,6 +371,7 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
 
       {/* Editor + Preview container */}
       <div
+        data-editor-content=""
         style={{
           display: "flex",
           flexWrap: "wrap",

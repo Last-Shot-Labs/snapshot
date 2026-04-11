@@ -142,6 +142,7 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
               type="button"
               id={`accordion-${config.id ?? "default"}-btn-${index}`}
               data-testid={`accordion-header-${index}`}
+              data-accordion-trigger=""
               onClick={() => !isDisabled && toggle(index)}
               aria-expanded={isOpen}
               aria-controls={`accordion-${config.id ?? "default"}-panel-${index}`}
@@ -194,6 +195,7 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
             <div
               id={`accordion-${config.id ?? "default"}-panel-${index}`}
               data-testid={`accordion-panel-${index}`}
+              data-accordion-content=""
               role="region"
               aria-labelledby={`accordion-${config.id ?? "default"}-btn-${index}`}
               style={{

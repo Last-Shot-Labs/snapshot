@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { cleanup, render, screen, fireEvent } from "@testing-library/react";
 import { createElement } from "react";
 import { Provider } from "jotai/react";
 import { TabsComponent } from "../component";
@@ -34,6 +34,10 @@ function createWrapper(
 
 describe("TabsComponent", () => {
   let store: ReturnType<typeof createStore>;
+
+  afterEach(() => {
+    cleanup();
+  });
 
   beforeEach(() => {
     store = createStore();
@@ -96,7 +100,7 @@ describe("TabsComponent", () => {
     // Tab 2 content should be visible
     expect(screen.getByTestId("child-Content 2")).toBeDefined();
     // Tab 1 panel should be hidden (display: none)
-    const panels = container.querySelectorAll("[data-snapshot-tab-panel]");
+    const panels = container.querySelectorAll("[data-tab-content]");
     const tab1Panel = panels[0] as HTMLElement;
     expect(tab1Panel.style.display).toBe("none");
   });
@@ -198,7 +202,7 @@ describe("TabsComponent", () => {
     const { container } = render(createElement(TabsComponent, { config }), {
       wrapper: createWrapper(store),
     });
-    expect(container.querySelector("[data-snapshot-tab-icon]")).not.toBeNull();
+    expect(container.querySelector("[data-tab-icon]")).not.toBeNull();
   });
 
   it("lazy mounts tab content — unmounted tabs are not rendered", () => {

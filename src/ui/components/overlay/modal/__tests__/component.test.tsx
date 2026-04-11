@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { cleanup, render, screen, fireEvent } from "@testing-library/react";
 import { createElement } from "react";
 import { Provider } from "jotai/react";
 import { ModalComponent } from "../component";
@@ -34,6 +34,10 @@ function createWrapper(store: ReturnType<typeof createStore>) {
 
 describe("ModalComponent", () => {
   let store: ReturnType<typeof createStore>;
+
+  afterEach(() => {
+    cleanup();
+  });
 
   beforeEach(() => {
     store = createStore();
@@ -104,7 +108,7 @@ describe("ModalComponent", () => {
       createElement(ModalComponent, { config: baseConfig }),
       { wrapper: createWrapper(store) },
     );
-    const dialogEl = container.querySelector("[data-snapshot-modal-dialog]");
+    const dialogEl = container.querySelector("[data-modal-content]");
     expect(dialogEl).not.toBeNull();
     fireEvent.keyDown(dialogEl!, { key: "Escape" });
     // After closing, modal stack should be empty
@@ -117,7 +121,7 @@ describe("ModalComponent", () => {
       createElement(ModalComponent, { config: baseConfig }),
       { wrapper: createWrapper(store) },
     );
-    const overlay = container.querySelector("[data-snapshot-modal-overlay]");
+    const overlay = container.querySelector("[data-modal-overlay]");
     expect(overlay).not.toBeNull();
     fireEvent.click(overlay!);
     expect(store.get(modalStackAtom)).toEqual([]);
@@ -144,7 +148,7 @@ describe("ModalComponent", () => {
     const { container } = render(createElement(ModalComponent, { config }), {
       wrapper: createWrapper(store),
     });
-    expect(container.querySelector("[data-snapshot-modal-header]")).toBeNull();
+    expect(container.querySelector("[data-modal-header]")).toBeNull();
   });
 
   it("renders with full size", () => {
@@ -158,7 +162,7 @@ describe("ModalComponent", () => {
     const { container } = render(createElement(ModalComponent, { config }), {
       wrapper: createWrapper(store),
     });
-    const dialog = container.querySelector("[data-snapshot-modal-dialog]");
+    const dialog = container.querySelector("[data-modal-content]");
     expect(dialog).not.toBeNull();
   });
 

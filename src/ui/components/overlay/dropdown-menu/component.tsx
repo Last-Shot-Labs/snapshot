@@ -262,6 +262,7 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
         <div
           ref={menuRef}
           role="menu"
+          data-menu-content=""
           data-testid="dropdown-menu-content"
           onKeyDown={handleKeyDown}
           style={{
@@ -289,6 +290,7 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
                 <div
                   key={`sep-${i}`}
                   role="separator"
+                  data-menu-separator=""
                   data-testid="dropdown-menu-separator"
                   style={{
                     height: "1px",
@@ -326,6 +328,7 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
               <div
                 key={`item-${i}`}
                 role="menuitem"
+                data-menu-item=""
                 data-testid="dropdown-menu-item"
                 tabIndex={-1}
                 aria-disabled={isDisabled || undefined}

@@ -75,29 +75,142 @@ export declare const spacingSchema: z.ZodEnum<["compact", "default", "comfortabl
 /** Zod schema for font configuration. */
 export declare const fontSchema: z.ZodObject<{
     /** Primary font family (body text, headings). */
-    sans: z.ZodOptional<z.ZodString>;
+    sans: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+        /** Font family name exposed through the token role. */
+        family: z.ZodString;
+        /** Font source type. */
+        source: z.ZodEnum<["google", "url"]>;
+        /** Source URL for self-hosted fonts. Required when source is "url". */
+        url: z.ZodOptional<z.ZodString>;
+        /** Weight list for Google Fonts or self-hosted variants. */
+        weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+    }, "strict", z.ZodTypeAny, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }>, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }>]>>;
     /** Monospace font family (code, pre). */
-    mono: z.ZodOptional<z.ZodString>;
+    mono: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+        /** Font family name exposed through the token role. */
+        family: z.ZodString;
+        /** Font source type. */
+        source: z.ZodEnum<["google", "url"]>;
+        /** Source URL for self-hosted fonts. Required when source is "url". */
+        url: z.ZodOptional<z.ZodString>;
+        /** Weight list for Google Fonts or self-hosted variants. */
+        weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+    }, "strict", z.ZodTypeAny, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }>, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }>]>>;
     /** Display font (large headings, hero text). */
-    display: z.ZodOptional<z.ZodString>;
+    display: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+        /** Font family name exposed through the token role. */
+        family: z.ZodString;
+        /** Font source type. */
+        source: z.ZodEnum<["google", "url"]>;
+        /** Source URL for self-hosted fonts. Required when source is "url". */
+        url: z.ZodOptional<z.ZodString>;
+        /** Weight list for Google Fonts or self-hosted variants. */
+        weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+    }, "strict", z.ZodTypeAny, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }>, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }, {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    }>]>>;
     /** Base font size in px. Default: 16. */
     baseSize: z.ZodOptional<z.ZodNumber>;
     /** Type scale ratio. Default: 1.25 (major third). */
     scale: z.ZodOptional<z.ZodNumber>;
-    /** Custom font URL (e.g. Google Fonts @import URL). */
-    url: z.ZodOptional<z.ZodString>;
 }, "strict", z.ZodTypeAny, {
-    url?: string | undefined;
-    sans?: string | undefined;
-    mono?: string | undefined;
-    display?: string | undefined;
+    sans?: string | {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    } | undefined;
+    mono?: string | {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    } | undefined;
+    display?: string | {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    } | undefined;
     baseSize?: number | undefined;
     scale?: number | undefined;
 }, {
-    url?: string | undefined;
-    sans?: string | undefined;
-    mono?: string | undefined;
-    display?: string | undefined;
+    sans?: string | {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    } | undefined;
+    mono?: string | {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    } | undefined;
+    display?: string | {
+        family: string;
+        source: "url" | "google";
+        url?: string | undefined;
+        weights?: number[] | undefined;
+    } | undefined;
     baseSize?: number | undefined;
     scale?: number | undefined;
 }>;
@@ -609,29 +722,142 @@ export declare const flavorOverrideSchema: z.ZodObject<{
     spacing: z.ZodOptional<z.ZodEnum<["compact", "default", "comfortable", "spacious"]>>;
     font: z.ZodOptional<z.ZodObject<{
         /** Primary font family (body text, headings). */
-        sans: z.ZodOptional<z.ZodString>;
+        sans: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+            /** Font family name exposed through the token role. */
+            family: z.ZodString;
+            /** Font source type. */
+            source: z.ZodEnum<["google", "url"]>;
+            /** Source URL for self-hosted fonts. Required when source is "url". */
+            url: z.ZodOptional<z.ZodString>;
+            /** Weight list for Google Fonts or self-hosted variants. */
+            weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+        }, "strict", z.ZodTypeAny, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }>, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }>]>>;
         /** Monospace font family (code, pre). */
-        mono: z.ZodOptional<z.ZodString>;
+        mono: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+            /** Font family name exposed through the token role. */
+            family: z.ZodString;
+            /** Font source type. */
+            source: z.ZodEnum<["google", "url"]>;
+            /** Source URL for self-hosted fonts. Required when source is "url". */
+            url: z.ZodOptional<z.ZodString>;
+            /** Weight list for Google Fonts or self-hosted variants. */
+            weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+        }, "strict", z.ZodTypeAny, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }>, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }>]>>;
         /** Display font (large headings, hero text). */
-        display: z.ZodOptional<z.ZodString>;
+        display: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+            /** Font family name exposed through the token role. */
+            family: z.ZodString;
+            /** Font source type. */
+            source: z.ZodEnum<["google", "url"]>;
+            /** Source URL for self-hosted fonts. Required when source is "url". */
+            url: z.ZodOptional<z.ZodString>;
+            /** Weight list for Google Fonts or self-hosted variants. */
+            weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+        }, "strict", z.ZodTypeAny, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }>, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }, {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        }>]>>;
         /** Base font size in px. Default: 16. */
         baseSize: z.ZodOptional<z.ZodNumber>;
         /** Type scale ratio. Default: 1.25 (major third). */
         scale: z.ZodOptional<z.ZodNumber>;
-        /** Custom font URL (e.g. Google Fonts @import URL). */
-        url: z.ZodOptional<z.ZodString>;
     }, "strict", z.ZodTypeAny, {
-        url?: string | undefined;
-        sans?: string | undefined;
-        mono?: string | undefined;
-        display?: string | undefined;
+        sans?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
+        mono?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
+        display?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
         baseSize?: number | undefined;
         scale?: number | undefined;
     }, {
-        url?: string | undefined;
-        sans?: string | undefined;
-        mono?: string | undefined;
-        display?: string | undefined;
+        sans?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
+        mono?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
+        display?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
         baseSize?: number | undefined;
         scale?: number | undefined;
     }>>;
@@ -889,10 +1115,24 @@ export declare const flavorOverrideSchema: z.ZodObject<{
     radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "full" | undefined;
     spacing?: "default" | "compact" | "comfortable" | "spacious" | undefined;
     font?: {
-        url?: string | undefined;
-        sans?: string | undefined;
-        mono?: string | undefined;
-        display?: string | undefined;
+        sans?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
+        mono?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
+        display?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
         baseSize?: number | undefined;
         scale?: number | undefined;
     } | undefined;
@@ -977,10 +1217,24 @@ export declare const flavorOverrideSchema: z.ZodObject<{
     radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "full" | undefined;
     spacing?: "default" | "compact" | "comfortable" | "spacious" | undefined;
     font?: {
-        url?: string | undefined;
-        sans?: string | undefined;
-        mono?: string | undefined;
-        display?: string | undefined;
+        sans?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
+        mono?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
+        display?: string | {
+            family: string;
+            source: "url" | "google";
+            url?: string | undefined;
+            weights?: number[] | undefined;
+        } | undefined;
         baseSize?: number | undefined;
         scale?: number | undefined;
     } | undefined;
@@ -1133,29 +1387,142 @@ export declare const themeConfigSchema: z.ZodObject<{
         spacing: z.ZodOptional<z.ZodEnum<["compact", "default", "comfortable", "spacious"]>>;
         font: z.ZodOptional<z.ZodObject<{
             /** Primary font family (body text, headings). */
-            sans: z.ZodOptional<z.ZodString>;
+            sans: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+                /** Font family name exposed through the token role. */
+                family: z.ZodString;
+                /** Font source type. */
+                source: z.ZodEnum<["google", "url"]>;
+                /** Source URL for self-hosted fonts. Required when source is "url". */
+                url: z.ZodOptional<z.ZodString>;
+                /** Weight list for Google Fonts or self-hosted variants. */
+                weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+            }, "strict", z.ZodTypeAny, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>]>>;
             /** Monospace font family (code, pre). */
-            mono: z.ZodOptional<z.ZodString>;
+            mono: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+                /** Font family name exposed through the token role. */
+                family: z.ZodString;
+                /** Font source type. */
+                source: z.ZodEnum<["google", "url"]>;
+                /** Source URL for self-hosted fonts. Required when source is "url". */
+                url: z.ZodOptional<z.ZodString>;
+                /** Weight list for Google Fonts or self-hosted variants. */
+                weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+            }, "strict", z.ZodTypeAny, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>]>>;
             /** Display font (large headings, hero text). */
-            display: z.ZodOptional<z.ZodString>;
+            display: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+                /** Font family name exposed through the token role. */
+                family: z.ZodString;
+                /** Font source type. */
+                source: z.ZodEnum<["google", "url"]>;
+                /** Source URL for self-hosted fonts. Required when source is "url". */
+                url: z.ZodOptional<z.ZodString>;
+                /** Weight list for Google Fonts or self-hosted variants. */
+                weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+            }, "strict", z.ZodTypeAny, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>]>>;
             /** Base font size in px. Default: 16. */
             baseSize: z.ZodOptional<z.ZodNumber>;
             /** Type scale ratio. Default: 1.25 (major third). */
             scale: z.ZodOptional<z.ZodNumber>;
-            /** Custom font URL (e.g. Google Fonts @import URL). */
-            url: z.ZodOptional<z.ZodString>;
         }, "strict", z.ZodTypeAny, {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         }, {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         }>>;
@@ -1413,10 +1780,24 @@ export declare const themeConfigSchema: z.ZodObject<{
         radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "full" | undefined;
         spacing?: "default" | "compact" | "comfortable" | "spacious" | undefined;
         font?: {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         } | undefined;
@@ -1501,10 +1882,24 @@ export declare const themeConfigSchema: z.ZodObject<{
         radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "full" | undefined;
         spacing?: "default" | "compact" | "comfortable" | "spacious" | undefined;
         font?: {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         } | undefined;
@@ -1651,29 +2046,142 @@ export declare const themeConfigSchema: z.ZodObject<{
         spacing: z.ZodOptional<z.ZodEnum<["compact", "default", "comfortable", "spacious"]>>;
         font: z.ZodOptional<z.ZodObject<{
             /** Primary font family (body text, headings). */
-            sans: z.ZodOptional<z.ZodString>;
+            sans: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+                /** Font family name exposed through the token role. */
+                family: z.ZodString;
+                /** Font source type. */
+                source: z.ZodEnum<["google", "url"]>;
+                /** Source URL for self-hosted fonts. Required when source is "url". */
+                url: z.ZodOptional<z.ZodString>;
+                /** Weight list for Google Fonts or self-hosted variants. */
+                weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+            }, "strict", z.ZodTypeAny, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>]>>;
             /** Monospace font family (code, pre). */
-            mono: z.ZodOptional<z.ZodString>;
+            mono: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+                /** Font family name exposed through the token role. */
+                family: z.ZodString;
+                /** Font source type. */
+                source: z.ZodEnum<["google", "url"]>;
+                /** Source URL for self-hosted fonts. Required when source is "url". */
+                url: z.ZodOptional<z.ZodString>;
+                /** Weight list for Google Fonts or self-hosted variants. */
+                weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+            }, "strict", z.ZodTypeAny, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>]>>;
             /** Display font (large headings, hero text). */
-            display: z.ZodOptional<z.ZodString>;
+            display: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodEffects<z.ZodObject<{
+                /** Font family name exposed through the token role. */
+                family: z.ZodString;
+                /** Font source type. */
+                source: z.ZodEnum<["google", "url"]>;
+                /** Source URL for self-hosted fonts. Required when source is "url". */
+                url: z.ZodOptional<z.ZodString>;
+                /** Weight list for Google Fonts or self-hosted variants. */
+                weights: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
+            }, "strict", z.ZodTypeAny, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }, {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            }>]>>;
             /** Base font size in px. Default: 16. */
             baseSize: z.ZodOptional<z.ZodNumber>;
             /** Type scale ratio. Default: 1.25 (major third). */
             scale: z.ZodOptional<z.ZodNumber>;
-            /** Custom font URL (e.g. Google Fonts @import URL). */
-            url: z.ZodOptional<z.ZodString>;
         }, "strict", z.ZodTypeAny, {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         }, {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         }>>;
@@ -2111,10 +2619,24 @@ export declare const themeConfigSchema: z.ZodObject<{
         radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "full" | undefined;
         spacing?: "default" | "compact" | "comfortable" | "spacious" | undefined;
         font?: {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         } | undefined;
@@ -2236,10 +2758,24 @@ export declare const themeConfigSchema: z.ZodObject<{
         radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "full" | undefined;
         spacing?: "default" | "compact" | "comfortable" | "spacious" | undefined;
         font?: {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         } | undefined;
@@ -2391,10 +2927,24 @@ export declare const themeConfigSchema: z.ZodObject<{
         radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "full" | undefined;
         spacing?: "default" | "compact" | "comfortable" | "spacious" | undefined;
         font?: {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         } | undefined;
@@ -2478,10 +3028,24 @@ export declare const themeConfigSchema: z.ZodObject<{
         radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "full" | undefined;
         spacing?: "default" | "compact" | "comfortable" | "spacious" | undefined;
         font?: {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         } | undefined;
@@ -2614,10 +3178,24 @@ export declare const themeConfigSchema: z.ZodObject<{
         radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "full" | undefined;
         spacing?: "default" | "compact" | "comfortable" | "spacious" | undefined;
         font?: {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         } | undefined;
@@ -2701,10 +3279,24 @@ export declare const themeConfigSchema: z.ZodObject<{
         radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "full" | undefined;
         spacing?: "default" | "compact" | "comfortable" | "spacious" | undefined;
         font?: {
-            url?: string | undefined;
-            sans?: string | undefined;
-            mono?: string | undefined;
-            display?: string | undefined;
+            sans?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            mono?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
+            display?: string | {
+                family: string;
+                source: "url" | "google";
+                url?: string | undefined;
+                weights?: number[] | undefined;
+            } | undefined;
             baseSize?: number | undefined;
             scale?: number | undefined;
         } | undefined;

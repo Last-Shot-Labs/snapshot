@@ -145,7 +145,7 @@ export function Avatar({ config }: { config: AvatarConfig }) {
 
       {/* Generic fallback */}
       {!showImage && !initials && !config.icon && (
-        <span data-testid="avatar-fallback" aria-hidden="true">
+        <span data-avatar-fallback="" data-testid="avatar-fallback" aria-hidden="true">
           ?
         </span>
       )}

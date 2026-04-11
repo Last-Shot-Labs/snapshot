@@ -1,5 +1,6 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
-import type { Plugin, UserConfig, ViteDevServer } from "vite";
+import type { Plugin, ResolvedConfig, UserConfig, ViteDevServer } from "vite";
 import { runSync, consoleLogger, type SyncOptions } from "../cli/sync";
 import { generateTailwindBridge } from "../ui/tokens/tailwind-bridge";
 import { buildPrefetchManifest, type ViteManifestEntry } from "./prefetch";
@@ -43,15 +44,55 @@ function normalizeManifestUrl(manifestFile: string): string {
   return `/${normalized || "snapshot.manifest.json"}`;
 }
 
-function getSnapshotAppHtml(entryId: string): string {
+function resolveManifestThemeMode(
+  root: string,
+  manifestFile: string,
+): "light" | "dark" | "system" | undefined {
+  try {
+    const manifestPath = path.resolve(root, manifestFile);
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as {
+      theme?: { mode?: unknown };
+    };
+    const mode = manifest.theme?.mode;
+    if (mode === "light" || mode === "dark" || mode === "system") {
+      return mode;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
+function getThemeBootScript(
+  manifestMode: "light" | "dark" | "system" | undefined,
+): string {
+  const fallbackMode = manifestMode ?? "system";
+  return `(function(){try{var storageKey='snapshot-theme-mode';var fallbackMode=${JSON.stringify(fallbackMode)};var stored=localStorage.getItem(storageKey);var mode=stored==='light'||stored==='dark'||stored==='system'?stored:fallbackMode;var resolved=mode==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):mode;if(resolved==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(_error){}})();`;
+}
+
+function getSnapshotAppHtml(
+  entryId: string,
+  options: {
+    includeViteClient: boolean;
+    manifestMode?: "light" | "dark" | "system";
+    stylesheetHrefs?: string[];
+  },
+): string {
+  const stylesheetLinks = (options.stylesheetHrefs ?? [])
+    .map((href) => `    <link rel="stylesheet" href="${href}" />`)
+    .join("\n");
+  const viteClient = options.includeViteClient
+    ? '    <script type="module" src="/@vite/client"></script>\n'
+    : "";
   return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Snapshot</title>
-    <script type="module" src="/@vite/client"></script>
-  </head>
+    <script>${getThemeBootScript(options.manifestMode)}</script>
+${stylesheetLinks ? `${stylesheetLinks}\n` : ""}${viteClient}  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="${entryId}"></script>
@@ -60,19 +101,34 @@ function getSnapshotAppHtml(entryId: string): string {
 `;
 }
 
+function withBase(base: string, fileName: string): string {
+  const normalizedBase = base.endsWith("/") ? base : `${base}/`;
+  return `${normalizedBase}${fileName}`.replace(/\/{2,}/g, "/");
+}
+
 export function snapshotApp(opts: SnapshotAppOptions = {}): Plugin {
+  const manifestFile = opts.manifestFile ?? "snapshot.manifest.json";
   const manifestUrl = normalizeManifestUrl(
-    opts.manifestFile ?? "snapshot.manifest.json",
+    manifestFile,
   );
   const apiUrlExpression = opts.apiUrl
     ? JSON.stringify(opts.apiUrl)
     : "import.meta.env.VITE_API_URL ?? window.location.origin";
+  let isBuild = false;
+  let resolvedBase = "/";
+  let manifestMode: "light" | "dark" | "system" | undefined;
 
   return {
     name: "snapshot-app",
     enforce: "pre",
 
-    async config(userConfig) {
+    async config(userConfig, env) {
+      isBuild = env.command === "build";
+      manifestMode = resolveManifestThemeMode(
+        userConfig.root ?? process.cwd(),
+        manifestFile,
+      );
+
       // Auto-inject @tailwindcss/vite if available.
       // Vite's config hook return type is Omit<UserConfig, "plugins">, so we
       // push onto the mutable plugins array instead of returning a new one.
@@ -94,7 +150,22 @@ export function snapshotApp(opts: SnapshotAppOptions = {}): Plugin {
       } catch {
         // @tailwindcss/vite not installed — Tailwind classes won't work but app still runs
       }
-      return null;
+
+      if (!isBuild) {
+        return null;
+      }
+
+      return {
+        build: {
+          rollupOptions: {
+            input: VIRTUAL_APP_ENTRY_ID,
+          },
+        },
+      };
+    },
+
+    configResolved(config: ResolvedConfig) {
+      resolvedBase = config.base;
     },
 
     resolveId(id) {
@@ -153,12 +224,49 @@ createRoot(root).render(
 
         const html = await server.transformIndexHtml(
           pathname,
-          getSnapshotAppHtml(`/@id/${VIRTUAL_APP_ENTRY_ID}`),
+          getSnapshotAppHtml(`/@id/${VIRTUAL_APP_ENTRY_ID}`, {
+            includeViteClient: true,
+            manifestMode,
+          }),
         );
 
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.end(html);
+      });
+    },
+
+    generateBundle(_options, bundle) {
+      if (!isBuild) {
+        return;
+      }
+
+      const entryChunk = Object.values(bundle).find(
+        (chunk) =>
+          chunk.type === "chunk" &&
+          chunk.isEntry &&
+          (chunk.facadeModuleId === RESOLVED_VIRTUAL_APP_ENTRY_ID ||
+            chunk.facadeModuleId === VIRTUAL_APP_ENTRY_ID),
+      );
+
+      if (!entryChunk || entryChunk.type !== "chunk") {
+        return;
+      }
+
+      const stylesheetHrefs = Object.values(bundle).flatMap((asset) =>
+        asset.type === "asset" && asset.fileName.endsWith(".css")
+          ? [withBase(resolvedBase, asset.fileName)]
+          : [],
+      );
+
+      this.emitFile({
+        type: "asset",
+        fileName: "index.html",
+        source: getSnapshotAppHtml(withBase(resolvedBase, entryChunk.fileName), {
+          includeViteClient: false,
+          manifestMode,
+          stylesheetHrefs,
+        }),
       });
     },
   };

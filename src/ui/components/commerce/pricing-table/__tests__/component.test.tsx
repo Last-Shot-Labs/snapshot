@@ -171,8 +171,8 @@ describe("PricingTable", () => {
     render(<PricingTable config={baseConfig} />, { wrapper });
 
     const cards = screen.getAllByTestId("pricing-tier-card");
-    expect(cards[0]?.getAttribute("data-highlighted")).toBeNull();
-    expect(cards[1]?.getAttribute("data-highlighted")).toBe("true");
+    expect(cards[0]?.getAttribute("data-featured")).toBeNull();
+    expect(cards[1]?.getAttribute("data-featured")).toBe("true");
   });
 
   it("renders table variant", () => {

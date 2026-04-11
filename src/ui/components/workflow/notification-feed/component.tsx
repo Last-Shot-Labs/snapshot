@@ -363,7 +363,7 @@ export function NotificationFeed({
               <div
                 key={itemKey}
                 data-notification-item
-                data-read={isRead ? "" : undefined}
+                data-unread={!isRead ? "" : undefined}
                 role={
                   config.itemAction || config.markReadAction
                     ? "button"

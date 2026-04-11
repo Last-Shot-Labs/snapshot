@@ -23,6 +23,7 @@ import {
   deriveDarkVariant,
 } from "./color";
 import { getFlavor } from "./flavors";
+import { getRegisteredSchemaTypes } from "../manifest/schema";
 
 // ── Known Google Font families ────────────────────────────────────────────────
 
@@ -42,13 +43,196 @@ const KNOWN_GOOGLE_FONTS = new Set([
   "Geist",
 ]);
 
-/**
- * Build a Google Fonts @import URL for a given family name.
- */
-function googleFontImport(family: string): string {
-  const encoded = family.replace(/\s+/g, "+");
-  return `@import url(https://fonts.googleapis.com/css2?family=${encoded}:wght@300;400;500;600;700&display=swap);`;
+function getFontFamilyName(
+  fontRole: FontConfig["sans"] | FontConfig["mono"] | FontConfig["display"],
+): string | undefined {
+  if (!fontRole) {
+    return undefined;
+  }
+
+  return typeof fontRole === "string" ? fontRole : fontRole.family;
 }
+
+function getFontWeights(
+  fontRole: FontConfig["sans"] | FontConfig["mono"] | FontConfig["display"],
+): number[] | undefined {
+  if (!fontRole || typeof fontRole === "string") {
+    return undefined;
+  }
+
+  return fontRole.weights;
+}
+
+function getGoogleFontImport(
+  family: string,
+  weights?: number[],
+): string {
+  const encoded = family.replace(/\s+/g, "+");
+  const normalizedWeights =
+    weights && weights.length > 0
+      ? [...new Set(weights)].sort((left, right) => left - right).join(";")
+      : "300;400;500;600;700";
+  return `@import url(https://fonts.googleapis.com/css2?family=${encoded}:wght@${normalizedWeights}&display=swap);`;
+}
+
+function getFontFaceRule(
+  family: string,
+  url: string,
+  weights?: number[],
+): string {
+  const weight = weights?.length === 1 ? `\n  font-weight: ${weights[0]};` : "";
+  return `@font-face {\n  font-family: '${family}';\n  src: url('${url}');${weight}\n  font-display: swap;\n}`;
+}
+
+const ALL_COMPONENT_TYPES = [
+  "stat-card",
+  "data-table",
+  "form",
+  "auto-form",
+  "stack",
+  "text",
+  "link",
+  "divider",
+  "oauth-buttons",
+  "passkey-button",
+  "button",
+  "detail-card",
+  "modal",
+  "drawer",
+  "tabs",
+  "badge",
+  "avatar",
+  "alert",
+  "progress",
+  "skeleton",
+  "switch",
+  "empty-state",
+  "accordion",
+  "breadcrumb",
+  "list",
+  "tooltip",
+  "timeline",
+  "code-block",
+  "stepper",
+  "tree-view",
+  "kanban",
+  "calendar",
+  "audit-log",
+  "notification-feed",
+  "dropdown-menu",
+  "pricing-table",
+  "file-uploader",
+  "rich-text-editor",
+  "rich-input",
+  "emoji-picker",
+  "reaction-bar",
+  "presence-indicator",
+  "typing-indicator",
+  "message-thread",
+  "comment-section",
+  "chat-window",
+  "popover",
+  "separator",
+  "command-palette",
+  "input",
+  "textarea",
+  "toggle",
+  "multi-select",
+  "context-menu",
+  "scroll-area",
+  "filter-bar",
+  "inline-edit",
+  "markdown",
+  "tag-selector",
+  "entity-picker",
+  "highlighted-text",
+  "favorite-button",
+  "notification-bell",
+  "save-indicator",
+  "compare-view",
+  "quick-add",
+  "location-input",
+  "avatar-group",
+  "link-embed",
+  "gif-picker",
+  "feed",
+  "chart",
+  "wizard",
+  "spinner",
+  "error-page",
+  "not-found",
+  "offline-banner",
+  "carousel",
+  "video",
+  "embed",
+  "vote",
+  "banner",
+  "split-pane",
+] as const;
+
+const SURFACE_COMPONENT_TYPES = [
+  "alert",
+  "audit-log",
+  "avatar-group",
+  "banner",
+  "calendar",
+  "carousel",
+  "chart",
+  "chat-window",
+  "code-block",
+  "command-palette",
+  "comment-section",
+  "compare-view",
+  "context-menu",
+  "detail-card",
+  "dropdown-menu",
+  "embed",
+  "emoji-picker",
+  "entity-picker",
+  "error-page",
+  "favorite-button",
+  "feed",
+  "file-uploader",
+  "filter-bar",
+  "gif-picker",
+  "highlighted-text",
+  "inline-edit",
+  "kanban",
+  "link-embed",
+  "list",
+  "location-input",
+  "markdown",
+  "message-thread",
+  "multi-select",
+  "not-found",
+  "notification-bell",
+  "notification-feed",
+  "offline-banner",
+  "popover",
+  "pricing-table",
+  "progress",
+  "quick-add",
+  "reaction-bar",
+  "rich-input",
+  "rich-text-editor",
+  "save-indicator",
+  "scroll-area",
+  "separator",
+  "skeleton",
+  "split-pane",
+  "stat-card",
+  "stepper",
+  "switch",
+  "tabs",
+  "tag-selector",
+  "timeline",
+  "toggle",
+  "tooltip",
+  "tree-view",
+  "video",
+  "vote",
+  "wizard",
+].filter((value, index, array) => array.indexOf(value) === index);
 
 // ── Radius mapping ───────────────────────────────────────────────────────────
 
@@ -559,14 +743,18 @@ export function resolveTokens(config: ThemeConfig = {}): string {
   );
 
   // Font
-  if (font.sans) {
-    lightVars.push(`  --sn-font-sans: ${font.sans};`);
+  const sansFamily = getFontFamilyName(font.sans);
+  const monoFamily = getFontFamilyName(font.mono);
+  const displayFamily = getFontFamilyName(font.display);
+
+  if (sansFamily) {
+    lightVars.push(`  --sn-font-sans: ${sansFamily};`);
   }
-  if (font.mono) {
-    lightVars.push(`  --sn-font-mono: ${font.mono};`);
+  if (monoFamily) {
+    lightVars.push(`  --sn-font-mono: ${monoFamily};`);
   }
-  if (font.display) {
-    lightVars.push(`  --sn-font-display: ${font.display};`);
+  if (displayFamily) {
+    lightVars.push(`  --sn-font-display: ${displayFamily};`);
   }
   if (font.baseSize) {
     lightVars.push(`  --sn-font-size-base: ${font.baseSize}px;`);
@@ -696,23 +884,37 @@ export function resolveTokens(config: ThemeConfig = {}): string {
 
   // 7.5 Font imports — must appear before any other CSS rules
   const fontImports: string[] = [];
+  const fontFaces: string[] = [];
+  const seenGoogleFonts = new Set<string>();
 
-  if (font.url) {
-    // Explicit font URL takes priority
-    fontImports.push(`@import url(${font.url});`);
-  } else {
-    // Auto-detect known Google Font families from sans, display, and mono
-    const seen = new Set<string>();
-    for (const fontName of [font.sans, font.display, font.mono]) {
-      if (!fontName) continue;
-      // The font value may include fallbacks (e.g. "Inter, sans-serif"),
-      // so extract the first family name
-      const firstName = fontName.split(",")[0]!.trim().replace(/^['"]|['"]$/g, "");
-      if (KNOWN_GOOGLE_FONTS.has(firstName) && !seen.has(firstName)) {
-        seen.add(firstName);
-        fontImports.push(googleFontImport(firstName));
-      }
+  for (const fontRole of [font.sans, font.display, font.mono]) {
+    if (!fontRole) {
+      continue;
     }
+
+    if (typeof fontRole === "string") {
+      const firstName = fontRole
+        .split(",")[0]!
+        .trim()
+        .replace(/^['"]|['"]$/g, "");
+      if (KNOWN_GOOGLE_FONTS.has(firstName) && !seenGoogleFonts.has(firstName)) {
+        seenGoogleFonts.add(firstName);
+        fontImports.push(getGoogleFontImport(firstName));
+      }
+      continue;
+    }
+
+    if (fontRole.source === "google") {
+      if (!seenGoogleFonts.has(fontRole.family)) {
+        seenGoogleFonts.add(fontRole.family);
+        fontImports.push(getGoogleFontImport(fontRole.family, fontRole.weights));
+      }
+      continue;
+    }
+
+    fontFaces.push(
+      getFontFaceRule(fontRole.family, fontRole.url!, getFontWeights(fontRole)),
+    );
   }
 
   // 8. Build CSS output
@@ -724,6 +926,10 @@ export function resolveTokens(config: ThemeConfig = {}): string {
 
   sections.push(`:root {\n${lightVars.join("\n")}\n}`);
   sections.push(`.dark {\n${darkVars.join("\n")}\n}`);
+
+  if (fontFaces.length > 0) {
+    sections.push(fontFaces.join("\n\n"));
+  }
 
   if (componentBlocks.length > 0) {
     sections.push(componentBlocks.join("\n\n"));
@@ -748,26 +954,79 @@ export function resolveTokens(config: ThemeConfig = {}): string {
  * output adapts to whatever theme tokens are active.
  */
 export function resolveFrameworkStyles(): string {
+  const allComponentSelector = [
+    ...new Set([...ALL_COMPONENT_TYPES, ...getRegisteredSchemaTypes()]),
+  ]
+    .map(
+    (type) => `[data-snapshot-component="${type}"]`,
+  )
+    .join(",\n");
+  const surfaceSelector = SURFACE_COMPONENT_TYPES.map(
+    (type) => `[data-snapshot-component="${type}"]`,
+  ).join(",\n");
   return `/* ── CSS Reset ──────────────────────────────────────────────────────────── */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
+html {
   font-family: var(--sn-font-sans, system-ui, -apple-system, sans-serif);
-  font-size: var(--sn-font-size-md, 1rem);
+  font-size: var(--sn-font-size-base, 16px);
   line-height: var(--sn-leading-normal, 1.5);
-  color: var(--sn-color-foreground);
-  background: var(--sn-color-background);
+  color: var(--sn-color-foreground, #111827);
+  background: var(--sn-color-background, #ffffff);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+body {
+  min-height: 100dvh;
+  font-family: inherit;
+  font-size: var(--sn-font-size-md, 1rem);
+  line-height: inherit;
+  color: inherit;
+  background: inherit;
 }
 button, input, textarea, select { font: inherit; }
+img, video, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration-color: color-mix(in oklch, var(--sn-color-primary, #2563eb) 35%, transparent); }
+table { width: 100%; border-collapse: collapse; }
+code, pre { font-family: var(--sn-font-mono, ui-monospace, SFMono-Regular, monospace); }
+pre {
+  background: color-mix(in oklch, var(--sn-color-muted, #f3f4f6) 75%, var(--sn-color-card, #ffffff));
+  border: var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb);
+  border-radius: var(--sn-radius-lg, 0.75rem);
+  overflow: auto;
+}
 
 /* ── Page layout ───────────────────────────────────────────────────────── */
 
 [data-snapshot-page] {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: var(--sn-spacing-lg, 1.5rem);
+  width: 100%;
+}
+
+${allComponentSelector} {
+  max-width: 100%;
+  min-width: 0;
+}
+
+${surfaceSelector} {
+  background: var(--sn-color-card, #ffffff);
+  border: var(--sn-card-border, var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb));
+  border-radius: var(--sn-radius-lg, 0.75rem);
+  box-shadow: var(--sn-card-shadow, var(--sn-shadow-sm, 0 1px 3px rgba(0,0,0,0.1)));
+}
+
+[data-snapshot-component="stack"],
+[data-snapshot-component="text"],
+[data-snapshot-component="link"],
+[data-snapshot-component="divider"],
+[data-snapshot-component="separator"],
+[data-snapshot-component="oauth-buttons"],
+[data-snapshot-component="passkey-button"] {
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 /* ── Data table ────────────────────────────────────────────────────────── */
@@ -830,84 +1089,177 @@ button, input, textarea, select { font: inherit; }
 
 /* ── Form ──────────────────────────────────────────────────────────────── */
 
-[data-snapshot-component="form"] form {
+[data-snapshot-component="form"] form,
+[data-snapshot-component="auto-form"] form {
   display: flex;
   flex-direction: column;
   gap: var(--sn-spacing-md, 1rem);
   max-width: min(100%, 36rem);
 }
-[data-snapshot-component="form"] [data-sn-field] {
+[data-snapshot-component="form"] [data-sn-field],
+[data-snapshot-component="auto-form"] [data-sn-field] {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--sn-spacing-2xs, 0.125rem);
 }
-[data-snapshot-component="form"] [data-sn-field] label {
+[data-snapshot-component="form"] [data-sn-field] label,
+[data-snapshot-component="auto-form"] [data-sn-field] label {
   font-size: var(--sn-font-size-sm, 0.875rem);
-  font-weight: 500;
-  color: var(--sn-color-foreground, #111);
+  font-weight: var(--sn-font-weight-medium, 500);
+  color: var(--sn-color-foreground, #111827);
 }
+[data-snapshot-component="input"] input,
+[data-snapshot-component="textarea"] textarea,
+[data-snapshot-component="multi-select"] input,
+[data-snapshot-component="location-input"] input,
+[data-snapshot-component="quick-add"] input,
+[data-snapshot-component="tag-selector"] input,
 [data-snapshot-component="form"] input[type="text"],
 [data-snapshot-component="form"] input[type="email"],
 [data-snapshot-component="form"] input[type="password"],
 [data-snapshot-component="form"] input[type="number"],
 [data-snapshot-component="form"] input[type="date"],
 [data-snapshot-component="form"] textarea,
-[data-snapshot-component="form"] select {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--sn-color-border, #e5e7eb);
-  border-radius: var(--sn-radius-md, 0.375rem);
-  background: var(--sn-color-background, #fff);
-  color: var(--sn-color-foreground, #111);
-  font-size: var(--sn-font-size-sm, 0.875rem);
-  line-height: 1.5;
+[data-snapshot-component="form"] select,
+[data-snapshot-component="auto-form"] input[type="text"],
+[data-snapshot-component="auto-form"] input[type="email"],
+[data-snapshot-component="auto-form"] input[type="password"],
+[data-snapshot-component="auto-form"] input[type="number"],
+[data-snapshot-component="auto-form"] input[type="date"],
+[data-snapshot-component="auto-form"] textarea,
+[data-snapshot-component="auto-form"] select {
   width: 100%;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  min-height: var(--sn-input-height, 2.5rem);
+  padding: var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem);
+  border: var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb);
+  border-radius: var(--sn-radius-md, 0.5rem);
+  background: var(--sn-color-background, #ffffff);
+  color: var(--sn-color-foreground, #111827);
+  font-size: var(--sn-font-size-sm, 0.875rem);
+  line-height: var(--sn-leading-normal, 1.5);
+  transition:
+    border-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
+    box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
+    background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease);
 }
 [data-snapshot-component="form"] input:focus,
 [data-snapshot-component="form"] textarea:focus,
-[data-snapshot-component="form"] select:focus {
+[data-snapshot-component="form"] select:focus,
+[data-snapshot-component="auto-form"] input:focus,
+[data-snapshot-component="auto-form"] textarea:focus,
+[data-snapshot-component="auto-form"] select:focus,
+[data-snapshot-component="input"] input:focus,
+[data-snapshot-component="textarea"] textarea:focus {
   outline: none;
   border-color: var(--sn-color-primary, #2563eb);
   box-shadow: 0 0 0 2px color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
 }
-[data-snapshot-component="form"] textarea {
+[data-snapshot-component="form"] textarea,
+[data-snapshot-component="auto-form"] textarea,
+[data-snapshot-component="textarea"] textarea {
   min-height: 5rem;
   resize: vertical;
 }
-[data-snapshot-component="form"] [data-sn-field] label:has(input[type="checkbox"]) {
+[data-snapshot-component="form"] [data-sn-field] label:has(input[type="checkbox"]),
+[data-snapshot-component="auto-form"] [data-sn-field] label:has(input[type="checkbox"]) {
   flex-direction: row;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
 }
-[data-snapshot-component="form"] input[type="checkbox"] {
+[data-snapshot-component="form"] input[type="checkbox"],
+[data-snapshot-component="auto-form"] input[type="checkbox"],
+[data-snapshot-component="switch"] input,
+[data-snapshot-component="toggle"] input {
   width: 1rem;
   height: 1rem;
   accent-color: var(--sn-color-primary, #2563eb);
 }
-[data-snapshot-component="form"] [data-sn-field-error] {
+[data-snapshot-component="form"] [data-sn-field-error],
+[data-snapshot-component="auto-form"] [data-sn-field-error] {
   font-size: var(--sn-font-size-xs, 0.75rem);
   color: var(--sn-color-destructive, #dc2626);
 }
-[data-snapshot-component="form"] [data-sn-submit] {
+[data-snapshot-component="form"] [data-sn-submit],
+[data-snapshot-component="auto-form"] [data-sn-submit] {
   padding: 0.5rem 1rem;
   background: var(--sn-color-primary, #2563eb);
   color: var(--sn-color-primary-foreground, #fff);
   border: none;
-  border-radius: var(--sn-radius-md, 0.375rem);
+  border-radius: var(--sn-radius-md, 0.5rem);
   font-size: var(--sn-font-size-sm, 0.875rem);
   font-weight: 500;
   cursor: pointer;
   align-self: flex-start;
   transition: opacity 0.15s;
 }
-[data-snapshot-component="form"] [data-sn-submit]:hover { opacity: 0.9; }
-[data-snapshot-component="form"] [data-sn-submit]:disabled { opacity: 0.5; cursor: not-allowed; }
+[data-snapshot-component="form"] [data-sn-submit]:hover,
+[data-snapshot-component="auto-form"] [data-sn-submit]:hover { opacity: 0.9; }
+[data-snapshot-component="form"] [data-sn-submit]:disabled,
+[data-snapshot-component="auto-form"] [data-sn-submit]:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ── Detail card ───────────────────────────────────────────────────────── */
 
 [data-snapshot-component="detail-card"] {
   max-width: 32rem;
+}
+[data-snapshot-component="badge"] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sn-spacing-xs, 0.25rem);
+  border-radius: var(--sn-badge-radius, var(--sn-radius-full, 9999px));
+  white-space: nowrap;
+}
+[data-snapshot-component="avatar"] img,
+[data-snapshot-component="avatar"] [data-avatar-fallback],
+[data-snapshot-component="avatar"] [data-testid="avatar-initials"] {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+[data-snapshot-component="alert"] {
+  padding: var(--sn-spacing-md, 1rem) var(--sn-spacing-lg, 1.5rem);
+}
+[data-snapshot-component="empty-state"] {
+  display: grid;
+  place-items: center;
+  gap: var(--sn-spacing-md, 1rem);
+  min-height: 12rem;
+  padding: var(--sn-spacing-xl, 2rem);
+  text-align: center;
+}
+[data-snapshot-component="list"] {
+  overflow: hidden;
+}
+[data-snapshot-component="list"] [data-list-item] {
+  border-bottom: var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb);
+}
+[data-snapshot-component="list"] [data-list-item]:last-child {
+  border-bottom: 0;
+}
+[data-snapshot-component="breadcrumb"] ol {
+  list-style: none;
+}
+[data-snapshot-component="tabs"] [data-tab-list] {
+  display: flex;
+  gap: var(--sn-spacing-xs, 0.25rem);
+  border-bottom: var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb);
+  padding-bottom: 0;
+}
+[data-snapshot-component="tabs"] [data-tab-content] {
+  padding-top: var(--sn-spacing-md, 1rem);
+}
+[data-snapshot-component="modal"] [data-modal-overlay],
+[data-snapshot-component="drawer"] [data-drawer-overlay] {
+  backdrop-filter: var(--sn-modal-backdrop-filter, none);
+  -webkit-backdrop-filter: var(--sn-modal-backdrop-filter, none);
+}
+[data-snapshot-component="modal"] [data-modal-content],
+[data-snapshot-component="drawer"] [data-drawer-content],
+[data-snapshot-component="popover"] {
+  background: var(--sn-color-card, #ffffff);
+  border: var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb);
+  box-shadow: var(--sn-shadow-xl, 0 25px 50px -12px rgba(0,0,0,0.25));
 }
 
 /* ── Generic component constraints ─────────────────────────────────────── */
@@ -921,9 +1273,12 @@ button, input, textarea, select { font: inherit; }
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
-select:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: 2px;
+select:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+a:focus-visible {
+  outline: var(--sn-ring-width, 2px) solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
+  outline-offset: var(--sn-ring-offset, 2px);
 }
 
 /* ── Built-in animations ──────────────────────────────────────────────── */

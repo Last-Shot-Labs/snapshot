@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { cleanup, render, screen, fireEvent } from "@testing-library/react";
 import { createElement } from "react";
 import { Provider } from "jotai/react";
 import { DrawerComponent } from "../component";
@@ -25,6 +25,10 @@ function createWrapper(store: ReturnType<typeof createStore>) {
 
 describe("DrawerComponent", () => {
   let store: ReturnType<typeof createStore>;
+
+  afterEach(() => {
+    cleanup();
+  });
 
   beforeEach(() => {
     store = createStore();
@@ -83,7 +87,7 @@ describe("DrawerComponent", () => {
       createElement(DrawerComponent, { config: baseConfig }),
       { wrapper: createWrapper(store) },
     );
-    const panel = container.querySelector("[data-snapshot-drawer-panel]");
+    const panel = container.querySelector("[data-drawer-content]");
     expect(panel?.getAttribute("data-side")).toBe("right");
   });
 
@@ -97,7 +101,7 @@ describe("DrawerComponent", () => {
     const { container } = render(createElement(DrawerComponent, { config }), {
       wrapper: createWrapper(store),
     });
-    const panel = container.querySelector("[data-snapshot-drawer-panel]");
+    const panel = container.querySelector("[data-drawer-content]");
     expect(panel?.getAttribute("data-side")).toBe("left");
   });
 
@@ -107,7 +111,7 @@ describe("DrawerComponent", () => {
       createElement(DrawerComponent, { config: baseConfig }),
       { wrapper: createWrapper(store) },
     );
-    const panel = container.querySelector("[data-snapshot-drawer-panel]");
+    const panel = container.querySelector("[data-drawer-content]");
     fireEvent.keyDown(panel!, { key: "Escape" });
     expect(store.get(modalStackAtom)).toEqual([]);
   });
@@ -118,7 +122,7 @@ describe("DrawerComponent", () => {
       createElement(DrawerComponent, { config: baseConfig }),
       { wrapper: createWrapper(store) },
     );
-    const overlay = container.querySelector("[data-snapshot-drawer-overlay]");
+    const overlay = container.querySelector("[data-drawer-overlay]");
     fireEvent.click(overlay!);
     expect(store.get(modalStackAtom)).toEqual([]);
   });
