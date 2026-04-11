@@ -1,3 +1,4 @@
+import { z } from "zod";
 /**
  * A manifest reference to a per-environment value.
  */
@@ -8,7 +9,16 @@ export type EnvRef = {
 /**
  * Zod schema for a manifest environment reference.
  */
-export declare const envRefSchema: any;
+export declare const envRefSchema: z.ZodObject<{
+    env: z.ZodString;
+    default: z.ZodOptional<z.ZodString>;
+}, "strict", z.ZodTypeAny, {
+    env: string;
+    default?: string | undefined;
+}, {
+    env: string;
+    default?: string | undefined;
+}>;
 /**
  * Check whether a value is an environment reference.
  *

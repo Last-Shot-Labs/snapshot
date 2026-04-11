@@ -120,4 +120,8 @@ export interface UseDataTableResult {
   refetch: () => void;
   /** All data rows (before pagination, after filtering/sorting/searching). */
   data: Record<string, unknown>[];
+  /** Whether infinite scroll mode is active. */
+  isInfiniteScroll: boolean;
+  /** Whether there are more rows to load (infinite scroll only). */
+  hasMore: boolean;
 }

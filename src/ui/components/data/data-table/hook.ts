@@ -406,6 +406,10 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
 
   // Pagination
   const paginationEnabled = config.pagination !== false;
+  const isInfiniteScroll =
+    paginationEnabled &&
+    typeof config.pagination === "object" &&
+    config.pagination.type === "infinite";
   const pageSize =
     paginationEnabled && typeof config.pagination === "object"
       ? (config.pagination.pageSize ?? 10)
@@ -423,12 +427,15 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
     }
   }, [currentPage, totalPages]);
 
-  // Paginated rows
+  // Paginated rows — infinite scroll accumulates all pages up to current
   const rows = useMemo(() => {
     if (!paginationEnabled) return processedRows;
+    if (isInfiniteScroll) {
+      return processedRows.slice(0, clampedPage * pageSize);
+    }
     const start = (clampedPage - 1) * pageSize;
     return processedRows.slice(start, start + pageSize);
-  }, [processedRows, paginationEnabled, clampedPage, pageSize]);
+  }, [processedRows, paginationEnabled, isInfiniteScroll, clampedPage, pageSize]);
 
   // Selected rows and IDs
   const selectedRows = useMemo(
@@ -566,5 +573,7 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
     error,
     refetch,
     data: processedRows,
+    isInfiniteScroll,
+    hasMore: isInfiniteScroll && clampedPage < totalPages,
   };
 }

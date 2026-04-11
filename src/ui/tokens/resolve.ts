@@ -925,5 +925,32 @@ select:focus-visible {
   outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
   outline-offset: 2px;
 }
+
+/* ── Built-in animations ──────────────────────────────────────────────── */
+
+@keyframes sn-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes sn-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes sn-fade-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes sn-slide-left {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes sn-slide-right {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes sn-scale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
 `;
 }

@@ -35,6 +35,7 @@ import { useSetStateValue, useStateValue } from "../state";
 import { resolveDetectedLocale, resolveI18nRefs } from "../i18n/resolve";
 import type { PolicyExpr } from "../policies/types";
 import { resolveTokens, resolveFrameworkStyles } from "../tokens/resolve";
+import { registerShortcuts } from "../shortcuts/index";
 import { getAuthScreenPath } from "./auth-routes";
 import { compileManifest } from "./compiler";
 import {
@@ -1094,6 +1095,18 @@ function ManifestRouter({
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  // Register keyboard shortcuts from manifest
+  useEffect(() => {
+    const shortcuts = (manifest.raw as Record<string, unknown>).shortcuts as
+      | Record<string, import("../shortcuts/types").ShortcutBinding>
+      | undefined;
+    if (!shortcuts || Object.keys(shortcuts).length === 0) return;
+    return registerShortcuts(
+      shortcuts,
+      (action) => void execute(action as unknown as Parameters<typeof execute>[0]),
+    );
+  }, [(manifest.raw as Record<string, unknown>).shortcuts, execute]);
 
   useEffect(() => {
     if (typeof window === "undefined") {

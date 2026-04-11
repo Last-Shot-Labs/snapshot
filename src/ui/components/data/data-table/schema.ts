@@ -112,8 +112,8 @@ export const bulkActionSchema = z
  */
 const paginationConfigSchema = z
   .object({
-    /** Pagination strategy. */
-    type: z.enum(["offset", "cursor"]),
+    /** Pagination strategy. "infinite" appends rows on scroll instead of paginating. */
+    type: z.enum(["offset", "cursor", "infinite"]),
     /** Number of rows per page. Defaults to 10. */
     pageSize: z.number().int().min(1).optional(),
   })

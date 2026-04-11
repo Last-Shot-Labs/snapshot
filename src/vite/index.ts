@@ -1,12 +1,15 @@
 import path from "node:path";
 import type { Plugin, UserConfig, ViteDevServer } from "vite";
 import { runSync, consoleLogger, type SyncOptions } from "../cli/sync";
+import { generateTailwindBridge } from "../ui/tokens/tailwind-bridge";
 import { buildPrefetchManifest, type ViteManifestEntry } from "./prefetch";
 import { rscTransform } from "./rsc-transform";
 import { serverActionsTransform } from "./server-actions";
 
 const VIRTUAL_APP_ENTRY_ID = "virtual:snapshot-entry";
 const RESOLVED_VIRTUAL_APP_ENTRY_ID = "\0virtual:snapshot-entry";
+const VIRTUAL_GLOBALS_ID = "virtual:snapshot-globals.css";
+const RESOLVED_VIRTUAL_GLOBALS_ID = "\0virtual:snapshot-globals.css";
 
 export interface SnapshotSyncOptions {
   /** URL of the bunshot backend. Falls back to VITE_API_URL env var. */
@@ -69,19 +72,52 @@ export function snapshotApp(opts: SnapshotAppOptions = {}): Plugin {
     name: "snapshot-app",
     enforce: "pre",
 
+    async config(userConfig) {
+      // Auto-inject @tailwindcss/vite if available.
+      // Vite's config hook return type is Omit<UserConfig, "plugins">, so we
+      // push onto the mutable plugins array instead of returning a new one.
+      try {
+        const tailwindModule = await import(
+          // @ts-ignore — optional peer dep, no type declarations expected
+          "@tailwindcss/vite"
+        );
+        const tailwindVite = (tailwindModule.default ?? tailwindModule) as
+          | { default?: () => Plugin }
+          | (() => Plugin);
+        const tailwindPlugin =
+          typeof tailwindVite === "function"
+            ? tailwindVite()
+            : (tailwindVite as { default?: () => Plugin }).default?.();
+        if (tailwindPlugin) {
+          (userConfig.plugins ??= []).push(tailwindPlugin);
+        }
+      } catch {
+        // @tailwindcss/vite not installed — Tailwind classes won't work but app still runs
+      }
+      return null;
+    },
+
     resolveId(id) {
       if (id === VIRTUAL_APP_ENTRY_ID) {
         return RESOLVED_VIRTUAL_APP_ENTRY_ID;
+      }
+      if (id === VIRTUAL_GLOBALS_ID) {
+        return RESOLVED_VIRTUAL_GLOBALS_ID;
       }
       return null;
     },
 
     load(id) {
+      if (id === RESOLVED_VIRTUAL_GLOBALS_ID) {
+        return generateTailwindBridge();
+      }
+
       if (id !== RESOLVED_VIRTUAL_APP_ENTRY_ID) {
         return null;
       }
 
       return `
+import "${VIRTUAL_GLOBALS_ID}";
 import { createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { ManifestApp } from "@lastshotlabs/snapshot/ui";

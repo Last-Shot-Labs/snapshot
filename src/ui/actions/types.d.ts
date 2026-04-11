@@ -176,30 +176,228 @@ export type ActionConfig = NavigateAction | NavigateExternalAction | ApiAction |
  */
 export type ActionExecuteFn = (action: ActionConfig | ActionConfig[], context?: Record<string, unknown>) => Promise<void>;
 /** Schema for navigate action. */
-export declare const navigateActionSchema: any;
-export declare const navigateExternalActionSchema: any;
+export declare const navigateActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"navigate">;
+    to: z.ZodString;
+    replace: z.ZodOptional<z.ZodBoolean>;
+}, "strict", z.ZodTypeAny, {
+    type: "navigate";
+    to: string;
+    replace?: boolean | undefined;
+}, {
+    type: "navigate";
+    to: string;
+    replace?: boolean | undefined;
+}>;
+export declare const navigateExternalActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"navigate-external">;
+    to: z.ZodString;
+    target: z.ZodOptional<z.ZodEnum<["_self", "_blank"]>>;
+}, "strict", z.ZodTypeAny, {
+    type: "navigate-external";
+    to: string;
+    target?: "_self" | "_blank" | undefined;
+}, {
+    type: "navigate-external";
+    to: string;
+    target?: "_self" | "_blank" | undefined;
+}>;
 /** Schema for open-modal action. */
-export declare const openModalActionSchema: any;
+export declare const openModalActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"open-modal">;
+    modal: z.ZodString;
+    payload: z.ZodOptional<z.ZodUnknown>;
+    resultTarget: z.ZodOptional<z.ZodString>;
+}, "strict", z.ZodTypeAny, {
+    type: "open-modal";
+    modal: string;
+    payload?: unknown;
+    resultTarget?: string | undefined;
+}, {
+    type: "open-modal";
+    modal: string;
+    payload?: unknown;
+    resultTarget?: string | undefined;
+}>;
 /** Schema for close-modal action. */
-export declare const closeModalActionSchema: any;
+export declare const closeModalActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"close-modal">;
+    modal: z.ZodOptional<z.ZodString>;
+    result: z.ZodOptional<z.ZodUnknown>;
+}, "strict", z.ZodTypeAny, {
+    type: "close-modal";
+    result?: unknown;
+    modal?: string | undefined;
+}, {
+    type: "close-modal";
+    result?: unknown;
+    modal?: string | undefined;
+}>;
 /** Schema for refresh action. */
-export declare const refreshActionSchema: any;
+export declare const refreshActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"refresh">;
+    target: z.ZodString;
+}, "strict", z.ZodTypeAny, {
+    type: "refresh";
+    target: string;
+}, {
+    type: "refresh";
+    target: string;
+}>;
 /** Schema for set-value action. */
-export declare const setValueActionSchema: any;
+export declare const setValueActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"set-value">;
+    target: z.ZodString;
+    value: z.ZodUnknown;
+}, "strict", z.ZodTypeAny, {
+    type: "set-value";
+    target: string;
+    value?: unknown;
+}, {
+    type: "set-value";
+    target: string;
+    value?: unknown;
+}>;
 /** Schema for download action. */
-export declare const downloadActionSchema: any;
+export declare const downloadActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"download">;
+    endpoint: z.ZodUnion<[z.ZodString, z.ZodObject<{
+        resource: z.ZodString;
+        params: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<unknown, z.ZodTypeDef, unknown>>>;
+    }, "strict", z.ZodTypeAny, {
+        resource: string;
+        params?: Record<string, unknown> | undefined;
+    }, {
+        resource: string;
+        params?: Record<string, unknown> | undefined;
+    }>]>;
+    filename: z.ZodOptional<z.ZodString>;
+}, "strict", z.ZodTypeAny, {
+    type: "download";
+    endpoint: string | {
+        resource: string;
+        params?: Record<string, unknown> | undefined;
+    };
+    filename?: string | undefined;
+}, {
+    type: "download";
+    endpoint: string | {
+        resource: string;
+        params?: Record<string, unknown> | undefined;
+    };
+    filename?: string | undefined;
+}>;
 export declare const copyActionSchema: z.ZodType<CopyAction>;
-export declare const emitActionSchema: any;
-export declare const submitFormActionSchema: any;
-export declare const resetFormActionSchema: any;
-export declare const setThemeActionSchema: any;
+export declare const emitActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"emit">;
+    event: z.ZodString;
+    payload: z.ZodOptional<z.ZodUnknown>;
+}, "strict", z.ZodTypeAny, {
+    type: "emit";
+    event: string;
+    payload?: unknown;
+}, {
+    type: "emit";
+    event: string;
+    payload?: unknown;
+}>;
+export declare const submitFormActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"submit-form">;
+    formId: z.ZodString;
+}, "strict", z.ZodTypeAny, {
+    type: "submit-form";
+    formId: string;
+}, {
+    type: "submit-form";
+    formId: string;
+}>;
+export declare const resetFormActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"reset-form">;
+    formId: z.ZodString;
+}, "strict", z.ZodTypeAny, {
+    type: "reset-form";
+    formId: string;
+}, {
+    type: "reset-form";
+    formId: string;
+}>;
+export declare const setThemeActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"set-theme">;
+    flavor: z.ZodOptional<z.ZodString>;
+    mode: z.ZodOptional<z.ZodEnum<["light", "dark", "system"]>>;
+}, "strict", z.ZodTypeAny, {
+    type: "set-theme";
+    flavor?: string | undefined;
+    mode?: "system" | "dark" | "light" | undefined;
+}, {
+    type: "set-theme";
+    flavor?: string | undefined;
+    mode?: "system" | "dark" | "light" | undefined;
+}>;
 /** Schema for confirm action. */
-export declare const confirmActionSchema: any;
+export declare const confirmActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"confirm">;
+    message: z.ZodString;
+    confirmLabel: z.ZodOptional<z.ZodString>;
+    cancelLabel: z.ZodOptional<z.ZodString>;
+    variant: z.ZodOptional<z.ZodEnum<["default", "destructive"]>>;
+}, "strict", z.ZodTypeAny, {
+    type: "confirm";
+    message: string;
+    variant?: "default" | "destructive" | undefined;
+    confirmLabel?: string | undefined;
+    cancelLabel?: string | undefined;
+}, {
+    type: "confirm";
+    message: string;
+    variant?: "default" | "destructive" | undefined;
+    confirmLabel?: string | undefined;
+    cancelLabel?: string | undefined;
+}>;
 /** Schema for run-workflow action. */
-export declare const runWorkflowActionSchema: any;
+export declare const runWorkflowActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"run-workflow">;
+    workflow: z.ZodString;
+    input: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+}, "strict", z.ZodTypeAny, {
+    type: "run-workflow";
+    workflow: string;
+    input?: Record<string, unknown> | undefined;
+}, {
+    type: "run-workflow";
+    workflow: string;
+    input?: Record<string, unknown> | undefined;
+}>;
 /** Schema for track action. */
-export declare const trackActionSchema: any;
-export declare const logActionSchema: any;
+export declare const trackActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"track">;
+    event: z.ZodString;
+    props: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+}, "strict", z.ZodTypeAny, {
+    type: "track";
+    event: string;
+    props?: Record<string, unknown> | undefined;
+}, {
+    type: "track";
+    event: string;
+    props?: Record<string, unknown> | undefined;
+}>;
+export declare const logActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"log">;
+    level: z.ZodEnum<["info", "warn", "error", "debug"]>;
+    message: z.ZodString;
+    data: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+}, "strict", z.ZodTypeAny, {
+    type: "log";
+    message: string;
+    level: "info" | "warn" | "error" | "debug";
+    data?: Record<string, unknown> | undefined;
+}, {
+    type: "log";
+    message: string;
+    level: "info" | "warn" | "error" | "debug";
+    data?: Record<string, unknown> | undefined;
+}>;
 /** Schema for api action. Uses z.lazy() for recursive onSuccess/onError. */
 export declare const apiActionSchema: z.ZodType<ApiAction>;
 /** Schema for toast action. Uses z.lazy() for recursive action. */

@@ -28,6 +28,7 @@ export {
   colorToOklch,
   parseOklchString,
 } from "./color";
+export { generateTailwindBridge } from "./tailwind-bridge";
 export type {
   ThemeConfig,
   ThemeColors,

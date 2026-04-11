@@ -1,29 +1,231 @@
 import { z } from "zod";
 import type { FromRef } from "../context/types";
-export declare const httpMethodSchema: any;
+export declare const httpMethodSchema: z.ZodEnum<["GET", "POST", "PUT", "PATCH", "DELETE"]>;
 export declare const resourceParamSchema: z.ZodType<unknown | FromRef>;
-export declare const resourceRefSchema: any;
+export declare const resourceRefSchema: z.ZodObject<{
+    resource: z.ZodString;
+    params: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<unknown, z.ZodTypeDef, unknown>>>;
+}, "strict", z.ZodTypeAny, {
+    resource: string;
+    params?: Record<string, unknown> | undefined;
+}, {
+    resource: string;
+    params?: Record<string, unknown> | undefined;
+}>;
 /**
  * Invalidation target declaration for mutation-side cache refresh.
  *
  * A target can either reference another manifest resource by name or
  * an explicit query key tuple.
  */
-export declare const resourceInvalidationTargetSchema: any;
+export declare const resourceInvalidationTargetSchema: z.ZodUnion<[z.ZodString, z.ZodObject<{
+    key: z.ZodArray<z.ZodString, "many">;
+}, "strict", z.ZodTypeAny, {
+    key: string[];
+}, {
+    key: string[];
+}>]>;
 /**
  * A reference to the cache entry an optimistic mutation should mutate.
  */
-export declare const optimisticTargetSchema: any;
+export declare const optimisticTargetSchema: z.ZodUnion<[z.ZodString, z.ZodObject<{
+    resource: z.ZodString;
+    params: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+}, "strict", z.ZodTypeAny, {
+    resource: string;
+    params?: Record<string, unknown> | undefined;
+}, {
+    resource: string;
+    params?: Record<string, unknown> | undefined;
+}>]>;
 /**
  * Optimistic update strategy for a mutation resource.
  */
-export declare const optimisticConfigSchema: any;
-export declare const endpointTargetSchema: any;
-export declare const dataSourceSchema: any;
+export declare const optimisticConfigSchema: z.ZodEffects<z.ZodObject<{
+    target: z.ZodUnion<[z.ZodString, z.ZodObject<{
+        resource: z.ZodString;
+        params: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+    }, "strict", z.ZodTypeAny, {
+        resource: string;
+        params?: Record<string, unknown> | undefined;
+    }, {
+        resource: string;
+        params?: Record<string, unknown> | undefined;
+    }>]>;
+    merge: z.ZodEnum<["append", "prepend", "replace", "patch", "remove"]>;
+    idField: z.ZodOptional<z.ZodString>;
+}, "strict", z.ZodTypeAny, {
+    merge: "replace" | "remove" | "patch" | "append" | "prepend";
+    target: string | {
+        resource: string;
+        params?: Record<string, unknown> | undefined;
+    };
+    idField?: string | undefined;
+}, {
+    merge: "replace" | "remove" | "patch" | "append" | "prepend";
+    target: string | {
+        resource: string;
+        params?: Record<string, unknown> | undefined;
+    };
+    idField?: string | undefined;
+}>, {
+    merge: "replace" | "remove" | "patch" | "append" | "prepend";
+    target: string | {
+        resource: string;
+        params?: Record<string, unknown> | undefined;
+    };
+    idField?: string | undefined;
+}, {
+    merge: "replace" | "remove" | "patch" | "append" | "prepend";
+    target: string | {
+        resource: string;
+        params?: Record<string, unknown> | undefined;
+    };
+    idField?: string | undefined;
+}>;
+export declare const endpointTargetSchema: z.ZodUnion<[z.ZodString, z.ZodObject<{
+    resource: z.ZodString;
+    params: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<unknown, z.ZodTypeDef, unknown>>>;
+}, "strict", z.ZodTypeAny, {
+    resource: string;
+    params?: Record<string, unknown> | undefined;
+}, {
+    resource: string;
+    params?: Record<string, unknown> | undefined;
+}>]>;
+export declare const dataSourceSchema: z.ZodUnion<[z.ZodString, z.ZodObject<{
+    from: z.ZodString;
+    transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
+    transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
+}, "strict", z.ZodTypeAny, {
+    from: string;
+    transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "split" | "trim" | "lowercase" | "uppercase" | "first" | "json" | "count" | "last" | "sum" | undefined;
+    transformArg?: string | number | undefined;
+}, {
+    from: string;
+    transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "split" | "trim" | "lowercase" | "uppercase" | "first" | "json" | "count" | "last" | "sum" | undefined;
+    transformArg?: string | number | undefined;
+}>, z.ZodObject<{
+    resource: z.ZodString;
+    params: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<unknown, z.ZodTypeDef, unknown>>>;
+}, "strict", z.ZodTypeAny, {
+    resource: string;
+    params?: Record<string, unknown> | undefined;
+}, {
+    resource: string;
+    params?: Record<string, unknown> | undefined;
+}>]>;
 /**
  * Schema for a manifest resource declaration.
  */
-export declare const resourceConfigSchema: any;
+export declare const resourceConfigSchema: z.ZodObject<{
+    method: z.ZodOptional<z.ZodEnum<["GET", "POST", "PUT", "PATCH", "DELETE"]>>;
+    endpoint: z.ZodString;
+    client: z.ZodOptional<z.ZodString>;
+    params: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+    cacheMs: z.ZodOptional<z.ZodNumber>;
+    pollMs: z.ZodOptional<z.ZodNumber>;
+    refetchOnMount: z.ZodOptional<z.ZodBoolean>;
+    refetchOnWindowFocus: z.ZodOptional<z.ZodBoolean>;
+    retry: z.ZodOptional<z.ZodNumber>;
+    retryDelayMs: z.ZodOptional<z.ZodNumber>;
+    dependsOn: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    invalidates: z.ZodOptional<z.ZodArray<z.ZodUnion<[z.ZodString, z.ZodObject<{
+        key: z.ZodArray<z.ZodString, "many">;
+    }, "strict", z.ZodTypeAny, {
+        key: string[];
+    }, {
+        key: string[];
+    }>]>, "many">>;
+    optimistic: z.ZodOptional<z.ZodEffects<z.ZodObject<{
+        target: z.ZodUnion<[z.ZodString, z.ZodObject<{
+            resource: z.ZodString;
+            params: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+        }, "strict", z.ZodTypeAny, {
+            resource: string;
+            params?: Record<string, unknown> | undefined;
+        }, {
+            resource: string;
+            params?: Record<string, unknown> | undefined;
+        }>]>;
+        merge: z.ZodEnum<["append", "prepend", "replace", "patch", "remove"]>;
+        idField: z.ZodOptional<z.ZodString>;
+    }, "strict", z.ZodTypeAny, {
+        merge: "replace" | "remove" | "patch" | "append" | "prepend";
+        target: string | {
+            resource: string;
+            params?: Record<string, unknown> | undefined;
+        };
+        idField?: string | undefined;
+    }, {
+        merge: "replace" | "remove" | "patch" | "append" | "prepend";
+        target: string | {
+            resource: string;
+            params?: Record<string, unknown> | undefined;
+        };
+        idField?: string | undefined;
+    }>, {
+        merge: "replace" | "remove" | "patch" | "append" | "prepend";
+        target: string | {
+            resource: string;
+            params?: Record<string, unknown> | undefined;
+        };
+        idField?: string | undefined;
+    }, {
+        merge: "replace" | "remove" | "patch" | "append" | "prepend";
+        target: string | {
+            resource: string;
+            params?: Record<string, unknown> | undefined;
+        };
+        idField?: string | undefined;
+    }>>;
+}, "strict", z.ZodTypeAny, {
+    endpoint: string;
+    method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | undefined;
+    params?: Record<string, unknown> | undefined;
+    client?: string | undefined;
+    cacheMs?: number | undefined;
+    pollMs?: number | undefined;
+    refetchOnMount?: boolean | undefined;
+    refetchOnWindowFocus?: boolean | undefined;
+    retry?: number | undefined;
+    retryDelayMs?: number | undefined;
+    dependsOn?: string[] | undefined;
+    invalidates?: (string | {
+        key: string[];
+    })[] | undefined;
+    optimistic?: {
+        merge: "replace" | "remove" | "patch" | "append" | "prepend";
+        target: string | {
+            resource: string;
+            params?: Record<string, unknown> | undefined;
+        };
+        idField?: string | undefined;
+    } | undefined;
+}, {
+    endpoint: string;
+    method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | undefined;
+    params?: Record<string, unknown> | undefined;
+    client?: string | undefined;
+    cacheMs?: number | undefined;
+    pollMs?: number | undefined;
+    refetchOnMount?: boolean | undefined;
+    refetchOnWindowFocus?: boolean | undefined;
+    retry?: number | undefined;
+    retryDelayMs?: number | undefined;
+    dependsOn?: string[] | undefined;
+    invalidates?: (string | {
+        key: string[];
+    })[] | undefined;
+    optimistic?: {
+        merge: "replace" | "remove" | "patch" | "append" | "prepend";
+        target: string | {
+            resource: string;
+            params?: Record<string, unknown> | undefined;
+        };
+        idField?: string | undefined;
+    } | undefined;
+}>;
 export type HttpMethod = z.infer<typeof httpMethodSchema>;
 export type ResourceRef = z.infer<typeof resourceRefSchema>;
 /** Invalidation target entry declared on a resource. */

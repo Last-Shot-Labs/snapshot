@@ -315,6 +315,40 @@ export const containerConfigSchema = z.object({
   visible: z.union([z.boolean(), fromRefSchema]).optional(),
 }).strict();
 
+export const backgroundConfigSchema = z.object({
+  image: z.string().optional(),
+  position: z.string().optional(),
+  size: z.string().optional(),
+  overlay: z.string().optional(),
+}).strict();
+
+export const gridConfigSchema = z.object({
+  type: z.literal("grid"),
+  id: z.string().optional(),
+  columns: z.union([
+    z.number(),
+    z.string(),
+    responsiveSchema(z.union([z.number(), z.string()])),
+  ]).optional(),
+  template: z.string().optional(),
+  rows: z.string().optional(),
+  areas: z.array(z.string()).optional(),
+  gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
+  children: z.array(z.lazy(() => componentConfigSchema)).default([]),
+  background: backgroundConfigSchema.optional(),
+  className: z.string().optional(),
+  style: z.record(z.union([z.string(), z.number()])).optional(),
+  visible: z.union([z.boolean(), fromRefSchema]).optional(),
+}).strict();
+
+export const spacerConfigSchema = z.object({
+  type: z.literal("spacer"),
+  size: z.string().optional(),
+  flex: z.boolean().optional(),
+  className: z.string().optional(),
+  style: z.record(z.union([z.string(), z.number()])).optional(),
+}).strict();
+
 const customComponentPropTypeSchema = z.enum(["string", "number", "boolean"]);
 
 export const customComponentPropSchema = z
@@ -852,6 +886,8 @@ registerComponentSchema("select", selectConfigSchema);
 registerComponentSchema("card", cardConfigSchema);
 registerComponentSchema("section", sectionConfigSchema);
 registerComponentSchema("container", containerConfigSchema);
+registerComponentSchema("grid", gridConfigSchema);
+registerComponentSchema("spacer", spacerConfigSchema);
 registerComponentSchema("spinner", spinnerConfigSchema);
 registerComponentSchema("error-page", errorPageConfigSchema);
 registerComponentSchema("not-found", notFoundConfigSchema);
@@ -1370,6 +1406,7 @@ export const manifestConfigSchema = z
     policies: policiesSchema.optional(),
     i18n: i18nConfigSchema.optional(),
     subApps: subAppsSchema.optional(),
+    shortcuts: z.record(z.record(z.unknown())).optional(),
     routes: z.array(routeConfigSchema).min(1),
   })
   .strict()

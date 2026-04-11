@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { useDataTable } from "./hook";
 import { useActionExecutor } from "../../../actions/executor";
 import { ComponentRenderer } from "../../../manifest/renderer";
@@ -326,6 +326,30 @@ function SkeletonRows({
       ))}
     </>
   );
+}
+
+// ── Infinite scroll sentinel ─────────────────────────────────────────────────
+
+/**
+ * Invisible sentinel element that triggers loading the next page when it
+ * enters the viewport via IntersectionObserver.
+ */
+function InfiniteScrollSentinel({ onIntersect }: { onIntersect: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) onIntersect();
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [onIntersect]);
+
+  return <div ref={ref} style={{ height: 1 }} />;
 }
 
 // ── Main component ──────────────────────────────────────────────────────────
@@ -762,8 +786,13 @@ export function DataTable({ config }: { config: DataTableConfig }) {
         </table>
       </div>
 
-      {/* Pagination controls */}
-      {table.pagination && table.pagination.totalPages > 1 && (
+      {/* Infinite scroll sentinel */}
+      {table.isInfiniteScroll && table.hasMore && (
+        <InfiniteScrollSentinel onIntersect={() => table.nextPage()} />
+      )}
+
+      {/* Pagination controls (hidden for infinite scroll) */}
+      {table.pagination && table.pagination.totalPages > 1 && !table.isInfiniteScroll && (
         <div
           data-table-pagination
           role="navigation"

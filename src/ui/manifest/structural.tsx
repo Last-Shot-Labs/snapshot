@@ -41,6 +41,27 @@ const GAP_MAP: Record<string, string> = {
   xl: "var(--sn-spacing-xl, 2rem)",
 };
 
+// ── Background image / overlay support ───────────────────────────────────────
+
+interface BackgroundConfig {
+  image?: string;
+  position?: string;
+  size?: string;
+  overlay?: string;
+}
+
+function resolveBackgroundStyle(bg?: BackgroundConfig): CSSProperties {
+  if (!bg) return {};
+  const style: CSSProperties = {};
+  if (bg.image) {
+    style.backgroundImage = `url(${bg.image})`;
+    style.backgroundPosition = bg.position ?? "center";
+    style.backgroundSize = bg.size ?? "cover";
+    style.backgroundRepeat = "no-repeat";
+  }
+  return style;
+}
+
 const JUSTIFY_MAP: Record<string, string> = {
   start: "flex-start",
   center: "center",
@@ -91,6 +112,23 @@ function ensureStyles() {
   stylesInjected = true;
 }
 
+// ── Animation maps for config.animate support ───────────────────────────────
+
+const ANIMATION_MAP: Record<string, string> = {
+  fade: "sn-fade",
+  "fade-up": "sn-fade-up",
+  "fade-down": "sn-fade-down",
+  "slide-left": "sn-slide-left",
+  "slide-right": "sn-slide-right",
+  scale: "sn-scale",
+};
+
+const DURATION_MAP: Record<string, string> = {
+  fast: "var(--sn-duration-fast, 150ms)",
+  normal: "var(--sn-duration-normal, 250ms)",
+  slow: "var(--sn-duration-slow, 500ms)",
+};
+
 // ── ComponentRenderer (inline for structural children) ──────────────────────
 
 /**
@@ -126,9 +164,45 @@ function InlineComponentRenderer({ config }: { config: ComponentConfig }) {
   const configStyle = (config as Record<string, unknown>).style as
     | Record<string, string | number>
     | undefined;
+
+  const position = (config as Record<string, unknown>).position as string | undefined;
+  const top = (config as Record<string, unknown>).top as string | undefined;
+  const bottom = (config as Record<string, unknown>).bottom as string | undefined;
+  const zIndex = (config as Record<string, unknown>).zIndex as string | undefined;
+
+  const Z_INDEX_MAP: Record<string, number> = {
+    base: 0, dropdown: 10, sticky: 20, overlay: 30, modal: 40, popover: 50, toast: 60,
+  };
+
+  const positionStyle: CSSProperties = {
+    ...(position ? { position: position as CSSProperties["position"] } : {}),
+    ...(top !== undefined ? { top } : {}),
+    ...(bottom !== undefined ? { bottom } : {}),
+    ...(zIndex ? { zIndex: Z_INDEX_MAP[zIndex] ?? (Number(zIndex) || undefined) } : {}),
+  };
+
+  // Resolve animation config
+  const animate = (config as Record<string, unknown>).animate as {
+    enter?: string;
+    duration?: string;
+    delay?: number;
+  } | undefined;
+
+  const animationStyle: CSSProperties = {};
+  if (animate?.enter && animate.enter !== "none") {
+    const name = ANIMATION_MAP[animate.enter] ?? animate.enter;
+    const duration = DURATION_MAP[animate.duration ?? "normal"] ?? "var(--sn-duration-normal, 250ms)";
+    animationStyle.animation = `${name} ${duration} var(--sn-ease-out, ease-out) both`;
+    if (animate.delay) {
+      animationStyle.animationDelay = `${animate.delay}ms`;
+    }
+  }
+
   const style: CSSProperties = {
     ...(span ? { gridColumn: `span ${span}` } : undefined),
+    ...animationStyle,
     ...(configStyle as CSSProperties),
+    ...positionStyle,
   };
 
   return (
@@ -178,7 +252,10 @@ function Row({ config }: { config: Record<string, unknown> }) {
     ...configStyle,
   };
 
-  return (
+  const rowBg = (rowConfig as unknown as Record<string, unknown>).background as BackgroundConfig | undefined;
+  const bgStyle = resolveBackgroundStyle(rowBg);
+
+  const rowContent = (
     <div
       style={style}
       className={rowConfig.className}
@@ -193,6 +270,28 @@ function Row({ config }: { config: Record<string, unknown> }) {
       ))}
     </div>
   );
+
+  if (rowBg?.overlay) {
+    return (
+      <div style={{ position: "relative", ...bgStyle }}>
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: rowBg.overlay,
+          zIndex: 0,
+        }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          {rowContent}
+        </div>
+      </div>
+    );
+  }
+
+  if (Object.keys(bgStyle).length > 0) {
+    return <div style={bgStyle}>{rowContent}</div>;
+  }
+
+  return rowContent;
 }
 
 // ── Heading ─────────────────────────────────────────────────────────────────
@@ -413,6 +512,7 @@ interface CardConfig {
   subtitle?: string;
   children: ComponentConfig[];
   gap?: string;
+  background?: BackgroundConfig;
   className?: string;
   style?: Record<string, string | number>;
   visible?: unknown;
@@ -422,8 +522,10 @@ function Card({ config }: { config: Record<string, unknown> }) {
   const cardConfig = config as unknown as CardConfig;
   const gap = useResponsiveValue(cardConfig.gap ?? "md");
   const configStyle = cardConfig.style as CSSProperties | undefined;
+  const cardBg = cardConfig.background;
+  const bgStyle = resolveBackgroundStyle(cardBg);
 
-  return (
+  const cardContent = (
     <div
       data-snapshot-card
       className={cardConfig.className}
@@ -471,6 +573,28 @@ function Card({ config }: { config: Record<string, unknown> }) {
       ))}
     </div>
   );
+
+  if (cardBg?.overlay) {
+    return (
+      <div style={{ position: "relative", ...bgStyle, borderRadius: "var(--sn-radius-lg, 0.75rem)", overflow: "hidden" }}>
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: cardBg.overlay,
+          zIndex: 0,
+        }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          {cardContent}
+        </div>
+      </div>
+    );
+  }
+
+  if (Object.keys(bgStyle).length > 0) {
+    return <div style={{ ...bgStyle, borderRadius: "var(--sn-radius-lg, 0.75rem)", overflow: "hidden" }}>{cardContent}</div>;
+  }
+
+  return cardContent;
 }
 
 // ── Section ───────────────────────────────────────────────────────────────────
@@ -483,6 +607,7 @@ interface SectionConfig {
   children: ComponentConfig[];
   gap?: string;
   divider?: boolean;
+  background?: BackgroundConfig;
   className?: string;
   style?: Record<string, string | number>;
   visible?: unknown;
@@ -492,8 +617,10 @@ function Section({ config }: { config: Record<string, unknown> }) {
   const sectionConfig = config as unknown as SectionConfig;
   const gap = useResponsiveValue(sectionConfig.gap ?? "lg");
   const configStyle = sectionConfig.style as CSSProperties | undefined;
+  const sectionBg = sectionConfig.background;
+  const bgStyle = resolveBackgroundStyle(sectionBg);
 
-  return (
+  const sectionContent = (
     <section
       data-snapshot-section
       className={sectionConfig.className}
@@ -543,6 +670,28 @@ function Section({ config }: { config: Record<string, unknown> }) {
       ))}
     </section>
   );
+
+  if (sectionBg?.overlay) {
+    return (
+      <div style={{ position: "relative", ...bgStyle }}>
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: sectionBg.overlay,
+          zIndex: 0,
+        }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          {sectionContent}
+        </div>
+      </div>
+    );
+  }
+
+  if (Object.keys(bgStyle).length > 0) {
+    return <div style={bgStyle}>{sectionContent}</div>;
+  }
+
+  return sectionContent;
 }
 
 // ── Container ─────────────────────────────────────────────────────────────────
@@ -595,6 +744,140 @@ function Container({ config }: { config: Record<string, unknown> }) {
   );
 }
 
+// ── Grid ──────────────────────────────────────────────────────────────────────
+
+interface GridConfig {
+  type: "grid";
+  id?: string;
+  columns?: string | number | { default?: number | string; sm?: number | string; md?: number | string; lg?: number | string; xl?: number | string };
+  template?: string;
+  rows?: string;
+  areas?: string[];
+  gap?: string;
+  children: ComponentConfig[];
+  background?: BackgroundConfig;
+  className?: string;
+  style?: Record<string, string | number>;
+  visible?: unknown;
+}
+
+function Grid({ config }: { config: Record<string, unknown> }) {
+  const gridConfig = config as unknown as GridConfig;
+  const gap = useResponsiveValue(gridConfig.gap ?? "md");
+  const columns = useResponsiveValue(
+    (gridConfig.columns ?? 1) as string | number | { default: string | number; sm?: string | number; md?: string | number; lg?: string | number; xl?: string | number; "2xl"?: string | number },
+  );
+  const configStyle = gridConfig.style as CSSProperties | undefined;
+
+  let gridTemplateColumns: string;
+  if (gridConfig.template) {
+    gridTemplateColumns = gridConfig.template;
+  } else if (typeof columns === "number") {
+    gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+  } else if (typeof columns === "string" && !isNaN(Number(columns))) {
+    gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+  } else {
+    gridTemplateColumns = String(columns);
+  }
+
+  const style: CSSProperties = {
+    display: "grid",
+    gridTemplateColumns,
+    gap: GAP_MAP[gap] ?? GAP_MAP["md"],
+    ...(gridConfig.rows ? { gridTemplateRows: gridConfig.rows } : {}),
+    ...(gridConfig.areas ? { gridTemplateAreas: gridConfig.areas.map(a => `"${a}"`).join(" ") } : {}),
+    ...configStyle,
+  };
+
+  const gridBg = gridConfig.background;
+  const bgStyle = resolveBackgroundStyle(gridBg);
+
+  const gridContent = (
+    <div data-snapshot-grid className={gridConfig.className} style={style}>
+      {gridConfig.children?.map((child, i) => {
+        const area = (child as Record<string, unknown>).area as string | undefined;
+        if (area) {
+          return (
+            <div key={child.id ?? `grid-child-${i}`} style={{ gridArea: area }}>
+              <InlineComponentRenderer config={child} />
+            </div>
+          );
+        }
+        return (
+          <InlineComponentRenderer
+            key={child.id ?? `grid-child-${i}`}
+            config={child}
+          />
+        );
+      })}
+    </div>
+  );
+
+  if (gridBg?.overlay) {
+    return (
+      <div style={{ position: "relative", ...bgStyle }}>
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: gridBg.overlay,
+          zIndex: 0,
+        }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          {gridContent}
+        </div>
+      </div>
+    );
+  }
+
+  if (Object.keys(bgStyle).length > 0) {
+    return <div style={bgStyle}>{gridContent}</div>;
+  }
+
+  return gridContent;
+}
+
+// ── Spacer ────────────────────────────────────────────────────────────────────
+
+interface SpacerConfig {
+  type: "spacer";
+  size?: string;
+  flex?: boolean;
+  className?: string;
+  style?: Record<string, string | number>;
+}
+
+function Spacer({ config }: { config: Record<string, unknown> }) {
+  const spacerConfig = config as unknown as SpacerConfig;
+  const configStyle = spacerConfig.style as CSSProperties | undefined;
+
+  if (spacerConfig.flex) {
+    return <div data-snapshot-spacer style={{ flex: 1, ...configStyle }} className={spacerConfig.className} />;
+  }
+
+  const sizeMap: Record<string, string> = {
+    xs: "var(--sn-spacing-xs, 0.25rem)",
+    sm: "var(--sn-spacing-sm, 0.5rem)",
+    md: "var(--sn-spacing-md, 1rem)",
+    lg: "var(--sn-spacing-lg, 1.5rem)",
+    xl: "var(--sn-spacing-xl, 2rem)",
+    "2xl": "var(--sn-spacing-2xl, 3rem)",
+    "3xl": "var(--sn-spacing-3xl, 4rem)",
+  };
+
+  const size = spacerConfig.size ?? "md";
+  return (
+    <div
+      data-snapshot-spacer
+      className={spacerConfig.className}
+      style={{
+        height: sizeMap[size] ?? size,
+        flexShrink: 0,
+        ...configStyle,
+      }}
+    />
+  );
+}
+
 // ── Register all structural components ──────────────────────────────────────
 
 /**
@@ -611,4 +894,6 @@ export const STRUCTURAL_COMPONENTS = {
   card: Card,
   section: Section,
   container: Container,
+  grid: Grid,
+  spacer: Spacer,
 } as const;

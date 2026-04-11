@@ -181,6 +181,20 @@ import {
   PasskeyButton,
   passkeyButtonConfigSchema,
 } from "./primitives/passkey-button";
+import {
+  Carousel,
+  carouselConfigSchema,
+} from "./media/carousel/index";
+import { Video } from "./media/video/index";
+import { videoConfigSchema } from "./media/video/schema";
+import { Embed } from "./media/embed/index";
+import { embedConfigSchema } from "./media/embed/schema";
+import { Vote } from "./data/vote/index";
+import { voteConfigSchema } from "./data/vote/schema";
+import { Banner } from "./content/banner/index";
+import { bannerConfigSchema } from "./content/banner/schema";
+import { SplitPane } from "./layout/split-pane/index";
+import { splitPaneConfigSchema } from "./layout/split-pane/schema";
 
 let builtInComponentsRegistered = false;
 
@@ -639,4 +653,40 @@ export function registerBuiltInComponents(): void {
     DefaultOffline as Parameters<typeof registerComponent>[1],
   );
   registerComponentSchema("offline-banner", offlineBannerConfigSchema);
+
+  registerComponent(
+    "carousel",
+    Carousel as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("carousel", carouselConfigSchema);
+
+  registerComponent(
+    "video",
+    Video as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("video", videoConfigSchema);
+
+  registerComponent(
+    "embed",
+    Embed as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("embed", embedConfigSchema);
+
+  registerComponent(
+    "vote",
+    Vote as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("vote", voteConfigSchema);
+
+  registerComponent(
+    "banner",
+    Banner as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("banner", bannerConfigSchema);
+
+  registerComponent(
+    "split-pane",
+    SplitPane as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("split-pane", splitPaneConfigSchema);
 }
