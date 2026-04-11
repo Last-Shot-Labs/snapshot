@@ -861,6 +861,13 @@ export function useActionExecutor(): ActionExecuteFn {
                       void execute(builtin.action!.action, builtinContext),
                   }
                 : undefined,
+              undo: builtin.undo
+                ? {
+                    label: builtin.undo.label,
+                    action: builtin.undo.action,
+                    duration: builtin.undo.duration,
+                  }
+                : undefined,
             });
             return message;
           }

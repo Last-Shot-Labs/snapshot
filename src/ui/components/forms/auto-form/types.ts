@@ -43,7 +43,10 @@ export interface UseAutoFormResult {
   /** Set a single field value. */
   setValue: (name: string, value: unknown) => void;
   /** Set multiple field values at once. */
-  setValues: (values: Record<string, unknown>) => void;
+  setValues: (
+    values: Record<string, unknown>,
+    options?: { markPristine?: boolean },
+  ) => void;
   /** Submit handler — validates all fields, then calls onSubmit if valid. */
   handleSubmit: () => Promise<void>;
   /** Whether the form is currently submitting. */
@@ -56,4 +59,6 @@ export interface UseAutoFormResult {
   isDirty: boolean;
   /** Mark a field as touched (triggers validation display). */
   touchField: (name: string) => void;
+  /** Mark the current values, or the provided values, as the clean baseline. */
+  markPristine: (values?: Record<string, unknown>) => void;
 }

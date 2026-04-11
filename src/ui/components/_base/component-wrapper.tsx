@@ -39,6 +39,16 @@ interface ComponentWrapperProps {
   background?: ComponentBackgroundConfig;
   /** Optional transition config. */
   transition?: ComponentTransitionConfig;
+  /** Accessible label override. */
+  ariaLabel?: string;
+  /** Accessible description target id. */
+  ariaDescribedBy?: string;
+  /** Optional landmark or semantic role. */
+  role?: string;
+  /** Optional live region politeness setting. */
+  ariaLive?: "off" | "polite" | "assertive";
+  /** Raw manifest config used for dev-only inspection. */
+  config?: Record<string, unknown>;
   /** Children to render. */
   children: ReactNode;
 }
@@ -307,6 +317,11 @@ export function ComponentWrapper({
   glass,
   background,
   transition,
+  ariaLabel,
+  ariaDescribedBy,
+  role,
+  ariaLive,
+  config,
   children,
 }: ComponentWrapperProps) {
   const manifest = useManifestRuntime();
@@ -348,13 +363,22 @@ export function ComponentWrapper({
           "1px solid color-mix(in oklch, var(--sn-color-border, #e5e7eb) 50%, transparent)",
       }
     : undefined;
+  const isDevEnvironment =
+    typeof process !== "undefined" && process.env.NODE_ENV !== "production";
+  const devConfig =
+    isDevEnvironment && config ? JSON.stringify(config) : undefined;
 
   return (
     <div
       data-snapshot-component={type}
       data-snapshot-id={id}
       data-component-id={id}
+      data-snapshot-config={devConfig}
       className={className}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+      role={role}
+      aria-live={ariaLive}
       style={
         style ||
         tokenStyle ||

@@ -35,12 +35,14 @@ export interface UseWizardResult {
   setStepValue: (name: string, value: unknown) => void;
   /** Mark a field as touched (triggers validation display). */
   touchField: (name: string) => void;
+  /** Whether the current step can be skipped. */
+  canSkip: boolean;
   /** Advance to the next step (validates current step first). Returns true on success. */
-  nextStep: () => boolean;
+  nextStep: () => Promise<boolean>;
   /** Go back to the previous step (no validation). */
-  prevStep: () => void;
+  prevStep: () => Promise<void>;
   /** Skip the current step (only if allowSkip is true). */
-  skipStep: () => void;
+  skipStep: () => Promise<void>;
   /** Reset the wizard to the first step and clear collected values. */
   resetWizard: () => void;
   /** Whether submission is in progress. */

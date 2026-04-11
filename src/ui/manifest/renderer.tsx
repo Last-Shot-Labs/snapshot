@@ -92,6 +92,7 @@ export function ComponentRenderer({ config }: ComponentRendererProps) {
     <ComponentWrapper
       type={config.type}
       id={config.id}
+      config={config as Record<string, unknown>}
       className={config.className}
       sticky={
         "sticky" in config
@@ -117,6 +118,29 @@ export function ComponentRenderer({ config }: ComponentRendererProps) {
       transition={
         "transition" in config
           ? (config.transition as ComponentTransitionConfig)
+          : undefined
+      }
+      ariaLabel={
+        "ariaLabel" in config && typeof config.ariaLabel === "string"
+          ? config.ariaLabel
+          : undefined
+      }
+      ariaDescribedBy={
+        "ariaDescribedBy" in config && typeof config.ariaDescribedBy === "string"
+          ? config.ariaDescribedBy
+          : undefined
+      }
+      role={
+        "role" in config && typeof config.role === "string"
+          ? config.role
+          : undefined
+      }
+      ariaLive={
+        "ariaLive" in config &&
+        (config.ariaLive === "off" ||
+          config.ariaLive === "polite" ||
+          config.ariaLive === "assertive")
+          ? config.ariaLive
           : undefined
       }
       tokens={
@@ -165,7 +189,11 @@ export function PageRenderer({
       resources={resources}
       api={api}
     >
-      <div data-snapshot-page={page.title ?? ""}>
+      <div
+        id="main-content"
+        tabIndex={-1}
+        data-snapshot-page={page.title ?? ""}
+      >
         {page.content.map((config, i) => (
           <ComponentRenderer
             key={config.id ?? `component-${i}`}

@@ -38,5 +38,7 @@ export const notificationBellConfigSchema = z
     style: z.record(z.union([z.string(), z.number()])).optional(),
     /** Additional CSS class name. */
     className: z.string().optional(),
+    /** Live region politeness for unread count changes. */
+    ariaLive: z.enum(["off", "polite", "assertive"]).default("polite"),
   })
   .strict();

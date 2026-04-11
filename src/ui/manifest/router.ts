@@ -1,5 +1,5 @@
 import { resolveTemplate } from "../expressions/template";
-import type { CompiledManifest, CompiledRoute } from "./types";
+import type { CompiledManifest, CompiledRoute, RouteMatch } from "./types";
 
 export function normalizePathname(path: string): string {
   if (!path) {
@@ -54,39 +54,69 @@ export function matchRoutePath(
 export function resolveRouteMatch(
   manifest: CompiledManifest,
   currentPath: string,
-): { route: CompiledRoute | null; params: Record<string, string> } {
+): RouteMatch {
+  const buildMatch = (
+    route: CompiledRoute | null,
+    params: Record<string, string>,
+  ): RouteMatch => {
+    if (!route) {
+      return {
+        route: null,
+        params,
+        parents: [],
+        activeRoutes: [],
+      };
+    }
+
+    const activeRoutes: CompiledRoute[] = [];
+    let currentRoute: CompiledRoute | undefined = route;
+    while (currentRoute) {
+      activeRoutes.unshift(currentRoute);
+      currentRoute = currentRoute.parentId
+        ? findRouteById(manifest, currentRoute.parentId)
+        : undefined;
+    }
+
+    return {
+      route,
+      params,
+      parents: activeRoutes.slice(0, -1),
+      activeRoutes,
+    };
+  };
+
   const normalizedCurrentPath = normalizePathname(currentPath);
   const exactRoute = manifest.routeMap[normalizedCurrentPath];
   if (exactRoute) {
-    return { route: exactRoute, params: {} };
+    return buildMatch(exactRoute, {});
   }
 
   for (const route of manifest.routes) {
     const params = matchRoutePath(route.path, normalizedCurrentPath);
     if (params) {
-      return { route, params };
+      return buildMatch(route, params);
     }
   }
 
   if (manifest.app.notFound) {
     const notFoundRoute = findRouteById(manifest, manifest.app.notFound);
     if (notFoundRoute) {
-      return { route: notFoundRoute, params: {} };
+      return buildMatch(notFoundRoute, {});
     }
   }
 
   if (manifest.app.home) {
     const homeRoute = manifest.routeMap[normalizePathname(manifest.app.home)];
     if (homeRoute) {
-      return { route: homeRoute, params: {} };
+      return buildMatch(homeRoute, {});
     }
   }
 
   if (manifest.firstRoute) {
-    return { route: manifest.firstRoute, params: {} };
+    return buildMatch(manifest.firstRoute, {});
   }
 
-  return { route: null, params: {} };
+  return buildMatch(null, {});
 }
 
 export function resolveDocumentTitle(

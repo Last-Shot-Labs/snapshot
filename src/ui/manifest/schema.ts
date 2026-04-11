@@ -249,6 +249,7 @@ export const baseComponentConfigSchema = z.object({
   background: componentBackgroundSchema.optional(),
   transition: componentTransitionSchema.optional(),
   ariaLabel: z.string().optional(),
+  ariaDescribedBy: z.string().optional(),
   role: z.string().optional(),
   ariaLive: z.enum(["off", "polite", "assertive"]).optional(),
 });
@@ -319,6 +320,14 @@ export const loadingConfigSchema = z
   })
   .strict();
 
+const actionConfigSchema: z.ZodType = z.lazy(() =>
+  z
+    .object({
+      type: z.string(),
+    })
+    .passthrough(),
+);
+
 export const emptyStateConfigSchema = z
   .object({
     icon: z.string().optional(),
@@ -377,14 +386,6 @@ export const headingConfigSchema = baseComponentConfigSchema.extend({
   align: z.enum(["left", "center", "right"]).optional(),
   fallback: z.string().optional(),
 });
-
-const actionConfigSchema: z.ZodType = z.lazy(() =>
-  z
-    .object({
-      type: z.string(),
-    })
-    .passthrough(),
-);
 
 const eventActionValueSchema = z.union([
   actionConfigSchema,
@@ -1418,44 +1419,56 @@ export const routeTransitionSchema = z
   })
   .strict();
 
-export const routeConfigSchema = z
-  .object({
-    id: z.string().min(1),
-    path: z.string().startsWith("/"),
-    title: textOrTRefSchema.optional(),
-    content: z.array(componentConfigSchema).min(1).optional(),
-    roles: z.array(z.string()).optional(),
-    breadcrumb: plainTextOrTRefSchema.optional(),
-    layouts: z.array(routeLayoutSchema).optional(),
-    slots: z.record(z.array(componentConfigSchema)).optional(),
-    preload: z.array(endpointTargetSchema).optional(),
-    prefetch: z.array(endpointTargetSchema).optional(),
-    refreshOnEnter: z.array(z.string().min(1)).optional(),
-    invalidateOnLeave: z.array(z.string().min(1)).optional(),
-    enter: z
-      .union([z.string().min(1), manifestWorkflowDefinitionSchema])
-      .optional(),
-    leave: z
-      .union([z.string().min(1), manifestWorkflowDefinitionSchema])
-      .optional(),
-    guard: routeGuardSchema.optional(),
-    events: eventActionMapSchema.optional(),
-    transition: routeTransitionSchema.optional(),
-    preset: z.string().optional(),
-    presetConfig: z.record(z.unknown()).optional(),
+export const outletComponentSchema = baseComponentConfigSchema
+  .extend({
+    type: z.literal("outlet"),
+    fallback: z.array(componentConfigSchema).optional(),
   })
-  .refine(
-    (data) => {
-      if (data.preset && data.content) {
-        return false;
-      }
-      return Boolean(data.preset || data.content);
-    },
-    {
-      message: "Route must define either content or preset, but not both.",
-    },
-  )
   .strict();
+
+registerComponentSchema("outlet", outletComponentSchema);
+
+export const routeConfigSchema: z.ZodType = z.lazy(() =>
+  z
+    .object({
+      id: z.string().min(1),
+      path: z.string().min(1),
+      title: textOrTRefSchema.optional(),
+      content: z.array(componentConfigSchema).min(1).optional(),
+      roles: z.array(z.string()).optional(),
+      breadcrumb: plainTextOrTRefSchema.optional(),
+      layouts: z.array(routeLayoutSchema).optional(),
+      slots: z.record(z.array(componentConfigSchema)).optional(),
+      preload: z.array(endpointTargetSchema).optional(),
+      prefetch: z.array(endpointTargetSchema).optional(),
+      refreshOnEnter: z.array(z.string().min(1)).optional(),
+      invalidateOnLeave: z.array(z.string().min(1)).optional(),
+      enter: z
+        .union([z.string().min(1), manifestWorkflowDefinitionSchema])
+        .optional(),
+      leave: z
+        .union([z.string().min(1), manifestWorkflowDefinitionSchema])
+        .optional(),
+      guard: routeGuardSchema.optional(),
+      events: eventActionMapSchema.optional(),
+      transition: routeTransitionSchema.optional(),
+      preset: z.string().optional(),
+      presetConfig: z.record(z.unknown()).optional(),
+      children: z.array(routeConfigSchema).optional(),
+    })
+    .strict()
+    .refine(
+      (data) => {
+        if (data.preset && data.content) {
+          return false;
+        }
+        return Boolean(data.preset || data.content);
+      },
+      {
+        message: "Route must define either content or preset, but not both.",
+      },
+    ),
+);
 
 export const stateValueConfigSchema = z
   .object({
@@ -1477,6 +1490,7 @@ export const stateValueConfigSchema = z
       ])
       .default("none"),
   })
+  .strict()
   .superRefine((value, ctx) => {
     if (value.compute && value.data) {
       ctx.addIssue({
@@ -1484,8 +1498,7 @@ export const stateValueConfigSchema = z
         message: "State definitions cannot declare both compute and data.",
       });
     }
-  })
-  .strict();
+  });
 
 /**
  * Manifest cache defaults for TanStack Query.
@@ -1544,7 +1557,7 @@ export const appConfigSchema = z
             z
               .object({
                 label: z.string(),
-                href: z.string(),
+                target: z.string().min(1),
               })
               .strict(),
           )
@@ -1608,6 +1621,9 @@ export const overlayConfigSchema: z.ZodType = z.union([
         .union([z.string().min(1), manifestWorkflowDefinitionSchema])
         .optional(),
       urlParam: z.string().optional(),
+      trapFocus: z.boolean().default(true),
+      initialFocus: z.string().optional(),
+      returnFocus: z.boolean().default(true),
       className: z.string().optional(),
       style: z.record(z.union([z.string(), z.number()])).optional(),
       footer: z
@@ -1632,6 +1648,9 @@ export const overlayConfigSchema: z.ZodType = z.union([
         .union([z.string().min(1), manifestWorkflowDefinitionSchema])
         .optional(),
       urlParam: z.string().optional(),
+      trapFocus: z.boolean().default(true),
+      initialFocus: z.string().optional(),
+      returnFocus: z.boolean().default(true),
       className: z.string().optional(),
       style: z.record(z.union([z.string(), z.number()])).optional(),
       footer: z
@@ -1653,6 +1672,76 @@ function collectNavPaths(items: z.infer<typeof navItemSchema>[]): string[] {
     }
   }
   return paths;
+}
+
+function normalizeDeclaredRouteSegment(path: string): string {
+  if (!path) {
+    return "/";
+  }
+
+  if (path === "/") {
+    return "/";
+  }
+
+  const trimmed = path.replace(/\/+$/, "");
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
+
+function joinDeclaredRoutePath(parentPath: string, childPath: string): string {
+  const normalizedParent = normalizeDeclaredRouteSegment(parentPath);
+  const normalizedChild = normalizeDeclaredRouteSegment(childPath);
+
+  if (normalizedParent === "/") {
+    return normalizedChild;
+  }
+
+  if (normalizedChild === "/") {
+    return normalizedParent;
+  }
+
+  return `${normalizedParent}${normalizedChild}`.replace(/\/{2,}/g, "/");
+}
+
+type ManifestRouteIssueTarget = {
+  route: z.infer<typeof routeConfigSchema>;
+  path: (string | number)[];
+  fullPath: string;
+  isRoot: boolean;
+};
+
+function flattenDeclaredRoutes(
+  routes: z.infer<typeof routeConfigSchema>[],
+  parentPath = "",
+  parentIssuePath: Array<string | number> = ["routes"],
+): ManifestRouteIssueTarget[] {
+  const flattened: ManifestRouteIssueTarget[] = [];
+
+  routes.forEach((route, index) => {
+    const isRoot = parentPath.length === 0;
+    const fullPath = isRoot
+      ? normalizeDeclaredRouteSegment(route.path)
+      : joinDeclaredRoutePath(parentPath, route.path);
+    const issuePath = [...parentIssuePath, index] as Array<string | number>;
+
+    flattened.push({
+      route,
+      path: issuePath,
+      fullPath,
+      isRoot,
+    });
+
+    if (route.children?.length) {
+      flattened.push(
+        ...flattenDeclaredRoutes(
+          route.children,
+          fullPath,
+          [...issuePath, "children"],
+        ),
+      );
+    }
+  });
+
+  return flattened;
 }
 
 const lazyManifestConfigSchema: z.ZodType = z.lazy(() => manifestConfigSchema);
@@ -1715,26 +1804,35 @@ export const manifestConfigSchema = z
   .superRefine((data, ctx) => {
     const routeIds = new Set<string>();
     const routePaths = new Set<string>();
+    const flattenedRoutes = flattenDeclaredRoutes(data.routes);
 
-    data.routes.forEach((route, index) => {
+    flattenedRoutes.forEach(({ route, path, fullPath, isRoot }) => {
       if (routeIds.has(route.id)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["routes", index, "id"],
+          path: [...path, "id"],
           message: `Duplicate route id "${route.id}"`,
         });
       } else {
         routeIds.add(route.id);
       }
 
-      if (routePaths.has(route.path)) {
+      if (isRoot && !route.path.startsWith("/")) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["routes", index, "path"],
-          message: `Duplicate route path "${route.path}"`,
+          path: [...path, "path"],
+          message: "Top-level route paths must start with '/'.",
+        });
+      }
+
+      if (routePaths.has(fullPath)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [...path, "path"],
+          message: `Duplicate route path "${fullPath}"`,
         });
       } else {
-        routePaths.add(route.path);
+        routePaths.add(fullPath);
       }
     });
 

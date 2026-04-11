@@ -1,7 +1,11 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
 // Canonical fromRefSchema source is _base/types.ts
-import { dataSourceSchema, fromRefSchema } from "../../_base/types";
+import {
+  dataSourceSchema,
+  endpointTargetSchema,
+  fromRefSchema,
+} from "../../_base/types";
 
 /**
  * Schema for a single command item within a group.
@@ -62,6 +66,25 @@ export const commandPaletteConfigSchema = z
     groups: z.array(commandGroupSchema).optional(),
     /** API endpoint for dynamic items. Supports FromRef. */
     data: dataSourceSchema.optional(),
+    /** Auto-register labeled manifest shortcuts as commands. */
+    autoRegisterShortcuts: z.boolean().default(true),
+    /** Debounced remote search endpoint. */
+    searchEndpoint: z
+      .object({
+        endpoint: endpointTargetSchema,
+        debounce: z.number().int().positive().default(300),
+        minLength: z.number().int().nonnegative().default(2),
+      })
+      .optional(),
+    /** Persist and show recent commands. */
+    recentItems: z
+      .object({
+        enabled: z.boolean().default(false),
+        maxItems: z.number().int().positive().default(5),
+      })
+      .optional(),
+    /** Keyboard shortcut used to open the palette. */
+    shortcut: z.string().default("ctrl+k"),
     /** Message shown when search yields no results. Default: "No results found". */
     emptyMessage: z.string().optional(),
     /** Max height of the results list. Default: "300px". */

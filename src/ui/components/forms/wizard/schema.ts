@@ -4,7 +4,10 @@ import {
   baseComponentConfigSchema,
   endpointTargetSchema,
 } from "../../_base/types";
-import { fieldConfigSchema } from "../auto-form/schema";
+import {
+  fieldConfigSchema,
+  fieldValidationSchema,
+} from "../auto-form/schema";
 
 /**
  * Re-export for consumers that want to import the field schema directly.
@@ -24,6 +27,31 @@ export const wizardStepSchema = z.object({
   fields: z.array(fieldConfigSchema),
   /** Override label for the "Next" or submit button on this step. */
   submitLabel: z.string().optional(),
+  /** Additional per-field validation gates for this step. */
+  validate: z
+    .array(
+      z
+        .object({
+          field: z.string(),
+          rule: fieldValidationSchema,
+        })
+        .strict(),
+    )
+    .optional(),
+  /** Whether this step can be skipped. */
+  skip: z.union([z.boolean(), z.object({ expr: z.string() }).strict()]).optional(),
+  /** Async validation endpoint for this step. */
+  asyncValidate: z
+    .object({
+      endpoint: endpointTargetSchema,
+      body: z.record(z.unknown()).optional(),
+    })
+    .strict()
+    .optional(),
+  /** Actions fired when this step becomes active. */
+  onEnter: z.union([actionSchema, z.array(actionSchema)]).optional(),
+  /** Actions fired before leaving this step. */
+  onLeave: z.union([actionSchema, z.array(actionSchema)]).optional(),
 });
 
 /**

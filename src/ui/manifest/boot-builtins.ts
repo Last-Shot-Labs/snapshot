@@ -14,6 +14,12 @@ import { registerBuiltInGuards } from "./guard-registry";
 
 let booted = false;
 
+export function registerLegacyStructuralComponents(): void {
+  for (const [type, component] of Object.entries(LEGACY_STRUCTURAL_COMPONENTS)) {
+    registerComponent(type, component);
+  }
+}
+
 /**
  * Register all built-in manifest registries exactly once.
  *
@@ -26,9 +32,7 @@ export function bootBuiltins(): void {
 
   booted = true;
   registerBuiltInComponents();
-  for (const [type, component] of Object.entries(LEGACY_STRUCTURAL_COMPONENTS)) {
-    registerComponent(type, component);
-  }
+  registerLegacyStructuralComponents();
   registerBuiltInFlavors();
   registerBuiltInLayouts();
   registerBuiltInGuards();

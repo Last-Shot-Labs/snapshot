@@ -1,4 +1,10 @@
 import { z } from "zod";
+import { actionSchema } from "../../../actions/types";
+import {
+  emptyStateConfigSchema,
+  liveConfigSchema,
+  loadingConfigSchema,
+} from "../../../manifest/schema";
 import { dataSourceSchema, fromRefSchema } from "../../_base/types";
 
 /**
@@ -55,6 +61,31 @@ export const feedSchema = z
     emptyMessage: z.string().default("No activity yet"),
     /** Number of items per page. */
     pageSize: z.number().int().min(1).default(20),
+    /** Infinite scroll toggle. */
+    infinite: z.boolean().optional(),
+    /** Render timestamps as relative time labels. */
+    relativeTime: z.boolean().default(false),
+    /** Group feed items by a time bucket. */
+    groupBy: z.enum(["date", "week", "month"]).optional(),
+    /** Per-item action buttons rendered inline. */
+    itemActions: z
+      .array(
+        z
+          .object({
+            label: z.string(),
+            icon: z.string().optional(),
+            action: z.union([actionSchema, z.array(actionSchema)]),
+            variant: z.enum(["default", "destructive"]).optional(),
+          })
+          .strict(),
+      )
+      .optional(),
+    /** Automatic loading placeholder config. */
+    loading: loadingConfigSchema.optional(),
+    /** Rich empty state config. */
+    empty: emptyStateConfigSchema.optional(),
+    /** Live refresh configuration driven by realtime events. */
+    live: liveConfigSchema.optional(),
     /** Visibility toggle. Can be a FromRef for conditional display. */
     visible: z.union([z.boolean(), fromRefSchema]).optional(),
     /** Inline style overrides. */

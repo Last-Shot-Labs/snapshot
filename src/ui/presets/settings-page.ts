@@ -51,24 +51,28 @@ function mapFormField(field: FormFieldDef): Record<string, unknown> {
  */
 function mapSection(section: SettingsSectionDef): Record<string, unknown> {
   const formFields = section.fields.map(mapFormField);
+  const formId = `${slugify(section.label)}-form`;
 
   const formConfig: Record<string, unknown> = {
     type: "form",
-    id: `${slugify(section.label)}-form`,
+    id: formId,
     submit: section.submitEndpoint,
     method: section.method ?? "PATCH",
     fields: formFields,
-    onSuccess: {
-      type: "toast",
-      message: `${section.label} settings saved`,
-      variant: "success",
-    },
   };
 
   if (section.autoSave) {
     formConfig.autoSubmit = true;
+    if (section.autoSaveDelay !== undefined) {
+      formConfig.autoSubmitDelay = section.autoSaveDelay;
+    }
   } else {
     formConfig.submitLabel = section.submitLabel ?? "Save Changes";
+    formConfig.onSuccess = {
+      type: "toast",
+      message: `${section.label} settings saved`,
+      variant: "success",
+    };
   }
 
   if (section.dataEndpoint) {
@@ -82,7 +86,7 @@ function mapSection(section: SettingsSectionDef): Record<string, unknown> {
           formConfig,
           {
             type: "save-indicator",
-            status: "idle",
+            status: { from: `${formId}.saveStatus` },
           },
         ]
       : [formConfig],

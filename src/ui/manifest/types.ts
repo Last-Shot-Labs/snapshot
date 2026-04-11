@@ -177,8 +177,11 @@ export type ComponentConfig =
 export interface CompiledRoute {
   id: string;
   path: string;
+  parentId?: string | null;
+  parentPath?: string | null;
   page: PageConfig;
   preload?: EndpointTarget[];
+  prefetch?: EndpointTarget[];
   refreshOnEnter?: string[];
   invalidateOnLeave?: string[];
   enter?: RouteConfig["enter"];
@@ -186,6 +189,16 @@ export interface CompiledRoute {
   guard?: RouteGuard;
   events?: RouteConfig["events"];
   transition?: RouteTransitionConfig;
+}
+
+/**
+ * Resolved route match for the current pathname.
+ */
+export interface RouteMatch {
+  route: CompiledRoute | null;
+  params: Record<string, string>;
+  parents: CompiledRoute[];
+  activeRoutes: CompiledRoute[];
 }
 
 /**
@@ -214,6 +227,7 @@ export interface CompiledManifest {
 export interface ManifestAppProps {
   manifest: ManifestConfig;
   apiUrl: string;
+  lazyComponents?: boolean;
 }
 
 export type ConfigDrivenComponent = React.ComponentType<{

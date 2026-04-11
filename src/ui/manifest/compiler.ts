@@ -80,19 +80,80 @@ function toPageConfig(route: RouteConfig): PageConfig {
 
 function expandRoutePresets(routes: RouteConfig[]): RouteConfig[] {
   return routes.map((route) => {
-    if (!route.preset) {
-      return route;
+    const nextRoute = route.preset
+      ? (() => {
+          const expanded = expandPreset(route.preset, route.presetConfig ?? {});
+          return {
+            ...route,
+            title: route.title ?? expanded.title,
+            content: expanded.content,
+            preset: undefined,
+            presetConfig: undefined,
+          };
+        })()
+      : route;
+
+    if (!nextRoute.children?.length) {
+      return nextRoute;
     }
 
-    const expanded = expandPreset(route.preset, route.presetConfig ?? {});
     return {
-      ...route,
-      title: route.title ?? expanded.title,
-      content: expanded.content,
-      preset: undefined,
-      presetConfig: undefined,
+      ...nextRoute,
+      children: expandRoutePresets(nextRoute.children),
     };
   });
+}
+
+function normalizeCompiledRouteSegment(path: string): string {
+  if (!path || path === "/") {
+    return "/";
+  }
+
+  const trimmed = path.replace(/\/+$/, "");
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
+
+function joinCompiledRoutePath(parentPath: string, childPath: string): string {
+  const normalizedParent = normalizeCompiledRouteSegment(parentPath);
+  const normalizedChild = normalizeCompiledRouteSegment(childPath);
+
+  if (normalizedParent === "/") {
+    return normalizedChild;
+  }
+
+  if (normalizedChild === "/") {
+    return normalizedParent;
+  }
+
+  return `${normalizedParent}${normalizedChild}`.replace(/\/{2,}/g, "/");
+}
+
+function walkRoutes<T>(
+  routes: RouteConfig[],
+  visit: (
+    route: RouteConfig,
+    fullPath: string,
+    parent?: RouteConfig,
+    parentPath?: string,
+  ) => T,
+  parentPath = "",
+  parentRoute?: RouteConfig,
+): T[] {
+  const results: T[] = [];
+
+  for (const route of routes) {
+    const fullPath =
+      parentPath.length === 0
+        ? normalizeCompiledRouteSegment(route.path)
+        : joinCompiledRoutePath(parentPath, route.path);
+    results.push(visit(route, fullPath, parentRoute, parentPath || undefined));
+
+    if (route.children?.length) {
+      results.push(...walkRoutes(route.children, visit, fullPath, route));
+    }
+  }
+
+  return results;
 }
 
 function resolveManifestEnvRefs<T>(
@@ -220,20 +281,29 @@ function collectWorkflowDefinitions(
     });
   }
 
-  for (const route of manifest.routes) {
-    if (route.enter && typeof route.enter !== "string") {
-      result.push({
-        location: `routes.${route.id}.enter`,
-        definition: route.enter,
+  for (const definitions of walkRoutes(manifest.routes, (candidate) => {
+    const nestedDefinitions: Array<{
+      location: string;
+      definition: WorkflowDefinition;
+    }> = [];
+
+    if (candidate.enter && typeof candidate.enter !== "string") {
+      nestedDefinitions.push({
+        location: `routes.${candidate.id}.enter`,
+        definition: candidate.enter,
       });
     }
 
-    if (route.leave && typeof route.leave !== "string") {
-      result.push({
-        location: `routes.${route.id}.leave`,
-        definition: route.leave,
+    if (candidate.leave && typeof candidate.leave !== "string") {
+      nestedDefinitions.push({
+        location: `routes.${candidate.id}.leave`,
+        definition: candidate.leave,
       });
     }
+
+    return nestedDefinitions;
+  })) {
+    result.push(...definitions);
   }
 
   for (const [name, overlay] of Object.entries(manifest.overlays ?? {})) {
@@ -449,8 +519,8 @@ function validatePolicyRefs(manifest: EnvResolvedManifest): void {
     }
   }
 
-  for (const route of manifest.routes) {
-    for (const ref of collectPolicyRefNames(route)) {
+  for (const candidate of walkRoutes(manifest.routes, (routeValue) => routeValue)) {
+    for (const ref of collectPolicyRefNames(candidate)) {
       referencedPolicies.add(ref);
     }
   }
@@ -539,18 +609,18 @@ function validateResourceClients(manifest: EnvResolvedManifest): void {
 }
 
 function validateRegisteredGuards(manifest: EnvResolvedManifest): void {
-  for (const route of manifest.routes) {
+  for (const candidate of walkRoutes(manifest.routes, (routeValue) => routeValue)) {
     const guardName =
-      typeof route.guard === "string"
-        ? route.guard
-        : route.guard?.name;
+      typeof candidate.guard === "string"
+        ? candidate.guard
+        : candidate.guard?.name;
     if (!guardName) {
       continue;
     }
 
     if (!resolveGuard(guardName)) {
       throw new Error(
-        `Route "${route.id}" references unknown guard "${guardName}". Register it before compiling the manifest.`,
+        `Route "${candidate.id}" references unknown guard "${guardName}". Register it before compiling the manifest.`,
       );
     }
   }
@@ -644,22 +714,28 @@ function buildCompiledManifest(
     }
   }
 
-  const routes: CompiledRoute[] = runtimeManifest.routes.map((route) => {
-    validateRouteSlots(route);
-    return {
-      id: route.id,
-      path: route.path,
-      page: toPageConfig(route),
-      preload: route.preload,
-      refreshOnEnter: route.refreshOnEnter,
-      invalidateOnLeave: route.invalidateOnLeave,
-      enter: route.enter,
-      leave: route.leave,
-      guard: route.guard,
-      events: route.events,
-      transition: route.transition,
-    };
-  });
+  const routes = walkRoutes(
+    runtimeManifest.routes,
+    (route, fullPath, parentRoute, parentPath): CompiledRoute => {
+      validateRouteSlots(route);
+      return {
+        id: route.id,
+        path: fullPath,
+        parentId: parentRoute?.id ?? null,
+        parentPath: parentPath ?? null,
+        page: toPageConfig(route),
+        preload: route.preload,
+        prefetch: route.prefetch,
+        refreshOnEnter: route.refreshOnEnter,
+        invalidateOnLeave: route.invalidateOnLeave,
+        enter: route.enter,
+        leave: route.leave,
+        guard: route.guard,
+        events: route.events,
+        transition: route.transition,
+      };
+    },
+  );
 
   const routeMap = Object.fromEntries(
     routes.map((route) => [route.path, route]),
@@ -686,6 +762,7 @@ function buildCompiledManifest(
       apiUrl: runtimeManifest.app?.apiUrl,
       shell: runtimeManifest.app?.shell ?? "full-width",
       title: runtimeManifest.app?.title,
+      headers: runtimeManifest.app?.headers,
       cache: {
         staleTime: runtimeManifest.app?.cache?.staleTime ?? 5 * 60 * 1000,
         gcTime: runtimeManifest.app?.cache?.gcTime ?? 10 * 60 * 1000,
@@ -696,6 +773,8 @@ function buildCompiledManifest(
       error: runtimeManifest.app?.error,
       notFound: runtimeManifest.app?.notFound,
       offline: runtimeManifest.app?.offline,
+      breadcrumbs: runtimeManifest.app?.breadcrumbs,
+      a11y: runtimeManifest.app?.a11y,
     },
     toast: runtimeManifest.toast,
     analytics: runtimeManifest.analytics,

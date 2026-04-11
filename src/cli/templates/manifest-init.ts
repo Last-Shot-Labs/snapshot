@@ -22,7 +22,7 @@ export interface ManifestInitOptions {
  */
 export function generateManifestJson(options: ManifestInitOptions): string {
   const manifest: Record<string, unknown> = {
-    $schema: "./node_modules/@lastshotlabs/snapshot/manifest-schema.json",
+    $schema: "./snapshot.schema.json",
     app: {
       title: "Snapshot App",
       shell: options.includeSidebar ? "sidebar" : "minimal",

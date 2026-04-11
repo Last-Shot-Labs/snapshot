@@ -21,6 +21,15 @@ export interface ClientSort {
   direction: "asc" | "desc";
 }
 
+function isInactiveFilterValue(value: unknown): boolean {
+  return (
+    value === undefined ||
+    value === null ||
+    value === "" ||
+    (Array.isArray(value) && value.length === 0)
+  );
+}
+
 function compareClientValues(left: unknown, right: unknown): number {
   if (left == null && right == null) {
     return 0;
@@ -77,12 +86,16 @@ export function applyClientFilters<T extends Record<string, unknown>>(
   data: T[],
   filters: ClientFilter[],
 ): T[] {
-  if (filters.length === 0) {
+  const activeFilters = filters.filter(
+    (filter) => !isInactiveFilterValue(filter.value),
+  );
+
+  if (activeFilters.length === 0) {
     return data;
   }
 
   return data.filter((item) =>
-    filters.every((filter) => matchesFilter(item, filter)),
+    activeFilters.every((filter) => matchesFilter(item, filter)),
   );
 }
 

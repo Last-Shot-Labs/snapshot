@@ -130,12 +130,34 @@ export function createSnapshot<
   const runtimeWsConfig = runtimeRealtime?.ws
     ? {
         url: runtimeRealtime.ws.url ?? resolveWebSocketUrl(runtimeApiUrl),
-        autoReconnect: runtimeRealtime.ws.autoReconnect,
+        autoReconnect:
+          runtimeRealtime.ws.reconnect?.enabled ??
+          runtimeRealtime.ws.autoReconnect,
         reconnectOnLogin: runtimeRealtime.ws.reconnectOnLogin,
         reconnectOnFocus: runtimeRealtime.ws.reconnectOnFocus,
-        maxReconnectAttempts: runtimeRealtime.ws.maxReconnectAttempts,
-        reconnectBaseDelay: runtimeRealtime.ws.reconnectBaseDelay,
-        reconnectMaxDelay: runtimeRealtime.ws.reconnectMaxDelay,
+        maxReconnectAttempts:
+          runtimeRealtime.ws.reconnect?.maxAttempts ??
+          runtimeRealtime.ws.maxReconnectAttempts,
+        reconnectBaseDelay:
+          runtimeRealtime.ws.reconnect?.baseDelay ??
+          runtimeRealtime.ws.reconnectBaseDelay,
+        reconnectMaxDelay:
+          runtimeRealtime.ws.reconnect?.maxDelay ??
+          runtimeRealtime.ws.reconnectMaxDelay,
+        auth: runtimeRealtime.ws.auth
+          ? {
+              strategy: runtimeRealtime.ws.auth.strategy,
+              paramName: runtimeRealtime.ws.auth.paramName,
+              token: () => tokenStorage.get(),
+            }
+          : undefined,
+        heartbeat: runtimeRealtime.ws.heartbeat
+          ? {
+              enabled: runtimeRealtime.ws.heartbeat.enabled,
+              interval: runtimeRealtime.ws.heartbeat.interval,
+              message: runtimeRealtime.ws.heartbeat.message,
+            }
+          : undefined,
         events: runtimeRealtime.ws.events,
         onConnected: createManifestRealtimeCallback(
           { channel: "ws", kind: "connected" },

@@ -44,19 +44,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function shallowEqualRecord(
-  left: Record<string, unknown>,
-  right: Record<string, unknown>,
-): boolean {
-  const leftKeys = Object.keys(left);
-  const rightKeys = Object.keys(right);
-  if (leftKeys.length !== rightKeys.length) {
-    return false;
-  }
-
-  return leftKeys.every((key) => left[key] === right[key]);
-}
-
 function isHaltSignal(value: unknown): boolean {
   if (!isRecord(value)) {
     return false;
@@ -926,8 +913,13 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
   const resourceCache = useManifestResourceCache();
   const localeState = useSubscribe({ from: "global.locale" });
   const autoSubmitAllowed = useEvaluateExpression(config.autoSubmitWhen);
-  const autoSubmittedRef = useRef(false);
+  const lastAutoSubmitRef = useRef<string | null>(null);
   const lastPublishedStateRef = useRef<string | null>(null);
+  const lastInitialDataRef = useRef<string | null>(null);
+  const formRef = useRef<ReturnType<typeof useAutoForm> | null>(null);
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
   const activeLocale = resolveRuntimeLocale(runtime?.raw.i18n, localeState);
   const resolvedDataTarget = useMemo(
     () =>
@@ -1102,6 +1094,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
           }
         }
 
+        setSaveStatus("saving");
         const result =
           resourceCache && isResourceRef(resolvedSubmitTarget)
             ? await resourceCache.mutateTarget(resolvedSubmitTarget, {
@@ -1133,7 +1126,13 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
             result,
           });
         }
+        if (!config.resetOnSubmit) {
+          formRef.current?.markPristine(values);
+        }
+        lastAutoSubmitRef.current = JSON.stringify(values);
+        setSaveStatus("saved");
       } catch (error) {
+        setSaveStatus("error");
         let handled = false;
         if (config.onError) {
           await executeAction(config.onError, { error });
@@ -1168,6 +1167,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
       config.on?.error,
       method,
       executeAction,
+      config.resetOnSubmit,
       resourceCache,
       resolvedSubmitTarget,
       runtime?.resources,
@@ -1175,20 +1175,29 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
   );
 
   const form = useAutoForm(resolvedFields, onSubmit);
+  formRef.current = form;
 
   useEffect(() => {
     if (
-      initialData.data &&
-      typeof initialData.data === "object" &&
-      !Array.isArray(initialData.data) &&
-      !shallowEqualRecord(
-        form.values,
-        initialData.data as Record<string, unknown>,
-      )
+      !initialData.data ||
+      typeof initialData.data !== "object" ||
+      Array.isArray(initialData.data)
     ) {
-      form.setValues(initialData.data);
+      return;
     }
-  }, [form.setValues, form.values, initialData.data]);
+
+    const serializedInitialData = JSON.stringify(initialData.data);
+    if (lastInitialDataRef.current === serializedInitialData) {
+      return;
+    }
+
+    form.setValues(initialData.data as Record<string, unknown>, {
+      markPristine: true,
+    });
+    lastInitialDataRef.current = serializedInitialData;
+    lastAutoSubmitRef.current = null;
+    setSaveStatus("idle");
+  }, [form.setValues, initialData.data]);
 
   // Publish form state when id is set
   useEffect(() => {
@@ -1197,6 +1206,8 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
         values: form.values,
         isDirty: form.isDirty,
         isValid: form.isValid,
+        isSubmitting: form.isSubmitting,
+        saveStatus,
         errors: form.errors,
       };
       const nextSerialized = JSON.stringify(nextPublishedState);
@@ -1213,6 +1224,8 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
     form.values,
     form.isDirty,
     form.isValid,
+    form.isSubmitting,
+    saveStatus,
     form.errors,
   ]);
 
@@ -1256,15 +1269,45 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
 
   useEffect(() => {
     if (
-      config.autoSubmit &&
-      autoSubmitAllowed &&
-      !form.isSubmitting &&
-      !autoSubmittedRef.current
+      !config.autoSubmit ||
+      !autoSubmitAllowed ||
+      !form.isDirty ||
+      !form.isValid ||
+      form.isSubmitting
     ) {
-      autoSubmittedRef.current = true;
-      void handleSubmit();
+      return;
     }
-  }, [autoSubmitAllowed, config.autoSubmit, form.isSubmitting, handleSubmit]);
+
+    const serializedValues = JSON.stringify(form.values);
+    if (lastAutoSubmitRef.current === serializedValues) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      void handleSubmit();
+    }, config.autoSubmitDelay ?? 800);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    autoSubmitAllowed,
+    config.autoSubmit,
+    config.autoSubmitDelay,
+    form.isDirty,
+    form.isSubmitting,
+    form.isValid,
+    form.values,
+    handleSubmit,
+  ]);
+
+  useEffect(() => {
+    if (!config.autoSubmit || !form.isDirty || form.isSubmitting) {
+      return;
+    }
+
+    if (saveStatus !== "idle") {
+      setSaveStatus("idle");
+    }
+  }, [config.autoSubmit, form.isDirty, form.isSubmitting, saveStatus]);
 
   if (visible === false) return null;
 

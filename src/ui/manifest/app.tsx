@@ -13,6 +13,7 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
+import { ZodError } from "zod";
 import {
   ApiClient,
   getRegisteredClient,
@@ -27,6 +28,7 @@ import {
   useResolveFrom,
   useSubscribe,
 } from "../context/index";
+import { SkipLinks } from "../components/_base/skip-links";
 import { Layout } from "../components/layout/layout";
 import { Nav } from "../components/layout/nav";
 import { DrawerComponent } from "../components/overlay/drawer";
@@ -37,15 +39,25 @@ import { resolveDetectedLocale, resolveI18nRefs } from "../i18n/resolve";
 import type { PolicyExpr } from "../policies/types";
 import { evaluatePolicy } from "../policies/evaluate";
 import { resolveTokens, resolveFrameworkStyles } from "../tokens/resolve";
+import { validateContrast } from "../tokens/contrast-checker";
 import { registerShortcuts } from "../shortcuts/index";
 import { getAuthScreenPath } from "./auth-routes";
+import { registerBuiltInComponents } from "../components/register";
 import { compileManifest } from "./compiler";
 import { useEventBridge, useSseEventBridge } from "./event-bridge";
 import { TransitionWrapper } from "./transition-wrapper";
+import { ManifestErrorOverlay } from "./error-overlay";
+import { ComponentInspector } from "./inspector";
+import { registerLegacyStructuralComponents } from "./boot-builtins";
 import {
   evaluateManifestGuard,
   guardUsesAuthState,
 } from "./guard-registry";
+import {
+  collectComponentTypes,
+  ensureComponentsLoaded,
+  resetLazyRegistry,
+} from "./lazy-registry";
 import {
   ManifestRuntimeProvider,
   RouteRuntimeProvider,
@@ -54,6 +66,7 @@ import {
 import { normalizePathname, resolveRouteMatch } from "./router";
 import { ComponentRenderer, PageRenderer } from "./renderer";
 import type { EndpointTarget } from "./resources";
+import { useRoutePrefetch } from "./use-route-prefetch";
 import type {
   ComponentConfig,
   CompiledManifest,
@@ -63,6 +76,7 @@ import type {
 } from "./types";
 import type { ShortcutBinding } from "../shortcuts/types";
 import { bootBuiltins } from "./boot-builtins";
+import { resetRegisteredComponents } from "./component-registry";
 import { resolveTemplate } from "../expressions/template";
 
 const EMPTY_OBJECT: Record<string, unknown> = {};
@@ -404,13 +418,28 @@ function getRawRouteRecord(
     return undefined;
   }
 
-  return rawRoutes.find((route) => {
-    if (!isRecord(route)) {
-      return false;
+  const visit = (routes: unknown[]): Record<string, unknown> | undefined => {
+    for (const route of routes) {
+      if (!isRecord(route)) {
+        continue;
+      }
+
+      if (route["id"] === routeId) {
+        return route;
+      }
+
+      if (Array.isArray(route["children"])) {
+        const nested = visit(route["children"] as unknown[]);
+        if (nested) {
+          return nested;
+        }
+      }
     }
 
-    return route["id"] === routeId;
-  }) as Record<string, unknown> | undefined;
+    return undefined;
+  };
+
+  return visit(rawRoutes);
 }
 
 function readRouteLayouts(
@@ -1003,6 +1032,7 @@ interface ManifestRouterProps {
   api: ReturnType<typeof createSnapshot>["api"];
   snapshot: ReturnType<typeof createSnapshot>;
   runtimeClients: Record<string, ApiClientLike>;
+  lazyComponents?: boolean;
   basePath?: string;
   parentTheme?: CompiledManifest["theme"];
   parentPolicies?: Record<string, PolicyExpr>;
@@ -1013,6 +1043,7 @@ function ManifestRouter({
   api,
   snapshot,
   runtimeClients,
+  lazyComponents,
   basePath,
   parentTheme,
   parentPolicies,
@@ -1020,6 +1051,7 @@ function ManifestRouter({
   const [currentLocation, setCurrentLocation] = useState(getBrowserLocation);
   const [isPreloading, setIsPreloading] = useState(false);
   const [runtimeError, setRuntimeError] = useState<Error | null>(null);
+  const [lazyRouteKey, setLazyRouteKey] = useState("");
   const [isOffline, setIsOffline] = useState(() =>
     typeof navigator !== "undefined" ? navigator.onLine === false : false,
   );
@@ -1214,13 +1246,40 @@ function ManifestRouter({
     () => resolveSubAppMatch(localizedManifest, currentLocation.pathname, basePath),
     [basePath, currentLocation.pathname, localizedManifest],
   );
-  const { route, params } = useMemo(
+  const match = useMemo(
     () =>
       subAppMatch
-        ? { route: null, params: {} as Record<string, string> }
+        ? {
+            route: null,
+            params: {} as Record<string, string>,
+            parents: [] as CompiledRoute[],
+            activeRoutes: [] as CompiledRoute[],
+          }
         : resolveRouteMatch(localizedManifest, scopedCurrentPath),
     [localizedManifest, scopedCurrentPath, subAppMatch],
   );
+  const route = match.route;
+  const params = match.params;
+  const renderedRoute = match.activeRoutes[0] ?? route;
+  const lazyTypes = useMemo(
+    () =>
+      lazyComponents
+        ? collectRouteRenderTypes(
+            localizedManifest,
+            match.activeRoutes.length > 0
+              ? match.activeRoutes
+              : route
+                ? [route]
+                : [],
+          )
+        : [],
+    [lazyComponents, localizedManifest, match.activeRoutes, route],
+  );
+  const nextLazyRouteKey = useMemo(
+    () => lazyTypes.slice().sort().join("|"),
+    [lazyTypes],
+  );
+  useRoutePrefetch(route?.prefetch);
   useEventBridge(
     wsManager as ReturnType<typeof snapshot.useWebSocketManager>,
     localizedManifest.realtime?.ws?.eventActions as
@@ -1293,6 +1352,39 @@ function ManifestRouter({
       document.title = nextTitle;
     }
   }, [activeLocale, localizedManifest, params, route, routeQuery, scopedCurrentPath]);
+
+  useEffect(() => {
+    if (!lazyComponents) {
+      setLazyRouteKey("");
+      return;
+    }
+
+    if (lazyTypes.length === 0) {
+      setLazyRouteKey(nextLazyRouteKey);
+      return;
+    }
+
+    let cancelled = false;
+    void ensureComponentsLoaded(lazyTypes)
+      .then(() => {
+        if (!cancelled) {
+          setLazyRouteKey(nextLazyRouteKey);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setRuntimeError(
+            error instanceof Error
+              ? error
+              : new Error("Lazy component registration failed"),
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lazyComponents, lazyTypes, nextLazyRouteKey]);
 
   useEffect(() => {
     setRuntimeError(null);
@@ -1564,6 +1656,7 @@ function ManifestRouter({
           api={api}
           snapshot={snapshot}
           runtimeClients={subAppClients}
+          lazyComponents={lazyComponents}
           basePath={subAppMatch.mountPath}
           parentTheme={localizedManifest.theme ?? parentTheme}
           parentPolicies={policyMap}
@@ -1592,6 +1685,14 @@ function ManifestRouter({
     );
   }
 
+  if (lazyComponents && lazyRouteKey !== nextLazyRouteKey) {
+    return (
+      <div data-snapshot-lazy-loading="" style={{ padding: "1rem" }}>
+        Loading route...
+      </div>
+    );
+  }
+
   if (runtimeError) {
     return <AppFallback manifest={localizedManifest} name="error" api={api} />;
   }
@@ -1616,6 +1717,7 @@ function ManifestRouter({
         value={{
           currentPath: scopedCurrentPath,
           currentRoute: route,
+          match,
           params,
           query: routeQuery,
           navigate,
@@ -1645,6 +1747,7 @@ function ManifestRouter({
       value={{
         currentPath: scopedCurrentPath,
         currentRoute: route,
+        match,
         params,
         query: routeQuery,
         navigate,
@@ -1660,7 +1763,7 @@ function ManifestRouter({
       >
         <AppShell
           manifest={localizedManifest}
-          route={route}
+          route={renderedRoute ?? route}
           currentPath={scopedCurrentPath}
           navigate={navigate}
           isPreloading={isPreloading}
@@ -1737,21 +1840,143 @@ function DarkModeManager({ themeMode }: { themeMode?: "light" | "dark" | "system
   return null;
 }
 
+function collectFallbackComponentTypes(
+  manifest: CompiledManifest,
+  types: Set<string>,
+): void {
+  (Object.keys(FALLBACK_COMPONENT_TYPES) as AppFallbackName[]).forEach((name) => {
+    const configured = manifest.app[name];
+
+    if (typeof configured === "string") {
+      const route = resolveRouteByTarget(manifest, configured);
+      if (route) {
+        collectComponentTypes(route.page, types);
+      }
+      return;
+    }
+
+    if (configured && typeof configured === "object") {
+      collectComponentTypes(configured, types);
+      return;
+    }
+
+    types.add(FALLBACK_COMPONENT_TYPES[name]);
+  });
+}
+
+function collectRouteRenderTypes(
+  manifest: CompiledManifest,
+  routes: CompiledRoute[],
+): string[] {
+  const types = new Set<string>();
+
+  routes.forEach((route) => {
+    collectComponentTypes(route, types);
+    collectComponentTypes(route.page, types);
+    collectComponentTypes(readRouteSlots(manifest, route.id), types);
+
+    readRouteLayouts(manifest, route.id).forEach((layout) => {
+      if (typeof layout === "string") {
+        return;
+      }
+
+      collectComponentTypes(layout.slots, types);
+      collectComponentTypes(layout.props, types);
+    });
+  });
+
+  collectComponentTypes(manifest.overlays, types);
+  collectFallbackComponentTypes(manifest, types);
+
+  return [...types];
+}
+
+interface ManifestCompileIssue {
+  path: string;
+  message: string;
+  expected?: string;
+  received?: string;
+}
+
+function toManifestCompileIssues(error: Error): ManifestCompileIssue[] {
+  if (error instanceof ZodError) {
+    return error.issues.map((issue) => ({
+      path: issue.path.join("."),
+      message: issue.message,
+      expected:
+        "expected" in issue && issue.expected !== undefined
+          ? String(issue.expected)
+          : undefined,
+      received:
+        "received" in issue && issue.received !== undefined
+          ? String(issue.received)
+          : undefined,
+    }));
+  }
+
+  return [
+    {
+      path: "",
+      message: error.message,
+    },
+  ];
+}
+
 /**
  * Render the manifest-driven application shell.
  *
  * @param props - Manifest runtime props
  * @returns A fully rendered manifest application
  */
-export function ManifestApp({ manifest, apiUrl }: ManifestAppProps) {
+export function ManifestApp({
+  manifest,
+  apiUrl,
+  lazyComponents = false,
+}: ManifestAppProps) {
   bootBuiltins();
-  const compiledManifest = useMemo(() => compileManifest(manifest), [manifest]);
+  const isDev =
+    typeof process !== "undefined" && process.env.NODE_ENV !== "production";
+  const compileState = useMemo(() => {
+    try {
+      return {
+        compiled: compileManifest(manifest),
+        error: null as Error | null,
+      };
+    } catch (error) {
+      const resolvedError =
+        error instanceof Error
+          ? error
+          : new Error("Manifest compilation failed");
+      if (!isDev) {
+        throw resolvedError;
+      }
+      return {
+        compiled: null,
+        error: resolvedError,
+      };
+    }
+  }, [isDev, manifest]);
+
+  if (compileState.error && !compileState.compiled) {
+    return isDev ? (
+      <ManifestErrorOverlay errors={toManifestCompileIssues(compileState.error)} />
+    ) : null;
+  }
+
+  const compiledManifest = compileState.compiled!;
   const runtimeApiUrl = compiledManifest.app.apiUrl ?? apiUrl;
   const tokenCss = useMemo(
     () => resolveTokens(compiledManifest.theme ?? {}),
     [compiledManifest.theme],
   );
-  const frameworkCss = useMemo(() => resolveFrameworkStyles(), []);
+  const frameworkCss = useMemo(
+    () =>
+      resolveFrameworkStyles({
+        respectReducedMotion:
+          compiledManifest.app.a11y?.respectReducedMotion !== false,
+      }),
+    [compiledManifest.app.a11y?.respectReducedMotion],
+  );
   const snapshot = useMemo(
     () =>
       createSnapshot({
@@ -1765,8 +1990,30 @@ export function ManifestApp({ manifest, apiUrl }: ManifestAppProps) {
     [compiledManifest, snapshot],
   );
 
+  useEffect(() => {
+    if (!isDev) {
+      return;
+    }
+
+    validateContrast(compiledManifest.theme);
+  }, [compiledManifest.theme, isDev]);
+
+  useLayoutEffect(() => {
+    resetLazyRegistry();
+
+    if (lazyComponents) {
+      resetRegisteredComponents();
+      registerLegacyStructuralComponents();
+      return;
+    }
+
+    registerBuiltInComponents(true);
+    registerLegacyStructuralComponents();
+  }, [lazyComponents, compiledManifest]);
+
   return (
     <snapshot.QueryProvider>
+      <SkipLinks links={compiledManifest.app.a11y?.skipLinks} />
       <div aria-hidden="true" hidden data-snapshot-token-styles="">
         <style
           id="snapshot-tokens"
@@ -1810,8 +2057,10 @@ export function ManifestApp({ manifest, apiUrl }: ManifestAppProps) {
                 api={snapshot.api}
                 snapshot={snapshot}
                 runtimeClients={runtimeClients}
+                lazyComponents={lazyComponents}
               />
               <ToastContainer />
+              {isDev ? <ComponentInspector /> : null}
             </SnapshotDragDropProvider>
           </AppContextProvider>
         </ManifestRuntimeProvider>

@@ -1298,6 +1298,12 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
               value: {
                 currentPath: currentRoute.path,
                 currentRoute,
+                match: {
+                  route: currentRoute,
+                  params: {},
+                  parents: [],
+                  activeRoutes: [currentRoute],
+                },
                 params: {},
                 query: {},
                 navigate: () => {},

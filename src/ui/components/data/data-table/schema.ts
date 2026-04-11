@@ -3,12 +3,14 @@ import { actionSchema } from "../../../actions/types";
 import {
   clientFilterSchema,
   clientSortSchema,
+  emptyStateConfigSchema,
   liveConfigSchema,
+  loadingConfigSchema,
   urlSyncConfigSchema,
   baseComponentConfigSchema,
-  dataSourceSchema,
   fromRefSchema,
 } from "../../../manifest/schema";
+import { dataSourceSchema } from "../../../manifest/resources";
 import { pollConfigSchema } from "../../_base/types";
 import { contextMenuItemSchema } from "../../overlay/context-menu/schema";
 
@@ -210,8 +212,24 @@ export const dataTableConfigSchema = baseComponentConfigSchema
     clientSort: z.array(clientSortSchema).optional(),
     /** Live refresh configuration driven by realtime events. */
     live: liveConfigSchema.optional(),
+    /** Automatic loading placeholder config. */
+    loading: loadingConfigSchema.optional(),
+    /** Rich empty state config. */
+    empty: emptyStateConfigSchema.optional(),
     /** Message shown when there is no data. */
     emptyMessage: z.string().optional(),
+    /** Virtualized rendering for large datasets. */
+    virtualize: z
+      .union([
+        z.boolean(),
+        z
+          .object({
+            itemHeight: z.number().positive().default(48),
+            overscan: z.number().int().nonnegative().default(5),
+          })
+          .strict(),
+      ])
+      .optional(),
     /** Enable expandable row detail. */
     expandable: z.boolean().optional(),
     /** Child components rendered in the expanded row area. Row data is available via from-ref. */

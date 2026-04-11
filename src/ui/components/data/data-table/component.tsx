@@ -1,10 +1,15 @@
 'use client';
 
 import React, { useMemo, useState, useCallback, useEffect, useId } from "react";
+import { useAtomValue } from "jotai/react";
 import { useDataTable } from "./hook";
 import { useActionExecutor } from "../../../actions/executor";
+import { AutoEmptyState } from "../../_base/auto-empty-state";
+import type { AutoEmptyStateConfig } from "../../_base/auto-empty-state";
+import { AutoSkeleton } from "../../_base/auto-skeleton";
 import { ContextMenuPortal } from "../../_base/context-menu-portal";
 import { useSharedDragDrop } from "../../_base/drag-drop-provider";
+import { useLiveData } from "../../_base/use-live-data";
 import { useReorderable } from "../../_base/use-reorderable";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import {
@@ -15,8 +20,10 @@ import {
   getSortableStyle,
 } from "../../../hooks/use-drag-drop";
 import { useInfiniteScroll } from "../../../hooks/use-infinite-scroll";
+import { useVirtualList } from "../../../hooks/use-virtual-list";
 import type { ComponentConfig } from "../../../manifest/types";
 import type { DataTableConfig, ResolvedColumn } from "./types";
+import { wsManagerAtom } from "../../../../ws/atom";
 
 // ── Formatting helpers ──────────────────────────────────────────────────────
 
@@ -308,6 +315,30 @@ function getDensityPadding(
   }
 }
 
+function toAutoEmptyStateConfig(
+  empty: DataTableConfig["empty"],
+): AutoEmptyStateConfig | null {
+  if (!empty) {
+    return null;
+  }
+
+  return {
+    icon: empty.icon,
+    title: empty.title,
+    description: empty.description,
+    ...(empty.action?.action
+      ? {
+          action: {
+            label: empty.action.label,
+            action: empty.action.action,
+            icon: empty.action.icon,
+            variant: empty.action.variant,
+          },
+        }
+      : {}),
+  };
+}
+
 // ── Loading skeleton ────────────────────────────────────────────────────────
 
 function SkeletonRows({
@@ -454,6 +485,7 @@ function DroppableTableBody({
 export function DataTable({ config }: { config: DataTableConfig }) {
   const table = useDataTable(config);
   const execute = useActionExecutor();
+  const wsManager = useAtomValue(wsManagerAtom);
   const sharedDragDrop = useSharedDragDrop();
   const generatedId = useId();
   const density = config.density ?? "default";
@@ -508,6 +540,41 @@ export function DataTable({ config }: { config: DataTableConfig }) {
   });
   // Determine if we need an actions column
   const hasActions = (config.actions?.length ?? 0) > 0;
+  const virtualConfig = useMemo(
+    () =>
+      typeof config.virtualize === "object"
+        ? config.virtualize
+        : config.virtualize
+          ? { itemHeight: 48, overscan: 5 }
+          : null,
+    [config.virtualize],
+  );
+  const virtualList = useVirtualList({
+    totalCount: renderedRows.length,
+    itemHeight: virtualConfig?.itemHeight ?? 48,
+    overscan: virtualConfig?.overscan ?? 5,
+  });
+  const liveConfig = useMemo(
+    () =>
+      config.live === true
+        ? { event: "*", indicator: false, debounce: undefined }
+        : config.live
+          ? {
+              event: config.live.event,
+              indicator: config.live.indicator,
+              debounce: config.live.debounce,
+            }
+          : null,
+    [config.live],
+  );
+  const { hasNewData, refresh } = useLiveData({
+    event: liveConfig?.event ?? "*",
+    onRefresh: table.refetch,
+    debounce: liveConfig?.debounce,
+    indicator: liveConfig?.indicator,
+    wsManager,
+    enabled: liveConfig !== null,
+  });
 
   // Expandable row state
   const [expandedRows, setExpandedRows] = useState<Set<string | number>>(
@@ -540,6 +607,10 @@ export function DataTable({ config }: { config: DataTableConfig }) {
     }
     return "Search...";
   }, [config.searchable]);
+  const emptyStateConfig = useMemo(
+    () => toAutoEmptyStateConfig(config.empty),
+    [config.empty],
+  );
 
   // Bulk actions toolbar
   const showBulkActions =
@@ -761,6 +832,26 @@ export function DataTable({ config }: { config: DataTableConfig }) {
       </React.Fragment>
     );
   };
+  const visibleRowEntries = virtualConfig
+    ? virtualList.visibleIndices.map((rowIndex) => ({
+        row: renderedRows[rowIndex] as Record<string, unknown>,
+        rowIndex,
+        sortableId: rowIds[rowIndex],
+      }))
+    : renderedRows.map((row, rowIndex) => ({
+        row: row as Record<string, unknown>,
+        rowIndex,
+        sortableId: rowIds[rowIndex],
+      }));
+  const topSpacerHeight = virtualConfig ? virtualList.offsetTop : 0;
+  const bottomSpacerHeight = virtualConfig
+    ? Math.max(
+        0,
+        virtualList.totalHeight -
+          topSpacerHeight -
+          visibleRowEntries.length * (virtualConfig.itemHeight ?? 48),
+      )
+    : 0;
 
   return (
     <div
@@ -786,6 +877,26 @@ export function DataTable({ config }: { config: DataTableConfig }) {
 [data-snapshot-component="data-table"] [data-bulk-action]:focus { outline: none; }
 [data-snapshot-component="data-table"] [data-bulk-action]:focus-visible { outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb)); outline-offset: var(--sn-ring-offset, 2px); }
       `}</style>
+      {hasNewData ? (
+        <div
+          data-table-live-indicator=""
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "0.75rem",
+            marginBottom: "0.75rem",
+            padding: "0.75rem 1rem",
+            borderRadius: "var(--sn-radius-md, 0.5rem)",
+            backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
+          }}
+        >
+          <span>New data available</span>
+          <button type="button" onClick={refresh}>
+            Refresh
+          </button>
+        </div>
+      ) : null}
       {/* Search bar */}
       {config.searchable && (
         <div
@@ -851,7 +962,14 @@ export function DataTable({ config }: { config: DataTableConfig }) {
       )}
 
       {/* Table */}
-      <div style={{ overflowX: "auto" }}>
+      <div
+        ref={virtualConfig ? virtualList.containerRef : undefined}
+        style={{
+          overflowX: "auto",
+          overflowY: virtualConfig ? "auto" : undefined,
+          maxHeight: virtualConfig ? `${(virtualConfig.itemHeight ?? 48) * 8}px` : undefined,
+        }}
+      >
         <table
           style={{
             width: "100%",
@@ -932,9 +1050,16 @@ export function DataTable({ config }: { config: DataTableConfig }) {
 
           <DroppableTableBody containerId={containerId}>
             {/* Loading state */}
-            {table.isLoading && (
-              <SkeletonRows columnCount={totalColumns} rowCount={5} />
-            )}
+            {table.isLoading &&
+              (config.loading && !config.loading.disabled ? (
+                <tr>
+                  <td colSpan={totalColumns} style={{ padding: cellPadding }}>
+                    <AutoSkeleton componentType="data-table" config={config.loading} />
+                  </td>
+                </tr>
+              ) : (
+                <SkeletonRows columnCount={totalColumns} rowCount={5} />
+              ))}
 
             {/* Error state */}
             {table.error && (
@@ -957,9 +1082,13 @@ export function DataTable({ config }: { config: DataTableConfig }) {
                   colSpan={totalColumns}
                   style={{ padding: cellPadding, textAlign: "center" }}
                 >
-                  <div data-table-empty>
-                    {config.emptyMessage ?? "No data available"}
-                  </div>
+                  {emptyStateConfig ? (
+                    <AutoEmptyState config={emptyStateConfig} />
+                  ) : (
+                    <div data-table-empty>
+                      {config.emptyMessage ?? "No data available"}
+                    </div>
+                  )}
                 </td>
               </tr>
             )}
@@ -972,19 +1101,38 @@ export function DataTable({ config }: { config: DataTableConfig }) {
                   items={rowIds}
                   strategy={verticalListSortingStrategy}
                 >
-                  {renderedRows.map((row, rowIndex) =>
-                    renderRow(
-                      row as Record<string, unknown>,
-                      rowIndex,
-                      true,
-                      rowIds[rowIndex],
-                    ),
-                  )}
+                  <>
+                    {topSpacerHeight > 0 ? (
+                      <tr aria-hidden="true">
+                        <td colSpan={totalColumns} style={{ height: `${topSpacerHeight}px`, padding: 0 }} />
+                      </tr>
+                    ) : null}
+                    {visibleRowEntries.map(({ row, rowIndex, sortableId }) =>
+                      renderRow(row, rowIndex, true, sortableId),
+                    )}
+                    {bottomSpacerHeight > 0 ? (
+                      <tr aria-hidden="true">
+                        <td colSpan={totalColumns} style={{ height: `${bottomSpacerHeight}px`, padding: 0 }} />
+                      </tr>
+                    ) : null}
+                  </>
                 </SortableContext>
               ) : (
-                renderedRows.map((row, rowIndex) =>
-                  renderRow(row as Record<string, unknown>, rowIndex, false),
-                )
+                <>
+                  {topSpacerHeight > 0 ? (
+                    <tr aria-hidden="true">
+                      <td colSpan={totalColumns} style={{ height: `${topSpacerHeight}px`, padding: 0 }} />
+                    </tr>
+                  ) : null}
+                  {visibleRowEntries.map(({ row, rowIndex }) =>
+                    renderRow(row, rowIndex, false),
+                  )}
+                  {bottomSpacerHeight > 0 ? (
+                    <tr aria-hidden="true">
+                      <td colSpan={totalColumns} style={{ height: `${bottomSpacerHeight}px`, padding: 0 }} />
+                    </tr>
+                  ) : null}
+                </>
               ))}
           </DroppableTableBody>
         </table>

@@ -37,6 +37,12 @@ export interface SnapshotAppOptions {
    * Falls back to `import.meta.env.VITE_API_URL` at runtime if omitted.
    */
   apiUrl?: string;
+  /**
+   * Enable route-aware lazy component loading in ManifestApp.
+   * This keeps the virtual entry aligned with the manifest runtime when
+   * code-splitting is enabled.
+   */
+  lazyComponents?: boolean;
 }
 
 function normalizeManifestUrl(manifestFile: string): string {
@@ -200,12 +206,35 @@ if (!root) {
   throw new Error("Snapshot app shell is missing #root");
 }
 
-createRoot(root).render(
-  createElement(ManifestApp, {
-    manifest,
-    apiUrl,
-  }),
-);
+let snapshotRoot;
+
+function render(nextManifest) {
+  if (!snapshotRoot) {
+    snapshotRoot = createRoot(root);
+  }
+
+  snapshotRoot.render(
+    createElement(ManifestApp, {
+      manifest: nextManifest,
+      apiUrl,
+      lazyComponents: ${opts.lazyComponents === true ? "true" : "false"},
+    }),
+  );
+}
+
+render(manifest);
+
+if (import.meta.hot) {
+  import.meta.hot.on("snapshot:manifest-update", async (data) => {
+    try {
+      const mod = await import(/* @vite-ignore */ data.file + "?t=" + data.timestamp);
+      render(mod.default);
+    } catch (error) {
+      console.error("[snapshot] manifest hot reload failed", error);
+      import.meta.hot.invalidate();
+    }
+  });
+}
 `;
     },
 
@@ -234,6 +263,27 @@ createRoot(root).render(
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.end(html);
       });
+    },
+
+    handleHotUpdate(context) {
+      const manifestPath = path.resolve(
+        context.server.config.root,
+        manifestFile,
+      );
+      if (path.resolve(context.file) !== manifestPath) {
+        return;
+      }
+
+      context.server.ws.send({
+        type: "custom",
+        event: "snapshot:manifest-update",
+        data: {
+          file: manifestUrl,
+          timestamp: Date.now(),
+        },
+      });
+
+      return [];
     },
 
     generateBundle(_options, bundle) {

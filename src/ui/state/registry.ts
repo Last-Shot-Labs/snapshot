@@ -1,7 +1,6 @@
 import { atom, createStore } from "jotai";
-import type { PrimitiveAtom } from "jotai";
 import { evaluateExpression } from "../expressions/parser";
-import type { AtomRegistry, JotaiStore } from "./types";
+import type { AtomRegistry, JotaiStore, StateAtom } from "./types";
 
 export function extractStateDependencies(expression: string): string[] {
   const refs = new Set<string>();
@@ -24,19 +23,22 @@ function toExpressionTemplate(expression: string): string {
 export function createComputedAtom(
   computeExpr: string,
   registry: AtomRegistry,
-): PrimitiveAtom<unknown> {
+): StateAtom {
   const dependencies = extractStateDependencies(computeExpr);
   const expression = toExpressionTemplate(computeExpr);
-  const computedAtom = atom((get) => {
-    const context: Record<string, unknown> = {};
-    for (const dependency of dependencies) {
-      const dependencyAtom = registry.get(dependency);
-      if (dependencyAtom) {
-        context[dependency] = get(dependencyAtom);
+  const computedAtom = atom(
+    (get) => {
+      const context: Record<string, unknown> = {};
+      for (const dependency of dependencies) {
+        const dependencyAtom = registry.get(dependency);
+        if (dependencyAtom) {
+          context[dependency] = get(dependencyAtom);
+        }
       }
-    }
-    return evaluateExpression(expression, context);
-  });
+      return evaluateExpression(expression, context);
+    },
+    () => {},
+  );
   computedAtom.debugLabel = `snapshot:computed:${computeExpr}`;
   return computedAtom;
 }
@@ -45,7 +47,7 @@ export function createComputedAtom(
  * Jotai-backed registry for named state atoms.
  */
 export class AtomRegistryImpl implements AtomRegistry {
-  private readonly atoms = new Map<string, PrimitiveAtom<unknown>>();
+  private readonly atoms = new Map<string, StateAtom>();
   readonly store: JotaiStore;
 
   constructor(store?: JotaiStore) {
@@ -54,8 +56,8 @@ export class AtomRegistryImpl implements AtomRegistry {
 
   register(
     id: string,
-    atomOverride?: PrimitiveAtom<unknown>,
-  ): PrimitiveAtom<unknown> {
+    atomOverride?: StateAtom,
+  ): StateAtom {
     const existing = this.atoms.get(id);
     if (existing && !atomOverride) return existing;
     if (existing && atomOverride) {
@@ -70,7 +72,7 @@ export class AtomRegistryImpl implements AtomRegistry {
     return created;
   }
 
-  get(id: string): PrimitiveAtom<unknown> | undefined {
+  get(id: string): StateAtom | undefined {
     return this.atoms.get(id);
   }
 

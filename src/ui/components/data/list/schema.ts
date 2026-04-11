@@ -2,10 +2,12 @@ import { z } from "zod";
 import {
   clientFilterSchema,
   clientSortSchema,
+  emptyStateConfigSchema,
   liveConfigSchema,
+  loadingConfigSchema,
   baseComponentConfigSchema,
-  dataSourceSchema,
 } from "../../../manifest/schema";
+import { dataSourceSchema } from "../../../manifest/resources";
 import { pollConfigSchema } from "../../_base/types";
 import { actionSchema } from "../../../actions/types";
 import { contextMenuItemSchema } from "../../overlay/context-menu/schema";
@@ -97,6 +99,22 @@ export const listConfigSchema = baseComponentConfigSchema.extend({
   clientSort: z.array(clientSortSchema).optional(),
   /** Live refresh configuration driven by realtime events. */
   live: liveConfigSchema.optional(),
+  /** Automatic loading placeholder config. */
+  loading: loadingConfigSchema.optional(),
+  /** Rich empty state config. */
+  empty: emptyStateConfigSchema.optional(),
+  /** Virtualized rendering for large datasets. */
+  virtualize: z
+    .union([
+      z.boolean(),
+      z
+        .object({
+          itemHeight: z.number().positive().default(48),
+          overscan: z.number().int().nonnegative().default(5),
+        })
+        .strict(),
+    ])
+    .optional(),
   /** Message shown when no items are available. */
   emptyMessage: z.string().optional(),
   /** Custom error message. Default: "Failed to load items". */

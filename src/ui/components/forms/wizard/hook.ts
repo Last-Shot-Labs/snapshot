@@ -1,5 +1,7 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { usePublish } from "../../../context/hooks";
+import { evaluateExpression } from "../../../expressions/parser";
+import { useEvaluateExpression } from "../../../expressions/use-expression";
 import {
   useActionExecutor,
   SnapshotApiContext,
@@ -8,117 +10,119 @@ import {
   buildRequestUrl,
   resolveEndpointTarget,
 } from "../../../manifest/resources";
-import { useManifestRuntime } from "../../../manifest/runtime";
+import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
 import type { FieldConfig } from "../auto-form/types";
 import type { WizardConfig, UseWizardResult } from "./types";
 
 const STEP_ANIMATION_DURATION = 200;
 
-// ── Validation helpers ────────────────────────────────────────────────────────
-
 function validateField(field: FieldConfig, value: unknown): string | undefined {
-  if (field.required && (value == null || value === "" || value === false)) {
+  const validation = field.validate ?? field.validation;
+  const required = typeof field.required === "boolean" ? field.required : false;
+
+  if (required && (value == null || value === "" || value === false)) {
     return `${field.label ?? field.name} is required`;
   }
-  if (field.validation) {
-    const v = field.validation;
+  if (validation) {
     const str = typeof value === "string" ? value : String(value ?? "");
-    if (v.minLength !== undefined && str.length < v.minLength) {
-      return v.message ?? `Minimum length is ${v.minLength}`;
+    if (validation.minLength !== undefined && str.length < validation.minLength) {
+      return validation.message ?? `Minimum length is ${validation.minLength}`;
     }
-    if (v.maxLength !== undefined && str.length > v.maxLength) {
-      return v.message ?? `Maximum length is ${v.maxLength}`;
+    if (validation.maxLength !== undefined && str.length > validation.maxLength) {
+      return validation.message ?? `Maximum length is ${validation.maxLength}`;
     }
-    if (v.min !== undefined && typeof value === "number" && value < v.min) {
-      return v.message ?? `Minimum value is ${v.min}`;
+    if (validation.min !== undefined && typeof value === "number" && value < validation.min) {
+      return validation.message ?? `Minimum value is ${validation.min}`;
     }
-    if (v.max !== undefined && typeof value === "number" && value > v.max) {
-      return v.message ?? `Maximum value is ${v.max}`;
+    if (validation.max !== undefined && typeof value === "number" && value > validation.max) {
+      return validation.message ?? `Maximum value is ${validation.max}`;
     }
-    if (v.pattern !== undefined) {
+    if (validation.equals !== undefined && str !== validation.equals) {
+      return validation.message ?? `Value must equal ${validation.equals}`;
+    }
+    if (validation.pattern !== undefined) {
       try {
         const patternValue =
-          typeof v.pattern === "string" ? v.pattern : v.pattern.value;
+          typeof validation.pattern === "string"
+            ? validation.pattern
+            : validation.pattern.value;
         if (!new RegExp(patternValue).test(str)) {
-          return v.message ?? `Invalid format`;
+          return validation.message ?? "Invalid format";
         }
       } catch {
-        // ignore bad regex
+        return validation.message ?? "Invalid format";
       }
     }
   }
   return undefined;
 }
 
-function validateStep(
-  fields: FieldConfig[],
-  values: Record<string, unknown>,
-): Record<string, string | undefined> {
-  const errors: Record<string, string | undefined> = {};
-  for (const field of fields) {
-    const err = validateField(field, values[field.name]);
-    if (err) errors[field.name] = err;
-  }
-  return errors;
-}
-
 function hasErrors(errors: Record<string, string | undefined>): boolean {
-  return Object.values(errors).some((e) => e != null);
+  return Object.values(errors).some((error) => error != null);
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
-
-/**
- * Headless hook for managing wizard (multi-step form) state.
- *
- * Provides step navigation, per-step validation, accumulated data collection,
- * and final submission. Publishes accumulated data to the page context when
- * the wizard's `id` is set.
- *
- * Step transitions include an animation state flag (`isAnimating`) that can
- * be used to drive CSS transitions.
- *
- * @param config - The wizard configuration (from the Zod schema)
- * @returns All state and handlers needed to render a wizard
- *
- * @example
- * ```tsx
- * const wizard = useWizard(config)
- *
- * // wizard.currentStep — 0-based index
- * // wizard.stepValues  — current step field values
- * // wizard.nextStep()  — validates then advances
- * // wizard.prevStep()  — goes back without validation
- * // wizard.isComplete  — true after final submission
- * ```
- */
 export function useWizard(config: WizardConfig): UseWizardResult {
   const api = useContext(SnapshotApiContext);
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const runtime = useManifestRuntime();
-
+  const routeRuntime = useRouteRuntime();
   const [currentStep, setCurrentStep] = useState(0);
-  const [stepValues, setStepValues] = useState<Record<string, unknown>>({});
-  const [stepErrors, setStepErrors] = useState<
-    Record<string, string | undefined>
+  const [stepData, setStepData] = useState<Record<number, Record<string, unknown>>>({});
+  const [errorsByStep, setErrorsByStep] = useState<
+    Record<number, Record<string, string | undefined>>
   >({});
-  const [stepTouched, setStepTouched] = useState<Record<string, boolean>>({});
-  // Accumulated data across all steps
-  const [accumulatedData, setAccumulatedData] = useState<
-    Record<string, unknown>
-  >({});
+  const [touchedByStep, setTouchedByStep] = useState<Record<number, Record<string, boolean>>>(
+    {},
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<Error | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previousStepRef = useRef<number | null>(null);
 
   const totalSteps = config.steps.length;
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === totalSteps - 1;
+  const currentStepConfig = config.steps[currentStep];
+  const skipExpression =
+    currentStepConfig?.skip && typeof currentStepConfig.skip !== "boolean"
+      ? currentStepConfig.skip.expr
+      : undefined;
+  const skipExpressionResult = useEvaluateExpression(skipExpression);
 
-  // Transition to a new step with animation
+  const accumulatedData = useMemo(
+    () =>
+      Object.keys(stepData)
+        .map((key) => Number(key))
+        .sort((left, right) => left - right)
+        .reduce<Record<string, unknown>>(
+          (result, index) => ({ ...result, ...(stepData[index] ?? {}) }),
+          {},
+        ),
+    [stepData],
+  );
+  const stepValues = stepData[currentStep] ?? {};
+  const stepErrors = errorsByStep[currentStep] ?? {};
+  const stepTouched = touchedByStep[currentStep] ?? {};
+
+  const canSkip = useMemo(() => {
+    if (isLastStep) {
+      return false;
+    }
+    if (typeof currentStepConfig?.skip === "boolean") {
+      return currentStepConfig.skip;
+    }
+    if (currentStepConfig?.skip) {
+      return skipExpressionResult;
+    }
+    return (
+      config.allowSkip &&
+      Boolean(currentStepConfig?.fields.every((field) => !field.required))
+    );
+  }, [config.allowSkip, currentStepConfig, isLastStep, skipExpressionResult]);
+
   const transitionTo = useCallback((nextIndex: number) => {
     if (transitionTimerRef.current) {
       clearTimeout(transitionTimerRef.current);
@@ -126,9 +130,6 @@ export function useWizard(config: WizardConfig): UseWizardResult {
     setIsAnimating(true);
     transitionTimerRef.current = setTimeout(() => {
       setCurrentStep(nextIndex);
-      setStepValues({});
-      setStepErrors({});
-      setStepTouched({});
       setIsAnimating(false);
       transitionTimerRef.current = null;
     }, STEP_ANIMATION_DURATION);
@@ -142,107 +143,253 @@ export function useWizard(config: WizardConfig): UseWizardResult {
     };
   }, []);
 
+  useEffect(() => {
+    if (!publish) {
+      return;
+    }
+    publish({
+      ...accumulatedData,
+      ...stepValues,
+      _step: currentStep,
+      _complete: isComplete,
+    });
+  }, [accumulatedData, currentStep, isComplete, publish, stepValues]);
+
+  useEffect(() => {
+    if (!currentStepConfig?.onEnter) {
+      previousStepRef.current = currentStep;
+      return;
+    }
+
+    const previousStep = previousStepRef.current;
+    previousStepRef.current = currentStep;
+    if (previousStep === currentStep) {
+      return;
+    }
+
+    void execute(currentStepConfig.onEnter, {
+      step: currentStep,
+      values: { ...accumulatedData, ...stepValues },
+    });
+  }, [accumulatedData, currentStep, currentStepConfig?.onEnter, execute, stepValues]);
+
   const setStepValue = useCallback((name: string, value: unknown) => {
-    setStepValues((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user changes the value
-    setStepErrors((prev) => ({ ...prev, [name]: undefined }));
-  }, []);
+    setStepData((currentData) => ({
+      ...currentData,
+      [currentStep]: {
+        ...(currentData[currentStep] ?? {}),
+        [name]: value,
+      },
+    }));
+    setErrorsByStep((currentErrors) => ({
+      ...currentErrors,
+      [currentStep]: {
+        ...(currentErrors[currentStep] ?? {}),
+        [name]: undefined,
+      },
+    }));
+  }, [currentStep]);
 
   const touchField = useCallback((name: string) => {
-    setStepTouched((prev) => ({ ...prev, [name]: true }));
-  }, []);
+    setTouchedByStep((currentTouched) => ({
+      ...currentTouched,
+      [currentStep]: {
+        ...(currentTouched[currentStep] ?? {}),
+        [name]: true,
+      },
+    }));
+  }, [currentStep]);
 
-  const nextStep = useCallback((): boolean => {
-    const step = config.steps[currentStep];
-    if (!step) return false;
-
-    // Validate current step
-    const errors = validateStep(step.fields, stepValues);
-    if (hasErrors(errors)) {
-      setStepErrors(errors);
-      // Touch all fields to show errors
-      const allTouched: Record<string, boolean> = {};
-      for (const field of step.fields) {
-        allTouched[field.name] = true;
+  const validateCurrentStep = useCallback(() => {
+    const errors: Record<string, string | undefined> = {};
+    const fields = currentStepConfig?.fields ?? [];
+    for (const field of fields) {
+      const error = validateField(field, stepValues[field.name]);
+      if (error) {
+        errors[field.name] = error;
       }
-      setStepTouched(allTouched);
+    }
+
+    for (const rule of currentStepConfig?.validate ?? []) {
+      const fieldValue = stepValues[rule.field];
+      const pseudoField = {
+        name: rule.field,
+        type: "text",
+        validate: rule.rule,
+      } as unknown as FieldConfig;
+      const error = validateField(pseudoField, fieldValue);
+      if (error) {
+        errors[rule.field] = error;
+      }
+    }
+
+    setErrorsByStep((currentErrors) => ({
+      ...currentErrors,
+      [currentStep]: errors,
+    }));
+    setTouchedByStep((currentTouched) => ({
+      ...currentTouched,
+      [currentStep]: Object.fromEntries(
+        fields.map((field) => [field.name, true]),
+      ) as Record<string, boolean>,
+    }));
+    return errors;
+  }, [currentStep, currentStepConfig, stepValues]);
+
+  const runStepLeave = useCallback(async () => {
+    if (!currentStepConfig?.onLeave) {
+      return;
+    }
+    await execute(currentStepConfig.onLeave, {
+      step: currentStep,
+      values: { ...accumulatedData, ...stepValues },
+    });
+  }, [accumulatedData, currentStep, currentStepConfig?.onLeave, execute, stepValues]);
+
+  const runAsyncValidation = useCallback(
+    async (values: Record<string, unknown>): Promise<boolean> => {
+      if (!currentStepConfig?.asyncValidate || !api) {
+        return true;
+      }
+
+      const request = resolveEndpointTarget(
+        currentStepConfig.asyncValidate.endpoint,
+        runtime?.resources,
+        undefined,
+        "POST",
+      );
+      const url = buildRequestUrl(request.endpoint, request.params);
+      const payload = {
+        ...values,
+        ...(currentStepConfig.asyncValidate.body ?? {}),
+      };
+      const result = await api.post(url, payload);
+      const record = (result ?? {}) as Record<string, unknown>;
+      if (record.valid === false) {
+        const asyncErrors =
+          record.errors && typeof record.errors === "object"
+            ? (record.errors as Record<string, string>)
+            : {};
+        setErrorsByStep((currentErrors) => ({
+          ...currentErrors,
+          [currentStep]: {
+            ...(currentErrors[currentStep] ?? {}),
+            ...asyncErrors,
+          },
+        }));
+        setTouchedByStep((currentTouched) => ({
+          ...currentTouched,
+          [currentStep]: {
+            ...(currentTouched[currentStep] ?? {}),
+            ...Object.fromEntries(Object.keys(asyncErrors).map((key) => [key, true])),
+          },
+        }));
+        return false;
+      }
+      return true;
+    },
+    [api, currentStep, currentStepConfig?.asyncValidate, runtime?.resources],
+  );
+
+  const nextStep = useCallback(async (): Promise<boolean> => {
+    if (!currentStepConfig) {
       return false;
     }
 
-    // Merge current step values into accumulated data
-    const newAccumulated = { ...accumulatedData, ...stepValues };
-    setAccumulatedData(newAccumulated);
+    await runStepLeave();
+    const errors = validateCurrentStep();
+    if (hasErrors(errors)) {
+      return false;
+    }
 
-    if (publish) {
-      publish({ ...newAccumulated, _step: currentStep });
+    const nextValues = {
+      ...accumulatedData,
+      ...stepValues,
+    };
+    const asyncValid = await runAsyncValidation(nextValues);
+    if (!asyncValid) {
+      return false;
     }
 
     if (isLastStep) {
-      // Submit
-      void (async () => {
-        setIsSubmitting(true);
-        setSubmitError(null);
-        try {
-          if (config.submitEndpoint && api) {
-            const request = resolveEndpointTarget(
-              config.submitEndpoint,
-              runtime?.resources,
-              undefined,
-              "POST",
-            );
-            const url = buildRequestUrl(request.endpoint, request.params);
-            switch (request.method) {
-              case "PUT":
-                await api.put(url, newAccumulated);
-                break;
-              case "PATCH":
-                await api.patch(url, newAccumulated);
-                break;
-              default:
-                await api.post(url, newAccumulated);
-            }
-          }
-          if (config.onComplete) {
-            await execute(config.onComplete, { data: newAccumulated });
-          }
-          setIsComplete(true);
-          if (publish) {
-            publish({ ...newAccumulated, _complete: true });
-          }
-        } catch (err) {
-          setSubmitError(
-            err instanceof Error ? err : new Error("Submission failed"),
+      setIsSubmitting(true);
+      setSubmitError(null);
+      try {
+        if (config.submitEndpoint && api) {
+          const request = resolveEndpointTarget(
+            config.submitEndpoint,
+            runtime?.resources,
+            undefined,
+            "POST",
           );
-        } finally {
-          setIsSubmitting(false);
+          const url = buildRequestUrl(request.endpoint, request.params);
+          switch (request.method) {
+            case "PUT":
+              await api.put(url, nextValues);
+              break;
+            case "PATCH":
+              await api.patch(url, nextValues);
+              break;
+            default:
+              await api.post(url, nextValues);
+              break;
+          }
         }
-      })();
-      return true;
+        if (config.onComplete) {
+          await execute(config.onComplete, {
+            data: nextValues,
+            route: {
+              id: routeRuntime?.currentRoute?.id,
+              path: routeRuntime?.currentPath,
+            },
+          });
+        }
+        setIsComplete(true);
+        return true;
+      } catch (error) {
+        setSubmitError(error instanceof Error ? error : new Error("Submission failed"));
+        return false;
+      } finally {
+        setIsSubmitting(false);
+      }
     }
 
     transitionTo(currentStep + 1);
     return true;
   }, [
-    config,
-    currentStep,
-    stepValues,
     accumulatedData,
-    isLastStep,
-    publish,
     api,
+    config.onComplete,
+    config.submitEndpoint,
+    currentStep,
+    currentStepConfig,
     execute,
+    isLastStep,
+    routeRuntime?.currentPath,
+    routeRuntime?.currentRoute?.id,
+    runAsyncValidation,
+    runStepLeave,
+    runtime?.resources,
+    stepValues,
     transitionTo,
+    validateCurrentStep,
   ]);
 
-  const prevStep = useCallback(() => {
-    if (isFirstStep) return;
+  const prevStep = useCallback(async () => {
+    if (isFirstStep) {
+      return;
+    }
+    await runStepLeave();
     transitionTo(currentStep - 1);
-  }, [currentStep, isFirstStep, transitionTo]);
+  }, [currentStep, isFirstStep, runStepLeave, transitionTo]);
 
-  const skipStep = useCallback(() => {
-    if (!config.allowSkip || isLastStep) return;
+  const skipStep = useCallback(async () => {
+    if (!canSkip) {
+      return;
+    }
+    await runStepLeave();
     transitionTo(currentStep + 1);
-  }, [config.allowSkip, currentStep, isLastStep, transitionTo]);
+  }, [canSkip, currentStep, runStepLeave, transitionTo]);
 
   const resetWizard = useCallback(() => {
     if (transitionTimerRef.current) {
@@ -250,10 +397,9 @@ export function useWizard(config: WizardConfig): UseWizardResult {
       transitionTimerRef.current = null;
     }
     setCurrentStep(0);
-    setStepValues({});
-    setStepErrors({});
-    setStepTouched({});
-    setAccumulatedData({});
+    setStepData({});
+    setErrorsByStep({});
+    setTouchedByStep({});
     setIsSubmitting(false);
     setSubmitError(null);
     setIsComplete(false);
@@ -274,6 +420,7 @@ export function useWizard(config: WizardConfig): UseWizardResult {
     stepTouched,
     setStepValue,
     touchField,
+    canSkip,
     nextStep,
     prevStep,
     skipStep,

@@ -384,29 +384,12 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
     return undefined;
   }, [config.searchable]);
 
-  const resolvedClientFilters = useResolveFrom(
-    config.clientFilter ?? [],
-  ) as Array<{
-    field: string;
-    operator:
-      | "equals"
-      | "contains"
-      | "startsWith"
-      | "endsWith"
-      | "gt"
-      | "lt"
-      | "gte"
-      | "lte"
-      | "in"
-      | "notEquals";
-    value: unknown;
-  }>;
-  const resolvedClientSort = useResolveFrom(
-    config.clientSort ?? [],
-  ) as Array<{
-    field: string;
-    direction: "asc" | "desc";
-  }>;
+  const resolvedClientConfig = useResolveFrom({
+    filters: config.clientFilter ?? [],
+    sort: config.clientSort ?? [],
+  });
+  const resolvedClientFilters = resolvedClientConfig.filters;
+  const resolvedClientSort = resolvedClientConfig.sort;
 
   // Filter + search + sort pipeline
   const processedRows = useMemo(() => {

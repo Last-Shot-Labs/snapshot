@@ -981,7 +981,9 @@ export function resolveTokens(config: ThemeConfig = {}): string {
  * All values are parameterized via `--sn-*` token custom properties so the
  * output adapts to whatever theme tokens are active.
  */
-export function resolveFrameworkStyles(): string {
+export function resolveFrameworkStyles(options?: {
+  respectReducedMotion?: boolean;
+}): string {
   const allComponentSelector = [
     ...new Set([...ALL_COMPONENT_TYPES, ...getRegisteredSchemaTypes()]),
   ]
@@ -992,6 +994,19 @@ export function resolveFrameworkStyles(): string {
   const surfaceSelector = SURFACE_COMPONENT_TYPES.map(
     (type) => `[data-snapshot-component="${type}"]`,
   ).join(",\n");
+  const reducedMotionCss =
+    options?.respectReducedMotion === false
+      ? ""
+      : `
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: var(--sn-duration-instant, 0ms) !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: var(--sn-duration-instant, 0ms) !important;
+  }
+}
+`;
   return `/* ── CSS Reset ──────────────────────────────────────────────────────────── */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1361,6 +1376,29 @@ a:focus-visible {
   background: var(--sn-scrollbar-thumb-hover, var(--sn-color-primary, #2563eb));
 }
 
+[data-snapshot-skip-links] {
+  position: fixed;
+  top: var(--sn-spacing-sm, 0.5rem);
+  left: var(--sn-spacing-sm, 0.5rem);
+  z-index: var(--sn-z-index-toast, 60);
+}
+
+[data-snapshot-skip-links] a {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateY(-200%);
+  padding: var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem);
+  border-radius: var(--sn-radius-md, 0.5rem);
+  background: var(--sn-color-card, #ffffff);
+  border: var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb);
+  box-shadow: var(--sn-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+}
+
+[data-snapshot-skip-links] a:focus {
+  transform: translateY(0);
+}
+
 /* ── Built-in animations ──────────────────────────────────────────────── */
 
 @keyframes sn-fade {
@@ -1387,9 +1425,13 @@ a:focus-visible {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
+@keyframes snapshot-spinner {
+  to { transform: rotate(360deg); }
+}
 @keyframes sn-bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
+${reducedMotionCss}
 `;
 }

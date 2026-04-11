@@ -6,6 +6,16 @@ interface WsConfig {
   maxReconnectAttempts?: number;
   reconnectBaseDelay?: number;
   reconnectMaxDelay?: number;
+  auth?: {
+    strategy: "query-param" | "first-message";
+    paramName?: string;
+    token?: string | null | (() => string | null | undefined);
+  };
+  heartbeat?: {
+    enabled?: boolean;
+    interval?: number;
+    message?: string;
+  };
   onConnected?: () => void;
   onDisconnected?: () => void;
   onReconnecting?: (attempt: number) => void;
@@ -25,6 +35,7 @@ export class WebSocketManager<
   private readonly listeners = new Map<string, Set<EventHandler>>();
   private reconnectAttempts = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private destroyed = false;
 
   private readonly url: string;
@@ -37,6 +48,8 @@ export class WebSocketManager<
   private readonly onDisconnected: (() => void) | undefined;
   private readonly onReconnecting: ((attempt: number) => void) | undefined;
   private readonly onReconnectFailed: (() => void) | undefined;
+  private readonly auth: WsConfig["auth"];
+  private readonly heartbeat: Required<NonNullable<WsConfig["heartbeat"]>>;
 
   constructor(config: WsConfig) {
     this.url = config.url;
@@ -49,10 +62,16 @@ export class WebSocketManager<
     this.onDisconnected = config.onDisconnected;
     this.onReconnecting = config.onReconnecting;
     this.onReconnectFailed = config.onReconnectFailed;
+    this.auth = config.auth;
+    this.heartbeat = {
+      enabled: config.heartbeat?.enabled ?? false,
+      interval: config.heartbeat?.interval ?? 30000,
+      message: config.heartbeat?.message ?? "ping",
+    };
 
     this.connect();
 
-    if (this.reconnectOnFocus) {
+    if (this.reconnectOnFocus && typeof document !== "undefined") {
       document.addEventListener(
         "visibilitychange",
         this.handleVisibilityChange,
@@ -65,6 +84,10 @@ export class WebSocketManager<
   }
 
   private handleVisibilityChange = () => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
     if (
       document.visibilityState === "visible" &&
       !this.isConnected &&
@@ -74,11 +97,66 @@ export class WebSocketManager<
     }
   };
 
+  private resolveAuthToken(): string | null {
+    const token = this.auth?.token;
+    if (typeof token === "function") {
+      return token() ?? null;
+    }
+
+    return token ?? null;
+  }
+
+  private buildConnectionUrl(): string {
+    if (this.auth?.strategy !== "query-param") {
+      return this.url;
+    }
+
+    const token = this.resolveAuthToken();
+    if (!token) {
+      return this.url;
+    }
+
+    const base =
+      typeof window !== "undefined" && window.location.origin !== "null"
+        ? window.location.origin
+        : "http://localhost";
+    const url = new URL(this.url, base);
+    url.searchParams.set(this.auth.paramName ?? "token", token);
+    return url.toString();
+  }
+
+  private emit(event: string, payload: unknown): void {
+    this.listeners.get(event)?.forEach((handler) => handler(payload));
+    if (event !== "*") {
+      this.listeners.get("*")?.forEach((handler) => handler(payload));
+    }
+  }
+
+  private clearHeartbeatTimer(): void {
+    if (this.heartbeatTimer !== null) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+  }
+
+  private startHeartbeat(): void {
+    this.clearHeartbeatTimer();
+    if (!this.heartbeat.enabled) {
+      return;
+    }
+
+    this.heartbeatTimer = setInterval(() => {
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        this.ws.send(this.heartbeat.message);
+      }
+    }, this.heartbeat.interval);
+  }
+
   private connect() {
     if (this.destroyed) return;
 
     try {
-      this.ws = new WebSocket(this.url);
+      this.ws = new WebSocket(this.buildConnectionUrl());
     } catch {
       this.scheduleReconnect();
       return;
@@ -87,22 +165,31 @@ export class WebSocketManager<
     this.ws.onopen = () => {
       this.reconnectAttempts = 0;
       this.clearReconnectTimer();
+      this.startHeartbeat();
+      if (this.auth?.strategy === "first-message") {
+        const token = this.resolveAuthToken();
+        if (token) {
+          this.sendMessage({ type: "auth", token });
+        }
+      }
       this.onConnected?.();
-      // Re-subscribe to all tracked rooms after reconnect
+      this.emit("connected", { connected: true });
       this.rooms.forEach((room) =>
         this.sendMessage({ action: "subscribe", room }),
       );
     };
 
     this.ws.onclose = () => {
+      this.clearHeartbeatTimer();
       this.onDisconnected?.();
+      this.emit("disconnected", { connected: false });
       if (this.autoReconnect && !this.destroyed) {
         this.scheduleReconnect();
       }
     };
 
     this.ws.onerror = () => {
-      // onclose fires after onerror — reconnect logic is handled there
+      // onclose fires after onerror; reconnect logic lives there.
     };
 
     this.ws.onmessage = (event: MessageEvent) => {
@@ -112,11 +199,10 @@ export class WebSocketManager<
           event?: string;
           [key: string]: unknown;
         };
-        const eventName = message["event"] ?? message["type"] ?? "";
-        this.listeners.get(eventName)?.forEach((handler) => handler(message));
-        this.listeners.get("*")?.forEach((handler) => handler(message));
+        const eventName = message["event"] ?? message["type"] ?? "message";
+        this.emit(eventName, message);
       } catch {
-        // Ignore unparseable messages
+        this.emit("message", event.data);
       }
     };
   }
@@ -131,6 +217,7 @@ export class WebSocketManager<
     if (this.destroyed || this.reconnectTimer !== null) return;
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       this.onReconnectFailed?.();
+      this.emit("reconnectFailed", { attempts: this.reconnectAttempts });
       return;
     }
 
@@ -141,6 +228,7 @@ export class WebSocketManager<
     );
 
     this.onReconnecting?.(this.reconnectAttempts);
+    this.emit("reconnecting", { attempt: this.reconnectAttempts, delay });
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
@@ -173,7 +261,10 @@ export class WebSocketManager<
     this.sendMessage({ type, payload });
   }
 
-  on<K extends keyof TEvents>(event: K, handler: (data: TEvents[K]) => void) {
+  on<K extends keyof TEvents | "*">(
+    event: K,
+    handler: (data: K extends keyof TEvents ? TEvents[K] : unknown) => void,
+  ) {
     const key = event as string;
     if (!this.listeners.has(key)) {
       this.listeners.set(key, new Set());
@@ -181,15 +272,18 @@ export class WebSocketManager<
     this.listeners.get(key)!.add(handler as EventHandler);
   }
 
-  off<K extends keyof TEvents>(event: K, handler: (data: TEvents[K]) => void) {
+  off<K extends keyof TEvents | "*">(
+    event: K,
+    handler: (data: K extends keyof TEvents ? TEvents[K] : unknown) => void,
+  ) {
     const key = event as string;
     this.listeners.get(key)?.delete(handler as EventHandler);
   }
 
   reconnect() {
     this.clearReconnectTimer();
+    this.clearHeartbeatTimer();
     if (this.ws) {
-      // Close without triggering auto-reconnect cycle — we'll connect immediately
       this.ws.onclose = null;
       this.ws.close();
       this.ws = null;
@@ -201,10 +295,13 @@ export class WebSocketManager<
   disconnect() {
     this.destroyed = true;
     this.clearReconnectTimer();
-    document.removeEventListener(
-      "visibilitychange",
-      this.handleVisibilityChange,
-    );
+    this.clearHeartbeatTimer();
+    if (typeof document !== "undefined") {
+      document.removeEventListener(
+        "visibilitychange",
+        this.handleVisibilityChange,
+      );
+    }
     if (this.ws) {
       this.ws.onclose = null;
       this.ws.close();

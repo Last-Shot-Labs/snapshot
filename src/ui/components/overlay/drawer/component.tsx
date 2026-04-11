@@ -11,6 +11,7 @@ import {
   getButtonStyle,
   BUTTON_INTERACTIVE_CSS,
 } from "../../_base/button-styles";
+import { useFocusTrap } from "../../_base/use-focus-trap";
 import { useDrawer } from "./hook";
 import type { DrawerConfig } from "./schema";
 
@@ -75,6 +76,15 @@ export function DrawerComponent({ config }: { config: DrawerConfig }) {
       panelRef.current.focus();
     }
   }, [isOpen, animating]);
+
+  useFocusTrap(
+    isOpen && animating && config.trapFocus !== false,
+    panelRef,
+    {
+      initialFocus: config.initialFocus,
+      returnFocus: config.returnFocus,
+    },
+  );
 
   // Escape key closes the drawer
   const handleKeyDown = useCallback(

@@ -1,4 +1,4 @@
-import type { PrimitiveAtom } from "jotai";
+import type { PrimitiveAtom, WritableAtom } from "jotai";
 import type { createStore } from "jotai/vanilla";
 import type { ReactNode } from "react";
 import type { ApiClient } from "../../api/client";
@@ -7,6 +7,8 @@ import type { EndpointTarget, ResourceMap } from "../manifest/resources";
 /** The Jotai store type, derived from the createStore return type. */
 export type JotaiStore = ReturnType<typeof createStore>;
 
+export type StateAtom = WritableAtom<unknown, [unknown], void>;
+
 /**
  * Registry of named state atoms.
  * Backing store is shared per scope (app or route).
@@ -14,9 +16,9 @@ export type JotaiStore = ReturnType<typeof createStore>;
 export interface AtomRegistry {
   register(
     id: string,
-    atomOverride?: PrimitiveAtom<unknown>,
-  ): PrimitiveAtom<unknown>;
-  get(id: string): PrimitiveAtom<unknown> | undefined;
+    atomOverride?: StateAtom,
+  ): StateAtom;
+  get(id: string): StateAtom | undefined;
   unregister(id: string): void;
   keys(): string[];
   readonly store: JotaiStore;

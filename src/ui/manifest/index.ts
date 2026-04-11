@@ -4,6 +4,7 @@ export {
   registerComponentSchema,
   getRegisteredSchemaTypes,
   baseComponentConfigSchema,
+  suspenseFallbackSchema,
   rowConfigSchema,
   headingConfigSchema,
   buttonConfigSchema,
@@ -27,7 +28,9 @@ export {
   pageConfigSchema,
   routeGuardConfigSchema,
   routeGuardSchema,
+  routeTransitionSchema,
   routeConfigSchema,
+  outletComponentSchema,
   overlayConfigSchema,
   stateValueConfigSchema,
   manifestConfigSchema,
@@ -99,9 +102,12 @@ export {
 // Rendering
 export { ComponentRenderer, PageRenderer } from "./renderer";
 export type { ComponentRendererProps, PageRendererProps } from "./renderer";
+export { TransitionWrapper } from "./transition-wrapper";
 
 // App
 export { ManifestApp, injectStyleSheet } from "./app";
+export { generateBreadcrumbs } from "./breadcrumbs";
+export { generateJsonSchema } from "./json-schema";
 export {
   ManifestRuntimeProvider,
   ManifestRuntimeContext,
@@ -115,6 +121,9 @@ export {
   useOverlayRuntime,
   useRouteRuntime,
 } from "./runtime";
+export { useAutoBreadcrumbs } from "../hooks/use-auto-breadcrumbs";
+export { useRoutePrefetch } from "./use-route-prefetch";
+export { useVirtualList } from "../hooks/use-virtual-list";
 
 // Types
 export type {
@@ -124,6 +133,7 @@ export type {
   PushConfig,
   CompiledManifest,
   CompiledRoute,
+  RouteMatch,
   ManifestConfig,
   NavItem,
   NavigationConfig,

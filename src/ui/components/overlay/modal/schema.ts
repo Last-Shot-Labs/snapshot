@@ -27,6 +27,12 @@ export const modalConfigSchema = baseComponentConfigSchema.extend({
   onClose: z.union([z.string().min(1), workflowDefinitionSchema]).optional(),
   /** URL query parameter used for deep-linking this modal. */
   urlParam: z.string().optional(),
+  /** Trap keyboard focus while the modal is open. */
+  trapFocus: z.boolean().default(true),
+  /** CSS selector for the first element to receive focus. */
+  initialFocus: z.string().optional(),
+  /** Return focus to the previously focused element on close. */
+  returnFocus: z.boolean().default(true),
   /** Inline style overrides. */
   style: z.record(z.union([z.string(), z.number()])).optional(),
   /** Additional CSS class name. */

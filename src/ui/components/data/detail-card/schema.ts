@@ -1,5 +1,9 @@
 import { z } from "zod";
 import {
+  emptyStateConfigSchema,
+  loadingConfigSchema,
+} from "../../../manifest/schema";
+import {
   baseComponentConfigSchema,
   dataSourceSchema,
   fromRefSchema,
@@ -95,6 +99,10 @@ export const detailCardConfigSchema = baseComponentConfigSchema.extend({
   actions: z.array(detailCardActionSchema).optional(),
   /** Message shown when data is null/undefined (e.g. no row selected). */
   emptyState: z.string().optional(),
+  /** Rich empty state config. */
+  empty: emptyStateConfigSchema.optional(),
+  /** Automatic loading placeholder config. */
+  loading: loadingConfigSchema.optional(),
   /** Component id for publishing/subscribing. */
   id: z.string().optional(),
   /** Visibility toggle. */

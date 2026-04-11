@@ -221,6 +221,12 @@ export interface ToastAction extends ActionBase {
   duration?: number;
   /** Optional action button in the toast. */
   action?: { label: string; action: ActionConfig };
+  /** Optional undo action with countdown. */
+  undo?: {
+    label?: string;
+    action: ActionConfig;
+    duration?: number;
+  };
 }
 
 /**
@@ -563,6 +569,13 @@ function buildToastActionSchema(): z.ZodType<ToastAction> {
         .object({
           label: z.string(),
           action: z.lazy(() => actionSchema),
+        })
+        .optional(),
+      undo: z
+        .object({
+          label: z.string().default("Undo"),
+          action: z.lazy(() => actionSchema),
+          duration: z.number().int().positive().default(5000),
         })
         .optional(),
     })

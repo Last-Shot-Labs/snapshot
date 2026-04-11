@@ -348,10 +348,7 @@ export function Wizard({ config }: { config: WizardConfig }) {
     (wizard.isLastStep ? config.submitLabel : "Next");
 
   // Determine if current step is skippable
-  const isSkippable =
-    config.allowSkip &&
-    !wizard.isLastStep &&
-    currentStepConfig?.fields.every((f) => !f.required);
+  const isSkippable = wizard.canSkip;
 
   // Completed state
   if (wizard.isComplete) {
@@ -531,7 +528,9 @@ ${BUTTON_INTERACTIVE_CSS}
           data-sn-button=""
           data-variant="outline"
           data-wizard-back
-          onClick={wizard.prevStep}
+          onClick={() => {
+            void wizard.prevStep();
+          }}
           disabled={wizard.isFirstStep || wizard.isAnimating}
           style={getButtonStyle(
             "outline",
@@ -555,7 +554,9 @@ ${BUTTON_INTERACTIVE_CSS}
               data-sn-button=""
               data-variant="ghost"
               data-wizard-skip
-              onClick={wizard.skipStep}
+              onClick={() => {
+                void wizard.skipStep();
+              }}
               disabled={wizard.isAnimating}
               style={getButtonStyle("ghost", "sm", wizard.isAnimating)}
             >
@@ -569,7 +570,9 @@ ${BUTTON_INTERACTIVE_CSS}
             data-sn-button=""
             data-variant="default"
             data-wizard-next
-            onClick={() => wizard.nextStep()}
+            onClick={() => {
+              void wizard.nextStep();
+            }}
             disabled={wizard.isSubmitting || wizard.isAnimating}
             style={getButtonStyle(
               "default",

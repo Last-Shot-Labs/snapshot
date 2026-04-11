@@ -28,7 +28,7 @@ const validationPatternSchema = z.union([
     .strict(),
 ]);
 
-const fieldValidationSchema = z
+export const fieldValidationSchema = z
   .object({
     required: z.boolean().optional(),
     minLength: z.number().optional(),
@@ -216,6 +216,7 @@ export const autoFormConfigSchema = extendComponentSchema({
       .optional(),
     autoSubmit: z.boolean().optional(),
     autoSubmitWhen: z.string().optional(),
+    autoSubmitDelay: z.number().int().nonnegative().optional(),
     layout: z.enum(["vertical", "horizontal", "grid"]).default("vertical"),
   })
   .strict()

@@ -11,6 +11,7 @@
 
 // Tokens & Flavors
 export { resolveTokens, resolveFrameworkStyles } from "./ui/tokens/resolve";
+export { validateContrast } from "./ui/tokens/contrast-checker";
 export { useTokenEditor } from "./ui/tokens/editor";
 export { defineFlavor, getFlavor, getAllFlavors } from "./ui/tokens/flavors";
 export {
@@ -30,6 +31,9 @@ export {
   deriveDarkVariant,
   colorToOklch,
   parseOklchString,
+  relativeLuminance,
+  contrastRatio,
+  meetsWcagAA,
 } from "./ui/tokens/color";
 export type {
   ThemeConfig,
@@ -157,6 +161,7 @@ export {
   ManifestApp,
   PageRenderer,
   ComponentRenderer,
+  TransitionWrapper,
   compileManifest,
   defineManifest,
   parseManifest,
@@ -178,6 +183,7 @@ export {
   getRegisteredWorkflowAction,
   getRegisteredSchemaTypes,
   injectStyleSheet,
+  generateJsonSchema,
   ManifestRuntimeProvider,
   OverlayRuntimeProvider,
   RouteRuntimeProvider,
@@ -187,6 +193,8 @@ export {
   useManifestResourceCache,
   useOverlayRuntime,
   useRouteRuntime,
+  useRoutePrefetch,
+  useVirtualList,
   manifestConfigSchema,
   appConfigSchema,
   toastConfigSchema,
@@ -196,7 +204,9 @@ export {
   pageConfigSchema,
   routeGuardConfigSchema,
   routeGuardSchema,
+  routeTransitionSchema,
   routeConfigSchema,
+  outletComponentSchema,
   overlayConfigSchema,
   componentConfigSchema,
   navItemSchema,
@@ -226,6 +236,7 @@ export type {
   PushConfig,
   CompiledManifest,
   CompiledRoute,
+  RouteMatch,
   ManifestConfig,
   NavItem,
   NavigationConfig,
@@ -442,6 +453,18 @@ export type { CommandPaletteConfig } from "./ui/components/overlay/command-palet
 // Components — Input
 export { Input, inputConfigSchema } from "./ui/components/forms/input/index";
 export type { InputConfig } from "./ui/components/forms/input/index";
+export {
+  DatePicker,
+  datePickerConfigSchema,
+} from "./ui/components/forms/date-picker";
+export type { DatePickerConfig } from "./ui/components/forms/date-picker";
+export { Slider, sliderConfigSchema } from "./ui/components/forms/slider";
+export type { SliderConfig } from "./ui/components/forms/slider";
+export {
+  ColorPicker,
+  colorPickerConfigSchema,
+} from "./ui/components/forms/color-picker";
+export type { ColorPickerConfig } from "./ui/components/forms/color-picker";
 
 // Components — Textarea
 export {
@@ -716,6 +739,12 @@ export { usePoll } from "./ui/hooks/use-poll";
 export type { UsePollOptions } from "./ui/hooks/use-poll";
 export { useInfiniteScroll } from "./ui/hooks/use-infinite-scroll";
 export type { UseInfiniteScrollOptions } from "./ui/hooks/use-infinite-scroll";
+export { useAutoBreadcrumbs } from "./ui/hooks/use-auto-breadcrumbs";
+export {
+  generateBreadcrumbs,
+  type BreadcrumbAutoConfig,
+  type BreadcrumbItem,
+} from "./ui/manifest/breadcrumbs";
 
 // Headless Hooks (Level 2/3)
 // export { useDataTable } from './ui/hooks/use-data-table'

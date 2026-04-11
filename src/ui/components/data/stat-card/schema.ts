@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
+import {
+  emptyStateConfigSchema,
+  liveConfigSchema,
+} from "../../../manifest/schema";
 import { dataSourceSchema, fromRefSchema, pollConfigSchema } from "../../_base/types";
 
 /** Schema for a responsive value — flat or breakpoint map. */
@@ -87,6 +91,10 @@ export const statCardConfigSchema = z
     errorMessage: z.string().optional(),
     /** Polling behavior for endpoint-backed stat cards. */
     poll: pollConfigSchema.optional(),
+    /** Rich empty state config. */
+    empty: emptyStateConfigSchema.optional(),
+    /** Live refresh configuration driven by realtime events. */
+    live: liveConfigSchema.optional(),
     // --- BaseComponentConfig fields ---
     /** Component id for publishing/subscribing. */
     id: z.string().optional(),
@@ -96,5 +104,7 @@ export const statCardConfigSchema = z
     style: z.record(z.union([z.string(), z.number()])).optional(),
     /** Additional CSS class name. */
     className: z.string().optional(),
+    /** Live region politeness for dynamic metric updates. */
+    ariaLive: z.enum(["off", "polite", "assertive"]).default("polite"),
   })
   .strict();

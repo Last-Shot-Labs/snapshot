@@ -2,22 +2,26 @@
 
 import React, {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
   type CSSProperties,
 } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
-import { useActionExecutor } from "../../../actions/executor";
+import { usePublish, useSubscribe } from "../../../context/hooks";
+import { useActionExecutor, SnapshotApiContext } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
 import { useComponentData } from "../../_base/use-component-data";
+import { buildRequestUrl, resolveEndpointTarget } from "../../../manifest/resources";
+import { useManifestRuntime } from "../../../manifest/runtime";
+import { matchesCombo, parseChord } from "../../../shortcuts";
 import type { ActionConfig } from "../../../actions/types";
 import type { CommandPaletteConfig } from "./types";
 
 const ANIMATION_DURATION = 150;
+const RECENT_STORAGE_PREFIX = "snapshot-command-palette";
 
-/** Shape of a single command item for internal use. */
 interface CommandItem {
   label: string;
   icon?: string;
@@ -26,93 +30,245 @@ interface CommandItem {
   description?: string;
 }
 
-/** Shape of a command group for internal use. */
 interface CommandGroup {
   label: string;
   items: CommandItem[];
 }
 
-/**
- * Flatten all groups into a single ordered list of items with group indices
- * for keyboard navigation.
- */
 function flattenItems(
   groups: CommandGroup[],
 ): Array<{ item: CommandItem; groupIndex: number; itemIndex: number }> {
-  const flat: Array<{
-    item: CommandItem;
-    groupIndex: number;
-    itemIndex: number;
-  }> = [];
-  groups.forEach((group, gi) => {
-    group.items.forEach((item, ii) => {
-      flat.push({ item, groupIndex: gi, itemIndex: ii });
+  const flat: Array<{ item: CommandItem; groupIndex: number; itemIndex: number }> = [];
+  groups.forEach((group, groupIndex) => {
+    group.items.forEach((item, itemIndex) => {
+      flat.push({ item, groupIndex, itemIndex });
     });
   });
   return flat;
 }
 
-/**
- * CommandPalette component — a searchable command/action list.
- *
- * Provides a search input at the top, a filterable grouped list of commands,
- * keyboard navigation (arrow keys + Enter), and dispatches actions on selection.
- *
- * @param props.config - The command palette config from the manifest
- *
- * @example
- * ```json
- * {
- *   "type": "command-palette",
- *   "placeholder": "Search commands...",
- *   "groups": [
- *     {
- *       "label": "Navigation",
- *       "items": [
- *         { "label": "Dashboard", "icon": "layout-dashboard", "action": { "type": "navigate", "to": "/dashboard" } }
- *       ]
- *     }
- *   ]
- * }
- * ```
- */
+function normalizeSearchGroups(data: unknown): CommandGroup[] {
+  if (data == null || typeof data !== "object") {
+    return [];
+  }
+
+  const record = data as Record<string, unknown>;
+  if (Array.isArray(record.groups)) {
+    return record.groups as CommandGroup[];
+  }
+  if (Array.isArray(record.items)) {
+    return [
+      {
+        label: "Search",
+        items: record.items as CommandItem[],
+      },
+    ];
+  }
+  return [];
+}
+
 export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
-  const visible = useSubscribe(config.visible ?? true);
+  const visible = useSubscribe(config.visible ?? false);
   const publish = usePublish(config.id);
   const executeAction = useActionExecutor();
-
+  const api = useContext(SnapshotApiContext);
+  const runtime = useManifestRuntime();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
   const [animating, setAnimating] = useState(false);
+  const [shortcutVisible, setShortcutVisible] = useState(false);
+  const [searchGroups, setSearchGroups] = useState<CommandGroup[]>([]);
+  const [recentItems, setRecentItems] = useState<CommandItem[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-
+  const storageKey = `${RECENT_STORAGE_PREFIX}:${config.id ?? "default"}`;
   const placeholder = config.placeholder ?? "Type a command...";
   const emptyMessage = config.emptyMessage ?? "No results found";
   const maxHeight = config.maxHeight ?? "300px";
 
-  // Fetch dynamic items if data endpoint is provided
   const dataResult = useComponentData(config.data ?? "");
-
-  // Merge static groups with dynamic data
-  const allGroups: CommandGroup[] = useMemo(() => {
-    const staticGroups: CommandGroup[] = (config.groups ??
-      []) as CommandGroup[];
-    if (
-      dataResult?.data &&
-      Array.isArray((dataResult.data as Record<string, unknown>).groups)
-    ) {
-      const dynamicGroups = (dataResult.data as Record<string, unknown>)
-        .groups as CommandGroup[];
-      return [...staticGroups, ...dynamicGroups];
+  const shortcutCommands = useMemo(() => {
+    if (!config.autoRegisterShortcuts) {
+      return [];
     }
-    return staticGroups;
-  }, [config.groups, dataResult?.data]);
 
-  // Filter groups by query
+    const manifestShortcuts = runtime?.raw.shortcuts as
+      | Record<string, { label?: string; action: ActionConfig; disabled?: boolean }>
+      | undefined;
+    if (!manifestShortcuts) {
+      return [];
+    }
+
+    return Object.entries(manifestShortcuts)
+      .filter(([, shortcutConfig]) => shortcutConfig.label && shortcutConfig.disabled !== true)
+      .map(([shortcut, shortcutConfig]) => ({
+        label: shortcutConfig.label!,
+        shortcut,
+        action: shortcutConfig.action,
+      }));
+  }, [config.autoRegisterShortcuts, runtime?.raw.shortcuts]);
+
+  useEffect(() => {
+    if (!config.recentItems?.enabled || typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      const stored = window.localStorage.getItem(storageKey);
+      if (!stored) {
+        return;
+      }
+      const parsed = JSON.parse(stored) as CommandItem[];
+      if (Array.isArray(parsed)) {
+        setRecentItems(parsed);
+      }
+    } catch {
+      setRecentItems([]);
+    }
+  }, [config.recentItems?.enabled, storageKey]);
+
+  useEffect(() => {
+    if (!config.recentItems?.enabled || typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(
+      storageKey,
+      JSON.stringify(recentItems.slice(0, config.recentItems.maxItems)),
+    );
+  }, [config.recentItems, recentItems, storageKey]);
+
+  useEffect(() => {
+    const combos = parseChord(config.shortcut);
+    if (typeof window === "undefined" || combos.length === 0) {
+      return;
+    }
+
+    let chordIndex = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const clearChord = () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      chordIndex = 0;
+      timer = undefined;
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isTyping =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.tagName === "SELECT" ||
+        target?.isContentEditable;
+      if (isTyping && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        return;
+      }
+
+      const expected = combos[chordIndex];
+      if (!expected || !matchesCombo(event, expected)) {
+        clearChord();
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (chordIndex === combos.length - 1) {
+        clearChord();
+        setShortcutVisible((current) => !current);
+        return;
+      }
+
+      chordIndex += 1;
+      timer = setTimeout(clearChord, 1000);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      clearChord();
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [config.shortcut]);
+
+  useEffect(() => {
+    if (!config.searchEndpoint || typeof window === "undefined") {
+      setSearchGroups([]);
+      return;
+    }
+
+    if (query.trim().length < config.searchEndpoint.minLength) {
+      setSearchGroups([]);
+      return;
+    }
+
+    if (!api) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => {
+      const request = resolveEndpointTarget(
+        config.searchEndpoint!.endpoint,
+        runtime?.resources,
+        { q: query.trim() },
+      );
+      const url = buildRequestUrl(request.endpoint, request.params);
+
+      void (async () => {
+        try {
+          const response =
+            request.method === "POST"
+              ? await api.post(url, { q: query.trim() })
+              : await api.get(url);
+          if (!controller.signal.aborted) {
+            setSearchGroups(normalizeSearchGroups(response));
+          }
+        } catch {
+          if (!controller.signal.aborted) {
+            setSearchGroups([]);
+          }
+        }
+      })();
+    }, config.searchEndpoint.debounce);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, [api, config.searchEndpoint, query, runtime?.resources]);
+
+  const allGroups: CommandGroup[] = useMemo(() => {
+    const groups: CommandGroup[] = [];
+    if (config.recentItems?.enabled && recentItems.length > 0 && query.trim().length === 0) {
+      groups.push({
+        label: "Recent",
+        items: recentItems.slice(0, config.recentItems.maxItems),
+      });
+    }
+    if (shortcutCommands.length > 0) {
+      groups.push({ label: "Shortcuts", items: shortcutCommands });
+    }
+    groups.push(...((config.groups ?? []) as CommandGroup[]));
+    groups.push(...normalizeSearchGroups(dataResult.data));
+    groups.push(...searchGroups);
+    return groups;
+  }, [
+    config.groups,
+    config.recentItems,
+    dataResult.data,
+    query,
+    recentItems,
+    searchGroups,
+    shortcutCommands,
+  ]);
+
   const filteredGroups: CommandGroup[] = useMemo(() => {
-    if (!query.trim()) return allGroups;
+    if (!query.trim()) {
+      return allGroups;
+    }
     const lowerQuery = query.toLowerCase();
     return allGroups
       .map((group) => ({
@@ -126,19 +282,16 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
       .filter((group) => group.items.length > 0);
   }, [allGroups, query]);
 
-  const flatItems = useMemo(
-    () => flattenItems(filteredGroups),
-    [filteredGroups],
-  );
+  const flatItems = useMemo(() => flattenItems(filteredGroups), [filteredGroups]);
 
-  // Reset active index when query changes
   useEffect(() => {
     setActiveIndex(0);
   }, [query]);
 
-  // Scroll active item into view
   useEffect(() => {
-    if (!listRef.current) return;
+    if (!listRef.current) {
+      return;
+    }
     const activeElement = listRef.current.querySelector(
       `[data-command-index="${activeIndex}"]`,
     );
@@ -147,72 +300,92 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
     }
   }, [activeIndex]);
 
+  const persistRecentItem = useCallback(
+    (item: CommandItem) => {
+      if (!config.recentItems?.enabled) {
+        return;
+      }
+
+      setRecentItems((currentItems) => {
+        const next = [
+          item,
+          ...currentItems.filter((entry) => entry.label !== item.label),
+        ];
+        return next.slice(0, config.recentItems!.maxItems);
+      });
+    },
+    [config.recentItems],
+  );
+
   const handleSelect = useCallback(
     (item: CommandItem) => {
+      persistRecentItem(item);
       if (publish) {
         publish({ selectedItem: item });
       }
       if (item.action) {
-        executeAction(item.action);
+        void executeAction(item.action);
       }
+      setShortcutVisible(false);
     },
-    [publish, executeAction],
+    [executeAction, persistRecentItem, publish],
   );
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      switch (e.key) {
+    (event: React.KeyboardEvent) => {
+      switch (event.key) {
         case "ArrowDown":
-          e.preventDefault();
-          setActiveIndex((prev) =>
-            prev < flatItems.length - 1 ? prev + 1 : 0,
+          event.preventDefault();
+          setActiveIndex((currentIndex) =>
+            currentIndex < flatItems.length - 1 ? currentIndex + 1 : 0,
           );
           break;
         case "ArrowUp":
-          e.preventDefault();
-          setActiveIndex((prev) =>
-            prev > 0 ? prev - 1 : flatItems.length - 1,
+          event.preventDefault();
+          setActiveIndex((currentIndex) =>
+            currentIndex > 0 ? currentIndex - 1 : flatItems.length - 1,
           );
           break;
         case "Enter":
-          e.preventDefault();
+          event.preventDefault();
           if (flatItems[activeIndex]) {
-            handleSelect(flatItems[activeIndex].item);
+            handleSelect(flatItems[activeIndex]!.item);
           }
+          break;
+        case "Escape":
+          event.preventDefault();
+          setShortcutVisible(false);
+          if (publish) {
+            publish({ dismissed: true });
+          }
+          break;
+        default:
           break;
       }
     },
-    [flatItems, activeIndex, handleSelect],
+    [activeIndex, flatItems, handleSelect, publish],
   );
 
-  // Mounted/animating pattern for enter/exit animation
-  const isVisible = visible !== false;
+  const isVisible = visible !== false || shortcutVisible;
   useEffect(() => {
     if (isVisible) {
       setMounted(true);
-      const enterTimer = setTimeout(() => setAnimating(true), 10);
+      const enterTimer = setTimeout(() => {
+        setAnimating(true);
+        inputRef.current?.focus();
+      }, 10);
       return () => clearTimeout(enterTimer);
-    } else if (mounted) {
+    }
+    if (mounted) {
       setAnimating(false);
       const exitTimer = setTimeout(() => setMounted(false), ANIMATION_DURATION);
       return () => clearTimeout(exitTimer);
     }
-  }, [isVisible]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isVisible, mounted]);
 
-  // Escape key handler to close (publish a close signal)
-  const handleEscape = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        if (publish) {
-          publish({ dismissed: true });
-        }
-      }
-    },
-    [publish],
-  );
-
-  if (!mounted) return null;
+  if (!mounted) {
+    return null;
+  }
 
   const animationStyle: CSSProperties = {
     opacity: animating ? 1 : 0,
@@ -226,24 +399,21 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
     <div
       data-snapshot-component="command-palette"
       className={config.className}
-      onKeyDown={(e) => {
-        handleEscape(e);
-        handleKeyDown(e);
-      }}
+      onKeyDown={handleKeyDown}
       style={{
         display: "flex",
         flexDirection: "column",
         ...animationStyle,
-        backgroundColor: "var(--sn-color-popover, var(--sn-color-card, #fff))",
-        ...((config.style as React.CSSProperties) ?? {}),
+        backgroundColor: "var(--sn-color-popover, var(--sn-color-card, #ffffff))",
         color:
-          "var(--sn-color-popover-foreground, var(--sn-color-foreground, #111))",
+          "var(--sn-color-popover-foreground, var(--sn-color-foreground, #111827))",
         border:
           "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
         borderRadius: "var(--sn-radius-lg, 0.5rem)",
         boxShadow:
           "var(--sn-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1))",
         overflow: "hidden",
+        ...(config.style as React.CSSProperties),
       }}
     >
       <style>{`
@@ -256,13 +426,8 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
         [data-snapshot-component="command-palette"] [data-snapshot-command-item]:hover {
           background-color: var(--sn-color-accent, #f3f4f6);
         }
-        [data-snapshot-component="command-palette"] [data-snapshot-command-item]:focus { outline: none; }
-        [data-snapshot-component="command-palette"] [data-snapshot-command-item]:focus-visible {
-          background-color: var(--sn-color-accent, #f3f4f6);
-        }
       `}</style>
 
-      {/* Search input */}
       <div
         data-snapshot-command-input=""
         style={{
@@ -283,7 +448,7 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
           ref={inputRef}
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(event) => setQuery(event.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}
           style={{
@@ -291,15 +456,28 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
             border: "none",
             outline: "none",
             backgroundColor: "transparent",
-            color: "var(--sn-color-foreground, #111)",
+            color: "var(--sn-color-foreground, #111827)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
             fontFamily: "inherit",
             lineHeight: "var(--sn-leading-normal, 1.5)",
           }}
         />
+        <kbd
+          style={{
+            fontSize: "var(--sn-font-size-xs, 0.75rem)",
+            fontFamily: "var(--sn-font-mono, monospace)",
+            color: "var(--sn-color-muted-foreground, #6b7280)",
+            backgroundColor: "var(--sn-color-muted, #f3f4f6)",
+            padding: "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-xs, 0.25rem)",
+            borderRadius: "var(--sn-radius-xs, 0.125rem)",
+            border:
+              "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
+          }}
+        >
+          {config.shortcut}
+        </kbd>
       </div>
 
-      {/* Results list */}
       <div
         ref={listRef}
         data-snapshot-command-list=""
@@ -314,8 +492,7 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
           <div
             data-snapshot-command-empty=""
             style={{
-              padding:
-                "var(--sn-spacing-lg, 1.5rem) var(--sn-spacing-md, 1rem)",
+              padding: "var(--sn-spacing-lg, 1.5rem) var(--sn-spacing-md, 1rem)",
               textAlign: "center",
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
               color: "var(--sn-color-muted-foreground, #6b7280)",
@@ -324,32 +501,27 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
             {emptyMessage}
           </div>
         ) : (
-          filteredGroups.map((group, groupIdx) => (
-            <div key={`group-${groupIdx}`} data-snapshot-command-group="">
-              {/* Group heading */}
+          filteredGroups.map((group, groupIndex) => (
+            <div key={`group-${group.label}-${groupIndex}`} data-snapshot-command-group="">
               <div
                 data-snapshot-command-group-heading=""
                 style={{
-                  padding:
-                    "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+                  padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
                   fontSize: "var(--sn-font-size-xs, 0.75rem)",
                   fontWeight: "var(--sn-font-weight-semibold, 600)" as string,
                   color: "var(--sn-color-muted-foreground, #6b7280)",
-                  textTransform: "uppercase" as const,
+                  textTransform: "uppercase",
                   letterSpacing: "var(--sn-tracking-wide, 0.05em)",
                 }}
               >
                 {group.label}
               </div>
-
-              {/* Items */}
-              {group.items.map((item, itemIdx) => {
+              {group.items.map((item, itemIndex) => {
                 const currentFlatIndex = flatIndex++;
                 const isActive = currentFlatIndex === activeIndex;
-
                 return (
                   <div
-                    key={`item-${groupIdx}-${itemIdx}`}
+                    key={`item-${groupIndex}-${itemIndex}-${item.label}`}
                     data-command-index={currentFlatIndex}
                     data-snapshot-command-item=""
                     role="option"
@@ -360,35 +532,31 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
                       display: "flex",
                       alignItems: "center",
                       gap: "var(--sn-spacing-sm, 0.5rem)",
-                      padding:
-                        "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+                      padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
                       borderRadius: "var(--sn-radius-sm, 0.25rem)",
                       cursor: "pointer",
                       backgroundColor: isActive
                         ? "var(--sn-color-accent, #f3f4f6)"
                         : "transparent",
                       color: isActive
-                        ? "var(--sn-color-accent-foreground, #111)"
-                        : "var(--sn-color-foreground, #111)",
-                      transition: `background-color var(--sn-duration-fast, 100ms) var(--sn-ease-default, ease)`,
+                        ? "var(--sn-color-accent-foreground, #111827)"
+                        : "var(--sn-color-foreground, #111827)",
+                      transition:
+                        "background-color var(--sn-duration-fast, 100ms) var(--sn-ease-default, ease)",
                     }}
                   >
-                    {/* Icon */}
-                    {item.icon && (
+                    {item.icon ? (
                       <Icon
                         name={item.icon}
                         size={16}
                         color="var(--sn-color-muted-foreground, #6b7280)"
                       />
-                    )}
-
-                    {/* Label + description */}
+                    ) : null}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div
                         style={{
                           fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                          fontWeight:
-                            "var(--sn-font-weight-normal, 400)" as string,
+                          fontWeight: "var(--sn-font-weight-normal, 400)" as string,
                           lineHeight: "var(--sn-leading-normal, 1.5)",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -397,7 +565,7 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
                       >
                         {item.label}
                       </div>
-                      {item.description && (
+                      {item.description ? (
                         <div
                           style={{
                             fontSize: "var(--sn-font-size-xs, 0.75rem)",
@@ -410,11 +578,9 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
                         >
                           {item.description}
                         </div>
-                      )}
+                      ) : null}
                     </div>
-
-                    {/* Shortcut badge */}
-                    {item.shortcut && (
+                    {item.shortcut ? (
                       <kbd
                         data-snapshot-command-shortcut=""
                         style={{
@@ -436,7 +602,7 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
                       >
                         {item.shortcut}
                       </kbd>
-                    )}
+                    ) : null}
                   </div>
                 );
               })}

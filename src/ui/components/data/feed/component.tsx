@@ -1,45 +1,51 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useAtomValue } from "jotai/react";
+import { useActionExecutor } from "../../../actions/executor";
 import { usePublish, useSubscribe } from "../../../context/hooks";
-import { useComponentData } from "../../_base/use-component-data";
 import { isFromRef } from "../../../context/utils";
+import { Icon } from "../../../icons/index";
+import { useInfiniteScroll } from "../../../hooks/use-infinite-scroll";
+import { wsManagerAtom } from "../../../../ws/atom";
+import { AutoEmptyState } from "../../_base/auto-empty-state";
+import type { AutoEmptyStateConfig } from "../../_base/auto-empty-state";
+import { AutoSkeleton } from "../../_base/auto-skeleton";
+import { useComponentData } from "../../_base/use-component-data";
+import { useLiveData } from "../../_base/use-live-data";
+import { formatRelativeTime } from "./relative-time";
 import type { FeedConfig, FeedItem } from "./types";
-
-// ── Badge color map ──────────────────────────────────────────────────────────
 
 const BADGE_COLOR_MAP: Record<string, { bg: string; fg: string }> = {
   primary: {
-    bg: "var(--sn-color-primary, oklch(0.205 0 0))",
-    fg: "var(--sn-color-primary-foreground, #fff)",
+    bg: "var(--sn-color-primary, #111827)",
+    fg: "var(--sn-color-primary-foreground, #ffffff)",
   },
   secondary: {
-    bg: "var(--sn-color-secondary, oklch(0.97 0 0))",
-    fg: "var(--sn-color-secondary-foreground, #0f172a)",
+    bg: "var(--sn-color-secondary, #f3f4f6)",
+    fg: "var(--sn-color-secondary-foreground, #111827)",
   },
   success: {
-    bg: "var(--sn-color-success, oklch(0.586 0.209 145.071))",
-    fg: "var(--sn-color-success-foreground, #fff)",
+    bg: "var(--sn-color-success, #16a34a)",
+    fg: "var(--sn-color-success-foreground, #ffffff)",
   },
   warning: {
-    bg: "var(--sn-color-warning, oklch(0.681 0.162 75.834))",
-    fg: "var(--sn-color-warning-foreground, #fff)",
+    bg: "var(--sn-color-warning, #d97706)",
+    fg: "var(--sn-color-warning-foreground, #ffffff)",
   },
   destructive: {
-    bg: "var(--sn-color-destructive, oklch(0.577 0.245 27.325))",
-    fg: "var(--sn-color-destructive-foreground, #fff)",
+    bg: "var(--sn-color-destructive, #dc2626)",
+    fg: "var(--sn-color-destructive-foreground, #ffffff)",
   },
   info: {
-    bg: "var(--sn-color-info, oklch(0.546 0.245 262.881))",
-    fg: "var(--sn-color-info-foreground, #fff)",
+    bg: "var(--sn-color-info, #2563eb)",
+    fg: "var(--sn-color-info-foreground, #ffffff)",
   },
   muted: {
-    bg: "var(--sn-color-muted, oklch(0.97 0 0))",
-    fg: "var(--sn-color-muted-foreground, #64748b)",
+    bg: "var(--sn-color-muted, #f3f4f6)",
+    fg: "var(--sn-color-muted-foreground, #6b7280)",
   },
 };
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function getField(item: Record<string, unknown>, path: string): unknown {
   return item[path];
@@ -47,17 +53,7 @@ function getField(item: Record<string, unknown>, path: string): unknown {
 
 function formatTimestamp(ts: string): string {
   try {
-    const date = new Date(ts);
-    const now = Date.now();
-    const diff = now - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "just now";
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    if (days < 7) return `${days}d ago`;
-    return new Intl.DateTimeFormat().format(date);
+    return new Intl.DateTimeFormat().format(new Date(ts));
   } catch {
     return ts;
   }
@@ -78,14 +74,12 @@ function resolveItems(
   rawItems: Record<string, unknown>[],
   config: FeedConfig,
 ): FeedItem[] {
-  return rawItems.map((item, i) => {
+  return rawItems.map((item, index) => {
     const keyVal = getField(item, config.itemKey);
     const key =
-      typeof keyVal === "string" || typeof keyVal === "number" ? keyVal : i;
+      typeof keyVal === "string" || typeof keyVal === "number" ? keyVal : index;
 
-    const avatar = config.avatar
-      ? String(getField(item, config.avatar) ?? "")
-      : undefined;
+    const avatar = config.avatar ? String(getField(item, config.avatar) ?? "") : undefined;
     const title = String(getField(item, config.title) ?? "");
     const description = config.description
       ? String(getField(item, config.description) ?? "")
@@ -100,8 +94,7 @@ function resolveItems(
       const rawBadge = getField(item, config.badge.field);
       if (rawBadge != null) {
         badgeValue = String(rawBadge);
-        const mapped = config.badge.colorMap?.[badgeValue];
-        badgeColor = mapped ?? "muted";
+        badgeColor = config.badge.colorMap?.[badgeValue] ?? "muted";
       }
     }
 
@@ -118,13 +111,93 @@ function resolveItems(
   });
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+function resolveGroupLabel(
+  timestamp: string,
+  groupBy: NonNullable<FeedConfig["groupBy"]>,
+): string {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown";
+  }
+
+  if (groupBy === "month") {
+    return new Intl.DateTimeFormat(undefined, {
+      month: "long",
+      year: "numeric",
+    }).format(date);
+  }
+
+  if (groupBy === "week") {
+    const start = new Date(date);
+    const day = start.getDay();
+    const offset = day === 0 ? 6 : day - 1;
+    start.setDate(start.getDate() - offset);
+    return `Week of ${new Intl.DateTimeFormat().format(start)}`;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function groupItems(
+  items: FeedItem[],
+  groupBy: FeedConfig["groupBy"],
+): Array<{ label: string; items: FeedItem[] }> {
+  if (!groupBy) {
+    return [{ label: "", items }];
+  }
+
+  const groups = new Map<string, FeedItem[]>();
+  for (const item of items) {
+    const label = item.timestamp
+      ? resolveGroupLabel(item.timestamp, groupBy)
+      : "Unknown";
+    const bucket = groups.get(label);
+    if (bucket) {
+      bucket.push(item);
+    } else {
+      groups.set(label, [item]);
+    }
+  }
+
+  return Array.from(groups, ([label, groupedItems]) => ({
+    label,
+    items: groupedItems,
+  }));
+}
+
+function toAutoEmptyStateConfig(
+  empty: FeedConfig["empty"],
+): AutoEmptyStateConfig | null {
+  if (!empty) {
+    return null;
+  }
+
+  return {
+    icon: empty.icon,
+    title: empty.title,
+    description: empty.description,
+    ...(empty.action?.action
+      ? {
+          action: {
+            label: empty.action.label,
+            action: empty.action.action,
+            icon: empty.action.icon,
+            variant: empty.action.variant,
+          },
+        }
+      : {}),
+  };
+}
 
 function FeedBadge({ value, color }: { value: string; color: string }) {
   const colors = BADGE_COLOR_MAP[color] ?? BADGE_COLOR_MAP.muted!;
   return (
     <span
-      data-feed-badge
+      data-feed-badge=""
       style={{
         display: "inline-block",
         padding: "var(--sn-spacing-2xs, 2px) var(--sn-spacing-xs, 4px)",
@@ -145,14 +218,20 @@ function FeedItemRow({
   item,
   onClick,
   isSelected,
+  itemActions,
+  relativeTime,
 }: {
   item: FeedItem;
   onClick: (raw: Record<string, unknown>) => void;
   isSelected: boolean;
+  itemActions?: FeedConfig["itemActions"];
+  relativeTime: boolean;
 }) {
+  const execute = useActionExecutor();
+
   return (
     <div
-      data-feed-item
+      data-feed-item=""
       data-selected={isSelected ? "" : undefined}
       onClick={() => onClick(item.raw)}
       style={{
@@ -162,14 +241,11 @@ function FeedItemRow({
         borderBottom:
           "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
         cursor: "pointer",
-        backgroundColor: isSelected
-          ? "var(--sn-color-muted, #f3f4f6)"
-          : undefined,
+        backgroundColor: isSelected ? "var(--sn-color-muted, #f3f4f6)" : undefined,
         transition:
           "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
       }}
     >
-      {/* Avatar */}
       {item.avatar ? (
         <img
           src={item.avatar}
@@ -186,7 +262,7 @@ function FeedItemRow({
       ) : (
         <div
           aria-hidden="true"
-          data-feed-avatar-fallback
+          data-feed-avatar-fallback=""
           style={{
             width: "2rem",
             height: "2rem",
@@ -207,7 +283,6 @@ function FeedItemRow({
         </div>
       )}
 
-      {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
@@ -218,7 +293,7 @@ function FeedItemRow({
           }}
         >
           <span
-            data-feed-title
+            data-feed-title=""
             style={{
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
               fontWeight: "var(--sn-font-weight-medium, 500)",
@@ -227,13 +302,13 @@ function FeedItemRow({
           >
             {item.title}
           </span>
-          {item.badgeValue && item.badgeColor && (
+          {item.badgeValue && item.badgeColor ? (
             <FeedBadge value={item.badgeValue} color={item.badgeColor} />
-          )}
+          ) : null}
         </div>
-        {item.description && (
+        {item.description ? (
           <div
-            data-feed-description
+            data-feed-description=""
             style={{
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
               color: "var(--sn-color-muted-foreground, #6b7280)",
@@ -245,13 +320,12 @@ function FeedItemRow({
           >
             {item.description}
           </div>
-        )}
+        ) : null}
       </div>
 
-      {/* Timestamp */}
-      {item.timestamp && (
+      {item.timestamp ? (
         <span
-          data-feed-timestamp
+          data-feed-timestamp=""
           style={{
             fontSize: "var(--sn-font-size-xs, 0.75rem)",
             color: "var(--sn-color-muted-foreground, #6b7280)",
@@ -260,106 +334,166 @@ function FeedItemRow({
             paddingTop: "var(--sn-spacing-2xs, 2px)",
           }}
         >
-          {formatTimestamp(item.timestamp)}
+          {relativeTime
+            ? formatRelativeTime(item.timestamp)
+            : formatTimestamp(item.timestamp)}
         </span>
-      )}
+      ) : null}
+
+      {itemActions && itemActions.length > 0 ? (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "var(--sn-spacing-xs, 4px)",
+            flexShrink: 0,
+          }}
+        >
+          {itemActions.map((itemAction, index) => (
+            <button
+              key={`${itemAction.label}-${index}`}
+              type="button"
+              aria-label={itemAction.label}
+              onClick={(event) => {
+                event.stopPropagation();
+                void execute(itemAction.action, { item: item.raw });
+              }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "var(--sn-spacing-2xs, 2px)",
+                border:
+                  "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
+                backgroundColor:
+                  itemAction.variant === "destructive"
+                    ? "color-mix(in oklch, var(--sn-color-destructive, #dc2626) 8%, transparent)"
+                    : "transparent",
+                color:
+                  itemAction.variant === "destructive"
+                    ? "var(--sn-color-destructive, #dc2626)"
+                    : "var(--sn-color-muted-foreground, #6b7280)",
+                borderRadius: "var(--sn-radius-sm, 0.25rem)",
+                padding: "var(--sn-spacing-2xs, 2px) var(--sn-spacing-xs, 4px)",
+                cursor: "pointer",
+              }}
+            >
+              {itemAction.icon ? <Icon name={itemAction.icon} size={14} /> : null}
+              <span>{itemAction.label}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
-
-/**
- * Config-driven Feed component.
- *
- * Renders a scrollable activity/event stream from an endpoint or from-ref.
- * Supports avatar, title, description, timestamp, badge rendering, pagination,
- * and empty state. Publishes selected item to page context when `id` is set.
- *
- * @param props.config - Feed configuration from the Zod schema
- *
- * @example
- * ```tsx
- * <Feed config={{
- *   data: 'GET /api/activity',
- *   title: 'message',
- *   description: 'detail',
- *   timestamp: 'createdAt',
- * }} />
- * ```
- */
 export function Feed({ config }: { config: FeedConfig }) {
   const publish = usePublish(config.id);
-
-  // Resolve data — either from-ref or endpoint fetch
+  const wsManager = useAtomValue(wsManagerAtom);
   const isRef = isFromRef(config.data);
   const resolvedRef = useSubscribe(config.data);
-  const { data: fetchedData, isLoading, error } = useComponentData(config.data);
-
+  const { data: fetchedData, isLoading, error, refetch } = useComponentData(config.data);
   const [page, setPage] = useState(1);
-  const [selectedItem, setSelectedItem] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Record<string, unknown> | null>(null);
+  const [, setRelativeTick] = useState(0);
 
-  // Collect raw rows from whichever source is active
   const rawRows = useMemo<Record<string, unknown>[]>(() => {
     if (isRef) {
-      if (Array.isArray(resolvedRef)) {
-        return resolvedRef as Record<string, unknown>[];
-      }
+      return Array.isArray(resolvedRef) ? (resolvedRef as Record<string, unknown>[]) : [];
+    }
+    if (fetchedData == null) {
       return [];
     }
-    if (fetchedData == null) return [];
-    if (Array.isArray(fetchedData))
+    if (Array.isArray(fetchedData)) {
       return fetchedData as Record<string, unknown>[];
-    // Support { data: [...] } or { items: [...] } shapes
+    }
     const asRecord = fetchedData as Record<string, unknown>;
-    if (Array.isArray(asRecord["data"]))
-      return asRecord["data"] as Record<string, unknown>[];
-    if (Array.isArray(asRecord["items"]))
-      return asRecord["items"] as Record<string, unknown>[];
+    if (Array.isArray(asRecord.data)) {
+      return asRecord.data as Record<string, unknown>[];
+    }
+    if (Array.isArray(asRecord.items)) {
+      return asRecord.items as Record<string, unknown>[];
+    }
     return [];
-  }, [isRef, resolvedRef, fetchedData]);
+  }, [fetchedData, isRef, resolvedRef]);
 
-  const resolvedItems = useMemo(
-    () => resolveItems(rawRows, config),
-    [rawRows, config],
-  );
-
-  // Pagination
+  const resolvedItems = useMemo(() => resolveItems(rawRows, config), [config, rawRows]);
   const pageSize = config.pageSize;
   const totalPages = Math.max(1, Math.ceil(resolvedItems.length / pageSize));
-  const visibleItems = useMemo(() => {
-    return resolvedItems.slice(0, page * pageSize);
-  }, [resolvedItems, page, pageSize]);
-
+  const visibleItems = useMemo(
+    () => resolvedItems.slice(0, page * pageSize),
+    [page, pageSize, resolvedItems],
+  );
+  const groupedItems = useMemo(
+    () => groupItems(visibleItems, config.groupBy),
+    [config.groupBy, visibleItems],
+  );
+  const emptyStateConfig = useMemo(
+    () => toAutoEmptyStateConfig(config.empty),
+    [config.empty],
+  );
   const hasMore = page * pageSize < resolvedItems.length;
 
   const loadMore = useCallback(() => {
-    setPage((p) => Math.min(p + 1, totalPages));
+    setPage((currentPage) => Math.min(currentPage + 1, totalPages));
   }, [totalPages]);
 
   const selectItem = useCallback((item: Record<string, unknown>) => {
     setSelectedItem(item);
   }, []);
 
-  // Publish selected item when changed
   useEffect(() => {
     if (publish) {
       publish(selectedItem);
     }
   }, [publish, selectedItem]);
 
+  useEffect(() => {
+    if (!config.relativeTime) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setRelativeTick((tick) => tick + 1);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [config.relativeTime]);
+
+  const liveConfig = useMemo(
+    () =>
+      config.live === true
+        ? { event: "*", indicator: false, debounce: undefined }
+        : config.live
+          ? {
+              event: config.live.event,
+              indicator: config.live.indicator,
+              debounce: config.live.debounce,
+            }
+          : null,
+    [config.live],
+  );
+  const { hasNewData, refresh } = useLiveData({
+    event: liveConfig?.event ?? "*",
+    onRefresh: refetch,
+    debounce: liveConfig?.debounce,
+    indicator: liveConfig?.indicator,
+    wsManager,
+    enabled: liveConfig !== null,
+  });
   const loading = !isRef && isLoading;
   const fetchError = !isRef ? error : null;
+  const infiniteScrollRef = useInfiniteScroll({
+    hasNextPage: config.infinite ? hasMore : false,
+    isLoading: loading,
+    loadNextPage: loadMore,
+  });
 
   return (
     <div
       data-snapshot-component="feed"
       className={config.className}
       style={{
-        backgroundColor: "var(--sn-color-card, #fff)",
+        backgroundColor: "var(--sn-color-card, #ffffff)",
         color: "var(--sn-color-card-foreground, #111827)",
         borderRadius: "var(--sn-radius-md, 6px)",
         border:
@@ -368,68 +502,127 @@ export function Feed({ config }: { config: FeedConfig }) {
         ...(config.style as React.CSSProperties),
       }}
     >
-      {/* Loading state */}
-      {loading && (
+      {hasNewData ? (
         <div
-          data-feed-loading
           style={{
-            padding: "var(--sn-spacing-md, 12px)",
-            color: "var(--sn-color-muted-foreground, #6b7280)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            textAlign: "center",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "var(--sn-spacing-sm, 8px)",
+            padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
+            borderBottom:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+            backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
           }}
         >
-          Loading…
+          <span>New activity available</span>
+          <button
+            type="button"
+            onClick={refresh}
+            style={{
+              border:
+                "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
+              backgroundColor: "var(--sn-color-card, #ffffff)",
+              borderRadius: "var(--sn-radius-sm, 0.25rem)",
+              padding: "var(--sn-spacing-2xs, 2px) var(--sn-spacing-sm, 8px)",
+              cursor: "pointer",
+            }}
+          >
+            Refresh
+          </button>
         </div>
-      )}
+      ) : null}
 
-      {/* Error state */}
-      {fetchError && (
+      {loading ? (
+        config.loading && !config.loading.disabled ? (
+          <AutoSkeleton componentType="feed" config={config.loading} />
+        ) : (
+          <div
+            data-feed-loading=""
+            style={{
+              padding: "var(--sn-spacing-md, 12px)",
+              color: "var(--sn-color-muted-foreground, #6b7280)",
+              fontSize: "var(--sn-font-size-sm, 0.875rem)",
+              textAlign: "center",
+            }}
+          >
+            Loading...
+          </div>
+        )
+      ) : null}
+
+      {fetchError ? (
         <div
-          data-feed-error
+          data-feed-error=""
           role="alert"
           style={{
             padding: "var(--sn-spacing-md, 12px)",
-            color: "var(--sn-color-destructive, oklch(0.577 0.245 27.325))",
+            color: "var(--sn-color-destructive, #dc2626)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
             textAlign: "center",
           }}
         >
           Error: {fetchError.message}
         </div>
-      )}
+      ) : null}
 
-      {/* Empty state */}
-      {!loading && !fetchError && visibleItems.length === 0 && (
-        <div
-          data-feed-empty
-          style={{
-            padding: "var(--sn-spacing-md, 12px)",
-            color: "var(--sn-color-muted-foreground, #6b7280)",
-            fontSize: "var(--sn-font-size-md, 1rem)",
-            textAlign: "center",
-          }}
-        >
-          {config.emptyMessage}
-        </div>
-      )}
+      {!loading && !fetchError && visibleItems.length === 0 ? (
+        emptyStateConfig ? (
+          <AutoEmptyState config={emptyStateConfig} />
+        ) : (
+          <div
+            data-feed-empty=""
+            style={{
+              padding: "var(--sn-spacing-md, 12px)",
+              color: "var(--sn-color-muted-foreground, #6b7280)",
+              fontSize: "var(--sn-font-size-md, 1rem)",
+              textAlign: "center",
+            }}
+          >
+            {config.emptyMessage}
+          </div>
+        )
+      ) : null}
 
-      {/* Items */}
-      {!loading && !fetchError && visibleItems.length > 0 && (
-        <div data-feed-list role="list">
-          {visibleItems.map((item) => (
-            <FeedItemRow
-              key={item.key}
-              item={item}
-              onClick={selectItem}
-              isSelected={selectedItem === item.raw}
-            />
+      {!loading && !fetchError && visibleItems.length > 0 ? (
+        <div data-feed-list="" role="list">
+          {groupedItems.map((group) => (
+            <React.Fragment key={group.label || "default"}>
+              {group.label ? (
+                <div
+                  style={{
+                    padding:
+                      "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
+                    backgroundColor: "var(--sn-color-muted, #f3f4f6)",
+                    color: "var(--sn-color-muted-foreground, #6b7280)",
+                    fontSize: "var(--sn-font-size-xs, 0.75rem)",
+                    fontWeight: "var(--sn-font-weight-semibold, 600)",
+                    textTransform: "uppercase",
+                    letterSpacing: "var(--sn-tracking-wide, 0.05em)",
+                  }}
+                >
+                  {group.label}
+                </div>
+              ) : null}
+              {group.items.map((item) => (
+                <FeedItemRow
+                  key={item.key}
+                  item={item}
+                  onClick={selectItem}
+                  isSelected={selectedItem === item.raw}
+                  itemActions={config.itemActions}
+                  relativeTime={config.relativeTime}
+                />
+              ))}
+            </React.Fragment>
           ))}
+          {config.infinite && hasMore ? (
+            <div ref={infiniteScrollRef} aria-hidden="true" style={{ height: "1px" }} />
+          ) : null}
         </div>
-      )}
+      ) : null}
 
-      {/* Load more */}
-      {!loading && !fetchError && hasMore && (
+      {!loading && !fetchError && hasMore && !config.infinite ? (
         <div
           style={{
             padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
@@ -440,11 +633,11 @@ export function Feed({ config }: { config: FeedConfig }) {
         >
           <button
             type="button"
-            data-feed-load-more
+            data-feed-load-more=""
             onClick={loadMore}
             style={{
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              color: "var(--sn-color-primary, oklch(0.205 0 0))",
+              color: "var(--sn-color-primary, #111827)",
               background: "none",
               border: "none",
               cursor: "pointer",
@@ -454,7 +647,8 @@ export function Feed({ config }: { config: FeedConfig }) {
             Load more
           </button>
         </div>
-      )}
+      ) : null}
+
       <style>{`
         [data-snapshot-component="feed"] [data-feed-item]:hover {
           background: var(--sn-color-accent, var(--sn-color-muted));

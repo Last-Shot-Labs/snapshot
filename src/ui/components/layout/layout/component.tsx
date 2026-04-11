@@ -83,8 +83,10 @@ function SidebarLayout({
           </aside>
         ) : null}
         <main
+          id="main-content"
           aria-label="Main content"
           data-layout-content=""
+          tabIndex={-1}
           style={{
             flex: 1,
             minWidth: 0,
@@ -192,8 +194,10 @@ function TopNavLayout({
           </aside>
         ) : null}
         <main
+          id="main-content"
           aria-label="Main content"
           data-layout-content=""
+          tabIndex={-1}
           style={{
             flex: 1,
             minWidth: 0,
@@ -270,8 +274,10 @@ function StackedLayout({
         </aside>
       ) : null}
       <main
+        id="main-content"
         aria-label="Main content"
         data-layout-content=""
+        tabIndex={-1}
         style={{
           flex: 1,
           padding: "var(--sn-spacing-lg, 1.5rem)",
@@ -325,8 +331,10 @@ function MinimalLayout({
       }}
     >
       <main
+        id="main-content"
         aria-label="Main content"
         data-layout-content=""
+        tabIndex={-1}
         style={{
           width: "100%",
           maxWidth: "var(--sn-container-md, 32rem)",
@@ -364,7 +372,12 @@ function FullWidthLayout({
         ...style,
       }}
     >
-      <main aria-label="Main content" data-layout-content="">
+      <main
+        id="main-content"
+        aria-label="Main content"
+        data-layout-content=""
+        tabIndex={-1}
+      >
         {children}
       </main>
     </div>

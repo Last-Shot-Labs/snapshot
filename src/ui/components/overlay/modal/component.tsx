@@ -11,6 +11,7 @@ import {
   getButtonStyle,
   BUTTON_INTERACTIVE_CSS,
 } from "../../_base/button-styles";
+import { useFocusTrap } from "../../_base/use-focus-trap";
 import { useModal } from "./hook";
 import type { ModalConfig } from "./schema";
 
@@ -74,6 +75,15 @@ export function ModalComponent({ config }: { config: ModalConfig }) {
       dialogRef.current.focus();
     }
   }, [isOpen, animating]);
+
+  useFocusTrap(
+    isOpen && animating && config.trapFocus !== false,
+    dialogRef,
+    {
+      initialFocus: config.initialFocus,
+      returnFocus: config.returnFocus,
+    },
+  );
 
   // Escape key closes the modal
   const handleKeyDown = useCallback(

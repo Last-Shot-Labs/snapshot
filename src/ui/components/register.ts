@@ -99,6 +99,9 @@ import {
 import { Input, inputConfigSchema } from "./forms/input/index";
 import { Textarea, textareaConfigSchema } from "./forms/textarea/index";
 import { Toggle, toggleConfigSchema } from "./forms/toggle/index";
+import { DatePicker, datePickerConfigSchema } from "./forms/date-picker";
+import { Slider, sliderConfigSchema } from "./forms/slider";
+import { ColorPicker, colorPickerConfigSchema } from "./forms/color-picker";
 import {
   MultiSelect,
   multiSelectConfigSchema,
@@ -185,6 +188,7 @@ import {
   Carousel,
   carouselConfigSchema,
 } from "./media/carousel/index";
+import { SnapshotImage, snapshotImageSchema } from "./media/image";
 import { Video } from "./media/video/index";
 import { videoConfigSchema } from "./media/video/schema";
 import { Embed } from "./media/embed/index";
@@ -214,8 +218,8 @@ let builtInComponentsRegistered = false;
  * The function is idempotent so boot code can call it safely without worrying
  * about duplicate registrations.
  */
-export function registerBuiltInComponents(): void {
-  if (builtInComponentsRegistered) {
+export function registerBuiltInComponents(force = false): void {
+  if (builtInComponentsRegistered && !force) {
     return;
   }
 
@@ -509,6 +513,24 @@ export function registerBuiltInComponents(): void {
   registerComponentSchema("input", inputConfigSchema);
 
   registerComponent(
+    "date-picker",
+    DatePicker as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("date-picker", datePickerConfigSchema);
+
+  registerComponent(
+    "slider",
+    Slider as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("slider", sliderConfigSchema);
+
+  registerComponent(
+    "color-picker",
+    ColorPicker as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("color-picker", colorPickerConfigSchema);
+
+  registerComponent(
     "textarea",
     Textarea as Parameters<typeof registerComponent>[1],
   );
@@ -671,6 +693,12 @@ export function registerBuiltInComponents(): void {
   registerComponentSchema("carousel", carouselConfigSchema);
 
   registerComponent(
+    "image",
+    SnapshotImage as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("image", snapshotImageSchema);
+
+  registerComponent(
     "video",
     Video as unknown as Parameters<typeof registerComponent>[1],
   );
@@ -729,4 +757,8 @@ export function registerBuiltInComponents(): void {
     SplitPane as unknown as Parameters<typeof registerComponent>[1],
   );
   registerComponentSchema("split-pane", splitPaneConfigSchema);
+}
+
+export function resetBuiltInComponentRegistration(): void {
+  builtInComponentsRegistered = false;
 }

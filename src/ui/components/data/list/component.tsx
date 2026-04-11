@@ -1,12 +1,17 @@
 'use client';
 
 import React, { useEffect, useId, useMemo, useState } from "react";
+import { useAtomValue } from "jotai/react";
 import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom } from "../../../context/hooks";
+import { AutoEmptyState } from "../../_base/auto-empty-state";
+import type { AutoEmptyStateConfig } from "../../_base/auto-empty-state";
+import { AutoSkeleton } from "../../_base/auto-skeleton";
 import { useComponentData } from "../../_base/use-component-data";
 import { applyClientFilters, applyClientSort } from "../../_base/client-data-ops";
 import { ContextMenuPortal } from "../../_base/context-menu-portal";
 import { useSharedDragDrop } from "../../_base/drag-drop-provider";
+import { useLiveData } from "../../_base/use-live-data";
 import { useReorderable } from "../../_base/use-reorderable";
 import { Icon } from "../../../icons/index";
 import {
@@ -16,8 +21,10 @@ import {
   verticalListSortingStrategy,
   getSortableStyle,
 } from "../../../hooks/use-drag-drop";
+import { useVirtualList } from "../../../hooks/use-virtual-list";
 import type { ListConfig, ListItemConfig } from "./types";
 import type { ActionConfig, ActionExecuteFn } from "../../../actions/types";
+import { wsManagerAtom } from "../../../../ws/atom";
 
 /**
  * Badge pill component for list items.
@@ -85,6 +92,30 @@ function ListSkeleton() {
       </div>
     </div>
   );
+}
+
+function toAutoEmptyStateConfig(
+  empty: ListConfig["empty"],
+): AutoEmptyStateConfig | null {
+  if (!empty) {
+    return null;
+  }
+
+  return {
+    icon: empty.icon,
+    title: empty.title,
+    description: empty.description,
+    ...(empty.action?.action
+      ? {
+          action: {
+            label: empty.action.label,
+            action: empty.action.action,
+            icon: empty.action.icon,
+            variant: empty.action.variant,
+          },
+        }
+      : {}),
+  };
 }
 
 /**
@@ -328,6 +359,7 @@ function DroppableListBody({
  */
 export function ListComponent({ config }: { config: ListConfig }) {
   const execute = useActionExecutor();
+  const wsManager = useAtomValue(wsManagerAtom);
   const generatedId = useId();
   const variant = config.variant ?? "default";
   const showDivider = config.divider !== false && variant !== "card";
@@ -349,7 +381,7 @@ export function ListComponent({ config }: { config: ListConfig }) {
   } | null>(null);
 
   // Fetch data if endpoint is provided
-  const { data, isLoading, error } = useComponentData(
+  const { data, isLoading, error, refetch } = useComponentData(
     config.data ?? "",
     undefined,
     { poll: config.poll },
@@ -438,6 +470,51 @@ export function ListComponent({ config }: { config: ListConfig }) {
         : visibleItems,
     [config.limit, visibleItems],
   );
+  const liveConfig = useMemo(
+    () =>
+      config.live === true
+        ? { event: "*", indicator: false, debounce: undefined }
+        : config.live
+          ? {
+              event: config.live.event,
+              indicator: config.live.indicator,
+              debounce: config.live.debounce,
+            }
+          : null,
+    [config.live],
+  );
+  const { hasNewData, refresh } = useLiveData({
+    event: liveConfig?.event ?? "*",
+    onRefresh: refetch,
+    debounce: liveConfig?.debounce,
+    indicator: liveConfig?.indicator,
+    wsManager,
+    enabled: liveConfig !== null,
+  });
+  const virtualConfig = useMemo(
+    () =>
+      typeof config.virtualize === "object"
+        ? config.virtualize
+        : config.virtualize
+          ? { itemHeight: 48, overscan: 5 }
+          : null,
+    [config.virtualize],
+  );
+  const virtualList = useVirtualList({
+    totalCount: limitedItems.length,
+    itemHeight: virtualConfig?.itemHeight ?? 48,
+    overscan: virtualConfig?.overscan ?? 5,
+  });
+  const emptyStateConfig = useMemo(
+    () => toAutoEmptyStateConfig(config.empty),
+    [config.empty],
+  );
+  const renderedItems = virtualConfig
+    ? virtualList.visibleIndices.map((index) => ({
+        item: limitedItems[index]!,
+        index,
+      }))
+    : limitedItems.map((item, index) => ({ item, index }));
 
   const containerStyle: React.CSSProperties =
     variant === "bordered"
@@ -466,13 +543,36 @@ export function ListComponent({ config }: { config: ListConfig }) {
 [data-snapshot-component="list"] [data-list-item][role="button"]:focus { outline: none; }
 [data-snapshot-component="list"] [data-list-item][role="button"]:focus-visible { outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb)); outline-offset: var(--sn-ring-offset, 2px); border-radius: var(--sn-radius-md, 0.5rem); }
       `}</style>
+      {hasNewData ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "0.75rem",
+            padding: "0.75rem 1rem",
+            marginBottom: "0.75rem",
+            borderRadius: "var(--sn-radius-md, 0.5rem)",
+            backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
+          }}
+        >
+          <span>New items available</span>
+          <button type="button" onClick={refresh}>
+            Refresh
+          </button>
+        </div>
+      ) : null}
       {/* Loading state */}
       {isLoading && (
-        <div data-testid="list-loading">
-          {[0, 1, 2].map((i) => (
-            <ListSkeleton key={i} />
-          ))}
-        </div>
+        config.loading && !config.loading.disabled ? (
+          <AutoSkeleton componentType="list" config={config.loading} />
+        ) : (
+          <div data-testid="list-loading">
+            {[0, 1, 2].map((i) => (
+              <ListSkeleton key={i} />
+            ))}
+          </div>
+        )
       )}
 
       {/* Error state */}
@@ -492,24 +592,28 @@ export function ListComponent({ config }: { config: ListConfig }) {
 
       {/* Empty state */}
       {!isLoading && !error && limitedItems.length === 0 && (
-        <div
-          data-testid="list-empty"
-          style={{
-            padding: "var(--sn-spacing-lg, 1.5rem)",
-            color: "var(--sn-color-muted-foreground, #6b7280)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            textAlign: "center",
-          }}
-        >
-          {emptyMessage}
-        </div>
+        emptyStateConfig ? (
+          <AutoEmptyState config={emptyStateConfig} />
+        ) : (
+          <div
+            data-testid="list-empty"
+            style={{
+              padding: "var(--sn-spacing-lg, 1.5rem)",
+              color: "var(--sn-color-muted-foreground, #6b7280)",
+              fontSize: "var(--sn-font-size-sm, 0.875rem)",
+              textAlign: "center",
+            }}
+          >
+            {emptyMessage}
+          </div>
+        )
       )}
 
       {/* Items */}
       {!isLoading && !error && dropEnabled ? (
         <ManagedListItems
           containerId={containerId}
-          items={limitedItems}
+          items={renderedItems.map(({ item }) => item)}
           selectable={selectable}
           showDivider={showDivider}
           isCard={variant === "card"}
@@ -525,29 +629,54 @@ export function ListComponent({ config }: { config: ListConfig }) {
       ) : (
         !isLoading &&
         !error &&
-        limitedItems.map((item, index) => (
-          <ListItem
-            key={index}
-            item={item}
-            selectable={selectable}
-            showDivider={showDivider && index < limitedItems.length - 1}
-            isCard={variant === "card"}
-            draggable={sortable}
-            execute={execute}
-            onContextMenu={
-              config.contextMenu
-                ? (event) => {
-                    event.preventDefault();
-                    setContextMenuState({
-                      x: event.clientX,
-                      y: event.clientY,
-                      context: item as unknown as Record<string, unknown>,
-                    });
+        (
+          <div
+            ref={virtualConfig ? virtualList.containerRef : undefined}
+            style={{
+              overflowY: virtualConfig ? "auto" : undefined,
+              maxHeight: virtualConfig ? `${(virtualConfig.itemHeight ?? 48) * 8}px` : undefined,
+            }}
+          >
+            <div style={{ paddingTop: virtualConfig ? `${virtualList.offsetTop}px` : undefined }}>
+              {renderedItems.map(({ item, index }) => (
+                <ListItem
+                  key={index}
+                  item={item}
+                  selectable={selectable}
+                  showDivider={showDivider && index < renderedItems.length - 1}
+                  isCard={variant === "card"}
+                  draggable={sortable}
+                  execute={execute}
+                  onContextMenu={
+                    config.contextMenu
+                      ? (event) => {
+                          event.preventDefault();
+                          setContextMenuState({
+                            x: event.clientX,
+                            y: event.clientY,
+                            context: item as unknown as Record<string, unknown>,
+                          });
+                        }
+                      : undefined
                   }
-                : undefined
-            }
-          />
-        ))
+                />
+              ))}
+            </div>
+            {virtualConfig ? (
+              <div
+                aria-hidden="true"
+                style={{
+                  height: `${Math.max(
+                    0,
+                    virtualList.totalHeight -
+                      virtualList.offsetTop -
+                      renderedItems.length * (virtualConfig.itemHeight ?? 48),
+                  )}px`,
+                }}
+              />
+            ) : null}
+          </div>
+        )
       )}
       {config.contextMenu ? (
         <ContextMenuPortal

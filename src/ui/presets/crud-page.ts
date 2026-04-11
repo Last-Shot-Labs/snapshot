@@ -104,6 +104,11 @@ export function crudPage(options: CrudPageOptions): PageConfig {
   const tableId = `${slug}-table`;
   const createModalId = `${slug}-create-modal`;
   const editDrawerId = `${slug}-edit-drawer`;
+  const filterBarId = `${slug}-filters`;
+  const selectFilters =
+    options.filters?.filter((filter) => filter.type === "select") ?? [];
+  const textFilters =
+    options.filters?.filter((filter) => filter.type === "text") ?? [];
 
   // ── Columns ──────────────────────────────────────────────────────────────
 
@@ -184,11 +189,12 @@ export function crudPage(options: CrudPageOptions): PageConfig {
     children: headerChildren,
   });
 
-  if (options.filters && options.filters.length > 0) {
+  if (selectFilters.length > 0) {
     content.push({
       type: "filter-bar",
-      id: `${slug}-filters`,
-      filters: options.filters.map((filter) => ({
+      id: filterBarId,
+      showSearch: false,
+      filters: selectFilters.map((filter) => ({
         key: filter.key,
         label: filter.label,
         options: filter.options ?? [],
@@ -206,10 +212,35 @@ export function crudPage(options: CrudPageOptions): PageConfig {
       type: options.pagination?.type ?? "offset",
       pageSize: options.pagination?.pageSize ?? 20,
     },
-    searchable: true,
+    searchable:
+      textFilters.length > 0
+        ? {
+            placeholder:
+              textFilters[0]?.label
+                ? `Search ${textFilters[0].label.toLowerCase()}...`
+                : "Search...",
+            fields: textFilters.map((filter) => filter.key),
+          }
+        : true,
     emptyMessage:
       options.emptyState?.title ?? `No ${options.title.toLowerCase()} yet`,
   };
+
+  if (options.emptyState) {
+    tableConfig.empty = {
+      title: options.emptyState.title,
+      description: options.emptyState.description,
+      icon: options.emptyState.icon,
+    };
+  }
+
+  if (selectFilters.length > 0) {
+    tableConfig.clientFilter = selectFilters.map((filter) => ({
+      field: filter.key,
+      operator: "equals",
+      value: { from: `${filterBarId}.filters.${filter.key}` },
+    }));
+  }
 
   if (rowActions.length > 0) {
     tableConfig.actions = rowActions;

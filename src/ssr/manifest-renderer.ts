@@ -606,6 +606,12 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
       value: {
         currentPath,
         currentRoute: route,
+        match: {
+          route,
+          params: routeParams,
+          parents: [],
+          activeRoutes: [route],
+        },
         params: routeParams,
         query: {},
         navigate: () => {},
@@ -823,6 +829,12 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
           value: {
             currentPath: requestMatch.url.pathname,
             currentRoute: route,
+            match: {
+              route,
+              params: requestMatch.params as Record<string, string>,
+              parents: [],
+              activeRoutes: [route],
+            },
             params: requestMatch.params as Record<string, string>,
             query: requestMatch.query as Record<string, string>,
             navigate: () => {},
@@ -1161,6 +1173,12 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
               value: {
                 currentPath: currentRoute.path,
                 currentRoute,
+                match: {
+                  route: currentRoute,
+                  params: {},
+                  parents: [],
+                  activeRoutes: [currentRoute],
+                },
                 params: {},
                 query: {},
                 navigate: () => {},

@@ -45,3 +45,7 @@ export function getRegisteredComponent(
 ): ConfigDrivenComponent | undefined {
   return runtimeComponentRegistry.get(type);
 }
+
+export function resetRegisteredComponents(): void {
+  runtimeComponentRegistry.clear();
+}

@@ -6,7 +6,13 @@
  * registry (for rendering) and the schema registry (for validation).
  */
 
-import { useState, useId, type CSSProperties } from "react";
+import {
+  createContext,
+  useContext,
+  useId,
+  useState,
+  type CSSProperties,
+} from "react";
 import { usePublish, useResolveFrom, useSubscribe } from "../context/index";
 import { getRegisteredComponent } from "./component-registry";
 import { useActionExecutor } from "../actions/executor";
@@ -19,7 +25,9 @@ import {
   getButtonStyle,
   BUTTON_INTERACTIVE_CSS,
 } from "../components/_base/button-styles";
+import { SuspenseWrapper } from "../components/_base/suspense-wrapper";
 import { useManifestRuntime, useRouteRuntime } from "./runtime";
+import { PageRenderer } from "./renderer";
 import { renderIcon } from "../icons/render";
 import type {
   RowConfig,
@@ -30,6 +38,7 @@ import type {
 } from "./types";
 
 const EMPTY_POLICY_MAP: Record<string, unknown> = {};
+const OutletDepthContext = createContext(0);
 
 // ── Spacing token map ───────────────────────────────────────────────────────
 
@@ -262,12 +271,16 @@ function Row({ config }: { config: Record<string, unknown> }) {
       role="group"
       data-snapshot-row
     >
-      {rowConfig.children.map((child, i) => (
-        <InlineComponentRenderer
-          key={child.id ?? `row-child-${i}`}
-          config={child}
-        />
-      ))}
+      <SuspenseWrapper config={(rowConfig as { suspense?: unknown }).suspense as Parameters<typeof SuspenseWrapper>[0]["config"]}>
+        <>
+          {rowConfig.children.map((child, i) => (
+            <InlineComponentRenderer
+              key={child.id ?? `row-child-${i}`}
+              config={child}
+            />
+          ))}
+        </>
+      </SuspenseWrapper>
     </div>
   );
 
@@ -565,12 +578,16 @@ function Card({ config }: { config: Record<string, unknown> }) {
           )}
         </div>
       )}
-      {cardConfig.children?.map((child, i) => (
-        <InlineComponentRenderer
-          key={child.id ?? `card-child-${i}`}
-          config={child}
-        />
-      ))}
+      <SuspenseWrapper config={(cardConfig as { suspense?: unknown }).suspense as Parameters<typeof SuspenseWrapper>[0]["config"]}>
+        <>
+          {cardConfig.children?.map((child, i) => (
+            <InlineComponentRenderer
+              key={child.id ?? `card-child-${i}`}
+              config={child}
+            />
+          ))}
+        </>
+      </SuspenseWrapper>
     </div>
   );
 
@@ -662,12 +679,16 @@ function Section({ config }: { config: Record<string, unknown> }) {
           margin: 0,
         }} />
       )}
-      {sectionConfig.children?.map((child, i) => (
-        <InlineComponentRenderer
-          key={child.id ?? `section-child-${i}`}
-          config={child}
-        />
-      ))}
+      <SuspenseWrapper config={(sectionConfig as { suspense?: unknown }).suspense as Parameters<typeof SuspenseWrapper>[0]["config"]}>
+        <>
+          {sectionConfig.children?.map((child, i) => (
+            <InlineComponentRenderer
+              key={child.id ?? `section-child-${i}`}
+              config={child}
+            />
+          ))}
+        </>
+      </SuspenseWrapper>
     </section>
   );
 
@@ -734,12 +755,16 @@ function Container({ config }: { config: Record<string, unknown> }) {
         ...configStyle,
       }}
     >
-      {containerConfig.children?.map((child, i) => (
-        <InlineComponentRenderer
-          key={child.id ?? `container-child-${i}`}
-          config={child}
-        />
-      ))}
+      <SuspenseWrapper config={(containerConfig as { suspense?: unknown }).suspense as Parameters<typeof SuspenseWrapper>[0]["config"]}>
+        <>
+          {containerConfig.children?.map((child, i) => (
+            <InlineComponentRenderer
+              key={child.id ?? `container-child-${i}`}
+              config={child}
+            />
+          ))}
+        </>
+      </SuspenseWrapper>
     </div>
   );
 }
@@ -794,22 +819,26 @@ function Grid({ config }: { config: Record<string, unknown> }) {
 
   const gridContent = (
     <div data-snapshot-grid className={gridConfig.className} style={style}>
-      {gridConfig.children?.map((child, i) => {
-        const area = (child as Record<string, unknown>).area as string | undefined;
-        if (area) {
-          return (
-            <div key={child.id ?? `grid-child-${i}`} style={{ gridArea: area }}>
-              <InlineComponentRenderer config={child} />
-            </div>
-          );
-        }
-        return (
-          <InlineComponentRenderer
-            key={child.id ?? `grid-child-${i}`}
-            config={child}
-          />
-        );
-      })}
+      <SuspenseWrapper config={(gridConfig as { suspense?: unknown }).suspense as Parameters<typeof SuspenseWrapper>[0]["config"]}>
+        <>
+          {gridConfig.children?.map((child, i) => {
+            const area = (child as Record<string, unknown>).area as string | undefined;
+            if (area) {
+              return (
+                <div key={child.id ?? `grid-child-${i}`} style={{ gridArea: area }}>
+                  <InlineComponentRenderer config={child} />
+                </div>
+              );
+            }
+            return (
+              <InlineComponentRenderer
+                key={child.id ?? `grid-child-${i}`}
+                config={child}
+              />
+            );
+          })}
+        </>
+      </SuspenseWrapper>
     </div>
   );
 
@@ -878,6 +907,44 @@ function Spacer({ config }: { config: Record<string, unknown> }) {
   );
 }
 
+interface OutletConfig {
+  type: "outlet";
+  fallback?: ComponentConfig[];
+}
+
+function OutletComponent({ config }: { config: Record<string, unknown> }) {
+  const outletConfig = config as OutletConfig;
+  const routeRuntime = useRouteRuntime();
+  const manifest = useManifestRuntime();
+  const outletDepth = useContext(OutletDepthContext);
+  const activeRoutes = routeRuntime?.match.activeRoutes ?? [];
+  const childRoute = activeRoutes[outletDepth + 1] ?? null;
+
+  if (!childRoute) {
+    return (
+      <>
+        {outletConfig.fallback?.map((child, index) => (
+          <InlineComponentRenderer
+            key={child.id ?? `outlet-fallback-${index}`}
+            config={child}
+          />
+        )) ?? null}
+      </>
+    );
+  }
+
+  return (
+    <OutletDepthContext.Provider value={outletDepth + 1}>
+      <PageRenderer
+        page={childRoute.page}
+        routeId={childRoute.id}
+        state={manifest?.state}
+        resources={manifest?.resources}
+      />
+    </OutletDepthContext.Provider>
+  );
+}
+
 // ── Register all structural components ──────────────────────────────────────
 
 /**
@@ -890,4 +957,5 @@ export const LEGACY_STRUCTURAL_COMPONENTS = {
   heading: Heading,
   select: Select,
   card: Card,
+  outlet: OutletComponent,
 } as const;

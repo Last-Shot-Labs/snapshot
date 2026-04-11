@@ -112,7 +112,18 @@ export const dashboardPresetConfigSchema = z
       .array(
         z
           .object({
-            variant: z.enum(["line", "bar", "area", "pie", "donut"]),
+            variant: z.enum([
+              "line",
+              "bar",
+              "area",
+              "pie",
+              "donut",
+              "sparkline",
+              "funnel",
+              "radar",
+              "treemap",
+              "scatter",
+            ]),
             endpoint: z.string().min(1),
             title: z.string().optional(),
             series: z

@@ -123,7 +123,17 @@ export interface StatDef {
 }
 
 export interface ChartDef {
-  variant: "line" | "bar" | "area" | "pie" | "donut";
+  variant:
+    | "line"
+    | "bar"
+    | "area"
+    | "pie"
+    | "donut"
+    | "sparkline"
+    | "funnel"
+    | "radar"
+    | "treemap"
+    | "scatter";
   endpoint: string;
   title?: string;
   series?: Array<{

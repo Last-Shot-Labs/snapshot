@@ -23,7 +23,7 @@ import {
   type ResourceInvalidationTarget,
   type ResourceMap,
 } from "./resources";
-import type { CompiledManifest, CompiledRoute } from "./types";
+import type { CompiledManifest, CompiledRoute, RouteMatch } from "./types";
 
 export const ManifestRuntimeContext = createContext<CompiledManifest | null>(
   null,
@@ -79,6 +79,7 @@ interface ManifestResourceCacheValue {
 interface RouteRuntimeValue {
   currentPath: string;
   currentRoute: CompiledRoute | null;
+  match: RouteMatch;
   params: Record<string, string>;
   query: Record<string, string>;
   navigate: (to: string, options?: { replace?: boolean }) => void;

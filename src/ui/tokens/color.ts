@@ -232,6 +232,11 @@ export function colorToOklch(color: string): [number, number, number] {
  * Compute relative luminance from OKLCH for WCAG contrast calculations.
  * Uses sRGB relative luminance (rec. 709) from the linear RGB values.
  */
+export function relativeLuminance(color: string): number {
+  const [l, c, h] = colorToOklch(color);
+  return oklchToRelativeLuminance(l, c, h);
+}
+
 function oklchToRelativeLuminance(l: number, c: number, h: number): number {
   const [la, a, b] = oklchToOklab(l, c, h);
   const [lr, lg, lb] = oklabToLinearRgb(la, a, b);
@@ -247,10 +252,22 @@ function oklchToRelativeLuminance(l: number, c: number, h: number): number {
  *
  * @returns Contrast ratio >= 1 (higher is better, 4.5:1 is WCAG AA for normal text)
  */
-function contrastRatio(lum1: number, lum2: number): number {
+function calculateContrastRatio(lum1: number, lum2: number): number {
   const lighter = Math.max(lum1, lum2);
   const darker = Math.min(lum1, lum2);
   return (lighter + 0.05) / (darker + 0.05);
+}
+
+export function contrastRatio(left: string, right: string): number {
+  return calculateContrastRatio(relativeLuminance(left), relativeLuminance(right));
+}
+
+export function meetsWcagAA(
+  left: string,
+  right: string,
+  largeText = false,
+): boolean {
+  return contrastRatio(left, right) >= (largeText ? 3 : 4.5);
 }
 
 /**
@@ -270,8 +287,8 @@ export function deriveForeground(backgroundColor: string): string {
   const darkL = 0.145;
   const darkLum = oklchToRelativeLuminance(darkL, 0, 0);
 
-  const whiteContrast = contrastRatio(whiteLum, bgLum);
-  const darkContrast = contrastRatio(darkLum, bgLum);
+  const whiteContrast = calculateContrastRatio(whiteLum, bgLum);
+  const darkContrast = calculateContrastRatio(darkLum, bgLum);
 
   if (whiteContrast >= darkContrast) {
     // Light foreground on dark background

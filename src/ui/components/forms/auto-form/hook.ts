@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import type {
   FieldConfig,
   FieldErrors,
@@ -174,6 +174,8 @@ export function useAutoForm(
   onSubmit: (values: Record<string, unknown>) => Promise<void>,
 ): UseAutoFormResult {
   const initialValues = useMemo(() => buildInitialValues(fields), [fields]);
+  const [pristineValues, setPristineValues] =
+    useState<Record<string, unknown>>(initialValues);
   const [values, setValuesState] =
     useState<Record<string, unknown>>(initialValues);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -215,9 +217,22 @@ export function useAutoForm(
     setValuesState((prev) => ({ ...prev, [name]: value }));
   }, []);
 
+  const markPristine = useCallback((nextValues?: Record<string, unknown>) => {
+    setPristineValues(nextValues ?? values);
+  }, [values]);
+
   const setMultipleValues = useCallback(
-    (newValues: Record<string, unknown>) => {
-      setValuesState((prev) => ({ ...prev, ...newValues }));
+    (
+      newValues: Record<string, unknown>,
+      options?: { markPristine?: boolean },
+    ) => {
+      setValuesState((prev) => {
+        const next = { ...prev, ...newValues };
+        if (options?.markPristine) {
+          setPristineValues(next);
+        }
+        return next;
+      });
     },
     [],
   );
@@ -255,10 +270,10 @@ export function useAutoForm(
   }, [values, validateAll]);
 
   const reset = useCallback(() => {
-    setValuesState(buildInitialValues(fieldsRef.current));
+    setValuesState(pristineValues);
     setErrors({});
     setTouched({});
-  }, []);
+  }, [pristineValues]);
 
   const isValid = useMemo(() => {
     const allErrors = validateAll();
@@ -267,10 +282,17 @@ export function useAutoForm(
 
   const isDirty = useMemo(() => {
     for (const field of fields) {
-      if (values[field.name] !== initialValues[field.name]) return true;
+      if (values[field.name] !== pristineValues[field.name]) return true;
     }
     return false;
-  }, [values, initialValues, fields]);
+  }, [values, pristineValues, fields]);
+
+  useEffect(() => {
+    setValuesState(initialValues);
+    setPristineValues(initialValues);
+    setErrors({});
+    setTouched({});
+  }, [initialValues]);
 
   return {
     values,
@@ -284,5 +306,6 @@ export function useAutoForm(
     reset,
     isDirty,
     touchField,
+    markPristine,
   };
 }

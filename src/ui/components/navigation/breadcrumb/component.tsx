@@ -3,141 +3,57 @@
 import React, { useMemo } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { interpolate } from "../../../actions/interpolate";
-import type { CompiledRoute } from "../../../manifest/types";
-import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
+import { useAutoBreadcrumbs } from "../../../hooks/use-auto-breadcrumbs";
 import { renderIcon } from "../../../icons/render";
+import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
 import type { BreadcrumbConfig, BreadcrumbItemConfig } from "./types";
 
-/** Separator character lookup. */
 const SEPARATORS: Record<string, string> = {
   slash: "/",
-  chevron: "\u203A", // ›
-  dot: "\u00B7", // ·
-  arrow: "\u2192", // →
+  chevron: "\u203A",
+  dot: "\u00B7",
+  arrow: "\u2192",
 };
 
-/**
- * Computes the visible items when maxItems is set.
- * Shows the first item, an ellipsis placeholder, and the last (maxItems - 1) items.
- */
 function collapseItems(
   items: BreadcrumbItemConfig[],
   maxItems: number,
 ): Array<BreadcrumbItemConfig | { label: "..."; collapsed: true }> {
-  if (items.length <= maxItems) return items;
+  if (items.length <= maxItems) {
+    return items;
+  }
 
   const tail = items.slice(-(maxItems - 1));
   return [items[0]!, { label: "...", collapsed: true } as never, ...tail];
 }
 
-function normalizePath(path: string): string {
-  if (!path) return "/";
-  if (path.length > 1 && path.endsWith("/")) {
-    return path.slice(0, -1);
-  }
-  return path;
-}
-
-function routeLabel(
-  route: Pick<CompiledRoute, "id" | "path" | "page">,
-  params: Record<string, string>,
-  currentPath: string,
-): string {
-  const template = route.page.breadcrumb ?? route.page.title ?? route.id;
-  return interpolate(template, {
-    params,
-    route: {
-      id: route.id,
-      path: currentPath,
-      pattern: route.path,
-    },
-  });
-}
-
-function deriveRouteItems(
-  config: BreadcrumbConfig,
-  manifest: ReturnType<typeof useManifestRuntime>,
-  routeRuntime: ReturnType<typeof useRouteRuntime>,
-): BreadcrumbItemConfig[] {
-  if (!manifest || !routeRuntime?.currentRoute) {
-    return [];
-  }
-
-  const currentRoute = routeRuntime.currentRoute;
-  const currentPath = normalizePath(routeRuntime.currentPath);
-  const params = routeRuntime.params;
-  const appBreadcrumbs = manifest.app.breadcrumbs;
-  const items: BreadcrumbItemConfig[] = [];
-  const pushUnique = (item: BreadcrumbItemConfig) => {
-    const previous = items[items.length - 1];
-    if (previous?.path === item.path && previous?.label === item.label) {
-      return;
-    }
-    items.push(item);
-  };
-
-  if (config.includeHome !== false && manifest.app.home) {
-    const homePath = normalizePath(appBreadcrumbs?.home?.href ?? manifest.app.home);
-    pushUnique({
-      label:
-        appBreadcrumbs?.home?.label ??
-        routeLabel(
-          manifest.routes.find((route) => normalizePath(route.path) === homePath) ??
-            currentRoute,
-          params,
-          homePath,
-        ),
-      path: currentPath === homePath ? undefined : homePath,
-      icon: appBreadcrumbs?.home?.icon,
-    });
-  }
-
-  const patternParts = normalizePath(currentRoute.path)
-    .split("/")
-    .filter(Boolean);
-  const currentParts = currentPath.split("/").filter(Boolean);
-
-  for (let i = 0; i < patternParts.length; i += 1) {
-    const patternPath = `/${patternParts.slice(0, i + 1).join("/")}`;
-    const actualPath = `/${currentParts.slice(0, i + 1).join("/")}`;
-    const route = manifest.routes.find(
-      (candidate) => normalizePath(candidate.path) === patternPath,
-    );
-    if (!route) {
-      continue;
-    }
-
-    pushUnique({
-      label:
-        appBreadcrumbs?.labels?.[actualPath] ??
-        routeLabel(route, params, actualPath),
-      path: i === patternParts.length - 1 ? undefined : actualPath,
-    });
-  }
-
-  if (items.length === 0) {
-    pushUnique({
-      label: routeLabel(currentRoute, params, currentPath),
-    });
-  }
-
-  return items;
-}
-
 /**
- * Breadcrumb component — renders a navigation breadcrumb trail.
- *
- * Shows the user's current location within the application hierarchy.
- * The last item is rendered as non-interactive (current page).
- * Supports collapsing middle items when maxItems is exceeded.
- *
- * @param props.config - The breadcrumb config from the manifest
+ * Breadcrumb component that supports explicit items and manifest-driven auto generation.
  */
 export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
   const execute = useActionExecutor();
   const manifest = useManifestRuntime();
   const routeRuntime = useRouteRuntime();
   const separator = SEPARATORS[config.separator ?? "chevron"] ?? "\u203A";
+  const autoItems = useAutoBreadcrumbs(
+    manifest?.app.breadcrumbs?.auto || (config.source ?? "manual") === "route"
+      ? {
+          auto: true,
+          home:
+            config.includeHome === false
+              ? undefined
+              : manifest?.app.breadcrumbs?.home ??
+                (manifest?.app.home
+                  ? {
+                      label: "Home",
+                      href: manifest.app.home,
+                    }
+                  : undefined),
+          separator: manifest?.app.breadcrumbs?.separator ?? "/",
+          labels: manifest?.app.breadcrumbs?.labels,
+        }
+      : undefined,
+  );
   const context = useMemo(
     () => ({
       params: routeRuntime?.params ?? {},
@@ -151,17 +67,13 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
   );
 
   const resolvedItems = useMemo(() => {
-    const baseItems =
-      (config.source ?? "manual") === "route" || !config.items
-        ? deriveRouteItems(config, manifest, routeRuntime)
-        : config.items;
-
+    const baseItems = config.items?.length ? config.items : autoItems;
     return baseItems.map((item) => ({
       ...item,
       label: interpolate(item.label, context),
       path: item.path ? interpolate(item.path, context) : undefined,
     }));
-  }, [config, context, manifest, routeRuntime]);
+  }, [autoItems, config.items, context]);
 
   const visibleItems =
     config.maxItems != null
@@ -229,8 +141,7 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                 gap: "var(--sn-spacing-xs, 0.25rem)",
               }}
             >
-              {/* Separator (before every item except the first) */}
-              {index > 0 && (
+              {index > 0 ? (
                 <span
                   aria-hidden="true"
                   style={{
@@ -240,7 +151,7 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                 >
                   {separator}
                 </span>
-              )}
+              ) : null}
 
               {isCollapsed ? (
                 <span
@@ -251,7 +162,6 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                   ...
                 </span>
               ) : isLast ? (
-                /* Current page — not a link */
                 <span
                   aria-current="page"
                   style={{
@@ -260,7 +170,7 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                       "var(--sn-font-weight-medium, 500)" as unknown as number,
                   }}
                 >
-                  {item.icon && (
+                  {item.icon ? (
                     <span
                       aria-hidden="true"
                       style={{
@@ -269,11 +179,10 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                     >
                       {renderIcon(item.icon, 14)}
                     </span>
-                  )}
+                  ) : null}
                   {item.label}
                 </span>
               ) : (
-                /* Clickable breadcrumb item */
                 <a
                   href={(item as BreadcrumbItemConfig).path ?? "#"}
                   onClick={(event) =>
@@ -283,18 +192,19 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                     color: "var(--sn-color-muted-foreground, #6b7280)",
                     textDecoration: "none",
                     cursor: "pointer",
-                    transition: `color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)`,
+                    transition:
+                      "color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)",
                   }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color =
+                  onMouseEnter={(event) => {
+                    event.currentTarget.style.color =
                       "var(--sn-color-foreground, #111827)";
                   }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color =
+                  onMouseLeave={(event) => {
+                    event.currentTarget.style.color =
                       "var(--sn-color-muted-foreground, #6b7280)";
                   }}
                 >
-                  {(item as BreadcrumbItemConfig).icon && (
+                  {(item as BreadcrumbItemConfig).icon ? (
                     <span
                       aria-hidden="true"
                       style={{
@@ -303,7 +213,7 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                     >
                       {renderIcon((item as BreadcrumbItemConfig).icon, 14)}
                     </span>
-                  )}
+                  ) : null}
                   {item.label}
                 </a>
               )}
