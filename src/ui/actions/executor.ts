@@ -3,7 +3,7 @@ import { AppRegistryContext, PageRegistryContext } from "../context/providers";
 import { useSubscribe } from "../context/hooks";
 import { isFromRef } from "../context/utils";
 import { useConfirmManager } from "./confirm";
-import { resolveTemplate } from "../expressions/template";
+import { resolveTemplateValue } from "../expressions/template";
 import { resolveRuntimeLocale } from "../i18n/resolve";
 import { useModalManager } from "./modal-manager";
 import { useToastManager } from "./toast";
@@ -155,18 +155,27 @@ function resolveWorkflowValue(
   }
 
   if (typeof value === "string") {
-    return resolveTemplate(
+    const routeContext =
+      (context["route"] as Record<string, unknown> | undefined) ?? {};
+    return resolveTemplateValue(
       value,
       {
         ...context,
         app: manifestRuntime?.app ?? {},
-        auth: manifestRuntime?.auth ?? {},
+        auth: {
+          ...(manifestRuntime?.raw.auth ?? {}),
+          ...(manifestRuntime?.auth ?? {}),
+        },
         route: {
-          id: routeRuntime?.currentRoute?.id,
-          path: routeRuntime?.currentPath,
-          pattern: routeRuntime?.currentRoute?.path,
-          params: routeRuntime?.params,
-          query: routeRuntime?.query,
+          id: routeRuntime?.currentRoute?.id ?? routeContext["id"],
+          path: routeRuntime?.currentPath ?? routeContext["path"],
+          pattern: routeRuntime?.currentRoute?.path ?? routeContext["pattern"],
+          params:
+            routeRuntime?.params ??
+            (routeContext["params"] as Record<string, string> | undefined),
+          query:
+            routeRuntime?.query ??
+            (routeContext["query"] as Record<string, string> | undefined),
         },
       },
       {

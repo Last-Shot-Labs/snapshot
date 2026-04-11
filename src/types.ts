@@ -211,6 +211,7 @@ export type PasskeyLoginVars = PasskeyLoginBody & { redirectTo?: string };
 export interface RequestOptions {
   headers?: Record<string, string>;
   signal?: AbortSignal;
+  suppressUnauthenticated?: boolean;
 }
 
 // ── SSE types ─────────────────────────────────────────────────────────────────

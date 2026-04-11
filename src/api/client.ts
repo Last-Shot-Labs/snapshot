@@ -246,7 +246,9 @@ export class ApiClient implements ApiClientLike {
 
       this.storage?.clear();
       this.storage?.clearRefreshToken();
-      this.onUnauthenticated?.();
+      if (!options?.suppressUnauthenticated) {
+        this.onUnauthenticated?.();
+      }
       const errBody = await response.json().catch(() => null);
       throw new ApiError(401, errBody);
     }

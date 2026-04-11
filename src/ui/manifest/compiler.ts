@@ -15,6 +15,7 @@ import { defaultFeedbackFragment } from "./defaults/feedback";
 import { resolveGuard } from "./guard-registry";
 import { mergeFragment } from "./merge";
 import { setDeclaredCustomActionSchemas } from "../workflows/registry";
+import { mergeContract } from "../../auth/contract";
 import type {
   AppConfig,
   AnalyticsConfig,
@@ -640,6 +641,10 @@ function buildCompiledManifest(
   const auth = runtimeManifest.auth
     ? {
         ...runtimeManifest.auth,
+        contract: mergeContract(
+          runtimeManifest.app?.apiUrl ?? "",
+          runtimeManifest.auth.contract as Parameters<typeof mergeContract>[1],
+        ),
         session: runtimeManifest.auth.session ?? {
           mode: "cookie" as const,
           storage: "sessionStorage" as const,
@@ -702,6 +707,7 @@ export function defineManifest<TManifest extends ManifestConfig>(
  * @returns The parsed manifest
  */
 export function parseManifest(manifest: unknown): ParsedManifestConfig {
+  bootBuiltins();
   return withManifestCustomComponents(manifest, () =>
     manifestConfigSchema.parse(manifest),
   );
@@ -716,6 +722,7 @@ export function parseManifest(manifest: unknown): ParsedManifestConfig {
 export function safeParseManifest(
   manifest: unknown,
 ): SafeParseReturnType<unknown, ParsedManifestConfig> {
+  bootBuiltins();
   return withManifestCustomComponents(manifest, () =>
     manifestConfigSchema.safeParse(manifest),
   );

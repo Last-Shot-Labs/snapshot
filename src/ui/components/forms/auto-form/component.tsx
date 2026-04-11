@@ -26,7 +26,7 @@ import {
 } from "../../_base/button-styles";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useEvaluateExpression } from "../../../expressions/use-expression";
-import { resolveTemplate } from "../../../expressions/template";
+import { resolveTemplateValue } from "../../../expressions/template";
 import { useAutoForm } from "./hook";
 import type { AutoFormConfig, FieldConfig, FieldSectionConfig } from "./types";
 import type { ApiClient } from "../../../../api/client";
@@ -652,7 +652,10 @@ function buildTemplateContext(
 ): Record<string, unknown> {
   return {
     app: runtime?.app ?? {},
-    auth: runtime?.auth ?? {},
+    auth: {
+      ...(runtime?.raw.auth ?? {}),
+      ...(runtime?.auth ?? {}),
+    },
     route: {
       ...(routeRuntime?.currentRoute ?? {}),
       path: routeRuntime?.currentPath,
@@ -668,11 +671,7 @@ function resolveMaybeTemplate(
   runtime: ReturnType<typeof useManifestRuntime>,
   routeRuntime: ReturnType<typeof useRouteRuntime>,
 ): unknown {
-  if (typeof value !== "string") {
-    return value;
-  }
-
-  return resolveTemplate(
+  return resolveTemplateValue(
     value,
     buildTemplateContext(runtime, routeRuntime),
     {
@@ -680,6 +679,34 @@ function resolveMaybeTemplate(
       i18n: runtime?.raw.i18n,
     },
   );
+}
+
+function resolveEndpointTemplates<T>(
+  value: T,
+  locale: string | undefined,
+  runtime: ReturnType<typeof useManifestRuntime>,
+  routeRuntime: ReturnType<typeof useRouteRuntime>,
+): T {
+  if (typeof value === "string") {
+    return resolveMaybeTemplate(value, locale, runtime, routeRuntime) as T;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) =>
+      resolveEndpointTemplates(item, locale, runtime, routeRuntime),
+    ) as T;
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, nested]) => [
+        key,
+        resolveEndpointTemplates(nested, locale, runtime, routeRuntime),
+      ]),
+    ) as T;
+  }
+
+  return value;
 }
 
 // ── Section renderer ──────────────────────────────────────────────────────
@@ -869,12 +896,32 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
   const runtime = useManifestRuntime();
   const routeRuntime = useRouteRuntime();
   const resourceCache = useManifestResourceCache();
-  const initialData = useComponentData(config.data ?? "");
   const localeState = useSubscribe({ from: "global.locale" });
   const autoSubmitAllowed = useEvaluateExpression(config.autoSubmitWhen);
   const autoSubmittedRef = useRef(false);
   const lastPublishedStateRef = useRef<string | null>(null);
   const activeLocale = resolveRuntimeLocale(runtime?.raw.i18n, localeState);
+  const resolvedDataTarget = useMemo(
+    () =>
+      resolveEndpointTemplates(
+        config.data ?? "",
+        activeLocale,
+        runtime,
+        routeRuntime,
+      ),
+    [activeLocale, config.data, routeRuntime, runtime],
+  );
+  const resolvedSubmitTarget = useMemo(
+    () =>
+      resolveEndpointTemplates(
+        config.submit,
+        activeLocale,
+        runtime,
+        routeRuntime,
+      ),
+    [activeLocale, config.submit, routeRuntime, runtime],
+  );
+  const initialData = useComponentData(resolvedDataTarget);
 
   const allFields = useMemo(() => resolveFields(config), [config]);
   const resolvedFields = useMemo(
@@ -1028,15 +1075,15 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
         }
 
         const result =
-          resourceCache && isResourceRef(config.submit)
-            ? await resourceCache.mutateTarget(config.submit, {
+          resourceCache && isResourceRef(resolvedSubmitTarget)
+            ? await resourceCache.mutateTarget(resolvedSubmitTarget, {
                 method,
                 payload: values,
                 pathParams: values,
               })
             : await submitToApi(
                 api,
-                config.submit,
+                resolvedSubmitTarget,
                 runtime?.resources,
                 method,
                 values,
@@ -1086,7 +1133,6 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
     },
     [
       api,
-      config.submit,
       config.onSuccess,
       config.onError,
       config.on?.afterSubmit,
@@ -1095,6 +1141,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
       method,
       executeAction,
       resourceCache,
+      resolvedSubmitTarget,
       runtime?.resources,
     ],
   );

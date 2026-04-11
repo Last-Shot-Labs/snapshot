@@ -239,15 +239,11 @@ describe("compiler", () => {
       ],
     });
 
-    expect(compiled.auth?.contract).toEqual({
-      endpoints: {
-        me: "/custom/auth/me",
-      },
-      headers: {
-        csrf: "x-custom-csrf",
-      },
-      csrfCookieName: "custom_csrf",
-    });
+    expect(compiled.auth?.contract?.endpoints.me).toBe("/custom/auth/me");
+    expect(compiled.auth?.contract?.endpoints.login).toBe("/auth/login");
+    expect(compiled.auth?.contract?.headers.csrf).toBe("x-custom-csrf");
+    expect(compiled.auth?.contract?.headers.userToken).toBe("x-user-token");
+    expect(compiled.auth?.contract?.csrfCookieName).toBe("custom_csrf");
     expect(compiled.auth?.on?.unauthenticated).toBe("redirect-to-login");
     expect(compiled.auth?.on?.forbidden).toBe("show-forbidden");
     expect(compiled.auth?.on?.logout).toBe("clear-session");

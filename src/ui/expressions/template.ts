@@ -11,6 +11,29 @@ function resolvePath(path: string, context: Record<string, unknown>): unknown {
   return getNestedValue(context, path);
 }
 
+function resolveTemplateToken(
+  token: string,
+  context: Record<string, unknown>,
+  options: ResolveTemplateOptions,
+): unknown {
+  const locale = options.locale ?? "en";
+
+  if (token.startsWith("i18n:")) {
+    const key = token.slice(5);
+    return resolveTRef({ t: key }, locale, options.i18n) || key;
+  }
+
+  if (token.startsWith("date:")) {
+    return resolveDateTemplate(token.slice(5), context, locale);
+  }
+
+  if (token.startsWith("number:")) {
+    return resolveNumberTemplate(token.slice(7), context, locale);
+  }
+
+  return resolvePath(token, context);
+}
+
 function resolveDateTemplate(
   token: string,
   context: Record<string, unknown>,
@@ -77,27 +100,29 @@ export function resolveTemplate(
     return template;
   }
 
-  const locale = options.locale ?? "en";
-
   return template.replace(/\{([^}]+)\}/g, (match, token: string) => {
-    if (token.startsWith("i18n:")) {
-      const key = token.slice(5);
-      const resolved = resolveTRef({ t: key }, locale, options.i18n);
-      return resolved || key;
-    }
-
-    if (token.startsWith("date:")) {
-      return resolveDateTemplate(token.slice(5), context, locale) ?? match;
-    }
-
-    if (token.startsWith("number:")) {
-      return resolveNumberTemplate(token.slice(7), context, locale) ?? match;
-    }
-
-    const resolved = resolvePath(token, context);
+    const resolved = resolveTemplateToken(token, context, options);
     if (resolved == null) {
       return match;
     }
     return String(resolved);
   });
+}
+
+export function resolveTemplateValue(
+  template: unknown,
+  context: Record<string, unknown>,
+  options: ResolveTemplateOptions = {},
+): unknown {
+  if (typeof template !== "string" || !template.includes("{")) {
+    return template;
+  }
+
+  const singleTokenMatch = template.match(/^\{([^}]+)\}$/);
+  if (!singleTokenMatch) {
+    return resolveTemplate(template, context, options);
+  }
+
+  const resolved = resolveTemplateToken(singleTokenMatch[1]!, context, options);
+  return resolved == null ? template : resolved;
 }

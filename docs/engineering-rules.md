@@ -77,6 +77,44 @@ src/
 
 ## Config-Driven UI Patterns
 
+### Manifest-Only Architecture
+
+These rules enforce the vision in `docs/specs/manifest-only-ui.md`. Every new feature,
+component, and code path must satisfy all of them.
+
+1. **One code path per concept.** If two components solve the same problem differently, one
+   is wrong. There is one data-fetching hook (`useComponentData`), one from-ref resolver
+   (`resolveFromRef`), one template resolver (`resolveTemplate`), one icon renderer
+   (`renderIcon`). Adding a second path for any of these is a bug, not a feature.
+
+2. **No escape hatches.** Auth is not special. Feedback screens are not special. Every screen
+   is a route with a layout and components. No `if (route.id === "login")` branching, no
+   `resolveAuthScreen`, no route-id checks that create special rendering paths. If a concept
+   needs special treatment, the framework is incomplete — fix the framework.
+
+3. **Fragments replace bespoke code.** Framework-provided defaults (auth screens, error pages,
+   feedback) are manifest fragments composed from public primitives — the same primitives a
+   consumer would use. If a default fragment looks bad, the component library is incomplete.
+   Fix the library, not the fragment.
+
+4. **Registries, not switches.** Components, layouts, actions, and guards are all registered
+   in registries and resolved by name. No switch statements over type strings, no hardcoded
+   lists. Adding a new type means calling `register*()`, not editing framework internals.
+
+5. **Defaults render presentably.** A manifest with minimal config must produce a beautiful,
+   themed, working app. `resolveTokens({})` returns sensible defaults. Default fragments
+   fill gaps the consumer doesn't specify. A blank-ish manifest should never produce a
+   broken or unstyled page.
+
+6. **Consumer apps have no source code.** The target consumer repo is:
+   `snapshot.manifest.json` + `index.html` + `vite.config.ts` + `package.json`. No `src/`
+   directory, no `.tsx`, no `.css`. The only exception is an optional
+   `src/custom-components.ts` for genuinely bespoke needs — and that file must use tokens.
+
+7. **Dogfooding drives completeness.** If a consuming app needs bespoke code to accomplish
+   something, the framework is incomplete. Every feature must work end-to-end from manifest
+   config alone.
+
 ### Component File Conventions
 
 ```

@@ -55,7 +55,7 @@ describe("fieldConfigSchema", () => {
   it("rejects unknown field type", () => {
     const result = fieldConfigSchema.safeParse({
       name: "x",
-      type: "color",
+      type: "bogus",
     });
     expect(result.success).toBe(false);
   });
@@ -85,6 +85,14 @@ describe("fieldConfigSchema", () => {
       "checkbox",
       "date",
       "file",
+      "time",
+      "datetime",
+      "radio-group",
+      "switch",
+      "slider",
+      "color",
+      "combobox",
+      "tag-input",
     ] as const;
     for (const type of types) {
       const result = fieldConfigSchema.safeParse({ name: "f", type });

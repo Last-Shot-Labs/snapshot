@@ -38,7 +38,13 @@ function dispatchPopStateEvent(): void {
 }
 
 function setTestUrl(url: string): void {
-  window.happyDOM.setURL(url);
+  if (window.happyDOM?.setURL) {
+    window.happyDOM.setURL(url);
+    return;
+  }
+
+  const nextUrl = new URL(url, window.location.origin);
+  window.history.replaceState({}, "", `${nextUrl.pathname}${nextUrl.search}`);
 }
 
 const originalWebSocket = global.WebSocket;
@@ -446,7 +452,7 @@ describe("ManifestApp", () => {
     render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Email")).toBeDefined();
+      expect(screen.getByLabelText(/Email/i)).toBeDefined();
     });
 
     await act(async () => {
@@ -969,7 +975,7 @@ describe("ManifestApp", () => {
     render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Email")).toBeDefined();
+      expect(screen.getByLabelText(/Email/i)).toBeDefined();
     });
   });
 

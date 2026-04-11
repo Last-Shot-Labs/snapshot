@@ -154,10 +154,10 @@ describe("Manifest auth fragments", () => {
       expect(screen.getByText("Sign in to continue.")).toBeDefined();
     });
 
-    fireEvent.change(screen.getByLabelText("Email"), {
+    fireEvent.change(screen.getByLabelText(/Email/i), {
       target: { value: "ada@example.com" },
     });
-    fireEvent.change(screen.getByLabelText("Password"), {
+    fireEvent.change(screen.getByLabelText(/Password/i, { selector: "input" }), {
       target: { value: "secret" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
@@ -199,7 +199,7 @@ describe("Manifest auth fragments", () => {
       expect(screen.getByRole("heading", { name: "Forgot password" })).toBeDefined();
     });
 
-    fireEvent.change(screen.getByLabelText("Email"), {
+    fireEvent.change(screen.getByLabelText(/Email/i), {
       target: { value: "ada@example.com" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Send reset link" }));
@@ -314,8 +314,10 @@ describe("Manifest auth fragments", () => {
       expect(screen.getByRole("button", { name: "Make an account" })).toBeDefined();
       expect(screen.queryByText("Use Google Workspace")).toBeNull();
       expect(screen.queryByRole("button", { name: "Sign in with passkey" })).toBeNull();
-      expect(screen.getByLabelText("Work email")).toBeDefined();
-      expect(screen.getByLabelText("Secret phrase")).toBeDefined();
+      expect(screen.getByLabelText(/Work email/i, { selector: "input" })).toBeDefined();
+      expect(
+        screen.getByLabelText(/Secret phrase/i, { selector: "input" }),
+      ).toBeDefined();
     });
   });
 
@@ -497,13 +499,13 @@ describe("Manifest auth fragments", () => {
     render(<ManifestApp manifest={buildAuthManifest()} apiUrl="http://localhost" />);
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Email")).toBeDefined();
+      expect(screen.getByLabelText(/Email/i)).toBeDefined();
     });
 
-    fireEvent.change(screen.getByLabelText("Email"), {
+    fireEvent.change(screen.getByLabelText(/Email/i), {
       target: { value: "ada@example.com" },
     });
-    fireEvent.change(screen.getByLabelText("Password"), {
+    fireEvent.change(screen.getByLabelText(/Password/i, { selector: "input" }), {
       target: { value: "secret" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
@@ -567,24 +569,29 @@ describe("Manifest auth fragments", () => {
     render(<ManifestApp manifest={buildAuthManifest()} apiUrl="http://localhost" />);
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Email")).toBeDefined();
+      expect(screen.getByLabelText(/Email/i)).toBeDefined();
     });
 
-    fireEvent.change(screen.getByLabelText("Email"), {
+    fireEvent.change(screen.getByLabelText(/Email/i), {
       target: { value: "ada@example.com" },
     });
-    fireEvent.change(screen.getByLabelText("Password"), {
+    fireEvent.change(screen.getByLabelText(/Password/i, { selector: "input" }), {
       target: { value: "secret" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Verification code")).toBeDefined();
+      expect(
+        screen.getByLabelText(/Verification code/i, { selector: "input" }),
+      ).toBeDefined();
     });
 
-    fireEvent.change(screen.getByLabelText("Verification code"), {
+    fireEvent.change(
+      screen.getByLabelText(/Verification code/i, { selector: "input" }),
+      {
       target: { value: "123456" },
-    });
+      },
+    );
     fireEvent.click(screen.getByRole("button", { name: "Verify" }));
 
     await waitFor(() => {

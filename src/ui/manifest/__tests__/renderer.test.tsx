@@ -1,14 +1,16 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ComponentRenderer, PageRenderer } from "../renderer";
 import { registerComponent } from "../component-registry";
+import { bootBuiltins } from "../boot-builtins";
 import type { PageConfig, ComponentConfig } from "../types";
 
-// Ensure structural components are registered
-import "../structural";
+beforeAll(() => {
+  bootBuiltins();
+});
 
 describe("ComponentRenderer", () => {
   it("renders a known component type", () => {
@@ -123,16 +125,15 @@ describe("ComponentRenderer", () => {
     expect(screen.getByText("Custom Content")).toBeDefined();
   });
 
-  it("merges custom props into the registered component config", () => {
+  it("passes custom component props through the registered component config", () => {
     const MyCustom = ({ config }: { config: Record<string, unknown> }) => (
       <span>{String(config["label"])}</span>
     );
     registerComponent("test-custom-props", MyCustom);
 
     const config = {
-      type: "custom",
-      component: "test-custom-props",
-      props: { label: "Prop Content" },
+      type: "test-custom-props",
+      label: "Prop Content",
     } as unknown as ComponentConfig;
 
     render(<ComponentRenderer config={config} />);

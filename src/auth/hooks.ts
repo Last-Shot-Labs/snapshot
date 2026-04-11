@@ -66,7 +66,9 @@ export function createAuthHooks({
       queryKey: AUTH_QUERY_KEY,
       queryFn: async () => {
         try {
-          return await api.get<AuthUser>(contract.endpoints.me);
+          return await api.get<AuthUser>(contract.endpoints.me, {
+            suppressUnauthenticated: true,
+          });
         } catch {
           return null;
         }
