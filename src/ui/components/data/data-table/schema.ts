@@ -4,7 +4,9 @@ import {
   baseComponentConfigSchema,
   dataSourceSchema,
   fromRefSchema,
+  pollConfigSchema,
 } from "../../_base/types";
+import { contextMenuItemSchema } from "../../overlay/context-menu/schema";
 
 /**
  * Schema for badge color mapping. Maps values to semantic color names.
@@ -116,6 +118,10 @@ const paginationConfigSchema = z
     type: z.enum(["offset", "cursor", "infinite"]),
     /** Number of rows per page. Defaults to 10. */
     pageSize: z.number().int().min(1).optional(),
+    /** Alias for enabling infinite-scroll mode. */
+    infinite: z.boolean().optional(),
+    /** Threshold in pixels before loading the next page. */
+    infiniteThreshold: z.number().positive().optional(),
   })
   .strict();
 
@@ -176,6 +182,22 @@ export const dataTableConfigSchema = baseComponentConfigSchema
     actions: z.array(rowActionSchema).optional(),
     /** Bulk actions shown when rows are selected. */
     bulkActions: z.array(bulkActionSchema).optional(),
+    /** Enable row drag-and-drop. */
+    draggable: z.boolean().optional(),
+    /** Action fired after row reorder. */
+    onReorder: actionSchema.optional(),
+    /** Legacy reorder alias. */
+    reorderAction: actionSchema.optional(),
+    /** Named drag group for cross-component moves. */
+    dragGroup: z.string().optional(),
+    /** Accepted external drop targets. */
+    dropTargets: z.array(z.string()).optional(),
+    /** Action fired on external drop. */
+    onDrop: actionSchema.optional(),
+    /** Context-menu entries for each row. */
+    contextMenu: z.array(contextMenuItemSchema).optional(),
+    /** Polling behavior for endpoint-backed tables. */
+    poll: pollConfigSchema.optional(),
     /** Message shown when there is no data. */
     emptyMessage: z.string().optional(),
     /** Enable expandable row detail. */

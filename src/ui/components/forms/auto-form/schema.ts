@@ -18,13 +18,25 @@ const fieldOptionSchema = z.object({
 /**
  * Schema for per-field validation rules.
  */
+const validationPatternSchema = z.union([
+  z.string(),
+  z
+    .object({
+      value: z.string(),
+      message: z.string().optional(),
+    })
+    .strict(),
+]);
+
 const fieldValidationSchema = z
   .object({
+    required: z.boolean().optional(),
     minLength: z.number().optional(),
     maxLength: z.number().optional(),
     min: z.number().optional(),
     max: z.number().optional(),
-    pattern: z.string().optional(),
+    pattern: validationPatternSchema.optional(),
+    equals: z.string().optional(),
     message: z.string().optional(),
   })
   .strict();
@@ -75,9 +87,11 @@ export const fieldConfigSchema = z
     /** Placeholder text for text-like inputs. */
     placeholder: z.string().optional(),
     /** Whether the field is required. */
-    required: z.boolean().optional(),
+    required: z.union([z.boolean(), fromRefSchema]).optional(),
     /** Client-side validation rules. */
     validation: fieldValidationSchema.optional(),
+    /** Canonical validation alias. */
+    validate: fieldValidationSchema.optional(),
     /** Options for select fields. Array of {label, value} or a string endpoint. */
     options: z.union([z.array(fieldOptionSchema), dataSourceSchema]).optional(),
     /** Field to use as the option label when options come from an endpoint. */
@@ -96,7 +110,7 @@ export const fieldConfigSchema = z
     /** Conditional visibility — show this field only when condition is met. */
     dependsOn: dependsOnSchema.optional(),
     /** Static visibility toggle. */
-    visible: z.boolean().optional(),
+    visible: z.union([z.boolean(), fromRefSchema]).optional(),
     autoComplete: z.string().optional(),
     visibleWhen: z.string().optional(),
     inlineAction: z

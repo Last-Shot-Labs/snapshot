@@ -193,6 +193,16 @@ import { Vote } from "./data/vote/index";
 import { voteConfigSchema } from "./data/vote/schema";
 import { Banner } from "./content/banner/index";
 import { bannerConfigSchema } from "./content/banner/schema";
+import { Container } from "./layout/container";
+import { containerConfigSchema } from "./layout/container/schema";
+import { Grid } from "./layout/grid";
+import { gridConfigSchema } from "./layout/grid/schema";
+import { Row } from "./layout/row";
+import { rowConfigSchema } from "./layout/row/schema";
+import { Section } from "./layout/section";
+import { sectionConfigSchema } from "./layout/section/schema";
+import { Spacer } from "./layout/spacer";
+import { spacerConfigSchema } from "./layout/spacer/schema";
 import { SplitPane } from "./layout/split-pane/index";
 import { splitPaneConfigSchema } from "./layout/split-pane/schema";
 
@@ -683,6 +693,36 @@ export function registerBuiltInComponents(): void {
     Banner as unknown as Parameters<typeof registerComponent>[1],
   );
   registerComponentSchema("banner", bannerConfigSchema);
+
+  registerComponent(
+    "row",
+    Row as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("row", rowConfigSchema);
+
+  registerComponent(
+    "container",
+    Container as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("container", containerConfigSchema);
+
+  registerComponent(
+    "grid",
+    Grid as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("grid", gridConfigSchema);
+
+  registerComponent(
+    "section",
+    Section as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("section", sectionConfigSchema);
+
+  registerComponent(
+    "spacer",
+    Spacer as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("spacer", spacerConfigSchema);
 
   registerComponent(
     "split-pane",

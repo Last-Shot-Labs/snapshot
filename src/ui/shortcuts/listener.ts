@@ -1,5 +1,8 @@
-import { parseCombo, matchesCombo } from "./parse";
-import type { ShortcutBinding } from "./types";
+import { parseChord, matchesCombo } from "./parse";
+import type { ActionConfig } from "../actions/types";
+import type { ParsedShortcut, ShortcutBinding } from "./types";
+
+const CHORD_TIMEOUT = 1000;
 
 /**
  * Register a global keyboard shortcut listener.
@@ -10,13 +13,41 @@ import type { ShortcutBinding } from "./types";
  */
 export function registerShortcuts(
   shortcuts: Record<string, ShortcutBinding>,
-  executor: (action: Record<string, unknown>) => void,
+  executor: (action: ActionConfig | ActionConfig[]) => void,
 ): () => void {
-  const parsed = Object.entries(shortcuts).map(([combo, action]) => ({
-    combo: parseCombo(combo),
-    action,
-    hasModifier: combo.includes("ctrl") || combo.includes("alt") || combo.includes("meta") || combo.includes("cmd"),
-  }));
+  const parsed: ParsedShortcut[] = Object.entries(shortcuts)
+    .filter(([, binding]) => binding.disabled !== true)
+    .map(([combo, binding]) => ({
+      id: combo,
+      sequence: parseChord(combo),
+      binding,
+      hasModifier: combo
+        .toLowerCase()
+        .split(/\s+then\s+/i)
+        .some(
+          (segment) =>
+            segment.includes("ctrl") ||
+            segment.includes("alt") ||
+            segment.includes("meta") ||
+            segment.includes("cmd"),
+        ),
+    }))
+    .filter((entry) => entry.sequence.length > 0);
+
+  let activeChord:
+    | {
+        id: string;
+        nextIndex: number;
+        timer: ReturnType<typeof setTimeout>;
+      }
+    | undefined;
+
+  function clearActiveChord() {
+    if (activeChord?.timer) {
+      clearTimeout(activeChord.timer);
+    }
+    activeChord = undefined;
+  }
 
   function handler(event: KeyboardEvent) {
     // Skip when typing in inputs (unless shortcut has a modifier)
@@ -27,17 +58,67 @@ export function registerShortcuts(
       target.tagName === "SELECT" ||
       target.isContentEditable;
 
-    for (const { combo, action, hasModifier } of parsed) {
-      if (isTyping && !hasModifier) continue;
-      if (matchesCombo(event, combo)) {
+    if (activeChord) {
+      const activeEntry = parsed.find((entry) => entry.id === activeChord?.id);
+      const expected = activeEntry?.sequence[activeChord.nextIndex];
+      if (activeEntry && expected && matchesCombo(event, expected)) {
         event.preventDefault();
         event.stopPropagation();
-        executor(action as Record<string, unknown>);
+        if (activeChord.nextIndex === activeEntry.sequence.length - 1) {
+          clearActiveChord();
+          executor(activeEntry.binding.action);
+          return;
+        }
+
+        const timer = setTimeout(() => {
+          clearActiveChord();
+        }, CHORD_TIMEOUT);
+        clearTimeout(activeChord.timer);
+        activeChord = {
+          id: activeEntry.id,
+          nextIndex: activeChord.nextIndex + 1,
+          timer,
+        };
         return;
       }
+
+      clearActiveChord();
+    }
+
+    for (const entry of parsed) {
+      const combo = entry.sequence[0];
+      if (!combo) {
+        continue;
+      }
+      if (isTyping && !entry.hasModifier) {
+        continue;
+      }
+      if (!matchesCombo(event, combo)) {
+        continue;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (entry.sequence.length === 1) {
+        executor(entry.binding.action);
+        return;
+      }
+
+      activeChord = {
+        id: entry.id,
+        nextIndex: 1,
+        timer: setTimeout(() => {
+          clearActiveChord();
+        }, CHORD_TIMEOUT),
+      };
+      return;
     }
   }
 
   window.addEventListener("keydown", handler);
-  return () => window.removeEventListener("keydown", handler);
+  return () => {
+    clearActiveChord();
+    window.removeEventListener("keydown", handler);
+  };
 }

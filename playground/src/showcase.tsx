@@ -99,9 +99,9 @@ const PAGES: {
     key: "structural",
     label: "Structural",
     group: "Foundation",
-    count: 6,
+    count: 10,
     description:
-      "Raw layout primitives for rows, headings, buttons, and selects before they are wrapped into product screens.",
+      "Raw layout primitives for rows, grids, containers, sections, spacers, headings, buttons, and selects before they are wrapped into product screens.",
   },
   {
     key: "communication",
@@ -500,6 +500,134 @@ const structuralRow = {
         },
       ],
     },
+  ],
+};
+
+const gridLayoutDemo = {
+  type: "grid",
+  gap: "md",
+  columns: { default: 1, md: 6 },
+  areas: {
+    default: ["hero", "meta", "actions"],
+    md: ["hero hero hero hero meta meta", "actions actions actions actions meta meta"],
+  },
+  children: [
+    {
+      type: "section",
+      area: "hero",
+      justify: "center",
+      background: {
+        gradient: {
+          type: "linear",
+          direction: "135deg",
+          stops: [
+            { color: "var(--sn-color-primary, #2563eb)", position: "0%" },
+            { color: "var(--sn-color-info, #06b6d4)", position: "100%" },
+          ],
+        },
+      },
+      style: {
+        minHeight: "16rem",
+        borderRadius: "var(--sn-radius-xl, 1rem)",
+        padding: "var(--sn-spacing-xl, 2rem)",
+        color: "var(--sn-color-primary-foreground, #ffffff)",
+      },
+      children: [
+        { type: "heading", text: "Grid areas from manifest", level: 2 },
+        {
+          type: "text",
+          text: "The hero, metadata rail, and action shelf are all positioned by named areas instead of manual CSS.",
+        },
+      ],
+    },
+    {
+      type: "stack",
+      area: "meta",
+      gap: "sm",
+      glass: true,
+      style: {
+        padding: "var(--sn-spacing-lg, 1.5rem)",
+        borderRadius: "var(--sn-radius-xl, 1rem)",
+      },
+      children: [
+        { type: "heading", text: "Meta Rail", level: 4 },
+        { type: "text", text: "Sticky KPIs, annotations, and filters fit naturally here." },
+        { type: "badge", text: "Responsive", color: "info", variant: "soft" },
+      ],
+    },
+    {
+      type: "row",
+      area: "actions",
+      gap: "sm",
+      wrap: true,
+      children: [
+        {
+          type: "button",
+          label: "Primary CTA",
+          action: { type: "toast", message: "Primary CTA" },
+        },
+        {
+          type: "button",
+          label: "Secondary CTA",
+          variant: "outline",
+          action: { type: "toast", message: "Secondary CTA" },
+        },
+      ],
+    },
+  ],
+};
+
+const containerDemo = {
+  type: "container",
+  maxWidth: "prose",
+  padding: "lg",
+  background: "var(--sn-color-card, #ffffff)",
+  style: {
+    borderRadius: "var(--sn-radius-xl, 1rem)",
+    paddingBlock: "var(--sn-spacing-xl, 2rem)",
+  },
+  children: [
+    { type: "heading", text: "Container", level: 3 },
+    {
+      type: "text",
+      text: "Use manifest-only max-width constraints for editorial layouts, settings panels, or readable marketing copy without custom wrappers.",
+    },
+  ],
+};
+
+const sectionDemo = {
+  type: "section",
+  height: "18rem",
+  justify: "center",
+  align: "start",
+  background: {
+    overlay: "color-mix(in oklch, var(--sn-color-foreground, #111827) 28%, transparent)",
+    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+    position: "center",
+    size: "cover",
+  },
+  style: {
+    borderRadius: "var(--sn-radius-xl, 1rem)",
+    padding: "var(--sn-spacing-xl, 2rem)",
+    color: "var(--sn-color-primary-foreground, #ffffff)",
+  },
+  children: [
+    { type: "badge", text: "Section", variant: "soft", color: "secondary" },
+    { type: "heading", text: "Full-bleed hero sections from JSON", level: 2 },
+    {
+      type: "text",
+      text: "Background imagery, overlays, and centered content are driven entirely by manifest config.",
+    },
+  ],
+};
+
+const spacerDemo = {
+  type: "row",
+  align: "center",
+  children: [
+    { type: "badge", text: "Left", variant: "solid", color: "primary" },
+    { type: "spacer", axis: "horizontal", size: "3xl" },
+    { type: "badge", text: "Right", variant: "outline", color: "info" },
   ],
 };
 
@@ -2306,6 +2434,18 @@ function StructuralPage() {
         <ShowcaseSection title="Row Layout">
           <RenderConfig config={structuralRow} />
         </ShowcaseSection>
+        <ShowcaseSection title="Grid Layout">
+          <RenderConfig config={gridLayoutDemo} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Container">
+          <RenderConfig config={containerDemo} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Section">
+          <RenderConfig config={sectionDemo} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Spacer">
+          <RenderConfig config={spacerDemo} />
+        </ShowcaseSection>
         <ShowcaseSection title="Headings">
           <RenderConfig config={headings} />
         </ShowcaseSection>
@@ -2950,6 +3090,10 @@ const SECTION_INDEX: { title: string; page: Page }[] = [
   { title: "Button Sizes", page: "structural" },
   { title: "Button Disabled States", page: "structural" },
   { title: "Row Layout", page: "structural" },
+  { title: "Grid Layout", page: "structural" },
+  { title: "Container", page: "structural" },
+  { title: "Section", page: "structural" },
+  { title: "Spacer", page: "structural" },
   { title: "Headings", page: "structural" },
   { title: "Select", page: "structural" },
   // Communication

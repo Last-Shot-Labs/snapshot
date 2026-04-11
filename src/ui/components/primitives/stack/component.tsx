@@ -56,6 +56,11 @@ export interface StackConfig {
   justify?: keyof typeof JUSTIFY_MAP;
   maxWidth?: keyof typeof MAX_WIDTH_MAP;
   padding?: keyof typeof PADDING_MAP;
+  overflow?: "auto" | "hidden" | "scroll" | "visible";
+  maxHeight?: string;
+  animation?: {
+    stagger?: number;
+  };
   className?: string;
   style?: Record<string, string | number>;
 }
@@ -70,6 +75,8 @@ export function Stack({ config }: { config: StackConfig }) {
     padding: config.padding ? PADDING_MAP[config.padding] : undefined,
     maxWidth: config.maxWidth ? MAX_WIDTH_MAP[config.maxWidth] : undefined,
     marginInline: config.maxWidth ? "auto" : undefined,
+    overflow: config.overflow,
+    maxHeight: config.maxHeight,
     width: "100%",
     ...(config.style as CSSProperties | undefined),
   };
@@ -77,10 +84,18 @@ export function Stack({ config }: { config: StackConfig }) {
   return (
     <div className={config.className} style={style}>
       {config.children.map((child, index) => (
-        <ComponentRenderer
+        <div
           key={child.id ?? `stack-child-${index}`}
-          config={child}
-        />
+          style={
+            typeof config.animation?.stagger === "number"
+              ? ({
+                  ["--sn-stagger-index" as "--sn-stagger-index"]: index,
+                } as CSSProperties)
+              : undefined
+          }
+        >
+          <ComponentRenderer config={child} />
+        </div>
       ))}
     </div>
   );

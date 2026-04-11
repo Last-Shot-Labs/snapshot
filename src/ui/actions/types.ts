@@ -14,16 +14,23 @@ export const ACTION_TYPES = [
   "set-value",
   "download",
   "copy",
+  "copy-to-clipboard",
   "emit",
   "submit-form",
   "reset-form",
   "set-theme",
   "confirm",
+  "scroll-to",
   "toast",
   "log",
   "track",
   "run-workflow",
 ] as const;
+
+export interface ActionBase {
+  debounce?: number;
+  throttle?: number;
+}
 
 /**
  * A reference to another component's published value.
@@ -36,7 +43,7 @@ const fromRefSchema = z.object({
 /**
  * Navigate to a route.
  */
-export interface NavigateAction {
+export interface NavigateAction extends ActionBase {
   type: "navigate";
   /** Route path. Supports `{param}` interpolation from context. */
   to: string;
@@ -47,7 +54,7 @@ export interface NavigateAction {
 /**
  * Call an API endpoint.
  */
-export interface ApiAction {
+export interface ApiAction extends ActionBase {
   type: "api";
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   /** Endpoint path. Supports `{param}` interpolation. */
@@ -64,7 +71,7 @@ export interface ApiAction {
   onError?: ActionConfig | ActionConfig[];
 }
 
-export interface NavigateExternalAction {
+export interface NavigateExternalAction extends ActionBase {
   type: "navigate-external";
   to: string;
   target?: "_self" | "_blank";
@@ -73,7 +80,7 @@ export interface NavigateExternalAction {
 /**
  * Open a modal or drawer by id.
  */
-export interface OpenModalAction {
+export interface OpenModalAction extends ActionBase {
   type: "open-modal";
   /** The id of the modal/drawer component to open. */
   modal: string;
@@ -86,7 +93,7 @@ export interface OpenModalAction {
 /**
  * Close a modal or drawer.
  */
-export interface CloseModalAction {
+export interface CloseModalAction extends ActionBase {
   type: "close-modal";
   /** Specific modal id. Omit to close the topmost. */
   modal?: string;
@@ -97,7 +104,7 @@ export interface CloseModalAction {
 /**
  * Re-fetch a component's data.
  */
-export interface RefreshAction {
+export interface RefreshAction extends ActionBase {
   type: "refresh";
   /** Component id to refresh. Can be a comma-separated list for multiple. */
   target: string;
@@ -106,7 +113,7 @@ export interface RefreshAction {
 /**
  * Set another component's published value.
  */
-export interface SetValueAction {
+export interface SetValueAction extends ActionBase {
   type: "set-value";
   /** Component id. */
   target: string;
@@ -117,7 +124,7 @@ export interface SetValueAction {
 /**
  * Download a file from an endpoint.
  */
-export interface DownloadAction {
+export interface DownloadAction extends ActionBase {
   type: "download";
   /** Endpoint path. Supports `{param}` interpolation. */
   endpoint: EndpointTarget;
@@ -125,29 +132,35 @@ export interface DownloadAction {
   filename?: string;
 }
 
-export interface CopyAction {
+export interface CopyAction extends ActionBase {
   type: "copy";
   text: string;
   onSuccess?: ActionConfig | ActionConfig[];
 }
 
-export interface EmitAction {
+export interface CopyToClipboardAction extends ActionBase {
+  type: "copy-to-clipboard";
+  text: string;
+  toast?: string;
+}
+
+export interface EmitAction extends ActionBase {
   type: "emit";
   event: string;
   payload?: unknown;
 }
 
-export interface SubmitFormAction {
+export interface SubmitFormAction extends ActionBase {
   type: "submit-form";
   formId: string;
 }
 
-export interface ResetFormAction {
+export interface ResetFormAction extends ActionBase {
   type: "reset-form";
   formId: string;
 }
 
-export interface SetThemeAction {
+export interface SetThemeAction extends ActionBase {
   type: "set-theme";
   flavor?: string;
   mode?: "light" | "dark" | "system";
@@ -156,22 +169,42 @@ export interface SetThemeAction {
 /**
  * Show a confirmation dialog. Stops the chain if cancelled.
  */
-export interface ConfirmAction {
+export interface ConfirmAction extends ActionBase {
   type: "confirm";
-  /** Message to display. Supports `{param}` interpolation. */
-  message: string;
+  /** Dialog title. */
+  title?: string;
+  /** Dialog description/message. */
+  description?: string;
+  /** Backwards-compatible body copy. */
+  message?: string;
   /** Confirm button text. Default: "Confirm". */
   confirmLabel?: string;
   /** Cancel button text. Default: "Cancel". */
   cancelLabel?: string;
   /** Visual variant. */
   variant?: "default" | "destructive";
+  /** Require an exact typed string before confirm is enabled. */
+  requireInput?: string;
+  /** Optional actions executed after confirmation succeeds. */
+  onConfirm?: ActionConfig | ActionConfig[];
+  /** Optional actions executed when the dialog is cancelled. */
+  onCancel?: ActionConfig | ActionConfig[];
 }
 
 /**
  * Show a toast notification.
  */
-export interface ToastAction {
+export interface ScrollToAction extends ActionBase {
+  type: "scroll-to";
+  target: string;
+  behavior?: "smooth" | "instant" | "auto";
+  block?: "start" | "center" | "end" | "nearest";
+}
+
+/**
+ * Show a toast notification.
+ */
+export interface ToastAction extends ActionBase {
   type: "toast";
   /** Message. Supports `{param}` interpolation. */
   message: string;
@@ -186,7 +219,7 @@ export interface ToastAction {
 /**
  * Track an analytics event through all manifest-configured providers.
  */
-export interface TrackAction {
+export interface TrackAction extends ActionBase {
   type: "track";
   /** Analytics event name. Supports `{param}` interpolation. */
   event: string;
@@ -194,7 +227,7 @@ export interface TrackAction {
   props?: Record<string, unknown>;
 }
 
-export interface LogAction {
+export interface LogAction extends ActionBase {
   type: "log";
   level: "info" | "warn" | "error" | "debug";
   message: string;
@@ -204,7 +237,7 @@ export interface LogAction {
 /**
  * Run a named manifest workflow.
  */
-export interface RunWorkflowAction {
+export interface RunWorkflowAction extends ActionBase {
   type: "run-workflow";
   /** Workflow id declared in manifest.workflows. */
   workflow: string;
@@ -225,11 +258,13 @@ export type ActionConfig =
   | SetValueAction
   | DownloadAction
   | CopyAction
+  | CopyToClipboardAction
   | EmitAction
   | SubmitFormAction
   | ResetFormAction
   | SetThemeAction
   | ConfirmAction
+  | ScrollToAction
   | ToastAction
   | LogAction
   | TrackAction
@@ -247,6 +282,11 @@ export type ActionExecuteFn = (
 // Because ApiAction and ToastAction have recursive references to ActionConfig,
 // all schemas that participate in the recursion use z.lazy().
 
+const actionTimingFields = {
+  debounce: z.number().int().positive().optional(),
+  throttle: z.number().int().positive().optional(),
+} as const;
+
 /** Schema for navigate action. */
 export const navigateActionSchema = z
   .object({
@@ -254,6 +294,7 @@ export const navigateActionSchema = z
     to: z.string(),
     replace: z.boolean().optional(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 export const navigateExternalActionSchema = z
@@ -262,6 +303,7 @@ export const navigateExternalActionSchema = z
     to: z.string(),
     target: z.enum(["_self", "_blank"]).optional(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 /** Schema for open-modal action. */
@@ -272,6 +314,7 @@ export const openModalActionSchema = z
     payload: z.unknown().optional(),
     resultTarget: z.string().optional(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 /** Schema for close-modal action. */
@@ -281,6 +324,7 @@ export const closeModalActionSchema = z
     modal: z.string().optional(),
     result: z.unknown().optional(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 /** Schema for refresh action. */
@@ -289,6 +333,7 @@ export const refreshActionSchema = z
     type: z.literal("refresh"),
     target: z.string(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 /** Schema for set-value action. */
@@ -298,6 +343,7 @@ export const setValueActionSchema = z
     target: z.string(),
     value: z.unknown(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 /** Schema for download action. */
@@ -307,6 +353,7 @@ export const downloadActionSchema = z
     endpoint: endpointTargetSchema,
     filename: z.string().optional(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 export const copyActionSchema: z.ZodType<CopyAction> = z.lazy(() =>
@@ -318,8 +365,18 @@ export const copyActionSchema: z.ZodType<CopyAction> = z.lazy(() =>
         .union([z.lazy(() => actionSchema), z.array(z.lazy(() => actionSchema))])
         .optional(),
     })
+    .extend(actionTimingFields)
     .strict(),
 );
+
+export const copyToClipboardActionSchema = z
+  .object({
+    type: z.literal("copy-to-clipboard"),
+    text: z.string(),
+    toast: z.string().optional(),
+  })
+  .extend(actionTimingFields)
+  .strict();
 
 export const emitActionSchema = z
   .object({
@@ -327,6 +384,7 @@ export const emitActionSchema = z
     event: z.string().min(1),
     payload: z.unknown().optional(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 export const submitFormActionSchema = z
@@ -334,6 +392,7 @@ export const submitFormActionSchema = z
     type: z.literal("submit-form"),
     formId: z.string().min(1),
   })
+  .extend(actionTimingFields)
   .strict();
 
 export const resetFormActionSchema = z
@@ -341,6 +400,7 @@ export const resetFormActionSchema = z
     type: z.literal("reset-form"),
     formId: z.string().min(1),
   })
+  .extend(actionTimingFields)
   .strict();
 
 export const setThemeActionSchema = z
@@ -349,17 +409,38 @@ export const setThemeActionSchema = z
     flavor: z.string().optional(),
     mode: z.enum(["light", "dark", "system"]).optional(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 /** Schema for confirm action. */
 export const confirmActionSchema = z
   .object({
     type: z.literal("confirm"),
-    message: z.string(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    message: z.string().optional(),
     confirmLabel: z.string().optional(),
     cancelLabel: z.string().optional(),
     variant: z.enum(["default", "destructive"]).optional(),
+    requireInput: z.string().optional(),
+    onConfirm: z
+      .union([z.lazy(() => actionSchema), z.array(z.lazy(() => actionSchema))])
+      .optional(),
+    onCancel: z
+      .union([z.lazy(() => actionSchema), z.array(z.lazy(() => actionSchema))])
+      .optional(),
   })
+  .extend(actionTimingFields)
+  .strict();
+
+export const scrollToActionSchema = z
+  .object({
+    type: z.literal("scroll-to"),
+    target: z.string().min(1),
+    behavior: z.enum(["smooth", "instant", "auto"]).optional(),
+    block: z.enum(["start", "center", "end", "nearest"]).optional(),
+  })
+  .extend(actionTimingFields)
   .strict();
 
 /** Schema for run-workflow action. */
@@ -369,6 +450,7 @@ export const runWorkflowActionSchema = z
     workflow: z.string().min(1),
     input: z.record(z.unknown()).optional(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 /**
@@ -397,6 +479,7 @@ function buildApiActionSchema(): z.ZodType<ApiAction> {
         ])
         .optional(),
     })
+    .extend(actionTimingFields)
     .strict();
 }
 
@@ -418,6 +501,7 @@ function buildToastActionSchema(): z.ZodType<ToastAction> {
         })
         .optional(),
     })
+    .extend(actionTimingFields)
     .strict();
 }
 
@@ -428,6 +512,7 @@ export const trackActionSchema = z
     event: z.string().min(1),
     props: z.record(z.unknown()).optional(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 export const logActionSchema = z
@@ -437,6 +522,7 @@ export const logActionSchema = z
     message: z.string(),
     data: z.record(z.unknown()).optional(),
   })
+  .extend(actionTimingFields)
   .strict();
 
 /** Schema for api action. Uses z.lazy() for recursive onSuccess/onError. */
@@ -462,11 +548,13 @@ export const actionSchema: z.ZodType<ActionConfig> = z.lazy(() =>
     setValueActionSchema,
     downloadActionSchema,
     copyActionSchema,
+    copyToClipboardActionSchema,
     emitActionSchema,
     submitFormActionSchema,
     resetFormActionSchema,
     setThemeActionSchema,
     confirmActionSchema,
+    scrollToActionSchema,
     apiActionSchema,
     toastActionSchema,
     logActionSchema,

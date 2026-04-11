@@ -3,6 +3,7 @@ export { useModalManager, modalStackAtom } from "./modal-manager";
 export { useToastManager, ToastContainer, toastQueueAtom } from "./toast";
 export { useConfirmManager, ConfirmDialog, confirmAtom } from "./confirm";
 export { interpolate } from "./interpolate";
+export { debounceAction, throttleAction } from "./timing";
 export {
   actionSchema,
   navigateActionSchema,
@@ -12,7 +13,9 @@ export {
   refreshActionSchema,
   setValueActionSchema,
   downloadActionSchema,
+  copyToClipboardActionSchema,
   confirmActionSchema,
+  scrollToActionSchema,
   toastActionSchema,
   trackActionSchema,
   runWorkflowActionSchema,
@@ -20,6 +23,7 @@ export {
 export type {
   ActionConfig,
   ActionExecuteFn,
+  ActionBase,
   NavigateAction,
   ApiAction,
   OpenModalAction,
@@ -27,8 +31,12 @@ export type {
   RefreshAction,
   SetValueAction,
   DownloadAction,
+  CopyAction,
+  CopyToClipboardAction,
   ConfirmAction,
+  ScrollToAction,
   ToastAction,
+  LogAction,
   TrackAction,
   RunWorkflowAction,
 } from "./types";

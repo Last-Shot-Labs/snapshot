@@ -1,10 +1,14 @@
 import { z } from "zod";
 import { type EndpointTarget } from "../manifest/resources";
-export declare const ACTION_TYPES: readonly ["navigate", "navigate-external", "api", "open-modal", "close-modal", "refresh", "set-value", "download", "copy", "emit", "submit-form", "reset-form", "set-theme", "confirm", "toast", "log", "track", "run-workflow"];
+export declare const ACTION_TYPES: readonly ["navigate", "navigate-external", "api", "open-modal", "close-modal", "refresh", "set-value", "download", "copy", "copy-to-clipboard", "emit", "submit-form", "reset-form", "set-theme", "confirm", "scroll-to", "toast", "log", "track", "run-workflow"];
+export interface ActionBase {
+    debounce?: number;
+    throttle?: number;
+}
 /**
  * Navigate to a route.
  */
-export interface NavigateAction {
+export interface NavigateAction extends ActionBase {
     type: "navigate";
     /** Route path. Supports `{param}` interpolation from context. */
     to: string;
@@ -14,7 +18,7 @@ export interface NavigateAction {
 /**
  * Call an API endpoint.
  */
-export interface ApiAction {
+export interface ApiAction extends ActionBase {
     type: "api";
     method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     /** Endpoint path. Supports `{param}` interpolation. */
@@ -32,7 +36,7 @@ export interface ApiAction {
     /** Actions to execute on error. Error available as `{error}`. */
     onError?: ActionConfig | ActionConfig[];
 }
-export interface NavigateExternalAction {
+export interface NavigateExternalAction extends ActionBase {
     type: "navigate-external";
     to: string;
     target?: "_self" | "_blank";
@@ -40,7 +44,7 @@ export interface NavigateExternalAction {
 /**
  * Open a modal or drawer by id.
  */
-export interface OpenModalAction {
+export interface OpenModalAction extends ActionBase {
     type: "open-modal";
     /** The id of the modal/drawer component to open. */
     modal: string;
@@ -52,7 +56,7 @@ export interface OpenModalAction {
 /**
  * Close a modal or drawer.
  */
-export interface CloseModalAction {
+export interface CloseModalAction extends ActionBase {
     type: "close-modal";
     /** Specific modal id. Omit to close the topmost. */
     modal?: string;
@@ -62,7 +66,7 @@ export interface CloseModalAction {
 /**
  * Re-fetch a component's data.
  */
-export interface RefreshAction {
+export interface RefreshAction extends ActionBase {
     type: "refresh";
     /** Component id to refresh. Can be a comma-separated list for multiple. */
     target: string;
@@ -70,7 +74,7 @@ export interface RefreshAction {
 /**
  * Set another component's published value.
  */
-export interface SetValueAction {
+export interface SetValueAction extends ActionBase {
     type: "set-value";
     /** Component id. */
     target: string;
@@ -80,32 +84,37 @@ export interface SetValueAction {
 /**
  * Download a file from an endpoint.
  */
-export interface DownloadAction {
+export interface DownloadAction extends ActionBase {
     type: "download";
     /** Endpoint path. Supports `{param}` interpolation. */
     endpoint: EndpointTarget;
     /** Suggested filename. */
     filename?: string;
 }
-export interface CopyAction {
+export interface CopyAction extends ActionBase {
     type: "copy";
     text: string;
     onSuccess?: ActionConfig | ActionConfig[];
 }
-export interface EmitAction {
+export interface CopyToClipboardAction extends ActionBase {
+    type: "copy-to-clipboard";
+    text: string;
+    toast?: string;
+}
+export interface EmitAction extends ActionBase {
     type: "emit";
     event: string;
     payload?: unknown;
 }
-export interface SubmitFormAction {
+export interface SubmitFormAction extends ActionBase {
     type: "submit-form";
     formId: string;
 }
-export interface ResetFormAction {
+export interface ResetFormAction extends ActionBase {
     type: "reset-form";
     formId: string;
 }
-export interface SetThemeAction {
+export interface SetThemeAction extends ActionBase {
     type: "set-theme";
     flavor?: string;
     mode?: "light" | "dark" | "system";
@@ -113,21 +122,40 @@ export interface SetThemeAction {
 /**
  * Show a confirmation dialog. Stops the chain if cancelled.
  */
-export interface ConfirmAction {
+export interface ConfirmAction extends ActionBase {
     type: "confirm";
-    /** Message to display. Supports `{param}` interpolation. */
-    message: string;
+    /** Dialog title. */
+    title?: string;
+    /** Dialog description/message. */
+    description?: string;
+    /** Backwards-compatible body copy. */
+    message?: string;
     /** Confirm button text. Default: "Confirm". */
     confirmLabel?: string;
     /** Cancel button text. Default: "Cancel". */
     cancelLabel?: string;
     /** Visual variant. */
     variant?: "default" | "destructive";
+    /** Require an exact typed string before confirm is enabled. */
+    requireInput?: string;
+    /** Optional actions executed after confirmation succeeds. */
+    onConfirm?: ActionConfig | ActionConfig[];
+    /** Optional actions executed when the dialog is cancelled. */
+    onCancel?: ActionConfig | ActionConfig[];
 }
 /**
  * Show a toast notification.
  */
-export interface ToastAction {
+export interface ScrollToAction extends ActionBase {
+    type: "scroll-to";
+    target: string;
+    behavior?: "smooth" | "instant" | "auto";
+    block?: "start" | "center" | "end" | "nearest";
+}
+/**
+ * Show a toast notification.
+ */
+export interface ToastAction extends ActionBase {
     type: "toast";
     /** Message. Supports `{param}` interpolation. */
     message: string;
@@ -144,14 +172,14 @@ export interface ToastAction {
 /**
  * Track an analytics event through all manifest-configured providers.
  */
-export interface TrackAction {
+export interface TrackAction extends ActionBase {
     type: "track";
     /** Analytics event name. Supports `{param}` interpolation. */
     event: string;
     /** Optional event properties. Supports nested `{ from: "..." }` refs. */
     props?: Record<string, unknown>;
 }
-export interface LogAction {
+export interface LogAction extends ActionBase {
     type: "log";
     level: "info" | "warn" | "error" | "debug";
     message: string;
@@ -160,7 +188,7 @@ export interface LogAction {
 /**
  * Run a named manifest workflow.
  */
-export interface RunWorkflowAction {
+export interface RunWorkflowAction extends ActionBase {
     type: "run-workflow";
     /** Workflow id declared in manifest.workflows. */
     workflow: string;
@@ -170,7 +198,7 @@ export interface RunWorkflowAction {
 /**
  * All possible action configs. Discriminated union on `type`.
  */
-export type ActionConfig = NavigateAction | NavigateExternalAction | ApiAction | OpenModalAction | CloseModalAction | RefreshAction | SetValueAction | DownloadAction | CopyAction | EmitAction | SubmitFormAction | ResetFormAction | SetThemeAction | ConfirmAction | ToastAction | LogAction | TrackAction | RunWorkflowAction;
+export type ActionConfig = NavigateAction | NavigateExternalAction | ApiAction | OpenModalAction | CloseModalAction | RefreshAction | SetValueAction | DownloadAction | CopyAction | CopyToClipboardAction | EmitAction | SubmitFormAction | ResetFormAction | SetThemeAction | ConfirmAction | ScrollToAction | ToastAction | LogAction | TrackAction | RunWorkflowAction;
 /**
  * The execute function returned by useActionExecutor.
  */
@@ -288,6 +316,19 @@ export declare const downloadActionSchema: z.ZodObject<{
     filename?: string | undefined;
 }>;
 export declare const copyActionSchema: z.ZodType<CopyAction>;
+export declare const copyToClipboardActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"copy-to-clipboard">;
+    text: z.ZodString;
+    toast: z.ZodOptional<z.ZodString>;
+}, "strict", z.ZodTypeAny, {
+    type: "copy-to-clipboard";
+    text: string;
+    toast?: string | undefined;
+}, {
+    type: "copy-to-clipboard";
+    text: string;
+    toast?: string | undefined;
+}>;
 export declare const emitActionSchema: z.ZodObject<{
     type: z.ZodLiteral<"emit">;
     event: z.ZodString;
@@ -337,22 +378,53 @@ export declare const setThemeActionSchema: z.ZodObject<{
 /** Schema for confirm action. */
 export declare const confirmActionSchema: z.ZodObject<{
     type: z.ZodLiteral<"confirm">;
-    message: z.ZodString;
+    title: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
+    message: z.ZodOptional<z.ZodString>;
     confirmLabel: z.ZodOptional<z.ZodString>;
     cancelLabel: z.ZodOptional<z.ZodString>;
     variant: z.ZodOptional<z.ZodEnum<["default", "destructive"]>>;
+    requireInput: z.ZodOptional<z.ZodString>;
+    onConfirm: z.ZodOptional<z.ZodUnion<[z.ZodLazy<z.ZodType<ActionConfig, z.ZodTypeDef, ActionConfig>>, z.ZodArray<z.ZodLazy<z.ZodType<ActionConfig, z.ZodTypeDef, ActionConfig>>, "many">]>>;
+    onCancel: z.ZodOptional<z.ZodUnion<[z.ZodLazy<z.ZodType<ActionConfig, z.ZodTypeDef, ActionConfig>>, z.ZodArray<z.ZodLazy<z.ZodType<ActionConfig, z.ZodTypeDef, ActionConfig>>, "many">]>>;
 }, "strict", z.ZodTypeAny, {
-    message: string;
     type: "confirm";
+    title?: string | undefined;
+    description?: string | undefined;
+    message?: string | undefined;
     variant?: "default" | "destructive" | undefined;
     confirmLabel?: string | undefined;
     cancelLabel?: string | undefined;
+    requireInput?: string | undefined;
+    onConfirm?: ActionConfig | ActionConfig[] | undefined;
+    onCancel?: ActionConfig | ActionConfig[] | undefined;
 }, {
-    message: string;
     type: "confirm";
+    title?: string | undefined;
+    description?: string | undefined;
+    message?: string | undefined;
     variant?: "default" | "destructive" | undefined;
     confirmLabel?: string | undefined;
     cancelLabel?: string | undefined;
+    requireInput?: string | undefined;
+    onConfirm?: ActionConfig | ActionConfig[] | undefined;
+    onCancel?: ActionConfig | ActionConfig[] | undefined;
+}>;
+export declare const scrollToActionSchema: z.ZodObject<{
+    type: z.ZodLiteral<"scroll-to">;
+    target: z.ZodString;
+    behavior: z.ZodOptional<z.ZodEnum<["smooth", "instant", "auto"]>>;
+    block: z.ZodOptional<z.ZodEnum<["start", "center", "end", "nearest"]>>;
+}, "strict", z.ZodTypeAny, {
+    type: "scroll-to";
+    target: string;
+    behavior?: "smooth" | "instant" | "auto" | undefined;
+    block?: "start" | "center" | "end" | "nearest" | undefined;
+}, {
+    type: "scroll-to";
+    target: string;
+    behavior?: "smooth" | "instant" | "auto" | undefined;
+    block?: "start" | "center" | "end" | "nearest" | undefined;
 }>;
 /** Schema for run-workflow action. */
 export declare const runWorkflowActionSchema: z.ZodObject<{

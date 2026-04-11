@@ -38,6 +38,7 @@ function useStatCardLogic(config: StatCardConfig): UseStatCardResult {
   const { data, isLoading, error, refetch } = useComponentData(
     config.data,
     config.params as Record<string, unknown | FromRef> | undefined,
+    { poll: config.poll },
   );
 
   const result = useMemo((): Omit<UseStatCardResult, "refetch" | "data"> => {

@@ -886,14 +886,8 @@ function Spacer({ config }: { config: Record<string, unknown> }) {
  * The boot layer registers these components explicitly so importing the UI
  * package remains side-effect free.
  */
-export const STRUCTURAL_COMPONENTS = {
-  row: Row,
+export const LEGACY_STRUCTURAL_COMPONENTS = {
   heading: Heading,
-  button: Button,
   select: Select,
   card: Card,
-  section: Section,
-  container: Container,
-  grid: Grid,
-  spacer: Spacer,
 } as const;

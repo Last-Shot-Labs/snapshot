@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
-import { dataSourceSchema, fromRefSchema } from "../../_base/types";
+import { dataSourceSchema, fromRefSchema, pollConfigSchema } from "../../_base/types";
 
 /** Schema for a responsive value — flat or breakpoint map. */
 function responsiveSchema<T extends z.ZodTypeAny>(inner: T) {
@@ -85,6 +85,8 @@ export const statCardConfigSchema = z
     loading: z.enum(["skeleton", "pulse", "spinner"]).optional(),
     /** Custom error message. Default: "Failed to load". */
     errorMessage: z.string().optional(),
+    /** Polling behavior for endpoint-backed stat cards. */
+    poll: pollConfigSchema.optional(),
     // --- BaseComponentConfig fields ---
     /** Component id for publishing/subscribing. */
     id: z.string().optional(),

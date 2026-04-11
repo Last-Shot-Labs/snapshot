@@ -16,6 +16,7 @@ import {
   useManifestResourcePolling,
   useManifestRuntime,
 } from "../../manifest/runtime";
+import { usePoll } from "../../hooks/use-poll";
 
 /**
  * Result returned by `useComponentData`.
@@ -30,6 +31,13 @@ export interface ComponentDataResult {
   error: Error | null;
   /** Manually re-fetch the data. */
   refetch: () => void;
+}
+
+export interface ComponentDataOptions {
+  poll?: {
+    interval: number;
+    pauseWhenHidden?: boolean;
+  };
 }
 
 function getInitialInlineData(
@@ -71,6 +79,7 @@ function getInitialInlineData(
 export function useComponentData(
   dataConfig: string | FromRef | ResourceRef,
   params?: Record<string, unknown | FromRef>,
+  options?: ComponentDataOptions,
 ): ComponentDataResult {
   const resolvedData = useSubscribe(dataConfig);
   const api = useContext(SnapshotApiContext);
@@ -211,6 +220,13 @@ export function useComponentData(
   const refetch = useCallback(() => {
     setFetchCount((c) => c + 1);
   }, []);
+
+  usePoll({
+    interval: options?.poll?.interval ?? 1000,
+    pauseWhenHidden: options?.poll?.pauseWhenHidden ?? true,
+    onPoll: refetch,
+    enabled: Boolean(options?.poll),
+  });
 
   return { data, isLoading, error, refetch };
 }

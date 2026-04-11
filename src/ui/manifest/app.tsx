@@ -31,9 +31,11 @@ import { Layout } from "../components/layout/layout";
 import { Nav } from "../components/layout/nav";
 import { DrawerComponent } from "../components/overlay/drawer";
 import { ModalComponent } from "../components/overlay/modal";
+import { SnapshotDragDropProvider } from "../components/_base/drag-drop-provider";
 import { useSetStateValue, useStateValue } from "../state";
 import { resolveDetectedLocale, resolveI18nRefs } from "../i18n/resolve";
 import type { PolicyExpr } from "../policies/types";
+import { evaluatePolicy } from "../policies/evaluate";
 import { resolveTokens, resolveFrameworkStyles } from "../tokens/resolve";
 import { registerShortcuts } from "../shortcuts/index";
 import { getAuthScreenPath } from "./auth-routes";
@@ -57,6 +59,7 @@ import type {
   ManifestAppProps,
   OverlayConfig,
 } from "./types";
+import type { ShortcutBinding } from "../shortcuts/types";
 import { bootBuiltins } from "./boot-builtins";
 import { resolveTemplate } from "../expressions/template";
 
@@ -1098,15 +1101,37 @@ function ManifestRouter({
 
   // Register keyboard shortcuts from manifest
   useEffect(() => {
-    const shortcuts = (manifest.raw as Record<string, unknown>).shortcuts as
-      | Record<string, import("../shortcuts/types").ShortcutBinding>
+    const rawShortcuts = manifest.raw.shortcuts as
+      | Record<string, ShortcutBinding>
       | undefined;
-    if (!shortcuts || Object.keys(shortcuts).length === 0) return;
+    if (!rawShortcuts || Object.keys(rawShortcuts).length === 0) return;
+
+    const shortcuts = Object.fromEntries(
+      Object.entries(rawShortcuts).filter((entry) => {
+        const binding = entry[1];
+        if (binding.disabled === true) {
+          return false;
+        }
+        if (binding.disabled === false || binding.disabled === undefined) {
+          return true;
+        }
+        return !evaluatePolicy(
+          `shortcut:${entry[0]}`,
+          binding.disabled,
+          { policies: policyMap, parentPolicies },
+        );
+      }),
+    );
+
+    if (Object.keys(shortcuts).length === 0) {
+      return;
+    }
+
     return registerShortcuts(
       shortcuts,
-      (action) => void execute(action as unknown as Parameters<typeof execute>[0]),
+      (action) => void execute(action),
     );
-  }, [(manifest.raw as Record<string, unknown>).shortcuts, execute]);
+  }, [execute, manifest.raw.shortcuts, parentPolicies, policyMap]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -1733,28 +1758,30 @@ export function ManifestApp({ manifest, apiUrl }: ManifestAppProps) {
             resources={compiledManifest.resources}
             api={snapshot.api}
           >
-            <ManifestApiHeadersBridge
-              manifest={compiledManifest}
-              api={snapshot.api}
-              clients={runtimeClients}
-            />
-            {compiledManifest.auth || compiledManifest.realtime ? (
-              <>
-                <AuthRuntimeBridge
-                  manifest={compiledManifest}
-                  useUser={snapshot.useUser}
-                />
-                <ManifestAuthWorkflowBridge manifest={compiledManifest} />
-                <ManifestRealtimeWorkflowBridge manifest={compiledManifest} />
-              </>
-            ) : null}
-            <ManifestRouter
-              manifest={compiledManifest}
-              api={snapshot.api}
-              snapshot={snapshot}
-              runtimeClients={runtimeClients}
-            />
-            <ToastContainer />
+            <SnapshotDragDropProvider>
+              <ManifestApiHeadersBridge
+                manifest={compiledManifest}
+                api={snapshot.api}
+                clients={runtimeClients}
+              />
+              {compiledManifest.auth || compiledManifest.realtime ? (
+                <>
+                  <AuthRuntimeBridge
+                    manifest={compiledManifest}
+                    useUser={snapshot.useUser}
+                  />
+                  <ManifestAuthWorkflowBridge manifest={compiledManifest} />
+                  <ManifestRealtimeWorkflowBridge manifest={compiledManifest} />
+                </>
+              ) : null}
+              <ManifestRouter
+                manifest={compiledManifest}
+                api={snapshot.api}
+                snapshot={snapshot}
+                runtimeClients={runtimeClients}
+              />
+              <ToastContainer />
+            </SnapshotDragDropProvider>
           </AppContextProvider>
         </ManifestRuntimeProvider>
       </SnapshotApiContext.Provider>

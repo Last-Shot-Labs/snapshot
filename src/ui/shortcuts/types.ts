@@ -1,11 +1,11 @@
 import type { ActionConfig } from "../actions/types";
+import type { PolicyExpr } from "../policies/types";
 
 /** Keyboard shortcut definition from manifest. */
 export interface ShortcutBinding {
-  /** The action to execute when this shortcut fires. */
-  type: string;
-  /** Additional action properties (modal name, event name, etc.) */
-  [key: string]: unknown;
+  label?: string;
+  action: ActionConfig | ActionConfig[];
+  disabled?: boolean | PolicyExpr;
 }
 
 /** Parsed keyboard combo. */
@@ -15,4 +15,11 @@ export interface ParsedCombo {
   alt: boolean;
   shift: boolean;
   meta: boolean;
+}
+
+export interface ParsedShortcut {
+  id: string;
+  sequence: ParsedCombo[];
+  binding: ShortcutBinding;
+  hasModifier: boolean;
 }

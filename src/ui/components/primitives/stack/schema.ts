@@ -12,4 +12,6 @@ export const stackConfigSchema = extendComponentSchema({
     .default("start"),
   maxWidth: z.enum(["xs", "sm", "md", "lg", "xl", "2xl", "full"]).optional(),
   padding: z.enum(["none", "sm", "md", "lg", "xl"]).optional(),
+  overflow: z.enum(["auto", "hidden", "scroll", "visible"]).optional(),
+  maxHeight: z.string().optional(),
 }).strict();

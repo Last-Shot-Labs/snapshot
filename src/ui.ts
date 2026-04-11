@@ -100,14 +100,19 @@ export {
   refreshActionSchema,
   setValueActionSchema,
   downloadActionSchema,
+  copyToClipboardActionSchema,
   confirmActionSchema,
+  scrollToActionSchema,
   toastActionSchema,
   trackActionSchema,
   runWorkflowActionSchema,
+  debounceAction,
+  throttleAction,
 } from "./ui/actions/index";
 export type {
   ActionConfig,
   ActionExecuteFn,
+  ActionBase,
   NavigateAction,
   ApiAction,
   OpenModalAction,
@@ -115,8 +120,12 @@ export type {
   RefreshAction,
   SetValueAction,
   DownloadAction,
+  CopyAction,
+  CopyToClipboardAction,
   ConfirmAction,
+  ScrollToAction,
   ToastAction,
+  LogAction,
   TrackAction,
   RunWorkflowAction,
   ModalManager,
@@ -679,6 +688,10 @@ export {
   BREAKPOINTS as UI_BREAKPOINTS,
 } from "./ui/hooks/use-breakpoint";
 export type { Breakpoint } from "./ui/hooks/use-breakpoint";
+export { usePoll } from "./ui/hooks/use-poll";
+export type { UsePollOptions } from "./ui/hooks/use-poll";
+export { useInfiniteScroll } from "./ui/hooks/use-infinite-scroll";
+export type { UseInfiniteScrollOptions } from "./ui/hooks/use-infinite-scroll";
 
 // Headless Hooks (Level 2/3)
 // export { useDataTable } from './ui/hooks/use-data-table'

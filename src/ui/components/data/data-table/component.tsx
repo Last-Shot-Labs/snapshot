@@ -1,9 +1,20 @@
 'use client';
 
-import React, { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import React, { useMemo, useState, useCallback, useEffect, useId } from "react";
 import { useDataTable } from "./hook";
 import { useActionExecutor } from "../../../actions/executor";
+import { ContextMenuPortal } from "../../_base/context-menu-portal";
+import { useSharedDragDrop } from "../../_base/drag-drop-provider";
+import { useReorderable } from "../../_base/use-reorderable";
 import { ComponentRenderer } from "../../../manifest/renderer";
+import {
+  SortableContext,
+  useDroppable,
+  useSortable,
+  verticalListSortingStrategy,
+  getSortableStyle,
+} from "../../../hooks/use-drag-drop";
+import { useInfiniteScroll } from "../../../hooks/use-infinite-scroll";
 import type { ComponentConfig } from "../../../manifest/types";
 import type { DataTableConfig, ResolvedColumn } from "./types";
 
@@ -334,22 +345,85 @@ function SkeletonRows({
  * Invisible sentinel element that triggers loading the next page when it
  * enters the viewport via IntersectionObserver.
  */
-function InfiniteScrollSentinel({ onIntersect }: { onIntersect: () => void }) {
-  const ref = useRef<HTMLDivElement>(null);
+function SortableTableRow({
+  id,
+  containerId,
+  children,
+  style,
+  dataSelected,
+  onClick,
+  onContextMenu,
+}: {
+  id: string;
+  containerId: string;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+  dataSelected?: string;
+  onClick?: () => void;
+  onContextMenu?: (event: React.MouseEvent) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id,
+    data: {
+      kind: "snapshot-shared-dnd-item",
+      containerId,
+    },
+  });
 
-  useEffect(() => {
-    if (!ref.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) onIntersect();
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [onIntersect]);
+  return (
+    <tr
+      ref={setNodeRef}
+      data-selected={dataSelected}
+      style={{
+        ...style,
+        ...getSortableStyle(transform, transition, isDragging),
+      }}
+      onClick={onClick}
+      onContextMenu={onContextMenu}
+      {...attributes}
+      {...listeners}
+    >
+      {children}
+    </tr>
+  );
+}
 
-  return <div ref={ref} style={{ height: 1 }} />;
+function DroppableTableBody({
+  containerId,
+  children,
+}: {
+  containerId: string;
+  children: React.ReactNode;
+}) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: `container:${containerId}`,
+    data: {
+      kind: "snapshot-shared-dnd-container",
+      containerId,
+    },
+  });
+
+  return (
+    <tbody
+      ref={setNodeRef}
+      style={{
+        backgroundColor: isOver
+          ? "color-mix(in oklch, var(--sn-color-primary, #2563eb) 3%, transparent)"
+          : undefined,
+        transition:
+          "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+      }}
+    >
+      {children}
+    </tbody>
+  );
 }
 
 // ── Main component ──────────────────────────────────────────────────────────
@@ -380,9 +454,58 @@ function InfiniteScrollSentinel({ onIntersect }: { onIntersect: () => void }) {
 export function DataTable({ config }: { config: DataTableConfig }) {
   const table = useDataTable(config);
   const execute = useActionExecutor();
+  const sharedDragDrop = useSharedDragDrop();
+  const generatedId = useId();
   const density = config.density ?? "default";
   const cellPadding = getDensityPadding(density);
-
+  const draggable = config.draggable ?? false;
+  const dropEnabled =
+    draggable ||
+    Boolean(config.dropTargets?.length) ||
+    config.onDrop !== undefined;
+  const reorderAction = config.onReorder ?? config.reorderAction;
+  const containerId = useMemo(
+    () => config.id ?? `data-table-${generatedId.replace(/[:]/g, "")}`,
+    [config.id, generatedId],
+  );
+  const [contextMenuState, setContextMenuState] = useState<{
+    x: number;
+    y: number;
+    context?: Record<string, unknown>;
+  } | null>(null);
+  const {
+    orderedItems: orderedRows,
+    itemIds: rowIds,
+    moveItem,
+    removeItem,
+    insertItem,
+  } = useReorderable({
+      items: table.rows,
+      getKey: (row) => {
+        const record = row as Record<string, unknown>;
+        const id = record["id"] ?? record["_id"];
+        return typeof id === "string" || typeof id === "number" ? id : undefined;
+      },
+      onReorder: reorderAction
+        ? ({ oldIndex, newIndex, item, items }) =>
+            execute(reorderAction, {
+              oldIndex,
+              newIndex,
+              item,
+              items,
+            })
+        : undefined,
+    });
+  const renderedRows = dropEnabled ? orderedRows : table.rows;
+  const infiniteScrollRef = useInfiniteScroll({
+    hasNextPage: table.hasMore,
+    isLoading: table.isLoading,
+    loadNextPage: table.nextPage,
+    threshold:
+      typeof config.pagination === "object"
+        ? config.pagination.infiniteThreshold
+        : undefined,
+  });
   // Determine if we need an actions column
   const hasActions = (config.actions?.length ?? 0) > 0;
 
@@ -402,6 +525,7 @@ export function DataTable({ config }: { config: DataTableConfig }) {
   // Column count for skeleton and colSpan
   const totalColumns =
     table.columns.length +
+    (draggable ? 1 : 0) +
     (config.selectable ? 1 : 0) +
     (hasActions ? 1 : 0) +
     (config.expandable ? 1 : 0);
@@ -422,6 +546,221 @@ export function DataTable({ config }: { config: DataTableConfig }) {
     config.bulkActions &&
     config.bulkActions.length > 0 &&
     table.selectedIds.length > 0;
+
+  useEffect(() => {
+    if (!sharedDragDrop || !dropEnabled) {
+      return;
+    }
+
+    return sharedDragDrop.registerContainer({
+      id: containerId,
+      dragGroup: config.dragGroup,
+      dropTargets: config.dropTargets,
+      moveItem,
+      removeItem,
+      insertItem,
+      onDrop: config.onDrop
+        ? ({ item, source, target, index, items }) =>
+            execute(config.onDrop!, {
+              item,
+              source,
+              target,
+              index,
+              items,
+            })
+        : undefined,
+    });
+  }, [
+    config.dragGroup,
+    config.dropTargets,
+    config.onDrop,
+    containerId,
+    dropEnabled,
+    execute,
+    insertItem,
+    moveItem,
+    removeItem,
+    sharedDragDrop,
+  ]);
+
+  const renderRow = (
+    row: Record<string, unknown>,
+    rowIndex: number,
+    sortable: boolean,
+    sortableId?: string,
+  ): React.ReactNode => {
+    const id = row["id"];
+    const rowId =
+      typeof id === "string" || typeof id === "number" ? id : rowIndex;
+    const isExpanded = expandedRows.has(rowId);
+
+    const rowStyle: React.CSSProperties = {
+      backgroundColor: table.selection.has(rowId)
+        ? "var(--sn-color-accent, #dbeafe)"
+        : undefined,
+      cursor:
+        config.expandable || config.rowClickAction || draggable
+          ? "pointer"
+          : undefined,
+    };
+
+    const rowChildren = (
+      <>
+        {config.expandable && (
+          <td style={{ padding: cellPadding, width: "32px" }}>
+            <span
+              style={{
+                display: "inline-flex",
+                transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                transition:
+                  "transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+                color: "var(--sn-color-muted-foreground, #6b7280)",
+              }}
+            >
+              &#x25B6;
+            </span>
+          </td>
+        )}
+        {draggable && (
+          <td style={{ padding: cellPadding, width: "32px" }}>
+            <span
+              aria-hidden="true"
+              style={{
+                display: "inline-flex",
+                color: "var(--sn-color-muted-foreground, #6b7280)",
+              }}
+            >
+              &#x22EE;
+            </span>
+          </td>
+        )}
+        {config.selectable && (
+          <td style={{ padding: cellPadding, width: "40px" }}>
+            <input
+              type="checkbox"
+              checked={table.selection.has(rowId)}
+              onChange={() => table.toggleRow(rowId)}
+              aria-label={`Select row ${rowId}`}
+            />
+          </td>
+        )}
+        {table.columns.map((col) => (
+          <td
+            key={col.field}
+            style={{
+              padding: cellPadding,
+              textAlign: col.align ?? "left",
+            }}
+          >
+            {formatCellValue(row[col.field], col, row)}
+          </td>
+        ))}
+        {hasActions && (
+          <td style={{ padding: cellPadding, textAlign: "right" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "var(--sn-spacing-xs, 4px)",
+                justifyContent: "flex-end",
+              }}
+            >
+              {config.actions!.map((action, actionIndex) => {
+                if (
+                  action.visible === false ||
+                  (typeof action.visible === "boolean" && !action.visible)
+                ) {
+                  return null;
+                }
+
+                return (
+                  <button
+                    type="button"
+                    key={actionIndex}
+                    data-row-action
+                    onClick={() =>
+                      void execute(action.action, {
+                        row,
+                        ...row,
+                      })
+                    }
+                    style={{ cursor: "pointer" }}
+                  >
+                    {action.label}
+                  </button>
+                );
+              })}
+            </div>
+          </td>
+        )}
+      </>
+    );
+
+    const onRowClick = config.expandable
+      ? () => toggleExpandRow(rowId)
+      : config.rowClickAction
+        ? () =>
+            void execute(config.rowClickAction!, {
+              row,
+              ...row,
+            })
+        : undefined;
+
+    const onRowContextMenu = config.contextMenu
+      ? (event: React.MouseEvent) => {
+          event.preventDefault();
+          setContextMenuState({
+            x: event.clientX,
+            y: event.clientY,
+            context: { row, ...row },
+          });
+        }
+      : undefined;
+
+    return (
+      <React.Fragment key={rowId}>
+        {sortable ? (
+          <SortableTableRow
+            id={sortableId ?? String(rowId)}
+            containerId={containerId}
+            dataSelected={table.selection.has(rowId) ? "" : undefined}
+            style={rowStyle}
+            onClick={onRowClick}
+            onContextMenu={onRowContextMenu}
+          >
+            {rowChildren}
+          </SortableTableRow>
+        ) : (
+          <tr
+            data-selected={table.selection.has(rowId) ? "" : undefined}
+            onClick={onRowClick}
+            onContextMenu={onRowContextMenu}
+            style={rowStyle}
+          >
+            {rowChildren}
+          </tr>
+        )}
+        {config.expandable && isExpanded && config.expandedContent && (
+          <tr data-expanded-row>
+            <td
+              colSpan={totalColumns}
+              style={{
+                padding: cellPadding,
+                backgroundColor: "var(--sn-color-secondary, #f8fafc)",
+                borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+              }}
+            >
+              {config.expandedContent.map((child, ci) => (
+                <ComponentRenderer
+                  key={ci}
+                  config={child as ComponentConfig}
+                />
+              ))}
+            </td>
+          </tr>
+        )}
+      </React.Fragment>
+    );
+  };
 
   return (
     <div
@@ -526,6 +865,9 @@ export function DataTable({ config }: { config: DataTableConfig }) {
               {config.expandable && (
                 <th style={{ padding: cellPadding, width: "32px" }} />
               )}
+              {draggable && (
+                <th style={{ padding: cellPadding, width: "32px" }} />
+              )}
               {/* Select all checkbox */}
               {config.selectable && (
                 <th style={{ padding: cellPadding, width: "40px" }}>
@@ -533,8 +875,8 @@ export function DataTable({ config }: { config: DataTableConfig }) {
                     type="checkbox"
                     onChange={() => table.toggleAll()}
                     checked={
-                      table.rows.length > 0 &&
-                      table.rows.every((row, i) => {
+                      renderedRows.length > 0 &&
+                      renderedRows.every((row, i) => {
                         const id = (row as Record<string, unknown>)["id"];
                         const rowId =
                           typeof id === "string" || typeof id === "number"
@@ -588,7 +930,7 @@ export function DataTable({ config }: { config: DataTableConfig }) {
             </tr>
           </thead>
 
-          <tbody>
+          <DroppableTableBody containerId={containerId}>
             {/* Loading state */}
             {table.isLoading && (
               <SkeletonRows columnCount={totalColumns} rowCount={5} />
@@ -609,7 +951,7 @@ export function DataTable({ config }: { config: DataTableConfig }) {
             )}
 
             {/* Empty state */}
-            {!table.isLoading && !table.error && table.rows.length === 0 && (
+            {!table.isLoading && !table.error && renderedRows.length === 0 && (
               <tr>
                 <td
                   colSpan={totalColumns}
@@ -625,170 +967,32 @@ export function DataTable({ config }: { config: DataTableConfig }) {
             {/* Data rows */}
             {!table.isLoading &&
               !table.error &&
-              table.rows.map((row, rowIndex) => {
-                const rowRecord = row as Record<string, unknown>;
-                const id = rowRecord["id"];
-                const rowId =
-                  typeof id === "string" || typeof id === "number"
-                    ? id
-                    : rowIndex;
-
-                const isExpanded = expandedRows.has(rowId);
-
-                return (
-                  <React.Fragment key={rowId}>
-                    <tr
-                      data-selected={
-                        table.selection.has(rowId) ? "" : undefined
-                      }
-                      onClick={
-                        config.expandable
-                          ? () => toggleExpandRow(rowId)
-                          : config.rowClickAction
-                            ? () =>
-                                void execute(config.rowClickAction!, {
-                                  row: rowRecord,
-                                  ...rowRecord,
-                                })
-                            : undefined
-                      }
-                      style={{
-                        backgroundColor: table.selection.has(rowId)
-                          ? "var(--sn-color-accent, #dbeafe)"
-                          : undefined,
-                        cursor:
-                          config.expandable || config.rowClickAction
-                            ? "pointer"
-                            : undefined,
-                      }}
-                    >
-                      {/* Expand toggle */}
-                      {config.expandable && (
-                        <td style={{ padding: cellPadding, width: "32px" }}>
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              transform: isExpanded
-                                ? "rotate(90deg)"
-                                : "rotate(0deg)",
-                              transition:
-                                "transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-                              color:
-                                "var(--sn-color-muted-foreground, #6b7280)",
-                            }}
-                          >
-                            &#x25B6;
-                          </span>
-                        </td>
-                      )}
-
-                      {/* Row selection checkbox */}
-                      {config.selectable && (
-                        <td style={{ padding: cellPadding, width: "40px" }}>
-                          <input
-                            type="checkbox"
-                            checked={table.selection.has(rowId)}
-                            onChange={() => table.toggleRow(rowId)}
-                            aria-label={`Select row ${rowId}`}
-                          />
-                        </td>
-                      )}
-
-                      {/* Data cells */}
-                      {table.columns.map((col) => (
-                        <td
-                          key={col.field}
-                          style={{
-                            padding: cellPadding,
-                            textAlign: col.align ?? "left",
-                          }}
-                        >
-                          {formatCellValue(
-                            rowRecord[col.field],
-                            col,
-                            rowRecord,
-                          )}
-                        </td>
-                      ))}
-
-                      {/* Row action buttons */}
-                      {hasActions && (
-                        <td
-                          style={{ padding: cellPadding, textAlign: "right" }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "var(--sn-spacing-xs, 4px)",
-                              justifyContent: "flex-end",
-                            }}
-                          >
-                            {config.actions!.map((action, actionIndex) => {
-                              // Handle visibility
-                              if (action.visible === false) return null;
-                              // FromRef visibility would need useSubscribe, but for now handle boolean
-                              if (
-                                typeof action.visible === "boolean" &&
-                                !action.visible
-                              )
-                                return null;
-
-                              return (
-                                <button
-                                  type="button"
-                                  key={actionIndex}
-                                  data-row-action
-                                  onClick={() =>
-                                    void execute(action.action, {
-                                      row: rowRecord,
-                                      ...rowRecord,
-                                    })
-                                  }
-                                  style={{ cursor: "pointer" }}
-                                >
-                                  {action.label}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-
-                    {/* Expanded row content */}
-                    {config.expandable &&
-                      isExpanded &&
-                      config.expandedContent && (
-                        <tr data-expanded-row>
-                          <td
-                            colSpan={totalColumns}
-                            style={{
-                              padding: cellPadding,
-                              backgroundColor:
-                                "var(--sn-color-secondary, #f8fafc)",
-                              borderBottom:
-                                "1px solid var(--sn-color-border, #e5e7eb)",
-                            }}
-                          >
-                            {config.expandedContent.map((child, ci) => (
-                              <ComponentRenderer
-                                key={ci}
-                                config={child as ComponentConfig}
-                              />
-                            ))}
-                          </td>
-                        </tr>
-                      )}
-                  </React.Fragment>
-                );
-              })}
-          </tbody>
+              (draggable ? (
+                <SortableContext
+                  items={rowIds}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {renderedRows.map((row, rowIndex) =>
+                    renderRow(
+                      row as Record<string, unknown>,
+                      rowIndex,
+                      true,
+                      rowIds[rowIndex],
+                    ),
+                  )}
+                </SortableContext>
+              ) : (
+                renderedRows.map((row, rowIndex) =>
+                  renderRow(row as Record<string, unknown>, rowIndex, false),
+                )
+              ))}
+          </DroppableTableBody>
         </table>
       </div>
 
       {/* Infinite scroll sentinel */}
       {table.isInfiniteScroll && table.hasMore && (
-        <InfiniteScrollSentinel onIntersect={() => table.nextPage()} />
+        <div ref={infiniteScrollRef} style={{ height: 1 }} />
       )}
 
       {/* Pagination controls (hidden for infinite scroll) */}
@@ -832,6 +1036,13 @@ export function DataTable({ config }: { config: DataTableConfig }) {
           </div>
         </div>
       )}
+      {config.contextMenu ? (
+        <ContextMenuPortal
+          items={config.contextMenu}
+          state={contextMenuState}
+          onClose={() => setContextMenuState(null)}
+        />
+      ) : null}
     </div>
   );
 }

@@ -37,7 +37,9 @@ function validateField(field: FieldConfig, value: unknown): string | undefined {
     }
     if (v.pattern !== undefined) {
       try {
-        if (!new RegExp(v.pattern).test(str)) {
+        const patternValue =
+          typeof v.pattern === "string" ? v.pattern : v.pattern.value;
+        if (!new RegExp(patternValue).test(str)) {
           return v.message ?? `Invalid format`;
         }
       } catch {

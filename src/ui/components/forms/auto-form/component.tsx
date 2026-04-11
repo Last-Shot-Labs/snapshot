@@ -113,6 +113,14 @@ function isFieldVisible(
 ): boolean {
   if (field.visible === false) return false;
 
+  if (
+    field.visible &&
+    typeof field.visible === "object" &&
+    "from" in field.visible
+  ) {
+    return Boolean(values[field.visible.from]);
+  }
+
   if (field.dependsOn) {
     const dep = field.dependsOn;
     const watchedValue = values[dep.field];
@@ -136,6 +144,22 @@ function isFieldVisible(
   return true;
 }
 
+function isFieldRequired(
+  field: FieldConfig,
+  values: Record<string, unknown>,
+): boolean {
+  if (field.required === true) {
+    return true;
+  }
+
+  return Boolean(
+    field.required &&
+      typeof field.required === "object" &&
+      "from" in field.required &&
+      values[field.required.from],
+  );
+}
+
 // ── Resolve fields ────────────────────────────────────────────────────────
 
 function resolveFields(config: AutoFormConfig): FieldConfig[] {
@@ -151,6 +175,7 @@ function resolveFields(config: AutoFormConfig): FieldConfig[] {
 function FieldRenderer({
   field,
   value,
+  required,
   error,
   showError,
   onChange,
@@ -158,6 +183,7 @@ function FieldRenderer({
 }: {
   field: FieldConfig;
   value: unknown;
+  required: boolean;
   error: string | undefined;
   showError: boolean;
   onChange: (value: unknown) => void;
@@ -194,6 +220,7 @@ function FieldRenderer({
     onBlur,
     disabled: field.disabled,
     readOnly: field.readOnly,
+    required,
     "aria-invalid": hasError,
     "aria-describedby": hasError
       ? `${fieldId}-error`
@@ -572,9 +599,9 @@ function FieldRenderer({
           marginBottom: "var(--sn-spacing-xs, 0.25rem)",
         }}
       >
-        <span>
-          {label}
-          {field.required && (
+          <span>
+            {label}
+            {required && (
             <span
               style={{
                 color: "var(--sn-color-destructive, #ef4444)",
@@ -832,6 +859,7 @@ function FieldGrid({
             <FieldRenderer
               field={field}
               value={form.values[field.name]}
+              required={isFieldRequired(field, form.values)}
               error={form.errors[field.name]}
               showError={!!form.touched[field.name]}
               onChange={(value) => form.setValue(field.name, value)}

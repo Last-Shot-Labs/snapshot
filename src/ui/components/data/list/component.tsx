@@ -1,20 +1,19 @@
 'use client';
 
-import React, { useState, useCallback } from "react";
+import React, { useEffect, useId, useMemo, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { useComponentData } from "../../_base/use-component-data";
+import { ContextMenuPortal } from "../../_base/context-menu-portal";
+import { useSharedDragDrop } from "../../_base/drag-drop-provider";
+import { useReorderable } from "../../_base/use-reorderable";
 import { Icon } from "../../../icons/index";
 import {
-  DndContext,
   SortableContext,
-  closestCenter,
+  useDroppable,
   useSortable,
   verticalListSortingStrategy,
-  arrayMove,
-  useDndSensors,
   getSortableStyle,
 } from "../../../hooks/use-drag-drop";
-import type { DragEndEvent } from "../../../hooks/use-drag-drop";
 import type { ListConfig, ListItemConfig } from "./types";
 import type { ActionConfig, ActionExecuteFn } from "../../../actions/types";
 
@@ -94,13 +93,17 @@ function ListItem({
   selectable,
   showDivider,
   isCard,
+  draggable,
   execute,
+  onContextMenu,
 }: {
   item: ListItemConfig;
   selectable: boolean;
   showDivider: boolean;
   isCard: boolean;
+  draggable: boolean;
   execute: (action: ActionConfig | ActionConfig[]) => Promise<void>;
+  onContextMenu?: (event: React.MouseEvent) => void;
 }) {
   const isClickable = selectable && (item.action != null || item.href != null);
 
@@ -115,6 +118,7 @@ function ListItem({
       data-list-item=""
       data-testid="list-item"
       onClick={isClickable ? handleClick : undefined}
+      onContextMenu={onContextMenu}
       onKeyDown={
         isClickable
           ? (e) => {
@@ -159,6 +163,17 @@ function ListItem({
           : undefined
       }
     >
+      {draggable ? (
+        <span
+          aria-hidden="true"
+          style={{
+            color: "var(--sn-color-muted-foreground, #6b7280)",
+            flexShrink: 0,
+          }}
+        >
+          <Icon name="grip-vertical" size={16} />
+        </span>
+      ) : null}
       {/* Icon */}
       {item.icon && (
         <span
@@ -236,9 +251,11 @@ function ListItem({
  */
 function SortableListItem({
   id,
+  containerId,
   children,
 }: {
   id: string;
+  containerId: string;
   children: React.ReactNode;
 }) {
   const {
@@ -248,12 +265,50 @@ function SortableListItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({
+    id,
+    data: {
+      kind: "snapshot-shared-dnd-item",
+      containerId,
+    },
+  });
 
   const style = getSortableStyle(transform, transition, isDragging);
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+}
+
+function DroppableListBody({
+  containerId,
+  children,
+}: {
+  containerId: string;
+  children: React.ReactNode;
+}) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: `container:${containerId}`,
+    data: {
+      kind: "snapshot-shared-dnd-container",
+      containerId,
+    },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        backgroundColor: isOver
+          ? "color-mix(in oklch, var(--sn-color-primary, #2563eb) 4%, transparent)"
+          : undefined,
+        borderRadius: "var(--sn-radius-md, 0.5rem)",
+        transition:
+          "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+      }}
+    >
       {children}
     </div>
   );
@@ -271,14 +326,32 @@ function SortableListItem({
  */
 export function ListComponent({ config }: { config: ListConfig }) {
   const execute = useActionExecutor();
+  const generatedId = useId();
   const variant = config.variant ?? "default";
   const showDivider = config.divider !== false && variant !== "card";
   const selectable = config.selectable ?? false;
-  const sortable = config.sortable ?? false;
+  const sortable = config.draggable ?? config.sortable ?? false;
+  const dropEnabled =
+    sortable ||
+    Boolean(config.dropTargets?.length) ||
+    config.onDrop !== undefined;
   const emptyMessage = config.emptyMessage ?? "No items";
+  const containerId = useMemo(
+    () => config.id ?? `list-${generatedId.replace(/[:]/g, "")}`,
+    [config.id, generatedId],
+  );
+  const [contextMenuState, setContextMenuState] = useState<{
+    x: number;
+    y: number;
+    context?: Record<string, unknown>;
+  } | null>(null);
 
   // Fetch data if endpoint is provided
-  const { data, isLoading, error } = useComponentData(config.data ?? "");
+  const { data, isLoading, error } = useComponentData(
+    config.data ?? "",
+    undefined,
+    { poll: config.poll },
+  );
 
   // Resolve items: static config or mapped from data
   const hasEndpoint = config.data != null;
@@ -294,6 +367,12 @@ export function ListComponent({ config }: { config: ListConfig }) {
     if (Array.isArray(dataArray)) {
       resolvedItems = dataArray.map(
         (row: Record<string, unknown>): ListItemConfig => ({
+          id:
+            typeof row.id === "string" || typeof row.id === "number"
+              ? String(row.id)
+              : typeof row._id === "string" || typeof row._id === "number"
+                ? String(row._id)
+                : undefined,
           title: String(row[config.titleField ?? "title"] ?? row.name ?? ""),
           description: config.descriptionField
             ? String(row[config.descriptionField] ?? "")
@@ -373,14 +452,21 @@ export function ListComponent({ config }: { config: ListConfig }) {
       )}
 
       {/* Items */}
-      {!isLoading && !error && sortable ? (
-        <SortableListItems
+      {!isLoading && !error && dropEnabled ? (
+        <ManagedListItems
+          containerId={containerId}
           items={resolvedItems}
           selectable={selectable}
           showDivider={showDivider}
           isCard={variant === "card"}
           execute={execute}
-          reorderAction={config.reorderAction}
+          draggable={sortable}
+          dragGroup={config.dragGroup}
+          dropTargets={config.dropTargets}
+          contextMenu={config.contextMenu}
+          onOpenContextMenu={setContextMenuState}
+          onDropAction={config.onDrop}
+          reorderAction={config.onReorder ?? config.reorderAction}
         />
       ) : (
         !isLoading &&
@@ -392,82 +478,163 @@ export function ListComponent({ config }: { config: ListConfig }) {
             selectable={selectable}
             showDivider={showDivider && index < resolvedItems.length - 1}
             isCard={variant === "card"}
+            draggable={sortable}
             execute={execute}
+            onContextMenu={
+              config.contextMenu
+                ? (event) => {
+                    event.preventDefault();
+                    setContextMenuState({
+                      x: event.clientX,
+                      y: event.clientY,
+                      context: item as unknown as Record<string, unknown>,
+                    });
+                  }
+                : undefined
+            }
           />
         ))
       )}
+      {config.contextMenu ? (
+        <ContextMenuPortal
+          items={config.contextMenu}
+          state={contextMenuState}
+          onClose={() => setContextMenuState(null)}
+        />
+      ) : null}
     </div>
   );
 }
 
-/** Sortable list items wrapper with DnD context. */
-function SortableListItems({
+/** Managed list items wrapper with shared DnD registration. */
+function ManagedListItems({
+  containerId,
   items: initialItems,
   selectable,
   showDivider,
   isCard,
   execute,
+  draggable,
+  dragGroup,
+  dropTargets,
+  contextMenu,
+  onOpenContextMenu,
+  onDropAction,
   reorderAction,
 }: {
+  containerId: string;
   items: ListItemConfig[];
   selectable: boolean;
   showDivider: boolean;
   isCard: boolean;
   execute: ActionExecuteFn;
+  draggable: boolean;
+  dragGroup?: string;
+  dropTargets?: string[];
+  contextMenu?: ListConfig["contextMenu"];
+  onOpenContextMenu: (state: { x: number; y: number; context?: Record<string, unknown> } | null) => void;
+  onDropAction?: ActionConfig;
   reorderAction?: ActionConfig;
 }) {
-  const sensors = useDndSensors();
-  const [items, setItems] = useState(initialItems);
+  const sharedDragDrop = useSharedDragDrop();
+  const { orderedItems, itemIds, insertItem, moveItem, removeItem } =
+    useReorderable({
+    items: initialItems,
+    getKey: (item) => item.id ?? item.href ?? item.title,
+    onReorder: reorderAction
+      ? ({ oldIndex, newIndex, item, items }) =>
+          execute(reorderAction, {
+            oldIndex,
+            newIndex,
+            item,
+            items,
+          })
+      : undefined,
+    });
 
-  React.useEffect(() => {
-    setItems(initialItems);
-  }, [initialItems]);
+  useEffect(() => {
+    if (!sharedDragDrop) {
+      return;
+    }
 
-  const itemIds = items.map((_, i) => `list-item-${i}`);
+    return sharedDragDrop.registerContainer({
+      id: containerId,
+      dragGroup,
+      dropTargets,
+      moveItem,
+      removeItem,
+      insertItem,
+      onDrop: onDropAction
+        ? ({ item, source, target, index, items }) =>
+            execute(onDropAction, {
+              item,
+              source,
+              target,
+              index,
+              items,
+            })
+        : undefined,
+    });
+  }, [
+    containerId,
+    dragGroup,
+    dropTargets,
+    execute,
+    insertItem,
+    moveItem,
+    onDropAction,
+    removeItem,
+    sharedDragDrop,
+  ]);
 
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (!over || active.id === over.id) return;
+  const renderedItems = orderedItems.map((item, index) => {
+    const content = (
+      <ListItem
+        item={item}
+        selectable={selectable}
+        showDivider={showDivider && index < orderedItems.length - 1}
+        isCard={isCard}
+        draggable={draggable}
+        execute={execute}
+        onContextMenu={
+          contextMenu
+            ? (event) => {
+                event.preventDefault();
+                onOpenContextMenu({
+                  x: event.clientX,
+                  y: event.clientY,
+                  context: item as unknown as Record<string, unknown>,
+                });
+              }
+            : undefined
+        }
+      />
+    );
 
-      const oldIndex = itemIds.indexOf(String(active.id));
-      const newIndex = itemIds.indexOf(String(over.id));
-      if (oldIndex === -1 || newIndex === -1) return;
+    if (!draggable) {
+      return <React.Fragment key={itemIds[index]}>{content}</React.Fragment>;
+    }
 
-      const reordered = arrayMove(items, oldIndex, newIndex);
-      setItems(reordered);
-
-      if (reorderAction) {
-        void execute(reorderAction, {
-          fromIndex: oldIndex,
-          toIndex: newIndex,
-          item: items[oldIndex],
-          items: reordered.map((it) => it.title),
-        });
-      }
-    },
-    [items, itemIds, execute, reorderAction],
-  );
+    return (
+      <SortableListItem
+        key={itemIds[index]}
+        id={itemIds[index]!}
+        containerId={containerId}
+      >
+        {content}
+      </SortableListItem>
+    );
+  });
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
-        {items.map((item, index) => (
-          <SortableListItem key={itemIds[index]} id={itemIds[index]!}>
-            <ListItem
-              item={item}
-              selectable={selectable}
-              showDivider={showDivider && index < items.length - 1}
-              isCard={isCard}
-              execute={execute}
-            />
-          </SortableListItem>
-        ))}
-      </SortableContext>
-    </DndContext>
+    <DroppableListBody containerId={containerId}>
+      {draggable ? (
+        <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+          {renderedItems}
+        </SortableContext>
+      ) : (
+        renderedItems
+      )}
+    </DroppableListBody>
   );
 }

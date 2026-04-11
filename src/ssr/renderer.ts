@@ -4,7 +4,6 @@ import type { QueryKey } from "@tanstack/react-query";
 import React from "react";
 import { SnapshotApiContext } from "../ui/actions/executor";
 import { AppContextProvider } from "../ui/context/providers";
-import "../ui/components/register";
 import {
   AppShellWrapper,
   isCustomPage,
@@ -13,7 +12,6 @@ import {
   type CustomPageDeclaration,
   type PageLoaderResult,
 } from "../ui/entity-pages";
-import "../ui/manifest/structural";
 import { compileManifest } from "../ui/manifest/compiler";
 import { PageRenderer } from "../ui/manifest/renderer";
 import type { ManifestConfig } from "../ui/manifest/types";

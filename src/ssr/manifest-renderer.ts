@@ -9,7 +9,6 @@ import { Layout } from "../ui/components/layout/layout";
 import { Nav } from "../ui/components/layout/nav";
 import { resolveDetectedLocale, resolveI18nRefs } from "../ui/i18n/resolve";
 import type { PolicyExpr } from "../ui/policies/types";
-import "../ui/components/register";
 import {
   AppShellWrapper,
   isCustomPage,
@@ -18,7 +17,6 @@ import {
   mapPageDeclaration,
   type PageLoaderResult,
 } from "../ui/entity-pages";
-import "../ui/manifest/structural";
 import { compileManifest } from "../ui/manifest/compiler";
 import { evaluateManifestGuard } from "../ui/manifest/guard-registry";
 import { ComponentRenderer, PageRenderer } from "../ui/manifest/renderer";

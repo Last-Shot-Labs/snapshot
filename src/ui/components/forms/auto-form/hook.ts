@@ -16,12 +16,20 @@ import type {
 export function validateField(
   field: FieldConfig,
   value: unknown,
+  values: Record<string, unknown> = {},
 ): string | undefined {
+  const validation = field.validate ?? field.validation;
   const strValue = typeof value === "string" ? value : "";
   const isEmptyArray = Array.isArray(value) && value.length === 0;
+  const isRequired =
+    field.required === true ||
+    (field.required &&
+      typeof field.required === "object" &&
+      "from" in field.required &&
+      Boolean(values[field.required.from]));
 
   // Required check
-  if (field.required) {
+  if (isRequired || validation?.required) {
     if (
       value === undefined ||
       value === null ||
@@ -29,7 +37,7 @@ export function validateField(
       isEmptyArray
     ) {
       return (
-        field.validation?.message ?? `${field.label ?? field.name} is required`
+        validation?.message ?? `${field.label ?? field.name} is required`
       );
     }
   }
@@ -39,7 +47,7 @@ export function validateField(
     return undefined;
   }
 
-  const v = field.validation;
+  const v = validation;
   if (!v) return undefined;
 
   if (v.minLength !== undefined && strValue.length < v.minLength) {
@@ -59,13 +67,56 @@ export function validateField(
   }
 
   if (v.pattern !== undefined) {
-    const regex = new RegExp(v.pattern);
+    const patternValue =
+      typeof v.pattern === "string" ? v.pattern : v.pattern.value;
+    const regex = new RegExp(patternValue);
     if (!regex.test(strValue)) {
-      return v.message ?? `Invalid format`;
+      return (
+        (typeof v.pattern === "object" ? v.pattern.message : undefined) ??
+        v.message ??
+        `Invalid format`
+      );
     }
   }
 
+  if (v.equals !== undefined && value !== values[v.equals]) {
+    return v.message ?? `Must match ${v.equals}`;
+  }
+
   return undefined;
+}
+
+function isFieldVisible(
+  field: FieldConfig,
+  values: Record<string, unknown>,
+): boolean {
+  if (field.visible === false) {
+    return false;
+  }
+
+  if (
+    field.visible &&
+    typeof field.visible === "object" &&
+    "from" in field.visible
+  ) {
+    return Boolean(values[field.visible.from]);
+  }
+
+  if (!field.dependsOn) {
+    return true;
+  }
+
+  const watchedValue = values[field.dependsOn.field];
+  if (field.dependsOn.value !== undefined) {
+    return watchedValue === field.dependsOn.value;
+  }
+  if (field.dependsOn.notValue !== undefined) {
+    return watchedValue !== field.dependsOn.notValue;
+  }
+  if (field.dependsOn.filled) {
+    return Boolean(watchedValue);
+  }
+  return true;
 }
 
 /**
@@ -139,7 +190,10 @@ export function useAutoForm(
   const validateAll = useCallback((): FieldErrors => {
     const newErrors: FieldErrors = {};
     for (const field of fieldsRef.current) {
-      const error = validateField(field, values[field.name]);
+      if (!isFieldVisible(field, values)) {
+        continue;
+      }
+      const error = validateField(field, values[field.name], values);
       if (error) newErrors[field.name] = error;
     }
     return newErrors;
@@ -149,7 +203,10 @@ export function useAutoForm(
     (name: string): string | undefined => {
       const field = fieldsRef.current.find((f) => f.name === name);
       if (!field) return undefined;
-      return validateField(field, values[name]);
+      if (!isFieldVisible(field, values)) {
+        return undefined;
+      }
+      return validateField(field, values[name], values);
     },
     [values],
   );

@@ -13,6 +13,12 @@ import {
   useSubscribe,
 } from "../context/index";
 import { ComponentWrapper } from "../components/_base/component-wrapper";
+import type {
+  ComponentAnimationConfig,
+  ComponentBackgroundConfig,
+  ComponentTransitionConfig,
+  ComponentZIndex,
+} from "../components/_base/types";
 import { useResponsiveValue } from "../hooks/use-breakpoint";
 import { evaluatePolicy } from "../policies/evaluate";
 import { isPolicyRef, type PolicyExpr } from "../policies/types";
@@ -87,6 +93,32 @@ export function ComponentRenderer({ config }: ComponentRendererProps) {
       type={config.type}
       id={config.id}
       className={config.className}
+      sticky={
+        "sticky" in config
+          ? (config.sticky as boolean | { top?: string; zIndex?: ComponentZIndex })
+          : undefined
+      }
+      zIndex={
+        "zIndex" in config
+          ? (config.zIndex as ComponentZIndex)
+          : undefined
+      }
+      animation={
+        "animation" in config
+          ? (config.animation as ComponentAnimationConfig)
+          : undefined
+      }
+      glass={"glass" in config ? Boolean(config.glass) : undefined}
+      background={
+        "background" in config
+          ? (config.background as ComponentBackgroundConfig)
+          : undefined
+      }
+      transition={
+        "transition" in config
+          ? (config.transition as ComponentTransitionConfig)
+          : undefined
+      }
       tokens={
         "tokens" in config &&
         config.tokens &&

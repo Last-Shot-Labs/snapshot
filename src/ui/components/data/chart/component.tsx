@@ -251,7 +251,11 @@ export function Chart({ config }: { config: ChartConfig }) {
 
   const isRef = isFromRef(config.data);
   const resolvedRef = useSubscribe(config.data);
-  const { data: fetchedData, isLoading, error } = useComponentData(config.data);
+  const { data: fetchedData, isLoading, error } = useComponentData(
+    config.data,
+    undefined,
+    { poll: config.poll },
+  );
 
   const rows = useMemo<Record<string, unknown>[]>(() => {
     if (isRef) return normalizeRows(resolvedRef);

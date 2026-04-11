@@ -2,14 +2,17 @@ import { z } from "zod";
 import {
   baseComponentConfigSchema,
   dataSourceSchema,
-  fromRefSchema,
+  pollConfigSchema,
 } from "../../_base/types";
 import { actionSchema } from "../../../actions/types";
+import { contextMenuItemSchema } from "../../overlay/context-menu/schema";
 
 /**
  * Schema for a static list item.
  */
 export const listItemSchema = z.object({
+  /** Stable item identity for reordering and cross-component drag-and-drop. */
+  id: z.string().optional(),
   /** Primary text for the item. */
   title: z.string(),
   /** Secondary description text. */
@@ -67,8 +70,22 @@ export const listConfigSchema = baseComponentConfigSchema.extend({
   selectable: z.boolean().optional(),
   /** Enable drag-and-drop reordering. Default: false. */
   sortable: z.boolean().optional(),
+  /** Canonical drag-and-drop toggle. */
+  draggable: z.boolean().optional(),
   /** Action dispatched when items are reordered via drag-and-drop. */
   reorderAction: actionSchema.optional(),
+  /** Canonical reorder action. */
+  onReorder: actionSchema.optional(),
+  /** Named drag group for cross-component moves. */
+  dragGroup: z.string().optional(),
+  /** Accepted external drop targets. */
+  dropTargets: z.array(z.string()).optional(),
+  /** Action fired when an external item is dropped. */
+  onDrop: actionSchema.optional(),
+  /** Row context-menu items. */
+  contextMenu: z.array(contextMenuItemSchema).optional(),
+  /** Polling behavior for endpoint-backed lists. */
+  poll: pollConfigSchema.optional(),
   /** Message shown when no items are available. */
   emptyMessage: z.string().optional(),
   /** Custom error message. Default: "Failed to load items". */

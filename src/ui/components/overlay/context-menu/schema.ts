@@ -9,7 +9,7 @@ import { fromRefSchema } from "../../_base/types";
  * Items can be interactive (with label + action), separators,
  * or disabled entries.
  */
-const contextMenuItemSchema = z.object({
+export const contextMenuItemSchema = z.object({
   /** Display label for the menu item. */
   label: z.string(),
   /** Optional icon name (Lucide kebab-case). */

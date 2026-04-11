@@ -4,6 +4,12 @@ import {
   endpointTargetSchema,
   resourceRefSchema,
 } from "../../manifest/resources";
+import {
+  componentAnimationSchema,
+  componentBackgroundSchema,
+  componentTransitionSchema,
+  componentZIndexSchema,
+} from "./schema";
 
 /**
  * Schema for a FromRef value — a reference to another component's published data.
@@ -64,6 +70,18 @@ export function orFromRef<T extends z.ZodTypeAny>(
 
 export { dataSourceSchema, endpointTargetSchema, resourceRefSchema };
 
+export const pollConfigSchema = z
+  .object({
+    interval: z.number().int().positive().min(1000),
+    pauseWhenHidden: z.boolean().default(true),
+  })
+  .strict();
+
+export type ComponentZIndex = z.infer<typeof componentZIndexSchema>;
+export type ComponentAnimationConfig = z.infer<typeof componentAnimationSchema>;
+export type ComponentBackgroundConfig = z.infer<typeof componentBackgroundSchema>;
+export type ComponentTransitionConfig = z.infer<typeof componentTransitionSchema>;
+
 /**
  * Base config fields shared by all config-driven components.
  * Every component schema should extend this via `.merge()` or `.extend()`.
@@ -81,6 +99,28 @@ export const baseComponentConfigSchema = z.object({
   className: z.string().optional(),
   /** Inline style overrides as a CSS property map. */
   style: z.record(z.union([z.string(), z.number()])).optional(),
+  /** Sticky positioning. */
+  sticky: z
+    .union([
+      z.boolean(),
+      z
+        .object({
+          top: z.string().optional(),
+          zIndex: componentZIndexSchema.optional(),
+        })
+        .strict(),
+    ])
+    .optional(),
+  /** Explicit z-index override. */
+  zIndex: componentZIndexSchema.optional(),
+  /** Enter animation config. */
+  animation: componentAnimationSchema.optional(),
+  /** Glass effect shorthand. */
+  glass: z.boolean().optional(),
+  /** Background fill shorthand. */
+  background: componentBackgroundSchema.optional(),
+  /** Transition shorthand. */
+  transition: componentTransitionSchema.optional(),
 });
 
 /** Base config type inferred from the schema. */

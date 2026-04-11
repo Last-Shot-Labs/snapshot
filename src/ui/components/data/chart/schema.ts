@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { baseComponentConfigSchema, dataSourceSchema } from "../../_base/types";
+import {
+  baseComponentConfigSchema,
+  dataSourceSchema,
+  pollConfigSchema,
+} from "../../_base/types";
 
 /**
  * Schema for a single data series in the chart.
@@ -42,5 +46,7 @@ export const chartSchema = baseComponentConfigSchema
     grid: z.boolean().default(true),
     /** Message shown when there is no data. */
     emptyMessage: z.string().default("No data"),
+    /** Polling behavior for endpoint-backed charts. */
+    poll: pollConfigSchema.optional(),
   })
   .strict();

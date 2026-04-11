@@ -22,6 +22,7 @@ import { resolveFromRef } from "../context/from-ref";
 import { createAnalyticsDispatcher } from "../analytics/dispatch";
 import { resolveTokens } from "../tokens/resolve";
 import { runWorkflow } from "../workflows/engine";
+import { debounceAction, throttleAction } from "./timing";
 import type { AtomRegistry } from "../context/types";
 import type { ApiClient } from "../../api/client";
 import type { ActionConfig, ActionExecuteFn } from "./types";
@@ -221,6 +222,11 @@ function resolveWorkflowValue(
   return value;
 }
 
+function getActionTimingKey(action: ActionConfig): string {
+  const { debounce, throttle, ...stableAction } = action;
+  return JSON.stringify(stableAction);
+}
+
 export function useActionExecutor(): ActionExecuteFn {
   const api = useContext(SnapshotApiContext);
   const pageRegistry = useContext(PageRegistryContext);
@@ -271,6 +277,7 @@ export function useActionExecutor(): ActionExecuteFn {
         builtin: ActionConfig,
         builtinContext: Record<string, unknown>,
       ): Promise<unknown> => {
+        const executeBuiltinActionNow = async (): Promise<unknown> => {
         switch (builtin.type) {
           case "navigate": {
             const to = String(
@@ -599,6 +606,47 @@ export function useActionExecutor(): ActionExecuteFn {
             return text;
           }
 
+          case "copy-to-clipboard": {
+            if (
+              typeof navigator === "undefined" ||
+              typeof navigator.clipboard?.writeText !== "function"
+            ) {
+              return undefined;
+            }
+
+            const text = String(
+              resolveWorkflowValue(
+                builtin.text,
+                builtinContext,
+                pageRegistry,
+                appRegistry,
+                activeLocale,
+                runtime,
+                routeRuntime,
+                overlayRuntime,
+              ),
+            );
+            await navigator.clipboard.writeText(text);
+            if (builtin.toast) {
+              toastManager.show({
+                message: String(
+                  resolveWorkflowValue(
+                    builtin.toast,
+                    { ...builtinContext, text },
+                    pageRegistry,
+                    appRegistry,
+                    activeLocale,
+                    runtime,
+                    routeRuntime,
+                    overlayRuntime,
+                  ),
+                ),
+                variant: "success",
+              });
+            }
+            return text;
+          }
+
           case "emit": {
             const eventName = String(
               resolveWorkflowValue(
@@ -678,9 +726,26 @@ export function useActionExecutor(): ActionExecuteFn {
           }
 
           case "confirm": {
-            const message = String(
+            const title =
+              builtin.title !== undefined
+                ? String(
+                    resolveWorkflowValue(
+                      builtin.title,
+                      builtinContext,
+                      pageRegistry,
+                      appRegistry,
+                      activeLocale,
+                      runtime,
+                      routeRuntime,
+                      overlayRuntime,
+                    ),
+                  )
+                : undefined;
+            const descriptionSource =
+              builtin.description ?? builtin.message ?? title ?? "";
+            const description = String(
               resolveWorkflowValue(
-                builtin.message,
+                descriptionSource,
                 builtinContext,
                 pageRegistry,
                 appRegistry,
@@ -691,15 +756,53 @@ export function useActionExecutor(): ActionExecuteFn {
               ),
             );
             const confirmed = await confirmManager.show({
-              message,
+              title,
+              description,
+              message: description,
               confirmLabel: builtin.confirmLabel,
               cancelLabel: builtin.cancelLabel,
               variant: builtin.variant,
+              requireInput: builtin.requireInput,
             });
             if (!confirmed) {
+              if (builtin.onCancel) {
+                await execute(builtin.onCancel, builtinContext);
+              }
               throw WORKFLOW_CANCELLED;
             }
+            if (builtin.onConfirm) {
+              await execute(builtin.onConfirm, builtinContext);
+            }
             return true;
+          }
+
+          case "scroll-to": {
+            if (typeof document === "undefined") {
+              return undefined;
+            }
+
+            const target = String(
+              resolveWorkflowValue(
+                builtin.target,
+                builtinContext,
+                pageRegistry,
+                appRegistry,
+                activeLocale,
+                runtime,
+                routeRuntime,
+                overlayRuntime,
+              ),
+            );
+            const resolvedTarget = target.startsWith("#")
+              ? document.querySelector(target)
+              : document.querySelector(
+                  `[data-snapshot-id="${target}"], [data-component-id="${target}"], #${target}`,
+                );
+            resolvedTarget?.scrollIntoView({
+              behavior: builtin.behavior === "instant" ? "auto" : builtin.behavior ?? "smooth",
+              block: builtin.block ?? "start",
+            });
+            return target;
           }
 
           case "toast": {
@@ -804,6 +907,31 @@ export function useActionExecutor(): ActionExecuteFn {
           case "run-workflow":
             return;
         }
+        };
+
+        const executeWithTiming = (): Promise<unknown> => {
+          const baseKey = getActionTimingKey(builtin);
+          const throttled = builtin.throttle
+            ? () =>
+                throttleAction(
+                  `${baseKey}:throttle`,
+                  executeBuiltinActionNow,
+                  builtin.throttle!,
+                )
+            : executeBuiltinActionNow;
+
+          if (builtin.debounce) {
+            return debounceAction(
+              `${baseKey}:debounce`,
+              throttled,
+              builtin.debounce,
+            );
+          }
+
+          return throttled();
+        };
+
+        return executeWithTiming();
       };
 
       try {

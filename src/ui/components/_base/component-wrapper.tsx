@@ -6,6 +6,12 @@ import { useManifestRuntime, useRouteRuntime } from "../../manifest/runtime";
 import { useSubscribe } from "../../context";
 import { SnapshotApiContext } from "../../actions/executor";
 import { useContext } from "react";
+import type {
+  ComponentAnimationConfig,
+  ComponentBackgroundConfig,
+  ComponentTransitionConfig,
+  ComponentZIndex,
+} from "./types";
 
 /**
  * Props for ComponentWrapper.
@@ -21,8 +27,169 @@ interface ComponentWrapperProps {
   className?: string;
   /** Optional inline style overrides from component config. */
   style?: Record<string, string | number>;
+  /** Optional sticky positioning. */
+  sticky?: boolean | { top?: string; zIndex?: ComponentZIndex };
+  /** Optional z-index override. */
+  zIndex?: ComponentZIndex;
+  /** Optional animation config. */
+  animation?: ComponentAnimationConfig;
+  /** Optional glass treatment. */
+  glass?: boolean;
+  /** Optional background config. */
+  background?: ComponentBackgroundConfig;
+  /** Optional transition config. */
+  transition?: ComponentTransitionConfig;
   /** Children to render. */
   children: ReactNode;
+}
+
+const Z_INDEX_MAP: Record<string, string> = {
+  base: "var(--sn-z-index-base, 0)",
+  dropdown: "var(--sn-z-index-dropdown, 10)",
+  sticky: "var(--sn-z-index-sticky, 20)",
+  overlay: "var(--sn-z-index-overlay, 30)",
+  modal: "var(--sn-z-index-modal, 40)",
+  popover: "var(--sn-z-index-popover, 50)",
+  toast: "var(--sn-z-index-toast, 60)",
+};
+
+const DURATION_MAP: Record<string, string> = {
+  instant: "var(--sn-duration-instant, 0ms)",
+  fast: "var(--sn-duration-fast, 150ms)",
+  normal: "var(--sn-duration-normal, 300ms)",
+  slow: "var(--sn-duration-slow, 500ms)",
+};
+
+const EASING_MAP: Record<string, string> = {
+  default: "var(--sn-ease-default, ease)",
+  in: "var(--sn-ease-in, ease-in)",
+  out: "var(--sn-ease-out, ease-out)",
+  "in-out": "var(--sn-ease-in-out, ease-in-out)",
+  spring: "var(--sn-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1))",
+};
+
+const TRANSITION_PROPERTY_MAP: Record<string, string> = {
+  all: "all",
+  colors: "color, background-color, border-color",
+  opacity: "opacity",
+  shadow: "box-shadow",
+  transform: "transform",
+};
+
+function resolveZIndexValue(
+  value: ComponentZIndex | undefined,
+): CSSProperties["zIndex"] | undefined {
+  if (typeof value === "number") {
+    return value;
+  }
+  if (typeof value === "string") {
+    return Z_INDEX_MAP[value] ?? value;
+  }
+  return undefined;
+}
+
+function buildGradientCss(
+  gradient: Exclude<ComponentBackgroundConfig, string>["gradient"],
+): string {
+  if (!gradient) {
+    return "";
+  }
+
+  const stops = gradient.stops
+    .map((stop) => `${stop.color}${stop.position ? ` ${stop.position}` : ""}`)
+    .join(", ");
+  if (gradient.type === "radial") {
+    return `radial-gradient(${stops})`;
+  }
+  if (gradient.type === "conic") {
+    return `conic-gradient(from ${gradient.direction ?? "0deg"}, ${stops})`;
+  }
+  return `linear-gradient(${gradient.direction ?? "135deg"}, ${stops})`;
+}
+
+function resolveBackgroundStyle(
+  background: ComponentBackgroundConfig | undefined,
+): CSSProperties | undefined {
+  if (!background) {
+    return undefined;
+  }
+
+  if (typeof background === "string") {
+    return { background };
+  }
+
+  const layers: string[] = [];
+  if (background.overlay) {
+    layers.push(`linear-gradient(${background.overlay}, ${background.overlay})`);
+  }
+  if (background.gradient) {
+    layers.push(buildGradientCss(background.gradient));
+  }
+  if (background.image) {
+    layers.push(`url(${background.image})`);
+  }
+
+  return {
+    ...(layers.length > 0 ? { backgroundImage: layers.join(", ") } : undefined),
+    backgroundPosition: background.position ?? (background.image ? "center" : undefined),
+    backgroundSize: background.size ?? (background.image ? "cover" : undefined),
+    backgroundAttachment: background.fixed ? "fixed" : undefined,
+  };
+}
+
+function resolveTransitionStyle(
+  transition: ComponentTransitionConfig | undefined,
+): CSSProperties | undefined {
+  if (!transition) {
+    return undefined;
+  }
+
+  if (typeof transition === "string") {
+    return {
+      transition: `${TRANSITION_PROPERTY_MAP[transition] ?? transition} ${DURATION_MAP.fast} ${EASING_MAP.default}`,
+    };
+  }
+
+  const property =
+    TRANSITION_PROPERTY_MAP[transition.property] ?? transition.property;
+  const duration =
+    typeof transition.duration === "number"
+      ? `${transition.duration}ms`
+      : DURATION_MAP[transition.duration ?? "fast"];
+  const easing =
+    typeof transition.easing === "string"
+      ? (EASING_MAP[transition.easing] ?? transition.easing)
+      : EASING_MAP.default;
+
+  return {
+    transition: `${property} ${duration} ${easing}`,
+  };
+}
+
+function resolveAnimationStyle(
+  animation: ComponentAnimationConfig | undefined,
+): CSSProperties | undefined {
+  if (!animation) {
+    return undefined;
+  }
+
+  const duration =
+    typeof animation.duration === "number"
+      ? `${animation.duration}ms`
+      : DURATION_MAP[animation.duration ?? "normal"];
+  const easing =
+    typeof animation.easing === "string"
+      ? (EASING_MAP[animation.easing] ?? animation.easing)
+      : EASING_MAP.default;
+  const baseDelay = animation.delay ?? 0;
+  const animationDelay =
+    typeof animation.stagger === "number"
+      ? `calc(${baseDelay}ms + (var(--sn-stagger-index, 0) * ${animation.stagger}ms))`
+      : `${baseDelay}ms`;
+
+  return {
+    animation: `sn-${animation.enter} ${duration} ${easing} ${animationDelay} both`,
+  };
 }
 
 /**
@@ -134,6 +301,12 @@ export function ComponentWrapper({
   tokens,
   className,
   style,
+  sticky,
+  zIndex,
+  animation,
+  glass,
+  background,
+  transition,
   children,
 }: ComponentWrapperProps) {
   const manifest = useManifestRuntime();
@@ -149,16 +322,56 @@ export function ComponentWrapper({
           ]),
         )
       : undefined;
+  const stickyStyle =
+    sticky === undefined
+      ? undefined
+      : {
+          position: "sticky",
+          top: typeof sticky === "object" ? (sticky.top ?? "0") : "0",
+          zIndex:
+            resolveZIndexValue(
+              typeof sticky === "object" ? sticky.zIndex : "sticky",
+            ) ?? Z_INDEX_MAP.sticky,
+        };
+  const zIndexStyle =
+    zIndex === undefined ? undefined : { zIndex: resolveZIndexValue(zIndex) };
+  const animationStyle = resolveAnimationStyle(animation);
+  const backgroundStyle = resolveBackgroundStyle(background);
+  const transitionStyle = resolveTransitionStyle(transition);
+  const glassStyle = glass
+    ? {
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        background:
+          "color-mix(in oklch, var(--sn-color-card, #fff) 80%, transparent)",
+        border:
+          "1px solid color-mix(in oklch, var(--sn-color-border, #e5e7eb) 50%, transparent)",
+      }
+    : undefined;
 
   return (
     <div
       data-snapshot-component={type}
+      data-snapshot-id={id}
       data-component-id={id}
       className={className}
       style={
-        style || tokenStyle
+        style ||
+        tokenStyle ||
+        stickyStyle ||
+        zIndexStyle ||
+        animationStyle ||
+        backgroundStyle ||
+        transitionStyle ||
+        glassStyle
           ? ({
               ...(tokenStyle ?? {}),
+              ...(backgroundStyle ?? {}),
+              ...(glassStyle ?? {}),
+              ...(stickyStyle ?? {}),
+              ...(zIndexStyle ?? {}),
+              ...(transitionStyle ?? {}),
+              ...(animationStyle ?? {}),
               ...(style as CSSProperties | undefined),
             } as CSSProperties)
           : undefined

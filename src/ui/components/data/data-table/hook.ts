@@ -15,6 +15,7 @@ import {
   useManifestResourcePolling,
   useManifestRuntime,
 } from "../../../manifest/runtime";
+import { usePoll } from "../../../hooks/use-poll";
 import type {
   DataTableConfig,
   ResolvedColumn,
@@ -409,7 +410,7 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
   const isInfiniteScroll =
     paginationEnabled &&
     typeof config.pagination === "object" &&
-    config.pagination.type === "infinite";
+    (config.pagination.type === "infinite" || config.pagination.infinite === true);
   const pageSize =
     paginationEnabled && typeof config.pagination === "object"
       ? (config.pagination.pageSize ?? 10)
@@ -516,6 +517,13 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
   const refetch = useCallback(() => {
     setRefreshCounter((c) => c + 1);
   }, []);
+
+  usePoll({
+    interval: config.poll?.interval ?? 1000,
+    pauseWhenHidden: config.poll?.pauseWhenHidden ?? true,
+    onPoll: refetch,
+    enabled: Boolean(config.poll),
+  });
 
   // Publish state
   useEffect(() => {

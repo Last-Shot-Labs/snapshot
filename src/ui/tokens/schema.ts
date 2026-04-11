@@ -175,6 +175,16 @@ export const componentTokensSchema = z
       })
       .strict()
       .optional(),
+    scrollbar: z
+      .object({
+        width: z.string().optional(),
+        track: z.string().optional(),
+        thumb: z.string().optional(),
+        thumbHover: z.string().optional(),
+        radius: z.enum(["none", "sm", "md", "lg", "full"]).optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 

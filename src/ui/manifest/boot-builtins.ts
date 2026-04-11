@@ -5,7 +5,7 @@
  * runtime can call it explicitly before any manifest-driven work begins.
  */
 
-import { STRUCTURAL_COMPONENTS } from "./structural";
+import { LEGACY_STRUCTURAL_COMPONENTS } from "./structural";
 import { registerBuiltInComponents } from "../components/register";
 import { registerBuiltInFlavors } from "../tokens/flavors";
 import { registerBuiltInLayouts } from "../layouts/register";
@@ -26,7 +26,7 @@ export function bootBuiltins(): void {
 
   booted = true;
   registerBuiltInComponents();
-  for (const [type, component] of Object.entries(STRUCTURAL_COMPONENTS)) {
+  for (const [type, component] of Object.entries(LEGACY_STRUCTURAL_COMPONENTS)) {
     registerComponent(type, component);
   }
   registerBuiltInFlavors();

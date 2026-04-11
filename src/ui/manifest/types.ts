@@ -151,10 +151,12 @@ export interface NavItem {
 
 export interface RowConfig extends BaseComponentConfig {
   type: "row";
-  gap?: Responsive<"xs" | "sm" | "md" | "lg" | "xl">;
+  gap?: Responsive<"none" | "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl">;
   justify?: "start" | "center" | "end" | "between" | "around";
   align?: "start" | "center" | "end" | "stretch";
   wrap?: boolean;
+  overflow?: "auto" | "hidden" | "scroll" | "visible";
+  maxHeight?: string;
   children: ComponentConfig[];
 }
 

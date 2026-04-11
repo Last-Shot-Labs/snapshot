@@ -10,6 +10,12 @@ import { z } from "zod";
 import { themeConfigSchema } from "../tokens/schema";
 import { workflowConditionSchema } from "../workflows/schema";
 import {
+  componentAnimationSchema,
+  componentBackgroundSchema,
+  componentTransitionSchema,
+  componentZIndexSchema,
+} from "../components/_base/schema";
+import {
   dataSourceSchema,
   endpointTargetSchema,
   extractResourceRefs,
@@ -216,15 +222,35 @@ export const baseComponentConfigSchema = z.object({
   className: z.string().optional(),
   style: z.record(z.union([z.string(), z.number()])).optional(),
   span: responsiveSchema(z.number().int().min(1).max(12)).optional(),
+  sticky: z
+    .union([
+      z.boolean(),
+      z
+        .object({
+          top: z.string().optional(),
+          zIndex: componentZIndexSchema.optional(),
+        })
+        .strict(),
+    ])
+    .optional(),
+  zIndex: componentZIndexSchema.optional(),
+  animation: componentAnimationSchema.optional(),
+  glass: z.boolean().optional(),
+  background: componentBackgroundSchema.optional(),
+  transition: componentTransitionSchema.optional(),
 });
 
 export const rowConfigSchema: z.ZodType = z.lazy(() =>
   baseComponentConfigSchema.extend({
     type: z.literal("row"),
-    gap: responsiveSchema(z.enum(["xs", "sm", "md", "lg", "xl"])).optional(),
+    gap: responsiveSchema(
+      z.enum(["none", "2xs", "xs", "sm", "md", "lg", "xl", "2xl"]),
+    ).optional(),
     justify: z.enum(["start", "center", "end", "between", "around"]).optional(),
     align: z.enum(["start", "center", "end", "stretch"]).optional(),
     wrap: z.boolean().optional(),
+    overflow: z.enum(["auto", "hidden", "scroll", "visible"]).optional(),
+    maxHeight: z.string().optional(),
     children: z.array(componentConfigSchema).min(1),
   }),
 );
@@ -253,6 +279,16 @@ const actionConfigSchema: z.ZodType = z.lazy(() =>
     })
     .passthrough(),
 );
+
+export const shortcutConfigSchema = z
+  .object({
+    label: z.string().optional(),
+    action: z.union([actionConfigSchema, z.array(actionConfigSchema)]),
+    disabled: z.union([z.boolean(), policyExprSchema]).optional(),
+  })
+  .strict();
+
+export const shortcutsConfigSchema = z.record(shortcutConfigSchema);
 
 export const buttonConfigSchema = baseComponentConfigSchema.extend({
   type: z.literal("button"),
@@ -1406,7 +1442,7 @@ export const manifestConfigSchema = z
     policies: policiesSchema.optional(),
     i18n: i18nConfigSchema.optional(),
     subApps: subAppsSchema.optional(),
-    shortcuts: z.record(z.record(z.unknown())).optional(),
+    shortcuts: shortcutsConfigSchema.optional(),
     routes: z.array(routeConfigSchema).min(1),
   })
   .strict()
