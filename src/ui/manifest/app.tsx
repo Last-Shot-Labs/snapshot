@@ -58,6 +58,7 @@ import type {
   ManifestAppProps,
   OverlayConfig,
 } from "./types";
+import { bootBuiltins } from "./boot-builtins";
 
 const EMPTY_OBJECT: Record<string, unknown> = {};
 
@@ -1558,6 +1559,7 @@ function ManifestRouter({
  * @returns A fully rendered manifest application
  */
 export function ManifestApp({ manifest, apiUrl }: ManifestAppProps) {
+  bootBuiltins();
   const compiledManifest = useMemo(() => compileManifest(manifest), [manifest]);
   const runtimeApiUrl = compiledManifest.app.apiUrl ?? apiUrl;
   const snapshot = useMemo(
@@ -1577,7 +1579,7 @@ export function ManifestApp({ manifest, apiUrl }: ManifestAppProps) {
     [compiledManifest, snapshot],
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (compiledManifest.theme) {
       const css = resolveTokens(compiledManifest.theme);
       injectStyleSheet("snapshot-tokens", css);

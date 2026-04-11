@@ -2,6 +2,12 @@ import { useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ApiError } from "../../api/error";
 import { mergeContract, type AuthContract } from "../../auth/contract";
+import { BUTTON_INTERACTIVE_CSS } from "../components/_base/button-styles";
+import { BaseTextField } from "../components/_base/form-controls";
+import { ButtonControl } from "../components/forms/button";
+import {
+  Heading as StructuralHeading,
+} from "./structural";
 import { useSetStateValue, useStateValue } from "../state";
 import type {
   AuthErrorContext,
@@ -463,40 +469,77 @@ function AuthShell({
         minHeight: "100vh",
         display: "grid",
         placeItems: "center",
-        padding: "2rem 1rem",
+        padding: "var(--sn-spacing-2xl, 3rem) var(--sn-spacing-md, 1rem)",
         background:
-          "linear-gradient(180deg, rgba(247,248,250,1) 0%, rgba(255,255,255,1) 100%)",
+          "linear-gradient(180deg, color-mix(in oklch, var(--sn-color-muted, #f8fafc) 35%, transparent) 0%, var(--sn-color-background, #fff) 100%)",
+        color: "var(--sn-color-foreground, #0f172a)",
+        fontFamily:
+          "'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+        WebkitFontSmoothing: "antialiased",
+        MozOsxFontSmoothing: "grayscale",
+        textRendering: "optimizeLegibility",
       }}
     >
       <section
         style={{
           width: "100%",
           maxWidth: "28rem",
-          background: "#fff",
-          border: "1px solid rgba(15,23,42,0.08)",
-          borderRadius: "1rem",
-          boxShadow: "0 20px 40px rgba(15,23,42,0.08)",
-          padding: "1.5rem",
+          background: "var(--sn-color-surface, #fff)",
+          border:
+            "var(--sn-border-default, 1px) solid var(--sn-color-border, rgba(15,23,42,0.08))",
+          borderRadius: "var(--sn-radius-xl, 1rem)",
+          boxShadow: "var(--sn-shadow-xl, 0 20px 40px rgba(15,23,42,0.08))",
+          padding: "clamp(var(--sn-spacing-lg, 1.5rem), 4vw, var(--sn-spacing-2xl, 3rem))",
+          fontFamily: "inherit",
         }}
       >
         {branding?.logo ? (
           <img
             src={branding.logo}
             alt={branding.title ?? "Brand logo"}
-            style={{ height: "2.5rem", width: "auto", marginBottom: "1rem" }}
+            style={{
+              height: "var(--sn-spacing-2xl, 2.5rem)",
+              width: "auto",
+              marginBottom: "var(--sn-spacing-md, 1rem)",
+            }}
           />
         ) : null}
-        <h1 style={{ fontSize: "1.5rem", margin: 0 }}>{title}</h1>
+        <StructuralHeading
+          config={{
+            type: "heading",
+            text: title,
+            level: 1,
+            style: {
+              fontSize: "var(--sn-font-size-2xl, 1.5rem)",
+              margin: 0,
+              color: "var(--sn-color-foreground, #0f172a)",
+              lineHeight: "var(--sn-leading-tight, 1.25)",
+              fontFamily: "inherit",
+              fontWeight: "var(--sn-font-weight-bold, 700)",
+              letterSpacing: "-0.02em",
+            },
+          }}
+        />
         <p
           style={{
-            color: "#475569",
-            marginTop: "0.5rem",
-            marginBottom: "1.5rem",
+            color: "var(--sn-color-muted-foreground, #475569)",
+            marginTop: "var(--sn-spacing-xs, 0.5rem)",
+            marginBottom: "var(--sn-spacing-lg, 1.5rem)",
+            fontSize: "var(--sn-font-size-md, 1rem)",
+            lineHeight: "var(--sn-leading-relaxed, 1.75)",
           }}
         >
           {description}
         </p>
         {children}
+        <style>{`
+          [data-snapshot-auth-screen],
+          [data-snapshot-auth-screen] * {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            font-synthesis: none;
+          }
+        `}</style>
+        <style>{BUTTON_INTERACTIVE_CSS}</style>
       </section>
     </main>
   );
@@ -508,36 +551,24 @@ function Field({
   value,
   onChange,
   placeholder,
+  autoComplete,
 }: {
   label: string;
   type?: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  autoComplete?: string;
 }) {
   return (
-    <label
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.375rem",
-        marginBottom: "0.875rem",
-      }}
-    >
-      <span style={{ fontSize: "0.925rem", fontWeight: 600 }}>{label}</span>
-      <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.currentTarget.value)}
-        style={{
-          border: "1px solid rgba(15,23,42,0.14)",
-          borderRadius: "0.75rem",
-          padding: "0.75rem 0.875rem",
-          fontSize: "1rem",
-        }}
-      />
-    </label>
+    <BaseTextField
+      label={label}
+      type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      autoComplete={autoComplete}
+    />
   );
 }
 
@@ -558,10 +589,10 @@ function ErrorMessage({
     <p
       role="alert"
       style={{
-        color: "#b91c1c",
+        color: "var(--sn-color-destructive, #b91c1c)",
         marginTop: 0,
-        marginBottom: "0.875rem",
-        fontSize: "0.925rem",
+        marginBottom: "var(--sn-spacing-sm, 0.875rem)",
+        fontSize: "var(--sn-font-size-sm, 0.925rem)",
       }}
     >
       {formatError(error, context)}
@@ -577,14 +608,17 @@ function SuccessMessage({ message }: { message: string | null }) {
   return (
     <p
       style={{
-        color: "#166534",
-        background: "#f0fdf4",
-        border: "1px solid #bbf7d0",
-        borderRadius: "0.75rem",
-        padding: "0.75rem 0.875rem",
+        color: "var(--sn-color-success, #166534)",
+        background:
+          "color-mix(in oklch, var(--sn-color-success, #22c55e) 10%, var(--sn-color-background, #fff))",
+        border:
+          "var(--sn-border-default, 1px) solid color-mix(in oklch, var(--sn-color-success, #22c55e) 25%, transparent)",
+        borderRadius: "var(--sn-radius-lg, 0.75rem)",
+        padding:
+          "var(--sn-spacing-sm, 0.75rem) var(--sn-spacing-md, 0.875rem)",
         marginTop: 0,
-        marginBottom: "0.875rem",
-        fontSize: "0.925rem",
+        marginBottom: "var(--sn-spacing-sm, 0.875rem)",
+        fontSize: "var(--sn-font-size-sm, 0.925rem)",
       }}
     >
       {message}
@@ -598,8 +632,8 @@ function ActionsRow({ children }: { children: React.ReactNode }) {
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: "0.75rem",
-        marginTop: "1rem",
+        gap: "var(--sn-spacing-sm, 0.75rem)",
+        marginTop: "var(--sn-spacing-md, 1rem)",
       }}
     >
       {children}
@@ -619,24 +653,15 @@ function PrimaryButton({
   onClick?: () => void;
 }) {
   return (
-    <button
+    <ButtonControl
       type={type}
       disabled={disabled}
       onClick={onClick}
-      style={{
-        width: "100%",
-        border: 0,
-        borderRadius: "0.75rem",
-        padding: "0.85rem 1rem",
-        fontSize: "1rem",
-        fontWeight: 600,
-        background: disabled ? "#94a3b8" : "#0f172a",
-        color: "#fff",
-        cursor: disabled ? "default" : "pointer",
-      }}
+      variant="default"
+      size="md"
     >
       {children}
-    </button>
+    </ButtonControl>
   );
 }
 
@@ -650,24 +675,15 @@ function SecondaryButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <ButtonControl
       type="button"
       disabled={disabled}
       onClick={onClick}
-      style={{
-        width: "100%",
-        borderRadius: "0.75rem",
-        padding: "0.85rem 1rem",
-        fontSize: "0.95rem",
-        fontWeight: 600,
-        background: "#fff",
-        border: "1px solid rgba(15,23,42,0.14)",
-        color: "#0f172a",
-        cursor: disabled ? "default" : "pointer",
-      }}
+      variant="secondary"
+      size="md"
     >
       {children}
-    </button>
+    </ButtonControl>
   );
 }
 
@@ -687,8 +703,8 @@ function LinksRow({
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: "0.625rem",
-        marginTop: "1rem",
+        gap: "var(--sn-spacing-xs, 0.625rem)",
+        marginTop: "var(--sn-spacing-md, 1rem)",
       }}
     >
       {items.map((item) => (
@@ -700,10 +716,10 @@ function LinksRow({
             textAlign: "left",
             background: "transparent",
             border: 0,
-            color: "#475569",
+            color: "var(--sn-color-muted-foreground, #475569)",
             padding: 0,
             cursor: "pointer",
-            fontSize: "0.925rem",
+            fontSize: "var(--sn-font-size-sm, 0.925rem)",
           }}
         >
           {item.label}
@@ -763,19 +779,19 @@ function OAuthButtons({
   }
 
   return (
-    <div style={{ marginTop: "1rem" }}>
+    <div style={{ marginTop: "var(--sn-spacing-md, 1rem)" }}>
       <div
         style={{
           position: "relative",
-          marginBottom: "1rem",
+          marginBottom: "var(--sn-spacing-md, 1rem)",
           textAlign: "center",
-          color: "#64748b",
-          fontSize: "0.825rem",
+          color: "var(--sn-color-muted-foreground, #64748b)",
+          fontSize: "var(--sn-font-size-xs, 0.825rem)",
         }}
       >
         {heading}
       </div>
-      <div style={{ display: "grid", gap: "0.625rem" }}>
+      <div style={{ display: "grid", gap: "var(--sn-spacing-sm, 0.625rem)" }}>
         {providers.map((providerConfig) => (
           <SecondaryButton
             key={providerConfig.name}
@@ -786,9 +802,14 @@ function OAuthButtons({
             <span
               style={{
                 display: "flex",
+                width: "100%",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: providerConfig.description ? "0.25rem" : 0,
+                justifyContent: "center",
+                gap: providerConfig.description
+                  ? "var(--sn-spacing-2xs, 0.25rem)"
+                  : 0,
+                textAlign: "center",
               }}
             >
               <span>
@@ -798,9 +819,9 @@ function OAuthButtons({
               {providerConfig.description ? (
                 <span
                   style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 400,
-                    color: "#475569",
+                    fontSize: "var(--sn-font-size-xs, 0.8rem)",
+                    fontWeight: "var(--sn-font-weight-normal, 400)",
+                    color: "var(--sn-color-muted-foreground, #475569)",
                   }}
                 >
                   {providerConfig.description}
@@ -1023,6 +1044,7 @@ function LoginScreen({
         value={password}
         onChange={setPassword}
         placeholder={passwordField.placeholder}
+        autoComplete="current-password"
       />
       <ErrorMessage
         error={(mutation.error as ApiError | null) ?? null}
@@ -1054,7 +1076,13 @@ function LoginScreen({
     />
   );
   const passkeyBlock = showPasskey ? (
-    <div style={{ marginTop: "1rem", display: "grid", gap: "0.75rem" }}>
+    <div
+      style={{
+        marginTop: "var(--sn-spacing-md, 1rem)",
+        display: "grid",
+        gap: "var(--sn-spacing-sm, 0.75rem)",
+      }}
+    >
       <ErrorMessage
         error={
           passkeyMutation.error instanceof Error &&
@@ -1196,6 +1224,7 @@ function RegisterScreen({
         value={password}
         onChange={setPassword}
         placeholder={passwordField.placeholder}
+        autoComplete="new-password"
       />
       <ErrorMessage
         error={mutation.error ?? null}
@@ -1417,11 +1446,18 @@ function ResetPasswordScreen({
         value={password}
         onChange={setPassword}
         placeholder={passwordField.placeholder}
+        autoComplete="new-password"
       />
       {!token ? (
-        <p role="alert" style={{ color: "#b91c1c", marginTop: 0 }}>
-          This reset link is missing a token.
-        </p>
+      <p
+        role="alert"
+        style={{
+          color: "var(--sn-color-destructive, #b91c1c)",
+          marginTop: 0,
+        }}
+      >
+        This reset link is missing a token.
+      </p>
       ) : null}
       <SuccessMessage message={message} />
       <ErrorMessage
@@ -1541,7 +1577,13 @@ function VerifyEmailScreen({
     <>
       {!token ? (
         <>
-          <p role="alert" style={{ color: "#b91c1c", marginTop: 0 }}>
+          <p
+            role="alert"
+            style={{
+              color: "var(--sn-color-destructive, #b91c1c)",
+              marginTop: 0,
+            }}
+          >
             This verification link is missing a token.
           </p>
           <form
@@ -1694,7 +1736,12 @@ function MfaScreen({
     }
   }, [pendingChallenge]);
   const formBlock = !pendingChallenge ? (
-    <p style={{ color: "#475569", marginTop: 0 }}>
+    <p
+      style={{
+        color: "var(--sn-color-muted-foreground, #475569)",
+        marginTop: 0,
+      }}
+    >
       There is no active verification challenge.
     </p>
   ) : (
@@ -1716,11 +1763,17 @@ function MfaScreen({
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: "0.375rem",
-            marginBottom: "0.875rem",
+            gap: "var(--sn-spacing-2xs, 0.375rem)",
+            marginBottom: "var(--sn-spacing-sm, 0.875rem)",
           }}
         >
-          <span style={{ fontSize: "0.925rem", fontWeight: 600 }}>
+          <span
+            style={{
+              fontSize: "var(--sn-font-size-sm, 0.925rem)",
+              fontWeight: "var(--sn-font-weight-semibold, 600)",
+              color: "var(--sn-color-foreground, #0f172a)",
+            }}
+          >
             {methodField.label}
           </span>
           <select
@@ -1729,10 +1782,14 @@ function MfaScreen({
               setMethod(event.currentTarget.value as MfaMethod)
             }
             style={{
-              border: "1px solid rgba(15,23,42,0.14)",
-              borderRadius: "0.75rem",
-              padding: "0.75rem 0.875rem",
-              fontSize: "1rem",
+              backgroundColor: "var(--sn-color-background, #fff)",
+              color: "var(--sn-color-foreground, #0f172a)",
+              border:
+                "var(--sn-border-default, 1px) solid var(--sn-color-input, var(--sn-color-border, rgba(15,23,42,0.14)))",
+              borderRadius: "var(--sn-radius-lg, 0.75rem)",
+              padding:
+                "var(--sn-spacing-sm, 0.75rem) var(--sn-spacing-md, 0.875rem)",
+              fontSize: "var(--sn-font-size-md, 1rem)",
             }}
           >
             {pendingChallenge.mfaMethods.map((candidate) => (
@@ -1758,7 +1815,7 @@ function MfaScreen({
           : resolveSubmitLabel(manifest, "mfa", "Verify")}
       </PrimaryButton>
       {pendingChallenge.mfaMethods.includes("emailOtp") ? (
-        <div style={{ marginTop: "0.75rem" }}>
+        <div style={{ marginTop: "var(--sn-spacing-sm, 0.75rem)" }}>
           <SecondaryButton
             disabled={resendMutation.isPending}
             onClick={() => {

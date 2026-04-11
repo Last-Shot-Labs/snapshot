@@ -5,12 +5,13 @@
  * stays side-effect free.
  */
 import { registerComponent } from "../manifest/component-registry";
-import { registerComponentSchema } from "../manifest/schema";
+import { buttonConfigSchema, registerComponentSchema } from "../manifest/schema";
 import { StatCard, statCardConfigSchema } from "./data/stat-card/index";
 import { DataTable } from "./data/data-table/index";
 import { dataTableConfigSchema } from "./data/data-table/schema";
 import { AutoForm } from "./forms/auto-form/index";
 import { autoFormConfigSchema } from "./forms/auto-form/schema";
+import { Button } from "./forms/button/index";
 import { ModalComponent, modalConfigSchema } from "./overlay/modal";
 import { DrawerComponent, drawerConfigSchema } from "./overlay/drawer";
 import { DetailCard } from "./data/detail-card/index";
@@ -201,6 +202,9 @@ export function registerBuiltInComponents(): void {
     AutoForm as Parameters<typeof registerComponent>[1],
   );
   registerComponentSchema("form", autoFormConfigSchema);
+
+  registerComponent("button", Button as Parameters<typeof registerComponent>[1]);
+  registerComponentSchema("button", buttonConfigSchema);
 
   registerComponent(
     "detail-card",

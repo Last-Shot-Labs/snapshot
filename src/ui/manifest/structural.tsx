@@ -208,7 +208,7 @@ const HEADING_SIZE: Record<number, string> = {
   6: "var(--sn-font-size-md, 1rem)",
 };
 
-function Heading({ config }: { config: Record<string, unknown> }) {
+export function Heading({ config }: { config: Record<string, unknown> }) {
   const headingConfig = config as unknown as HeadingConfig;
   const text = useSubscribe(headingConfig.text);
   const level = headingConfig.level ?? 2;
@@ -245,7 +245,13 @@ function Heading({ config }: { config: Record<string, unknown> }) {
  * Button — click dispatches action config.
  * Supports variant, size, disabled (static or FromRef).
  */
-function Button({ config }: { config: Record<string, unknown> }) {
+export function Button({
+  config,
+  onClick,
+}: {
+  config: Record<string, unknown>;
+  onClick?: () => void;
+}) {
   const buttonConfig = config as unknown as ButtonConfig;
   const label = useSubscribe(buttonConfig.label);
   const disabled = useSubscribe(
@@ -260,6 +266,11 @@ function Button({ config }: { config: Record<string, unknown> }) {
   const configStyle = buttonConfig.style as CSSProperties | undefined;
 
   const handleClick = () => {
+    if (onClick) {
+      onClick();
+      return;
+    }
+
     if (disabled || !buttonConfig.action) return;
     void execute(buttonConfig.action as Parameters<typeof execute>[0]);
   };

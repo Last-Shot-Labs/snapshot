@@ -1,9 +1,12 @@
 import path from "node:path";
-import type { Plugin, UserConfig } from "vite";
+import type { Plugin, UserConfig, ViteDevServer } from "vite";
 import { runSync, consoleLogger, type SyncOptions } from "../cli/sync";
 import { buildPrefetchManifest, type ViteManifestEntry } from "./prefetch";
 import { rscTransform } from "./rsc-transform";
 import { serverActionsTransform } from "./server-actions";
+
+const VIRTUAL_APP_ENTRY_ID = "virtual:snapshot-entry";
+const RESOLVED_VIRTUAL_APP_ENTRY_ID = "\0virtual:snapshot-entry";
 
 export interface SnapshotSyncOptions {
   /** URL of the bunshot backend. Falls back to VITE_API_URL env var. */
@@ -17,6 +20,112 @@ export interface SnapshotSyncOptions {
   file?: string;
   /** Generate Zod validators alongside mutation hooks. */
   zod?: boolean;
+}
+
+export interface SnapshotAppOptions {
+  /**
+   * Snapshot manifest file to load from the project root.
+   * @default 'snapshot.manifest.json'
+   */
+  manifestFile?: string;
+  /**
+   * Explicit API URL to pass to `ManifestApp`.
+   * Falls back to `import.meta.env.VITE_API_URL` at runtime if omitted.
+   */
+  apiUrl?: string;
+}
+
+function normalizeManifestUrl(manifestFile: string): string {
+  const normalized = manifestFile.replace(/^\.\/+/, "").replace(/^\/+/, "");
+  return `/${normalized || "snapshot.manifest.json"}`;
+}
+
+function getSnapshotAppHtml(entryId: string): string {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snapshot</title>
+    <script type="module" src="/@vite/client"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="${entryId}"></script>
+  </body>
+</html>
+`;
+}
+
+export function snapshotApp(opts: SnapshotAppOptions = {}): Plugin {
+  const manifestUrl = normalizeManifestUrl(
+    opts.manifestFile ?? "snapshot.manifest.json",
+  );
+  const apiUrlExpression = opts.apiUrl
+    ? JSON.stringify(opts.apiUrl)
+    : "import.meta.env.VITE_API_URL ?? window.location.origin";
+
+  return {
+    name: "snapshot-app",
+    enforce: "pre",
+
+    resolveId(id) {
+      if (id === VIRTUAL_APP_ENTRY_ID) {
+        return RESOLVED_VIRTUAL_APP_ENTRY_ID;
+      }
+      return null;
+    },
+
+    load(id) {
+      if (id !== RESOLVED_VIRTUAL_APP_ENTRY_ID) {
+        return null;
+      }
+
+      return `
+import { createElement } from "react";
+import { createRoot } from "react-dom/client";
+import { ManifestApp } from "@lastshotlabs/snapshot/ui";
+import manifest from ${JSON.stringify(manifestUrl)};
+
+const apiUrl = ${apiUrlExpression};
+const root = document.getElementById("root");
+if (!root) {
+  throw new Error("Snapshot app shell is missing #root");
+}
+
+createRoot(root).render(
+  createElement(ManifestApp, {
+    manifest,
+    apiUrl,
+  }),
+);
+`;
+    },
+
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use(async (req, res, next) => {
+        if (!req.url || req.method !== "GET") {
+          next();
+          return;
+        }
+
+        const pathname = req.url.split("?", 1)[0];
+        if (pathname !== "/" && pathname !== "/index.html") {
+          next();
+          return;
+        }
+
+        const html = await server.transformIndexHtml(
+          pathname,
+          getSnapshotAppHtml(`/@id/${VIRTUAL_APP_ENTRY_ID}`),
+        );
+
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.end(html);
+      });
+    },
+  };
 }
 
 export function snapshotSync(opts: SnapshotSyncOptions = {}): Plugin {
