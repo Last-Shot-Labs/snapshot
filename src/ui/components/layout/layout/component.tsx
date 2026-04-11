@@ -2,6 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import type { LayoutProps, LayoutSlots } from "./types";
+import { resolveLayout } from "../../../layouts/registry";
 
 function readSlot(
   slots: LayoutSlots | undefined,
@@ -384,6 +385,20 @@ function FullWidthLayout({
 export function Layout({ config, nav, slots, children }: LayoutProps) {
   const rootStyle = (config.style as CSSProperties) ?? undefined;
   const cn = config.className;
+  const registeredLayout = resolveLayout(config.variant);
+  if (registeredLayout) {
+    const RegisteredLayout = registeredLayout.component;
+    return (
+      <RegisteredLayout
+        config={config as Record<string, unknown>}
+        nav={nav}
+        slots={slots}
+      >
+        {children}
+      </RegisteredLayout>
+    );
+  }
+
   switch (config.variant) {
     case "sidebar":
       return (
@@ -424,6 +439,12 @@ export function Layout({ config, nav, slots, children }: LayoutProps) {
         <FullWidthLayout style={rootStyle} className={cn}>
           {children}
         </FullWidthLayout>
+      );
+    case "centered":
+      return (
+        <MinimalLayout slots={slots} style={rootStyle} className={cn}>
+          {children}
+        </MinimalLayout>
       );
   }
 }

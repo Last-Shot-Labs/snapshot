@@ -1301,6 +1301,7 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
                 currentPath: currentRoute.path,
                 currentRoute,
                 params: {},
+                query: {},
                 navigate: () => {},
                 isPreloading: false,
               },

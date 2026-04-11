@@ -16,29 +16,8 @@ export type AuthScreen =
   | "forgot-password"
   | "reset-password"
   | "verify-email"
-  | "mfa";
-
-export const AUTH_SCREEN_DEFAULT_PATHS: Record<AuthScreen, string> = {
-  login: "/login",
-  register: "/register",
-  "forgot-password": "/forgot-password",
-  "reset-password": "/reset-password",
-  "verify-email": "/verify-email",
-  mfa: "/mfa",
-};
-
-/**
- * Minimal manifest shape needed to validate auth screen ids.
- */
-export type AuthRouteManifest = {
-  auth?: {
-    screens: AuthScreen[];
-  };
-  routes: {
-    id: string;
-    path: string;
-  }[];
-};
+  | "mfa"
+  | "sso-callback";
 
 /**
  * Resolve the path for an auth screen by matching the route id.
@@ -52,28 +31,4 @@ export function getAuthScreenPath(
   screen: AuthScreen,
 ): string | undefined {
   return manifest.routes.find((route) => route.id === screen)?.path;
-}
-
-/**
- * Return the default path used when an auth screen route is synthesized.
- */
-export function getDefaultAuthScreenPath(screen: AuthScreen): string {
-  return AUTH_SCREEN_DEFAULT_PATHS[screen];
-}
-
-/**
- * Collect auth screens that are enabled without a matching route id.
- *
- * @param manifest - Manifest data with auth and route declarations
- * @returns Enabled auth screens that do not have a matching route id
- */
-export function getMissingAuthScreenIds(
-  manifest: AuthRouteManifest,
-): AuthScreen[] {
-  if (!manifest.auth) {
-    return [];
-  }
-
-  const routeIds = new Set(manifest.routes.map((route) => route.id));
-  return manifest.auth.screens.filter((screen) => !routeIds.has(screen));
 }

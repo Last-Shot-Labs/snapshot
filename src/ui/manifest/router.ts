@@ -1,4 +1,4 @@
-import { interpolate } from "../actions/interpolate";
+import { resolveTemplate } from "../expressions/template";
 import type { CompiledManifest, CompiledRoute } from "./types";
 
 export function normalizePathname(path: string): string {
@@ -97,14 +97,22 @@ export function resolveDocumentTitle(
 ): string {
   const appTitle = manifest.app.title?.trim();
   const routeTitle = route?.page.title
-    ? interpolate(route.page.title, {
-        params,
-        route: {
-          id: route.id,
-          path: currentPath,
-          pattern: route.path,
+    ? resolveTemplate(
+        route.page.title,
+        {
+          params,
+          route: {
+            id: route.id,
+            path: currentPath,
+            pattern: route.path,
+            params,
+          },
         },
-      }).trim()
+        {
+          locale: manifest.raw.i18n?.default,
+          i18n: manifest.raw.i18n,
+        },
+      ).trim()
     : "";
 
   if (routeTitle && appTitle) {

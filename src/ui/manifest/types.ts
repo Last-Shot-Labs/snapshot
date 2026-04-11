@@ -4,6 +4,7 @@ import type {
   appConfigSchema,
   authProviderSchema,
   manifestConfigSchema,
+  observabilityConfigSchema,
   authScreenConfigSchema,
   pushConfigSchema,
   realtimeConfigSchema,
@@ -59,6 +60,10 @@ export type AppConfig = Resolved<z.infer<typeof appConfigSchema>>;
 export type ToastConfig = z.infer<typeof toastConfigSchema>;
 /** Resolved runtime view of `analyticsConfigSchema`. */
 export type AnalyticsConfig = Resolved<z.infer<typeof analyticsConfigSchema>>;
+/** Resolved runtime view of `observabilityConfigSchema`. */
+export type ObservabilityConfig = Resolved<
+  z.infer<typeof observabilityConfigSchema>
+>;
 /** Resolved runtime view of `pushConfigSchema`. */
 export type PushConfig = Resolved<z.infer<typeof pushConfigSchema>>;
 /** Resolved runtime view of `authProviderSchema`. */
@@ -175,6 +180,7 @@ export interface CompiledManifest {
   app: AppConfig;
   toast?: ToastConfig;
   analytics?: AnalyticsConfig;
+  observability?: ObservabilityConfig;
   push?: PushConfig;
   theme?: ThemeConfig;
   state?: StateConfig;

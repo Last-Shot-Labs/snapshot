@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
+import { renderIcon } from "../../../icons/render";
 import type { AccordionConfig } from "./types";
 
 /**
@@ -181,7 +182,7 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
                       fontSize: "var(--sn-font-size-md, 1rem)",
                     }}
                   >
-                    {item.icon}
+                    {renderIcon(item.icon, 16)}
                   </span>
                 )}
                 {item.title}

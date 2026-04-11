@@ -5,6 +5,7 @@ import {
   endpointTargetSchema,
   fromRefSchema,
 } from "../../_base/types";
+import { extendComponentSchema } from "../../_base/schema";
 
 /**
  * Schema for select/radio option entries.
@@ -60,6 +61,14 @@ export const fieldConfigSchema = z
       "checkbox",
       "date",
       "file",
+      "time",
+      "datetime",
+      "radio-group",
+      "switch",
+      "slider",
+      "color",
+      "combobox",
+      "tag-input",
     ]),
     /** Human-readable label. Defaults to the field name. */
     label: z.string().optional(),
@@ -81,12 +90,23 @@ export const fieldConfigSchema = z
     disabled: z.boolean().optional(),
     /** Helper text shown below the field. */
     helperText: z.string().optional(),
+    description: z.string().optional(),
     /** Column span in a multi-column layout (1-12). Default: full width. */
     span: z.number().int().min(1).max(12).optional(),
     /** Conditional visibility — show this field only when condition is met. */
     dependsOn: dependsOnSchema.optional(),
     /** Static visibility toggle. */
     visible: z.boolean().optional(),
+    autoComplete: z.string().optional(),
+    visibleWhen: z.string().optional(),
+    inlineAction: z
+      .object({
+        label: z.string(),
+        to: z.string(),
+      })
+      .strict()
+      .optional(),
+    readOnly: z.boolean().optional(),
   })
   .strict();
 
@@ -135,12 +155,9 @@ export const fieldSectionSchema = z.object({
  * }
  * ```
  */
-export const autoFormConfigSchema = z
-  .object({
+export const autoFormConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
-    type: z.literal("form"),
-    /** Optional component id for publishing form state to the page context. */
-    id: z.string().optional(),
+    type: z.enum(["form", "auto-form"]),
     /** Endpoint to load initial values from (for edit forms). */
     data: dataSourceSchema.optional(),
     /** Endpoint to submit form data to. */
@@ -160,10 +177,9 @@ export const autoFormConfigSchema = z
     gap: z.enum(["xs", "sm", "md", "lg"]).optional(),
     /** Label for the submit button. Defaults to "Submit". */
     submitLabel: z.string().optional(),
+    submitLoadingLabel: z.string().optional(),
     /** Whether to reset the form after successful submission. */
     resetOnSubmit: z.boolean().optional(),
-    /** Visibility toggle. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
     /** Actions to execute after a successful submission. */
     onSuccess: z.union([actionSchema, z.array(actionSchema)]).optional(),
     /** Actions to execute when submission fails. */
@@ -177,13 +193,16 @@ export const autoFormConfigSchema = z
         afterSubmit: z.string().optional(),
         /** Runs when submit fails. */
         error: z.string().optional(),
+        /** Inline action chain for a successful submit. */
+        success: z.array(actionSchema).optional(),
+        /** Inline action chain for a failed submit. */
+        failure: z.array(actionSchema).optional(),
       })
       .strict()
       .optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    autoSubmit: z.boolean().optional(),
+    autoSubmitWhen: z.string().optional(),
+    layout: z.enum(["vertical", "horizontal", "grid"]).default("vertical"),
   })
   .strict()
   .superRefine((value, ctx) => {

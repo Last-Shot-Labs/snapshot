@@ -1,17 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef, useContext } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
-import {
-  useActionExecutor,
-  SnapshotApiContext,
-} from "../../../actions/executor";
+import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
-import {
-  buildRequestUrl,
-  resolveEndpointTarget,
-} from "../../../manifest/resources";
-import { useManifestRuntime } from "../../../manifest/runtime";
+import { useComponentData } from "../../_base/use-component-data";
 import type { LocationInputConfig } from "./types";
 
 /** Shape of a resolved location. */
@@ -38,15 +31,13 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
   const initialValue = useSubscribe(config.value ?? "") as string;
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
-  const api = useContext(SnapshotApiContext);
-  const runtime = useManifestRuntime();
 
   const [query, setQuery] = useState(initialValue || "");
   const [results, setResults] = useState<LocationResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<LocationResult | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [debouncedQuery, setDebouncedQuery] = useState(initialValue || "");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const nameField = config.nameField ?? "name";
@@ -64,96 +55,71 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
     }
   }, [initialValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Debounced search
-  const search = useCallback(
-    async (q: string) => {
-      if (q.length < minChars) {
-        setResults([]);
-        setIsOpen(false);
-        return;
+  useEffect(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, debounceMs);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
       }
+    };
+  }, [debounceMs, query]);
 
-      setLoading(true);
-      try {
-        if (!api) throw new Error("API client not available");
-        const request = resolveEndpointTarget(
-          config.searchEndpoint,
-          runtime?.resources,
-          { q },
-        );
-        const url = buildRequestUrl(request.endpoint, request.params);
-        let data: unknown;
-        switch (request.method) {
-          case "POST":
-            data = await api.post(url, undefined);
-            break;
-          case "PUT":
-            data = await api.put(url, undefined);
-            break;
-          case "PATCH":
-            data = await api.patch(url, undefined);
-            break;
-          case "DELETE":
-            data = await api.delete(url);
-            break;
-          default:
-            data = await api.get(url);
-        }
-
-        const recordData =
-          data && typeof data === "object"
-            ? (data as Record<string, unknown>)
-            : undefined;
-        const items = Array.isArray(data)
-          ? data
-          : ((recordData?.results ??
-              recordData?.data ??
-              recordData?.items ??
-              []) as Record<string, unknown>[]);
-
-        const mapped: LocationResult[] = items.map(
-          (item: Record<string, unknown>) => ({
-            name: String(item[nameField] ?? ""),
-            address: item[addressField]
-              ? String(item[addressField])
-              : undefined,
-            lat: Number(item[latField] ?? 0),
-            lng: Number(item[lngField] ?? 0),
-          }),
-        );
-
-        setResults(mapped);
-        setIsOpen(mapped.length > 0);
-      } catch {
-        setResults([]);
-        setIsOpen(false);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [
-      api,
-      config.searchEndpoint,
-      nameField,
-      addressField,
-      latField,
-      lngField,
-      minChars,
-      runtime?.resources,
-    ],
+  const shouldSearch = debouncedQuery.length >= minChars;
+  const searchResults = useComponentData(
+    shouldSearch ? (config.searchEndpoint ?? "") : "",
+    shouldSearch ? { q: debouncedQuery } : undefined,
   );
+
+  useEffect(() => {
+    if (!shouldSearch) {
+      setResults([]);
+      setIsOpen(false);
+      return;
+    }
+
+    const payload = searchResults.data as unknown;
+    const recordData =
+      payload && typeof payload === "object" && !Array.isArray(payload)
+        ? (payload as Record<string, unknown>)
+        : undefined;
+    const items = Array.isArray(payload)
+      ? (payload as Record<string, unknown>[])
+      : ((recordData?.results ??
+          recordData?.data ??
+          recordData?.items ??
+          []) as Record<string, unknown>[]);
+
+    const mapped: LocationResult[] = items.map((item) => ({
+      name: String(item[nameField] ?? ""),
+      address: item[addressField] ? String(item[addressField]) : undefined,
+      lat: Number(item[latField] ?? 0),
+      lng: Number(item[lngField] ?? 0),
+    }));
+
+    setResults(mapped);
+    setIsOpen(mapped.length > 0);
+  }, [
+    addressField,
+    latField,
+    lngField,
+    nameField,
+    searchResults.data,
+    shouldSearch,
+  ]);
 
   const handleInputChange = useCallback(
     (value: string) => {
       setQuery(value);
       setSelected(null);
-
-      clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        void search(value);
-      }, debounceMs);
     },
-    [search, debounceMs],
+    [],
   );
 
   const handleSelect = useCallback(
@@ -195,7 +161,11 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
 
   // Cleanup debounce on unmount
   useEffect(() => {
-    return () => clearTimeout(debounceRef.current);
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
   }, []);
 
   if (visible === false) return null;
@@ -289,7 +259,7 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
             width: "100%",
           }}
         />
-        {loading && (
+        {searchResults.isLoading && shouldSearch && (
           <span
             style={{
               padding: "0 var(--sn-spacing-sm, 0.5rem)",

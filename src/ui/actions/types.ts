@@ -6,14 +6,21 @@ import {
 
 export const ACTION_TYPES = [
   "navigate",
+  "navigate-external",
   "api",
   "open-modal",
   "close-modal",
   "refresh",
   "set-value",
   "download",
+  "copy",
+  "emit",
+  "submit-form",
+  "reset-form",
+  "set-theme",
   "confirm",
   "toast",
+  "log",
   "track",
   "run-workflow",
 ] as const;
@@ -55,6 +62,12 @@ export interface ApiAction {
   onSuccess?: ActionConfig | ActionConfig[];
   /** Actions to execute on error. Error available as `{error}`. */
   onError?: ActionConfig | ActionConfig[];
+}
+
+export interface NavigateExternalAction {
+  type: "navigate-external";
+  to: string;
+  target?: "_self" | "_blank";
 }
 
 /**
@@ -112,6 +125,34 @@ export interface DownloadAction {
   filename?: string;
 }
 
+export interface CopyAction {
+  type: "copy";
+  text: string;
+  onSuccess?: ActionConfig | ActionConfig[];
+}
+
+export interface EmitAction {
+  type: "emit";
+  event: string;
+  payload?: unknown;
+}
+
+export interface SubmitFormAction {
+  type: "submit-form";
+  formId: string;
+}
+
+export interface ResetFormAction {
+  type: "reset-form";
+  formId: string;
+}
+
+export interface SetThemeAction {
+  type: "set-theme";
+  flavor?: string;
+  mode?: "light" | "dark" | "system";
+}
+
 /**
  * Show a confirmation dialog. Stops the chain if cancelled.
  */
@@ -153,6 +194,13 @@ export interface TrackAction {
   props?: Record<string, unknown>;
 }
 
+export interface LogAction {
+  type: "log";
+  level: "info" | "warn" | "error" | "debug";
+  message: string;
+  data?: Record<string, unknown>;
+}
+
 /**
  * Run a named manifest workflow.
  */
@@ -169,14 +217,21 @@ export interface RunWorkflowAction {
  */
 export type ActionConfig =
   | NavigateAction
+  | NavigateExternalAction
   | ApiAction
   | OpenModalAction
   | CloseModalAction
   | RefreshAction
   | SetValueAction
   | DownloadAction
+  | CopyAction
+  | EmitAction
+  | SubmitFormAction
+  | ResetFormAction
+  | SetThemeAction
   | ConfirmAction
   | ToastAction
+  | LogAction
   | TrackAction
   | RunWorkflowAction;
 
@@ -198,6 +253,14 @@ export const navigateActionSchema = z
     type: z.literal("navigate"),
     to: z.string(),
     replace: z.boolean().optional(),
+  })
+  .strict();
+
+export const navigateExternalActionSchema = z
+  .object({
+    type: z.literal("navigate-external"),
+    to: z.string(),
+    target: z.enum(["_self", "_blank"]).optional(),
   })
   .strict();
 
@@ -243,6 +306,48 @@ export const downloadActionSchema = z
     type: z.literal("download"),
     endpoint: endpointTargetSchema,
     filename: z.string().optional(),
+  })
+  .strict();
+
+export const copyActionSchema: z.ZodType<CopyAction> = z.lazy(() =>
+  z
+    .object({
+      type: z.literal("copy"),
+      text: z.string(),
+      onSuccess: z
+        .union([z.lazy(() => actionSchema), z.array(z.lazy(() => actionSchema))])
+        .optional(),
+    })
+    .strict(),
+);
+
+export const emitActionSchema = z
+  .object({
+    type: z.literal("emit"),
+    event: z.string().min(1),
+    payload: z.unknown().optional(),
+  })
+  .strict();
+
+export const submitFormActionSchema = z
+  .object({
+    type: z.literal("submit-form"),
+    formId: z.string().min(1),
+  })
+  .strict();
+
+export const resetFormActionSchema = z
+  .object({
+    type: z.literal("reset-form"),
+    formId: z.string().min(1),
+  })
+  .strict();
+
+export const setThemeActionSchema = z
+  .object({
+    type: z.literal("set-theme"),
+    flavor: z.string().optional(),
+    mode: z.enum(["light", "dark", "system"]).optional(),
   })
   .strict();
 
@@ -325,6 +430,15 @@ export const trackActionSchema = z
   })
   .strict();
 
+export const logActionSchema = z
+  .object({
+    type: z.literal("log"),
+    level: z.enum(["info", "warn", "error", "debug"]),
+    message: z.string(),
+    data: z.record(z.unknown()).optional(),
+  })
+  .strict();
+
 /** Schema for api action. Uses z.lazy() for recursive onSuccess/onError. */
 export const apiActionSchema: z.ZodType<ApiAction> = buildApiActionSchema();
 
@@ -341,14 +455,21 @@ export const toastActionSchema: z.ZodType<ToastAction> =
 export const actionSchema: z.ZodType<ActionConfig> = z.lazy(() =>
   z.union([
     navigateActionSchema,
+    navigateExternalActionSchema,
     openModalActionSchema,
     closeModalActionSchema,
     refreshActionSchema,
     setValueActionSchema,
     downloadActionSchema,
+    copyActionSchema,
+    emitActionSchema,
+    submitFormActionSchema,
+    resetFormActionSchema,
+    setThemeActionSchema,
     confirmActionSchema,
     apiActionSchema,
     toastActionSchema,
+    logActionSchema,
     trackActionSchema,
     runWorkflowActionSchema,
   ]),

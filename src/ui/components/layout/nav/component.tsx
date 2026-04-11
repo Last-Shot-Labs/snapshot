@@ -4,8 +4,9 @@ import { useEffect, useState, type CSSProperties } from "react";
 import type { NavConfig } from "./schema";
 import { useNav } from "./hook";
 import { useActionExecutor } from "../../../actions/executor";
-import { Icon } from "../../../icons/index";
+import { renderIcon } from "../../../icons/render";
 import type { ResolvedNavItem, AuthUser } from "./types";
+import { useManifestRuntime } from "../../../manifest/runtime";
 
 /** Props for the Nav component. */
 interface NavComponentProps {
@@ -77,11 +78,7 @@ function NavItem({
             "background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
         }}
       >
-        {item.icon && (
-          <span data-nav-icon="" aria-hidden="true">
-            <Icon name={item.icon} size={16} />
-          </span>
-        )}
+        {item.icon ? <span data-nav-icon="" aria-hidden="true">{renderIcon(item.icon, 16)}</span> : null}
         <span
           data-nav-label=""
           style={{
@@ -277,7 +274,7 @@ function UserMenu({
                   transition: `background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)`,
                 }}
               >
-                {item.icon && <Icon name={item.icon} size={16} />}
+                {renderIcon(item.icon, 16)}
                 <span>{item.label}</span>
               </button>
             </li>
@@ -298,10 +295,18 @@ function UserMenu({
  * @param props - Nav configuration, pathname, and navigation callback
  */
 export function Nav({ config, pathname, onNavigate }: NavComponentProps) {
+  const manifest = useManifestRuntime();
   const [currentPath, setCurrentPath] = useState(pathname ?? "/");
   const { items, isCollapsed, toggle, user } = useNav(config, currentPath);
-  const showUserMenu =
-    config.userMenu !== false && config.userMenu !== undefined;
+  const effectiveLogo =
+    config.logo ??
+    (manifest?.app?.title
+      ? {
+          text: manifest.app.title,
+          path: manifest.app.home ?? "/",
+        }
+      : undefined);
+  const showUserMenu = config.userMenu !== false;
 
   useEffect(() => {
     if (pathname) {
@@ -310,6 +315,9 @@ export function Nav({ config, pathname, onNavigate }: NavComponentProps) {
     }
 
     setCurrentPath(window.location.pathname);
+    const handler = () => setCurrentPath(window.location.pathname);
+    window.addEventListener("popstate", handler);
+    return () => window.removeEventListener("popstate", handler);
   }, [pathname]);
 
   return (
@@ -326,7 +334,7 @@ export function Nav({ config, pathname, onNavigate }: NavComponentProps) {
       }}
     >
       {/* Logo / Brand */}
-      {config.logo && (
+      {effectiveLogo && (
         <div
           data-nav-logo=""
           style={{
@@ -336,34 +344,34 @@ export function Nav({ config, pathname, onNavigate }: NavComponentProps) {
             padding: "var(--sn-spacing-md, 0.75rem)",
             borderBottom:
               "var(--sn-border-default, 1px) solid var(--sn-color-border)",
-            cursor: config.logo.path ? "pointer" : undefined,
+            cursor: effectiveLogo.path ? "pointer" : undefined,
           }}
           onClick={() => {
-            if (config.logo?.path && onNavigate) {
-              onNavigate(config.logo.path);
+            if (effectiveLogo?.path && onNavigate) {
+              onNavigate(effectiveLogo.path);
             }
           }}
           onKeyDown={(e) => {
             if (
               (e.key === "Enter" || e.key === " ") &&
-              config.logo?.path &&
+              effectiveLogo?.path &&
               onNavigate
             ) {
               e.preventDefault();
-              onNavigate(config.logo.path);
+              onNavigate(effectiveLogo.path);
             }
           }}
-          role={config.logo.path ? "link" : undefined}
-          tabIndex={config.logo.path ? 0 : undefined}
+          role={effectiveLogo.path ? "link" : undefined}
+          tabIndex={effectiveLogo.path ? 0 : undefined}
         >
-          {config.logo.src && (
+          {effectiveLogo.src && (
             <img
-              src={config.logo.src}
-              alt={config.logo.text ?? "Logo"}
+              src={effectiveLogo.src}
+              alt={effectiveLogo.text ?? "Logo"}
               style={{ height: "var(--sn-spacing-lg, 1.5rem)", width: "auto" }}
             />
           )}
-          {config.logo.text && (
+          {effectiveLogo.text && (
             <span
               style={{
                 fontSize: "var(--sn-font-size-lg, 1.125rem)",
@@ -371,7 +379,7 @@ export function Nav({ config, pathname, onNavigate }: NavComponentProps) {
                   "var(--sn-font-weight-semibold, 600)" as CSSProperties["fontWeight"],
               }}
             >
-              {config.logo.text}
+              {effectiveLogo.text}
             </span>
           )}
         </div>

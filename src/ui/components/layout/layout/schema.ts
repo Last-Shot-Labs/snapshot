@@ -24,7 +24,14 @@ export const layoutConfigSchema = z
     id: z.string().optional(),
     /** Layout variant determines the overall page structure. */
     variant: z
-      .enum(["sidebar", "top-nav", "stacked", "minimal", "full-width"])
+      .enum([
+        "sidebar",
+        "top-nav",
+        "stacked",
+        "minimal",
+        "full-width",
+        "centered",
+      ])
       .default("sidebar"),
     /** Custom sidebar width (CSS value). Default: 16rem. */
     sidebarWidth: z.string().optional(),

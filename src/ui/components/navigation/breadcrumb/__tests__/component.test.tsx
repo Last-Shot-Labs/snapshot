@@ -54,6 +54,7 @@ describe("BreadcrumbComponent", () => {
               currentPath: "/users/42",
               currentRoute: route ?? null,
               params: { id: "42" },
+              query: {},
               navigate,
               isPreloading: false,
             }}

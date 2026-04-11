@@ -8,6 +8,7 @@
 import { STRUCTURAL_COMPONENTS } from "./structural";
 import { registerBuiltInComponents } from "../components/register";
 import { registerBuiltInFlavors } from "../tokens/flavors";
+import { registerBuiltInLayouts } from "../layouts/register";
 import { registerComponent } from "./component-registry";
 
 let booted = false;
@@ -28,4 +29,9 @@ export function bootBuiltins(): void {
     registerComponent(type, component);
   }
   registerBuiltInFlavors();
+  registerBuiltInLayouts();
+}
+
+export function resetBootBuiltins(): void {
+  booted = false;
 }

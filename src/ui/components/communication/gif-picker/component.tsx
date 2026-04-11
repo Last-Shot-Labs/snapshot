@@ -5,20 +5,11 @@ import {
   useMemo,
   useCallback,
   useEffect,
-  useRef,
-  useContext,
 } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
-import {
-  useActionExecutor,
-  SnapshotApiContext,
-} from "../../../actions/executor";
+import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
-import {
-  buildRequestUrl,
-  resolveEndpointTarget,
-} from "../../../manifest/resources";
-import { useManifestRuntime } from "../../../manifest/runtime";
+import { useComponentData } from "../../_base/use-component-data";
 import type { GifPickerConfig, GifEntry } from "./types";
 
 /**
@@ -31,13 +22,9 @@ export function GifPicker({ config }: { config: GifPickerConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
-  const api = useContext(SnapshotApiContext);
-  const runtime = useManifestRuntime();
 
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<GifEntry[]>([]);
-  const [loading, setLoading] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const columns = config.columns ?? 2;
   const maxHeight = config.maxHeight ?? "300px";
@@ -58,92 +45,48 @@ export function GifPicker({ config }: { config: GifPickerConfig }) {
     }));
   }, [config.gifs]);
 
-  // Fetch GIFs from API
-  const fetchGifs = useCallback(
-    async (query: string) => {
-      const endpoint = query ? config.searchEndpoint : config.trendingEndpoint;
-      if (!endpoint) return;
-
-      setLoading(true);
-      try {
-        if (!api) throw new Error("No API client available");
-        const request = resolveEndpointTarget(
-          endpoint,
-          runtime?.resources,
-          query ? { q: query } : undefined,
-        );
-        const url = buildRequestUrl(request.endpoint, request.params);
-        let raw: unknown;
-        switch (request.method) {
-          case "POST":
-            raw = await api.post(url, undefined);
-            break;
-          case "PUT":
-            raw = await api.put(url, undefined);
-            break;
-          case "PATCH":
-            raw = await api.patch(url, undefined);
-            break;
-          case "DELETE":
-            raw = await api.delete(url);
-            break;
-          default:
-            raw = await api.get(url);
-        }
-        const data = raw as Record<string, unknown>;
-
-        const items = Array.isArray(data)
-          ? (data as Record<string, unknown>[])
-          : ((data.results ?? data.data ?? data.gifs ?? []) as Record<
-              string,
-              unknown
-            >[]);
-
-        setResults(
-          items.map((item: Record<string, unknown>, i: number) => ({
-            id: String(item.id ?? i),
-            url: String(item[urlField] ?? ""),
-            preview: String(item[previewField] ?? item[urlField] ?? ""),
-            width: item.width as number | undefined,
-            height: item.height as number | undefined,
-            title: String(item[titleField] ?? ""),
-          })),
-        );
-      } catch {
-        setResults([]);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [
-      api,
-      config.searchEndpoint,
-      config.trendingEndpoint,
-      runtime?.resources,
-      urlField,
-      previewField,
-      titleField,
-    ],
-  );
-
-  // Debounced search
   useEffect(() => {
-    if (!config.searchEndpoint && !config.trendingEndpoint) return;
-
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      void fetchGifs(search);
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearch(search);
     }, 300);
 
-    return () => clearTimeout(debounceRef.current);
-  }, [search, fetchGifs, config.searchEndpoint, config.trendingEndpoint]);
+    return () => clearTimeout(timeoutId);
+  }, [search]);
 
-  // Load trending on mount
-  useEffect(() => {
-    if (config.trendingEndpoint && !search) {
-      void fetchGifs("");
-    }
-  }, [config.trendingEndpoint]); // eslint-disable-line react-hooks/exhaustive-deps
+  const remoteTarget =
+    staticGifs.length > 0
+      ? ""
+      : debouncedSearch
+        ? (config.searchEndpoint ?? "")
+        : (config.trendingEndpoint ?? "");
+  const remoteResults = useComponentData(
+    remoteTarget,
+    debouncedSearch && config.searchEndpoint
+      ? { q: debouncedSearch }
+      : undefined,
+  );
+  const results = useMemo(() => {
+    const payload = remoteResults.data as unknown;
+    const recordData =
+      payload && typeof payload === "object" && !Array.isArray(payload)
+        ? (payload as Record<string, unknown>)
+        : undefined;
+    const items = Array.isArray(payload)
+      ? (payload as Record<string, unknown>[])
+      : ((recordData?.results ??
+          recordData?.data ??
+          recordData?.gifs ??
+          []) as Record<string, unknown>[]);
+
+    return items.map((item, index) => ({
+      id: String(item.id ?? index),
+      url: String(item[urlField] ?? ""),
+      preview: String(item[previewField] ?? item[urlField] ?? ""),
+      width: item.width as number | undefined,
+      height: item.height as number | undefined,
+      title: String(item[titleField] ?? ""),
+    }));
+  }, [previewField, remoteResults.data, titleField, urlField]);
 
   const handleSelect = useCallback(
     (gif: GifEntry) => {
@@ -164,6 +107,7 @@ export function GifPicker({ config }: { config: GifPickerConfig }) {
   if (visible === false) return null;
 
   const displayGifs = staticGifs.length > 0 ? staticGifs : results;
+  const loading = staticGifs.length === 0 && remoteResults.isLoading;
 
   return (
     <div

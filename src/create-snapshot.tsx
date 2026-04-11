@@ -8,6 +8,7 @@ import { createAuthHooks } from "./auth/hooks";
 import { createMfaHooks } from "./auth/mfa-hooks";
 import { createAccountHooks } from "./auth/account-hooks";
 import { createOAuthHooks } from "./auth/oauth-hooks";
+import { mergeContract } from "./auth/contract";
 import { createWebAuthnHooks } from "./auth/webauthn-hooks";
 import { isMfaChallenge } from "./types";
 import type { MfaChallenge } from "./types";
@@ -22,7 +23,6 @@ import { useTheme } from "./theme/hook";
 import { createLoaders } from "./routing/loaders";
 import { QueryProviderInner } from "./providers/QueryProvider";
 import { createAuthErrorFormatter } from "./auth/error-format";
-import { createManifestAuthRuntimeConfig } from "./ui/manifest/auth";
 import { getAuthScreenPath } from "./ui/manifest/auth-routes";
 import type {
   SnapshotConfig,
@@ -127,10 +127,6 @@ export function createSnapshot<
   const runtimeRealtime = compiledManifest.realtime;
   const runtimeAuthMode = compiledManifest.auth?.session?.mode ?? "cookie";
   const runtimeSession = compiledManifest.auth?.session;
-  const authRuntimeConfig = createManifestAuthRuntimeConfig(
-    runtimeApiUrl,
-    compiledManifest,
-  );
   const runtimeWsConfig = runtimeRealtime?.ws
     ? {
         url: runtimeRealtime.ws.url ?? resolveWebSocketUrl(runtimeApiUrl),
@@ -211,7 +207,10 @@ export function createSnapshot<
   }
 
   // ── Auth contract ────────────────────────────────────────────────────────────
-  const contract = authRuntimeConfig.contract;
+  const contract = mergeContract(
+    runtimeApiUrl,
+    compiledManifest.auth?.contract as Parameters<typeof mergeContract>[1],
+  );
 
   // ── API client ──────────────────────────────────────────────────────────────
   const api = new ApiClient({

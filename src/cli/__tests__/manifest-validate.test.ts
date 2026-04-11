@@ -40,14 +40,14 @@ describe("manifest validation logic", () => {
         {
           id: "home",
           path: "/home",
-          layout: "sidebar",
+          layouts: ["sidebar"],
           title: "Home",
           content: [{ type: "heading", text: "Welcome" }],
         },
         {
           id: "settings",
           path: "/settings",
-          layout: "sidebar",
+          layouts: ["sidebar"],
           title: "Settings",
           content: [{ type: "heading", text: "Settings" }],
         },
@@ -102,7 +102,7 @@ describe("manifest validation logic", () => {
         {
           id: "home",
           path: "/home",
-          layout: "invalid-layout",
+          layouts: ["invalid-layout"],
           content: [{ type: "heading", text: "Hi" }],
         },
       ],

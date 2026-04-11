@@ -27,6 +27,7 @@ import {
   useResolveFrom,
   useSubscribe,
 } from "../context/index";
+import { resolveFromRef } from "../context/from-ref";
 import { Layout } from "../components/layout/layout";
 import { Nav } from "../components/layout/nav";
 import { DrawerComponent } from "../components/overlay/drawer";
@@ -36,11 +37,6 @@ import { resolveDetectedLocale, resolveI18nRefs } from "../i18n/resolve";
 import { evaluatePolicy } from "../policies/evaluate";
 import type { PolicyExpr } from "../policies/types";
 import { resolveTokens } from "../tokens/resolve";
-import {
-  createManifestAuthRuntimeConfig,
-  ManifestAuthScreen,
-  resolveAuthScreen,
-} from "./auth";
 import { getAuthScreenPath } from "./auth-routes";
 import { compileManifest } from "./compiler";
 import {
@@ -59,6 +55,7 @@ import type {
   OverlayConfig,
 } from "./types";
 import { bootBuiltins } from "./boot-builtins";
+import { resolveTemplate } from "../expressions/template";
 
 const EMPTY_OBJECT: Record<string, unknown> = {};
 
@@ -82,8 +79,16 @@ export function injectStyleSheet(id: string, css: string): void {
 function evaluateRouteGuard(
   route: CompiledRoute | null,
   user: Record<string, unknown> | null,
+  manifest: CompiledManifest,
   policies: Record<string, PolicyExpr>,
   parentPolicies?: Record<string, PolicyExpr>,
+  routeContext?: {
+    id?: string;
+    path?: string;
+    pattern?: string;
+    params?: Record<string, string>;
+    query?: Record<string, string>;
+  },
 ): boolean {
   if (!route?.guard) {
     return true;
@@ -97,6 +102,10 @@ function evaluateRouteGuard(
   ];
 
   if (route.guard.authenticated && !user) {
+    return false;
+  }
+
+  if (route.guard.authenticated === false && user) {
     return false;
   }
 
@@ -114,6 +123,23 @@ function evaluateRouteGuard(
     return evaluatePolicy(route.guard.policy, expression, {
       policies,
       parentPolicies,
+      resolveFromRef: (ref) =>
+        resolveFromRef(ref, {
+          context: {
+            global: {
+              user,
+              auth: {
+                user,
+                isAuthenticated: Boolean(user),
+              },
+            },
+          },
+          route: routeContext,
+          manifest: {
+            app: manifest.app as Record<string, unknown>,
+            auth: (manifest.auth ?? {}) as Record<string, unknown>,
+          },
+        }),
     });
   }
 
@@ -145,6 +171,17 @@ function dispatchPopState(): void {
   }
 
   window.dispatchEvent(new Event("popstate"));
+}
+
+function getBrowserLocation(): { pathname: string; search: string } {
+  if (typeof window === "undefined") {
+    return { pathname: "/", search: "" };
+  }
+
+  return {
+    pathname: window.location.pathname,
+    search: window.location.search,
+  };
 }
 
 interface SubAppInheritConfig {
@@ -418,6 +455,7 @@ const BUILT_IN_LAYOUT_TYPES = new Set([
   "stacked",
   "minimal",
   "full-width",
+  "centered",
 ]);
 
 const SLOT_ENABLED_LAYOUT_TYPES = new Set(["sidebar", "top-nav", "stacked"]);
@@ -1036,7 +1074,6 @@ interface ManifestRouterProps {
   manifest: CompiledManifest;
   api: ReturnType<typeof createSnapshot>["api"];
   snapshot: ReturnType<typeof createSnapshot>;
-  authRuntimeConfig: ReturnType<typeof createManifestAuthRuntimeConfig>;
   runtimeClients: Record<string, ApiClientLike>;
   basePath?: string;
   parentTheme?: CompiledManifest["theme"];
@@ -1047,16 +1084,12 @@ function ManifestRouter({
   manifest,
   api,
   snapshot,
-  authRuntimeConfig,
   runtimeClients,
   basePath,
   parentTheme,
   parentPolicies,
 }: ManifestRouterProps) {
-  const [currentPath, setCurrentPath] = useState(() => {
-    if (typeof window === "undefined") return "/";
-    return window.location.pathname;
-  });
+  const [currentLocation, setCurrentLocation] = useState(getBrowserLocation);
   const [isPreloading, setIsPreloading] = useState(false);
   const [runtimeError, setRuntimeError] = useState<Error | null>(null);
   const [isOffline, setIsOffline] = useState(() =>
@@ -1131,14 +1164,17 @@ function ManifestRouter({
       } else {
         window.history.pushState({}, "", nextLocation);
       }
-      setCurrentPath(url.pathname);
+      setCurrentLocation({
+        pathname: url.pathname,
+        search: url.search,
+      });
     },
     [basePath],
   );
 
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
+      setCurrentLocation(getBrowserLocation());
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
@@ -1186,13 +1222,34 @@ function ManifestRouter({
     setLocaleState,
   ]);
 
+  useEffect(() => {
+    if (typeof document === "undefined" || !activeLocale) {
+      return;
+    }
+
+    document.documentElement.dir = ["ar", "he", "fa", "ur"].includes(
+      activeLocale.split("-")[0] ?? activeLocale,
+    )
+      ? "rtl"
+      : "ltr";
+  }, [activeLocale]);
+
   const scopedCurrentPath = useMemo(
-    () => stripMountPath(currentPath, basePath ?? "/"),
-    [basePath, currentPath],
+    () => stripMountPath(currentLocation.pathname, basePath ?? "/"),
+    [basePath, currentLocation.pathname],
   );
+  const scopedCurrentLocation = useMemo(
+    () => `${scopedCurrentPath}${currentLocation.search}`,
+    [currentLocation.search, scopedCurrentPath],
+  );
+  const routeQuery = useMemo(() => {
+    return Object.fromEntries(
+      new URLSearchParams(currentLocation.search).entries(),
+    );
+  }, [currentLocation.search]);
   const subAppMatch = useMemo(
-    () => resolveSubAppMatch(localizedManifest, currentPath, basePath),
-    [basePath, currentPath, localizedManifest],
+    () => resolveSubAppMatch(localizedManifest, currentLocation.pathname, basePath),
+    [basePath, currentLocation.pathname, localizedManifest],
   );
   const { route, params } = useMemo(
     () =>
@@ -1200,10 +1257,6 @@ function ManifestRouter({
         ? { route: null, params: {} as Record<string, string> }
         : resolveRouteMatch(localizedManifest, scopedCurrentPath),
     [localizedManifest, scopedCurrentPath, subAppMatch],
-  );
-  const authScreen = useMemo(
-    () => resolveAuthScreen(localizedManifest, route),
-    [localizedManifest, route],
   );
   const subAppClients = useMemo(
     () =>
@@ -1221,33 +1274,45 @@ function ManifestRouter({
       return;
     }
 
+    const templateContext = {
+      app: localizedManifest.app ?? {},
+      auth: localizedManifest.auth ?? {},
+      route: route
+        ? {
+            id: route.id,
+            path: scopedCurrentPath,
+            pattern: route.path,
+            params,
+            query: routeQuery,
+          }
+        : undefined,
+    };
+    const templateOptions = {
+      locale: activeLocale,
+      i18n: localizedManifest.raw.i18n,
+    };
     const appTitle =
       typeof localizedManifest.app.title === "string"
-        ? localizedManifest.app.title.trim()
+        ? resolveTemplate(
+            localizedManifest.app.title,
+            templateContext,
+            templateOptions,
+          ).trim()
         : "";
     const routeTitle =
       route && typeof route.page.title === "string"
-        ? route.page.title.trim()
-        : "";
-    const interpolatedRouteTitle =
-      routeTitle && route
-        ? routeTitle.replace(/\{([^}]+)\}/g, (match, key: string) => {
-            const value = (params as Record<string, unknown>)[key];
-            return value == null ? match : String(value);
-          })
+        ? resolveTemplate(route.page.title, templateContext, templateOptions).trim()
         : "";
     const nextTitle =
-      interpolatedRouteTitle && appTitle
-        ? `${interpolatedRouteTitle} | ${appTitle}`
-        : interpolatedRouteTitle || appTitle;
+      routeTitle && appTitle ? `${routeTitle} | ${appTitle}` : routeTitle || appTitle;
     if (nextTitle) {
       document.title = nextTitle;
     }
-  }, [localizedManifest.app.title, params, route]);
+  }, [activeLocale, localizedManifest, params, route, routeQuery, scopedCurrentPath]);
 
   useEffect(() => {
     setRuntimeError(null);
-  }, [currentPath, route?.id]);
+  }, [currentLocation.pathname, currentLocation.search, route?.id]);
 
   useEffect(() => {
     if (!subAppMatch?.subManifest.theme) {
@@ -1269,8 +1334,18 @@ function ManifestRouter({
   const routeAllowed = evaluateRouteGuard(
     route,
     user,
+    localizedManifest,
     policyMap,
     parentPolicies,
+    route
+      ? {
+          id: route.id,
+          path: scopedCurrentPath,
+          pattern: route.path,
+          params,
+          query: routeQuery,
+        }
+      : undefined,
   );
 
   useEffect(() => {
@@ -1278,12 +1353,31 @@ function ManifestRouter({
       return;
     }
 
-    if (route.guard?.authenticated && authLoading) {
+    if (route.guard?.authenticated !== undefined && authLoading) {
       return;
     }
 
     const baseFallback =
-      route.guard?.redirectTo ??
+      (route.guard?.redirectTo
+        ? resolveTemplate(
+            route.guard.redirectTo,
+            {
+              app: localizedManifest.app ?? {},
+              auth: localizedManifest.auth ?? {},
+              route: {
+                id: route.id,
+                path: scopedCurrentPath,
+                pattern: route.path,
+                params,
+                query: routeQuery,
+              },
+            },
+            {
+              locale: activeLocale,
+              i18n: localizedManifest.raw.i18n,
+            },
+          )
+        : undefined) ??
       (route.guard?.authenticated
         ? getAuthScreenPath(localizedManifest, "login")
         : undefined) ??
@@ -1294,21 +1388,27 @@ function ManifestRouter({
       route.guard?.authenticated && !route.guard?.redirectTo
         ? withRedirectParam(
             baseFallback,
-            `${window.location.pathname}${window.location.search}`,
+            `${currentLocation.pathname}${currentLocation.search}`,
           )
         : baseFallback;
-    if (fallback !== scopedCurrentPath) {
+    if (fallback !== scopedCurrentLocation) {
       navigate(fallback, { replace: true });
     }
   }, [
+    activeLocale,
     authLoading,
+    currentLocation.pathname,
+    currentLocation.search,
     localizedManifest,
     localizedManifest.app.home,
     localizedManifest.firstRoute?.path,
     navigate,
+    params,
     route,
     routeAllowed,
     scopedCurrentPath,
+    scopedCurrentLocation,
+    routeQuery,
   ]);
 
   useEffect(() => {
@@ -1468,7 +1568,6 @@ function ManifestRouter({
           manifest={subAppMatch.subManifest}
           api={api}
           snapshot={snapshot}
-          authRuntimeConfig={authRuntimeConfig}
           runtimeClients={subAppClients}
           basePath={subAppMatch.mountPath}
           parentTheme={localizedManifest.theme ?? parentTheme}
@@ -1508,7 +1607,7 @@ function ManifestRouter({
     );
   }
 
-  if (route.guard?.authenticated && authLoading) {
+  if (route.guard?.authenticated !== undefined && authLoading) {
     return (
       <div data-snapshot-auth-loading="" style={{ padding: "1rem" }}>
         <AppFallback manifest={localizedManifest} name="loading" api={api} />
@@ -1526,6 +1625,7 @@ function ManifestRouter({
         currentPath: scopedCurrentPath,
         currentRoute: route,
         params,
+        query: routeQuery,
         navigate,
         isPreloading,
       }}
@@ -1537,25 +1637,14 @@ function ManifestRouter({
         }
         onError={setRuntimeError}
       >
-        {authScreen ? (
-          <ManifestAuthScreen
-            manifest={localizedManifest}
-            route={route}
-            screen={authScreen}
-            snapshot={snapshot}
-            runtimeConfig={authRuntimeConfig}
-            navigate={(to, options) => navigate(to, options)}
-          />
-        ) : (
-          <AppShell
-            manifest={localizedManifest}
-            route={route}
-            currentPath={scopedCurrentPath}
-            navigate={navigate}
-            isPreloading={isPreloading}
-            api={api}
-          />
-        )}
+        <AppShell
+          manifest={localizedManifest}
+          route={route}
+          currentPath={scopedCurrentPath}
+          navigate={navigate}
+          isPreloading={isPreloading}
+          api={api}
+        />
       </ManifestErrorBoundary>
       <OverlayHost overlays={localizedManifest.overlays} />
     </RouteRuntimeProvider>
@@ -1583,10 +1672,6 @@ export function ManifestApp({ manifest, apiUrl }: ManifestAppProps) {
         manifest: compiledManifest.raw,
       }),
     [compiledManifest.raw, runtimeApiUrl],
-  );
-  const authRuntimeConfig = useMemo(
-    () => createManifestAuthRuntimeConfig(runtimeApiUrl, compiledManifest),
-    [compiledManifest, runtimeApiUrl],
   );
   const runtimeClients = useMemo(
     () => buildManifestClientMap(compiledManifest, snapshot),
@@ -1631,7 +1716,6 @@ export function ManifestApp({ manifest, apiUrl }: ManifestAppProps) {
               manifest={compiledManifest}
               api={snapshot.api}
               snapshot={snapshot}
-              authRuntimeConfig={authRuntimeConfig}
               runtimeClients={runtimeClients}
             />
             <ToastContainer />

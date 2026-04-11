@@ -57,7 +57,7 @@ export function generateManifestJson(options: ManifestInitOptions): string {
     {
       id: "dashboard",
       path: "/dashboard",
-      layout: options.includeSidebar ? "sidebar" : "minimal",
+      layouts: [options.includeSidebar ? "sidebar" : "minimal"],
       title: "Dashboard",
       content: [
         {
@@ -91,7 +91,7 @@ export function generateManifestJson(options: ManifestInitOptions): string {
     {
       id: "settings",
       path: "/settings",
-      layout: options.includeSidebar ? "sidebar" : "minimal",
+      layouts: [options.includeSidebar ? "sidebar" : "minimal"],
       title: "Settings",
       content: [
         {

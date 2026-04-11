@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { usePublish, useSubscribe } from "../../../context/hooks";
 import {
   useActionExecutor,
@@ -19,10 +19,13 @@ import {
   useManifestResourceCache,
   useManifestRuntime,
 } from "../../../manifest/runtime";
+import { useRouteRuntime } from "../../../manifest/runtime";
 import {
   getButtonStyle,
   BUTTON_INTERACTIVE_CSS,
 } from "../../_base/button-styles";
+import { useEvaluateExpression } from "../../../expressions/use-expression";
+import { resolveTemplate } from "../../../expressions/template";
 import { useAutoForm } from "./hook";
 import type { AutoFormConfig, FieldConfig, FieldSectionConfig } from "./types";
 import type { ApiClient } from "../../../../api/client";
@@ -38,6 +41,19 @@ const GAP_MAP: Record<string, string> = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function shallowEqualRecord(
+  left: Record<string, unknown>,
+  right: Record<string, unknown>,
+): boolean {
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+  if (leftKeys.length !== rightKeys.length) {
+    return false;
+  }
+
+  return leftKeys.every((key) => left[key] === right[key]);
 }
 
 function isHaltSignal(value: unknown): boolean {
@@ -56,6 +72,9 @@ export function toFieldOptions(
   if (Array.isArray(data)) {
     return data
       .map((item) => {
+        if (typeof item === "string") {
+          return { label: item, value: item };
+        }
         if (!item || typeof item !== "object") return null;
         const record = item as Record<string, unknown>;
         const label =
@@ -143,6 +162,11 @@ function FieldRenderer({
   onChange: (value: unknown) => void;
   onBlur: () => void;
 }) {
+  const executeAction = useActionExecutor();
+  const manifest = useManifestRuntime();
+  const routeRuntime = useRouteRuntime();
+  const showByExpression = useEvaluateExpression(field.visibleWhen);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const label = field.label ?? field.name;
   const fieldId = `sn-field-${field.name}`;
   const hasError = showError && !!error;
@@ -168,6 +192,7 @@ function FieldRenderer({
     name: field.name,
     onBlur,
     disabled: field.disabled,
+    readOnly: field.readOnly,
     "aria-invalid": hasError,
     "aria-describedby": hasError
       ? `${fieldId}-error`
@@ -180,6 +205,10 @@ function FieldRenderer({
     !Array.isArray(field.options) && field.options ? field.options : "",
   );
   let input: React.ReactNode;
+
+  if (!showByExpression) {
+    return null;
+  }
 
   switch (field.type) {
     case "textarea":
@@ -238,6 +267,34 @@ function FieldRenderer({
       );
       break;
 
+    case "switch":
+      input = (
+        <label
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "var(--sn-spacing-sm, 0.5rem)",
+            cursor: field.disabled ? "not-allowed" : "pointer",
+          }}
+        >
+          <input
+            {...commonProps}
+            type="checkbox"
+            checked={!!value}
+            onChange={(e) => onChange(e.target.checked)}
+            style={{
+              width: "2.5rem",
+              height: "1.25rem",
+              accentColor: "var(--sn-color-primary, #2563eb)",
+            }}
+          />
+          <span style={{ fontSize: "var(--sn-font-size-sm, 0.875rem)" }}>
+            {label}
+          </span>
+        </label>
+      );
+      break;
+
     case "number":
       input = (
         <input
@@ -272,16 +329,181 @@ function FieldRenderer({
       );
       break;
 
-    default:
+    case "radio-group": {
+      const fieldOptions = Array.isArray(field.options)
+        ? field.options
+        : toFieldOptions(
+            optionsResult.data,
+            field.labelField,
+            field.valueField,
+          );
+
+      input = (
+        <div
+          role="radiogroup"
+          aria-labelledby={`${fieldId}-legend`}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--sn-spacing-xs, 0.25rem)",
+          }}
+        >
+          {fieldOptions.map((opt) => (
+            <label
+              key={opt.value}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "var(--sn-spacing-sm, 0.5rem)",
+                fontSize: "var(--sn-font-size-sm, 0.875rem)",
+              }}
+            >
+              <input
+                {...commonProps}
+                type="radio"
+                value={opt.value}
+                checked={String(value ?? "") === opt.value}
+                onChange={() => onChange(opt.value)}
+              />
+              <span>{opt.label}</span>
+            </label>
+          ))}
+        </div>
+      );
+      break;
+    }
+
+    case "slider":
       input = (
         <input
           {...commonProps}
-          type={field.type}
-          value={(value as string) ?? ""}
-          placeholder={field.placeholder}
-          onChange={(e) => onChange(e.target.value)}
+          type="range"
+          value={
+            value === "" || value === undefined || value === null
+              ? 0
+              : Number(value)
+          }
+          min={field.validation?.min}
+          max={field.validation?.max}
+          onChange={(e) => onChange(Number(e.target.value))}
           style={inputStyle}
         />
+      );
+      break;
+
+    case "color":
+      input = (
+        <input
+          {...commonProps}
+          type="color"
+          value={typeof value === "string" && value ? value : "#2563eb"}
+          onChange={(e) => onChange(e.target.value)}
+          style={{
+            ...inputStyle,
+            minHeight: "2.75rem",
+            padding: "var(--sn-spacing-xs, 0.25rem)",
+          }}
+        />
+      );
+      break;
+
+    case "combobox": {
+      const fieldOptions = Array.isArray(field.options)
+        ? field.options
+        : toFieldOptions(
+            optionsResult.data,
+            field.labelField,
+            field.valueField,
+          );
+      const listId = `${fieldId}-list`;
+
+      input = (
+        <>
+          <input
+            {...commonProps}
+            list={listId}
+            value={(value as string) ?? ""}
+            placeholder={field.placeholder}
+            onChange={(e) => onChange(e.target.value)}
+            style={inputStyle}
+          />
+          <datalist id={listId}>
+            {fieldOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </datalist>
+        </>
+      );
+      break;
+    }
+
+    case "tag-input":
+      input = (
+        <input
+          {...commonProps}
+          type="text"
+          value={Array.isArray(value) ? value.join(", ") : String(value ?? "")}
+          placeholder={field.placeholder}
+          onChange={(e) =>
+            onChange(
+              e.target.value
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean),
+            )
+          }
+          style={inputStyle}
+        />
+      );
+      break;
+
+    default:
+      input = (
+        <div style={field.type === "password" ? { position: "relative" } : undefined}>
+          <input
+            {...commonProps}
+            type={
+              field.type === "password"
+                ? (passwordVisible ? "text" : "password")
+                : field.type === "datetime"
+                  ? "datetime-local"
+                  : field.type
+            }
+            value={(value as string) ?? ""}
+            placeholder={field.placeholder}
+            autoComplete={field.autoComplete}
+            onChange={(e) => onChange(e.target.value)}
+            style={{
+              ...inputStyle,
+              paddingRight:
+                field.type === "password"
+                  ? "var(--sn-spacing-2xl, 2.5rem)"
+                  : inputStyle.paddingRight,
+            }}
+          />
+          {field.type === "password" ? (
+            <button
+              type="button"
+              onClick={() => setPasswordVisible((current) => !current)}
+              aria-label={passwordVisible ? "Hide password" : "Show password"}
+              style={{
+                position: "absolute",
+                right: "var(--sn-spacing-sm, 0.5rem)",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--sn-color-muted-foreground)",
+                padding: "var(--sn-spacing-xs, 0.25rem)",
+              }}
+            >
+              <Icon name={passwordVisible ? "eye-off" : "eye"} size={16} />
+            </button>
+          ) : null}
+        </div>
       );
       break;
   }
@@ -339,7 +561,9 @@ function FieldRenderer({
       <label
         htmlFor={fieldId}
         style={{
-          display: "block",
+          display: field.inlineAction ? "flex" : "block",
+          justifyContent: field.inlineAction ? "space-between" : undefined,
+          alignItems: field.inlineAction ? "baseline" : undefined,
           fontSize: "var(--sn-font-size-sm, 0.875rem)",
           fontWeight:
             "var(--sn-font-weight-medium, 500)" as React.CSSProperties["fontWeight"],
@@ -347,19 +571,50 @@ function FieldRenderer({
           marginBottom: "var(--sn-spacing-xs, 0.25rem)",
         }}
       >
-        {label}
-        {field.required && (
-          <span
+        <span>
+          {label}
+          {field.required && (
+            <span
+              style={{
+                color: "var(--sn-color-destructive, #ef4444)",
+                marginLeft: "var(--sn-spacing-2xs, 2px)",
+              }}
+            >
+              *
+            </span>
+          )}
+        </span>
+        {field.inlineAction ? (
+          <button
+            type="button"
+            onClick={() => {
+              void executeAction({ type: "navigate", to: field.inlineAction!.to } as never);
+            }}
             style={{
-              color: "var(--sn-color-destructive, #ef4444)",
-              marginLeft: "var(--sn-spacing-2xs, 2px)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--sn-color-primary)",
+              fontSize: "var(--sn-font-size-xs, 0.75rem)",
+              padding: 0,
             }}
           >
-            *
-          </span>
-        )}
+            {field.inlineAction.label}
+          </button>
+        ) : null}
       </label>
       {input}
+      {field.description && (
+        <div
+          style={{
+            fontSize: "var(--sn-font-size-xs, 0.75rem)",
+            color: "var(--sn-color-muted-foreground, #6b7280)",
+            marginTop: "var(--sn-spacing-xs, 0.25rem)",
+          }}
+        >
+          {field.description}
+        </div>
+      )}
       {field.helperText && !hasError && (
         <div
           id={`${fieldId}-helper`}
@@ -387,6 +642,41 @@ function FieldRenderer({
         </div>
       )}
     </div>
+  );
+}
+
+function buildTemplateContext(
+  runtime: ReturnType<typeof useManifestRuntime>,
+  routeRuntime: ReturnType<typeof useRouteRuntime>,
+): Record<string, unknown> {
+  return {
+    app: runtime?.app ?? {},
+    auth: runtime?.auth ?? {},
+    route: {
+      ...(routeRuntime?.currentRoute ?? {}),
+      path: routeRuntime?.currentPath,
+      params: routeRuntime?.params,
+      query: routeRuntime?.query,
+    },
+  };
+}
+
+function resolveMaybeTemplate(
+  value: unknown,
+  runtime: ReturnType<typeof useManifestRuntime>,
+  routeRuntime: ReturnType<typeof useRouteRuntime>,
+): unknown {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  return resolveTemplate(
+    value,
+    buildTemplateContext(runtime, routeRuntime),
+    {
+      locale: runtime?.raw.i18n?.default,
+      i18n: runtime?.raw.i18n,
+    },
   );
 }
 
@@ -575,12 +865,91 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
   const publish = usePublish(config.id);
   const visible = useSubscribe(config.visible ?? true);
   const runtime = useManifestRuntime();
+  const routeRuntime = useRouteRuntime();
   const resourceCache = useManifestResourceCache();
   const initialData = useComponentData(config.data ?? "");
+  const autoSubmitAllowed = useEvaluateExpression(config.autoSubmitWhen);
+  const autoSubmittedRef = useRef(false);
+  const lastPublishedStateRef = useRef<string | null>(null);
 
-  const allFields = resolveFields(config);
+  const allFields = useMemo(() => resolveFields(config), [config]);
+  const resolvedFields = useMemo(
+    () =>
+      allFields.map((field) => ({
+        ...field,
+        label: resolveMaybeTemplate(field.label, runtime, routeRuntime) as
+          | string
+          | undefined,
+        placeholder: resolveMaybeTemplate(
+          field.placeholder,
+          runtime,
+          routeRuntime,
+        ) as string | undefined,
+        helperText: resolveMaybeTemplate(field.helperText, runtime, routeRuntime) as
+          | string
+          | undefined,
+        description: resolveMaybeTemplate(
+          field.description,
+          runtime,
+          routeRuntime,
+        ) as string | undefined,
+        default: resolveMaybeTemplate(field.default, runtime, routeRuntime),
+        inlineAction: field.inlineAction
+          ? {
+              ...field.inlineAction,
+              label: String(
+                resolveMaybeTemplate(
+                  field.inlineAction.label,
+                  runtime,
+                  routeRuntime,
+                ) ?? field.inlineAction.label,
+              ),
+              to: String(
+                resolveMaybeTemplate(
+                  field.inlineAction.to,
+                  runtime,
+                  routeRuntime,
+                ) ?? field.inlineAction.to,
+              ),
+            }
+          : undefined,
+      })),
+    [allFields, routeRuntime, runtime?.app, runtime?.auth, runtime?.raw.i18n],
+  );
+  const resolvedFieldMap = useMemo(
+    () => new Map(resolvedFields.map((field) => [field.name, field])),
+    [resolvedFields],
+  );
+  const resolvedSections = useMemo(
+    () =>
+      config.sections?.map((section) => ({
+        ...section,
+        title: String(
+          resolveMaybeTemplate(section.title, runtime, routeRuntime) ?? section.title,
+        ),
+        description: resolveMaybeTemplate(
+          section.description,
+          runtime,
+          routeRuntime,
+        ) as string | undefined,
+        fields: section.fields.map(
+          (field) => resolvedFieldMap.get(field.name) ?? field,
+        ),
+      })),
+    [config.sections, resolvedFieldMap, routeRuntime, runtime],
+  );
   const method = config.method ?? "POST";
-  const submitLabel = config.submitLabel ?? "Submit";
+  const submitLabel = String(
+    resolveMaybeTemplate(config.submitLabel ?? "Submit", runtime, routeRuntime) ??
+      "Submit",
+  );
+  const submitLoadingLabel = String(
+    resolveMaybeTemplate(
+      config.submitLoadingLabel ?? "Submitting...",
+      runtime,
+      routeRuntime,
+    ) ?? "Submitting...",
+  );
   const columns = config.columns ?? 1;
   const gap = GAP_MAP[config.gap ?? "md"] ?? GAP_MAP.md!;
 
@@ -634,6 +1003,11 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
         if (config.onSuccess) {
           await executeAction(config.onSuccess, { result });
         }
+        if (config.on?.success) {
+          await executeAction(config.on.success as Parameters<typeof executeAction>[0], {
+            result,
+          });
+        }
         if (config.on?.afterSubmit) {
           await runWorkflow(config.on.afterSubmit, {
             form: {
@@ -646,6 +1020,12 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
         let handled = false;
         if (config.onError) {
           await executeAction(config.onError, { error });
+          handled = true;
+        }
+        if (config.on?.failure) {
+          await executeAction(config.on.failure as Parameters<typeof executeAction>[0], {
+            error,
+          });
           handled = true;
         }
         if (config.on?.error) {
@@ -677,27 +1057,38 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
     ],
   );
 
-  const form = useAutoForm(allFields, onSubmit);
+  const form = useAutoForm(resolvedFields, onSubmit);
 
   useEffect(() => {
     if (
       initialData.data &&
       typeof initialData.data === "object" &&
-      !Array.isArray(initialData.data)
+      !Array.isArray(initialData.data) &&
+      !shallowEqualRecord(
+        form.values,
+        initialData.data as Record<string, unknown>,
+      )
     ) {
       form.setValues(initialData.data);
     }
-  }, [initialData.data, form.setValues]);
+  }, [form.setValues, form.values, initialData.data]);
 
   // Publish form state when id is set
   useEffect(() => {
     if (config.id) {
-      publish({
+      const nextPublishedState = {
         values: form.values,
         isDirty: form.isDirty,
         isValid: form.isValid,
         errors: form.errors,
-      });
+      };
+      const nextSerialized = JSON.stringify(nextPublishedState);
+      if (lastPublishedStateRef.current === nextSerialized) {
+        return;
+      }
+
+      lastPublishedStateRef.current = nextSerialized;
+      publish(nextPublishedState);
     }
   }, [
     config.id,
@@ -708,7 +1099,6 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
     form.errors,
   ]);
 
-  // Reset on successful submit if configured
   const handleSubmit = useCallback(async () => {
     const valuesBefore = { ...form.values };
     await form.handleSubmit();
@@ -719,6 +1109,45 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
       }
     }
   }, [form, config.resetOnSubmit]);
+
+  useEffect(() => {
+    if (!config.id) {
+      return;
+    }
+
+    const onSubmitEvent = (event: Event) => {
+      const detail = (event as CustomEvent<{ formId?: string }>).detail;
+      if (detail?.formId === config.id) {
+        void handleSubmit();
+      }
+    };
+
+    const onResetEvent = (event: Event) => {
+      const detail = (event as CustomEvent<{ formId?: string }>).detail;
+      if (detail?.formId === config.id) {
+        form.reset();
+      }
+    };
+
+    window.addEventListener("snapshot:submit-form", onSubmitEvent);
+    window.addEventListener("snapshot:reset-form", onResetEvent);
+    return () => {
+      window.removeEventListener("snapshot:submit-form", onSubmitEvent);
+      window.removeEventListener("snapshot:reset-form", onResetEvent);
+    };
+  }, [config.id, form, handleSubmit]);
+
+  useEffect(() => {
+    if (
+      config.autoSubmit &&
+      autoSubmitAllowed &&
+      !form.isSubmitting &&
+      !autoSubmittedRef.current
+    ) {
+      autoSubmittedRef.current = true;
+      void handleSubmit();
+    }
+  }, [autoSubmitAllowed, config.autoSubmit, form.isSubmitting, handleSubmit]);
 
   if (visible === false) return null;
 
@@ -736,12 +1165,13 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
         display: "flex",
         flexDirection: "column",
         gap,
+        alignItems: config.layout === "horizontal" ? "stretch" : undefined,
         ...((config.style as React.CSSProperties) ?? {}),
       }}
     >
       {/* Sections mode */}
-      {config.sections ? (
-        config.sections.map((section) => (
+      {resolvedSections ? (
+        resolvedSections.map((section) => (
           <SectionRenderer
             key={section.title}
             section={section}
@@ -752,7 +1182,12 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
         ))
       ) : (
         /* Flat fields mode */
-        <FieldGrid fields={allFields} form={form} columns={columns} gap={gap} />
+        <FieldGrid
+          fields={resolvedFields}
+          form={form}
+          columns={columns}
+          gap={gap}
+        />
       )}
 
       {/* Submit button */}
@@ -764,7 +1199,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
           data-variant="default"
           style={getButtonStyle("default", "sm", form.isSubmitting)}
         >
-          {form.isSubmitting ? "Submitting..." : submitLabel}
+          {form.isSubmitting ? submitLoadingLabel : submitLabel}
         </button>
       </div>
       <style>{`

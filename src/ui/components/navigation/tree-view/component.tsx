@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
+import { renderIcon } from "../../../icons/render";
 import { useComponentData } from "../../_base/use-component-data";
 import type { TreeViewConfig, TreeItemInput } from "./types";
 
@@ -162,7 +163,7 @@ function TreeNode({
             }}
             aria-hidden="true"
           >
-            {item.icon}
+            {renderIcon(item.icon, 14)}
           </span>
         )}
 
@@ -248,7 +249,7 @@ function collectExpandedKeys(
 export function TreeView({ config }: { config: TreeViewConfig }) {
   const hasEndpoint = config.data !== undefined;
   const { data, isLoading, error, refetch } = useComponentData(
-    hasEndpoint ? config.data! : "SKIP",
+    hasEndpoint ? config.data! : "",
   );
 
   const execute = useActionExecutor();

@@ -150,6 +150,8 @@ const authEndpointConfigSchema = z
     passkeyLoginOptions: stringOrEnvRef.optional(),
     passkeyLogin: stringOrEnvRef.optional(),
     oauthExchange: stringOrEnvRef.optional(),
+    oauthStart: stringOrEnvRef.optional(),
+    oauthCallback: stringOrEnvRef.optional(),
   })
   .strict();
 
@@ -201,6 +203,8 @@ export function getRegisteredSchemaTypes(): string[] {
 export const baseComponentConfigSchema = z.object({
   type: z.string(),
   id: z.string().optional(),
+  tokens: z.record(z.string()).optional(),
+  visibleWhen: z.string().optional(),
   visible: z
     .union([
       z.boolean(),
@@ -238,6 +242,8 @@ export const headingConfigSchema = baseComponentConfigSchema.extend({
       z.literal(6),
     ])
     .optional(),
+  align: z.enum(["left", "center", "right"]).optional(),
+  fallback: z.string().optional(),
 });
 
 const actionConfigSchema: z.ZodType = z.lazy(() =>
@@ -348,6 +354,24 @@ export const analyticsProviderSchema = z
 export const analyticsConfigSchema = z
   .object({
     providers: z.record(analyticsProviderSchema),
+  })
+  .strict();
+
+export const observabilityConfigSchema = z
+  .object({
+    audit: z
+      .object({
+        sink: z.string().min(1),
+      })
+      .strict()
+      .optional(),
+    errors: z
+      .object({
+        sink: z.string().min(1),
+        include: z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 
@@ -746,9 +770,33 @@ export const componentConfigSchema: z.ZodType = z
   .object({ type: z.string() })
   .passthrough()
   .superRefine((data, ctx) => {
+    const baseResult = baseComponentConfigSchema.safeParse(data);
+    if (!baseResult.success) {
+      for (const issue of baseResult.error.issues) {
+        ctx.addIssue(issue);
+      }
+      return;
+    }
+
     const schema = componentSchemaRegistry.get(data.type);
     if (schema) {
-      const result = schema.safeParse(data);
+      const result = schema.safeParse({
+        ...Object.fromEntries(
+          Object.entries(data).filter(
+            ([key]) =>
+              ![
+                "id",
+                "tokens",
+                "visibleWhen",
+                "visible",
+                "className",
+                "style",
+                "span",
+              ].includes(key),
+          ),
+        ),
+        type: data.type,
+      });
       if (!result.success) {
         for (const issue of result.error.issues) {
           ctx.addIssue(issue);
@@ -801,7 +849,10 @@ const authScreenNameSchema = z.enum([
   "reset-password",
   "verify-email",
   "mfa",
+  "sso-callback",
 ]);
+
+const authScreenModeSchema = z.union([z.literal("default"), z.literal(false)]);
 
 const authScreenLinkSchema = z
   .object({
@@ -941,7 +992,12 @@ const authWorkflowHooksSchema = z
 
 export const authScreenConfigSchema = z
   .object({
-    screens: z.array(authScreenNameSchema).min(1),
+    screens: z
+      .union([
+        z.array(authScreenNameSchema),
+        z.record(authScreenNameSchema, authScreenModeSchema),
+      ])
+      .optional(),
     session: authSessionSchema.optional(),
     contract: authContractSchema.optional(),
     providers: z.record(authProviderSchema).optional(),
@@ -1014,6 +1070,7 @@ export const layoutSchema = z.enum([
   "stacked",
   "minimal",
   "full-width",
+  "centered",
 ]);
 
 export const pageConfigSchema = z
@@ -1259,6 +1316,7 @@ export const manifestConfigSchema = z
     theme: themeConfigSchema.optional(),
     toast: toastConfigSchema.optional(),
     analytics: analyticsConfigSchema.optional(),
+    observability: observabilityConfigSchema.optional(),
     push: pushConfigSchema.optional(),
     ssr: manifestSsrConfigSchema.optional(),
     state: z.record(stateValueConfigSchema).optional(),

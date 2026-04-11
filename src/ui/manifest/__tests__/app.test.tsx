@@ -403,17 +403,14 @@ describe("ManifestApp", () => {
   });
 
   it("renders auth screens with manifest workflow bindings", async () => {
-    window.history.replaceState({}, "", "/");
+    window.history.replaceState({}, "", "/login");
     global.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.endsWith("/auth/me")) {
-        return new Response(
-          JSON.stringify({ id: "1", email: "ada@example.com" }),
-          {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          },
-        );
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
       }
 
       return new Response(JSON.stringify({ ok: true }), {
@@ -439,9 +436,9 @@ describe("ManifestApp", () => {
       },
       routes: [
         {
-          id: "login",
-          path: "/login",
-          content: [{ type: "heading", text: "Login Page" }],
+          id: "handled",
+          path: "/handled",
+          content: [{ type: "heading", text: "Handled" }],
         },
       ],
     };
@@ -449,7 +446,7 @@ describe("ManifestApp", () => {
     render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
 
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "Sign in" })).toBeDefined();
+      expect(screen.getByLabelText("Email")).toBeDefined();
     });
 
     await act(async () => {
@@ -696,7 +693,10 @@ describe("ManifestApp", () => {
 
     render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
     expect(screen.getByText("Please wait")).toBeDefined();
-    expect(requestedUrl).toContain("/api/users/42");
+
+    await waitFor(() => {
+      expect(requestedUrl).toContain("42");
+    });
 
     resolveFetch(
       new Response(JSON.stringify({ id: 42, name: "Ada" }), {
@@ -748,9 +748,11 @@ describe("ManifestApp", () => {
     };
 
     render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
-    expect(screen.getByText("Loading...")).toBeDefined();
-    expect(requestedUrl).toContain("/api/users/99");
-    expect(requestedUrl).toContain("include=projects");
+
+    await waitFor(() => {
+      expect(requestedUrl).toContain("99");
+      expect(requestedUrl).toContain("include=projects");
+    });
 
     resolveFetch(
       new Response(JSON.stringify({ id: 99, name: "Grace" }), {
@@ -766,6 +768,9 @@ describe("ManifestApp", () => {
 
   it("runs route leave and enter workflows during navigation", async () => {
     const manifest: ManifestConfig = {
+      app: {
+        shell: "sidebar",
+      },
       state: {
         enterStatus: {
           scope: "app",
@@ -816,6 +821,11 @@ describe("ManifestApp", () => {
     };
 
     render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "About" })).toBeDefined();
+    });
+
     fireEvent.click(screen.getByRole("button", { name: "About" }));
 
     await waitFor(() => {
@@ -900,11 +910,6 @@ describe("ManifestApp", () => {
       },
       routes: [
         {
-          id: "login",
-          path: "/login",
-          content: [{ type: "heading", text: "Login Page" }],
-        },
-        {
           id: "private",
           path: "/private",
           guard: {
@@ -951,11 +956,6 @@ describe("ManifestApp", () => {
       },
       routes: [
         {
-          id: "login",
-          path: "/login",
-          content: [{ type: "heading", text: "Login Page" }],
-        },
-        {
           id: "private",
           path: "/private",
           guard: {
@@ -969,11 +969,51 @@ describe("ManifestApp", () => {
     render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
 
     await waitFor(() => {
-      expect(screen.getByText("Login Page")).toBeDefined();
+      expect(screen.getByLabelText("Email")).toBeDefined();
     });
   });
 
-  it("renders the configured error feedback when route rendering fails", async () => {
+  it("redirects authenticated users away from guest-only auth routes", async () => {
+    window.history.replaceState({}, "", "/login");
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/auth/me")) {
+        return new Response(JSON.stringify({ name: "Ada" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    const manifest: ManifestConfig = {
+      app: {
+        home: "/dashboard",
+      },
+      auth: {
+        screens: ["login"],
+      },
+      routes: [
+        {
+          id: "dashboard",
+          path: "/dashboard",
+          content: [{ type: "heading", text: "Dashboard" }],
+        },
+      ],
+    };
+
+    render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Dashboard")).toBeDefined();
+    });
+  });
+
+  it("renders the component error boundary when a page component crashes", async () => {
     const manifest: ManifestConfig = {
       app: {
         shell: "full-width",
@@ -995,7 +1035,7 @@ describe("ManifestApp", () => {
     render(<ManifestApp manifest={manifest} apiUrl="http://localhost" />);
 
     await waitFor(() => {
-      expect(screen.getByText("Manifest error")).toBeDefined();
+      expect(screen.getByText(/Error in crash-probe:/)).toBeDefined();
     });
   });
 

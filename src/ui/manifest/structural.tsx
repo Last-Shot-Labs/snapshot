@@ -13,11 +13,12 @@ import { useActionExecutor } from "../actions/executor";
 import { useResponsiveValue } from "../hooks/use-breakpoint";
 import { evaluatePolicy } from "../policies/evaluate";
 import { isPolicyRef, type PolicyExpr } from "../policies/types";
+import { resolveTemplate } from "../expressions/template";
 import {
   getButtonStyle,
   BUTTON_INTERACTIVE_CSS,
 } from "../components/_base/button-styles";
-import { useManifestRuntime } from "./runtime";
+import { useManifestRuntime, useRouteRuntime } from "./runtime";
 import type {
   RowConfig,
   HeadingConfig,
@@ -210,10 +211,39 @@ const HEADING_SIZE: Record<number, string> = {
 
 export function Heading({ config }: { config: Record<string, unknown> }) {
   const headingConfig = config as unknown as HeadingConfig;
+  const route = useRouteRuntime();
   const text = useSubscribe(headingConfig.text);
+  const manifest = useManifestRuntime();
   const level = headingConfig.level ?? 2;
   const Tag = `h${level}` as const;
   const configStyle = headingConfig.style as CSSProperties | undefined;
+  const resolvedText = resolveTemplate(
+    typeof text === "string" ? text : String(text ?? ""),
+    {
+      app: manifest?.app ?? {},
+      auth: manifest?.auth ?? {},
+      route:
+        route
+          ? {
+              id: route.currentRoute?.id,
+              path: route.currentPath,
+              pattern: route.currentRoute?.path,
+              params: route.params,
+              query: route.query,
+            }
+          : {},
+    },
+    {
+      locale: manifest?.raw.i18n?.default,
+      i18n: manifest?.raw.i18n,
+    },
+  );
+  const displayText =
+    resolvedText.trim().length > 0
+      ? resolvedText
+      : resolveTemplate(headingConfig.fallback ?? "", {
+          app: manifest?.app ?? {},
+        });
 
   return (
     <Tag
@@ -225,6 +255,7 @@ export function Heading({ config }: { config: Record<string, unknown> }) {
             ? "var(--sn-font-weight-bold, 700)"
             : "var(--sn-font-weight-semibold, 600)",
         lineHeight: "var(--sn-leading-tight, 1.25)",
+        textAlign: headingConfig.align ?? "left",
         letterSpacing:
           level <= 2
             ? "var(--sn-tracking-tight, -0.025em)"
@@ -234,7 +265,7 @@ export function Heading({ config }: { config: Record<string, unknown> }) {
         ...configStyle,
       }}
     >
-      {typeof text === "string" ? text : String(text ?? "")}
+      {displayText}
     </Tag>
   );
 }

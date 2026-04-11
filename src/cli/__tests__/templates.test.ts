@@ -118,7 +118,6 @@ describe("sidebar root layout", () => {
 
 describe("scaffold favicon", () => {
   it("writes public/vite.svg", async () => {
-    vi.resetModules();
     const writtenPaths: string[] = [];
 
     vi.doMock("node:fs/promises", () => ({

@@ -67,6 +67,11 @@ function getNestedString(
   value: unknown,
   key: string,
 ): string | undefined {
+  if (value && typeof value === "object" && key in (value as Record<string, unknown>)) {
+    const direct = (value as Record<string, unknown>)[key];
+    return typeof direct === "string" ? direct : undefined;
+  }
+
   const parts = key.split(".");
   let current: unknown = value;
 

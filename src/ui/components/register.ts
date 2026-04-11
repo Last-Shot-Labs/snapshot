@@ -169,6 +169,18 @@ import {
   DefaultOffline,
   offlineBannerConfigSchema,
 } from "./feedback/default-offline";
+import { Stack, stackConfigSchema } from "./primitives/stack";
+import { Text, textConfigSchema } from "./primitives/text";
+import { Link, linkConfigSchema } from "./primitives/link";
+import { Divider, dividerConfigSchema } from "./primitives/divider";
+import {
+  OAuthButtons,
+  oauthButtonsConfigSchema,
+} from "./primitives/oauth-buttons";
+import {
+  PasskeyButton,
+  passkeyButtonConfigSchema,
+} from "./primitives/passkey-button";
 
 let builtInComponentsRegistered = false;
 
@@ -202,6 +214,47 @@ export function registerBuiltInComponents(): void {
     AutoForm as Parameters<typeof registerComponent>[1],
   );
   registerComponentSchema("form", autoFormConfigSchema);
+  registerComponent(
+    "auto-form",
+    AutoForm as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("auto-form", autoFormConfigSchema);
+
+  registerComponent(
+    "stack",
+    Stack as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("stack", stackConfigSchema);
+
+  registerComponent(
+    "text",
+    Text as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("text", textConfigSchema);
+
+  registerComponent(
+    "link",
+    Link as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("link", linkConfigSchema);
+
+  registerComponent(
+    "divider",
+    Divider as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("divider", dividerConfigSchema);
+
+  registerComponent(
+    "oauth-buttons",
+    OAuthButtons as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("oauth-buttons", oauthButtonsConfigSchema);
+
+  registerComponent(
+    "passkey-button",
+    PasskeyButton as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("passkey-button", passkeyButtonConfigSchema);
 
   registerComponent("button", Button as Parameters<typeof registerComponent>[1]);
   registerComponentSchema("button", buttonConfigSchema);

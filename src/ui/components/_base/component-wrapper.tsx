@@ -2,6 +2,10 @@
 
 import { Component, Suspense } from "react";
 import type { CSSProperties, ErrorInfo, ReactNode } from "react";
+import { useManifestRuntime, useRouteRuntime } from "../../manifest/runtime";
+import { useSubscribe } from "../../context";
+import { SnapshotApiContext } from "../../actions/executor";
+import { useContext } from "react";
 
 /**
  * Props for ComponentWrapper.
@@ -9,6 +13,10 @@ import type { CSSProperties, ErrorInfo, ReactNode } from "react";
 interface ComponentWrapperProps {
   /** The component type string (e.g. 'detail-card'). Applied as data-snapshot-component. */
   type: string;
+  /** Optional component id for scoped token overrides. */
+  id?: string;
+  /** Optional token overrides scoped to this component instance. */
+  tokens?: Record<string, string>;
   /** Optional CSS class name. */
   className?: string;
   /** Optional inline style overrides from component config. */
@@ -29,7 +37,14 @@ interface ErrorBoundaryState {
  * and displays a user-friendly error message instead of crashing the page.
  */
 class ComponentErrorBoundary extends Component<
-  { type: string; children: ReactNode },
+  {
+    type: string;
+    children: ReactNode;
+    manifest?: { observability?: { errors?: { sink?: string } } } | null;
+    api?: { post: (endpoint: string, body?: unknown) => Promise<unknown> } | null;
+    route?: string;
+    userId?: string;
+  },
   ErrorBoundaryState
 > {
   constructor(props: { type: string; children: ReactNode }) {
@@ -47,6 +62,18 @@ class ComponentErrorBoundary extends Component<
       error,
       info.componentStack,
     );
+
+    const sink = this.props.manifest?.observability?.errors?.sink;
+    if (sink && this.props.api) {
+      void this.props.api.post(sink, {
+        message: error.message,
+        stack: error.stack,
+        componentStack: info.componentStack,
+        route: this.props.route,
+        user: this.props.userId,
+        timestamp: new Date().toISOString(),
+      });
+    }
   }
 
   render(): ReactNode {
@@ -103,17 +130,47 @@ function ComponentSkeleton({ type }: { type: string }) {
  */
 export function ComponentWrapper({
   type,
+  id,
+  tokens,
   className,
   style,
   children,
 }: ComponentWrapperProps) {
+  const manifest = useManifestRuntime();
+  const routeRuntime = useRouteRuntime();
+  const api = useContext(SnapshotApiContext);
+  const user = useSubscribe({ from: "global.user" }) as { id?: string } | null;
+  const tokenStyle =
+    tokens && id
+      ? Object.fromEntries(
+          Object.entries(tokens).map(([tokenPath, value]) => [
+            `--sn-${tokenPath.replace(/\./g, "-")}`,
+            value,
+          ]),
+        )
+      : undefined;
+
   return (
     <div
       data-snapshot-component={type}
+      data-component-id={id}
       className={className}
-      style={style ? (style as CSSProperties) : undefined}
+      style={
+        style || tokenStyle
+          ? ({
+              ...(tokenStyle ?? {}),
+              ...(style as CSSProperties | undefined),
+            } as CSSProperties)
+          : undefined
+      }
     >
-      <ComponentErrorBoundary type={type}>
+      <ComponentErrorBoundary
+        type={type}
+        manifest={manifest?.raw as { observability?: { errors?: { sink?: string } } }}
+        api={api}
+        route={routeRuntime?.currentPath}
+        userId={user?.id}
+      >
         <Suspense fallback={<ComponentSkeleton type={type} />}>
           {children}
         </Suspense>

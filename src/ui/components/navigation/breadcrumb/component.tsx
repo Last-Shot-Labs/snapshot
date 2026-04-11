@@ -5,6 +5,7 @@ import { useActionExecutor } from "../../../actions/executor";
 import { interpolate } from "../../../actions/interpolate";
 import type { CompiledRoute } from "../../../manifest/types";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
+import { renderIcon } from "../../../icons/render";
 import type { BreadcrumbConfig, BreadcrumbItemConfig } from "./types";
 
 /** Separator character lookup. */
@@ -260,7 +261,7 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                         marginRight: "var(--sn-spacing-xs, 0.25rem)",
                       }}
                     >
-                      {item.icon}
+                      {renderIcon(item.icon, 14)}
                     </span>
                   )}
                   {item.label}
@@ -294,7 +295,7 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                         marginRight: "var(--sn-spacing-xs, 0.25rem)",
                       }}
                     >
-                      {(item as BreadcrumbItemConfig).icon}
+                      {renderIcon((item as BreadcrumbItemConfig).icon, 14)}
                     </span>
                   )}
                   {item.label}

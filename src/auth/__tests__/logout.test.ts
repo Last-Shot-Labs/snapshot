@@ -9,7 +9,7 @@ import type { ApiClient } from "../../api/client";
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
-const mockState = vi.hoisted(() => ({
+const mockState = {
   mockNavigate: vi.fn(),
   mockSetAtom: vi.fn(),
   mockMutate: vi.fn(),
@@ -19,7 +19,7 @@ const mockState = vi.hoisted(() => ({
   })),
   mockSetQueryData: vi.fn(),
   mockClear: vi.fn(),
-}));
+};
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mockState.mockNavigate,

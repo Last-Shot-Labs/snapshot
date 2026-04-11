@@ -33,6 +33,8 @@ export interface AuthEndpoints {
   passkeyLoginOptions: string;
   passkeyLogin: string;
   oauthExchange: string;
+  oauthStart: string;
+  oauthCallback: string;
 }
 
 export interface AuthHeaders {
@@ -101,6 +103,8 @@ export function defaultContract(apiUrl: string): AuthContract {
       passkeyLoginOptions: "/auth/passkey/login-options",
       passkeyLogin: "/auth/passkey/login",
       oauthExchange: "/auth/oauth/exchange",
+      oauthStart: "/auth/{provider}/start",
+      oauthCallback: "/auth/oauth/callback",
     },
     sessionRevoke: (id) => `/auth/sessions/${id}`,
     webauthnRemoveCredential: (id) => `/auth/mfa/webauthn/credentials/${id}`,

@@ -10,6 +10,9 @@ import {
 import { collectPolicyRefs, isPolicyRef } from "../policies/types";
 import { getRegisteredClient } from "../../api/client";
 import { manifestConfigSchema, withManifestCustomComponents } from "./schema";
+import { buildDefaultAuthFragment } from "./defaults/auth";
+import { defaultFeedbackFragment } from "./defaults/feedback";
+import { mergeFragment } from "./merge";
 import { setDeclaredCustomActionSchemas } from "../workflows/registry";
 import type {
   AppConfig,
@@ -31,6 +34,7 @@ import type {
   WorkflowMap,
 } from "../workflows/types";
 import type { ThemeConfig } from "../tokens/types";
+import { bootBuiltins } from "./boot-builtins";
 
 type EnvResolvedManifest = Omit<
   ParsedManifestConfig,
@@ -143,23 +147,6 @@ function resolveThemeFlavors(theme: ThemeConfig | undefined): void {
 
   for (const name of Object.keys(customFlavors)) {
     resolveFlavor(name);
-  }
-}
-
-function validateAuthScreenRoutes(manifest: EnvResolvedManifest): void {
-  if (!manifest.auth) {
-    return;
-  }
-
-  const routeIds = new Set(manifest.routes.map((route) => route.id));
-  for (const screen of manifest.auth.screens) {
-    if (routeIds.has(screen)) {
-      continue;
-    }
-
-    throw new Error(
-      `Auth screen "${screen}" is enabled but no route has id "${screen}". Add { "id": "${screen}", "path": "/your-path", ... } to routes.`,
-    );
   }
 }
 
@@ -543,13 +530,17 @@ function buildCompiledManifest(
   manifest: ParsedManifestConfig,
   env: Record<string, string | undefined>,
 ): CompiledManifest {
+  bootBuiltins();
   const resolvedManifest = resolveManifestEnvRefs(
     manifest,
     env,
   ) as EnvResolvedManifest;
+  const mergedManifest = mergeFragment(
+    mergeFragment(resolvedManifest, defaultFeedbackFragment),
+    buildDefaultAuthFragment(resolvedManifest),
+  ) as EnvResolvedManifest;
 
-  validateAuthScreenRoutes(resolvedManifest);
-  const runtimeManifest = resolvedManifest;
+  const runtimeManifest = mergedManifest;
 
   resolveThemeFlavors(runtimeManifest.theme);
   validatePolicyRefs(runtimeManifest);
@@ -656,6 +647,7 @@ function buildCompiledManifest(
     },
     toast: runtimeManifest.toast,
     analytics: runtimeManifest.analytics,
+    observability: runtimeManifest.observability,
     push: runtimeManifest.push,
     theme: runtimeManifest.theme,
     state: runtimeManifest.state,

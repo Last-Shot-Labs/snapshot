@@ -8,17 +8,17 @@ import type {
 /**
  * Inferred type for a single field configuration.
  */
-export type FieldConfig = z.infer<typeof fieldConfigSchema>;
+export type FieldConfig = z.input<typeof fieldConfigSchema>;
 
 /**
  * Inferred type for the AutoForm component config.
  */
-export type AutoFormConfig = z.infer<typeof autoFormConfigSchema>;
+export type AutoFormConfig = z.input<typeof autoFormConfigSchema>;
 
 /**
  * Inferred type for a field section configuration.
  */
-export type FieldSectionConfig = z.infer<typeof fieldSectionSchema>;
+export type FieldSectionConfig = z.input<typeof fieldSectionSchema>;
 
 /**
  * Per-field validation error.

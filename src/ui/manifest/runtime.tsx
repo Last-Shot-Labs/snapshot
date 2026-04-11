@@ -80,6 +80,7 @@ interface RouteRuntimeValue {
   currentPath: string;
   currentRoute: CompiledRoute | null;
   params: Record<string, string>;
+  query: Record<string, string>;
   navigate: (to: string, options?: { replace?: boolean }) => void;
   isPreloading: boolean;
 }

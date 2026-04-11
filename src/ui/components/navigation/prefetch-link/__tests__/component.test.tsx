@@ -8,10 +8,7 @@ import { PrefetchLink } from "../component";
 // We mock the SSR prefetch module to control when prefetchRoute is called.
 // vi.hoisted() ensures mockPrefetchRoute is initialized before vi.mock hoisting.
 
-const { mockPrefetchRoute } = vi.hoisted(() => {
-  const mockPrefetchRoute = vi.fn<(path: string) => void>();
-  return { mockPrefetchRoute };
-});
+const mockPrefetchRoute = vi.fn<(path: string) => void>();
 
 vi.mock("../../../../../ssr/prefetch", () => {
   return {

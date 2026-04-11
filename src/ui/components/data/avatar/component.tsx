@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
+import { renderIcon } from "../../../icons/render";
 import { getInitials } from "../../_base/utils";
 import type { AvatarConfig } from "./types";
 
@@ -138,7 +139,7 @@ export function Avatar({ config }: { config: AvatarConfig }) {
       {/* Icon fallback */}
       {!showImage && !initials && config.icon && (
         <span data-testid="avatar-icon" aria-hidden="true">
-          {config.icon}
+          {renderIcon(config.icon, 16)}
         </span>
       )}
 

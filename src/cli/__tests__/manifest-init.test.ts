@@ -83,16 +83,16 @@ describe("generateManifestJson", () => {
     const parsed = JSON.parse(
       generateManifestJson({ ...baseOptions, includeSidebar: true }),
     );
-    expect(parsed.routes[0].layout).toBe("sidebar");
-    expect(parsed.routes[1].layout).toBe("sidebar");
+    expect(parsed.routes[0].layouts).toEqual(["sidebar"]);
+    expect(parsed.routes[1].layouts).toEqual(["sidebar"]);
   });
 
   it("uses minimal layout when includeSidebar is false", () => {
     const parsed = JSON.parse(
       generateManifestJson({ ...baseOptions, includeSidebar: false }),
     );
-    expect(parsed.routes[0].layout).toBe("minimal");
-    expect(parsed.routes[1].layout).toBe("minimal");
+    expect(parsed.routes[0].layouts).toEqual(["minimal"]);
+    expect(parsed.routes[1].layouts).toEqual(["minimal"]);
   });
 
   it("always includes /dashboard and /settings pages", () => {

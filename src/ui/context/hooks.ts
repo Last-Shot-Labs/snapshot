@@ -111,6 +111,7 @@ export function useSubscribe(ref: FromRef | unknown): unknown {
       path: routeRuntime?.currentPath,
       pattern: routeRuntime?.currentRoute?.path,
       params: routeRuntime?.params,
+      query: routeRuntime?.query,
     };
     const resolved = getNestedValue(routeValue, refPath.slice(6));
     return applyTransform(

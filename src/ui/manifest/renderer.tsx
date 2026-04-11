@@ -16,6 +16,7 @@ import { ComponentWrapper } from "../components/_base/component-wrapper";
 import { useResponsiveValue } from "../hooks/use-breakpoint";
 import { evaluatePolicy } from "../policies/evaluate";
 import { isPolicyRef, type PolicyExpr } from "../policies/types";
+import { useEvaluateExpression } from "../expressions/use-expression";
 import { getRegisteredComponent } from "./component-registry";
 import { useManifestRuntime } from "./runtime";
 import type {
@@ -40,6 +41,11 @@ export function ComponentRenderer({ config }: ComponentRendererProps) {
   const visible = useSubscribe(
     config.visible !== undefined ? config.visible : true,
   );
+  const visibleWhen = useEvaluateExpression(
+    "visibleWhen" in config && typeof config.visibleWhen === "string"
+      ? config.visibleWhen
+      : undefined,
+  );
   const manifest = useManifestRuntime();
   const policyDefinitions = (manifest?.raw.policies ??
     EMPTY_POLICY_MAP) as Record<string, unknown>;
@@ -54,7 +60,7 @@ export function ComponentRenderer({ config }: ComponentRendererProps) {
         { policies: resolvedPolicies as Record<string, PolicyExpr> },
       )
     : visible !== false;
-  if (!isVisible) return null;
+  if (!isVisible || !visibleWhen) return null;
 
   const Component = getRegisteredComponent(config.type);
   if (!Component) {
@@ -79,7 +85,16 @@ export function ComponentRenderer({ config }: ComponentRendererProps) {
   return (
     <ComponentWrapper
       type={config.type}
+      id={config.id}
       className={config.className}
+      tokens={
+        "tokens" in config &&
+        config.tokens &&
+        typeof config.tokens === "object" &&
+        !Array.isArray(config.tokens)
+          ? (config.tokens as Record<string, string>)
+          : undefined
+      }
       style={Object.keys(mergedStyle).length > 0 ? mergedStyle : undefined}
     >
       <Component config={config as Record<string, unknown>} />

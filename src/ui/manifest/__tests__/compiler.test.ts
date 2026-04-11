@@ -165,9 +165,9 @@ describe("compiler", () => {
       },
       routes: [
         {
-          id: "login",
-          path: "/login",
-          content: [{ type: "heading", text: "Login" }],
+          id: "dashboard",
+          path: "/dashboard",
+          content: [{ type: "heading", text: "Dashboard" }],
         },
       ],
     });
@@ -194,6 +194,7 @@ describe("compiler", () => {
       enabled: true,
       autoPrompt: true,
     });
+    expect(compiled.routeMap["/login"]?.id).toBe("login");
   });
 
   it("preserves auth contract overrides and workflow handlers", () => {
@@ -231,9 +232,9 @@ describe("compiler", () => {
       },
       routes: [
         {
-          id: "login",
-          path: "/login",
-          content: [{ type: "heading", text: "Login" }],
+          id: "dashboard",
+          path: "/dashboard",
+          content: [{ type: "heading", text: "Dashboard" }],
         },
       ],
     });
@@ -370,9 +371,9 @@ describe("compiler", () => {
       },
       routes: [
         {
-          id: "login",
-          path: "/login",
-          content: [{ type: "heading", text: "Login" }],
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Home" }],
         },
       ],
     });
@@ -384,23 +385,22 @@ describe("compiler", () => {
     });
   });
 
-  it("requires enabled auth screens to have matching route ids", () => {
-    expect(() =>
-      compileManifest({
-        auth: {
-          screens: ["login"],
+  it("synthesizes default auth routes when screens are enabled", () => {
+    const compiled = compileManifest({
+      auth: {
+        screens: ["login"],
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Home" }],
         },
-        routes: [
-          {
-            id: "sign-in",
-            path: "/sign-in",
-            content: [{ type: "heading", text: "Login" }],
-          },
-        ],
-      }),
-    ).toThrow(
-      'Auth screen "login" is enabled but no route has id "login". Add { "id": "login", "path": "/your-path", ... } to routes.',
-    );
+      ],
+    });
+
+    expect(compiled.routeMap["/login"]?.id).toBe("login");
+    expect(compiled.routes.some((route) => route.id === "login")).toBe(true);
   });
 
   it("accepts custom auth screen paths when the route id matches", () => {

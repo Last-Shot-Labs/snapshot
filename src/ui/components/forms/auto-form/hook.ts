@@ -18,10 +18,16 @@ export function validateField(
   value: unknown,
 ): string | undefined {
   const strValue = typeof value === "string" ? value : "";
+  const isEmptyArray = Array.isArray(value) && value.length === 0;
 
   // Required check
   if (field.required) {
-    if (value === undefined || value === null || value === "") {
+    if (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      isEmptyArray
+    ) {
       return (
         field.validation?.message ?? `${field.label ?? field.name} is required`
       );
@@ -29,7 +35,7 @@ export function validateField(
   }
 
   // Skip further validation if empty and not required
-  if (value === undefined || value === null || value === "") {
+  if (value === undefined || value === null || value === "" || isEmptyArray) {
     return undefined;
   }
 
@@ -70,10 +76,12 @@ function buildInitialValues(fields: FieldConfig[]): Record<string, unknown> {
   for (const field of fields) {
     if (field.default !== undefined) {
       values[field.name] = field.default;
-    } else if (field.type === "checkbox") {
+    } else if (field.type === "checkbox" || field.type === "switch") {
       values[field.name] = false;
     } else if (field.type === "number") {
       values[field.name] = "";
+    } else if (field.type === "tag-input") {
+      values[field.name] = [];
     } else {
       values[field.name] = "";
     }
