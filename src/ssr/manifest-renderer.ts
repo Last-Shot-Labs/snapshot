@@ -569,7 +569,7 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
         }
 
         const slots = layoutSupportsSlots(layout)
-          ? Object.fromEntries(
+          ? (Object.fromEntries(
               [...slotDeclarations.entries()].map(([slotName, declaration]) => [
                 slotName,
                 renderSlot(
@@ -578,7 +578,7 @@ export function createManifestRenderer(rawConfig: ManifestSsrConfig): {
                   slotName === "main" ? children : undefined,
                 ),
               ]),
-            )
+            ) as Record<string, React.ReactNode>)
           : undefined;
 
         const navNode =

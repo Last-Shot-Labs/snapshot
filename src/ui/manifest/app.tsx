@@ -943,7 +943,7 @@ function AppShell({
       }
 
       const slotContent = layoutSupportsSlots(layout)
-        ? Object.fromEntries(
+        ? (Object.fromEntries(
             [...declaredSlots.entries()].map(([slotName, declaration]) => [
               slotName,
               renderSlot(
@@ -952,7 +952,7 @@ function AppShell({
                 slotName === "main" ? children : undefined,
               ),
             ]),
-          )
+          ) as Record<string, ReactNode>)
         : undefined;
 
       const navNode =
