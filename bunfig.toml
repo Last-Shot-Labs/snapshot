@@ -1,2 +1,6 @@
+[install]
+# Avoid running workspace lifecycle scripts when installing from snapshot.
+lifecycle-scripts = false
+
 [test]
 preload = ["./test-setup.ts"]

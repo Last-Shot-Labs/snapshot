@@ -48,27 +48,16 @@ export function resolveEnvRef(
 }
 
 /**
- * Build the default env source by preferring Vite's import.meta.env and then
- * falling back to process.env.
+ * Build the default env source from the current process environment.
+ *
+ * This stays CJS-safe so the shared manifest code can build into both ESM and
+ * CJS bundles without import.meta warnings.
  *
  * @returns A merged env record with string values
  */
 export function getDefaultEnvSource(): Record<string, string | undefined> {
-  const processEnv = typeof process !== "undefined" ? process.env : {};
-  const metaEnv =
-    typeof import.meta !== "undefined"
-      ? ((import.meta as { env?: Record<string, unknown> }).env ?? {})
-      : {};
+  const processEnv =
+    typeof process !== "undefined" && process.env ? process.env : {};
 
-  const resolvedMetaEnv: Record<string, string | undefined> = {};
-  for (const [key, value] of Object.entries(metaEnv)) {
-    if (typeof value === "string") {
-      resolvedMetaEnv[key] = value;
-    }
-  }
-
-  return {
-    ...processEnv,
-    ...resolvedMetaEnv,
-  };
+  return { ...processEnv };
 }
