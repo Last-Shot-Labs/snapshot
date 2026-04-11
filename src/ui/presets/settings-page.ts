@@ -54,10 +54,10 @@ function mapSection(section: SettingsSectionDef): Record<string, unknown> {
 
   const formConfig: Record<string, unknown> = {
     type: "form",
+    id: `${slugify(section.label)}-form`,
     submit: section.submitEndpoint,
     method: section.method ?? "PATCH",
     fields: formFields,
-    submitLabel: section.submitLabel ?? "Save Changes",
     onSuccess: {
       type: "toast",
       message: `${section.label} settings saved`,
@@ -65,13 +65,27 @@ function mapSection(section: SettingsSectionDef): Record<string, unknown> {
     },
   };
 
+  if (section.autoSave) {
+    formConfig.autoSubmit = true;
+  } else {
+    formConfig.submitLabel = section.submitLabel ?? "Save Changes";
+  }
+
   if (section.dataEndpoint) {
     formConfig.data = section.dataEndpoint;
   }
 
   const tab: Record<string, unknown> = {
     label: section.label,
-    content: [formConfig],
+    content: section.autoSave
+      ? [
+          formConfig,
+          {
+            type: "save-indicator",
+            status: "idle",
+          },
+        ]
+      : [formConfig],
   };
 
   if (section.icon) {

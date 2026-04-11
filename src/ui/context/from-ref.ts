@@ -1,4 +1,5 @@
-import type { FromRef } from "./types";
+import { evaluateExpression } from "../expressions/parser";
+import type { ExprRef, FromRef } from "./types";
 import { applyTransform, getNestedValue } from "./utils";
 
 export interface ResolveFromRefContext {
@@ -28,6 +29,66 @@ export interface ResolveFromRefContext {
     app?: Record<string, unknown>;
     auth?: Record<string, unknown>;
   } | null;
+}
+
+function isExprRef(value: unknown): value is ExprRef {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "expr" in value &&
+    typeof (value as ExprRef).expr === "string"
+  );
+}
+
+export function buildExpressionContext(
+  context: ResolveFromRefContext,
+): Record<string, unknown> {
+  return {
+    ...(context.context ?? {}),
+    app: context.manifest?.app ?? {},
+    auth: context.manifest?.auth ?? {},
+    route: {
+      id: context.route?.id,
+      path: context.route?.path,
+      pattern: context.route?.pattern,
+      params: context.route?.params,
+      query: context.route?.query,
+    },
+    overlay: {
+      id: context.overlay?.id,
+      kind: context.overlay?.kind,
+      payload: context.overlay?.payload,
+      result: context.overlay?.result,
+    },
+  };
+}
+
+export function resolveDynamicValue(
+  value: unknown,
+  context: ResolveFromRefContext,
+): unknown {
+  if (isExprRef(value)) {
+    return evaluateExpression(value.expr, buildExpressionContext(context));
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => resolveDynamicValue(item, context));
+  }
+
+  if (value && typeof value === "object") {
+    if ("from" in value) {
+      return resolveFromRef(value as FromRef, context);
+    }
+
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, nested]) => [
+        key,
+        resolveDynamicValue(nested, context),
+      ]),
+    );
+  }
+
+  return value;
 }
 
 function readRegistryValue(

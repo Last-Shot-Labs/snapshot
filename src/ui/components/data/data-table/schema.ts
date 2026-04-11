@@ -1,11 +1,15 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
 import {
+  clientFilterSchema,
+  clientSortSchema,
+  liveConfigSchema,
+  urlSyncConfigSchema,
   baseComponentConfigSchema,
   dataSourceSchema,
   fromRefSchema,
-  pollConfigSchema,
-} from "../../_base/types";
+} from "../../../manifest/schema";
+import { pollConfigSchema } from "../../_base/types";
 import { contextMenuItemSchema } from "../../overlay/context-menu/schema";
 
 /**
@@ -198,6 +202,14 @@ export const dataTableConfigSchema = baseComponentConfigSchema
     contextMenu: z.array(contextMenuItemSchema).optional(),
     /** Polling behavior for endpoint-backed tables. */
     poll: pollConfigSchema.optional(),
+    /** Sync table state into URL query params. */
+    urlSync: urlSyncConfigSchema.optional(),
+    /** In-memory filters applied after fetch. */
+    clientFilter: z.array(clientFilterSchema).optional(),
+    /** In-memory sorts applied after fetch. */
+    clientSort: z.array(clientSortSchema).optional(),
+    /** Live refresh configuration driven by realtime events. */
+    live: liveConfigSchema.optional(),
     /** Message shown when there is no data. */
     emptyMessage: z.string().optional(),
     /** Enable expandable row detail. */

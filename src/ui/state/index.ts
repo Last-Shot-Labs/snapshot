@@ -1,4 +1,8 @@
-export { AtomRegistryImpl } from "./registry";
+export {
+  AtomRegistryImpl,
+  createComputedAtom,
+  extractStateDependencies,
+} from "./registry";
 export {
   AppStateDefinitionsContext,
   AppStateProvider,
@@ -8,6 +12,13 @@ export {
   RouteStateRegistryContext,
 } from "./providers";
 export { useResetStateValue, useSetStateValue, useStateValue } from "./hooks";
+export {
+  clearPersistedState,
+  readPersistedState,
+  toPersistedStateKey,
+  writePersistedState,
+} from "./persist";
+export { usePersistedAtom } from "./use-persisted-atom";
 export type {
   AtomRegistry,
   JotaiStore,

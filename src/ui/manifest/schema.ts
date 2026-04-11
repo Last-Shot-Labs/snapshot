@@ -62,9 +62,19 @@ export const fromRefSchema = z
  */
 export const stringOrEnvRef = z.union([z.string(), envRefSchema]);
 
+/**
+ * An expression value evaluated safely through the Snapshot AST parser.
+ */
+export const exprSchema = z
+  .object({
+    expr: z.string(),
+  })
+  .strict();
+
 const textWithFromRefSchema = z.union([
   stringOrEnvRef,
   fromRefSchema,
+  exprSchema,
   tRefSchema,
 ]);
 const textOrTRefSchema = z.union([stringOrEnvRef, tRefSchema]);
@@ -238,7 +248,102 @@ export const baseComponentConfigSchema = z.object({
   glass: z.boolean().optional(),
   background: componentBackgroundSchema.optional(),
   transition: componentTransitionSchema.optional(),
+  ariaLabel: z.string().optional(),
+  role: z.string().optional(),
+  ariaLive: z.enum(["off", "polite", "assertive"]).optional(),
 });
+
+export const urlSyncConfigSchema = z.union([
+  z.boolean(),
+  z
+    .object({
+      params: z.record(z.string(), z.string()),
+      replace: z.boolean().default(true),
+    })
+    .strict(),
+]);
+
+export const clientFilterSchema = z
+  .object({
+    field: z.string(),
+    operator: z.enum([
+      "equals",
+      "contains",
+      "startsWith",
+      "endsWith",
+      "gt",
+      "lt",
+      "gte",
+      "lte",
+      "in",
+      "notEquals",
+    ]),
+    value: z.union([
+      z.string(),
+      z.number(),
+      z.boolean(),
+      z.array(z.unknown()),
+      fromRefSchema,
+      exprSchema,
+    ]),
+  })
+  .strict();
+
+export const clientSortSchema = z
+  .object({
+    field: z.string(),
+    direction: z.enum(["asc", "desc"]).default("asc"),
+  })
+  .strict();
+
+export const liveConfigSchema = z.union([
+  z.boolean(),
+  z
+    .object({
+      event: z.string().min(1).default("*"),
+      debounce: z.number().int().positive().optional(),
+      indicator: z.boolean().default(false),
+    })
+    .strict(),
+]);
+
+export const loadingConfigSchema = z
+  .object({
+    disabled: z.boolean().optional(),
+    variant: z
+      .enum(["auto", "table", "list", "card", "text", "chart", "stat"])
+      .default("auto"),
+    rows: z.number().int().positive().optional(),
+    count: z.number().int().positive().optional(),
+    delay: z.number().int().nonnegative().default(100),
+  })
+  .strict();
+
+export const emptyStateConfigSchema = z
+  .object({
+    icon: z.string().optional(),
+    title: z.string().default("No data"),
+    description: z.string().optional(),
+    action: z
+      .object({
+        label: z.string(),
+        action: z.union([actionConfigSchema, z.array(actionConfigSchema)]),
+        icon: z.string().optional(),
+        variant: z.enum(["default", "primary", "outline"]).default("primary"),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+export const suspenseFallbackSchema = z
+  .object({
+    type: z.enum(["skeleton", "spinner", "custom"]),
+    variant: z.enum(["card", "list", "text", "table"]).optional(),
+    count: z.number().int().positive().optional(),
+    component: z.record(z.unknown()).optional(),
+  })
+  .strict();
 
 export const rowConfigSchema: z.ZodType = z.lazy(() =>
   baseComponentConfigSchema.extend({
@@ -251,6 +356,7 @@ export const rowConfigSchema: z.ZodType = z.lazy(() =>
     wrap: z.boolean().optional(),
     overflow: z.enum(["auto", "hidden", "scroll", "visible"]).optional(),
     maxHeight: z.string().optional(),
+    suspense: suspenseFallbackSchema.optional(),
     children: z.array(componentConfigSchema).min(1),
   }),
 );
@@ -279,6 +385,13 @@ const actionConfigSchema: z.ZodType = z.lazy(() =>
     })
     .passthrough(),
 );
+
+const eventActionValueSchema = z.union([
+  actionConfigSchema,
+  z.array(actionConfigSchema),
+]);
+
+export const eventActionMapSchema = z.record(eventActionValueSchema);
 
 export const shortcutConfigSchema = z
   .object({
@@ -323,6 +436,7 @@ export const cardConfigSchema = z.object({
   subtitle: z.string().optional(),
   children: z.array(z.lazy(() => componentConfigSchema)).default([]),
   gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
+  suspense: suspenseFallbackSchema.optional(),
   className: z.string().optional(),
   style: z.record(z.union([z.string(), z.number()])).optional(),
   visible: z.union([z.boolean(), fromRefSchema]).optional(),
@@ -336,6 +450,7 @@ export const sectionConfigSchema = z.object({
   children: z.array(z.lazy(() => componentConfigSchema)).default([]),
   gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
   divider: z.boolean().optional(),
+  suspense: suspenseFallbackSchema.optional(),
   className: z.string().optional(),
   style: z.record(z.union([z.string(), z.number()])).optional(),
   visible: z.union([z.boolean(), fromRefSchema]).optional(),
@@ -346,6 +461,7 @@ export const containerConfigSchema = z.object({
   id: z.string().optional(),
   maxWidth: z.string().optional(),
   children: z.array(z.lazy(() => componentConfigSchema)).default([]),
+  suspense: suspenseFallbackSchema.optional(),
   className: z.string().optional(),
   style: z.record(z.union([z.string(), z.number()])).optional(),
   visible: z.union([z.boolean(), fromRefSchema]).optional(),
@@ -372,6 +488,7 @@ export const gridConfigSchema = z.object({
   gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
   children: z.array(z.lazy(() => componentConfigSchema)).default([]),
   background: backgroundConfigSchema.optional(),
+  suspense: suspenseFallbackSchema.optional(),
   className: z.string().optional(),
   style: z.record(z.union([z.string(), z.number()])).optional(),
   visible: z.union([z.boolean(), fromRefSchema]).optional(),
@@ -738,6 +855,30 @@ export const realtimeWsSchema = z
     maxReconnectAttempts: z.number().int().nonnegative().optional(),
     reconnectBaseDelay: z.number().int().nonnegative().optional(),
     reconnectMaxDelay: z.number().int().nonnegative().optional(),
+    auth: z
+      .object({
+        strategy: z.enum(["query-param", "first-message"]),
+        paramName: z.string().default("token"),
+      })
+      .strict()
+      .optional(),
+    reconnect: z
+      .object({
+        enabled: z.boolean().default(true),
+        maxAttempts: z.number().int().positive().default(10),
+        baseDelay: z.number().int().positive().default(1000),
+        maxDelay: z.number().int().positive().default(30000),
+      })
+      .strict()
+      .optional(),
+    heartbeat: z
+      .object({
+        enabled: z.boolean().default(false),
+        interval: z.number().int().positive().default(30000),
+        message: z.string().default("ping"),
+      })
+      .strict()
+      .optional(),
     on: z
       .object({
         connected: z.string().optional(),
@@ -747,15 +888,33 @@ export const realtimeWsSchema = z
       })
       .catchall(z.string())
       .optional(),
-    events: z.record(z.string()).optional(),
+    events: z
+      .record(z.union([z.string(), eventActionValueSchema]))
+      .optional(),
   })
   .strict()
   .transform((value) => ({
     ...value,
+    autoReconnect: value.reconnect?.enabled ?? value.autoReconnect,
+    maxReconnectAttempts:
+      value.reconnect?.maxAttempts ?? value.maxReconnectAttempts,
+    reconnectBaseDelay:
+      value.reconnect?.baseDelay ?? value.reconnectBaseDelay,
+    reconnectMaxDelay:
+      value.reconnect?.maxDelay ?? value.reconnectMaxDelay,
     on: {
       ...(value.on ?? {}),
-      ...(value.events ?? {}),
+      ...Object.fromEntries(
+        Object.entries(value.events ?? {}).filter(([, eventValue]) =>
+          typeof eventValue === "string",
+        ),
+      ),
     },
+    eventActions: Object.fromEntries(
+      Object.entries(value.events ?? {}).filter(
+        ([, eventValue]) => typeof eventValue !== "string",
+      ),
+    ),
   }));
 
 /**
@@ -775,16 +934,37 @@ export const realtimeSseEndpointSchema = z
       })
       .catchall(z.string())
       .optional(),
-    events: z.record(z.string()).optional(),
+    events: z
+      .record(z.union([z.string(), eventActionValueSchema]))
+      .optional(),
   })
   .strict()
   .transform((value) => ({
     ...value,
     on: {
       ...(value.on ?? {}),
-      ...(value.events ?? {}),
+      ...Object.fromEntries(
+        Object.entries(value.events ?? {}).filter(([, eventValue]) =>
+          typeof eventValue === "string",
+        ),
+      ),
     },
+    eventActions: Object.fromEntries(
+      Object.entries(value.events ?? {}).filter(
+        ([, eventValue]) => typeof eventValue !== "string",
+      ),
+    ),
   }));
+
+export const presenceConfigSchema = z
+  .object({
+    enabled: z.boolean().default(false),
+    channel: z.string().min(1),
+    heartbeatInterval: z.number().int().positive().default(10000),
+    offlineThreshold: z.number().int().positive().default(30000),
+    userData: z.record(z.unknown()).optional(),
+  })
+  .strict();
 
 /**
  * Manifest realtime configuration.
@@ -799,6 +979,7 @@ export const realtimeConfigSchema = z
       })
       .strict()
       .optional(),
+    presence: presenceConfigSchema.optional(),
   })
   .strict();
 
@@ -1228,13 +1409,27 @@ export const routeGuardSchema = z.union([
   routeGuardConfigSchema,
 ]);
 
-export const routeConfigSchema = pageConfigSchema
-  .extend({
+export const routeTransitionSchema = z
+  .object({
+    enter: z.string().default("fade-in"),
+    exit: z.string().default("fade-out"),
+    duration: z.number().int().positive().default(200),
+    easing: z.string().default("ease"),
+  })
+  .strict();
+
+export const routeConfigSchema = z
+  .object({
     id: z.string().min(1),
     path: z.string().startsWith("/"),
+    title: textOrTRefSchema.optional(),
+    content: z.array(componentConfigSchema).min(1).optional(),
+    roles: z.array(z.string()).optional(),
+    breadcrumb: plainTextOrTRefSchema.optional(),
     layouts: z.array(routeLayoutSchema).optional(),
     slots: z.record(z.array(componentConfigSchema)).optional(),
     preload: z.array(endpointTargetSchema).optional(),
+    prefetch: z.array(endpointTargetSchema).optional(),
     refreshOnEnter: z.array(z.string().min(1)).optional(),
     invalidateOnLeave: z.array(z.string().min(1)).optional(),
     enter: z
@@ -1244,7 +1439,22 @@ export const routeConfigSchema = pageConfigSchema
       .union([z.string().min(1), manifestWorkflowDefinitionSchema])
       .optional(),
     guard: routeGuardSchema.optional(),
+    events: eventActionMapSchema.optional(),
+    transition: routeTransitionSchema.optional(),
+    preset: z.string().optional(),
+    presetConfig: z.record(z.unknown()).optional(),
   })
+  .refine(
+    (data) => {
+      if (data.preset && data.content) {
+        return false;
+      }
+      return Boolean(data.preset || data.content);
+    },
+    {
+      message: "Route must define either content or preset, but not both.",
+    },
+  )
   .strict();
 
 export const stateValueConfigSchema = z
@@ -1252,6 +1462,28 @@ export const stateValueConfigSchema = z
     scope: z.enum(["app", "route"]).optional(),
     data: endpointTargetSchema.optional(),
     default: z.unknown().optional(),
+    compute: z.string().optional(),
+    persist: z
+      .union([
+        z.literal("none"),
+        z.literal("localStorage"),
+        z.literal("sessionStorage"),
+        z
+          .object({
+            storage: z.enum(["localStorage", "sessionStorage"]),
+            key: z.string().optional(),
+          })
+          .strict(),
+      ])
+      .default("none"),
+  })
+  .superRefine((value, ctx) => {
+    if (value.compute && value.data) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "State definitions cannot declare both compute and data.",
+      });
+    }
   })
   .strict();
 
@@ -1288,6 +1520,38 @@ export const appConfigSchema = z
     error: z.union([componentConfigSchema, stringOrEnvRef]).optional(),
     notFound: stringOrEnvRef.optional(),
     offline: z.union([componentConfigSchema, stringOrEnvRef]).optional(),
+    breadcrumbs: z
+      .object({
+        auto: z.boolean().default(false),
+        home: z
+          .object({
+            label: z.string().default("Home"),
+            icon: z.string().optional(),
+            href: z.string().default("/"),
+          })
+          .strict()
+          .optional(),
+        separator: z.string().default("/"),
+        labels: z.record(z.string(), z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    a11y: z
+      .object({
+        respectReducedMotion: z.boolean().default(true),
+        skipLinks: z
+          .array(
+            z
+              .object({
+                label: z.string(),
+                href: z.string(),
+              })
+              .strict(),
+          )
+          .optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 
@@ -1343,6 +1607,7 @@ export const overlayConfigSchema: z.ZodType = z.union([
       onClose: z
         .union([z.string().min(1), manifestWorkflowDefinitionSchema])
         .optional(),
+      urlParam: z.string().optional(),
       className: z.string().optional(),
       style: z.record(z.union([z.string(), z.number()])).optional(),
       footer: z
@@ -1366,6 +1631,7 @@ export const overlayConfigSchema: z.ZodType = z.union([
       onClose: z
         .union([z.string().min(1), manifestWorkflowDefinitionSchema])
         .optional(),
+      urlParam: z.string().optional(),
       className: z.string().optional(),
       style: z.record(z.union([z.string(), z.number()])).optional(),
       footer: z

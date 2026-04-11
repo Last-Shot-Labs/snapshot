@@ -1,7 +1,12 @@
 import { createContext, useEffect, useMemo, useRef } from "react";
 import { Provider as JotaiProvider } from "jotai/react";
 import { buildRequestUrl, resolveEndpointTarget } from "../manifest/resources";
-import { AtomRegistryImpl } from "./registry";
+import {
+  AtomRegistryImpl,
+  createComputedAtom,
+  extractStateDependencies,
+} from "./registry";
+import { readPersistedState, writePersistedState } from "./persist";
 import type {
   AtomRegistry,
   StateConfigMap,
@@ -39,10 +44,37 @@ function initializeRegistryState(
   api: StateProviderProps["api"],
 ): void {
   for (const [id, config] of Object.entries(state)) {
-    const atom = registry.register(id);
+    if (config.compute) {
+      registry.register(id, createComputedAtom(config.compute, registry));
+      continue;
+    }
 
-    if (config.default !== undefined) {
+    const atom = registry.register(id);
+    const persistConfig =
+      config.persist === "localStorage" || config.persist === "sessionStorage"
+        ? { storage: config.persist, key: id }
+        : typeof config.persist === "object"
+          ? { storage: config.persist.storage, key: config.persist.key ?? id }
+          : null;
+    const persistedValue =
+      persistConfig?.storage
+        ? readPersistedState(persistConfig.key, persistConfig.storage)
+        : undefined;
+
+    if (persistedValue !== undefined) {
+      registry.store.set(atom, persistedValue);
+    } else if (config.default !== undefined) {
       registry.store.set(atom, config.default);
+    }
+
+    if (persistConfig?.storage) {
+      registry.store.sub(atom, () => {
+        writePersistedState(
+          persistConfig.key,
+          registry.store.get(atom),
+          persistConfig.storage,
+        );
+      });
     }
 
     if (config.data && api) {
@@ -89,11 +121,45 @@ function primeRegistryState(
       continue;
     }
 
-    const atom = registry.register(id);
+    const atom = config.compute
+      ? registry.register(id, createComputedAtom(config.compute, registry))
+      : registry.register(id);
     if (config.default !== undefined) {
       registry.store.set(atom, config.default);
     }
   }
+}
+
+function assertNoComputedCycles(state: StateConfigMap): void {
+  const dependencyMap = Object.fromEntries(
+    Object.entries(state).map(([id, config]) => [
+      id,
+      config.compute ? extractStateDependencies(config.compute) : [],
+    ]),
+  ) as Record<string, string[]>;
+
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+
+  const visit = (id: string) => {
+    if (visited.has(id)) {
+      return;
+    }
+    if (visiting.has(id)) {
+      throw new Error(`Circular computed state dependency detected at "${id}"`);
+    }
+
+    visiting.add(id);
+    for (const dependency of dependencyMap[id] ?? []) {
+      if (dependency in dependencyMap) {
+        visit(dependency);
+      }
+    }
+    visiting.delete(id);
+    visited.add(id);
+  };
+
+  Object.keys(dependencyMap).forEach(visit);
 }
 
 export function AppStateProvider({
@@ -108,6 +174,7 @@ export function AppStateProvider({
   }
 
   const scopedState = useMemo(() => filterStateByScope(state, "app"), [state]);
+  assertNoComputedCycles(scopedState);
   primeRegistryState(registryRef.current, scopedState);
 
   useEffect(() => {
@@ -142,6 +209,7 @@ export function RouteStateProvider({
     () => filterStateByScope(state, "route"),
     [state],
   );
+  assertNoComputedCycles(scopedState);
   primeRegistryState(registryRef.current, scopedState);
 
   useEffect(() => {

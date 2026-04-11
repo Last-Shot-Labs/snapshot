@@ -66,6 +66,7 @@ function deriveRouteItems(
   const currentRoute = routeRuntime.currentRoute;
   const currentPath = normalizePath(routeRuntime.currentPath);
   const params = routeRuntime.params;
+  const appBreadcrumbs = manifest.app.breadcrumbs;
   const items: BreadcrumbItemConfig[] = [];
   const pushUnique = (item: BreadcrumbItemConfig) => {
     const previous = items[items.length - 1];
@@ -76,16 +77,19 @@ function deriveRouteItems(
   };
 
   if (config.includeHome !== false && manifest.app.home) {
-    const homePath = normalizePath(manifest.app.home);
-    const homeRoute = manifest.routes.find(
-      (route) => normalizePath(route.path) === homePath,
-    );
-    if (homeRoute) {
-      pushUnique({
-        label: routeLabel(homeRoute, params, homePath),
-        path: currentPath === homePath ? undefined : homePath,
-      });
-    }
+    const homePath = normalizePath(appBreadcrumbs?.home?.href ?? manifest.app.home);
+    pushUnique({
+      label:
+        appBreadcrumbs?.home?.label ??
+        routeLabel(
+          manifest.routes.find((route) => normalizePath(route.path) === homePath) ??
+            currentRoute,
+          params,
+          homePath,
+        ),
+      path: currentPath === homePath ? undefined : homePath,
+      icon: appBreadcrumbs?.home?.icon,
+    });
   }
 
   const patternParts = normalizePath(currentRoute.path)
@@ -104,7 +108,9 @@ function deriveRouteItems(
     }
 
     pushUnique({
-      label: routeLabel(route, params, actualPath),
+      label:
+        appBreadcrumbs?.labels?.[actualPath] ??
+        routeLabel(route, params, actualPath),
       path: i === patternParts.length - 1 ? undefined : actualPath,
     });
   }

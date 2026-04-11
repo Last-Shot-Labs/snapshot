@@ -25,6 +25,9 @@ export const ACTION_TYPES = [
   "log",
   "track",
   "run-workflow",
+  "branch",
+  "for-each",
+  "ws-send",
 ] as const;
 
 export interface ActionBase {
@@ -38,6 +41,10 @@ export interface ActionBase {
  */
 const fromRefSchema = z.object({
   from: z.string(),
+});
+
+const exprValueSchema = z.object({
+  expr: z.string(),
 });
 
 /**
@@ -245,6 +252,26 @@ export interface RunWorkflowAction extends ActionBase {
   input?: Record<string, unknown>;
 }
 
+export interface BranchAction extends ActionBase {
+  type: "branch";
+  condition: string;
+  then: ActionConfig | ActionConfig[];
+  else?: ActionConfig | ActionConfig[];
+}
+
+export interface ForEachAction extends ActionBase {
+  type: "for-each";
+  items: unknown[] | { from: string } | { expr: string };
+  action: ActionConfig;
+  onComplete?: ActionConfig;
+}
+
+export interface WsSendAction extends ActionBase {
+  type: "ws-send";
+  event: string;
+  data?: Record<string, unknown> | { from: string };
+}
+
 /**
  * All possible action configs. Discriminated union on `type`.
  */
@@ -268,7 +295,10 @@ export type ActionConfig =
   | ToastAction
   | LogAction
   | TrackAction
-  | RunWorkflowAction;
+  | RunWorkflowAction
+  | BranchAction
+  | ForEachAction
+  | WsSendAction;
 
 /**
  * The execute function returned by useActionExecutor.
@@ -453,6 +483,41 @@ export const runWorkflowActionSchema = z
   .extend(actionTimingFields)
   .strict();
 
+export const branchActionSchema: z.ZodType<BranchAction> = z.lazy(() =>
+  z
+    .object({
+      type: z.literal("branch"),
+      condition: z.string().min(1),
+      then: z.union([z.lazy(() => actionSchema), z.array(z.lazy(() => actionSchema))]),
+      else: z
+        .union([z.lazy(() => actionSchema), z.array(z.lazy(() => actionSchema))])
+        .optional(),
+    })
+    .extend(actionTimingFields)
+    .strict(),
+);
+
+export const forEachActionSchema: z.ZodType<ForEachAction> = z.lazy(() =>
+  z
+    .object({
+      type: z.literal("for-each"),
+      items: z.union([z.array(z.unknown()), fromRefSchema, exprValueSchema]),
+      action: z.lazy(() => actionSchema),
+      onComplete: z.lazy(() => actionSchema).optional(),
+    })
+    .extend(actionTimingFields)
+    .strict(),
+);
+
+export const wsSendActionSchema = z
+  .object({
+    type: z.literal("ws-send"),
+    event: z.string().min(1),
+    data: z.union([z.record(z.unknown()), fromRefSchema]).optional(),
+  })
+  .extend(actionTimingFields)
+  .strict();
+
 /**
  * Builds the api action schema. Separated into a function because it
  * references actionSchema recursively via z.lazy().
@@ -560,5 +625,8 @@ export const actionSchema: z.ZodType<ActionConfig> = z.lazy(() =>
     logActionSchema,
     trackActionSchema,
     runWorkflowActionSchema,
+    branchActionSchema,
+    forEachActionSchema,
+    wsSendActionSchema,
   ]),
 ) as z.ZodType<ActionConfig>;

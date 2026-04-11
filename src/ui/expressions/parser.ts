@@ -14,18 +14,88 @@ interface Token {
   value: string;
 }
 
+/**
+ * Expression AST used by the manifest-safe expression evaluator.
+ */
 type AstNode =
   | { type: "literal"; value: unknown }
   | { type: "ref"; path: string }
   | { type: "call"; name: "defined" | "empty" | "length"; ref: string }
-  | { type: "unary"; operator: "!"; operand: AstNode }
-  | { type: "binary"; operator: string; left: AstNode; right: AstNode };
+  | { type: "unary"; operator: "!" | "-"; operand: AstNode }
+  | { type: "binary"; operator: string; left: AstNode; right: AstNode }
+  | {
+      type: "ternary";
+      condition: AstNode;
+      consequent: AstNode;
+      alternate: AstNode;
+    }
+  | {
+      type: "method-call";
+      object: AstNode;
+      method: string;
+      args: AstNode[];
+    }
+  | {
+      type: "builtin-call";
+      namespace: "Math" | "String";
+      method: string;
+      args: AstNode[];
+    };
 
 export interface ExpressionContext {
   [key: string]: unknown;
 }
 
-const OPERATOR_TOKENS = ["||", "&&", "==", "!=", ">=", "<=", ">", "<", "!"];
+/**
+ * Safe builtin allowlist available to manifest expressions.
+ */
+export const SAFE_BUILTINS: Record<
+  "Math" | "String",
+  Record<string, (...args: unknown[]) => unknown>
+> = {
+  Math: {
+    floor: (value: unknown) => Math.floor(Number(value)),
+    ceil: (value: unknown) => Math.ceil(Number(value)),
+    round: (value: unknown) => Math.round(Number(value)),
+    abs: (value: unknown) => Math.abs(Number(value)),
+    min: (...values: unknown[]) => Math.min(...values.map(Number)),
+    max: (...values: unknown[]) => Math.max(...values.map(Number)),
+  },
+  String: {
+    includes: (value: unknown, search: unknown) =>
+      String(value).includes(String(search)),
+    startsWith: (value: unknown, search: unknown) =>
+      String(value).startsWith(String(search)),
+    endsWith: (value: unknown, search: unknown) =>
+      String(value).endsWith(String(search)),
+    toLowerCase: (value: unknown) => String(value).toLowerCase(),
+    toUpperCase: (value: unknown) => String(value).toUpperCase(),
+    trim: (value: unknown) => String(value).trim(),
+    length: (value: unknown) => String(value).length,
+    slice: (value: unknown, start: unknown, end?: unknown) =>
+      String(value).slice(
+        Number(start),
+        end !== undefined ? Number(end) : undefined,
+      ),
+  },
+};
+
+const OPERATOR_TOKENS = [
+  "||",
+  "&&",
+  "==",
+  "!=",
+  ">=",
+  "<=",
+  ">",
+  "<",
+  "!",
+  "+",
+  "-",
+  "*",
+  "/",
+  "%",
+] as const;
 
 function tokenize(input: string): Token[] {
   const tokens: Token[] = [];
@@ -47,7 +117,7 @@ function tokenize(input: string): Token[] {
       continue;
     }
 
-    if ("().[],".includes(current)) {
+    if ("().[],:?".includes(current)) {
       tokens.push({ type: "punctuation", value: current });
       index += 1;
       continue;
@@ -58,6 +128,11 @@ function tokenize(input: string): Token[] {
       let value = "";
       index += 1;
       while (index < input.length && input[index] !== quote) {
+        if (input[index] === "\\" && index + 1 < input.length) {
+          value += input[index + 1]!;
+          index += 2;
+          continue;
+        }
         value += input[index]!;
         index += 1;
       }
@@ -114,11 +189,28 @@ class Parser {
   }
 
   parse(): AstNode {
-    const expression = this.parseOrExpr();
+    const expression = this.parseTernaryExpr();
     if (this.peek()) {
       throw new Error(`Unexpected token "${this.peek()!.value}"`);
     }
     return expression;
+  }
+
+  private parseTernaryExpr(): AstNode {
+    const condition = this.parseOrExpr();
+    if (!this.match("punctuation", "?")) {
+      return condition;
+    }
+
+    const consequent = this.parseTernaryExpr();
+    this.expect("punctuation", ":");
+    const alternate = this.parseTernaryExpr();
+    return {
+      type: "ternary",
+      condition,
+      consequent,
+      alternate,
+    };
   }
 
   private parseOrExpr(): AstNode {
@@ -135,52 +227,193 @@ class Parser {
   }
 
   private parseAndExpr(): AstNode {
-    let left = this.parseNotExpr();
+    let left = this.parseEqualityExpr();
     while (this.match("operator", "&&")) {
       left = {
         type: "binary",
         operator: "&&",
         left,
-        right: this.parseNotExpr(),
+        right: this.parseEqualityExpr(),
       };
     }
     return left;
   }
 
-  private parseNotExpr(): AstNode {
+  private parseEqualityExpr(): AstNode {
+    let left = this.parseCompareExpr();
+    while (true) {
+      if (this.match("operator", "==")) {
+        left = {
+          type: "binary",
+          operator: "==",
+          left,
+          right: this.parseCompareExpr(),
+        };
+        continue;
+      }
+      if (this.match("operator", "!=")) {
+        left = {
+          type: "binary",
+          operator: "!=",
+          left,
+          right: this.parseCompareExpr(),
+        };
+        continue;
+      }
+      return left;
+    }
+  }
+
+  private parseCompareExpr(): AstNode {
+    let left = this.parseAddExpr();
+    while (true) {
+      const token = this.peek();
+      if (
+        token?.type === "operator" &&
+        [">", "<", ">=", "<="].includes(token.value)
+      ) {
+        this.index += 1;
+        left = {
+          type: "binary",
+          operator: token.value,
+          left,
+          right: this.parseAddExpr(),
+        };
+        continue;
+      }
+      return left;
+    }
+  }
+
+  private parseAddExpr(): AstNode {
+    let left = this.parseMultiplyExpr();
+    while (true) {
+      if (this.match("operator", "+")) {
+        left = {
+          type: "binary",
+          operator: "+",
+          left,
+          right: this.parseMultiplyExpr(),
+        };
+        continue;
+      }
+      if (this.match("operator", "-")) {
+        left = {
+          type: "binary",
+          operator: "-",
+          left,
+          right: this.parseMultiplyExpr(),
+        };
+        continue;
+      }
+      return left;
+    }
+  }
+
+  private parseMultiplyExpr(): AstNode {
+    let left = this.parseUnaryExpr();
+    while (true) {
+      if (this.match("operator", "*")) {
+        left = {
+          type: "binary",
+          operator: "*",
+          left,
+          right: this.parseUnaryExpr(),
+        };
+        continue;
+      }
+      if (this.match("operator", "/")) {
+        left = {
+          type: "binary",
+          operator: "/",
+          left,
+          right: this.parseUnaryExpr(),
+        };
+        continue;
+      }
+      if (this.match("operator", "%")) {
+        left = {
+          type: "binary",
+          operator: "%",
+          left,
+          right: this.parseUnaryExpr(),
+        };
+        continue;
+      }
+      return left;
+    }
+  }
+
+  private parseUnaryExpr(): AstNode {
     if (this.match("operator", "!")) {
       return {
         type: "unary",
         operator: "!",
-        operand: this.parseNotExpr(),
+        operand: this.parseUnaryExpr(),
       };
     }
 
-    return this.parseCompareExpr();
+    if (this.match("operator", "-")) {
+      return {
+        type: "unary",
+        operator: "-",
+        operand: this.parseUnaryExpr(),
+      };
+    }
+
+    return this.parseCallExpr();
   }
 
-  private parseCompareExpr(): AstNode {
-    const left = this.parsePrimary();
-    const operator = this.peek();
-    if (
-      operator?.type === "operator" &&
-      ["==", "!=", ">", "<", ">=", "<="].includes(operator.value)
-    ) {
-      this.index += 1;
-      return {
-        type: "binary",
-        operator: operator.value,
-        left,
-        right: this.parsePrimary(),
+  private parseCallExpr(): AstNode {
+    let current = this.parsePrimary();
+
+    while (this.match("punctuation", ".")) {
+      const method = this.expect("identifier").value;
+      const args = this.parseCallArgs();
+
+      if (
+        current.type === "ref" &&
+        (current.path === "Math" || current.path === "String")
+      ) {
+        current = {
+          type: "builtin-call",
+          namespace: current.path,
+          method,
+          args,
+        };
+        continue;
+      }
+
+      current = {
+        type: "method-call",
+        object: current,
+        method,
+        args,
       };
     }
 
-    return left;
+    return current;
+  }
+
+  private parseCallArgs(): AstNode[] {
+    this.expect("punctuation", "(");
+    const args: AstNode[] = [];
+    if (this.match("punctuation", ")")) {
+      return args;
+    }
+
+    while (true) {
+      args.push(this.parseTernaryExpr());
+      if (this.match("punctuation", ")")) {
+        return args;
+      }
+      this.expect("punctuation", ",");
+    }
   }
 
   private parsePrimary(): AstNode {
     if (this.match("punctuation", "(")) {
-      const expression = this.parseOrExpr();
+      const expression = this.parseTernaryExpr();
       this.expect("punctuation", ")");
       return expression;
     }
@@ -294,14 +527,8 @@ class Parser {
   }
 }
 
-function toComparable(value: unknown): number | string | null {
-  if (typeof value === "number" || typeof value === "string") {
-    return value;
-  }
-  if (value == null) {
-    return null;
-  }
-  return Number(value);
+function toNumber(value: unknown): number {
+  return typeof value === "number" ? value : Number(value);
 }
 
 function resolveRefPath(path: string, context: ExpressionContext): unknown {
@@ -326,6 +553,36 @@ function isEmpty(value: unknown): boolean {
   return false;
 }
 
+function evaluateMethodCall(
+  objectValue: unknown,
+  method: string,
+  args: unknown[],
+): unknown {
+  switch (method) {
+    case "includes":
+      return String(objectValue).includes(String(args[0]));
+    case "startsWith":
+      return String(objectValue).startsWith(String(args[0]));
+    case "endsWith":
+      return String(objectValue).endsWith(String(args[0]));
+    case "toLowerCase":
+      return String(objectValue).toLowerCase();
+    case "toUpperCase":
+      return String(objectValue).toUpperCase();
+    case "trim":
+      return String(objectValue).trim();
+    case "length":
+      return String(objectValue).length;
+    case "slice":
+      return String(objectValue).slice(
+        Number(args[0]),
+        args[1] !== undefined ? Number(args[1]) : undefined,
+      );
+    default:
+      throw new Error(`Unknown method "${method}" in manifest expression`);
+  }
+}
+
 function evaluateAst(node: AstNode, context: ExpressionContext): unknown {
   switch (node.type) {
     case "literal":
@@ -346,7 +603,29 @@ function evaluateAst(node: AstNode, context: ExpressionContext): unknown {
       }
     }
     case "unary":
-      return !Boolean(evaluateAst(node.operand, context));
+      return node.operator === "-"
+        ? -toNumber(evaluateAst(node.operand, context))
+        : !Boolean(evaluateAst(node.operand, context));
+    case "ternary":
+      return Boolean(evaluateAst(node.condition, context))
+        ? evaluateAst(node.consequent, context)
+        : evaluateAst(node.alternate, context);
+    case "builtin-call": {
+      const namespace = SAFE_BUILTINS[node.namespace];
+      const method = namespace[node.method];
+      if (!method) {
+        throw new Error(
+          `Unknown builtin "${node.namespace}.${node.method}" in manifest expression`,
+        );
+      }
+      return method(...node.args.map((arg) => evaluateAst(arg, context)));
+    }
+    case "method-call":
+      return evaluateMethodCall(
+        evaluateAst(node.object, context),
+        node.method,
+        node.args.map((arg) => evaluateAst(arg, context)),
+      );
     case "binary": {
       if (node.operator === "||") {
         return Boolean(evaluateAst(node.left, context)) ||
@@ -368,13 +647,25 @@ function evaluateAst(node: AstNode, context: ExpressionContext): unknown {
           // eslint-disable-next-line eqeqeq
           return left != right;
         case ">":
-          return Number(toComparable(left)) > Number(toComparable(right));
+          return toNumber(left) > toNumber(right);
         case "<":
-          return Number(toComparable(left)) < Number(toComparable(right));
+          return toNumber(left) < toNumber(right);
         case ">=":
-          return Number(toComparable(left)) >= Number(toComparable(right));
+          return toNumber(left) >= toNumber(right);
         case "<=":
-          return Number(toComparable(left)) <= Number(toComparable(right));
+          return toNumber(left) <= toNumber(right);
+        case "+":
+          return typeof left === "string" || typeof right === "string"
+            ? `${left ?? ""}${right ?? ""}`
+            : toNumber(left) + toNumber(right);
+        case "-":
+          return toNumber(left) - toNumber(right);
+        case "*":
+          return toNumber(left) * toNumber(right);
+        case "/":
+          return toNumber(left) / toNumber(right);
+        case "%":
+          return toNumber(left) % toNumber(right);
         default:
           return false;
       }
@@ -385,22 +676,48 @@ function evaluateAst(node: AstNode, context: ExpressionContext): unknown {
 export function evaluateExpression(
   expression: string,
   context: ExpressionContext,
-): boolean {
-  return Boolean(evaluateAst(new Parser(tokenize(expression)).parse(), context));
+): unknown {
+  return evaluateAst(new Parser(tokenize(expression)).parse(), context);
 }
 
 export function extractExpressionRefs(expression: string): string[] {
   const refs = new Set<string>();
-  expression.replace(
-    /\b([a-zA-Z_$][a-zA-Z0-9_$-]*(?:\.[a-zA-Z0-9_$-]+|\[(?:"[^"]*"|'[^']*'|\d+)\])*)\b/g,
-    (match, path: string) => {
-      if (["defined", "empty", "length", "true", "false", "null"].includes(match)) {
-        return match;
-      }
-      refs.add(path);
-      return match;
-    },
-  );
+  const ast = new Parser(tokenize(expression)).parse();
 
+  const walk = (node: AstNode): void => {
+    switch (node.type) {
+      case "ref":
+        if (node.path !== "Math" && node.path !== "String") {
+          refs.add(node.path);
+        }
+        return;
+      case "call":
+        refs.add(node.ref);
+        return;
+      case "unary":
+        walk(node.operand);
+        return;
+      case "binary":
+        walk(node.left);
+        walk(node.right);
+        return;
+      case "ternary":
+        walk(node.condition);
+        walk(node.consequent);
+        walk(node.alternate);
+        return;
+      case "method-call":
+        walk(node.object);
+        node.args.forEach(walk);
+        return;
+      case "builtin-call":
+        node.args.forEach(walk);
+        return;
+      case "literal":
+        return;
+    }
+  };
+
+  walk(ast);
   return [...refs];
 }

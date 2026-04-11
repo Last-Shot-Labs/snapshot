@@ -1,8 +1,10 @@
 import { useState, useMemo, useCallback, useEffect, useContext } from "react";
 import { useSubscribe } from "../../../context/hooks";
+import { useResolveFrom } from "../../../context/hooks";
 import { usePublish } from "../../../context/hooks";
 import { isFromRef } from "../../../context/utils";
 import { SnapshotApiContext } from "../../../actions/executor";
+import { applyClientFilters, applyClientSort } from "../../_base/client-data-ops";
 import {
   buildRequestUrl,
   isResourceRef,
@@ -16,6 +18,7 @@ import {
   useManifestRuntime,
 } from "../../../manifest/runtime";
 import { usePoll } from "../../../hooks/use-poll";
+import { useUrlSync } from "../../../hooks/use-url-sync";
 import type {
   DataTableConfig,
   ResolvedColumn,
@@ -381,9 +384,41 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
     return undefined;
   }, [config.searchable]);
 
+  const resolvedClientFilters = useResolveFrom(
+    config.clientFilter ?? [],
+  ) as Array<{
+    field: string;
+    operator:
+      | "equals"
+      | "contains"
+      | "startsWith"
+      | "endsWith"
+      | "gt"
+      | "lt"
+      | "gte"
+      | "lte"
+      | "in"
+      | "notEquals";
+    value: unknown;
+  }>;
+  const resolvedClientSort = useResolveFrom(
+    config.clientSort ?? [],
+  ) as Array<{
+    field: string;
+    direction: "asc" | "desc";
+  }>;
+
   // Filter + search + sort pipeline
   const processedRows = useMemo(() => {
     let rows = [...allRows];
+
+    if (resolvedClientFilters.length > 0) {
+      rows = applyClientFilters(rows, resolvedClientFilters);
+    }
+
+    if (resolvedClientSort.length > 0) {
+      rows = applyClientSort(rows, resolvedClientSort);
+    }
 
     // Apply filters
     if (Object.keys(filters).length > 0) {
@@ -403,7 +438,15 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
     }
 
     return rows;
-  }, [allRows, filters, search, searchFields, sort]);
+  }, [
+    allRows,
+    filters,
+    resolvedClientFilters,
+    resolvedClientSort,
+    search,
+    searchFields,
+    sort,
+  ]);
 
   // Pagination
   const paginationEnabled = config.pagination !== false;
@@ -461,6 +504,10 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
     [totalPages],
   );
 
+  const setPage = useCallback((page: number) => {
+    setCurrentPage(Math.max(1, page));
+  }, []);
+
   const nextPage = useCallback(
     () => setCurrentPage((p) => Math.min(p + 1, totalPages)),
     [totalPages],
@@ -517,6 +564,65 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
   const refetch = useCallback(() => {
     setRefreshCounter((c) => c + 1);
   }, []);
+
+  const urlSyncConfig = useMemo(() => {
+    if (!config.urlSync) {
+      return null;
+    }
+
+    if (config.urlSync === true) {
+      return {
+        params: {
+          page: "page",
+          pageSize: "pageSize",
+          sort: "sort",
+          sortDirection: "sortDirection",
+          search: "search",
+        },
+        replace: true,
+      };
+    }
+
+    return {
+      params: config.urlSync.params,
+      replace: config.urlSync.replace,
+    };
+  }, [config.urlSync]);
+
+  useUrlSync({
+    enabled: urlSyncConfig !== null,
+    params: urlSyncConfig?.params ?? {},
+    replace: urlSyncConfig?.replace,
+    state: {
+      page: clampedPage,
+      pageSize,
+      sort: sort?.column,
+      sortDirection: sort?.direction,
+      search,
+    },
+    onStateFromUrl: (state) => {
+      if (state["page"]) {
+        const nextPage = Number(state["page"]);
+        if (Number.isFinite(nextPage) && nextPage > 0) {
+          setPage(nextPage);
+        }
+      }
+
+      if (state["search"] !== undefined) {
+        setSearch(state["search"]);
+      }
+
+      const sortColumn = state["sort"];
+      if (sortColumn) {
+        const direction =
+          state["sortDirection"] === "desc" ? "desc" : "asc";
+        setSort({
+          column: sortColumn,
+          direction,
+        });
+      }
+    },
+  });
 
   usePoll({
     interval: config.poll?.interval ?? 1000,

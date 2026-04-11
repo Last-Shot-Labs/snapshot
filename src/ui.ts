@@ -636,10 +636,26 @@ export { Icon, ICON_PATHS } from "./ui/icons/index";
 export type { IconProps } from "./ui/icons/index";
 
 // Page Presets
-export { crudPage, dashboardPage, settingsPage } from "./ui/presets/index";
+export {
+  authPage,
+  crudPage,
+  dashboardPage,
+  expandPreset,
+  settingsPage,
+  authPresetConfigSchema,
+  crudPresetConfigSchema,
+  dashboardPresetConfigSchema,
+  settingsPresetConfigSchema,
+} from "./ui/presets/index";
 export type {
+  ActivityFeedDef,
+  AuthBrandingDef,
+  AuthPageOptions,
+  ChartDef,
   CrudPageOptions,
   DashboardPageOptions,
+  EmptyStateDef,
+  PaginationDef,
   SettingsPageOptions,
   ColumnDef,
   FormDef,
@@ -650,6 +666,14 @@ export type {
   StatDef,
   SettingsSectionDef,
 } from "./ui/presets/types";
+export { useUrlSync } from "./ui/hooks/use-url-sync";
+export {
+  clearPersistedState,
+  readPersistedState,
+  toPersistedStateKey,
+  writePersistedState,
+} from "./ui/state/persist";
+export { usePersistedAtom } from "./ui/state/use-persisted-atom";
 
 // Components — SnapshotImage
 export {

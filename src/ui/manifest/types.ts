@@ -14,6 +14,7 @@ import type {
   routeConfigSchema,
   routeGuardConfigSchema,
   routeGuardSchema,
+  routeTransitionSchema,
   navigationConfigSchema,
   stateValueConfigSchema,
   overlayConfigSchema,
@@ -84,6 +85,9 @@ export type RealtimeConfig = Resolved<z.infer<typeof realtimeConfigSchema>>;
 export type PageConfig = Resolved<z.infer<typeof pageConfigSchema>>;
 /** Resolved runtime view of `routeConfigSchema`. */
 export type RouteConfig = Resolved<z.infer<typeof routeConfigSchema>>;
+export type RouteTransitionConfig = Resolved<
+  z.infer<typeof routeTransitionSchema>
+>;
 /** Resolved runtime view of `routeGuardConfigSchema`. */
 export type RouteGuardConfig = Resolved<
   z.infer<typeof routeGuardConfigSchema>
@@ -180,6 +184,8 @@ export interface CompiledRoute {
   enter?: RouteConfig["enter"];
   leave?: RouteConfig["leave"];
   guard?: RouteGuard;
+  events?: RouteConfig["events"];
+  transition?: RouteTransitionConfig;
 }
 
 /**

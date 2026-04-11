@@ -2,7 +2,9 @@
 
 import React, { useEffect, useId, useMemo, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
+import { useResolveFrom } from "../../../context/hooks";
 import { useComponentData } from "../../_base/use-component-data";
+import { applyClientFilters, applyClientSort } from "../../_base/client-data-ops";
 import { ContextMenuPortal } from "../../_base/context-menu-portal";
 import { useSharedDragDrop } from "../../_base/drag-drop-provider";
 import { useReorderable } from "../../_base/use-reorderable";
@@ -385,6 +387,58 @@ export function ListComponent({ config }: { config: ListConfig }) {
     }
   }
 
+  const resolvedClientFilters = useResolveFrom(
+    config.clientFilter ?? [],
+  ) as Array<{
+    field: string;
+    operator:
+      | "equals"
+      | "contains"
+      | "startsWith"
+      | "endsWith"
+      | "gt"
+      | "lt"
+      | "gte"
+      | "lte"
+      | "in"
+      | "notEquals";
+    value: unknown;
+  }>;
+  const resolvedClientSort = useResolveFrom(
+    config.clientSort ?? [],
+  ) as Array<{
+    field: string;
+    direction: "asc" | "desc";
+  }>;
+
+  const visibleItems = useMemo(() => {
+    const normalizedItems = resolvedItems.map((item) => ({
+      ...item,
+      title: item.title,
+      description: item.description,
+      icon: item.icon,
+      badge: item.badge,
+      badgeColor: item.badgeColor,
+      href: item.href,
+      action: item.action,
+      id: item.id,
+    }));
+    const filtered =
+      resolvedClientFilters.length > 0
+        ? applyClientFilters(normalizedItems, resolvedClientFilters)
+        : normalizedItems;
+    return resolvedClientSort.length > 0
+      ? applyClientSort(filtered, resolvedClientSort)
+      : filtered;
+  }, [resolvedClientFilters, resolvedClientSort, resolvedItems]);
+  const limitedItems = useMemo(
+    () =>
+      config.limit && config.limit > 0
+        ? visibleItems.slice(0, config.limit)
+        : visibleItems,
+    [config.limit, visibleItems],
+  );
+
   const containerStyle: React.CSSProperties =
     variant === "bordered"
       ? {
@@ -437,7 +491,7 @@ export function ListComponent({ config }: { config: ListConfig }) {
       )}
 
       {/* Empty state */}
-      {!isLoading && !error && resolvedItems.length === 0 && (
+      {!isLoading && !error && limitedItems.length === 0 && (
         <div
           data-testid="list-empty"
           style={{
@@ -455,7 +509,7 @@ export function ListComponent({ config }: { config: ListConfig }) {
       {!isLoading && !error && dropEnabled ? (
         <ManagedListItems
           containerId={containerId}
-          items={resolvedItems}
+          items={limitedItems}
           selectable={selectable}
           showDivider={showDivider}
           isCard={variant === "card"}
@@ -471,12 +525,12 @@ export function ListComponent({ config }: { config: ListConfig }) {
       ) : (
         !isLoading &&
         !error &&
-        resolvedItems.map((item, index) => (
+        limitedItems.map((item, index) => (
           <ListItem
             key={index}
             item={item}
             selectable={selectable}
-            showDivider={showDivider && index < resolvedItems.length - 1}
+            showDivider={showDivider && index < limitedItems.length - 1}
             isCard={variant === "card"}
             draggable={sortable}
             execute={execute}

@@ -41,6 +41,46 @@ export function useDrawer(config: DrawerConfig): UseDrawerReturn {
     }
   }, [triggerValue, config.trigger, id, open, close]);
 
+  useEffect(() => {
+    if (!config.urlParam || typeof window === "undefined") {
+      return;
+    }
+
+    const syncFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has(config.urlParam!)) {
+        open(id);
+      } else {
+        close(id);
+      }
+    };
+
+    syncFromUrl();
+    window.addEventListener("popstate", syncFromUrl);
+    return () => {
+      window.removeEventListener("popstate", syncFromUrl);
+    };
+  }, [close, config.urlParam, id, open]);
+
+  useEffect(() => {
+    if (!config.urlParam || typeof window === "undefined") {
+      return;
+    }
+
+    const url = new URL(window.location.href);
+    if (currentlyOpen) {
+      url.searchParams.set(config.urlParam, "1");
+    } else {
+      url.searchParams.delete(config.urlParam);
+    }
+
+    const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (nextUrl !== currentUrl) {
+      window.history.replaceState(null, "", nextUrl);
+    }
+  }, [config.urlParam, currentlyOpen]);
+
   return {
     isOpen: currentlyOpen,
     open: () => open(id),

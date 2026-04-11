@@ -1,9 +1,12 @@
 import { z } from "zod";
 import {
+  clientFilterSchema,
+  clientSortSchema,
+  liveConfigSchema,
   baseComponentConfigSchema,
   dataSourceSchema,
-  pollConfigSchema,
-} from "../../_base/types";
+} from "../../../manifest/schema";
+import { pollConfigSchema } from "../../_base/types";
 import { actionSchema } from "../../../actions/types";
 import { contextMenuItemSchema } from "../../overlay/context-menu/schema";
 
@@ -62,6 +65,8 @@ export const listConfigSchema = baseComponentConfigSchema.extend({
   descriptionField: z.string().optional(),
   /** Response field name to use as item icon when using data endpoint. */
   iconField: z.string().optional(),
+  /** Optional item limit for endpoint-backed lists. */
+  limit: z.number().int().positive().optional(),
   /** Visual variant. */
   variant: z.enum(["default", "bordered", "card"]).optional(),
   /** Show dividers between items. */
@@ -86,6 +91,12 @@ export const listConfigSchema = baseComponentConfigSchema.extend({
   contextMenu: z.array(contextMenuItemSchema).optional(),
   /** Polling behavior for endpoint-backed lists. */
   poll: pollConfigSchema.optional(),
+  /** In-memory filters applied after fetch. */
+  clientFilter: z.array(clientFilterSchema).optional(),
+  /** In-memory sorts applied after fetch. */
+  clientSort: z.array(clientSortSchema).optional(),
+  /** Live refresh configuration driven by realtime events. */
+  live: liveConfigSchema.optional(),
   /** Message shown when no items are available. */
   emptyMessage: z.string().optional(),
   /** Custom error message. Default: "Failed to load items". */

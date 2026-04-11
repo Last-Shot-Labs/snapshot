@@ -79,17 +79,19 @@ export function useEvaluateExpression(expression: string | undefined): boolean {
       {},
     );
 
-    return evaluateExpression(expression, {
-      ...resolvedContext,
-      app: manifest?.app ?? {},
-      auth: manifest?.auth ?? {},
-      route: {
-        id: routeRuntime?.currentRoute?.id,
-        path: routeRuntime?.currentPath,
-        pattern: routeRuntime?.currentRoute?.path,
-        params: routeRuntime?.params,
-        query: routeRuntime?.query,
-      },
-    });
+    return Boolean(
+      evaluateExpression(expression, {
+        ...resolvedContext,
+        app: manifest?.app ?? {},
+        auth: manifest?.auth ?? {},
+        route: {
+          id: routeRuntime?.currentRoute?.id,
+          path: routeRuntime?.currentPath,
+          pattern: routeRuntime?.currentRoute?.path,
+          params: routeRuntime?.params,
+          query: routeRuntime?.query,
+        },
+      }),
+    );
   }, [expression, manifest?.app, manifest?.auth, refs, resolvedRefs, routeRuntime]);
 }

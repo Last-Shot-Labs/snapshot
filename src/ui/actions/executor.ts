@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo } from "react";
+import { useAtomValue } from "jotai/react";
 import { AppRegistryContext, PageRegistryContext } from "../context/providers";
 import { useSubscribe } from "../context/hooks";
 import { isFromRef } from "../context/utils";
@@ -18,11 +19,16 @@ import {
   useOverlayRuntime,
   useRouteRuntime,
 } from "../manifest/runtime";
-import { resolveFromRef } from "../context/from-ref";
+import {
+  buildExpressionContext,
+  resolveFromRef,
+} from "../context/from-ref";
+import { evaluateExpression } from "../expressions/parser";
 import { createAnalyticsDispatcher } from "../analytics/dispatch";
 import { resolveTokens } from "../tokens/resolve";
 import { runWorkflow } from "../workflows/engine";
 import { debounceAction, throttleAction } from "./timing";
+import { wsManagerAtom } from "../../ws/atom";
 import type { AtomRegistry } from "../context/types";
 import type { ApiClient } from "../../api/client";
 import type { ActionConfig, ActionExecuteFn } from "./types";
@@ -155,6 +161,31 @@ function resolveWorkflowValue(
     );
   }
 
+  if (
+    value &&
+    typeof value === "object" &&
+    "expr" in value &&
+    typeof (value as { expr: unknown }).expr === "string"
+  ) {
+    return evaluateExpression(
+      (value as { expr: string }).expr,
+      buildExpressionContext({
+        context,
+        pageRegistry,
+        appRegistry,
+        route: {
+          id: routeRuntime?.currentRoute?.id,
+          path: routeRuntime?.currentPath,
+          pattern: routeRuntime?.currentRoute?.path,
+          params: routeRuntime?.params,
+          query: routeRuntime?.query,
+        },
+        overlay: overlayRuntime,
+        manifest: manifestRuntime,
+      }),
+    );
+  }
+
   if (typeof value === "string") {
     const routeContext =
       (context["route"] as Record<string, unknown> | undefined) ?? {};
@@ -242,6 +273,7 @@ export function useActionExecutor(): ActionExecuteFn {
   const resourceCache = useManifestResourceCache();
   const routeRuntime = useRouteRuntime();
   const overlayRuntime = useOverlayRuntime();
+  const wsManager = useAtomValue(wsManagerAtom);
   const localeState = useSubscribe({ from: "global.locale" });
   const activeLocale = resolveRuntimeLocale(
     runtime?.raw.i18n,
@@ -904,6 +936,96 @@ export function useActionExecutor(): ActionExecuteFn {
             return message;
           }
 
+          case "branch": {
+            const matches = Boolean(
+              evaluateExpression(
+                builtin.condition,
+                buildExpressionContext({
+                  context: builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  route: {
+                    id: routeRuntime?.currentRoute?.id,
+                    path: routeRuntime?.currentPath,
+                    pattern: routeRuntime?.currentRoute?.path,
+                    params: routeRuntime?.params,
+                    query: routeRuntime?.query,
+                  },
+                  overlay: overlayRuntime,
+                  manifest: runtime,
+                }),
+              ),
+            );
+            const nextAction = matches ? builtin.then : builtin.else;
+            if (nextAction) {
+              await execute(nextAction, builtinContext);
+            }
+            return matches;
+          }
+
+          case "for-each": {
+            const resolvedItems = resolveWorkflowValue(
+              builtin.items,
+              builtinContext,
+              pageRegistry,
+              appRegistry,
+              activeLocale,
+              runtime,
+              routeRuntime,
+              overlayRuntime,
+            );
+            const items = Array.isArray(resolvedItems) ? resolvedItems : [];
+
+            for (let index = 0; index < items.length; index += 1) {
+              await execute(builtin.action, {
+                ...builtinContext,
+                item: items[index],
+                index,
+                items,
+              });
+            }
+
+            if (builtin.onComplete) {
+              await execute(builtin.onComplete, builtinContext);
+            }
+
+            return items.length;
+          }
+
+          case "ws-send": {
+            if (!wsManager) {
+              return undefined;
+            }
+
+            const event = String(
+              resolveWorkflowValue(
+                builtin.event,
+                builtinContext,
+                pageRegistry,
+                appRegistry,
+                activeLocale,
+                runtime,
+                routeRuntime,
+                overlayRuntime,
+              ),
+            );
+            const data =
+              builtin.data === undefined
+                ? undefined
+                : (resolveWorkflowValue(
+                    builtin.data,
+                    builtinContext,
+                    pageRegistry,
+                    appRegistry,
+                    activeLocale,
+                    runtime,
+                    routeRuntime,
+                    overlayRuntime,
+                  ) as Record<string, unknown>);
+            wsManager.send(event, data);
+            return data;
+          }
+
           case "run-workflow":
             return;
         }
@@ -971,6 +1093,7 @@ export function useActionExecutor(): ActionExecuteFn {
       routeRuntime,
       toastManager,
       runtime,
+      wsManager,
     ],
   );
 

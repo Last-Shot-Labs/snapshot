@@ -86,6 +86,17 @@ export interface FilterDef {
   options?: FilterOption[];
 }
 
+export interface PaginationDef {
+  pageSize?: number;
+  type?: "offset" | "cursor";
+}
+
+export interface EmptyStateDef {
+  title: string;
+  description?: string;
+  icon?: string;
+}
+
 // ── Stat definition ──────────────────────────────────────────────────────────
 
 /**
@@ -111,6 +122,24 @@ export interface StatDef {
   icon?: string;
 }
 
+export interface ChartDef {
+  variant: "line" | "bar" | "area" | "pie" | "donut";
+  endpoint: string;
+  title?: string;
+  series?: Array<{
+    field: string;
+    label?: string;
+    color?: string;
+  }>;
+  span?: number;
+}
+
+export interface ActivityFeedDef {
+  endpoint: string;
+  limit?: number;
+  title?: string;
+}
+
 // ── Settings section definition ──────────────────────────────────────────────
 
 /**
@@ -131,6 +160,19 @@ export interface SettingsSectionDef {
   submitLabel?: string;
   /** Optional icon name for the tab. */
   icon?: string;
+  autoSave?: boolean;
+  autoSaveDelay?: number;
+}
+
+export interface AuthBrandingDef {
+  logo?: string;
+  appName?: string;
+  tagline?: string;
+  background?: {
+    image?: string;
+    color?: string;
+    position?: string;
+  };
 }
 
 // ── Preset option types ──────────────────────────────────────────────────────
@@ -174,6 +216,8 @@ export interface CrudPageOptions {
   updateForm?: FormDef;
   /** Optional filter definitions for the table toolbar. */
   filters?: FilterDef[];
+  pagination?: PaginationDef;
+  emptyState?: EmptyStateDef;
   /**
    * ID prefix for context refs used by subcomponents.
    * Defaults to a slugified version of the title.
@@ -204,6 +248,8 @@ export interface DashboardPageOptions {
   stats: StatDef[];
   /** Optional API endpoint for the recent activity list. */
   recentActivity?: string;
+  charts?: ChartDef[];
+  activityFeed?: ActivityFeedDef;
   /**
    * ID prefix for context refs.
    * Defaults to a slugified version of the title.
@@ -242,5 +288,25 @@ export interface SettingsPageOptions {
    * ID prefix for context refs.
    * Defaults to a slugified version of the title.
    */
+  id?: string;
+}
+
+export interface AuthPageOptions {
+  screen:
+    | "login"
+    | "register"
+    | "forgot-password"
+    | "reset-password"
+    | "verify-email";
+  branding?: AuthBrandingDef;
+  oauthProviders?: string[];
+  passkey?: boolean;
+  redirects?: {
+    afterLogin?: string;
+    afterRegister?: string;
+    forgotPassword?: string;
+    login?: string;
+    register?: string;
+  };
   id?: string;
 }

@@ -34,7 +34,9 @@ export function PrefetchLink({
   // Viewport prefetch via IntersectionObserver.
   // Only active when prefetch === 'viewport'.
   useEffect(() => {
-    if (prefetch !== "viewport" || !ref.current) return;
+    if ((prefetch !== "viewport" && prefetch !== "visible") || !ref.current) {
+      return;
+    }
 
     // IntersectionObserver is not available in SSR — guard it.
     if (typeof IntersectionObserver === "undefined") return;
@@ -52,6 +54,14 @@ export function PrefetchLink({
     observer.observe(ref.current);
     return () => observer.disconnect();
   }, [to, prefetch, prefetchRoute]);
+
+  useEffect(() => {
+    if (prefetch !== "eager") {
+      return;
+    }
+
+    prefetchRoute(to);
+  }, [prefetch, prefetchRoute, to]);
 
   const handleMouseEnter =
     prefetch === "hover" ? () => prefetchRoute(to) : undefined;

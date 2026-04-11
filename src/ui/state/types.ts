@@ -12,7 +12,10 @@ export type JotaiStore = ReturnType<typeof createStore>;
  * Backing store is shared per scope (app or route).
  */
 export interface AtomRegistry {
-  register(id: string): PrimitiveAtom<unknown>;
+  register(
+    id: string,
+    atomOverride?: PrimitiveAtom<unknown>,
+  ): PrimitiveAtom<unknown>;
   get(id: string): PrimitiveAtom<unknown> | undefined;
   unregister(id: string): void;
   keys(): string[];
@@ -30,6 +33,15 @@ export interface StateConfig {
   scope?: StateScope;
   data?: EndpointTarget;
   default?: unknown;
+  compute?: string;
+  persist?:
+    | "none"
+    | "localStorage"
+    | "sessionStorage"
+    | {
+        storage: "localStorage" | "sessionStorage";
+        key?: string;
+      };
 }
 
 export type StateConfigMap = Record<string, StateConfig>;

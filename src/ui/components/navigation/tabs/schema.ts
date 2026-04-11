@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { baseComponentConfigSchema } from "../../../manifest/schema";
+import {
+  baseComponentConfigSchema,
+  urlSyncConfigSchema,
+} from "../../../manifest/schema";
 
 /**
  * Schema for a single tab within the tabs component.
@@ -29,6 +32,8 @@ export const tabsConfigSchema = baseComponentConfigSchema.extend({
   children: z.array(tabConfigSchema).min(1),
   /** Index of the initially active tab. */
   defaultTab: z.number().default(0),
+  /** Sync active tab state into URL query params. */
+  urlSync: urlSyncConfigSchema.optional(),
   /** Visual variant for the tab bar. */
   variant: z.enum(["default", "underline", "pills"]).default("default"),
   /** Inline style overrides. */

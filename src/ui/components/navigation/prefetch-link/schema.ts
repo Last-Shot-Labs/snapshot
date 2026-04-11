@@ -16,10 +16,14 @@ export const prefetchLinkSchema = z.object({
   /**
    * When to trigger prefetching:
    * - `'hover'`    — prefetch on `mouseenter` (default)
-   * - `'viewport'` — prefetch when the link enters the viewport
+   * - `'visible'`  — prefetch when the link enters the viewport
+   * - `'viewport'` — legacy alias for `'visible'`
+   * - `'eager'`    — prefetch immediately on mount
    * - `'none'`     — never prefetch automatically
    */
-  prefetch: z.enum(["hover", "viewport", "none"]).default("hover"),
+  prefetch: z
+    .enum(["hover", "visible", "viewport", "eager", "none"])
+    .default("hover"),
   /** Content rendered inside the anchor. */
   children: z.custom<React.ReactNode>().optional(),
   /** Additional CSS class name applied to the anchor. */

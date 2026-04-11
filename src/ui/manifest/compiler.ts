@@ -12,6 +12,7 @@ import { getRegisteredClient } from "../../api/client";
 import { manifestConfigSchema, withManifestCustomComponents } from "./schema";
 import { buildDefaultAuthFragment } from "./defaults/auth";
 import { defaultFeedbackFragment } from "./defaults/feedback";
+import { expandPreset } from "../presets/expand";
 import { resolveGuard } from "./guard-registry";
 import { mergeFragment } from "./merge";
 import { setDeclaredCustomActionSchemas } from "../workflows/registry";
@@ -63,12 +64,35 @@ const BUILTIN_WORKFLOW_NODE_TYPES = new Set<string>([
 ]);
 
 function toPageConfig(route: RouteConfig): PageConfig {
+  if (!route.content) {
+    throw new Error(
+      `Route "${route.id}" is missing content after compilation. Routes using presets must expand to a valid page config.`,
+    );
+  }
+
   return {
     title: route.title,
     content: route.content,
     roles: route.roles,
     breadcrumb: route.breadcrumb,
   };
+}
+
+function expandRoutePresets(routes: RouteConfig[]): RouteConfig[] {
+  return routes.map((route) => {
+    if (!route.preset) {
+      return route;
+    }
+
+    const expanded = expandPreset(route.preset, route.presetConfig ?? {});
+    return {
+      ...route,
+      title: route.title ?? expanded.title,
+      content: expanded.content,
+      preset: undefined,
+      presetConfig: undefined,
+    };
+  });
 }
 
 function resolveManifestEnvRefs<T>(
@@ -555,6 +579,7 @@ function buildCompiledManifest(
     manifest,
     env,
   ) as EnvResolvedManifest;
+  resolvedManifest.routes = expandRoutePresets(resolvedManifest.routes);
   const mergedManifest = mergeFragment(
     mergeFragment(resolvedManifest, defaultFeedbackFragment),
     buildDefaultAuthFragment(resolvedManifest),
@@ -631,6 +656,8 @@ function buildCompiledManifest(
       enter: route.enter,
       leave: route.leave,
       guard: route.guard,
+      events: route.events,
+      transition: route.transition,
     };
   });
 

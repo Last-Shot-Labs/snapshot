@@ -40,6 +40,8 @@ import { resolveTokens, resolveFrameworkStyles } from "../tokens/resolve";
 import { registerShortcuts } from "../shortcuts/index";
 import { getAuthScreenPath } from "./auth-routes";
 import { compileManifest } from "./compiler";
+import { useEventBridge, useSseEventBridge } from "./event-bridge";
+import { TransitionWrapper } from "./transition-wrapper";
 import {
   evaluateManifestGuard,
   guardUsesAuthState,
@@ -873,18 +875,25 @@ function AppShell({
       }
     }
   }
-  const page = isPreloading ? (
-    <div data-snapshot-route-loading="" style={{ padding: "1rem" }}>
-      {loadingFallback}
-    </div>
-  ) : (
-    <PageRenderer
-      page={route.page}
-      routeId={currentPath}
-      state={manifest.state}
-      resources={manifest.resources}
-      api={api}
-    />
+  const page = (
+    <TransitionWrapper
+      config={route.transition}
+      routeKey={`${route.id}:${currentPath}`}
+    >
+      {isPreloading ? (
+        <div data-snapshot-route-loading="" style={{ padding: "1rem" }}>
+          {loadingFallback}
+        </div>
+      ) : (
+        <PageRenderer
+          page={route.page}
+          routeId={currentPath}
+          state={manifest.state}
+          resources={manifest.resources}
+          api={api}
+        />
+      )}
+    </TransitionWrapper>
   );
 
   const renderSlot = (
@@ -1015,6 +1024,7 @@ function ManifestRouter({
     typeof navigator !== "undefined" ? navigator.onLine === false : false,
   );
   const execute = useActionExecutor();
+  const wsManager = snapshot.useWebSocketManager();
   const resourceCache = useManifestResourceCache();
   const previousMatchRef = useRef<{
     route: CompiledRoute | null;
@@ -1210,6 +1220,27 @@ function ManifestRouter({
         ? { route: null, params: {} as Record<string, string> }
         : resolveRouteMatch(localizedManifest, scopedCurrentPath),
     [localizedManifest, scopedCurrentPath, subAppMatch],
+  );
+  useEventBridge(
+    wsManager as ReturnType<typeof snapshot.useWebSocketManager>,
+    localizedManifest.realtime?.ws?.eventActions as
+      | Record<string, import("../actions/types").ActionConfig | import("../actions/types").ActionConfig[]>
+      | undefined,
+    execute,
+  );
+  useEventBridge(
+    wsManager as ReturnType<typeof snapshot.useWebSocketManager>,
+    route?.events as
+      | Record<string, import("../actions/types").ActionConfig | import("../actions/types").ActionConfig[]>
+      | undefined,
+    execute,
+  );
+  useSseEventBridge(
+    snapshot.onSseEvent,
+    localizedManifest.realtime?.sse?.endpoints as
+      | Record<string, { eventActions?: Record<string, import("../actions/types").ActionConfig | import("../actions/types").ActionConfig[]> }>
+      | undefined,
+    execute,
   );
   const subAppClients = useMemo(
     () =>

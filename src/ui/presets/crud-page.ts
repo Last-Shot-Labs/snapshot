@@ -184,15 +184,31 @@ export function crudPage(options: CrudPageOptions): PageConfig {
     children: headerChildren,
   });
 
+  if (options.filters && options.filters.length > 0) {
+    content.push({
+      type: "filter-bar",
+      id: `${slug}-filters`,
+      filters: options.filters.map((filter) => ({
+        key: filter.key,
+        label: filter.label,
+        options: filter.options ?? [],
+      })),
+    });
+  }
+
   // DataTable
   const tableConfig: Record<string, unknown> = {
     type: "data-table",
     id: tableId,
     data: options.listEndpoint,
     columns,
-    pagination: { type: "offset", pageSize: 20 },
+    pagination: {
+      type: options.pagination?.type ?? "offset",
+      pageSize: options.pagination?.pageSize ?? 20,
+    },
     searchable: true,
-    emptyMessage: `No ${options.title.toLowerCase()} yet`,
+    emptyMessage:
+      options.emptyState?.title ?? `No ${options.title.toLowerCase()} yet`,
   };
 
   if (rowActions.length > 0) {

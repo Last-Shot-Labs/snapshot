@@ -112,10 +112,9 @@ export class WebSocketManager<
           event?: string;
           [key: string]: unknown;
         };
-        const handlers = this.listeners.get(
-          message["event"] ?? message["type"] ?? "",
-        );
-        handlers?.forEach((h) => h(message));
+        const eventName = message["event"] ?? message["type"] ?? "";
+        this.listeners.get(eventName)?.forEach((handler) => handler(message));
+        this.listeners.get("*")?.forEach((handler) => handler(message));
       } catch {
         // Ignore unparseable messages
       }

@@ -25,6 +25,8 @@ export const modalConfigSchema = baseComponentConfigSchema.extend({
   onOpen: z.union([z.string().min(1), workflowDefinitionSchema]).optional(),
   /** Workflow or action(s) run when the modal closes. */
   onClose: z.union([z.string().min(1), workflowDefinitionSchema]).optional(),
+  /** URL query parameter used for deep-linking this modal. */
+  urlParam: z.string().optional(),
   /** Inline style overrides. */
   style: z.record(z.union([z.string(), z.number()])).optional(),
   /** Additional CSS class name. */

@@ -50,6 +50,13 @@ export interface FromRef {
   transformArg?: string | number;
 }
 
+/**
+ * Safe expression reference used anywhere manifest config supports computed values.
+ */
+export interface ExprRef {
+  expr: string;
+}
+
 /** Backwards-compatible alias for the shared state registry interface. */
 export type { AtomRegistry, JotaiStore };
 
@@ -94,5 +101,5 @@ export interface PageContextProviderProps {
  * Used internally — consumers don't need to use this directly.
  */
 export type ResolvedConfig<T> = {
-  [K in keyof T]: T[K] extends FromRef ? unknown : T[K];
+  [K in keyof T]: T[K] extends FromRef | ExprRef ? unknown : T[K];
 };

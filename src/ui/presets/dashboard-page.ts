@@ -10,7 +10,11 @@
  */
 
 import type { PageConfig } from "../manifest/types";
-import type { DashboardPageOptions, StatDef } from "./types";
+import type {
+  ChartDef,
+  DashboardPageOptions,
+  StatDef,
+} from "./types";
 
 // ── Internal helpers ─────────────────────────────────────────────────────────
 
@@ -54,6 +58,23 @@ function mapStatCard(stat: StatDef, index: number): Record<string, unknown> {
   }
 
   return config;
+}
+
+function mapChart(chart: ChartDef, index: number): Record<string, unknown> {
+  return {
+    type: "chart",
+    id: `chart-${index}`,
+    data: chart.endpoint,
+    chartType: chart.variant,
+    xKey: chart.series?.[0]?.field ?? "label",
+    series:
+      chart.series?.map((series, seriesIndex) => ({
+        key: series.field,
+        label: series.label ?? series.field,
+        color: series.color ?? `var(--sn-chart-${seriesIndex + 1})`,
+      })) ?? [{ key: "value", label: chart.title ?? "Value" }],
+    span: chart.span ?? 6,
+  };
 }
 
 // ── dashboardPage factory ────────────────────────────────────────────────────
@@ -106,18 +127,34 @@ export function dashboardPage(options: DashboardPageOptions): PageConfig {
     });
   }
 
+  if (options.charts && options.charts.length > 0) {
+    content.push({
+      type: "row",
+      gap: "md",
+      children: options.charts.map(mapChart),
+    });
+  }
+
   // Optional recent activity list
-  if (options.recentActivity) {
+  const activityFeed = options.activityFeed ?? (
+    options.recentActivity
+      ? {
+          endpoint: options.recentActivity,
+        }
+      : undefined
+  );
+  if (activityFeed) {
     content.push({
       type: "heading",
-      text: "Recent Activity",
+      text: activityFeed.title ?? "Recent Activity",
       level: 2,
     });
 
     content.push({
       type: "list",
       id: `${slug}-activity`,
-      data: options.recentActivity,
+      data: activityFeed.endpoint,
+      limit: activityFeed.limit,
       emptyMessage: "No recent activity",
     });
   }
