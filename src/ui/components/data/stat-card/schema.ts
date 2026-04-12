@@ -1,26 +1,12 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
 import {
+  baseComponentConfigSchema,
   emptyStateConfigSchema,
   errorStateConfigSchema,
   liveConfigSchema,
 } from "../../../manifest/schema";
 import { dataSourceSchema, fromRefSchema, pollConfigSchema } from "../../_base/types";
-
-/** Schema for a responsive value — flat or breakpoint map. */
-function responsiveSchema<T extends z.ZodTypeAny>(inner: T) {
-  return z.union([
-    inner,
-    z.object({
-      default: inner,
-      sm: inner.optional(),
-      md: inner.optional(),
-      lg: inner.optional(),
-      xl: inner.optional(),
-      "2xl": inner.optional(),
-    }),
-  ]);
-}
 
 /** Schema for the trend indicator configuration. */
 export const trendConfigSchema = z
@@ -52,8 +38,8 @@ export const trendConfigSchema = z
  * }
  * ```
  */
-export const statCardConfigSchema = z
-  .object({
+export const statCardConfigSchema = baseComponentConfigSchema
+  .extend({
     /** Component type discriminator. */
     type: z.literal("stat-card"),
     /** API endpoint to fetch data. Supports FromRef for dependent data. */
@@ -84,8 +70,6 @@ export const statCardConfigSchema = z
     trend: trendConfigSchema.optional(),
     /** Click action. */
     action: actionSchema.optional(),
-    /** Grid span inside a row. Responsive. */
-    span: responsiveSchema(z.number()).optional(),
     /** Loading skeleton variant. Default: 'skeleton'. */
     loading: z.enum(["skeleton", "pulse", "spinner"]).optional(),
     /** Error state config. */
@@ -96,15 +80,6 @@ export const statCardConfigSchema = z
     empty: emptyStateConfigSchema.optional(),
     /** Live refresh configuration driven by realtime events. */
     live: liveConfigSchema.optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
     /** Live region politeness for dynamic metric updates. */
     ariaLive: z.enum(["off", "polite", "assertive"]).default("polite"),
   })

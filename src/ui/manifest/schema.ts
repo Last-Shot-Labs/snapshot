@@ -1144,47 +1144,83 @@ function restoreComponentSchemaRegistry(
   }
 }
 
+/**
+ * All field names defined in baseComponentConfigSchema.
+ *
+ * Used to strip base fields before validating with component-specific schemas
+ * that don't extend the base (standalone `.strict()` schemas). Components that
+ * DO extend the base handle these fields via their `.extend()` override.
+ */
+const baseFieldNames = new Set(Object.keys(baseComponentConfigSchema.shape));
+
 export const componentConfigSchema: z.ZodType = z
   .object({ type: z.string() })
   .passthrough()
   .superRefine((data, ctx) => {
-    const baseResult = baseComponentConfigSchema.safeParse(data);
-    if (!baseResult.success) {
-      for (const issue of baseResult.error.issues) {
-        ctx.addIssue(issue);
-      }
-      return;
-    }
-
     const schema = componentSchemaRegistry.get(data.type);
-    if (schema) {
-      const result = schema.safeParse({
-        ...Object.fromEntries(
-          Object.entries(data).filter(
-            ([key]) =>
-              ![
-                "id",
-                "tokens",
-                "visibleWhen",
-                "visible",
-                "className",
-                "style",
-                "span",
-              ].includes(key),
-          ),
-        ),
-        type: data.type,
-      });
-      if (!result.success) {
-        for (const issue of result.error.issues) {
+    if (!schema) {
+      const baseResult = baseComponentConfigSchema.safeParse(data);
+      if (!baseResult.success) {
+        for (const issue of baseResult.error.issues) {
           ctx.addIssue(issue);
         }
       }
-    } else {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: `Unknown component type "${data.type}". Available types: ${[...componentSchemaRegistry.keys()].join(", ")}`,
       });
+      return;
+    }
+
+    // Try full validation first (works for schemas that extend the base).
+    const fullResult = schema.safeParse(data);
+    if (fullResult.success) return;
+
+    // If full validation failed with unrecognized base keys, the schema is
+    // standalone — fall back to two-phase: validate base, then component
+    // with base fields stripped.
+    const hasBaseKeyError = fullResult.error.issues.some(
+      (i) =>
+        i.code === "unrecognized_keys" &&
+        (i as { keys?: string[] }).keys?.every((k) => baseFieldNames.has(k)),
+    );
+
+    if (hasBaseKeyError) {
+      // Phase 1: validate base fields (don't early-return on failure so
+      // component overrides like chart's height still get checked).
+      const baseResult = baseComponentConfigSchema.safeParse(data);
+
+      // Phase 2: strip base fields, validate component-specific fields.
+      const componentData = Object.fromEntries(
+        Object.entries(data).filter(
+          ([key]) => !baseFieldNames.has(key) || key === "type",
+        ),
+      );
+      const componentResult = schema.safeParse(componentData);
+
+      // Report base errors, but skip fields the component schema overrides.
+      if (!baseResult.success) {
+        const componentRejects = new Set(
+          componentResult.success
+            ? []
+            : componentResult.error.issues.map((i) => String(i.path[0])),
+        );
+        for (const issue of baseResult.error.issues) {
+          const field = String(issue.path[0] ?? "");
+          if (componentRejects.has(field)) continue;
+          ctx.addIssue(issue);
+        }
+      }
+      if (!componentResult.success) {
+        for (const issue of componentResult.error.issues) {
+          ctx.addIssue(issue);
+        }
+      }
+    } else {
+      // No base-key mismatch — report full validation errors directly.
+      for (const issue of fullResult.error.issues) {
+        ctx.addIssue(issue);
+      }
     }
   });
 

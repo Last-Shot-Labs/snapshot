@@ -54,7 +54,7 @@ export default class ManifestValidate extends Command {
     const { safeCompileManifest } =
       await import("../../../ui/manifest/compiler.js");
 
-    const result = safeCompileManifest(parsed);
+    const result = safeCompileManifest(parsed, { skipRuntimeChecks: true });
 
     if (result.success) {
       const routeCount = result.compiled.routes.length;

@@ -4,6 +4,18 @@
  * Extracts the core generation logic from the build script so that consumer
  * apps can call `generateManifestSchema({ plugins, outPath })` to get a
  * schema that includes their custom component types.
+ *
+ * Pipeline:
+ *   1. zodToJsonSchema with $refStrategy "root"  → no warnings, clean $ref
+ *   2. resolveAtRiskRefs                          → inline only the $refs
+ *      whose targets will be invalidated by step 3
+ *   3. replaceComponentConfigs                    → swap component config
+ *      placeholders with the discriminated union
+ *   4. injectIconEnums                            → inject icon enum values
+ *   5. JSON.stringify                             → write to disk
+ *
+ * Steps 1-2 guarantee that no $ref target is invalidated by step 3.
+ * The remaining $refs stay compact and valid.
  */
 
 import { writeFileSync } from "node:fs";
@@ -36,11 +48,165 @@ const COMPONENT_SINGLE_FIELDS = new Set([
   "offline",
 ]);
 
+const ALL_COMPONENT_FIELDS = new Set([
+  ...COMPONENT_ARRAY_FIELDS,
+  ...COMPONENT_SINGLE_FIELDS,
+]);
+
+const MAX_DEPTH = 80;
+
 interface GenerateOptions {
   plugins?: SnapshotPlugin[];
   outPath: string;
   iconNames?: string[];
 }
+
+// ── Per-component $ref resolution ───────────────────────────────────────────
+
+/**
+ * Generate a single component's JSON Schema with zero `$ref` pointers.
+ *
+ * Uses `$refStrategy: "none"` which inlines everything. Recursive Zod
+ * types (action callbacks, nested conditions) degrade to `{}` at the
+ * recursion point — same behavior as `$ref` cycle-breaking, but without
+ * any surviving `$ref` pointers that would break when the schema is
+ * embedded in the main manifest's discriminated union.
+ *
+ * zodToJsonSchema emits a console.warn per recursion point. These are
+ * captured and reported as a single summary at the end of generation.
+ */
+function generateComponentSchema(
+  zodSchema: import("zod").ZodType,
+  recursionCount: { value: number },
+): Record<string, unknown> {
+  const originalWarn = console.warn;
+  console.warn = (msg: string) => {
+    if (
+      typeof msg === "string" &&
+      msg.includes("Recursive reference detected")
+    ) {
+      recursionCount.value++;
+    } else {
+      originalWarn(msg);
+    }
+  };
+
+  try {
+    return zodToJsonSchema(zodSchema, {
+      $refStrategy: "none",
+      errorMessages: false,
+    }) as Record<string, unknown>;
+  } finally {
+    console.warn = originalWarn;
+  }
+}
+
+// ── Manifest-level targeted $ref resolution ─────────────────────────────────
+
+/**
+ * Check whether a JSON Pointer path goes through a component config field
+ * that replaceComponentConfigs will restructure.
+ *
+ * Example: `#/properties/app/properties/loading/anyOf/0`
+ *   → "loading" is in COMPONENT_SINGLE_FIELDS → at risk → true
+ *
+ * Example: `#/properties/action/anyOf/0`
+ *   → "action" is NOT a component config field → safe → false
+ */
+function refTargetIsAtRisk(refPath: string): boolean {
+  const parts = refPath.replace(/^#\//, "").split("/");
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (parts[i] === "properties" && ALL_COMPONENT_FIELDS.has(parts[i + 1]!)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Pre-resolve $ref pointers whose targets will be invalidated by
+ * replaceComponentConfigs. Only these refs are inlined; all others stay
+ * as compact $ref pointers.
+ *
+ * Also breaks JS object sharing from zodToJsonSchema by serializing/parsing
+ * the tree first, so downstream WeakSet/identity-based traversals work
+ * correctly.
+ */
+function resolveAtRiskRefs(
+  rawSchema: Record<string, unknown>,
+): Record<string, unknown> {
+  // Break JS object sharing / potential cycles from zodToJsonSchema
+  const seen = new WeakSet<object>();
+  const str = JSON.stringify(rawSchema, (_key, value: unknown) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) return undefined;
+      seen.add(value);
+    }
+    return value;
+  });
+  const root = JSON.parse(str) as Record<string, unknown>;
+
+  // Navigate a JSON Pointer path in the root tree
+  function navigatePath(pointer: string): unknown {
+    if (pointer === "#") return root;
+    const parts = pointer
+      .replace(/^#\//, "")
+      .split("/")
+      .map((p) => p.replace(/~1/g, "/").replace(/~0/g, "~"));
+    let current: unknown = root;
+    for (const part of parts) {
+      if (current == null || typeof current !== "object") return undefined;
+      if (Array.isArray(current)) {
+        current = current[parseInt(part, 10)];
+      } else {
+        current = (current as Record<string, unknown>)[part];
+      }
+    }
+    return current;
+  }
+
+  const resolving = new Set<string>();
+
+  function walk(node: unknown, depth: number): unknown {
+    if (depth > MAX_DEPTH || node == null || typeof node !== "object")
+      return node;
+    if (Array.isArray(node))
+      return node.map((item) => walk(item, depth + 1));
+
+    const obj = node as Record<string, unknown>;
+
+    if (typeof obj["$ref"] === "string") {
+      const ref = obj["$ref"] as string;
+
+      // Safe ref — leave it as a pointer
+      if (!refTargetIsAtRisk(ref)) return obj;
+
+      // At-risk ref — inline the target
+      if (resolving.has(ref)) return {};
+      const target = navigatePath(ref);
+      if (target != null && typeof target === "object") {
+        resolving.add(ref);
+        const resolved = walk(
+          JSON.parse(JSON.stringify(target)),
+          depth + 1,
+        );
+        resolving.delete(ref);
+        return resolved;
+      }
+      return {};
+    }
+
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = walk(value, depth + 1);
+    }
+    return result;
+  }
+
+  return walk(root, 0) as Record<string, unknown>;
+}
+
+// ── Component union builder ─────────────────────────────────────────────────
 
 function buildComponentUnion(
   iconNames: string[],
@@ -51,13 +217,11 @@ function buildComponentUnion(
   }
 
   const componentSchemas: Record<string, unknown>[] = [];
+  const recursionCount = { value: 0 };
 
   for (const [typeName, zodSchema] of registeredSchemas) {
     try {
-      const jsonSchema = zodToJsonSchema(zodSchema, {
-        $refStrategy: "none",
-        errorMessages: false,
-      }) as Record<string, unknown>;
+      const jsonSchema = generateComponentSchema(zodSchema, recursionCount);
 
       // Ensure type is set to const for discriminator
       const properties =
@@ -65,8 +229,7 @@ function buildComponentUnion(
       properties["type"] = { type: "string", const: typeName };
       jsonSchema["properties"] = properties;
 
-      // Inject icon enum on icon fields — fresh object per component to
-      // avoid shared-reference issues with cycle-detecting serializers
+      // Inject icon enum on icon fields
       if (iconNames.length > 0 && properties["icon"]) {
         const iconProp = properties["icon"] as Record<string, unknown>;
         if (iconProp["type"] === "string" && !iconProp["enum"]) {
@@ -80,7 +243,6 @@ function buildComponentUnion(
 
       componentSchemas.push(jsonSchema);
     } catch {
-      // Skip components with exotic Zod types that zodToJsonSchema can't handle
       if (
         typeof process !== "undefined" &&
         process.env?.["NODE_ENV"] !== "production"
@@ -90,6 +252,13 @@ function buildComponentUnion(
         );
       }
     }
+  }
+
+  if (recursionCount.value > 0) {
+    console.log(
+      `[snapshot] ${componentSchemas.length} component types, ` +
+        `${recursionCount.value} recursive schema points defaulted to any`,
+    );
   }
 
   if (componentSchemas.length === 0) {
@@ -102,44 +271,30 @@ function buildComponentUnion(
   };
 }
 
-function deepCloneUnion(
-  union: Record<string, unknown>,
-  visited: WeakSet<object>,
-): Record<string, unknown> {
-  const clone = JSON.parse(JSON.stringify(union)) as Record<string, unknown>;
-  // Mark the clone (and its nested objects) as visited so the recursive
-  // traversal never enters component union content — it would otherwise
-  // find nested component-config-like fields and trigger infinite expansion.
-  function markVisited(node: unknown): void {
-    if (!node || typeof node !== "object") return;
-    const obj = node as Record<string, unknown>;
-    if (visited.has(obj)) return;
-    visited.add(obj);
-    if (Array.isArray(node)) {
-      node.forEach(markVisited);
-    } else {
-      for (const val of Object.values(obj)) markVisited(val);
-    }
-  }
-  markVisited(clone);
-  return clone;
-}
+// ── Post-processing ─────────────────────────────────────────────────────────
 
+/**
+ * Walk the schema tree and replace generic component config placeholders
+ * with the discriminated component union.
+ *
+ * After injecting a union at a node, the traversal skips that subtree.
+ * The injected union contains field names like "content" and "children"
+ * (they describe the schema of those fields), but they must NOT be replaced
+ * again — they are schema descriptions, not component config placeholders.
+ */
 function replaceComponentConfigs(
   node: unknown,
   union: Record<string, unknown>,
-  visited: WeakSet<object> = new WeakSet(),
+  depth: number = 0,
 ): void {
+  if (depth > MAX_DEPTH) return;
   if (!node || typeof node !== "object") return;
   if (Array.isArray(node)) {
-    node.forEach((item) => replaceComponentConfigs(item, union, visited));
+    node.forEach((item) => replaceComponentConfigs(item, union, depth + 1));
     return;
   }
 
   const obj = node as Record<string, unknown>;
-  if (visited.has(obj)) return;
-  visited.add(obj);
-
   const properties = obj["properties"] as Record<string, unknown> | undefined;
 
   if (properties) {
@@ -151,14 +306,13 @@ function replaceComponentConfigs(
       if (COMPONENT_ARRAY_FIELDS.has(key)) {
         if (prop["type"] === "array" && prop["items"]) {
           const items = prop["items"] as Record<string, unknown>;
-          // Replace if items looks like a generic object (passthrough)
           if (
             items["type"] === "object" ||
             items["anyOf"] ||
             items["allOf"] ||
             items["additionalProperties"] !== undefined
           ) {
-            prop["items"] = deepCloneUnion(union, visited);
+            prop["items"] = JSON.parse(JSON.stringify(union));
           }
         }
       }
@@ -171,31 +325,39 @@ function replaceComponentConfigs(
           prop["allOf"] ||
           prop["additionalProperties"] !== undefined
         ) {
-          properties[key] = deepCloneUnion(union, visited);
+          properties[key] = JSON.parse(JSON.stringify(union));
         }
       }
     }
   }
 
-  // Recurse into all sub-objects
+  // Recurse into sub-objects but skip injected unions (detected by
+  // discriminator sentinel) to prevent infinite re-expansion.
   for (const val of Object.values(obj)) {
-    replaceComponentConfigs(val, union, visited);
+    if (
+      val &&
+      typeof val === "object" &&
+      !Array.isArray(val) &&
+      (val as Record<string, unknown>)["discriminator"]
+    ) {
+      continue;
+    }
+    replaceComponentConfigs(val, union, depth + 1);
   }
 }
 
 function injectIconEnums(
   node: unknown,
   iconEnum: Record<string, unknown>,
-  visited: WeakSet<object> = new WeakSet(),
+  depth: number = 0,
 ): void {
+  if (depth > MAX_DEPTH) return;
   if (!node || typeof node !== "object") return;
   if (Array.isArray(node)) {
-    node.forEach((item) => injectIconEnums(item, iconEnum, visited));
+    node.forEach((item) => injectIconEnums(item, iconEnum, depth + 1));
     return;
   }
   const obj = node as Record<string, unknown>;
-  if (visited.has(obj)) return;
-  visited.add(obj);
 
   if (obj["icon"] && typeof obj["icon"] === "object") {
     const iconProp = obj["icon"] as Record<string, unknown>;
@@ -205,9 +367,11 @@ function injectIconEnums(
   }
 
   for (const val of Object.values(obj)) {
-    injectIconEnums(val, iconEnum, visited);
+    injectIconEnums(val, iconEnum, depth + 1);
   }
 }
+
+// ── Public API ──────────────────────────────────────────────────────────────
 
 /**
  * Generate a JSON Schema for the snapshot manifest and write it to disk.
@@ -236,12 +400,16 @@ export function generateManifestSchema(options: GenerateOptions): void {
 
   const iconNames = options.iconNames ?? [];
 
-  // Generate the base manifest schema
-  const rawSchema = zodToJsonSchema(manifestConfigSchema, {
+  // Generate the base manifest schema with "root" strategy — handles recursive
+  // Zod types via $ref without warnings. Then selectively resolve only the
+  // $ref pointers whose targets will be invalidated by replaceComponentConfigs.
+  // All other $refs stay as compact pointers.
+  const rawWithRefs = zodToJsonSchema(manifestConfigSchema, {
     $refStrategy: "root",
     errorMessages: false,
     markdownDescription: true,
   }) as Record<string, unknown>;
+  const rawSchema = resolveAtRiskRefs(rawWithRefs);
 
   // Build discriminated union of all component schemas
   const componentUnion = buildComponentUnion(iconNames);
@@ -262,19 +430,5 @@ export function generateManifestSchema(options: GenerateOptions): void {
   rawSchema["description"] =
     "Configuration schema for snapshot.manifest.json — the Snapshot frontend manifest file.";
 
-  // Serialize with cycle detection — zodToJsonSchema with $refStrategy "root"
-  // can produce actual object cycles for recursive Zod types.
-  const seen = new WeakSet<object>();
-  const json = JSON.stringify(
-    rawSchema,
-    (_key, value: unknown) => {
-      if (typeof value === "object" && value !== null) {
-        if (seen.has(value)) return {};
-        seen.add(value);
-      }
-      return value;
-    },
-    2,
-  );
-  writeFileSync(options.outPath, json);
+  writeFileSync(options.outPath, JSON.stringify(rawSchema, null, 2));
 }

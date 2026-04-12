@@ -39,6 +39,17 @@ import type {
 import type { ThemeConfig } from "../tokens/types";
 import { bootBuiltins } from "./boot-builtins";
 
+/**
+ * Options for manifest compilation.
+ *
+ * @property skipRuntimeChecks - When true, skip validations that depend on
+ *   runtime registrations (guards, custom clients). Use this in CLI context
+ *   where consumer app code hasn't registered these yet.
+ */
+export interface CompileOptions {
+  skipRuntimeChecks?: boolean;
+}
+
 type EnvResolvedManifest = Omit<
   ParsedManifestConfig,
   "app" | "auth" | "routes" | "analytics" | "push" | "realtime" | "toast"
@@ -646,6 +657,7 @@ function validateCustomClients(manifest: EnvResolvedManifest): void {
 function buildCompiledManifest(
   manifest: ParsedManifestConfig,
   env: Record<string, string | undefined>,
+  options: CompileOptions = {},
 ): CompiledManifest {
   bootBuiltins();
   const resolvedManifest = resolveManifestEnvRefs(
@@ -662,9 +674,11 @@ function buildCompiledManifest(
 
   resolveThemeFlavors(runtimeManifest.theme);
   validatePolicyRefs(runtimeManifest);
-  validateCustomClients(runtimeManifest);
+  if (!options.skipRuntimeChecks) {
+    validateCustomClients(runtimeManifest);
+    validateRegisteredGuards(runtimeManifest);
+  }
   validateResourceClients(runtimeManifest);
-  validateRegisteredGuards(runtimeManifest);
 
   const customActionDeclarations =
     (
@@ -841,10 +855,18 @@ export function safeParseManifest(
  * Parse and compile a manifest into the runtime shape.
  *
  * @param manifest - Manifest JSON or object
+ * @param options - Compile options
  * @returns The compiled manifest runtime model
  */
-export function compileManifest(manifest: unknown): CompiledManifest {
-  return buildCompiledManifest(parseManifest(manifest), getDefaultEnvSource());
+export function compileManifest(
+  manifest: unknown,
+  options?: CompileOptions,
+): CompiledManifest {
+  return buildCompiledManifest(
+    parseManifest(manifest),
+    getDefaultEnvSource(),
+    options,
+  );
 }
 
 /**
@@ -852,22 +874,28 @@ export function compileManifest(manifest: unknown): CompiledManifest {
  *
  * @param manifest - Manifest JSON or object
  * @param env - Environment source used to resolve `{ env: "..." }` values
+ * @param options - Compile options
  * @returns The compiled manifest runtime model
  */
 export function compileManifestWithEnv(
   manifest: unknown,
   env: Record<string, string | undefined>,
+  options?: CompileOptions,
 ): CompiledManifest {
-  return buildCompiledManifest(parseManifest(manifest), env);
+  return buildCompiledManifest(parseManifest(manifest), env, options);
 }
 
 /**
  * Parse and compile a manifest without throwing.
  *
  * @param manifest - Manifest JSON or object
+ * @param options - Compile options
  * @returns The parsed manifest and compiled runtime model, or validation errors
  */
-export function safeCompileManifest(manifest: unknown):
+export function safeCompileManifest(
+  manifest: unknown,
+  options?: CompileOptions,
+):
   | {
       success: true;
       manifest: ParsedManifestConfig;
@@ -889,7 +917,11 @@ export function safeCompileManifest(manifest: unknown):
     return {
       success: true,
       manifest: parsed.data,
-      compiled: buildCompiledManifest(parsed.data, getDefaultEnvSource()),
+      compiled: buildCompiledManifest(
+        parsed.data,
+        getDefaultEnvSource(),
+        options,
+      ),
     };
   } catch (error) {
     if (error instanceof ZodError) {

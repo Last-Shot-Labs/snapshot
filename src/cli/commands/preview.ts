@@ -3,8 +3,7 @@ import { intro, outro } from "@clack/prompts";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { bootBuiltins } from "../../ui/manifest/boot-builtins";
-import { safeParseManifest } from "../../ui/manifest/compiler";
+import { safeCompileManifest } from "../../ui/manifest/compiler";
 
 export default class Preview extends Command {
   static override description =
@@ -49,20 +48,20 @@ export default class Preview extends Command {
       );
     }
 
-    bootBuiltins();
-
+    let raw: unknown;
     try {
-      const raw = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as unknown;
-      const parsed = safeParseManifest(raw);
-      if (!parsed.success) {
-        const issues = parsed.error.issues
-          .map((issue) => `- ${issue.path.join(".") || "<root>"}: ${issue.message}`)
-          .join("\n");
-        this.error(`Invalid snapshot.manifest.json:\n${issues}`);
-      }
+      raw = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as unknown;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.error(`Failed to load '${flags.manifest}': ${message}`);
+    }
+
+    const result = safeCompileManifest(raw, { skipRuntimeChecks: true });
+    if (!result.success) {
+      const issues = result.error.issues
+        .map((issue) => `- ${issue.path.join(".") || "<root>"}: ${issue.message}`)
+        .join("\n");
+      this.error(`Invalid snapshot.manifest.json:\n${issues}`);
     }
 
     const { preview } = await import("vite");
