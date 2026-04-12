@@ -1105,8 +1105,12 @@ function ManifestRouter({
     typeof navigator !== "undefined" ? navigator.onLine === false : false,
   );
   const execute = useActionExecutor();
+  const executeRef = useRef(execute);
+  executeRef.current = execute;
   const wsManager = snapshot.useWebSocketManager();
   const resourceCache = useManifestResourceCache();
+  const resourceCacheRef = useRef(resourceCache);
+  resourceCacheRef.current = resourceCache;
   const previousMatchRef = useRef<{
     route: CompiledRoute | null;
     currentPath: string;
@@ -1555,6 +1559,8 @@ function ManifestRouter({
     const abortController = new AbortController();
 
     const runLifecycle = async () => {
+      const currentExecute = executeRef.current;
+      const currentResourceCache = resourceCacheRef.current;
       const previousMatch = previousMatchRef.current;
       if (
         previousMatch &&
@@ -1562,13 +1568,13 @@ function ManifestRouter({
           previousMatch.route?.id !== route.id)
       ) {
         applyRouteResourceInvalidations(
-          resourceCache,
+          currentResourceCache,
           previousMatch.route?.invalidateOnLeave,
         );
 
         if (previousMatch.route?.leave) {
           if (typeof previousMatch.route.leave === "string") {
-            await execute(
+            await currentExecute(
               { type: "run-workflow", workflow: previousMatch.route.leave },
               {
                 route: {
@@ -1581,7 +1587,7 @@ function ManifestRouter({
               },
             );
           } else {
-            await execute(previousMatch.route.leave as never, {
+            await currentExecute(previousMatch.route.leave as never, {
               route: {
                 id: previousMatch.route.id,
                 path: previousMatch.currentPath,
@@ -1600,14 +1606,14 @@ function ManifestRouter({
         params,
       };
 
-      applyRouteResourceInvalidations(resourceCache, route.refreshOnEnter);
+      applyRouteResourceInvalidations(currentResourceCache, route.refreshOnEnter);
 
       if (route.preload && route.preload.length > 0) {
         setIsPreloading(true);
         try {
           await Promise.all(
             route.preload.map((preloadTarget) => {
-              if (!resourceCache) {
+              if (!currentResourceCache) {
                 return Promise.resolve();
               }
 
@@ -1615,7 +1621,7 @@ function ManifestRouter({
                 preloadTarget,
                 params,
               );
-              return resourceCache.loadTarget(
+              return currentResourceCache.loadTarget(
                 resolvedTarget.target,
                 resolvedTarget.params,
                 { signal: abortController.signal },
@@ -1633,7 +1639,7 @@ function ManifestRouter({
 
       if (route.enter) {
         if (typeof route.enter === "string") {
-          await execute(
+          await currentExecute(
             { type: "run-workflow", workflow: route.enter },
             {
               route: {
@@ -1646,7 +1652,7 @@ function ManifestRouter({
             },
           );
         } else {
-          await execute(route.enter as never, {
+          await currentExecute(route.enter as never, {
             route: {
               id: route.id,
               path: scopedCurrentPath,
@@ -1676,7 +1682,11 @@ function ManifestRouter({
       cancelled = true;
       abortController.abort();
     };
-  }, [execute, params, resourceCache, route, routeAllowed, scopedCurrentPath]);
+    // Route lifecycle should only re-fire on actual route changes, not when
+    // callback identities shift.  execute and resourceCache are accessed via
+    // refs so they always reflect the latest value without being deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params, route, routeAllowed, scopedCurrentPath]);
 
   if (subAppMatch) {
     if (typeof window === "undefined") {

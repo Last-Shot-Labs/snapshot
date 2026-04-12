@@ -9,6 +9,7 @@ import type { ResolvedNavItem, AuthUser } from "./types";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
+import { FloatingPanel, FloatingMenuStyles, MenuItem } from "../../primitives/floating-menu";
 
 /** Props for the Nav component. */
 interface NavComponentProps {
@@ -37,18 +38,6 @@ function NavItem({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLLIElement>(null);
   const hasChildren = Boolean(item.children && item.children.length > 0);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    if (!isTopNav || !dropdownOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [isTopNav, dropdownOpen]);
 
   if (!item.isVisible) return null;
 
@@ -183,37 +172,30 @@ function NavItem({
       )}
 
       {/* Top-nav mode: floating dropdown */}
-      {isTopNav && hasChildren && dropdownOpen && (
-        <ul
-          role="menu"
-          data-nav-dropdown=""
-          style={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
-            left: 0,
-            minWidth: "11rem",
-            listStyle: "none",
-            margin: 0,
-            padding: "var(--sn-spacing-xs, 0.25rem)",
-            background: "var(--sn-color-popover, var(--sn-color-background))",
-            border: "1px solid var(--sn-color-border)",
-            borderRadius: "var(--sn-radius-md, 0.375rem)",
-            boxShadow: "0 4px 16px -2px rgba(0,0,0,0.12), 0 2px 6px -1px rgba(0,0,0,0.07)",
-            zIndex: 200,
-          }}
+      {isTopNav && hasChildren && (
+        <FloatingPanel
+          open={dropdownOpen}
+          onClose={() => setDropdownOpen(false)}
+          containerRef={containerRef}
+          side="bottom"
+          align="start"
+          dataAttributes={{ "data-nav-dropdown": "" }}
         >
-          {item.children!.map((child, index) => (
-            <NavItem
+          {item.children!.filter((child) => child.isVisible).map((child, index) => (
+            <MenuItem
               key={child.path ?? index}
-              item={child}
-              onNavigate={(path) => {
+              label={child.label}
+              icon={child.icon}
+              disabled={child.isDisabled}
+              active={child.isActive}
+              onClick={() => {
+                if (child.isDisabled) return;
                 setDropdownOpen(false);
-                onNavigate?.(path);
+                if (child.path) onNavigate?.(child.path);
               }}
-              isTopNav={false}
             />
           ))}
-        </ul>
+        </FloatingPanel>
       )}
     </li>
   );
@@ -615,6 +597,7 @@ export function Nav({ config, pathname, onNavigate, variant = "sidebar" }: NavCo
         </div>
       )}
 
+      <FloatingMenuStyles />
       <style>{`
         [data-snapshot-component="nav"] button[data-nav-link]:hover {
           background: var(--sn-color-accent, var(--sn-color-muted));

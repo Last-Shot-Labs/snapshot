@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { AtomRegistryImpl } from "../../../../context/registry";
 import {
@@ -47,6 +47,10 @@ const baseConfig: DropdownMenuConfig = {
 };
 
 describe("DropdownMenu", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -111,11 +115,9 @@ describe("DropdownMenu", () => {
     render(<DropdownMenu config={config} />, { wrapper });
     fireEvent.click(screen.getByTestId("dropdown-menu-trigger"));
 
-    expect(screen.getByTestId("dropdown-menu-label").textContent).toContain(
-      "Options",
-    );
-    expect(screen.getByTestId("dropdown-menu-separator")).toBeTruthy();
-    expect(screen.getAllByTestId("dropdown-menu-item")).toHaveLength(2);
+    expect(screen.getByText("Options")).toBeTruthy();
+    expect(screen.getByRole("separator")).toBeTruthy();
+    expect(screen.getAllByRole("menuitem")).toHaveLength(2);
   });
 
   it("renders trigger with icon", () => {
@@ -160,7 +162,7 @@ describe("DropdownMenu", () => {
     render(<DropdownMenu config={config} />, { wrapper });
     fireEvent.click(screen.getByTestId("dropdown-menu-trigger"));
 
-    const item = screen.getByTestId("dropdown-menu-item");
+    const item = screen.getByRole("menuitem");
     expect(item.getAttribute("aria-disabled")).toBe("true");
   });
 });

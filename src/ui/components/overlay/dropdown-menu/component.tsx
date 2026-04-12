@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
 import type { DropdownMenuConfig } from "./types";
-
-const ANIMATION_DURATION = 150;
+import {
+  FloatingPanel,
+  MenuItem,
+  MenuSeparator,
+  MenuLabel,
+  FloatingMenuStyles,
+} from "../../primitives/floating-menu";
 
 /**
  * Style map for trigger button variants.
@@ -38,6 +43,9 @@ const VARIANT_STYLES: Record<string, React.CSSProperties> = {
  * DropdownMenu component — a trigger button that opens a positioned dropdown
  * with items, separators, labels, and keyboard navigation.
  *
+ * Uses the shared FloatingPanel primitive for positioning, animation, and
+ * dismiss behavior, and MenuItem for consistent item rendering.
+ *
  * @param props.config - The dropdown menu config from the manifest
  *
  * @example
@@ -56,13 +64,8 @@ const VARIANT_STYLES: Record<string, React.CSSProperties> = {
 export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
   const execute = useActionExecutor();
   const [isOpen, setIsOpen] = useState(false);
-  const [animating, setAnimating] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const variant = config.trigger.variant ?? "default";
   const align = config.align ?? "start";
@@ -74,78 +77,19 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
     .filter((i) => i !== -1);
 
   const open = useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = null;
-    }
     setIsOpen(true);
-    setMounted(true);
     setFocusedIndex(-1);
-    openTimerRef.current = setTimeout(() => {
-      setAnimating(true);
-      openTimerRef.current = null;
-    }, 10);
   }, []);
 
   const close = useCallback(() => {
-    if (openTimerRef.current) {
-      clearTimeout(openTimerRef.current);
-      openTimerRef.current = null;
-    }
-    setAnimating(false);
-    closeTimerRef.current = setTimeout(() => {
-      setMounted(false);
-      setIsOpen(false);
-      setFocusedIndex(-1);
-      closeTimerRef.current = null;
-    }, ANIMATION_DURATION);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (openTimerRef.current) {
-        clearTimeout(openTimerRef.current);
-      }
-      if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current);
-      }
-    };
+    setIsOpen(false);
+    setFocusedIndex(-1);
   }, []);
 
   const toggle = useCallback(() => {
-    if (isOpen) {
-      close();
-    } else {
-      open();
-    }
+    if (isOpen) close();
+    else open();
   }, [isOpen, open, close]);
-
-  // Close on click outside
-  useEffect(() => {
-    if (!isOpen) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        close();
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, close]);
-
-  // Close on escape
-  useEffect(() => {
-    if (!isOpen) return;
-    function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        close();
-      }
-    }
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen, close]);
 
   const handleItemClick = useCallback(
     (index: number) => {
@@ -190,19 +134,6 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
     [isOpen, focusedIndex, actionableIndices, open, handleItemClick],
   );
 
-  // Alignment styles for menu positioning
-  const alignStyle: React.CSSProperties =
-    align === "end"
-      ? { right: 0 }
-      : align === "center"
-        ? { left: "50%", transform: "translateX(-50%)" }
-        : { left: 0 };
-
-  const sideStyle: React.CSSProperties =
-    side === "top"
-      ? { bottom: "100%", marginBottom: "var(--sn-spacing-xs, 0.25rem)" }
-      : { top: "100%", marginTop: "var(--sn-spacing-xs, 0.25rem)" };
-
   return (
     <div
       ref={containerRef}
@@ -215,6 +146,7 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
         ...((config.style as React.CSSProperties) ?? {}),
       }}
     >
+      <FloatingMenuStyles />
       <style>{`
         [data-snapshot-component="dropdown-menu"] > button:focus { outline: none; }
         [data-snapshot-component="dropdown-menu"] > button:hover {
@@ -224,14 +156,8 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
           outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
           outline-offset: var(--sn-ring-offset, 2px);
         }
-        [data-snapshot-component="dropdown-menu"] [role="menuitem"]:focus { outline: none; }
-        [data-snapshot-component="dropdown-menu"] [role="menuitem"]:hover {
-          background-color: var(--sn-color-secondary, #f3f4f6);
-        }
-        [data-snapshot-component="dropdown-menu"] [role="menuitem"]:focus-visible {
-          background-color: var(--sn-color-secondary, #f3f4f6);
-        }
       `}</style>
+
       {/* Trigger button */}
       <button
         type="button"
@@ -257,114 +183,40 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
         {config.trigger.label && <span>{config.trigger.label}</span>}
       </button>
 
-      {/* Menu */}
-      {mounted && (
-        <div
-          ref={menuRef}
-          role="menu"
-          data-menu-content=""
-          data-testid="dropdown-menu-content"
-          onKeyDown={handleKeyDown}
-          style={{
-            position: "absolute",
-            ...alignStyle,
-            ...sideStyle,
-            zIndex: "var(--sn-z-index-dropdown, 10)" as unknown as number,
-            minWidth: "180px",
-            backgroundColor: "var(--sn-color-card, #ffffff)",
-            border:
-              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-            borderRadius: "var(--sn-radius-md, 0.375rem)",
-            boxShadow:
-              "var(--sn-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1))",
-            padding: "var(--sn-spacing-xs, 0.25rem) 0",
-            opacity: animating ? 1 : 0,
-            transform: animating ? "scale(1)" : "scale(0.95)",
-            transformOrigin: side === "top" ? "bottom" : "top",
-            transition: `opacity var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease), transform var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease)`,
-          }}
-        >
+      {/* Menu — positioning, animation, dismiss all handled by FloatingPanel */}
+      <FloatingPanel
+        open={isOpen}
+        onClose={close}
+        containerRef={containerRef}
+        side={side}
+        align={align}
+        minWidth="180px"
+      >
+        <div onKeyDown={handleKeyDown} data-testid="dropdown-menu-content">
           {config.items.map((entry, i) => {
             if (entry.type === "separator") {
-              return (
-                <div
-                  key={`sep-${i}`}
-                  role="separator"
-                  data-menu-separator=""
-                  data-testid="dropdown-menu-separator"
-                  style={{
-                    height: "1px",
-                    backgroundColor: "var(--sn-color-border, #e5e7eb)",
-                    margin: "var(--sn-spacing-xs, 0.25rem) 0",
-                  }}
-                />
-              );
+              return <MenuSeparator key={`sep-${i}`} />;
             }
 
             if (entry.type === "label") {
-              return (
-                <div
-                  key={`label-${i}`}
-                  data-testid="dropdown-menu-label"
-                  style={{
-                    fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                    fontWeight: "var(--sn-font-weight-semibold, 600)",
-                    color: "var(--sn-color-muted-foreground, #6b7280)",
-                    padding:
-                      "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-                    userSelect: "none",
-                  }}
-                >
-                  {entry.text}
-                </div>
-              );
+              return <MenuLabel key={`label-${i}`} text={entry.text} />;
             }
 
             // type === "item"
-            const isFocused = focusedIndex === i;
-            const isDisabled = entry.disabled === true;
-
             return (
-              <div
+              <MenuItem
                 key={`item-${i}`}
-                role="menuitem"
-                data-menu-item=""
-                data-testid="dropdown-menu-item"
-                tabIndex={-1}
-                aria-disabled={isDisabled || undefined}
-                onClick={() => !isDisabled && handleItemClick(i)}
-                onMouseEnter={() => !isDisabled && setFocusedIndex(i)}
-                onMouseLeave={() => setFocusedIndex(-1)}
-                style={{
-                  padding:
-                    "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-                  fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                  color: entry.destructive
-                    ? "var(--sn-color-destructive, #dc2626)"
-                    : "var(--sn-color-foreground, #111827)",
-                  backgroundColor: isFocused
-                    ? "var(--sn-color-accent, #f1f5f9)"
-                    : "transparent",
-                  cursor: isDisabled ? "not-allowed" : "pointer",
-                  opacity: isDisabled
-                    ? "var(--sn-opacity-disabled, 0.5)"
-                    : undefined,
-                  pointerEvents: undefined,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--sn-spacing-xs, 0.25rem)",
-                  userSelect: "none",
-                  transition:
-                    "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-                }}
-              >
-                {entry.icon && <Icon name={entry.icon} size={16} />}
-                <span>{entry.label}</span>
-              </div>
+                label={entry.label}
+                icon={entry.icon}
+                onClick={() => handleItemClick(i)}
+                disabled={entry.disabled}
+                destructive={entry.destructive}
+                active={focusedIndex === i}
+              />
             );
           })}
         </div>
-      )}
+      </FloatingPanel>
     </div>
   );
 }

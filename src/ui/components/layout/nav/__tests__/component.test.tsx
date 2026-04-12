@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, fireEvent, cleanup } from "@testing-library/react";
 import { Provider as JotaiProvider } from "jotai/react";
 import { createStore } from "jotai/vanilla";
 import { atom } from "jotai";
@@ -72,6 +72,10 @@ function renderWithContext(
 }
 
 describe("Nav component", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   const baseConfig: NavConfig = {
     type: "nav",
     items: [
