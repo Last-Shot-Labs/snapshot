@@ -20,6 +20,65 @@ function findRouteById(
   return manifest.routes.find((route) => route.id === target);
 }
 
+function listPathPrefixes(path: string): string[] {
+  const normalizedPath = normalizePathname(path);
+  if (normalizedPath === "/") {
+    return ["/"];
+  }
+
+  const segments = normalizedPath.split("/").filter(Boolean);
+  return segments.map(
+    (_segment, index) => `/${segments.slice(0, index + 1).join("/")}`,
+  );
+}
+
+function findRouteByPathPrefix(
+  manifest: CompiledManifest,
+  prefix: string,
+): CompiledRoute | undefined {
+  const exactRoute = manifest.routeMap[prefix];
+  if (exactRoute) {
+    return exactRoute;
+  }
+
+  return manifest.routes.find((route) => matchRoutePath(route.path, prefix) !== null);
+}
+
+function resolveActiveRoutes(
+  manifest: CompiledManifest,
+  route: CompiledRoute,
+  currentPath: string,
+): CompiledRoute[] {
+  const derivedRoutes = listPathPrefixes(currentPath)
+    .map((prefix) => findRouteByPathPrefix(manifest, prefix))
+    .filter((candidate): candidate is CompiledRoute => Boolean(candidate));
+  const explicitRoutes: CompiledRoute[] = [];
+  let currentRoute: CompiledRoute | undefined = route;
+  while (currentRoute) {
+    explicitRoutes.unshift(currentRoute);
+    currentRoute = currentRoute.parentId
+      ? findRouteById(manifest, currentRoute.parentId)
+      : undefined;
+  }
+
+  const activeRoutes: CompiledRoute[] = [];
+  const seenRouteIds = new Set<string>();
+  for (const candidate of [...derivedRoutes, ...explicitRoutes]) {
+    if (seenRouteIds.has(candidate.id)) {
+      continue;
+    }
+
+    seenRouteIds.add(candidate.id);
+    activeRoutes.push(candidate);
+  }
+
+  if (activeRoutes.length === 0) {
+    return [route];
+  }
+
+  return activeRoutes;
+}
+
 export function matchRoutePath(
   routePath: string,
   currentPath: string,
@@ -68,14 +127,7 @@ export function resolveRouteMatch(
       };
     }
 
-    const activeRoutes: CompiledRoute[] = [];
-    let currentRoute: CompiledRoute | undefined = route;
-    while (currentRoute) {
-      activeRoutes.unshift(currentRoute);
-      currentRoute = currentRoute.parentId
-        ? findRouteById(manifest, currentRoute.parentId)
-        : undefined;
-    }
+    const activeRoutes = resolveActiveRoutes(manifest, route, currentPath);
 
     return {
       route,

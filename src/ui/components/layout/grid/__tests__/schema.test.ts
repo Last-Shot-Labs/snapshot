@@ -10,7 +10,7 @@ describe("gridConfigSchema", () => {
       columns: "240px 1fr",
       rows: "auto 1fr",
       gap: "md",
-      children: [{ type: "text", text: "Header", area: "header" }],
+      children: [{ type: "heading", text: "Header", area: "header" }],
     });
 
     expect(result.success).toBe(true);
@@ -21,7 +21,7 @@ describe("gridConfigSchema", () => {
       type: "grid",
       areas: { default: ["main"], lg: ["sidebar main"] },
       columns: { default: 1, lg: "240px 1fr" },
-      children: [{ type: "text", text: "Main" }],
+      children: [{ type: "heading", text: "Main" }],
     });
 
     expect(result.success).toBe(true);

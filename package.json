@@ -42,7 +42,7 @@
     "topicSeparator": " "
   },
   "scripts": {
-    "build": "tsup && oclif manifest",
+    "build": "tsup && oclif manifest && bun run scripts/generate-manifest-schema.ts",
     "typecheck": "tsc --noEmit",
     "dev": "tsup --watch",
     "test": "vitest run",
@@ -119,6 +119,6 @@
     "remark-gfm": "^4.0.1"
   },
   "optionalDependencies": {
-    "zod-to-json-schema": "^3.24.6"
+    "zod-to-json-schema": "^3.25.2"
   }
 }

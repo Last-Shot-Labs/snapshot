@@ -118,7 +118,7 @@ describe("chartSchema", () => {
   it("rejects invalid chart type", () => {
     const result = chartSchema.safeParse({
       ...baseConfig,
-      chartType: "scatter",
+      chartType: "bubble",
     });
     expect(result.success).toBe(false);
   });

@@ -38,11 +38,11 @@ export interface UseWizardResult {
   /** Whether the current step can be skipped. */
   canSkip: boolean;
   /** Advance to the next step (validates current step first). Returns true on success. */
-  nextStep: () => Promise<boolean>;
+  nextStep: () => boolean | Promise<boolean>;
   /** Go back to the previous step (no validation). */
-  prevStep: () => Promise<void>;
+  prevStep: () => void | Promise<void>;
   /** Skip the current step (only if allowSkip is true). */
-  skipStep: () => Promise<void>;
+  skipStep: () => void | Promise<void>;
   /** Reset the wizard to the first step and clear collected values. */
   resetWizard: () => void;
   /** Whether submission is in progress. */

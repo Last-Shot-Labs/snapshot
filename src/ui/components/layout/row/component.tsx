@@ -33,34 +33,56 @@ const JUSTIFY_MAP: Record<string, string> = {
 
 export function Row({ config }: { config: RowConfig }) {
   const gap = useResponsiveValue(config.gap);
-  const style: CSSProperties = {
-    display: "flex",
-    flexDirection: "row",
-    width: "100%",
-    gap: gap ? GAP_MAP[gap] ?? gap : undefined,
-    alignItems: config.align ? ALIGN_MAP[config.align] : undefined,
-    justifyContent: config.justify ? JUSTIFY_MAP[config.justify] : undefined,
-    flexWrap: config.wrap ? "wrap" : undefined,
-    overflow: config.overflow,
-    maxHeight: config.maxHeight,
-  };
+  const resolvedGap = gap ? GAP_MAP[gap] ?? gap : undefined;
+
+  // Use CSS Grid when any child declares a span — gridColumn requires a grid parent.
+  const hasSpans = config.children.some(
+    (c) =>
+      c && typeof c === "object" && "span" in c && (c as Record<string, unknown>).span !== undefined,
+  );
+
+  const style: CSSProperties = hasSpans
+    ? {
+        display: "grid",
+        gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
+        width: "100%",
+        gap: resolvedGap,
+        alignItems: config.align ? ALIGN_MAP[config.align] : undefined,
+      }
+    : {
+        display: "flex",
+        flexDirection: "row",
+        width: "100%",
+        gap: resolvedGap,
+        alignItems: config.align ? ALIGN_MAP[config.align] : undefined,
+        justifyContent: config.justify ? JUSTIFY_MAP[config.justify] : undefined,
+        flexWrap: config.wrap ? "wrap" : undefined,
+        overflow: config.overflow,
+        maxHeight: config.maxHeight,
+      };
 
   return (
     <div style={style}>
-      {config.children.map((child, index) => (
-        <div
-          key={child.id ?? `row-child-${index}`}
-          style={
-            typeof config.animation?.stagger === "number"
-              ? ({
-                  ["--sn-stagger-index" as "--sn-stagger-index"]: index,
-                } as CSSProperties)
-              : undefined
-          }
-        >
-          <ComponentRenderer config={child} />
-        </div>
-      ))}
+      {config.children.map((child, index) =>
+        hasSpans ? (
+          // In grid mode: no intermediate wrapper — ComponentWrapper becomes the direct
+          // grid item and its gridColumn (from span via ComponentRenderer) takes effect.
+          <ComponentRenderer key={child.id ?? `row-child-${index}`} config={child} />
+        ) : (
+          <div
+            key={child.id ?? `row-child-${index}`}
+            style={
+              typeof config.animation?.stagger === "number"
+                ? ({
+                    ["--sn-stagger-index" as "--sn-stagger-index"]: index,
+                  } as CSSProperties)
+                : undefined
+            }
+          >
+            <ComponentRenderer config={child} />
+          </div>
+        ),
+      )}
     </div>
   );
 }

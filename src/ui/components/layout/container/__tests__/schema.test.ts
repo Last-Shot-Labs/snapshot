@@ -9,7 +9,7 @@ describe("containerConfigSchema", () => {
       maxWidth: "xl",
       padding: "md",
       center: true,
-      children: [{ type: "text", text: "Hello" }],
+      children: [{ type: "heading", text: "Hello" }],
     });
 
     expect(result.success).toBe(true);
@@ -19,7 +19,7 @@ describe("containerConfigSchema", () => {
     const result = containerConfigSchema.safeParse({
       type: "container",
       maxWidth: 1200,
-      children: [{ type: "text", text: "Hello" }],
+      children: [{ type: "heading", text: "Hello" }],
     });
 
     expect(result.success).toBe(true);

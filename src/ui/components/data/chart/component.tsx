@@ -428,6 +428,10 @@ export function Chart({ config }: { config: ChartConfig }) {
   const loading = !isRef && isLoading;
   const fetchError = !isRef ? error : null;
 
+  if (!loading && !fetchError && rows.length === 0 && config.hideWhenEmpty) {
+    return null;
+  }
+
   return (
     <div
       data-snapshot-component="chart"

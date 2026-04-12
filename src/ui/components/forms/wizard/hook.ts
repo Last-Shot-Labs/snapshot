@@ -61,6 +61,12 @@ function hasErrors(errors: Record<string, string | undefined>): boolean {
   return Object.values(errors).some((error) => error != null);
 }
 
+function isPromiseLike<T>(
+  value: T | Promise<T> | void,
+): value is Promise<T> {
+  return value instanceof Promise;
+}
+
 export function useWizard(config: WizardConfig): UseWizardResult {
   const api = useContext(SnapshotApiContext);
   const execute = useActionExecutor();
@@ -236,11 +242,11 @@ export function useWizard(config: WizardConfig): UseWizardResult {
     return errors;
   }, [currentStep, currentStepConfig, stepValues]);
 
-  const runStepLeave = useCallback(async () => {
+  const runStepLeave = useCallback(() => {
     if (!currentStepConfig?.onLeave) {
       return;
     }
-    await execute(currentStepConfig.onLeave, {
+    return execute(currentStepConfig.onLeave, {
       step: currentStep,
       values: { ...accumulatedData, ...stepValues },
     });
@@ -291,71 +297,95 @@ export function useWizard(config: WizardConfig): UseWizardResult {
     [api, currentStep, currentStepConfig?.asyncValidate, runtime?.resources],
   );
 
-  const nextStep = useCallback(async (): Promise<boolean> => {
+  const nextStep = useCallback((): boolean | Promise<boolean> => {
     if (!currentStepConfig) {
       return false;
     }
 
-    await runStepLeave();
-    const errors = validateCurrentStep();
-    if (hasErrors(errors)) {
-      return false;
-    }
-
-    const nextValues = {
-      ...accumulatedData,
-      ...stepValues,
-    };
-    const asyncValid = await runAsyncValidation(nextValues);
-    if (!asyncValid) {
-      return false;
-    }
-
-    if (isLastStep) {
-      setIsSubmitting(true);
-      setSubmitError(null);
-      try {
-        if (config.submitEndpoint && api) {
-          const request = resolveEndpointTarget(
-            config.submitEndpoint,
-            runtime?.resources,
-            undefined,
-            "POST",
-          );
-          const url = buildRequestUrl(request.endpoint, request.params);
-          switch (request.method) {
-            case "PUT":
-              await api.put(url, nextValues);
-              break;
-            case "PATCH":
-              await api.patch(url, nextValues);
-              break;
-            default:
-              await api.post(url, nextValues);
-              break;
-          }
-        }
-        if (config.onComplete) {
-          await execute(config.onComplete, {
-            data: nextValues,
-            route: {
-              id: routeRuntime?.currentRoute?.id,
-              path: routeRuntime?.currentPath,
-            },
-          });
-        }
-        setIsComplete(true);
-        return true;
-      } catch (error) {
-        setSubmitError(error instanceof Error ? error : new Error("Submission failed"));
+    const proceedAfterLeave = (): boolean | Promise<boolean> => {
+      const errors = validateCurrentStep();
+      if (hasErrors(errors)) {
         return false;
-      } finally {
-        setIsSubmitting(false);
       }
+
+      const nextValues = {
+        ...accumulatedData,
+        ...stepValues,
+      };
+
+      const finishTransition = (): boolean | Promise<boolean> => {
+        if (isLastStep) {
+          setIsSubmitting(true);
+          setSubmitError(null);
+
+          const submitFlow = async (): Promise<boolean> => {
+            try {
+              if (config.submitEndpoint && api) {
+                const request = resolveEndpointTarget(
+                  config.submitEndpoint,
+                  runtime?.resources,
+                  undefined,
+                  "POST",
+                );
+                const url = buildRequestUrl(request.endpoint, request.params);
+                switch (request.method) {
+                  case "PUT":
+                    await api.put(url, nextValues);
+                    break;
+                  case "PATCH":
+                    await api.patch(url, nextValues);
+                    break;
+                  default:
+                    await api.post(url, nextValues);
+                    break;
+                }
+              }
+              if (config.onComplete) {
+                await execute(config.onComplete, {
+                  data: nextValues,
+                  route: {
+                    id: routeRuntime?.currentRoute?.id,
+                    path: routeRuntime?.currentPath,
+                  },
+                });
+              }
+              setIsComplete(true);
+              return true;
+            } catch (error) {
+              setSubmitError(
+                error instanceof Error ? error : new Error("Submission failed"),
+              );
+              return false;
+            } finally {
+              setIsSubmitting(false);
+            }
+          };
+
+          return submitFlow();
+        }
+
+        transitionTo(currentStep + 1);
+        return true;
+      };
+
+      if (currentStepConfig.asyncValidate && api) {
+        return runAsyncValidation(nextValues).then((asyncValid) => {
+          if (!asyncValid) {
+            return false;
+          }
+          return finishTransition();
+        });
+      }
+
+      return finishTransition();
+    };
+
+    const leaveResult = runStepLeave();
+    if (isPromiseLike(leaveResult)) {
+      return leaveResult.then(() => proceedAfterLeave());
     }
 
-    transitionTo(currentStep + 1);
-    return true;
+    return proceedAfterLeave();
   }, [
     accumulatedData,
     api,
@@ -375,19 +405,33 @@ export function useWizard(config: WizardConfig): UseWizardResult {
     validateCurrentStep,
   ]);
 
-  const prevStep = useCallback(async () => {
+  const prevStep = useCallback((): void | Promise<void> => {
     if (isFirstStep) {
       return;
     }
-    await runStepLeave();
+
+    const leaveResult = runStepLeave();
+    if (isPromiseLike(leaveResult)) {
+      return leaveResult.then(() => {
+        transitionTo(currentStep - 1);
+      });
+    }
+
     transitionTo(currentStep - 1);
   }, [currentStep, isFirstStep, runStepLeave, transitionTo]);
 
-  const skipStep = useCallback(async () => {
+  const skipStep = useCallback((): void | Promise<void> => {
     if (!canSkip) {
       return;
     }
-    await runStepLeave();
+
+    const leaveResult = runStepLeave();
+    if (isPromiseLike(leaveResult)) {
+      return leaveResult.then(() => {
+        transitionTo(currentStep + 1);
+      });
+    }
+
     transitionTo(currentStep + 1);
   }, [canSkip, currentStep, runStepLeave, transitionTo]);
 

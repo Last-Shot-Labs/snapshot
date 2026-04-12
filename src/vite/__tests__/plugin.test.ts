@@ -4,13 +4,15 @@ import path from "node:path";
 import type { ConfigEnv, Plugin, ResolvedConfig, UserConfig, ViteDevServer } from "vite";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const { tailwindPluginFactory, accessMock } = vi.hoisted(() => ({
+  tailwindPluginFactory: vi.fn(() => ({ name: "tailwindcss-vite" })),
+  accessMock: vi.fn(),
+}));
+
 vi.mock("../../cli/sync", () => ({
   runSync: vi.fn().mockResolvedValue(undefined),
   consoleLogger: {},
 }));
-
-const tailwindPluginFactory = vi.fn(() => ({ name: "tailwindcss-vite" }));
-const accessMock = vi.fn();
 
 vi.mock("node:fs/promises", () => ({
   access: accessMock,
@@ -74,13 +76,22 @@ describe("snapshotApp plugin", () => {
     expect(userConfig.plugins).toEqual(
       expect.arrayContaining([expect.objectContaining({ name: "tailwindcss-vite" })]),
     );
-    expect(result).toEqual({
-      build: {
-        rollupOptions: {
-          input: "virtual:snapshot-entry",
+    expect(result).toEqual(
+      expect.objectContaining({
+        build: {
+          rollupOptions: {
+            input: "virtual:snapshot-entry",
+          },
         },
-      },
-    });
+        resolve: expect.objectContaining({
+          dedupe: expect.arrayContaining([
+            "react",
+            "react-dom",
+            "@tanstack/react-query",
+          ]),
+        }),
+      }),
+    );
   });
 
   it("serves an HTML shell with the theme boot script in dev", async () => {

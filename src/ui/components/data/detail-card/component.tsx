@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from "react";
+import { AutoErrorState } from "../../_base/auto-error-state";
 import { ComponentWrapper } from "../../_base/component-wrapper";
 import { useActionExecutor } from "../../../actions/executor";
 import {
@@ -192,7 +193,9 @@ ${BUTTON_INTERACTIVE_CSS}
       {isLoading ? (
         <DetailCardSkeleton />
       ) : error ? (
-        <DetailCardError error={error} />
+        <div data-testid="detail-card-error">
+          <AutoErrorState config={config.error ?? {}} />
+        </div>
       ) : !data ? (
         <DetailCardEmpty
           message={config.emptyState ?? "Select an item to view details"}
@@ -371,28 +374,6 @@ function DetailCardSkeleton() {
   );
 }
 
-/**
- * Error state for the detail card.
- */
-function DetailCardError({ error }: { error: Error }) {
-  return (
-    <div
-      role="alert"
-      data-testid="detail-card-error"
-      style={{
-        padding: "var(--sn-spacing-md, 1rem)",
-        border:
-          "var(--sn-border-default, 1px) solid var(--sn-color-destructive, #ef4444)",
-        borderRadius: "var(--sn-radius-md, 0.375rem)",
-        color: "var(--sn-color-destructive, #ef4444)",
-        backgroundColor:
-          "color-mix(in oklch, var(--sn-color-destructive, #ef4444) 10%, var(--sn-color-card, #ffffff))",
-      }}
-    >
-      Failed to load details: {error.message}
-    </div>
-  );
-}
 
 /**
  * Empty state for the detail card (e.g., no row selected).

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
+import { AutoErrorState } from "../../_base/auto-error-state";
 import { renderIcon } from "../../../icons/render";
 import { useComponentData } from "../../_base/use-component-data";
 import type { TreeViewConfig, TreeItemInput } from "./types";
@@ -402,28 +403,11 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
         data-testid="tree-view"
         className={config.className}
       >
-        <div
-          data-testid="tree-view-error"
-          style={{ color: "var(--sn-color-destructive, #dc2626)" }}
-        >
-          <span style={{ fontSize: "var(--sn-font-size-sm, 0.875rem)" }}>
-            Failed to load tree
-          </span>
-          <button
-            onClick={() => refetch()}
-            style={{
-              marginLeft: "var(--sn-spacing-sm, 0.5rem)",
-              fontSize: "var(--sn-font-size-xs, 0.75rem)",
-              textDecoration: "underline",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "inherit",
-              padding: 0,
-            }}
-          >
-            Retry
-          </button>
+        <div data-testid="tree-view-error">
+          <AutoErrorState
+            config={config.error ?? {}}
+            onRetry={config.error?.retry !== undefined ? refetch : undefined}
+          />
         </div>
       </div>
     );

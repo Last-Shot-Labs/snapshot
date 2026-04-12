@@ -73,7 +73,7 @@ describe("Row", () => {
     const { container } = renderWithContext(
       <RowComponent config={config as unknown as Record<string, unknown>} />,
     );
-    const row = container.querySelector("[data-snapshot-row]");
+    const row = container.firstElementChild;
     expect(row?.getAttribute("style")).toContain("gap");
   });
 
@@ -89,7 +89,7 @@ describe("Row", () => {
     const { container } = renderWithContext(
       <RowComponent config={config as unknown as Record<string, unknown>} />,
     );
-    const row = container.querySelector("[data-snapshot-row]");
+    const row = container.firstElementChild;
     const style = row?.getAttribute("style") ?? "";
     expect(style).toContain("space-between");
     expect(style).toContain("center");
@@ -106,7 +106,7 @@ describe("Row", () => {
     const { container } = renderWithContext(
       <RowComponent config={config as unknown as Record<string, unknown>} />,
     );
-    const row = container.querySelector("[data-snapshot-row]");
+    const row = container.firstElementChild;
     expect(row?.getAttribute("style")).toContain("wrap");
   });
 
@@ -123,7 +123,7 @@ describe("Row", () => {
     const { container } = renderWithContext(
       <RowComponent config={config as unknown as Record<string, unknown>} />,
     );
-    const row = container.querySelector("[data-snapshot-row]");
+    const row = container.firstElementChild;
     expect(row?.getAttribute("style")).toContain("grid");
   });
 });

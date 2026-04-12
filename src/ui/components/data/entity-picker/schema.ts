@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
+import { errorStateConfigSchema } from "../../../manifest/schema";
 import { dataSourceSchema, fromRefSchema } from "../../_base/types";
 
 /**
@@ -51,6 +52,8 @@ export const entityPickerConfigSchema = z
     changeAction: actionSchema.optional(),
     /** Max height for the dropdown list. Default: "300px". */
     maxHeight: z.string().optional(),
+    /** Error state config. */
+    error: errorStateConfigSchema.optional(),
     // --- BaseComponentConfig fields ---
     /** Component id for publishing/subscribing. */
     id: z.string().optional(),

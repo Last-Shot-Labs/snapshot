@@ -1268,10 +1268,14 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
   }, [config.id, form, handleSubmit]);
 
   useEffect(() => {
+    const allowPristineAutoSubmit =
+      typeof config.autoSubmitWhen === "string" &&
+      lastAutoSubmitRef.current === null;
+
     if (
       !config.autoSubmit ||
       !autoSubmitAllowed ||
-      !form.isDirty ||
+      (!form.isDirty && !allowPristineAutoSubmit) ||
       !form.isValid ||
       form.isSubmitting
     ) {

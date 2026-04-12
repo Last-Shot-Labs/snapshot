@@ -2,6 +2,12 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import path from "node:path";
 import fs from "node:fs/promises";
 import os from "node:os";
+import {
+  readManifest,
+  generateThemeCss,
+  generateRouteFile,
+  generateNavFile,
+} from "../sync";
 
 describe("manifest processing", () => {
   let tmpDir: string;
@@ -18,13 +24,11 @@ describe("manifest processing", () => {
 
   describe("readManifest", () => {
     it("returns null for missing file", async () => {
-      const { readManifest } = await import("../sync");
       const result = await readManifest(tmpDir);
       expect(result).toBeNull();
     });
 
     it("returns compiled manifest for valid manifest", async () => {
-      const { readManifest } = await import("../sync");
       const manifest = {
         app: {
           home: "/",
@@ -50,7 +54,6 @@ describe("manifest processing", () => {
     });
 
     it("throws for invalid manifest", async () => {
-      const { readManifest } = await import("../sync");
       const invalid = { routes: "not-an-array" };
       await fs.writeFile(
         path.join(tmpDir, "snapshot.manifest.json"),
@@ -65,7 +68,6 @@ describe("manifest processing", () => {
 
   describe("generateThemeCss", () => {
     it("produces CSS with custom properties", async () => {
-      const { generateThemeCss } = await import("../sync");
       const css = generateThemeCss({
         flavor: "neutral",
         overrides: {
@@ -82,7 +84,6 @@ describe("manifest processing", () => {
 
   describe("generateRouteFile", () => {
     it("produces valid route code with imports", async () => {
-      const { generateRouteFile } = await import("../sync");
       const page = {
         title: "Dashboard",
         content: [{ type: "heading", text: "Dashboard" }],
@@ -105,7 +106,6 @@ describe("manifest processing", () => {
 
   describe("generateNavFile", () => {
     it("produces nav component code", async () => {
-      const { generateNavFile } = await import("../sync");
       const nav = [
         { label: "Home", path: "/" },
         { label: "Settings", path: "/settings", icon: "settings" },

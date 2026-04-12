@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
+import { AutoErrorState } from "../../_base/auto-error-state";
 import { useComponentData } from "../../_base/use-component-data";
 import { Icon } from "../../../icons/index";
 import type { EntityPickerConfig } from "./types";
@@ -357,36 +358,11 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
             )}
 
             {!isLoading && dataError && (
-              <div
-                data-testid="entity-picker-error"
-                style={{
-                  padding: "var(--sn-spacing-md, 0.75rem)",
-                  textAlign: "center",
-                  fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                  color: "var(--sn-color-destructive, #ef4444)",
-                }}
-              >
-                <div>Failed to load entities</div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    dataRefetch();
-                  }}
-                  style={{
-                    marginTop: "var(--sn-spacing-xs, 0.25rem)",
-                    padding:
-                      "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-sm, 0.5rem)",
-                    fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                    color: "var(--sn-color-primary, #2563eb)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                  }}
-                >
-                  Retry
-                </button>
-              </div>
+              <div data-testid="entity-picker-error">
+                <AutoErrorState
+                  config={config.error ?? {}}
+                  onRetry={config.error?.retry !== undefined ? dataRefetch : undefined}
+                /></div>
             )}
 
             {!isLoading && !dataError && filtered.length === 0 && (

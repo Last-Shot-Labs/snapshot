@@ -15,9 +15,13 @@ function resolveNavItem(
   subscribedVisible: unknown,
   subscribedDisabled: unknown,
 ): ResolvedNavItem {
-  const isActive = item.path
-    ? pathname === item.path || pathname.startsWith(item.path + "/")
-    : false;
+  // Group items (those with children) derive active state from their children,
+  // not from their own path — prevents double-highlight when a child shares the path.
+  const isActive = item.children?.length
+    ? false
+    : item.path
+      ? pathname === item.path || pathname.startsWith(item.path + "/")
+      : false;
   const resolvedVisible =
     typeof item.visible === "boolean"
       ? item.visible

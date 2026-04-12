@@ -6,6 +6,7 @@ import {
   type BreadcrumbAutoConfig,
   type BreadcrumbItem,
 } from "../manifest/breadcrumbs";
+import { resolveRouteMatch } from "../manifest/router";
 import { useManifestRuntime, useRouteRuntime } from "../manifest/runtime";
 
 /**
@@ -18,10 +19,16 @@ export function useAutoBreadcrumbs(
   const routeRuntime = useRouteRuntime();
 
   return useMemo(() => {
-    if (!config?.auto || !manifest || !routeRuntime?.match.route) {
+    if (!config?.auto || !manifest || !routeRuntime?.currentPath) {
       return [];
     }
 
-    return generateBreadcrumbs(routeRuntime.match, config);
-  }, [config, manifest, routeRuntime?.match]);
+    const match =
+      routeRuntime.match ?? resolveRouteMatch(manifest, routeRuntime.currentPath);
+    if (!match.route) {
+      return [];
+    }
+
+    return generateBreadcrumbs(match, config);
+  }, [config, manifest, routeRuntime?.currentPath, routeRuntime?.match]);
 }

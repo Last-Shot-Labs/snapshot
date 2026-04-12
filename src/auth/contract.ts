@@ -51,6 +51,8 @@ export interface AuthContract {
   oauthUnlink: (provider: OAuthProvider) => string;
   headers: AuthHeaders;
   csrfCookieName: string;
+  /** Field in the /me response to use as the canonical user ID. Defaults to "userId" (bunshot default). */
+  userIdField: string;
 }
 
 /**
@@ -65,6 +67,7 @@ export interface AuthContractConfig {
   oauthUnlink?: (provider: OAuthProvider) => string;
   headers?: Partial<AuthHeaders>;
   csrfCookieName?: string;
+  userIdField?: string;
 }
 
 // ── Factory ───────────────────────────────────────────────────────────────────
@@ -116,6 +119,7 @@ export function defaultContract(apiUrl: string): AuthContract {
       csrf: "x-csrf-token",
     },
     csrfCookieName: "csrf_token",
+    userIdField: "userId",
   };
 }
 
@@ -142,5 +146,6 @@ export function mergeContract(
     oauthUnlink: partial.oauthUnlink ?? def.oauthUnlink,
     headers: { ...def.headers, ...partial.headers },
     csrfCookieName: partial.csrfCookieName ?? def.csrfCookieName,
+    userIdField: partial.userIdField ?? def.userIdField,
   };
 }

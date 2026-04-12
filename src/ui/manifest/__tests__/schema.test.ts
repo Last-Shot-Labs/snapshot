@@ -467,11 +467,24 @@ describe("routeConfigSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects route paths that do not start with /", () => {
+  it("accepts route shape parsing and defers path validation to the manifest", () => {
     const result = routeConfigSchema.safeParse({
       id: "dashboard",
       path: "dashboard",
       content: [{ type: "heading", text: "Hello" }],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects route paths that do not start with / at the manifest level", () => {
+    const result = manifestConfigSchema.safeParse({
+      routes: [
+        {
+          id: "dashboard",
+          path: "dashboard",
+          content: [{ type: "heading", text: "Hello" }],
+        },
+      ],
     });
     expect(result.success).toBe(false);
   });

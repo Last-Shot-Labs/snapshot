@@ -55,11 +55,20 @@ export const breadcrumbConfigSchema = baseComponentConfigSchema
     className: z.string().optional(),
   })
   .superRefine((config, ctx) => {
-    if (
-      (config.source ?? "manual") === "manual" &&
-      config.items !== undefined &&
-      config.items.length === 0
-    ) {
+    if ((config.source ?? "manual") !== "manual") {
+      return;
+    }
+
+    if (!config.items) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["items"],
+        message: 'Breadcrumb items are required when source is "manual".',
+      });
+      return;
+    }
+
+    if (config.items.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["items"],

@@ -18,6 +18,7 @@ export interface ButtonControlProps {
   variant?: ButtonConfig["variant"];
   size?: ButtonConfig["size"];
   disabled?: boolean;
+  fullWidth?: boolean;
   onClick?: () => void;
   className?: string;
   style?: CSSProperties;
@@ -29,6 +30,7 @@ export function ButtonControl({
   variant = "default",
   size = "md",
   disabled,
+  fullWidth,
   onClick,
   className,
   style,
@@ -46,7 +48,7 @@ export function ButtonControl({
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        width: "100%",
+        width: fullWidth ? "100%" : "auto",
         minHeight: size === "lg" ? "3.25rem" : "2.875rem",
         appearance: "none",
         fontFamily:
@@ -86,17 +88,22 @@ export function Button({ config }: { config: ButtonConfig }) {
   const size = config.size ?? "md";
   const action = config.action;
 
+  const fullWidth = (config as { fullWidth?: boolean }).fullWidth;
   return (
     <div
       data-snapshot-component="button"
       className={config.className}
-      style={config.style as CSSProperties}
+      style={{
+        display: fullWidth ? "block" : "inline-flex",
+        ...(config.style as CSSProperties),
+      }}
     >
       <ButtonControl
         type="button"
         variant={variant}
         size={size}
         disabled={disabled}
+        fullWidth={fullWidth}
         onClick={() => {
           if (disabled || !action) {
             return;

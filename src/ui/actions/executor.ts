@@ -255,7 +255,77 @@ function resolveWorkflowValue(
 
 function getActionTimingKey(action: ActionConfig): string {
   const { debounce, throttle, ...stableAction } = action;
-  return JSON.stringify(stableAction);
+
+  switch (stableAction.type) {
+    case "set-value":
+      return JSON.stringify({
+        type: stableAction.type,
+        target: stableAction.target,
+      });
+    case "refresh":
+      return JSON.stringify({
+        type: stableAction.type,
+        target: stableAction.target,
+      });
+    case "submit-form":
+    case "reset-form":
+      return JSON.stringify({
+        type: stableAction.type,
+        formId: stableAction.formId,
+      });
+    case "scroll-to":
+      return JSON.stringify({
+        type: stableAction.type,
+        target: stableAction.target,
+        behavior: stableAction.behavior,
+        block: stableAction.block,
+      });
+    case "navigate":
+      return JSON.stringify({
+        type: stableAction.type,
+        to: stableAction.to,
+        replace: stableAction.replace,
+      });
+    case "navigate-external":
+      return JSON.stringify({
+        type: stableAction.type,
+        to: stableAction.to,
+        target: stableAction.target,
+      });
+    case "open-modal":
+      return JSON.stringify({
+        type: stableAction.type,
+        modal: stableAction.modal,
+        resultTarget: stableAction.resultTarget,
+      });
+    case "close-modal":
+      return JSON.stringify({
+        type: stableAction.type,
+        modal: stableAction.modal,
+      });
+    case "emit":
+      return JSON.stringify({
+        type: stableAction.type,
+        event: stableAction.event,
+      });
+    case "track":
+      return JSON.stringify({
+        type: stableAction.type,
+        event: stableAction.event,
+      });
+    case "run-workflow":
+      return JSON.stringify({
+        type: stableAction.type,
+        workflow: stableAction.workflow,
+      });
+    case "ws-send":
+      return JSON.stringify({
+        type: stableAction.type,
+        event: stableAction.event,
+      });
+    default:
+      return JSON.stringify(stableAction);
+  }
 }
 
 export function useActionExecutor(): ActionExecuteFn {

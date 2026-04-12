@@ -37,12 +37,12 @@ describe("prefetchLinkSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects invalid prefetch value", () => {
+  it("accepts prefetch: 'eager'", () => {
     const result = prefetchLinkSchema.safeParse({
       to: "/posts",
       prefetch: "eager",
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("rejects empty 'to' string", () => {

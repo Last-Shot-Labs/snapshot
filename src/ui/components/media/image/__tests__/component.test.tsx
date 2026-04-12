@@ -9,6 +9,7 @@ function baseConfig(
   overrides: Partial<SnapshotImageConfig> = {},
 ): SnapshotImageConfig {
   return {
+    type: "image",
     src: "/uploads/cover.jpg",
     width: 1200,
     quality: 75,
@@ -30,9 +31,7 @@ describe("SnapshotImage component", () => {
 
   it("renders with data-snapshot-component attribute", () => {
     const { container } = render(<SnapshotImage config={baseConfig()} />);
-    expect(
-      container.querySelector('[data-snapshot-component="snapshot-image"]'),
-    ).not.toBeNull();
+    expect(container.querySelector('[data-snapshot-component="image"]')).not.toBeNull();
   });
 
   it("constructs src URL with correct query params", () => {
@@ -114,9 +113,7 @@ describe("SnapshotImage component", () => {
     const { container } = render(
       <SnapshotImage config={baseConfig({ className: "my-image-wrapper" })} />,
     );
-    const wrapper = container.querySelector(
-      '[data-snapshot-component="snapshot-image"]',
-    );
+    const wrapper = container.querySelector('[data-snapshot-component="image"]');
     expect(wrapper?.className).toContain("my-image-wrapper");
   });
 

@@ -51,7 +51,7 @@ describe("ConfirmDialog", () => {
 
     expect(screen.getByText("Keep it")).toBeTruthy();
     expect(confirmButton.getAttribute("style")).toContain(
-      "var(--sn-color-destructive",
+      "var(--sn-opacity-disabled, 0.5)",
     );
     expect(confirmButton.hasAttribute("disabled")).toBe(true);
 

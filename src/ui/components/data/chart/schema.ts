@@ -67,6 +67,8 @@ export const chartSchema = baseComponentConfigSchema
     emptyMessage: z.string().default("No data"),
     /** Rich empty state config. */
     empty: emptyStateConfigSchema.optional(),
+    /** Hide the entire component (including its container) when there is no data. */
+    hideWhenEmpty: z.boolean().default(false),
     /** Automatic loading placeholder config. */
     loading: loadingConfigSchema.optional(),
     /** Live refresh configuration driven by realtime events. */

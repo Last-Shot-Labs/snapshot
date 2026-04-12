@@ -35,6 +35,12 @@ describe("manifest router helpers", () => {
     const manifest = compileManifest({
       routes: [
         {
+          id: "users",
+          path: "/users",
+          title: "Users",
+          content: [{ type: "heading", text: "Users Page" }],
+        },
+        {
           id: "user-detail",
           path: "/users/{id}",
           title: "User {params.id}",
@@ -47,6 +53,10 @@ describe("manifest router helpers", () => {
 
     expect(match.route?.id).toBe("user-detail");
     expect(match.params).toEqual({ id: "42" });
+    expect(match.activeRoutes.map((route) => route.id)).toEqual([
+      "users",
+      "user-detail",
+    ]);
   });
 
   it("builds document titles from route metadata and params", () => {

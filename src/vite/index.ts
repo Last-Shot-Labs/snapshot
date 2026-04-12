@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, copyFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import type { Plugin, ResolvedConfig, UserConfig, ViteDevServer } from "vite";
 import { runSync, consoleLogger, type SyncOptions } from "../cli/sync";
@@ -157,16 +157,24 @@ export function snapshotApp(opts: SnapshotAppOptions = {}): Plugin {
         // @tailwindcss/vite not installed — Tailwind classes won't work but app still runs
       }
 
-      if (!isBuild) {
-        return null;
-      }
-
       return {
-        build: {
-          rollupOptions: {
-            input: VIRTUAL_APP_ENTRY_ID,
-          },
+        resolve: {
+          dedupe: [
+            "react",
+            "react-dom",
+            "@tanstack/react-query",
+            "@tanstack/react-router",
+            "jotai",
+            "@unhead/react",
+          ],
         },
+        ...(isBuild && {
+          build: {
+            rollupOptions: {
+              input: VIRTUAL_APP_ENTRY_ID,
+            },
+          },
+        }),
       };
     },
 
@@ -239,14 +247,38 @@ if (import.meta.hot) {
     },
 
     configureServer(server: ViteDevServer) {
+      // Watch the manifest file so handleHotUpdate fires when it changes.
+      const manifestAbsPath = path.resolve(server.config.root, manifestFile);
+      server.watcher.add(manifestAbsPath);
+
+      // Copy the JSON Schema into the project root so VSCode can resolve
+      // "$schema": "./snapshot-schema.json" without cross-directory path issues.
+      try {
+        const schemaSource = path.resolve(__dirname, "snapshot-schema.json");
+        const schemaDest = path.resolve(server.config.root, "snapshot-schema.json");
+        if (existsSync(schemaSource)) {
+          copyFileSync(schemaSource, schemaDest);
+        }
+      } catch {
+        // Non-fatal — schema copy is a DX convenience, not a runtime requirement.
+      }
+
       server.middlewares.use(async (req, res, next) => {
         if (!req.url || req.method !== "GET") {
           next();
           return;
         }
 
-        const pathname = req.url.split("?", 1)[0];
-        if (pathname !== "/" && pathname !== "/index.html") {
+        const pathname = req.url.split("?", 1)[0] ?? "/";
+
+        // Let Vite handle actual assets (JS, CSS, source files, HMR, etc.)
+        const isAsset =
+          pathname.startsWith("/@") ||
+          pathname.startsWith("/node_modules/") ||
+          pathname.startsWith("/__vite") ||
+          /\.\w+$/.test(pathname);
+
+        if (isAsset && pathname !== "/index.html") {
           next();
           return;
         }

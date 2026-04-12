@@ -66,9 +66,13 @@ export function createAuthHooks({
       queryKey: AUTH_QUERY_KEY,
       queryFn: async () => {
         try {
-          return await api.get<AuthUser>(contract.endpoints.me, {
-            suppressUnauthenticated: true,
-          });
+          const raw = await api.get<Record<string, unknown>>(
+            contract.endpoints.me,
+            { suppressUnauthenticated: true },
+          );
+          if (!raw) return null;
+          const idValue = raw[contract.userIdField] ?? raw["id"];
+          return { ...raw, id: String(idValue) } as AuthUser;
         } catch {
           return null;
         }

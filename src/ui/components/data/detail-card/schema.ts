@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   emptyStateConfigSchema,
+  errorStateConfigSchema,
   loadingConfigSchema,
 } from "../../../manifest/schema";
 import {
@@ -101,6 +102,8 @@ export const detailCardConfigSchema = baseComponentConfigSchema.extend({
   emptyState: z.string().optional(),
   /** Rich empty state config. */
   empty: emptyStateConfigSchema.optional(),
+  /** Error state config. */
+  error: errorStateConfigSchema.optional(),
   /** Automatic loading placeholder config. */
   loading: loadingConfigSchema.optional(),
   /** Component id for publishing/subscribing. */

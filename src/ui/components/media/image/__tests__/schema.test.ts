@@ -3,6 +3,7 @@ import { snapshotImageSchema } from "../schema";
 
 describe("snapshotImageSchema", () => {
   const baseConfig = {
+    type: "image" as const,
     src: "/uploads/photo.jpg",
     width: 1200,
     alt: "A photo",
@@ -103,6 +104,7 @@ describe("snapshotImageSchema", () => {
 
   it("accepts full valid config", () => {
     const result = snapshotImageSchema.safeParse({
+      type: "image",
       src: "/uploads/cover.jpg",
       width: 1200,
       height: 630,

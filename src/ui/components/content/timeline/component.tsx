@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
+import { AutoErrorState } from "../../_base/auto-error-state";
 import { useComponentData } from "../../_base/use-component-data";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { Icon } from "../../../icons/icon";
@@ -166,30 +167,11 @@ export function Timeline({ config }: { config: TimelineConfig }) {
         data-testid="timeline"
         className={config.className}
       >
-        <div
-          data-testid="timeline-error"
-          style={{ color: "var(--sn-color-destructive, #dc2626)" }}
-        >
-          <span style={{ fontSize: "var(--sn-font-size-sm, 0.875rem)" }}>
-            Failed to load timeline
-          </span>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            aria-label="Retry"
-            style={{
-              marginLeft: "var(--sn-spacing-sm, 0.5rem)",
-              fontSize: "var(--sn-font-size-xs, 0.75rem)",
-              textDecoration: "underline",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "inherit",
-              padding: 0,
-            }}
-          >
-            Retry
-          </button>
+        <div data-testid="timeline-error">
+          <AutoErrorState
+            config={config.error ?? {}}
+            onRetry={config.error?.retry !== undefined ? refetch : undefined}
+          />
         </div>
       </div>
     );

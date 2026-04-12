@@ -156,6 +156,10 @@ export const componentTokensSchema = z
         activeIndicator: z
           .enum(["background", "border-left", "border-bottom", "dot"])
           .optional(),
+        /** Background color of the active nav item. Accepts any CSS color value or token reference. */
+        activeBackground: z.string().optional(),
+        /** Foreground color of the active nav item. */
+        activeForeground: z.string().optional(),
       })
       .strict()
       .optional(),

@@ -10,7 +10,7 @@ describe("sectionConfigSchema", () => {
       align: "center",
       justify: "between",
       bleed: true,
-      children: [{ type: "text", text: "Hero" }],
+      children: [{ type: "heading", text: "Hero" }],
     });
 
     expect(result.success).toBe(true);

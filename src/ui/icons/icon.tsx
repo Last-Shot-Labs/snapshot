@@ -33,6 +33,12 @@ export interface IconProps {
  * <Icon name="user" size={24} color="var(--sn-color-primary)" label="Profile" />
  * ```
  */
+function normalizeIconName(name: string): string {
+  // Accept both kebab-case ("arrow-left") and PascalCase ("ArrowLeft")
+  if (name.includes("-")) return name;
+  return name.replace(/([A-Z])/g, (m, ch, i) => (i === 0 ? ch.toLowerCase() : `-${ch.toLowerCase()}`));
+}
+
 export function Icon({
   name,
   size = 16,
@@ -40,7 +46,7 @@ export function Icon({
   className,
   label,
 }: IconProps): React.JSX.Element {
-  const svgContent = ICON_PATHS[name];
+  const svgContent = ICON_PATHS[normalizeIconName(name)];
 
   if (!svgContent) {
     return (

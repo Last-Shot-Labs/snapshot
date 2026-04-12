@@ -53,6 +53,8 @@ const TOKEN_PATH_MAP: Record<string, string> = {
   "components.modal.animation": "--sn-modal-animation",
   "components.nav.variant": "--sn-nav-variant",
   "components.nav.activeIndicator": "--sn-nav-active-indicator",
+  "components.nav.activeBackground": "--sn-nav-active-background",
+  "components.nav.activeForeground": "--sn-nav-active-foreground",
   "components.badge.variant": "--sn-badge-variant",
   "components.badge.rounded": "--sn-badge-radius",
   "components.toast.position": "--sn-toast-position",

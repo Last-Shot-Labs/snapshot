@@ -7,11 +7,15 @@ import {
   act,
   fireEvent,
   cleanup,
+  waitFor,
 } from "@testing-library/react";
 import { createElement } from "react";
 import { Provider } from "jotai/react";
 import { SnapshotApiContext } from "../../../../actions/executor";
-import { ManifestRuntimeProvider } from "../../../../manifest/runtime";
+import {
+  ManifestRuntimeProvider,
+  RouteRuntimeProvider,
+} from "../../../../manifest/runtime";
 import {
   PageRegistryContext,
   AppRegistryContext,
@@ -57,9 +61,40 @@ function createWrapper(options: {
     string,
     { method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"; endpoint: string }
   >;
+  routeRuntime?: {
+    currentPath: string;
+    currentRoute?: { id: string; path: string } | null;
+    params?: Record<string, string>;
+    query?: Record<string, string>;
+  };
 }) {
-  const { api, pageRegistry, resources } = options;
+  const { api, pageRegistry, resources, routeRuntime } = options;
   return function Wrapper({ children }: { children: React.ReactNode }) {
+    const content = routeRuntime
+      ? createElement(
+          RouteRuntimeProvider,
+          {
+            value: {
+              currentPath: routeRuntime.currentPath,
+              currentRoute: routeRuntime.currentRoute ?? null,
+              match: {
+                route: routeRuntime.currentRoute ?? null,
+                params: routeRuntime.params ?? {},
+                parents: [],
+                activeRoutes: routeRuntime.currentRoute
+                  ? [routeRuntime.currentRoute as never]
+                  : [],
+              },
+              params: routeRuntime.params ?? {},
+              query: routeRuntime.query ?? {},
+              navigate: vi.fn(),
+              isPreloading: false,
+            },
+          },
+          children,
+        )
+      : children;
+
     return createElement(
       Provider,
       null,
@@ -85,7 +120,7 @@ function createWrapper(options: {
             createElement(
               AppRegistryContext.Provider,
               { value: null },
-              children,
+              content,
             ),
           ),
         ),
@@ -767,5 +802,42 @@ describe("AutoForm", () => {
 
     expect(screen.getByText("Alpha")).toBeDefined();
     expect(screen.getByText("Beta")).toBeDefined();
+  });
+
+  it("auto-submits once when autoSubmitWhen is true for pristine default values", async () => {
+    const wrapper = createWrapper({
+      api: mockApi,
+      pageRegistry,
+      routeRuntime: {
+        currentPath: "/verify-email",
+        currentRoute: { id: "verify-email", path: "/verify-email" },
+        query: { token: "verify-123" },
+      },
+    });
+    const config: AutoFormConfig = {
+      type: "form",
+      submit: "/api/verify-email",
+      autoSubmit: true,
+      autoSubmitWhen: "defined(route.query.token)",
+      autoSubmitDelay: 0,
+      fields: [
+        {
+          name: "token",
+          type: "text",
+          default: "{route.query.token}",
+          visible: false,
+        },
+      ],
+    };
+
+    render(createElement(AutoForm, { config }), { wrapper });
+
+    await waitFor(() => {
+      expect(mockApi.post).toHaveBeenCalledWith("/api/verify-email", {
+        token: "verify-123",
+      });
+    });
+
+    expect(mockApi.post).toHaveBeenCalledTimes(1);
   });
 });

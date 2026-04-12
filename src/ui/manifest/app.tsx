@@ -449,7 +449,9 @@ function readRouteLayouts(
   const route = getRawRouteRecord(manifest, routeId);
   const layouts = route?.["layouts"];
   if (!Array.isArray(layouts) || layouts.length === 0) {
-    return [manifest.app.shell ?? "full-width"];
+    // navigation.mode takes precedence over app.shell so the nav config and
+    // layout variant stay in sync when only navigation.mode is set.
+    return [manifest.navigation?.mode ?? manifest.app.shell ?? "full-width"];
   }
 
   return layouts.filter(
@@ -1003,6 +1005,7 @@ function AppShell({
             config={navConfig}
             pathname={currentPath}
             onNavigate={(path) => navigate(path)}
+            variant={layoutType as "sidebar" | "top-nav"}
           />
         ) : undefined;
 

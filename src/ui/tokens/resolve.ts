@@ -588,6 +588,12 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
         `  --sn-nav-active-indicator: ${components.nav.activeIndicator};`,
       );
     }
+    if (components.nav.activeBackground) {
+      lines.push(`  --sn-nav-active-background: ${components.nav.activeBackground};`);
+    }
+    if (components.nav.activeForeground) {
+      lines.push(`  --sn-nav-active-foreground: ${components.nav.activeForeground};`);
+    }
     if (lines.length > 0) {
       blocks.push(`:root {\n${lines.join("\n")}\n}`);
     }

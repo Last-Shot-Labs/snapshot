@@ -3,6 +3,7 @@ import {
   clientFilterSchema,
   clientSortSchema,
   emptyStateConfigSchema,
+  errorStateConfigSchema,
   liveConfigSchema,
   loadingConfigSchema,
   baseComponentConfigSchema,
@@ -117,8 +118,8 @@ export const listConfigSchema = baseComponentConfigSchema.extend({
     .optional(),
   /** Message shown when no items are available. */
   emptyMessage: z.string().optional(),
-  /** Custom error message. Default: "Failed to load items". */
-  errorMessage: z.string().optional(),
+  /** Error state config. */
+  error: errorStateConfigSchema.optional(),
   /** Inline style overrides. */
   style: z.record(z.union([z.string(), z.number()])).optional(),
   /** Additional CSS class name. */

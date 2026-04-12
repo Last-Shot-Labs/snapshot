@@ -167,7 +167,7 @@ describe("StatCard", () => {
     render(<StatCard config={baseConfig} />, { wrapper });
 
     const errorEl = await screen.findByTestId("stat-card-error");
-    expect(errorEl.textContent).toContain("Failed to load");
+    expect(errorEl.textContent).toContain("Something went wrong");
   });
 
   it("shows loading state when no API client is provided", () => {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { fromRefSchema, componentConfigSchema } from "../../../manifest/schema";
+import { errorStateConfigSchema, fromRefSchema, componentConfigSchema } from "../../../manifest/schema";
 import { dataSourceSchema } from "../../_base/types";
 import { actionSchema } from "../../../actions/types";
 
@@ -67,6 +67,8 @@ export const timelineConfigSchema = z
     showConnector: z.boolean().optional(),
     /** Click action dispatched when an item is clicked. */
     action: actionSchema.optional(),
+    /** Error state config. */
+    error: errorStateConfigSchema.optional(),
     // --- BaseComponentConfig fields ---
     /** Component id for publishing/subscribing. */
     id: z.string().optional(),

@@ -24,6 +24,9 @@ import { useVirtualList } from "../../../hooks/use-virtual-list";
 import type { ComponentConfig } from "../../../manifest/types";
 import type { DataTableConfig, ResolvedColumn } from "./types";
 import { wsManagerAtom } from "../../../../ws/atom";
+import { Icon } from "../../../icons/icon";
+import { useSubscribe } from "../../../context/hooks";
+import { BUTTON_INTERACTIVE_CSS, getButtonStyle } from "../../_base/button-styles";
 
 // ── Formatting helpers ──────────────────────────────────────────────────────
 
@@ -337,6 +340,43 @@ function toAutoEmptyStateConfig(
         }
       : {}),
   };
+}
+
+// ── Toolbar button ──────────────────────────────────────────────────────────
+
+function ToolbarButton({
+  item,
+  execute,
+}: {
+  item: NonNullable<DataTableConfig["toolbar"]>[number];
+  execute: ReturnType<typeof useActionExecutor>;
+}) {
+  const disabled = useSubscribe(item.disabled ?? false) as boolean;
+  const variant = item.variant ?? "outline";
+  return (
+    <button
+      type="button"
+      data-sn-button=""
+      data-variant={variant}
+      disabled={disabled}
+      onClick={() => {
+        if (disabled) return;
+        void execute(item.action as Parameters<typeof execute>[0]);
+      }}
+      style={{
+        ...getButtonStyle(variant, "sm", disabled),
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "var(--sn-spacing-xs, 0.25rem)",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        opacity: 1,
+        filter: disabled ? "saturate(0.55) brightness(0.97)" : undefined,
+      }}
+    >
+      {item.icon && <Icon name={item.icon} size={14} />}
+      {item.label}
+    </button>
+  );
 }
 
 // ── Loading skeleton ────────────────────────────────────────────────────────
@@ -854,11 +894,7 @@ export function DataTable({ config }: { config: DataTableConfig }) {
     : 0;
 
   return (
-    <div
-      data-snapshot-component="data-table"
-      className={config.className}
-      style={config.style as React.CSSProperties}
-    >
+    <>
       <style>{`
 [data-snapshot-component="data-table"] tr[style*="cursor"]:hover,
 [data-snapshot-component="data-table"] tr[data-selected]:hover { background-color: var(--sn-color-secondary, #f3f4f6) !important; }
@@ -897,29 +933,45 @@ export function DataTable({ config }: { config: DataTableConfig }) {
           </button>
         </div>
       ) : null}
-      {/* Search bar */}
-      {config.searchable && (
+      {/* Table header: search + toolbar */}
+      {(config.searchable || config.toolbar?.length) ? (
         <div
           data-table-search
-          style={{ marginBottom: "var(--sn-spacing-md, 12px)" }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: config.searchable ? "space-between" : "flex-end",
+            gap: "var(--sn-spacing-sm, 0.5rem)",
+            marginBottom: "var(--sn-spacing-md, 12px)",
+          }}
         >
-          <input
-            type="text"
-            placeholder={searchPlaceholder}
-            value={table.search}
-            onChange={(e) => table.setSearch(e.target.value)}
-            aria-label="Search table"
-            style={{
-              padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
-              borderRadius: "var(--sn-radius-md, 6px)",
-              border:
-                "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
-              width: "100%",
-              maxWidth: "min(320px, 100%)",
-            }}
-          />
+          {config.searchable && (
+            <input
+              type="text"
+              placeholder={searchPlaceholder}
+              value={table.search}
+              onChange={(e) => table.setSearch(e.target.value)}
+              aria-label="Search table"
+              style={{
+                padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
+                borderRadius: "var(--sn-radius-md, 6px)",
+                border:
+                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
+                flex: "1 1 auto",
+                maxWidth: "min(320px, 100%)",
+              }}
+            />
+          )}
+          {config.toolbar?.length ? (
+            <div style={{ display: "flex", gap: "var(--sn-spacing-xs, 0.25rem)", flexShrink: 0 }}>
+              <style>{BUTTON_INTERACTIVE_CSS}</style>
+              {config.toolbar.map((item, i) => (
+                <ToolbarButton key={i} item={item} execute={execute} />
+              ))}
+            </div>
+          ) : null}
         </div>
-      )}
+      ) : null}
 
       {/* Bulk actions toolbar */}
       {showBulkActions && (
@@ -1191,6 +1243,6 @@ export function DataTable({ config }: { config: DataTableConfig }) {
           onClose={() => setContextMenuState(null)}
         />
       ) : null}
-    </div>
+    </>
   );
 }

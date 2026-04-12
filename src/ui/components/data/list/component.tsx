@@ -6,6 +6,7 @@ import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom } from "../../../context/hooks";
 import { AutoEmptyState } from "../../_base/auto-empty-state";
 import type { AutoEmptyStateConfig } from "../../_base/auto-empty-state";
+import { AutoErrorState } from "../../_base/auto-error-state";
 import { AutoSkeleton } from "../../_base/auto-skeleton";
 import { useComponentData } from "../../_base/use-component-data";
 import { applyClientFilters, applyClientSort } from "../../_base/client-data-ops";
@@ -577,16 +578,11 @@ export function ListComponent({ config }: { config: ListConfig }) {
 
       {/* Error state */}
       {!isLoading && error && (
-        <div
-          data-testid="list-error"
-          style={{
-            padding: "var(--sn-spacing-md, 1rem)",
-            color: "var(--sn-color-destructive, #dc2626)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            textAlign: "center",
-          }}
-        >
-          {config.errorMessage ?? "Failed to load items"}
+        <div data-testid="list-error">
+          <AutoErrorState
+            config={config.error ?? {}}
+            onRetry={config.error?.retry !== undefined ? refetch : undefined}
+          />
         </div>
       )}
 

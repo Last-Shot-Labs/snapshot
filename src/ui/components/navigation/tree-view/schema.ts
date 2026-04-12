@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { fromRefSchema } from "../../../manifest/schema";
+import { errorStateConfigSchema, fromRefSchema } from "../../../manifest/schema";
 import { dataSourceSchema } from "../../_base/types";
 import { actionSchema } from "../../../actions/types";
 
@@ -78,6 +78,8 @@ export const treeViewConfigSchema = z
     showConnectors: z.boolean().optional(),
     /** Action dispatched on item selection. */
     action: actionSchema.optional(),
+    /** Error state config. */
+    error: errorStateConfigSchema.optional(),
     // --- BaseComponentConfig fields ---
     /** Component id for publishing/subscribing. */
     id: z.string().optional(),

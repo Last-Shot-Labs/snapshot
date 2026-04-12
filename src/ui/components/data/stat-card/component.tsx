@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
+import { AutoErrorState } from "../../_base/auto-error-state";
 import { useComponentData } from "../../_base/use-component-data";
 import { Icon } from "../../../icons/index";
 import {
@@ -281,31 +282,11 @@ export function StatCard({ config }: { config: StatCardConfig }) {
 
       {/* Error state */}
       {!isLoading && error && (
-        <div
-          data-testid="stat-card-error"
-          style={{ color: "var(--sn-color-destructive, #dc2626)" }}
-        >
-          <span style={{ fontSize: "var(--sn-font-size-sm, 0.875rem)" }}>
-            {config.errorMessage ?? "Failed to load"}
-          </span>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              refetch();
-            }}
-            style={{
-              marginLeft: "var(--sn-spacing-sm, 0.5rem)",
-              fontSize: "var(--sn-font-size-xs, 0.75rem)",
-              textDecoration: "underline",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "inherit",
-              padding: 0,
-            }}
-          >
-            Retry
-          </button>
+        <div data-testid="stat-card-error">
+          <AutoErrorState
+            config={config.error ?? {}}
+            onRetry={config.error?.retry !== undefined ? refetch : undefined}
+          />
         </div>
       )}
 

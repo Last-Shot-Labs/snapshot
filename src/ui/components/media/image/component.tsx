@@ -77,7 +77,8 @@ export function SnapshotImage({ config }: { config: SnapshotImageConfig }) {
 
   return (
     <div
-      data-snapshot-image=""
+      data-snapshot-component="image"
+      className={config.className}
       style={{
         position: "relative",
         display: "inline-block",
@@ -85,6 +86,7 @@ export function SnapshotImage({ config }: { config: SnapshotImageConfig }) {
         lineHeight: 0,
         width: "100%",
         aspectRatio,
+        ...((config.style as React.CSSProperties | undefined) ?? {}),
       }}
     >
       {placeholder !== "empty" ? (

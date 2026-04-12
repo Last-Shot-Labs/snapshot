@@ -216,6 +216,10 @@ export function getRegisteredSchemaTypes(): string[] {
   return [...componentSchemaRegistry.keys()];
 }
 
+export function getRegisteredSchemas(): Map<string, z.ZodType> {
+  return new Map(componentSchemaRegistry);
+}
+
 export const baseComponentConfigSchema = z.object({
   type: z.string(),
   id: z.string().optional(),
@@ -345,6 +349,24 @@ export const emptyStateConfigSchema = z
   })
   .strict();
 
+export const errorStateConfigSchema = z
+  .object({
+    /** Heading text. Default: "Something went wrong". */
+    title: z.string().optional(),
+    /** Supporting text shown below the title. */
+    description: z.string().optional(),
+    /**
+     * Show a retry button. Pass `true` for the default label ("Retry") or
+     * `{ label: "..." }` to customise it.
+     */
+    retry: z
+      .union([z.boolean(), z.object({ label: z.string() }).strict()])
+      .optional(),
+    /** Icon name. Default: "circle-alert". */
+    icon: z.string().optional(),
+  })
+  .strict();
+
 export const suspenseFallbackSchema = z
   .object({
     type: z.enum(["skeleton", "spinner", "custom"]),
@@ -414,6 +436,8 @@ export const buttonConfigSchema = baseComponentConfigSchema.extend({
   size: z.enum(["sm", "md", "lg", "icon"]).optional(),
   action: z.union([actionConfigSchema, z.array(actionConfigSchema)]),
   disabled: z.union([z.boolean(), fromRefSchema]).optional(),
+  /** Stretch button to fill its container. Default false (content width). */
+  fullWidth: z.boolean().optional(),
 });
 
 const selectOptionSchema = z.object({
@@ -822,6 +846,12 @@ export const authContractSchema = z
     endpoints: authEndpointConfigSchema.optional(),
     headers: authHeadersConfigSchema.optional(),
     csrfCookieName: stringOrEnvRef.optional(),
+    /**
+     * The field in the /me response to use as the canonical user ID.
+     * Defaults to "userId" to match bunshot's /auth/me response shape.
+     * Override to "id" or any other field name for non-bunshot backends.
+     */
+    userIdField: z.string().min(1).default("userId"),
   })
   .strict();
 
@@ -892,6 +922,7 @@ export const realtimeWsSchema = z
     events: z
       .record(z.union([z.string(), eventActionValueSchema]))
       .optional(),
+    eventActions: z.record(eventActionValueSchema).optional(),
   })
   .strict()
   .transform((value) => ({
@@ -911,11 +942,14 @@ export const realtimeWsSchema = z
         ),
       ),
     },
-    eventActions: Object.fromEntries(
-      Object.entries(value.events ?? {}).filter(
-        ([, eventValue]) => typeof eventValue !== "string",
+    eventActions: {
+      ...(value.eventActions ?? {}),
+      ...Object.fromEntries(
+        Object.entries(value.events ?? {}).filter(
+          ([, eventValue]) => typeof eventValue !== "string",
+        ),
       ),
-    ),
+    },
   }));
 
 /**
@@ -938,6 +972,7 @@ export const realtimeSseEndpointSchema = z
     events: z
       .record(z.union([z.string(), eventActionValueSchema]))
       .optional(),
+    eventActions: z.record(eventActionValueSchema).optional(),
   })
   .strict()
   .transform((value) => ({
@@ -950,11 +985,14 @@ export const realtimeSseEndpointSchema = z
         ),
       ),
     },
-    eventActions: Object.fromEntries(
-      Object.entries(value.events ?? {}).filter(
-        ([, eventValue]) => typeof eventValue !== "string",
+    eventActions: {
+      ...(value.eventActions ?? {}),
+      ...Object.fromEntries(
+        Object.entries(value.events ?? {}).filter(
+          ([, eventValue]) => typeof eventValue !== "string",
+        ),
       ),
-    ),
+    },
   }));
 
 export const presenceConfigSchema = z

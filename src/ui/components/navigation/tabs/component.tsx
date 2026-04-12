@@ -228,7 +228,9 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
             data-tab-content=""
             aria-hidden={index !== activeTab}
             style={{
-              display: index === activeTab ? "block" : "none",
+              display: index === activeTab ? "flex" : "none",
+              flexDirection: "column",
+              gap: "var(--sn-spacing-md, 1rem)",
             }}
           >
             {tab.content.map((child, childIndex) => (

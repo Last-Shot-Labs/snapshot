@@ -238,5 +238,19 @@ export const dataTableConfigSchema = baseComponentConfigSchema
     rowClickAction: actionSchema.optional(),
     /** Table density. Affects row padding. */
     density: z.enum(["compact", "default", "comfortable"]).optional(),
+    /** Toolbar buttons rendered in the table card header, right-aligned. */
+    toolbar: z
+      .array(
+        z.object({
+          label: z.string(),
+          icon: z.string().optional(),
+          variant: z
+            .enum(["default", "secondary", "outline", "ghost", "destructive", "link"])
+            .optional(),
+          action: actionSchema,
+          disabled: z.union([z.boolean(), fromRefSchema]).optional(),
+        }).strict(),
+      )
+      .optional(),
   })
   .strict();
