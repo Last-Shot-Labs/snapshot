@@ -127,9 +127,16 @@ export function createSnapshot<
 
   // ── Plugin registration ───────────────────────────────────────────────────
   const plugins = config.plugins ?? [];
+  const seenTypeNames = new Set<string>();
   for (const plugin of plugins) {
     if (plugin.components) {
       for (const [typeName, entry] of Object.entries(plugin.components)) {
+        if (seenTypeNames.has(typeName)) {
+          console.warn(
+            `[snapshot] Duplicate component type "${typeName}" registered by plugin "${plugin.name}". Later registration overrides earlier one.`,
+          );
+        }
+        seenTypeNames.add(typeName);
         registerComponent(
           typeName,
           entry.component as Parameters<typeof registerComponent>[1],
@@ -151,8 +158,8 @@ export function createSnapshot<
     manifestWithPlugins = {
       ...manifestWithPlugins,
       componentGroups: {
-        ...existingGroups,
         ...Object.fromEntries(pluginGroups),
+        ...existingGroups,
       },
     } as typeof manifestWithPlugins;
   }
@@ -183,7 +190,12 @@ export function createSnapshot<
 
     for (const plugin of plugins) {
       if (plugin.setup) {
-        void plugin.setup(setupContext);
+        const result = plugin.setup(setupContext);
+        if (result && typeof (result as Promise<void>).then === "function") {
+          console.warn(
+            `[snapshot] Plugin "${plugin.name}" setup() returned a Promise. Async setup is not awaited — use synchronous setup or manage the async lifecycle externally.`,
+          );
+        }
       }
     }
   }

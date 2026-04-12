@@ -82,6 +82,7 @@ function baseConfig(overrides: Partial<ChartConfig> = {}): ChartConfig {
     legend: true,
     grid: true,
     emptyMessage: "No data",
+    hideWhenEmpty: false,
     ...overrides,
   };
 }

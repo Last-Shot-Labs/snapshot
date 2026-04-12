@@ -156,6 +156,7 @@ export function mapEntityFormPage(
         ? {
             entityPageData: {
               scope: "route",
+              persist: "none" as const,
               default: {
                 item: normalizeRecordForFields(
                   existingItem,

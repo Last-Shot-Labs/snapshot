@@ -195,6 +195,7 @@ export function mapEntityListPage(
     state: {
       entityPageData: {
         scope: "route",
+        persist: "none" as const,
         default: {
           items: normalizedItems,
           total: data.total,

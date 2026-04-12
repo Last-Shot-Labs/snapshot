@@ -31,8 +31,11 @@ export function createWsHooks<TEvents extends Record<string, unknown>>() {
       subscribe: (room) => manager?.subscribe(room),
       unsubscribe: (room) => manager?.unsubscribe(room),
       getRooms: () => manager?.getRooms() ?? [],
-      on: (event, handler) => manager?.on(event, handler),
-      off: (event, handler) => manager?.off(event, handler),
+      // Type safety enforced at SocketHook API boundary
+      on: (event, handler) =>
+        manager?.on(event, handler as (data: unknown) => void),
+      off: (event, handler) =>
+        manager?.off(event, handler as (data: unknown) => void),
       reconnect: () => manager?.reconnect(),
     };
   }
@@ -75,12 +78,12 @@ export function createWsHooks<TEvents extends Record<string, unknown>>() {
 
       manager.on(
         event as keyof TEvents,
-        scoped as (data: TEvents[keyof TEvents]) => void,
+        scoped as (data: unknown) => void,
       );
       return () => {
         manager.off(
           event as keyof TEvents,
-          scoped as (data: TEvents[keyof TEvents]) => void,
+          scoped as (data: unknown) => void,
         );
       };
     }, [room, event, handler, manager]);

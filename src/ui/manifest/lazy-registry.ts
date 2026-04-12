@@ -27,7 +27,7 @@ async function registerFromModule(
     registerComponent(type, component as Parameters<typeof registerComponent>[1]);
   }
   if (schema && isRecord(schema)) {
-    registerComponentSchema(type, schema as Parameters<typeof registerComponentSchema>[1]);
+    registerComponentSchema(type, schema as unknown as Parameters<typeof registerComponentSchema>[1]);
   }
 }
 
@@ -49,7 +49,7 @@ async function registerFromSplitModules(
     registerComponent(type, component as Parameters<typeof registerComponent>[1]);
   }
   if (schema && isRecord(schema)) {
-    registerComponentSchema(type, schema as Parameters<typeof registerComponentSchema>[1]);
+    registerComponentSchema(type, schema as unknown as Parameters<typeof registerComponentSchema>[1]);
   }
 }
 
@@ -773,4 +773,4 @@ export function resetLazyRegistry(): void {
   loadedAllBuiltIns = false;
 }
 
-COMPONENT_LOADERS["auto-form"] = COMPONENT_LOADERS.form;
+COMPONENT_LOADERS["auto-form"] = COMPONENT_LOADERS.form!;

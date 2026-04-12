@@ -49,6 +49,7 @@ const baseConfig: StatCardConfig = {
   data: "GET /api/stats/revenue",
   field: "total",
   label: "Revenue",
+  ariaLive: "polite",
 };
 
 describe("StatCard", () => {
@@ -264,6 +265,7 @@ describe("StatCard", () => {
     const config: StatCardConfig = {
       type: "stat-card",
       data: "GET /api/stats",
+      ariaLive: "polite",
     };
     const api = createMockApi({ name: "test", value: 42 });
     const wrapper = createTestWrapper(api);
@@ -279,6 +281,7 @@ describe("StatCard", () => {
       type: "stat-card",
       data: "GET /api/stats",
       field: "totalRevenue",
+      ariaLive: "polite",
     };
     const api = createMockApi({ totalRevenue: 1000 });
     const wrapper = createTestWrapper(api);

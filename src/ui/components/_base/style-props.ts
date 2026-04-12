@@ -396,8 +396,12 @@ export function resolveInteractiveCSS(
     if (hover.color) props.push(`color: ${resolveColor(hover.color)}`);
     if (hover.shadow) props.push(`box-shadow: ${resolveShadow(hover.shadow)}`);
     if (hover.opacity != null) props.push(`opacity: ${hover.opacity}`);
-    if (hover.transform) props.push(`transform: ${hover.transform}`);
-    if (hover.scale != null) props.push(`transform: scale(${hover.scale})`);
+    if (hover.transform || hover.scale != null) {
+      const parts: string[] = [];
+      if (hover.transform) parts.push(hover.transform as string);
+      if (hover.scale != null) parts.push(`scale(${hover.scale})`);
+      props.push(`transform: ${parts.join(" ")}`);
+    }
     if (hover.border) props.push(`border: ${hover.border}`);
     if (hover.borderRadius)
       props.push(`border-radius: ${resolveRadius(hover.borderRadius)}`);
@@ -429,8 +433,12 @@ export function resolveInteractiveCSS(
     const props: string[] = [];
     if (active.bg) props.push(`background: ${resolveColor(active.bg)}`);
     if (active.color) props.push(`color: ${resolveColor(active.color)}`);
-    if (active.transform) props.push(`transform: ${active.transform}`);
-    if (active.scale != null) props.push(`transform: scale(${active.scale})`);
+    if (active.transform || active.scale != null) {
+      const parts: string[] = [];
+      if (active.transform) parts.push(active.transform as string);
+      if (active.scale != null) parts.push(`scale(${active.scale})`);
+      props.push(`transform: ${parts.join(" ")}`);
+    }
     if (props.length) rules.push(`${sel}:active { ${props.join("; ")} }`);
   }
 
@@ -529,8 +537,9 @@ export function resolveResponsiveCSS(
   const css: string[] = [];
 
   // Skip default rules — they're handled by inline styles via resolveStyleProps
-  for (const [bp, rules] of Object.entries(bpRulesMap)) {
-    if (!rules.length) continue;
+  for (const bp of ["sm", "md", "lg", "xl", "2xl"] as const) {
+    const rules = bpRulesMap[bp];
+    if (!rules?.length) continue;
     const minWidth = BREAKPOINTS[bp];
     if (minWidth) {
       css.push(

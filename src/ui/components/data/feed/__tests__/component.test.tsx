@@ -63,6 +63,7 @@ function baseConfig(overrides: Partial<FeedConfig> = {}): FeedConfig {
     itemKey: "id",
     emptyMessage: "No activity yet",
     pageSize: 20,
+    relativeTime: false,
     ...overrides,
   };
 }

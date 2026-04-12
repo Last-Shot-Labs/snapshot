@@ -49,6 +49,8 @@ describe("ModalComponent", () => {
     id: "test-modal",
     title: "Test Modal",
     size: "md",
+    trapFocus: true,
+    returnFocus: true,
     content: [{ type: "test-child", text: "Hello from modal" }],
   };
 
@@ -143,6 +145,8 @@ describe("ModalComponent", () => {
       type: "modal",
       id: "no-title-modal",
       size: "md",
+      trapFocus: true,
+      returnFocus: true,
       content: [{ type: "test-child", text: "Body" }],
     };
     const { container } = render(createElement(ModalComponent, { config }), {
@@ -157,6 +161,8 @@ describe("ModalComponent", () => {
       type: "modal",
       id: "full-modal",
       size: "full",
+      trapFocus: true,
+      returnFocus: true,
       content: [],
     };
     const { container } = render(createElement(ModalComponent, { config }), {

@@ -4,6 +4,7 @@ import { Component, Suspense, useEffect, useRef, useState } from "react";
 import type { CSSProperties, ErrorInfo, ReactNode } from "react";
 import { useManifestRuntime, useRouteRuntime } from "../../manifest/runtime";
 import { useSubscribe } from "../../context";
+import { useEvaluateExpression } from "../../expressions/use-expression";
 import { SnapshotApiContext } from "../../actions/executor";
 import { useContext } from "react";
 import type {
@@ -379,10 +380,17 @@ export function ComponentWrapper({
       : null;
 
   // ── Exit animation lifecycle ──────────────────────────────────────────
+  const visibleExpr =
+    config?.visible &&
+    typeof config.visible === "object" &&
+    "expr" in config.visible
+      ? (config.visible as { expr: string }).expr
+      : undefined;
+  const exprVisible = useEvaluateExpression(visibleExpr);
   const isVisible = useSubscribe(
-    config?.visible !== undefined ? config.visible : true,
+    config?.visible !== undefined && !visibleExpr ? config.visible : true,
   );
-  const resolvedVisible = isVisible !== false;
+  const resolvedVisible = visibleExpr ? exprVisible : isVisible !== false;
   const [shouldRender, setShouldRender] = useState(resolvedVisible);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 

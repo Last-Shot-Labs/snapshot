@@ -41,6 +41,8 @@ describe("DrawerComponent", () => {
     title: "User Details",
     size: "md",
     side: "right",
+    trapFocus: true,
+    returnFocus: true,
     content: [{ type: "test-child", text: "Drawer content" }],
   };
 

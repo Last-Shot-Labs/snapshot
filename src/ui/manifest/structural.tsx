@@ -913,7 +913,7 @@ interface OutletConfig {
 }
 
 function OutletComponent({ config }: { config: Record<string, unknown> }) {
-  const outletConfig = config as OutletConfig;
+  const outletConfig = config as unknown as OutletConfig;
   const routeRuntime = useRouteRuntime();
   const manifest = useManifestRuntime();
   const outletDepth = useContext(OutletDepthContext);

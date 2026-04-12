@@ -101,6 +101,7 @@ export function mapEntityDashboardPage(
     state: {
       entityPageData: {
         scope: "route",
+        persist: "none" as const,
         default: {
           stats: data.stats,
           activity: data.activity ?? [],

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { useSubscribe, usePublish } from "../../../context/index";
+import { useEvaluateExpression } from "../../../expressions/use-expression";
 import type { CollapsibleConfig } from "./types";
 
 const DURATION_MAP: Record<string, number> = {
@@ -13,6 +14,14 @@ const DURATION_MAP: Record<string, number> = {
 };
 
 export function Collapsible({ config }: { config: CollapsibleConfig }) {
+  const openExpr =
+    config.open != null &&
+    typeof config.open === "object" &&
+    "expr" in config.open
+      ? (config.open as { expr: string }).expr
+      : undefined;
+  const exprOpen = useEvaluateExpression(openExpr);
+
   const controlledOpen = useSubscribe(
     config.open != null &&
       typeof config.open === "object" &&
@@ -22,13 +31,17 @@ export function Collapsible({ config }: { config: CollapsibleConfig }) {
   );
   const isControlled =
     config.open !== undefined &&
-    (typeof config.open === "boolean" || controlledOpen !== undefined);
+    (typeof config.open === "boolean" ||
+      controlledOpen !== undefined ||
+      openExpr !== undefined);
 
   const [internalOpen, setInternalOpen] = useState(config.defaultOpen ?? false);
   const isOpen = isControlled
-    ? typeof config.open === "boolean"
-      ? config.open
-      : Boolean(controlledOpen)
+    ? openExpr !== undefined
+      ? exprOpen
+      : typeof config.open === "boolean"
+        ? config.open
+        : Boolean(controlledOpen)
     : internalOpen;
 
   const contentRef = useRef<HTMLDivElement>(null);

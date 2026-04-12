@@ -27,7 +27,14 @@ const COMPONENT_ARRAY_FIELDS = new Set([
   "fallback",
 ]);
 
-const COMPONENT_SINGLE_FIELDS = new Set(["trigger", "render"]);
+const COMPONENT_SINGLE_FIELDS = new Set([
+  "trigger",
+  "render",
+  "loading",
+  "error",
+  "notFound",
+  "offline",
+]);
 
 interface GenerateOptions {
   plugins?: SnapshotPlugin[];
@@ -42,11 +49,6 @@ function buildComponentUnion(
   if (registeredSchemas.size === 0) {
     return null;
   }
-
-  const iconEnum =
-    iconNames.length > 0
-      ? { type: "string" as const, enum: iconNames }
-      : undefined;
 
   const componentSchemas: Record<string, unknown>[] = [];
 
@@ -63,11 +65,16 @@ function buildComponentUnion(
       properties["type"] = { type: "string", const: typeName };
       jsonSchema["properties"] = properties;
 
-      // Inject icon enum on icon fields
-      if (iconEnum && properties["icon"]) {
+      // Inject icon enum on icon fields — fresh object per component to
+      // avoid shared-reference issues with cycle-detecting serializers
+      if (iconNames.length > 0 && properties["icon"]) {
         const iconProp = properties["icon"] as Record<string, unknown>;
         if (iconProp["type"] === "string" && !iconProp["enum"]) {
-          properties["icon"] = { ...iconProp, ...iconEnum };
+          properties["icon"] = {
+            ...iconProp,
+            type: "string" as const,
+            enum: [...iconNames],
+          };
         }
       }
 
@@ -93,6 +100,29 @@ function buildComponentUnion(
     oneOf: componentSchemas,
     discriminator: { propertyName: "type" },
   };
+}
+
+function deepCloneUnion(
+  union: Record<string, unknown>,
+  visited: WeakSet<object>,
+): Record<string, unknown> {
+  const clone = JSON.parse(JSON.stringify(union)) as Record<string, unknown>;
+  // Mark the clone (and its nested objects) as visited so the recursive
+  // traversal never enters component union content — it would otherwise
+  // find nested component-config-like fields and trigger infinite expansion.
+  function markVisited(node: unknown): void {
+    if (!node || typeof node !== "object") return;
+    const obj = node as Record<string, unknown>;
+    if (visited.has(obj)) return;
+    visited.add(obj);
+    if (Array.isArray(node)) {
+      node.forEach(markVisited);
+    } else {
+      for (const val of Object.values(obj)) markVisited(val);
+    }
+  }
+  markVisited(clone);
+  return clone;
 }
 
 function replaceComponentConfigs(
@@ -128,7 +158,7 @@ function replaceComponentConfigs(
             items["allOf"] ||
             items["additionalProperties"] !== undefined
           ) {
-            prop["items"] = union;
+            prop["items"] = deepCloneUnion(union, visited);
           }
         }
       }
@@ -141,7 +171,7 @@ function replaceComponentConfigs(
           prop["allOf"] ||
           prop["additionalProperties"] !== undefined
         ) {
-          properties[key] = union;
+          properties[key] = deepCloneUnion(union, visited);
         }
       }
     }

@@ -219,6 +219,7 @@ export function mapEntityDetailPage(
     state: {
       entityPageData: {
         scope: "route",
+        persist: "none" as const,
         default: {
           item: normalizeRecordForFields(
             item,

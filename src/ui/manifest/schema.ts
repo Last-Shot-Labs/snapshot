@@ -1901,10 +1901,12 @@ export const manifestConfigSchema = z
     shortcuts: shortcutsConfigSchema.optional(),
     componentGroups: z
       .record(
-        z.object({
-          description: z.string().optional(),
-          components: z.array(componentConfigSchema),
-        }),
+        z
+          .object({
+            description: z.string().optional(),
+            components: z.array(componentConfigSchema).min(1),
+          })
+          .strict(),
       )
       .optional(),
     routes: z.array(routeConfigSchema).min(1),

@@ -91,7 +91,7 @@ export default class AddPage extends Command {
         message: "Route path",
         placeholder: "/users",
         validate: (value) =>
-          value.startsWith("/") ? undefined : "Path must start with /",
+          value?.startsWith("/") ? undefined : "Path must start with /",
       }));
     if (typeof routePathValue !== "string") {
       outro("Aborted.");

@@ -46,6 +46,9 @@ describe("BreadcrumbComponent", () => {
     );
     expect(route).toBeDefined();
 
+    const homeRoute = manifest.routes.find((r) => r.id === "home") ?? null;
+    const usersRoute = manifest.routes.find((r) => r.id === "users") ?? null;
+
     render(
       <Provider store={createStore()}>
         <ManifestRuntimeProvider manifest={manifest}>
@@ -53,6 +56,12 @@ describe("BreadcrumbComponent", () => {
             value={{
               currentPath: "/users/42",
               currentRoute: route ?? null,
+              match: {
+                route: route ?? null,
+                params: { id: "42" },
+                parents: [homeRoute, usersRoute].filter(Boolean) as typeof manifest.routes,
+                activeRoutes: [homeRoute, usersRoute, route].filter(Boolean) as typeof manifest.routes,
+              },
               params: { id: "42" },
               query: {},
               navigate,

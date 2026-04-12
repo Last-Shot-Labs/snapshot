@@ -421,8 +421,8 @@ export function ListComponent({ config }: { config: ListConfig }) {
   }
 
   const resolvedClientFilters = useResolveFrom(
-    config.clientFilter ?? [],
-  ) as Array<{
+    (config.clientFilter ?? []) as unknown as Record<string, unknown>,
+  ) as unknown as Array<{
     field: string;
     operator:
       | "equals"
@@ -438,8 +438,8 @@ export function ListComponent({ config }: { config: ListConfig }) {
     value: unknown;
   }>;
   const resolvedClientSort = useResolveFrom(
-    config.clientSort ?? [],
-  ) as Array<{
+    (config.clientSort ?? []) as unknown as Record<string, unknown>,
+  ) as unknown as Array<{
     field: string;
     direction: "asc" | "desc";
   }>;

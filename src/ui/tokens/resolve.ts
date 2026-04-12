@@ -1036,6 +1036,11 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  tab-size: 4;
+  -moz-tab-size: 4;
 }
 body {
   min-height: 100dvh;
@@ -1046,7 +1051,7 @@ body {
   background: inherit;
 }
 button, input, textarea, select { font: inherit; }
-img, video, svg { display: block; max-width: 100%; }
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
 p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
 #root { isolation: isolate; }
 a { color: inherit; text-decoration-color: color-mix(in oklch, var(--sn-color-primary, #2563eb) 35%, transparent); }
@@ -1458,8 +1463,8 @@ a:focus-visible {
   to { transform: rotate(360deg); }
 }
 @keyframes sn-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%, 100% { opacity: 1; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-8px); }
 }
 ${reducedMotionCss}
 `;

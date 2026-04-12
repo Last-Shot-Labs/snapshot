@@ -55,7 +55,7 @@ export function SuspenseWrapper({
       break;
     case "custom":
       fallback = config.component ? (
-        <ComponentRenderer config={config.component} />
+        <ComponentRenderer config={config.component as Parameters<typeof ComponentRenderer>[0]["config"]} />
       ) : null;
       break;
     default:

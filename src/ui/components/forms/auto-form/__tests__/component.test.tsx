@@ -76,9 +76,9 @@ function createWrapper(options: {
           {
             value: {
               currentPath: routeRuntime.currentPath,
-              currentRoute: routeRuntime.currentRoute ?? null,
+              currentRoute: (routeRuntime.currentRoute ?? null) as never,
               match: {
-                route: routeRuntime.currentRoute ?? null,
+                route: (routeRuntime.currentRoute ?? null) as never,
                 params: routeRuntime.params ?? {},
                 parents: [],
                 activeRoutes: routeRuntime.currentRoute
@@ -90,8 +90,8 @@ function createWrapper(options: {
               navigate: vi.fn(),
               isPreloading: false,
             },
+            children,
           },
-          children,
         )
       : children;
 

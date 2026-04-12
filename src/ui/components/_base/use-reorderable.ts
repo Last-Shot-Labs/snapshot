@@ -33,7 +33,7 @@ function areItemsEqual<T>(
   return previous.every((item, index) => {
     const nextItem = next[index];
     const previousKey = getKey?.(item);
-    const nextKey = getKey?.(nextItem);
+    const nextKey = nextItem !== undefined ? getKey?.(nextItem) : undefined;
     if (previousKey != null || nextKey != null) {
       return previousKey === nextKey;
     }

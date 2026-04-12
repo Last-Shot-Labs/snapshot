@@ -31,6 +31,74 @@ const SIZE_MAP: Record<
   },
 };
 
+function ToggleItem({
+  item,
+  selected,
+  variant,
+  sizeConfig,
+  isLast,
+  role,
+  onToggle,
+}: {
+  item: ToggleGroupConfig["items"][number];
+  selected: boolean;
+  variant: string;
+  sizeConfig: (typeof SIZE_MAP)[string];
+  isLast: boolean;
+  role: "checkbox" | "radio";
+  onToggle: () => void;
+}) {
+  const subscribedDisabled = useSubscribe(
+    item.disabled != null &&
+      typeof item.disabled === "object" &&
+      "from" in item.disabled
+      ? item.disabled
+      : undefined,
+  );
+  const itemDisabled =
+    typeof item.disabled === "boolean"
+      ? item.disabled
+      : subscribedDisabled === true;
+
+  const itemStyle: CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "var(--sn-spacing-xs, 0.25rem)",
+    height: sizeConfig.height,
+    padding: sizeConfig.padding,
+    fontSize: sizeConfig.fontSize,
+    fontFamily: "inherit",
+    fontWeight: selected ? 600 : 400,
+    background: selected ? "var(--sn-color-accent)" : "transparent",
+    color: selected ? "var(--sn-color-accent-foreground)" : "inherit",
+    border: "none",
+    borderRight:
+      variant === "outline" && !isLast
+        ? "1px solid var(--sn-color-border)"
+        : undefined,
+    cursor: itemDisabled ? "not-allowed" : "pointer",
+    opacity: itemDisabled ? 0.5 : 1,
+    transition:
+      "background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+  };
+
+  return (
+    <button
+      type="button"
+      role={role}
+      aria-checked={selected}
+      aria-label={item.label ?? item.value}
+      disabled={itemDisabled}
+      onClick={onToggle}
+      style={itemStyle}
+    >
+      {item.icon && renderIcon(item.icon, sizeConfig.iconSize)}
+      {item.label && <span>{item.label}</span>}
+    </button>
+  );
+}
+
 export function ToggleGroup({ config }: { config: ToggleGroupConfig }) {
   const execute = useActionExecutor();
   const controlledValue = useSubscribe(
@@ -78,6 +146,7 @@ export function ToggleGroup({ config }: { config: ToggleGroupConfig }) {
   const size = config.size ?? "md";
   const variant = config.variant ?? "outline";
   const sizeConfig = SIZE_MAP[size] ?? SIZE_MAP["md"]!;
+  const itemRole = config.mode === "multiple" ? "checkbox" : "radio";
 
   return (
     <div
@@ -92,50 +161,18 @@ export function ToggleGroup({ config }: { config: ToggleGroupConfig }) {
         overflow: "hidden",
       }}
     >
-      {config.items.map((item, i) => {
-        const selected = isSelected(item.value);
-        const itemDisabled =
-          typeof item.disabled === "boolean" ? item.disabled : false;
-
-        const itemStyle: CSSProperties = {
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "var(--sn-spacing-xs, 0.25rem)",
-          height: sizeConfig.height,
-          padding: sizeConfig.padding,
-          fontSize: sizeConfig.fontSize,
-          fontFamily: "inherit",
-          fontWeight: selected ? 600 : 400,
-          background: selected ? "var(--sn-color-accent)" : "transparent",
-          color: selected ? "var(--sn-color-accent-foreground)" : "inherit",
-          border: "none",
-          borderRight:
-            variant === "outline" && i < config.items.length - 1
-              ? "1px solid var(--sn-color-border)"
-              : undefined,
-          cursor: itemDisabled ? "not-allowed" : "pointer",
-          opacity: itemDisabled ? 0.5 : 1,
-          transition:
-            "background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-        };
-
-        return (
-          <button
-            key={item.value}
-            type="button"
-            role={config.mode === "multiple" ? "checkbox" : "radio"}
-            aria-checked={selected}
-            aria-label={item.label ?? item.value}
-            disabled={itemDisabled}
-            onClick={() => handleToggle(item.value)}
-            style={itemStyle}
-          >
-            {item.icon && renderIcon(item.icon, sizeConfig.iconSize)}
-            {item.label && <span>{item.label}</span>}
-          </button>
-        );
-      })}
+      {config.items.map((item, i) => (
+        <ToggleItem
+          key={item.value}
+          item={item}
+          selected={isSelected(item.value)}
+          variant={variant}
+          sizeConfig={sizeConfig}
+          isLast={i === config.items.length - 1}
+          role={itemRole}
+          onToggle={() => handleToggle(item.value)}
+        />
+      ))}
     </div>
   );
 }

@@ -100,7 +100,7 @@ describe("useWizard", () => {
     const { result } = renderHook(() => useWizard(baseConfig()), {
       wrapper: Wrapper,
     });
-    let success: boolean;
+    let success: boolean | Promise<boolean>;
     act(() => {
       success = result.current.nextStep();
     });
@@ -116,7 +116,7 @@ describe("useWizard", () => {
     act(() => {
       result.current.setStepValue("email", "valid@example.com");
     });
-    let success: boolean;
+    let success: boolean | Promise<boolean>;
     act(() => {
       success = result.current.nextStep();
     });
