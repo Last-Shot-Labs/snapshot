@@ -42,12 +42,14 @@ import { bootBuiltins } from "./boot-builtins";
 /**
  * Options for manifest compilation.
  *
- * @property skipRuntimeChecks - When true, skip validations that depend on
- *   runtime registrations (guards, custom clients). Use this in CLI context
- *   where consumer app code hasn't registered these yet.
+ * @property skipCustomClientChecks - When true, skip validation of custom
+ *   client registrations. Use in CLI context where consumer app code hasn't
+ *   called `registerClient()` yet. Guard validation still runs because
+ *   built-in guards (authenticated, role, permission, unauthenticated) are
+ *   registered by `bootBuiltins()`.
  */
 export interface CompileOptions {
-  skipRuntimeChecks?: boolean;
+  skipCustomClientChecks?: boolean;
 }
 
 type EnvResolvedManifest = Omit<
@@ -674,11 +676,11 @@ function buildCompiledManifest(
 
   resolveThemeFlavors(runtimeManifest.theme);
   validatePolicyRefs(runtimeManifest);
-  if (!options.skipRuntimeChecks) {
+  if (!options.skipCustomClientChecks) {
     validateCustomClients(runtimeManifest);
-    validateRegisteredGuards(runtimeManifest);
   }
   validateResourceClients(runtimeManifest);
+  validateRegisteredGuards(runtimeManifest);
 
   const customActionDeclarations =
     (
