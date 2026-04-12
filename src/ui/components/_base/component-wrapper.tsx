@@ -1,6 +1,6 @@
 'use client';
 
-import { Component, Suspense } from "react";
+import { Component, Suspense, useEffect, useRef, useState } from "react";
 import type { CSSProperties, ErrorInfo, ReactNode } from "react";
 import { useManifestRuntime, useRouteRuntime } from "../../manifest/runtime";
 import { useSubscribe } from "../../context";
@@ -11,7 +11,16 @@ import type {
   ComponentBackgroundConfig,
   ComponentTransitionConfig,
   ComponentZIndex,
+  HoverConfig,
+  FocusConfig,
+  ActiveConfig,
+  ExitAnimationConfig,
 } from "./types";
+import {
+  resolveStyleProps,
+  resolveInteractiveCSS,
+  resolveResponsiveCSS,
+} from "./style-props";
 
 /**
  * Props for ComponentWrapper.
@@ -47,7 +56,15 @@ interface ComponentWrapperProps {
   role?: string;
   /** Optional live region politeness setting. */
   ariaLive?: "off" | "polite" | "assertive";
-  /** Raw manifest config used for dev-only inspection. */
+  /** Hover state styles. */
+  hover?: HoverConfig;
+  /** Focus state styles. */
+  focus?: FocusConfig;
+  /** Active state styles. */
+  active?: ActiveConfig;
+  /** Exit animation config. */
+  exitAnimation?: ExitAnimationConfig;
+  /** Raw manifest config used for dev-only inspection and style prop resolution. */
   config?: Record<string, unknown>;
   /** Children to render. */
   children: ReactNode;
@@ -305,9 +322,11 @@ function ComponentSkeleton({ type }: { type: string }) {
  *
  * @param props - Wrapper props including type, className, style, and children
  */
+let idCounter = 0;
+
 export function ComponentWrapper({
   type,
-  id,
+  id: explicitId,
   tokens,
   className,
   style,
@@ -321,6 +340,10 @@ export function ComponentWrapper({
   ariaDescribedBy,
   role,
   ariaLive,
+  hover,
+  focus,
+  active,
+  exitAnimation,
   config,
   children,
 }: ComponentWrapperProps) {
@@ -328,6 +351,61 @@ export function ComponentWrapper({
   const routeRuntime = useRouteRuntime();
   const api = useContext(SnapshotApiContext);
   const user = useSubscribe({ from: "global.user" }) as { id?: string } | null;
+
+  // Auto-generate a stable id when interactive or responsive CSS is needed
+  const needsId = Boolean(hover || focus || active || hasResponsiveProps(config));
+  const autoIdRef = useRef<string | undefined>(undefined);
+  if (needsId && !explicitId && !autoIdRef.current) {
+    autoIdRef.current = `sn-auto-${++idCounter}`;
+  }
+  const id = explicitId ?? autoIdRef.current;
+
+  // ── Style prop resolution ─────────────────────────────────────────────
+  const styleProps = config ? resolveStyleProps(config) : undefined;
+
+  // ── Interactive CSS (hover/focus/active) ───────────────────────────────
+  const interactiveCSS =
+    id && (hover || focus || active)
+      ? resolveInteractiveCSS(id, hover, focus, active)
+      : null;
+
+  // ── Responsive CSS (media queries) ────────────────────────────────────
+  const responsiveCSS =
+    id && config ? resolveResponsiveCSS(id, config) : null;
+
+  const scopedCSS =
+    interactiveCSS || responsiveCSS
+      ? [interactiveCSS, responsiveCSS].filter(Boolean).join("\n")
+      : null;
+
+  // ── Exit animation lifecycle ──────────────────────────────────────────
+  const isVisible = useSubscribe(
+    config?.visible !== undefined ? config.visible : true,
+  );
+  const resolvedVisible = isVisible !== false;
+  const [shouldRender, setShouldRender] = useState(resolvedVisible);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+
+  useEffect(() => {
+    if (!resolvedVisible && shouldRender) {
+      if (exitAnimation) {
+        setIsAnimatingOut(true);
+        const dur =
+          DURATION_MS_MAP[exitAnimation.duration ?? "fast"] ?? 150;
+        const timer = setTimeout(() => {
+          setShouldRender(false);
+          setIsAnimatingOut(false);
+        }, dur);
+        return () => clearTimeout(timer);
+      } else {
+        setShouldRender(false);
+      }
+    } else if (resolvedVisible && !shouldRender) {
+      setShouldRender(true);
+    }
+  }, [resolvedVisible, shouldRender, exitAnimation]);
+
+  // ── Feature styles ────────────────────────────────────────────────────
   const tokenStyle =
     tokens && id
       ? Object.fromEntries(
@@ -337,11 +415,11 @@ export function ComponentWrapper({
           ]),
         )
       : undefined;
-  const stickyStyle =
+  const stickyStyle: CSSProperties | undefined =
     sticky === undefined
       ? undefined
       : {
-          position: "sticky",
+          position: "sticky" as const,
           top: typeof sticky === "object" ? (sticky.top ?? "0") : "0",
           zIndex:
             resolveZIndexValue(
@@ -350,7 +428,9 @@ export function ComponentWrapper({
         };
   const zIndexStyle =
     zIndex === undefined ? undefined : { zIndex: resolveZIndexValue(zIndex) };
-  const animationStyle = resolveAnimationStyle(animation);
+  const animationStyle = isAnimatingOut
+    ? resolveExitAnimationStyle(exitAnimation)
+    : resolveAnimationStyle(animation);
   const backgroundStyle = resolveBackgroundStyle(background);
   const transitionStyle = resolveTransitionStyle(transition);
   const glassStyle = glass
@@ -368,6 +448,22 @@ export function ComponentWrapper({
   const devConfig =
     isDevEnvironment && config ? JSON.stringify(config) : undefined;
 
+  // Priority: style props → feature styles → token overrides → raw style
+  const mergedStyle: CSSProperties = {
+    ...(styleProps ?? {}),
+    ...(backgroundStyle ?? {}),
+    ...(glassStyle ?? {}),
+    ...(stickyStyle ?? {}),
+    ...(zIndexStyle ?? {}),
+    ...(transitionStyle ?? {}),
+    ...(animationStyle ?? {}),
+    ...(tokenStyle ?? {}),
+    ...(style as CSSProperties | undefined),
+    ...(!shouldRender ? { display: "none" } : undefined),
+  };
+
+  const hasStyle = Object.keys(mergedStyle).length > 0;
+
   return (
     <div
       data-snapshot-component={type}
@@ -379,28 +475,9 @@ export function ComponentWrapper({
       aria-describedby={ariaDescribedBy}
       role={role}
       aria-live={ariaLive}
-      style={
-        style ||
-        tokenStyle ||
-        stickyStyle ||
-        zIndexStyle ||
-        animationStyle ||
-        backgroundStyle ||
-        transitionStyle ||
-        glassStyle
-          ? ({
-              ...(tokenStyle ?? {}),
-              ...(backgroundStyle ?? {}),
-              ...(glassStyle ?? {}),
-              ...(stickyStyle ?? {}),
-              ...(zIndexStyle ?? {}),
-              ...(transitionStyle ?? {}),
-              ...(animationStyle ?? {}),
-              ...(style as CSSProperties | undefined),
-            } as CSSProperties)
-          : undefined
-      }
+      style={hasStyle ? mergedStyle : undefined}
     >
+      {scopedCSS && <style dangerouslySetInnerHTML={{ __html: scopedCSS }} />}
       <ComponentErrorBoundary
         type={type}
         manifest={manifest?.raw as { observability?: { errors?: { sink?: string } } }}
@@ -414,4 +491,63 @@ export function ComponentWrapper({
       </ComponentErrorBoundary>
     </div>
   );
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+const DURATION_MS_MAP: Record<string, number> = {
+  instant: 0,
+  fast: 150,
+  normal: 300,
+  slow: 500,
+};
+
+function resolveExitAnimationStyle(
+  exit: ExitAnimationConfig | undefined,
+): CSSProperties | undefined {
+  if (!exit) return undefined;
+  const preset = exit.preset ?? "fade";
+  const duration =
+    typeof exit.duration === "string"
+      ? (DURATION_MAP[exit.duration] ?? DURATION_MAP.fast)
+      : DURATION_MAP.fast;
+  return {
+    animation: `sn-${preset} ${duration} var(--sn-ease-default, ease) reverse forwards`,
+  };
+}
+
+function hasResponsiveProps(
+  config: Record<string, unknown> | undefined,
+): boolean {
+  if (!config) return false;
+  const responsiveKeys = [
+    "padding",
+    "paddingX",
+    "paddingY",
+    "margin",
+    "marginX",
+    "marginY",
+    "gap",
+    "width",
+    "minWidth",
+    "maxWidth",
+    "height",
+    "minHeight",
+    "maxHeight",
+    "fontSize",
+    "display",
+    "flexDirection",
+  ];
+  for (const key of responsiveKeys) {
+    const val = config[key];
+    if (
+      val != null &&
+      typeof val === "object" &&
+      !Array.isArray(val) &&
+      "default" in (val as Record<string, unknown>)
+    ) {
+      return true;
+    }
+  }
+  return false;
 }

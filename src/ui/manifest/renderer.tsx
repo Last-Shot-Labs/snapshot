@@ -18,6 +18,10 @@ import type {
   ComponentBackgroundConfig,
   ComponentTransitionConfig,
   ComponentZIndex,
+  HoverConfig,
+  FocusConfig,
+  ActiveConfig,
+  ExitAnimationConfig,
 } from "../components/_base/types";
 import { useResponsiveValue } from "../hooks/use-breakpoint";
 import { evaluatePolicy } from "../policies/evaluate";
@@ -149,6 +153,26 @@ export function ComponentRenderer({ config }: ComponentRendererProps) {
         typeof config.tokens === "object" &&
         !Array.isArray(config.tokens)
           ? (config.tokens as Record<string, string>)
+          : undefined
+      }
+      hover={
+        "hover" in config && config.hover
+          ? (config.hover as HoverConfig)
+          : undefined
+      }
+      focus={
+        "focus" in config && config.focus
+          ? (config.focus as FocusConfig)
+          : undefined
+      }
+      active={
+        "active" in config && config.active
+          ? (config.active as ActiveConfig)
+          : undefined
+      }
+      exitAnimation={
+        "exitAnimation" in config && config.exitAnimation
+          ? (config.exitAnimation as ExitAnimationConfig)
           : undefined
       }
       style={Object.keys(mergedStyle).length > 0 ? mergedStyle : undefined}

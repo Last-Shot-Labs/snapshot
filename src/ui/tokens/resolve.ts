@@ -168,6 +168,17 @@ const ALL_COMPONENT_TYPES = [
   "vote",
   "banner",
   "split-pane",
+  "box",
+  "collapsible",
+  "icon-button",
+  "hover-card",
+  "toggle-group",
+  "nav-logo",
+  "nav-link",
+  "nav-dropdown",
+  "nav-section",
+  "nav-search",
+  "nav-user-menu",
 ] as const;
 
 const SURFACE_COMPONENT_TYPES = [
@@ -1036,6 +1047,8 @@ body {
 }
 button, input, textarea, select { font: inherit; }
 img, video, svg { display: block; max-width: 100%; }
+p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
+#root { isolation: isolate; }
 a { color: inherit; text-decoration-color: color-mix(in oklch, var(--sn-color-primary, #2563eb) 35%, transparent); }
 table { width: 100%; border-collapse: collapse; }
 code, pre { font-family: var(--sn-font-mono, ui-monospace, SFMono-Regular, monospace); }
@@ -1077,7 +1090,17 @@ ${surfaceSelector} {
 [data-snapshot-component="divider"],
 [data-snapshot-component="separator"],
 [data-snapshot-component="oauth-buttons"],
-[data-snapshot-component="passkey-button"] {
+[data-snapshot-component="passkey-button"],
+[data-snapshot-component="box"],
+[data-snapshot-component="collapsible"],
+[data-snapshot-component="icon-button"],
+[data-snapshot-component="toggle-group"],
+[data-snapshot-component="nav-logo"],
+[data-snapshot-component="nav-link"],
+[data-snapshot-component="nav-dropdown"],
+[data-snapshot-component="nav-section"],
+[data-snapshot-component="nav-search"],
+[data-snapshot-component="nav-user-menu"] {
   background: transparent;
   border: none;
   box-shadow: none;

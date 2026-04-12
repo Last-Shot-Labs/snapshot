@@ -209,6 +209,41 @@ import { Spacer } from "./layout/spacer";
 import { spacerConfigSchema } from "./layout/spacer/schema";
 import { SplitPane } from "./layout/split-pane/index";
 import { splitPaneConfigSchema } from "./layout/split-pane/schema";
+import { Box, boxConfigSchema } from "./layout/box/index";
+import {
+  Collapsible,
+  collapsibleConfigSchema,
+} from "./layout/collapsible/index";
+import {
+  IconButton,
+  iconButtonConfigSchema,
+} from "./forms/icon-button/index";
+import {
+  HoverCard,
+  hoverCardConfigSchema,
+} from "./overlay/hover-card/index";
+import {
+  ToggleGroup,
+  toggleGroupConfigSchema,
+} from "./forms/toggle-group/index";
+import { NavLogo, navLogoConfigSchema } from "./layout/nav-logo/index";
+import { NavLink, navLinkConfigSchema } from "./layout/nav-link/index";
+import {
+  NavDropdown,
+  navDropdownConfigSchema,
+} from "./layout/nav-dropdown/index";
+import {
+  NavSection,
+  navSectionConfigSchema,
+} from "./layout/nav-section/index";
+import {
+  NavSearch,
+  navSearchConfigSchema,
+} from "./layout/nav-search/index";
+import {
+  NavUserMenu,
+  navUserMenuConfigSchema,
+} from "./layout/nav-user-menu/index";
 
 let builtInComponentsRegistered = false;
 
@@ -757,6 +792,72 @@ export function registerBuiltInComponents(force = false): void {
     SplitPane as unknown as Parameters<typeof registerComponent>[1],
   );
   registerComponentSchema("split-pane", splitPaneConfigSchema);
+
+  registerComponent(
+    "box",
+    Box as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("box", boxConfigSchema);
+
+  registerComponent(
+    "collapsible",
+    Collapsible as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("collapsible", collapsibleConfigSchema);
+
+  registerComponent(
+    "icon-button",
+    IconButton as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("icon-button", iconButtonConfigSchema);
+
+  registerComponent(
+    "hover-card",
+    HoverCard as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("hover-card", hoverCardConfigSchema);
+
+  registerComponent(
+    "toggle-group",
+    ToggleGroup as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("toggle-group", toggleGroupConfigSchema);
+
+  registerComponent(
+    "nav-logo",
+    NavLogo as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("nav-logo", navLogoConfigSchema);
+
+  registerComponent(
+    "nav-link",
+    NavLink as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("nav-link", navLinkConfigSchema);
+
+  registerComponent(
+    "nav-dropdown",
+    NavDropdown as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("nav-dropdown", navDropdownConfigSchema);
+
+  registerComponent(
+    "nav-section",
+    NavSection as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("nav-section", navSectionConfigSchema);
+
+  registerComponent(
+    "nav-search",
+    NavSearch as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("nav-search", navSearchConfigSchema);
+
+  registerComponent(
+    "nav-user-menu",
+    NavUserMenu as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("nav-user-menu", navUserMenuConfigSchema);
 }
 
 export function resetBuiltInComponentRegistration(): void {

@@ -1,0 +1,99 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
+import { usePublish } from "../../../context/index";
+import { useActionExecutor } from "../../../actions/executor";
+import type { NavSearchConfig } from "./types";
+
+export function NavSearch({ config }: { config: NavSearchConfig }) {
+  const [value, setValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const publish = usePublish(config.publishTo);
+  const execute = useActionExecutor();
+
+  // Publish search value to state
+  useEffect(() => {
+    if (config.publishTo) publish(value);
+  }, [value, config.publishTo, publish]);
+
+  // Keyboard shortcut to focus
+  useEffect(() => {
+    if (!config.shortcut || typeof window === "undefined") return;
+    const shortcut = config.shortcut.toLowerCase();
+    const handler = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      const ctrl = e.ctrlKey || e.metaKey;
+      if (shortcut === "ctrl+k" && ctrl && key === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+      } else if (shortcut === "/" && key === "/" && !isTypingContext(e)) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [config.shortcut]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (config.onSearch) {
+      void execute(config.onSearch as Parameters<typeof execute>[0]);
+    }
+  };
+
+  const style: CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    position: "relative",
+  };
+
+  const inputStyle: CSSProperties = {
+    width: "100%",
+    minHeight: "2rem",
+    padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+    border: "1px solid var(--sn-color-border, #e5e7eb)",
+    borderRadius: "var(--sn-radius-md, 0.375rem)",
+    background: "var(--sn-color-background, #fff)",
+    color: "var(--sn-color-foreground, #111827)",
+    fontSize: "var(--sn-font-size-sm, 0.875rem)",
+    fontFamily: "inherit",
+    outline: "none",
+    transition:
+      "border-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={style} data-nav-search="">
+      <input
+        ref={inputRef}
+        type="search"
+        placeholder={config.placeholder ?? "Search..."}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        style={inputStyle}
+        aria-label={config.placeholder ?? "Search"}
+      />
+      {config.shortcut && (
+        <kbd
+          style={{
+            position: "absolute",
+            right: "var(--sn-spacing-sm, 0.5rem)",
+            fontSize: "var(--sn-font-size-xs, 0.75rem)",
+            color: "var(--sn-color-muted-foreground)",
+            pointerEvents: "none",
+            opacity: value ? 0 : 0.6,
+          }}
+        >
+          {config.shortcut}
+        </kbd>
+      )}
+    </form>
+  );
+}
+
+function isTypingContext(e: KeyboardEvent): boolean {
+  const tag = (e.target as HTMLElement)?.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+}

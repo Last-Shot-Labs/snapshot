@@ -9,6 +9,10 @@ import {
   componentBackgroundSchema,
   componentTransitionSchema,
   componentZIndexSchema,
+  hoverConfigSchema,
+  focusConfigSchema,
+  activeConfigSchema,
+  exitAnimationSchema,
 } from "./schema";
 
 /**
@@ -81,6 +85,10 @@ export type ComponentZIndex = z.infer<typeof componentZIndexSchema>;
 export type ComponentAnimationConfig = z.infer<typeof componentAnimationSchema>;
 export type ComponentBackgroundConfig = z.infer<typeof componentBackgroundSchema>;
 export type ComponentTransitionConfig = z.infer<typeof componentTransitionSchema>;
+export type HoverConfig = z.infer<typeof hoverConfigSchema>;
+export type FocusConfig = z.infer<typeof focusConfigSchema>;
+export type ActiveConfig = z.infer<typeof activeConfigSchema>;
+export type ExitAnimationConfig = z.infer<typeof exitAnimationSchema>;
 
 /**
  * Base config fields shared by all config-driven components.

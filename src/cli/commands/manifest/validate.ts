@@ -58,7 +58,7 @@ export default class ManifestValidate extends Command {
 
     if (result.success) {
       const routeCount = result.compiled.routes.length;
-      const navCount = result.compiled.navigation?.items.length ?? 0;
+      const navCount = result.compiled.navigation?.items?.length ?? 0;
       const flavor = result.compiled.theme?.flavor ?? "(none)";
 
       log.success("Manifest is valid.");

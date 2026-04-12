@@ -7,6 +7,8 @@ import { useActionExecutor } from "../../../actions/executor";
 import { renderIcon } from "../../../icons/render";
 import type { ResolvedNavItem, AuthUser } from "./types";
 import { useManifestRuntime } from "../../../manifest/runtime";
+import { ComponentRenderer } from "../../../manifest/renderer";
+import type { ComponentConfig } from "../../../manifest/types";
 
 /** Props for the Nav component. */
 interface NavComponentProps {
@@ -450,7 +452,38 @@ export function Nav({ config, pathname, onNavigate, variant = "sidebar" }: NavCo
   }, [pathname]);
 
   const isTopNav = variant === "top-nav";
+  const hasTemplate = Array.isArray(
+    (config as Record<string, unknown>).template,
+  );
 
+  // ── Template mode: render composable component tree ──────────────────────
+  if (hasTemplate) {
+    const templateItems = (config as Record<string, unknown>).template as ComponentConfig[];
+    return (
+      <nav
+        aria-label="Main navigation"
+        data-snapshot-component="nav"
+        data-variant={variant}
+        className={config.className}
+        style={{
+          display: "flex",
+          flexDirection: isTopNav ? "row" : "column",
+          alignItems: isTopNav ? "center" : undefined,
+          height: "100%",
+          ...((config.style as React.CSSProperties) ?? {}),
+        }}
+      >
+        {templateItems.map((child, i) => (
+          <ComponentRenderer
+            key={child.id ?? `nav-template-${i}`}
+            config={child}
+          />
+        ))}
+      </nav>
+    );
+  }
+
+  // ── Legacy items mode ────────────────────────────────────────────────────
   return (
     <nav
       aria-label="Main navigation"

@@ -129,11 +129,20 @@ describe("navConfigSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects missing items", () => {
+  it("accepts nav with items omitted (template mode)", () => {
     const result = navConfigSchema.safeParse({
       type: "nav",
+      template: [{ type: "nav-logo", text: "App" }],
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts nav with items provided (legacy mode)", () => {
+    const result = navConfigSchema.safeParse({
+      type: "nav",
+      items: [{ label: "Home", path: "/" }],
+    });
+    expect(result.success).toBe(true);
   });
 
   it("rejects extra properties", () => {

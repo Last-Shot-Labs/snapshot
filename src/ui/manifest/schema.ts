@@ -14,6 +14,11 @@ import {
   componentBackgroundSchema,
   componentTransitionSchema,
   componentZIndexSchema,
+  hoverConfigSchema,
+  focusConfigSchema,
+  activeConfigSchema,
+  exitAnimationSchema,
+  spacingEnum,
 } from "../components/_base/schema";
 import {
   dataSourceSchema,
@@ -256,6 +261,54 @@ export const baseComponentConfigSchema = z.object({
   ariaDescribedBy: z.string().optional(),
   role: z.string().optional(),
   ariaLive: z.enum(["off", "polite", "assertive"]).optional(),
+
+  // ── Universal style props ───────────────────────────────────────────────
+  padding: responsiveSchema(z.union([spacingEnum, z.string()])).optional(),
+  paddingX: responsiveSchema(z.union([spacingEnum, z.string()])).optional(),
+  paddingY: responsiveSchema(z.union([spacingEnum, z.string()])).optional(),
+  margin: responsiveSchema(z.union([spacingEnum, z.string()])).optional(),
+  marginX: responsiveSchema(z.union([spacingEnum, z.string()])).optional(),
+  marginY: responsiveSchema(z.union([spacingEnum, z.string()])).optional(),
+  gap: responsiveSchema(z.union([spacingEnum, z.string()])).optional(),
+  width: responsiveSchema(z.string()).optional(),
+  minWidth: responsiveSchema(z.string()).optional(),
+  maxWidth: responsiveSchema(z.string()).optional(),
+  height: responsiveSchema(z.string()).optional(),
+  minHeight: responsiveSchema(z.string()).optional(),
+  maxHeight: responsiveSchema(z.string()).optional(),
+  bg: z.union([z.string(), componentBackgroundSchema]).optional(),
+  color: z.string().optional(),
+  borderRadius: z.union([z.enum(["none", "xs", "sm", "md", "lg", "xl", "full"]), z.string()]).optional(),
+  border: z.string().optional(),
+  shadow: z.union([z.enum(["none", "xs", "sm", "md", "lg", "xl"]), z.string()]).optional(),
+  opacity: z.number().min(0).max(1).optional(),
+  overflow: z.enum(["auto", "hidden", "scroll", "visible"]).optional(),
+  cursor: z.string().optional(),
+  position: z.enum(["relative", "absolute", "fixed", "sticky"]).optional(),
+  inset: z.string().optional(),
+  display: responsiveSchema(z.enum(["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"])).optional(),
+  flexDirection: responsiveSchema(z.enum(["row", "column", "row-reverse", "column-reverse"])).optional(),
+  alignItems: z.enum(["start", "center", "end", "stretch", "baseline"]).optional(),
+  justifyContent: z.enum(["start", "center", "end", "between", "around", "evenly"]).optional(),
+  flexWrap: z.enum(["wrap", "nowrap", "wrap-reverse"]).optional(),
+  flex: z.string().optional(),
+  gridTemplateColumns: z.string().optional(),
+  gridTemplateRows: z.string().optional(),
+  gridColumn: z.string().optional(),
+  gridRow: z.string().optional(),
+  textAlign: z.enum(["left", "center", "right", "justify"]).optional(),
+  fontSize: responsiveSchema(z.union([z.enum(["xs", "sm", "base", "lg", "xl", "2xl", "3xl", "4xl"]), z.string()])).optional(),
+  fontWeight: z.union([z.enum(["light", "normal", "medium", "semibold", "bold"]), z.number()]).optional(),
+  lineHeight: z.union([z.enum(["none", "tight", "snug", "normal", "relaxed", "loose"]), z.string()]).optional(),
+  letterSpacing: z.union([z.enum(["tight", "normal", "wide"]), z.string()]).optional(),
+
+  // ── Interactive state props ─────────────────────────────────────────────
+  hover: hoverConfigSchema.optional(),
+  focus: focusConfigSchema.optional(),
+  active: activeConfigSchema.optional(),
+
+  // ── Exit animation ──────────────────────────────────────────────────────
+  exitAnimation: exitAnimationSchema.optional(),
 });
 
 export const urlSyncConfigSchema = z.union([
@@ -1168,9 +1221,19 @@ export const navItemSchema: z.ZodType = z.lazy(() =>
 export const navigationConfigSchema = z
   .object({
     mode: z.enum(["sidebar", "top-nav"]).optional(),
-    items: z.array(navItemSchema).min(1),
+    items: z.array(navItemSchema).optional(),
+    template: z.array(componentConfigSchema).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((data, ctx) => {
+    if (!data.items && !data.template) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Navigation must define either 'items' (legacy mode) or 'template' (composable mode)",
+      });
+    }
+  });
 
 const authScreenNameSchema = z.enum([
   "login",
@@ -1923,7 +1986,7 @@ export const manifestConfigSchema = z
       });
     }
 
-    if (data.navigation) {
+    if (data.navigation?.items) {
       const navPaths = collectNavPaths(data.navigation.items);
       navPaths.forEach((navPath, index) => {
         if (!routePaths.has(navPath)) {

@@ -115,8 +115,9 @@ export function useNav(config: NavConfig, pathname: string): UseNavResult {
 
   // Subscribe to badge FromRefs using a fixed number of useSubscribe calls (max 10)
   // to avoid hooks-in-loop violations. Items beyond 10 won't get live badge updates.
+  const navItems = config.items ?? [];
   const badgeRef = (index: number) => {
-    const item = config.items[index];
+    const item = navItems[index];
     if (
       item &&
       typeof item.badge === "object" &&
@@ -139,10 +140,10 @@ export function useNav(config: NavConfig, pathname: string): UseNavResult {
   const b9 = useSubscribe(badgeRef(9));
   const badgeValues: unknown[] = [b0, b1, b2, b3, b4, b5, b6, b7, b8, b9].slice(
     0,
-    config.items.length,
+    navItems.length,
   );
   const visibilityRef = (index: number) => {
-    const item = config.items[index];
+    const item = navItems[index];
     if (
       item &&
       typeof item.visible === "object" &&
@@ -174,9 +175,9 @@ export function useNav(config: NavConfig, pathname: string): UseNavResult {
     v7,
     v8,
     v9,
-  ].slice(0, config.items.length);
+  ].slice(0, navItems.length);
   const disabledRef = (index: number) => {
-    const item = config.items[index];
+    const item = navItems[index];
     if (
       item &&
       typeof item.disabled === "object" &&
@@ -208,10 +209,10 @@ export function useNav(config: NavConfig, pathname: string): UseNavResult {
     d7,
     d8,
     d9,
-  ].slice(0, config.items.length);
+  ].slice(0, navItems.length);
 
   const items = useMemo(() => {
-    return config.items.map((item, index) =>
+    return navItems.map((item, index) =>
       resolveNavItem(
         item,
         pathname,
@@ -225,7 +226,7 @@ export function useNav(config: NavConfig, pathname: string): UseNavResult {
     // badgeValues is intentionally spread to avoid array reference instability
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    config.items,
+    navItems,
     pathname,
     user,
     userRoles,

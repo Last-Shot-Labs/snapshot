@@ -86,14 +86,27 @@ const logoConfigSchema = z
 /**
  * Zod schema for the full Nav component configuration.
  */
+/**
+ * Schema for the component config type used in template mode.
+ * Imported lazily to avoid circular dependency issues.
+ */
+const templateComponentSchema: z.ZodType = z.lazy(() =>
+  z.object({ type: z.string() }).passthrough(),
+);
+
+/**
+ * Zod schema for the full Nav component configuration.
+ */
 export const navConfigSchema = z
   .object({
     /** Component type discriminator. */
     type: z.literal("nav"),
     /** Optional component id for context publishing. */
     id: z.string().optional(),
-    /** Navigation items. */
-    items: z.array(navItemSchema),
+    /** Navigation items (legacy items-based mode). */
+    items: z.array(navItemSchema).optional(),
+    /** Composable template — array of component configs rendered inside the nav. */
+    template: z.array(templateComponentSchema).optional(),
     /** Whether the sidebar is collapsible on mobile. Default: true. */
     collapsible: z.boolean().optional(),
     /** Show user menu. `true` uses defaults; object allows customization. */
