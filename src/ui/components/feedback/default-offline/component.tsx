@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import type { OfflineBannerConfig } from "./schema";
+import type { OfflineBannerConfig } from "./types";
 
 /**
  * Default offline feedback shown when the browser loses connectivity.

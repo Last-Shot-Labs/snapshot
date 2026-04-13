@@ -1,0 +1,44 @@
+// @vitest-environment jsdom
+import React from "react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CodeBlock } from "../component";
+
+vi.mock("../../../../context/hooks", () => ({
+  useSubscribe: (value: unknown) => value,
+  usePublish: () => vi.fn(),
+}));
+
+describe("CodeBlock", () => {
+  const writeText = vi.fn();
+
+  beforeEach(() => {
+    writeText.mockReset();
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+  });
+
+  it("renders title metadata and copies code", () => {
+    render(
+      <CodeBlock
+        config={{
+          type: "code-block",
+          code: "const answer = 42;",
+          language: "typescript",
+          title: "answer.ts",
+          showLineNumbers: true,
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId("code-block-title").textContent).toBe("answer.ts");
+    expect(screen.getByTestId("code-block-language").textContent).toBe("typescript");
+    expect(screen.getByTestId("code-block-line-numbers").textContent).toContain("1");
+
+    fireEvent.click(screen.getByTestId("code-block-copy"));
+
+    expect(writeText).toHaveBeenCalledWith("const answer = 42;");
+  });
+});

@@ -219,7 +219,8 @@ Build the config-driven component first, extract the hook second.
 - **Config, not implementation.** Assert config → output. Don't test atoms or React internals.
 - **Schema tests mandatory.** Valid/invalid configs, defaults, `from` ref fields.
 - **Config fixtures.** Define `baseConfig`, spread overrides. Don't construct inline.
-- **`from` ref tests** use `<TestPageContext>` with pre-populated atoms.
+- **Match the real test environment.** `bun test` preloads `src/test-setup.ts`; use `@vitest-environment jsdom` when interactive DOM behavior matters.
+- **`from` ref tests** use the actual provider and registry wrappers in the repo, typically `AppContextProvider` and `PageContextProvider` or explicit `AppRegistryContext` and `PageRegistryContext` wrappers with seeded atoms.
 - **Action tests** assert dispatch config, not side effects.
 - **No network.** Mock API client with fixtures.
 

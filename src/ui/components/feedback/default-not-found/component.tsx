@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import type { NotFoundConfig } from "./schema";
+import type { NotFoundConfig } from "./types";
 
 /**
  * Default not-found feedback shown when no route matches.

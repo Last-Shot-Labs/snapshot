@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import type { SpinnerConfig } from "./schema";
+import type { SpinnerConfig } from "./types";
 
 /**
  * Default loading feedback rendered while the manifest app is preloading.

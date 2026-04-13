@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import type { ErrorPageConfig } from "./schema";
+import type { ErrorPageConfig } from "./types";
 
 /**
  * Default error feedback shown when manifest work fails.
