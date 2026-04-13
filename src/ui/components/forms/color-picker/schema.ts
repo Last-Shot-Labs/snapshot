@@ -2,6 +2,7 @@ import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
 import { baseComponentConfigSchema } from "../../_base/types";
 
+/** Schema for color picker components with optional swatches, alpha, and change actions. */
 export const colorPickerConfigSchema = baseComponentConfigSchema
   .extend({
     type: z.literal("color-picker"),

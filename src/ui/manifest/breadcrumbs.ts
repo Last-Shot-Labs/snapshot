@@ -1,6 +1,7 @@
 import { interpolate } from "../actions/interpolate";
 import type { CompiledRoute, RouteMatch } from "./types";
 
+/** A single breadcrumb entry rendered from the matched route stack. */
 export interface BreadcrumbItem {
   label: string;
   path?: string;
@@ -8,6 +9,7 @@ export interface BreadcrumbItem {
   isCurrent: boolean;
 }
 
+/** Auto-breadcrumb configuration used to derive labels and optional home state from routes. */
 export interface BreadcrumbAutoConfig {
   auto: boolean;
   home?: {

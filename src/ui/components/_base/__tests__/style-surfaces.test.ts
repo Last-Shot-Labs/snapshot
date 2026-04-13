@@ -34,4 +34,38 @@ describe("style-surfaces", () => {
     expect(resolved.resolvedConfigForWrapper?.className).toBe("component-root item-root");
     expect(resolved.resolvedConfigForWrapper?.style).toEqual({ color: "blue" });
   });
+
+  it("merges implementation base states before component and item state overrides", () => {
+    const resolved = resolveSurfaceConfig({
+      implementationBase: {
+        style: { color: "red", backgroundColor: "white" },
+        states: {
+          current: {
+            style: { color: "purple", borderColor: "black" },
+          },
+        },
+      },
+      componentSurface: {
+        states: {
+          current: {
+            style: { color: "green" },
+          },
+        },
+      },
+      itemSurface: {
+        states: {
+          current: {
+            style: { color: "blue" },
+          },
+        },
+      },
+      activeStates: ["current"],
+    });
+
+    expect(resolved.resolvedConfigForWrapper?.style).toEqual({
+      color: "blue",
+      backgroundColor: "white",
+      borderColor: "black",
+    });
+  });
 });

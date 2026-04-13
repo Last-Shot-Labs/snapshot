@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
 import { useEffect, useRef } from "react";
 
+/** Options controlling interval-based polling from client components. */
 export interface UsePollOptions {
   interval: number;
   pauseWhenHidden: boolean;
@@ -40,7 +41,11 @@ export function usePoll({
         return;
       }
       timer = window.setInterval(() => {
-        if (pauseWhenHidden && typeof document !== "undefined" && document.hidden) {
+        if (
+          pauseWhenHidden &&
+          typeof document !== "undefined" &&
+          document.hidden
+        ) {
           return;
         }
         onPollRef.current();
@@ -75,7 +80,10 @@ export function usePoll({
     return () => {
       stop();
       if (pauseWhenHidden && typeof document !== "undefined") {
-        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
+        );
       }
     };
   }, [enabled, interval, pauseWhenHidden]);

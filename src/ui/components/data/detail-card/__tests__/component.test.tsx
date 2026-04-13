@@ -212,6 +212,42 @@ describe("DetailCard", () => {
     });
   });
 
+  it("applies canonical slot styles to the root and action button surfaces", () => {
+    const Wrapper = createTestWrapper(registry);
+    const atom = registry.register("source");
+    registry.store.set(atom, { name: "Alice" });
+
+    render(
+      <Wrapper>
+        <DetailCard
+          config={{
+            ...baseConfig,
+            id: "detail-card-slots",
+            slots: {
+              root: {
+                className: "detail-root-slot",
+              },
+              actionButton: {
+                style: { minWidth: "11rem" },
+              },
+            },
+            actions: [
+              {
+                label: "Edit",
+                action: { type: "open-modal", modal: "edit-user" },
+              },
+            ],
+          }}
+        />
+      </Wrapper>,
+    );
+
+    const root = document.querySelector('[data-snapshot-component="detail-card"]');
+    expect(root?.className).toContain("detail-root-slot");
+    const actionButton = screen.getByRole("button", { name: "Edit" });
+    expect(actionButton.getAttribute("style")).toContain("min-width: 11rem");
+  });
+
   it("renders null values as dashes", () => {
     const Wrapper = createTestWrapper(registry);
     const atom = registry.register("source");

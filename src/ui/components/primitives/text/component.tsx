@@ -6,21 +6,24 @@ import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { useRouteRuntime } from "../../../manifest/runtime";
 import { resolveTemplate } from "../../../expressions/template";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import type { TextConfig } from "./types";
 
-const COLOR_MAP: Record<string, string> = {
+const COLOR_MAP: Record<NonNullable<TextConfig["variant"]>, string> = {
   default: "var(--sn-color-foreground)",
   muted: "var(--sn-color-muted-foreground)",
-  subtle: "color-mix(in oklch, var(--sn-color-muted-foreground) 75%, transparent)",
+  subtle:
+    "color-mix(in oklch, var(--sn-color-muted-foreground) 75%, transparent)",
 };
 
-const SIZE_MAP: Record<string, string> = {
+const SIZE_MAP: Record<NonNullable<TextConfig["size"]>, string> = {
   xs: "var(--sn-font-size-xs, 0.75rem)",
   sm: "var(--sn-font-size-sm, 0.875rem)",
   md: "var(--sn-font-size-md, 1rem)",
   lg: "var(--sn-font-size-lg, 1.125rem)",
 };
 
-const WEIGHT_MAP: Record<string, CSSProperties["fontWeight"]> = {
+const WEIGHT_MAP: Record<NonNullable<TextConfig["weight"]>, CSSProperties["fontWeight"]> = {
   light: "var(--sn-font-weight-light, 300)",
   normal: "var(--sn-font-weight-normal, 400)",
   medium: "var(--sn-font-weight-medium, 500)",
@@ -28,14 +31,8 @@ const WEIGHT_MAP: Record<string, CSSProperties["fontWeight"]> = {
   bold: "var(--sn-font-weight-bold, 700)",
 };
 
-export interface TextConfig {
-  value: string;
-  variant?: "default" | "muted" | "subtle";
-  size?: "xs" | "sm" | "md" | "lg";
-  weight?: "light" | "normal" | "medium" | "semibold" | "bold";
-  align?: "left" | "center" | "right";
-  className?: string;
-  style?: Record<string, string | number>;
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
 export function Text({ config }: { config: TextConfig }) {
@@ -60,20 +57,31 @@ export function Text({ config }: { config: TextConfig }) {
       i18n: manifest?.raw.i18n,
     },
   );
+  const rootId = config.id ?? "text";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: {
+      color: COLOR_MAP[config.variant ?? "default"],
+      fontSize: SIZE_MAP[config.size ?? "md"],
+      fontWeight: WEIGHT_MAP[config.weight ?? "normal"],
+      textAlign: config.align ?? "left",
+      style: { margin: 0 },
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
 
   return (
-    <p
-      className={config.className}
-      style={{
-        margin: 0,
-        color: COLOR_MAP[config.variant ?? "default"],
-        fontSize: SIZE_MAP[config.size ?? "md"],
-        fontWeight: WEIGHT_MAP[config.weight ?? "normal"],
-        textAlign: config.align ?? "left",
-        ...(config.style as CSSProperties | undefined),
-      }}
-    >
-      {value}
-    </p>
+    <>
+      <p
+        data-snapshot-component="text"
+        data-snapshot-id={`${rootId}-root`}
+        className={rootSurface.className}
+        style={rootSurface.style}
+      >
+        {value}
+      </p>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+    </>
   );
 }

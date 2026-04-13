@@ -3,6 +3,7 @@ import { useAtom } from "jotai/react";
 import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
+/** Internal confirm-dialog request stored in the atom-backed manager queue. */
 export interface ConfirmRequest {
   title?: string;
   message?: string;
@@ -14,14 +15,17 @@ export interface ConfirmRequest {
   resolve: (confirmed: boolean) => void;
 }
 
+/** Options accepted when opening a confirmation dialog. */
 export type ConfirmOptions = Omit<ConfirmRequest, "resolve">;
 
 export const confirmAtom = atom<ConfirmRequest | null>(null);
 
+/** Imperative API for opening a confirmation dialog from manifest actions or custom UI. */
 export interface ConfirmManager {
   show: (options: ConfirmOptions) => Promise<boolean>;
 }
 
+/** Return the shared confirmation manager for the current Snapshot UI tree. */
 export function useConfirmManager(): ConfirmManager {
   const [, setConfirm] = useAtom(confirmAtom);
 
@@ -36,6 +40,7 @@ export function useConfirmManager(): ConfirmManager {
   return { show };
 }
 
+/** Render the global confirmation dialog for requests queued through `useConfirmManager`. */
 export function ConfirmDialog(): ReactNode {
   const [request, setRequest] = useAtom(confirmAtom);
   const [inputValue, setInputValue] = useState("");
@@ -93,7 +98,8 @@ export function ConfirmDialog(): ReactNode {
           gap: "var(--sn-spacing-md, 1rem)",
           background: "var(--sn-color-card, #fff)",
           color: "var(--sn-color-foreground, #111)",
-          border: "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
+          border:
+            "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
           borderRadius: "var(--sn-radius-lg, 0.75rem)",
           boxShadow: "var(--sn-shadow-xl, 0 25px 50px -12px rgba(0,0,0,0.25))",
           padding: "var(--sn-spacing-lg, 1.5rem)",
@@ -124,7 +130,9 @@ export function ConfirmDialog(): ReactNode {
         </div>
 
         {requiresInput ? (
-          <div style={{ display: "grid", gap: "var(--sn-spacing-xs, 0.25rem)" }}>
+          <div
+            style={{ display: "grid", gap: "var(--sn-spacing-xs, 0.25rem)" }}
+          >
             <label
               htmlFor="snapshot-confirm-input"
               style={{
@@ -143,7 +151,8 @@ export function ConfirmDialog(): ReactNode {
               style={{
                 width: "100%",
                 minHeight: "var(--sn-input-height, 2.5rem)",
-                padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
+                padding:
+                  "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
                 border:
                   "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
                 borderRadius: "var(--sn-radius-md, 0.5rem)",
@@ -165,7 +174,8 @@ export function ConfirmDialog(): ReactNode {
             onClick={handleCancel}
             type="button"
             style={{
-              padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
+              padding:
+                "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
               borderRadius: "var(--sn-radius-md, 0.375rem)",
               border:
                 "var(--sn-border-thin, 1px) solid var(--sn-color-border, #d1d5db)",
@@ -183,7 +193,8 @@ export function ConfirmDialog(): ReactNode {
             type="button"
             disabled={!isInputValid}
             style={{
-              padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
+              padding:
+                "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
               borderRadius: "var(--sn-radius-md, 0.375rem)",
               border: "none",
               background: isDestructive

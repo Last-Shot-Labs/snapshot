@@ -148,6 +148,7 @@ export function resolveSurfaceConfig(params: {
   merged = mergeSurfaceFields(merged, stripStateMap(itemSurface));
 
   for (const state of activeStates) {
+    merged = mergeSurfaceFields(merged, implementationBase?.states?.[state]);
     merged = mergeSurfaceFields(merged, componentSurface?.states?.[state]);
     merged = mergeSurfaceFields(merged, itemSurface?.states?.[state]);
   }

@@ -23,17 +23,14 @@
       ],
       "docs": [
         "apps/docs/src/content/docs/build/manifest-apps.md",
-        "apps/docs/src/content/docs/reference/ui.md",
+        "apps/docs/src/content/docs/reference/ui/index.md",
         "apps/docs/src/content/docs/reference/manifest.md",
         "apps/docs/src/content/docs/reference/components.md",
         "apps/docs/src/content/docs/start-here/capabilities.md"
       ]
     },
     "ssr-vite": {
-      "sources": [
-        "src/ssr",
-        "src/vite"
-      ],
+      "sources": ["src/ssr", "src/vite"],
       "docs": [
         "apps/docs/src/content/docs/integrate/ssr-rsc.md",
         "apps/docs/src/content/docs/reference/ssr.md",
@@ -42,9 +39,7 @@
       ]
     },
     "cli-sync": {
-      "sources": [
-        "src/cli"
-      ],
+      "sources": ["src/cli"],
       "docs": [
         "apps/docs/src/content/docs/build/sdk-apps.md",
         "apps/docs/src/content/docs/reference/cli.md",

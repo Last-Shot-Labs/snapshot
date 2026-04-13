@@ -21,6 +21,7 @@ interface ToastUndoConfig {
   duration: number;
 }
 
+/** Resolved toast entry stored in the runtime queue. */
 export interface ToastItem {
   id: string;
   message: string;
@@ -32,6 +33,7 @@ export interface ToastItem {
   undo?: ToastUndoConfig;
 }
 
+/** User-facing toast options accepted by the toast manager. */
 export interface ShowToastOptions {
   message: string;
   variant?: ToastVariant;
@@ -48,6 +50,7 @@ export interface ShowToastOptions {
 
 export const toastQueueAtom = atom<ToastItem[]>([]);
 
+/** Imperative API for enqueueing and dismissing transient toast messages. */
 export interface ToastManager {
   show: (options: ShowToastOptions) => string;
   dismiss: (id: string) => void;
@@ -55,6 +58,7 @@ export interface ToastManager {
 
 let toastCounter = 0;
 
+/** Return the toast manager bound to the active manifest runtime configuration. */
 export function useToastManager(): ToastManager {
   const runtime = useManifestRuntime();
   const [, setQueue] = useAtom(toastQueueAtom);
@@ -94,7 +98,9 @@ export function useToastManager(): ToastManager {
 
   const dismiss = useCallback(
     (id: string) => {
-      setQueue((currentQueue) => currentQueue.filter((toast) => toast.id !== id));
+      setQueue((currentQueue) =>
+        currentQueue.filter((toast) => toast.id !== id),
+      );
     },
     [setQueue],
   );
@@ -172,7 +178,9 @@ function ToastCard({
   onDismiss: (id: string) => void;
 }) {
   const execute = useActionExecutor();
-  const [remainingMs, setRemainingMs] = useState(toast.undo?.duration ?? toast.duration);
+  const [remainingMs, setRemainingMs] = useState(
+    toast.undo?.duration ?? toast.duration,
+  );
 
   useEffect(() => {
     if (toast.duration === 0) {
@@ -229,7 +237,8 @@ function ToastCard({
             border: "var(--sn-border-default, 1px) solid currentColor",
             color: "inherit",
             cursor: "pointer",
-            padding: "var(--sn-spacing-2xs, 0.25rem) var(--sn-spacing-xs, 0.5rem)",
+            padding:
+              "var(--sn-spacing-2xs, 0.25rem) var(--sn-spacing-xs, 0.5rem)",
             borderRadius: "var(--sn-radius-sm, 0.25rem)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
           }}
@@ -249,12 +258,14 @@ function ToastCard({
             border: "var(--sn-border-default, 1px) solid currentColor",
             color: "inherit",
             cursor: "pointer",
-            padding: "var(--sn-spacing-2xs, 0.25rem) var(--sn-spacing-xs, 0.5rem)",
+            padding:
+              "var(--sn-spacing-2xs, 0.25rem) var(--sn-spacing-xs, 0.5rem)",
             borderRadius: "var(--sn-radius-sm, 0.25rem)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
           }}
         >
-          {toast.undo.label} {undoCountdown !== null ? `(${undoCountdown})` : ""}
+          {toast.undo.label}{" "}
+          {undoCountdown !== null ? `(${undoCountdown})` : ""}
         </button>
       ) : null}
       <button
@@ -277,6 +288,7 @@ function ToastCard({
   );
 }
 
+/** Render the active toast queue using runtime-configured placement defaults. */
 export function ToastContainer(): ReactNode {
   const runtime = useManifestRuntime();
   const [queue, setQueue] = useAtom(toastQueueAtom);
@@ -304,7 +316,9 @@ export function ToastContainer(): ReactNode {
           key={toast.id}
           toast={toast}
           onDismiss={(id) => {
-            setQueue((currentQueue) => currentQueue.filter((entry) => entry.id !== id));
+            setQueue((currentQueue) =>
+              currentQueue.filter((entry) => entry.id !== id),
+            );
           }}
         />
       ))}

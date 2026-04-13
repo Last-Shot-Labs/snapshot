@@ -1,5 +1,9 @@
 import type {
+  DetailCardAction,
   DetailCardConfig,
+  DetailCardActionSlotNames,
+  DetailCardFieldSlotNames,
+  DetailCardSlotNames,
   DetailFieldConfig,
   DetailFieldFormat,
 } from "./schema";
@@ -19,6 +23,8 @@ export interface ResolvedField {
   format: DetailFieldFormat;
   /** Whether to show a copy button. */
   copyable: boolean;
+  /** Optional field-level slot overrides. */
+  slots?: DetailFieldConfig["slots"];
 }
 
 /**
@@ -39,4 +45,13 @@ export interface UseDetailCardResult {
   refetch: () => void;
 }
 
-export type { DetailCardConfig, DetailFieldConfig, DetailFieldFormat };
+export type DetailCardSlotName = DetailCardSlotNames[number];
+export type DetailCardFieldSlotName = DetailCardFieldSlotNames[number];
+export type DetailCardActionSlotName = DetailCardActionSlotNames[number];
+
+export type {
+  DetailCardAction,
+  DetailCardConfig,
+  DetailFieldConfig,
+  DetailFieldFormat,
+};

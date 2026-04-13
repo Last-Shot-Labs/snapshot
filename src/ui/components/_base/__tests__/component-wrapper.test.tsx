@@ -55,4 +55,35 @@ describe("ComponentWrapper", () => {
     expect(element.style.backdropFilter).toContain("blur");
     expect(element.style.backgroundImage).toContain("linear-gradient");
   });
+
+  it("applies canonical root slot backgrounds from config", () => {
+    const { container } = render(
+      <ComponentWrapper
+        type="panel"
+        id="slot-root"
+        config={{
+          type: "panel",
+          slots: {
+            root: {
+              bg: {
+                gradient: {
+                  type: "linear",
+                  direction: "90deg",
+                  stops: [
+                    { color: "#111111", position: "0%" },
+                    { color: "#eeeeee", position: "100%" },
+                  ],
+                },
+              },
+            },
+          },
+        }}
+      >
+        <div>content</div>
+      </ComponentWrapper>,
+    );
+
+    const element = container.firstElementChild as HTMLElement;
+    expect(element.style.backgroundImage).toContain("linear-gradient");
+  });
 });

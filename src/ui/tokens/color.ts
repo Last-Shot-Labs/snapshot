@@ -258,10 +258,15 @@ function calculateContrastRatio(lum1: number, lum2: number): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+/** Calculate the WCAG contrast ratio between two supported color values. */
 export function contrastRatio(left: string, right: string): number {
-  return calculateContrastRatio(relativeLuminance(left), relativeLuminance(right));
+  return calculateContrastRatio(
+    relativeLuminance(left),
+    relativeLuminance(right),
+  );
 }
 
+/** Check whether two colors satisfy WCAG AA contrast for normal or large text. */
 export function meetsWcagAA(
   left: string,
   right: string,

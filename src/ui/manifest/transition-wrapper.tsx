@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -35,6 +35,7 @@ function resolveAnimation(name: string): string {
   return KEYFRAME_MAP[name] ?? name;
 }
 
+/** Apply enter transitions around routed content when a route transition config is present. */
 export function TransitionWrapper({
   config,
   routeKey,

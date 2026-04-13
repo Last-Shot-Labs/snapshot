@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { baseComponentConfigSchema } from "../../../manifest/schema";
 
+/** Schema for optimized image components rendered through Snapshot's image route. */
 export const snapshotImageSchema = baseComponentConfigSchema.extend({
   type: z.literal("image"),
   src: z.string().min(1),

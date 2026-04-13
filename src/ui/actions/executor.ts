@@ -19,10 +19,7 @@ import {
   useOverlayRuntime,
   useRouteRuntime,
 } from "../manifest/runtime";
-import {
-  buildExpressionContext,
-  resolveFromRef,
-} from "../context/from-ref";
+import { buildExpressionContext, resolveFromRef } from "../context/from-ref";
 import { evaluateExpression } from "../expressions/parser";
 import { createAnalyticsDispatcher } from "../analytics/dispatch";
 import { resolveTokens } from "../tokens/resolve";
@@ -49,6 +46,7 @@ function dispatchPopStateEvent(): void {
   window.dispatchEvent(new Event("popstate"));
 }
 
+/** API client context consumed by built-in `api`, `download`, and related runtime actions. */
 export const SnapshotApiContext = createContext<ApiClient | null>(null);
 SnapshotApiContext.displayName = "SnapshotApiContext";
 
@@ -142,23 +140,20 @@ function resolveWorkflowValue(
   } | null,
 ): unknown {
   if (isFromRef(value)) {
-    return resolveFromRef(
-      value,
-      {
-        context,
-        pageRegistry,
-        appRegistry,
-        route: {
-          id: routeRuntime?.currentRoute?.id,
-          path: routeRuntime?.currentPath,
-          pattern: routeRuntime?.currentRoute?.path,
-          params: routeRuntime?.params,
-          query: routeRuntime?.query,
-        },
-        overlay: overlayRuntime,
-        manifest: manifestRuntime,
+    return resolveFromRef(value, {
+      context,
+      pageRegistry,
+      appRegistry,
+      route: {
+        id: routeRuntime?.currentRoute?.id,
+        path: routeRuntime?.currentPath,
+        pattern: routeRuntime?.currentRoute?.path,
+        params: routeRuntime?.params,
+        query: routeRuntime?.query,
       },
-    );
+      overlay: overlayRuntime,
+      manifest: manifestRuntime,
+    });
   }
 
   if (
@@ -328,6 +323,10 @@ function getActionTimingKey(action: ActionConfig): string {
   }
 }
 
+/**
+ * Return the action executor bound to the active runtime, registries, overlays,
+ * workflows, and optional API client.
+ */
 export function useActionExecutor(): ActionExecuteFn {
   const api = useContext(SnapshotApiContext);
   const pageRegistry = useContext(PageRegistryContext);
@@ -345,10 +344,7 @@ export function useActionExecutor(): ActionExecuteFn {
   const overlayRuntime = useOverlayRuntime();
   const wsManager = useAtomValue(wsManagerAtom);
   const localeState = useSubscribe({ from: "global.locale" });
-  const activeLocale = resolveRuntimeLocale(
-    runtime?.raw.i18n,
-    localeState,
-  );
+  const activeLocale = resolveRuntimeLocale(runtime?.raw.i18n, localeState);
 
   const execute: ActionExecuteFn = useCallback(
     async (
@@ -380,62 +376,73 @@ export function useActionExecutor(): ActionExecuteFn {
         builtinContext: Record<string, unknown>,
       ): Promise<unknown> => {
         const executeBuiltinActionNow = async (): Promise<unknown> => {
-        switch (builtin.type) {
-          case "navigate": {
-            const to = String(
-              resolveWorkflowValue(
-                builtin.to,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ),
-            );
-            if (builtin.replace) {
-              window.history.replaceState({}, "", to);
-            } else {
-              window.history.pushState({}, "", to);
-            }
-            dispatchPopStateEvent();
-            return to;
-          }
-
-          case "navigate-external": {
-            const to = String(
-              resolveWorkflowValue(
-                builtin.to,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ),
-            );
-            if (builtin.target === "_blank") {
-              window.open(to, "_blank", "noopener");
-            } else {
-              window.location.assign(to);
-            }
-            return to;
-          }
-
-          case "api": {
-            if (!api) {
-              throw new Error(
-                "useActionExecutor: SnapshotApiContext not provided. " +
-                  "Wrap your app in <SnapshotApiContext.Provider value={apiClient}>.",
+          switch (builtin.type) {
+            case "navigate": {
+              const to = String(
+                resolveWorkflowValue(
+                  builtin.to,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ),
               );
+              if (builtin.replace) {
+                window.history.replaceState({}, "", to);
+              } else {
+                window.history.pushState({}, "", to);
+              }
+              dispatchPopStateEvent();
+              return to;
             }
 
-            const target =
-              typeof builtin.endpoint === "string"
-                ? String(
-                    resolveWorkflowValue(
+            case "navigate-external": {
+              const to = String(
+                resolveWorkflowValue(
+                  builtin.to,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ),
+              );
+              if (builtin.target === "_blank") {
+                window.open(to, "_blank", "noopener");
+              } else {
+                window.location.assign(to);
+              }
+              return to;
+            }
+
+            case "api": {
+              if (!api) {
+                throw new Error(
+                  "useActionExecutor: SnapshotApiContext not provided. " +
+                    "Wrap your app in <SnapshotApiContext.Provider value={apiClient}>.",
+                );
+              }
+
+              const target =
+                typeof builtin.endpoint === "string"
+                  ? String(
+                      resolveWorkflowValue(
+                        builtin.endpoint,
+                        builtinContext,
+                        pageRegistry,
+                        appRegistry,
+                        activeLocale,
+                        runtime,
+                        routeRuntime,
+                        overlayRuntime,
+                      ),
+                    )
+                  : (resolveWorkflowValue(
                       builtin.endpoint,
                       builtinContext,
                       pageRegistry,
@@ -444,45 +451,183 @@ export function useActionExecutor(): ActionExecuteFn {
                       runtime,
                       routeRuntime,
                       overlayRuntime,
-                    ),
-                  )
-                : (resolveWorkflowValue(
-                    builtin.endpoint,
-                    builtinContext,
-                    pageRegistry,
-                    appRegistry,
-                    activeLocale,
-                    runtime,
-                    routeRuntime,
-                    overlayRuntime,
-                  ) as typeof builtin.endpoint);
+                    ) as typeof builtin.endpoint);
 
-            const params =
-              builtin.params &&
-              (resolveWorkflowValue(
-                builtin.params,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ) as Record<string, unknown>);
+              const params =
+                builtin.params &&
+                (resolveWorkflowValue(
+                  builtin.params,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ) as Record<string, unknown>);
 
-            const request = resolveEndpointTarget(
-              target,
-              runtime?.resources,
-              typeof target === "string"
-                ? params
-                : { ...(target.params ?? {}), ...(params ?? {}) },
-              builtin.method,
-            );
-            const endpoint = buildRequestUrl(request.endpoint, request.params);
-            const body =
-              builtin.body &&
-              resolveWorkflowValue(
-                builtin.body,
+              const request = resolveEndpointTarget(
+                target,
+                runtime?.resources,
+                typeof target === "string"
+                  ? params
+                  : { ...(target.params ?? {}), ...(params ?? {}) },
+                builtin.method,
+              );
+              const endpoint = buildRequestUrl(
+                request.endpoint,
+                request.params,
+              );
+              const body =
+                builtin.body &&
+                resolveWorkflowValue(
+                  builtin.body,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                );
+
+              try {
+                let result: unknown;
+                switch (request.method) {
+                  case "GET":
+                    result = await api.get(endpoint);
+                    break;
+                  case "POST":
+                    result = await api.post(endpoint, body);
+                    break;
+                  case "PUT":
+                    result = await api.put(endpoint, body);
+                    break;
+                  case "PATCH":
+                    result = await api.patch(endpoint, body);
+                    break;
+                  case "DELETE":
+                    result = await api.delete(endpoint, body);
+                    break;
+                }
+                const configuredInvalidations = new Set<string>();
+                for (const targetName of builtin.invalidates ?? []) {
+                  configuredInvalidations.add(targetName);
+                }
+                if (isResourceRef(target)) {
+                  for (const invalidation of runtime?.resources?.[
+                    target.resource
+                  ]?.invalidates ?? []) {
+                    if (typeof invalidation === "string") {
+                      configuredInvalidations.add(invalidation);
+                      continue;
+                    }
+
+                    resourceCache?.invalidateQueryKey(invalidation.key);
+                  }
+                }
+                for (const resourceName of configuredInvalidations) {
+                  resourceCache?.invalidateResource(resourceName);
+                }
+                if (builtin.onSuccess) {
+                  await execute(builtin.onSuccess, {
+                    ...builtinContext,
+                    result,
+                  });
+                }
+                return result;
+              } catch (error) {
+                if (builtin.onError) {
+                  await execute(builtin.onError, { ...builtinContext, error });
+                } else {
+                  throw error;
+                }
+                return undefined;
+              }
+            }
+
+            case "open-modal":
+              modalManager.open(
+                builtin.modal,
+                builtin.payload !== undefined
+                  ? resolveWorkflowValue(
+                      builtin.payload,
+                      builtinContext,
+                      pageRegistry,
+                      appRegistry,
+                      activeLocale,
+                      runtime,
+                      routeRuntime,
+                      overlayRuntime,
+                    )
+                  : undefined,
+                builtin.resultTarget,
+              );
+              return builtin.payload;
+
+            case "close-modal": {
+              const overlayId =
+                builtin.modal ??
+                modalManager.stack[modalManager.stack.length - 1];
+              const resultTarget = overlayId
+                ? modalManager.getResultTarget(overlayId)
+                : undefined;
+              const resolvedResult =
+                builtin.result !== undefined
+                  ? resolveWorkflowValue(
+                      builtin.result,
+                      builtinContext,
+                      pageRegistry,
+                      appRegistry,
+                      activeLocale,
+                      runtime,
+                      routeRuntime,
+                      overlayRuntime,
+                    )
+                  : undefined;
+              if (resultTarget && builtin.result !== undefined) {
+                const { registry, targetId } = resolveRegistry(
+                  resultTarget,
+                  pageRegistry,
+                  appRegistry,
+                );
+                if (registry) {
+                  const targetAtom = registry.register(targetId);
+                  registry.store.set(targetAtom, resolvedResult);
+                }
+              }
+              modalManager.close(overlayId, resolvedResult);
+              return resolvedResult;
+            }
+
+            case "refresh": {
+              const targets = builtin.target
+                .split(",")
+                .map((target) => target.trim());
+              for (const target of targets) {
+                if (target.startsWith("resource:")) {
+                  const resourceName = target.slice(9);
+                  if (resourceName && runtime?.resources?.[resourceName]) {
+                    resourceCache?.invalidateResource(resourceName);
+                  }
+                  continue;
+                }
+                const { registry } = resolveRegistry(
+                  `__refresh_${target}`,
+                  pageRegistry,
+                  appRegistry,
+                );
+                if (registry) {
+                  const refreshAtom = registry.register(`__refresh_${target}`);
+                  registry.store.set(refreshAtom, Date.now());
+                }
+              }
+              return builtin.target;
+            }
+
+            case "set-value": {
+              const value = resolveWorkflowValue(
+                builtin.value,
                 builtinContext,
                 pageRegistry,
                 appRegistry,
@@ -491,63 +636,141 @@ export function useActionExecutor(): ActionExecuteFn {
                 routeRuntime,
                 overlayRuntime,
               );
-
-            try {
-              let result: unknown;
-              switch (request.method) {
-                case "GET":
-                  result = await api.get(endpoint);
-                  break;
-                case "POST":
-                  result = await api.post(endpoint, body);
-                  break;
-                case "PUT":
-                  result = await api.put(endpoint, body);
-                  break;
-                case "PATCH":
-                  result = await api.patch(endpoint, body);
-                  break;
-                case "DELETE":
-                  result = await api.delete(endpoint, body);
-                  break;
+              const { registry, targetId } = resolveRegistry(
+                builtin.target,
+                pageRegistry,
+                appRegistry,
+              );
+              if (registry) {
+                const targetAtom = registry.register(targetId);
+                registry.store.set(targetAtom, value);
               }
-              const configuredInvalidations = new Set<string>();
-              for (const targetName of builtin.invalidates ?? []) {
-                configuredInvalidations.add(targetName);
-              }
-              if (isResourceRef(target)) {
-                for (const invalidation of runtime?.resources?.[target.resource]
-                  ?.invalidates ?? []) {
-                  if (typeof invalidation === "string") {
-                    configuredInvalidations.add(invalidation);
-                    continue;
-                  }
-
-                  resourceCache?.invalidateQueryKey(invalidation.key);
-                }
-              }
-              for (const resourceName of configuredInvalidations) {
-                resourceCache?.invalidateResource(resourceName);
-              }
-              if (builtin.onSuccess) {
-                await execute(builtin.onSuccess, { ...builtinContext, result });
-              }
-              return result;
-            } catch (error) {
-              if (builtin.onError) {
-                await execute(builtin.onError, { ...builtinContext, error });
-              } else {
-                throw error;
-              }
-              return undefined;
+              return value;
             }
-          }
 
-          case "open-modal":
-            modalManager.open(
-              builtin.modal,
-              builtin.payload !== undefined
-                ? resolveWorkflowValue(
+            case "download": {
+              if (!api) {
+                throw new Error(
+                  "useActionExecutor: SnapshotApiContext not provided for download action.",
+                );
+              }
+
+              const target =
+                typeof builtin.endpoint === "string"
+                  ? String(
+                      resolveWorkflowValue(
+                        builtin.endpoint,
+                        builtinContext,
+                        pageRegistry,
+                        appRegistry,
+                        activeLocale,
+                        runtime,
+                        routeRuntime,
+                        overlayRuntime,
+                      ),
+                    )
+                  : (resolveWorkflowValue(
+                      builtin.endpoint,
+                      builtinContext,
+                      pageRegistry,
+                      appRegistry,
+                      activeLocale,
+                      runtime,
+                      routeRuntime,
+                      overlayRuntime,
+                    ) as typeof builtin.endpoint);
+
+              const request = resolveEndpointTarget(
+                target,
+                runtime?.resources,
+                isResourceRef(target) ? target.params : undefined,
+              );
+              const endpoint = buildRequestUrl(
+                request.endpoint,
+                request.params,
+              );
+              const blob = await api.get<Blob>(endpoint);
+              triggerBrowserDownload(blob, builtin.filename ?? "download");
+              return blob;
+            }
+
+            case "copy": {
+              const text = String(
+                resolveWorkflowValue(
+                  builtin.text,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ),
+              );
+              await navigator.clipboard.writeText(text);
+              if (builtin.onSuccess) {
+                await execute(builtin.onSuccess, { ...builtinContext, text });
+              }
+              return text;
+            }
+
+            case "copy-to-clipboard": {
+              if (
+                typeof navigator === "undefined" ||
+                typeof navigator.clipboard?.writeText !== "function"
+              ) {
+                return undefined;
+              }
+
+              const text = String(
+                resolveWorkflowValue(
+                  builtin.text,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ),
+              );
+              await navigator.clipboard.writeText(text);
+              if (builtin.toast) {
+                toastManager.show({
+                  message: String(
+                    resolveWorkflowValue(
+                      builtin.toast,
+                      { ...builtinContext, text },
+                      pageRegistry,
+                      appRegistry,
+                      activeLocale,
+                      runtime,
+                      routeRuntime,
+                      overlayRuntime,
+                    ),
+                  ),
+                  variant: "success",
+                });
+              }
+              return text;
+            }
+
+            case "emit": {
+              const eventName = String(
+                resolveWorkflowValue(
+                  builtin.event,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ),
+              );
+              window.dispatchEvent(
+                new CustomEvent(`snapshot:${eventName}`, {
+                  detail: resolveWorkflowValue(
                     builtin.payload,
                     builtinContext,
                     pageRegistry,
@@ -556,540 +779,222 @@ export function useActionExecutor(): ActionExecuteFn {
                     runtime,
                     routeRuntime,
                     overlayRuntime,
-                  )
-                : undefined,
-              builtin.resultTarget,
-            );
-            return builtin.payload;
-
-          case "close-modal": {
-            const overlayId =
-              builtin.modal ??
-              modalManager.stack[modalManager.stack.length - 1];
-            const resultTarget = overlayId
-              ? modalManager.getResultTarget(overlayId)
-              : undefined;
-            const resolvedResult =
-              builtin.result !== undefined
-                ? resolveWorkflowValue(
-                    builtin.result,
-                    builtinContext,
-                    pageRegistry,
-                    appRegistry,
-                    activeLocale,
-                    runtime,
-                    routeRuntime,
-                    overlayRuntime,
-                  )
-                : undefined;
-            if (resultTarget && builtin.result !== undefined) {
-              const { registry, targetId } = resolveRegistry(
-                resultTarget,
-                pageRegistry,
-                appRegistry,
-              );
-              if (registry) {
-                const targetAtom = registry.register(targetId);
-                registry.store.set(targetAtom, resolvedResult);
-              }
-            }
-            modalManager.close(overlayId, resolvedResult);
-            return resolvedResult;
-          }
-
-          case "refresh": {
-            const targets = builtin.target
-              .split(",")
-              .map((target) => target.trim());
-            for (const target of targets) {
-              if (target.startsWith("resource:")) {
-                const resourceName = target.slice(9);
-                if (resourceName && runtime?.resources?.[resourceName]) {
-                  resourceCache?.invalidateResource(resourceName);
-                }
-                continue;
-              }
-              const { registry } = resolveRegistry(
-                `__refresh_${target}`,
-                pageRegistry,
-                appRegistry,
-              );
-              if (registry) {
-                const refreshAtom = registry.register(`__refresh_${target}`);
-                registry.store.set(refreshAtom, Date.now());
-              }
-            }
-            return builtin.target;
-          }
-
-          case "set-value": {
-            const value = resolveWorkflowValue(
-              builtin.value,
-              builtinContext,
-              pageRegistry,
-              appRegistry,
-              activeLocale,
-              runtime,
-              routeRuntime,
-              overlayRuntime,
-            );
-            const { registry, targetId } = resolveRegistry(
-              builtin.target,
-              pageRegistry,
-              appRegistry,
-            );
-            if (registry) {
-              const targetAtom = registry.register(targetId);
-              registry.store.set(targetAtom, value);
-            }
-            return value;
-          }
-
-          case "download": {
-            if (!api) {
-              throw new Error(
-                "useActionExecutor: SnapshotApiContext not provided for download action.",
-              );
-            }
-
-            const target =
-              typeof builtin.endpoint === "string"
-                ? String(
-                    resolveWorkflowValue(
-                      builtin.endpoint,
-                      builtinContext,
-                      pageRegistry,
-                      appRegistry,
-                      activeLocale,
-                      runtime,
-                      routeRuntime,
-                      overlayRuntime,
-                    ),
-                  )
-                : (resolveWorkflowValue(
-                    builtin.endpoint,
-                    builtinContext,
-                    pageRegistry,
-                    appRegistry,
-                    activeLocale,
-                    runtime,
-                    routeRuntime,
-                    overlayRuntime,
-                  ) as typeof builtin.endpoint);
-
-            const request = resolveEndpointTarget(
-              target,
-              runtime?.resources,
-              isResourceRef(target) ? target.params : undefined,
-            );
-            const endpoint = buildRequestUrl(request.endpoint, request.params);
-            const blob = await api.get<Blob>(endpoint);
-            triggerBrowserDownload(blob, builtin.filename ?? "download");
-            return blob;
-          }
-
-          case "copy": {
-            const text = String(
-              resolveWorkflowValue(
-                builtin.text,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ),
-            );
-            await navigator.clipboard.writeText(text);
-            if (builtin.onSuccess) {
-              await execute(builtin.onSuccess, { ...builtinContext, text });
-            }
-            return text;
-          }
-
-          case "copy-to-clipboard": {
-            if (
-              typeof navigator === "undefined" ||
-              typeof navigator.clipboard?.writeText !== "function"
-            ) {
-              return undefined;
-            }
-
-            const text = String(
-              resolveWorkflowValue(
-                builtin.text,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ),
-            );
-            await navigator.clipboard.writeText(text);
-            if (builtin.toast) {
-              toastManager.show({
-                message: String(
-                  resolveWorkflowValue(
-                    builtin.toast,
-                    { ...builtinContext, text },
-                    pageRegistry,
-                    appRegistry,
-                    activeLocale,
-                    runtime,
-                    routeRuntime,
-                    overlayRuntime,
                   ),
-                ),
-                variant: "success",
-              });
-            }
-            return text;
-          }
-
-          case "emit": {
-            const eventName = String(
-              resolveWorkflowValue(
-                builtin.event,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ),
-            );
-            window.dispatchEvent(
-              new CustomEvent(`snapshot:${eventName}`, {
-                detail: resolveWorkflowValue(
-                  builtin.payload,
-                  builtinContext,
-                  pageRegistry,
-                  appRegistry,
-                  activeLocale,
-                  runtime,
-                  routeRuntime,
-                  overlayRuntime,
-                ),
-              }),
-            );
-            return eventName;
-          }
-
-          case "submit-form":
-            window.dispatchEvent(
-              new CustomEvent("snapshot:submit-form", {
-                detail: { formId: builtin.formId },
-              }),
-            );
-            return builtin.formId;
-
-          case "reset-form":
-            window.dispatchEvent(
-              new CustomEvent("snapshot:reset-form", {
-                detail: { formId: builtin.formId },
-              }),
-            );
-            return builtin.formId;
-
-          case "set-theme": {
-            const nextTheme = {
-              ...(runtime?.theme ?? {}),
-              ...(builtin.flavor ? { flavor: builtin.flavor } : null),
-            };
-            const styleEl = document.getElementById(
-              "snapshot-tokens",
-            ) as HTMLStyleElement | null;
-            if (styleEl) {
-              styleEl.textContent = resolveTokens(nextTheme);
-            }
-            if (builtin.mode) {
-              const root = document.documentElement;
-              if (builtin.mode === "dark") {
-                root.classList.add("dark");
-              } else if (builtin.mode === "light") {
-                root.classList.remove("dark");
-              } else {
-                const dark = window.matchMedia(
-                  "(prefers-color-scheme: dark)",
-                ).matches;
-                root.classList.toggle("dark", dark);
-              }
-              window.dispatchEvent(
-                new CustomEvent("snapshot:set-theme", {
-                  detail: { mode: builtin.mode },
                 }),
               );
-            }
-            return nextTheme;
-          }
-
-          case "confirm": {
-            const title =
-              builtin.title !== undefined
-                ? String(
-                    resolveWorkflowValue(
-                      builtin.title,
-                      builtinContext,
-                      pageRegistry,
-                      appRegistry,
-                      activeLocale,
-                      runtime,
-                      routeRuntime,
-                      overlayRuntime,
-                    ),
-                  )
-                : undefined;
-            const descriptionSource =
-              builtin.description ?? builtin.message ?? title ?? "";
-            const description = String(
-              resolveWorkflowValue(
-                descriptionSource,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ),
-            );
-            const confirmed = await confirmManager.show({
-              title,
-              description,
-              message: description,
-              confirmLabel: builtin.confirmLabel,
-              cancelLabel: builtin.cancelLabel,
-              variant: builtin.variant,
-              requireInput: builtin.requireInput,
-            });
-            if (!confirmed) {
-              if (builtin.onCancel) {
-                await execute(builtin.onCancel, builtinContext);
-              }
-              throw WORKFLOW_CANCELLED;
-            }
-            if (builtin.onConfirm) {
-              await execute(builtin.onConfirm, builtinContext);
-            }
-            return true;
-          }
-
-          case "scroll-to": {
-            if (typeof document === "undefined") {
-              return undefined;
+              return eventName;
             }
 
-            const target = String(
-              resolveWorkflowValue(
-                builtin.target,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ),
-            );
-            const resolvedTarget = target.startsWith("#")
-              ? document.querySelector(target)
-              : document.querySelector(
-                  `[data-snapshot-id="${target}"], [data-component-id="${target}"], #${target}`,
-                );
-            resolvedTarget?.scrollIntoView({
-              behavior: builtin.behavior === "instant" ? "auto" : builtin.behavior ?? "smooth",
-              block: builtin.block ?? "start",
-            });
-            return target;
-          }
-
-          case "toast": {
-            const message = String(
-              resolveWorkflowValue(
-                builtin.message,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ),
-            );
-            toastManager.show({
-              message,
-              variant: builtin.variant,
-              duration: builtin.duration,
-              action: builtin.action
-                ? {
-                    label: builtin.action.label,
-                    onClick: () =>
-                      void execute(builtin.action!.action, builtinContext),
-                  }
-                : undefined,
-              undo: builtin.undo
-                ? {
-                    label: builtin.undo.label,
-                    action: builtin.undo.action,
-                    duration: builtin.undo.duration,
-                  }
-                : undefined,
-            });
-            return message;
-          }
-
-          case "track": {
-            const event = String(
-              resolveWorkflowValue(
-                builtin.event,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ),
-            );
-            const props = builtin.props
-              ? (resolveWorkflowValue(
-                  builtin.props,
-                  builtinContext,
-                  pageRegistry,
-                  appRegistry,
-                  activeLocale,
-                  runtime,
-                  routeRuntime,
-                  overlayRuntime,
-                ) as Record<string, unknown>)
-              : undefined;
-            await analyticsDispatcher.track(event, props);
-            return event;
-          }
-
-          case "log": {
-            const message = String(
-              resolveWorkflowValue(
-                builtin.message,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ),
-            );
-            const data = builtin.data
-              ? (resolveWorkflowValue(
-                  builtin.data,
-                  builtinContext,
-                  pageRegistry,
-                  appRegistry,
-                  activeLocale,
-                  runtime,
-                  routeRuntime,
-                  overlayRuntime,
-                ) as Record<string, unknown>)
-              : undefined;
-            const auditSink = (runtime?.raw as { observability?: { audit?: { sink?: string } } })
-              ?.observability?.audit?.sink;
-            if (auditSink && api) {
-              void api.post(auditSink, {
-                level: builtin.level,
-                message,
-                data,
-                timestamp: new Date().toISOString(),
-                route: routeRuntime?.currentPath,
-              });
-            }
-            const logger =
-              builtin.level === "debug" ? console.debug : console[builtin.level];
-            logger?.(message, data);
-            return message;
-          }
-
-          case "branch": {
-            const matches = Boolean(
-              evaluateExpression(
-                builtin.condition,
-                buildExpressionContext({
-                  context: builtinContext,
-                  pageRegistry,
-                  appRegistry,
-                  route: {
-                    id: routeRuntime?.currentRoute?.id,
-                    path: routeRuntime?.currentPath,
-                    pattern: routeRuntime?.currentRoute?.path,
-                    params: routeRuntime?.params,
-                    query: routeRuntime?.query,
-                  },
-                  overlay: overlayRuntime,
-                  manifest: runtime,
+            case "submit-form":
+              window.dispatchEvent(
+                new CustomEvent("snapshot:submit-form", {
+                  detail: { formId: builtin.formId },
                 }),
-              ),
-            );
-            const nextAction = matches ? builtin.then : builtin.else;
-            if (nextAction) {
-              await execute(nextAction, builtinContext);
+              );
+              return builtin.formId;
+
+            case "reset-form":
+              window.dispatchEvent(
+                new CustomEvent("snapshot:reset-form", {
+                  detail: { formId: builtin.formId },
+                }),
+              );
+              return builtin.formId;
+
+            case "set-theme": {
+              const nextTheme = {
+                ...(runtime?.theme ?? {}),
+                ...(builtin.flavor ? { flavor: builtin.flavor } : null),
+              };
+              const styleEl = document.getElementById(
+                "snapshot-tokens",
+              ) as HTMLStyleElement | null;
+              if (styleEl) {
+                styleEl.textContent = resolveTokens(nextTheme);
+              }
+              if (builtin.mode) {
+                const root = document.documentElement;
+                if (builtin.mode === "dark") {
+                  root.classList.add("dark");
+                } else if (builtin.mode === "light") {
+                  root.classList.remove("dark");
+                } else {
+                  const dark = window.matchMedia(
+                    "(prefers-color-scheme: dark)",
+                  ).matches;
+                  root.classList.toggle("dark", dark);
+                }
+                window.dispatchEvent(
+                  new CustomEvent("snapshot:set-theme", {
+                    detail: { mode: builtin.mode },
+                  }),
+                );
+              }
+              return nextTheme;
             }
-            return matches;
-          }
 
-          case "for-each": {
-            const resolvedItems = resolveWorkflowValue(
-              builtin.items,
-              builtinContext,
-              pageRegistry,
-              appRegistry,
-              activeLocale,
-              runtime,
-              routeRuntime,
-              overlayRuntime,
-            );
-            const items = Array.isArray(resolvedItems) ? resolvedItems : [];
-
-            for (let index = 0; index < items.length; index += 1) {
-              await execute(builtin.action, {
-                ...builtinContext,
-                item: items[index],
-                index,
-                items,
+            case "confirm": {
+              const title =
+                builtin.title !== undefined
+                  ? String(
+                      resolveWorkflowValue(
+                        builtin.title,
+                        builtinContext,
+                        pageRegistry,
+                        appRegistry,
+                        activeLocale,
+                        runtime,
+                        routeRuntime,
+                        overlayRuntime,
+                      ),
+                    )
+                  : undefined;
+              const descriptionSource =
+                builtin.description ?? builtin.message ?? title ?? "";
+              const description = String(
+                resolveWorkflowValue(
+                  descriptionSource,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ),
+              );
+              const confirmed = await confirmManager.show({
+                title,
+                description,
+                message: description,
+                confirmLabel: builtin.confirmLabel,
+                cancelLabel: builtin.cancelLabel,
+                variant: builtin.variant,
+                requireInput: builtin.requireInput,
               });
+              if (!confirmed) {
+                if (builtin.onCancel) {
+                  await execute(builtin.onCancel, builtinContext);
+                }
+                throw WORKFLOW_CANCELLED;
+              }
+              if (builtin.onConfirm) {
+                await execute(builtin.onConfirm, builtinContext);
+              }
+              return true;
             }
 
-            if (builtin.onComplete) {
-              await execute(builtin.onComplete, builtinContext);
+            case "scroll-to": {
+              if (typeof document === "undefined") {
+                return undefined;
+              }
+
+              const target = String(
+                resolveWorkflowValue(
+                  builtin.target,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ),
+              );
+              const resolvedTarget = target.startsWith("#")
+                ? document.querySelector(target)
+                : document.querySelector(
+                    `[data-snapshot-id="${target}"], [data-component-id="${target}"], #${target}`,
+                  );
+              resolvedTarget?.scrollIntoView({
+                behavior:
+                  builtin.behavior === "instant"
+                    ? "auto"
+                    : (builtin.behavior ?? "smooth"),
+                block: builtin.block ?? "start",
+              });
+              return target;
             }
 
-            return items.length;
-          }
-
-          case "ws-send": {
-            if (!wsManager) {
-              return undefined;
+            case "toast": {
+              const message = String(
+                resolveWorkflowValue(
+                  builtin.message,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ),
+              );
+              toastManager.show({
+                message,
+                variant: builtin.variant,
+                duration: builtin.duration,
+                action: builtin.action
+                  ? {
+                      label: builtin.action.label,
+                      onClick: () =>
+                        void execute(builtin.action!.action, builtinContext),
+                    }
+                  : undefined,
+                undo: builtin.undo
+                  ? {
+                      label: builtin.undo.label,
+                      action: builtin.undo.action,
+                      duration: builtin.undo.duration,
+                    }
+                  : undefined,
+              });
+              return message;
             }
 
-            const event = String(
-              resolveWorkflowValue(
-                builtin.event,
-                builtinContext,
-                pageRegistry,
-                appRegistry,
-                activeLocale,
-                runtime,
-                routeRuntime,
-                overlayRuntime,
-              ),
-            );
-            const data =
-              builtin.data === undefined
-                ? undefined
-                : (resolveWorkflowValue(
+            case "track": {
+              const event = String(
+                resolveWorkflowValue(
+                  builtin.event,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ),
+              );
+              const props = builtin.props
+                ? (resolveWorkflowValue(
+                    builtin.props,
+                    builtinContext,
+                    pageRegistry,
+                    appRegistry,
+                    activeLocale,
+                    runtime,
+                    routeRuntime,
+                    overlayRuntime,
+                  ) as Record<string, unknown>)
+                : undefined;
+              await analyticsDispatcher.track(event, props);
+              return event;
+            }
+
+            case "log": {
+              const message = String(
+                resolveWorkflowValue(
+                  builtin.message,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ),
+              );
+              const data = builtin.data
+                ? (resolveWorkflowValue(
                     builtin.data,
                     builtinContext,
                     pageRegistry,
@@ -1098,14 +1003,123 @@ export function useActionExecutor(): ActionExecuteFn {
                     runtime,
                     routeRuntime,
                     overlayRuntime,
-                  ) as Record<string, unknown>);
-            wsManager.send(event, data);
-            return data;
-          }
+                  ) as Record<string, unknown>)
+                : undefined;
+              const auditSink = (
+                runtime?.raw as {
+                  observability?: { audit?: { sink?: string } };
+                }
+              )?.observability?.audit?.sink;
+              if (auditSink && api) {
+                void api.post(auditSink, {
+                  level: builtin.level,
+                  message,
+                  data,
+                  timestamp: new Date().toISOString(),
+                  route: routeRuntime?.currentPath,
+                });
+              }
+              const logger =
+                builtin.level === "debug"
+                  ? console.debug
+                  : console[builtin.level];
+              logger?.(message, data);
+              return message;
+            }
 
-          case "run-workflow":
-            return;
-        }
+            case "branch": {
+              const matches = Boolean(
+                evaluateExpression(
+                  builtin.condition,
+                  buildExpressionContext({
+                    context: builtinContext,
+                    pageRegistry,
+                    appRegistry,
+                    route: {
+                      id: routeRuntime?.currentRoute?.id,
+                      path: routeRuntime?.currentPath,
+                      pattern: routeRuntime?.currentRoute?.path,
+                      params: routeRuntime?.params,
+                      query: routeRuntime?.query,
+                    },
+                    overlay: overlayRuntime,
+                    manifest: runtime,
+                  }),
+                ),
+              );
+              const nextAction = matches ? builtin.then : builtin.else;
+              if (nextAction) {
+                await execute(nextAction, builtinContext);
+              }
+              return matches;
+            }
+
+            case "for-each": {
+              const resolvedItems = resolveWorkflowValue(
+                builtin.items,
+                builtinContext,
+                pageRegistry,
+                appRegistry,
+                activeLocale,
+                runtime,
+                routeRuntime,
+                overlayRuntime,
+              );
+              const items = Array.isArray(resolvedItems) ? resolvedItems : [];
+
+              for (let index = 0; index < items.length; index += 1) {
+                await execute(builtin.action, {
+                  ...builtinContext,
+                  item: items[index],
+                  index,
+                  items,
+                });
+              }
+
+              if (builtin.onComplete) {
+                await execute(builtin.onComplete, builtinContext);
+              }
+
+              return items.length;
+            }
+
+            case "ws-send": {
+              if (!wsManager) {
+                return undefined;
+              }
+
+              const event = String(
+                resolveWorkflowValue(
+                  builtin.event,
+                  builtinContext,
+                  pageRegistry,
+                  appRegistry,
+                  activeLocale,
+                  runtime,
+                  routeRuntime,
+                  overlayRuntime,
+                ),
+              );
+              const data =
+                builtin.data === undefined
+                  ? undefined
+                  : (resolveWorkflowValue(
+                      builtin.data,
+                      builtinContext,
+                      pageRegistry,
+                      appRegistry,
+                      activeLocale,
+                      runtime,
+                      routeRuntime,
+                      overlayRuntime,
+                    ) as Record<string, unknown>);
+              wsManager.send(event, data);
+              return data;
+            }
+
+            case "run-workflow":
+              return;
+          }
         };
 
         const executeWithTiming = (): Promise<unknown> => {

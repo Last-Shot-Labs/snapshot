@@ -145,6 +145,51 @@ describe("detailCardConfigSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts canonical slots on the component, actions, and fields", () => {
+    const result = detailCardConfigSchema.safeParse({
+      ...baseConfig,
+      slots: {
+        panel: {
+          borderRadius: "lg",
+        },
+        actionButton: {
+          states: {
+            hover: {
+              bg: "surface.hover",
+            },
+          },
+        },
+      },
+      fields: [
+        {
+          field: "email",
+          copyable: true,
+          slots: {
+            fieldValue: {
+              color: "text.default",
+            },
+            copyButton: {
+              className: "copy-slot",
+            },
+          },
+        },
+      ],
+      actions: [
+        {
+          label: "Edit",
+          action: { type: "open-modal", modal: "edit-user" },
+          slots: {
+            actionButton: {
+              className: "action-slot",
+            },
+          },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it("rejects invalid type", () => {
     const result = detailCardConfigSchema.safeParse({
       ...baseConfig,

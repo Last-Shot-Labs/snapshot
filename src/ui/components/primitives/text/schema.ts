@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { extendComponentSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+export const textSlotNames = ["root"] as const;
 
 export const textConfigSchema = extendComponentSchema({
   type: z.literal("text"),
@@ -10,4 +12,5 @@ export const textConfigSchema = extendComponentSchema({
     .enum(["light", "normal", "medium", "semibold", "bold"])
     .default("normal"),
   align: z.enum(["left", "center", "right"]).default("left"),
+  slots: slotsSchema(textSlotNames).optional(),
 }).strict();

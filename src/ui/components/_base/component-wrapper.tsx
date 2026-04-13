@@ -18,6 +18,7 @@ import type {
   ExitAnimationConfig,
 } from "./types";
 import { mergeClassNames, resolveSurfacePresentation } from "./style-surfaces";
+import { resolveComponentBackgroundStyle } from "./background-style";
 
 /**
  * Props for ComponentWrapper.
@@ -110,55 +111,6 @@ function resolveZIndexValue(
     return Z_INDEX_MAP[value] ?? value;
   }
   return undefined;
-}
-
-function buildGradientCss(
-  gradient: Exclude<ComponentBackgroundConfig, string>["gradient"],
-): string {
-  if (!gradient) {
-    return "";
-  }
-
-  const stops = gradient.stops
-    .map((stop) => `${stop.color}${stop.position ? ` ${stop.position}` : ""}`)
-    .join(", ");
-  if (gradient.type === "radial") {
-    return `radial-gradient(${stops})`;
-  }
-  if (gradient.type === "conic") {
-    return `conic-gradient(from ${gradient.direction ?? "0deg"}, ${stops})`;
-  }
-  return `linear-gradient(${gradient.direction ?? "135deg"}, ${stops})`;
-}
-
-function resolveBackgroundStyle(
-  background: ComponentBackgroundConfig | undefined,
-): CSSProperties | undefined {
-  if (!background) {
-    return undefined;
-  }
-
-  if (typeof background === "string") {
-    return { background };
-  }
-
-  const layers: string[] = [];
-  if (background.overlay) {
-    layers.push(`linear-gradient(${background.overlay}, ${background.overlay})`);
-  }
-  if (background.gradient) {
-    layers.push(buildGradientCss(background.gradient));
-  }
-  if (background.image) {
-    layers.push(`url(${background.image})`);
-  }
-
-  return {
-    ...(layers.length > 0 ? { backgroundImage: layers.join(", ") } : undefined),
-    backgroundPosition: background.position ?? (background.image ? "center" : undefined),
-    backgroundSize: background.size ?? (background.image ? "cover" : undefined),
-    backgroundAttachment: background.fixed ? "fixed" : undefined,
-  };
 }
 
 function resolveTransitionStyle(
@@ -369,6 +321,15 @@ export function ComponentWrapper({
         focus,
         active,
       } as Record<string, unknown>),
+    itemSurface:
+      config &&
+      typeof config === "object" &&
+      "slots" in config &&
+      config.slots &&
+      typeof config.slots === "object" &&
+      "root" in (config.slots as Record<string, unknown>)
+        ? ((config.slots as Record<string, unknown>).root as Record<string, unknown>)
+        : undefined,
   });
 
   // ── Interactive CSS (hover/focus/active) ───────────────────────────────
@@ -436,7 +397,7 @@ export function ComponentWrapper({
   const animationStyle = isAnimatingOut
     ? resolveExitAnimationStyle(exitAnimation)
     : resolveAnimationStyle(animation);
-  const backgroundStyle = resolveBackgroundStyle(background);
+  const backgroundStyle = resolveComponentBackgroundStyle(background);
   const transitionStyle = resolveTransitionStyle(transition);
   const glassStyle = glass
     ? {

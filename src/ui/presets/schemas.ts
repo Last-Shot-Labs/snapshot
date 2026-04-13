@@ -32,6 +32,7 @@ const formSchema = z
   })
   .strict();
 
+/** Validate preset config for a CRUD page assembled from list/form primitives. */
 export const crudPresetConfigSchema = z
   .object({
     title: z.string().min(1),
@@ -46,7 +47,9 @@ export const crudPresetConfigSchema = z
             key: z.string().min(1),
             label: z.string().min(1),
             badge: z.boolean().optional(),
-            format: z.enum(["date", "currency", "number", "boolean"]).optional(),
+            format: z
+              .enum(["date", "currency", "number", "boolean"])
+              .optional(),
           })
           .strict(),
       )
@@ -84,6 +87,7 @@ export const crudPresetConfigSchema = z
   })
   .strict();
 
+/** Validate preset config for a dashboard page with stats, charts, and activity sections. */
 export const dashboardPresetConfigSchema = z
   .object({
     title: z.string().min(1),
@@ -154,6 +158,7 @@ export const dashboardPresetConfigSchema = z
   })
   .strict();
 
+/** Validate preset config for a settings page composed from one or more submitted sections. */
 export const settingsPresetConfigSchema = z
   .object({
     title: z.string().min(1),
@@ -178,6 +183,7 @@ export const settingsPresetConfigSchema = z
   })
   .strict();
 
+/** Validate preset config for auth screens such as login, register, and password recovery. */
 export const authPresetConfigSchema = z
   .object({
     screen: z.enum([

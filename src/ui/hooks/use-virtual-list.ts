@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -17,6 +17,7 @@ export interface UseVirtualListResult {
   visibleIndices: number[];
 }
 
+/** Compute the visible slice for a fixed-height virtualized list container. */
 export function useVirtualList({
   totalCount,
   itemHeight,

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect } from "react";
 import { useAtom } from "jotai/react";
@@ -9,6 +9,7 @@ import {
   type PersistStorage,
 } from "./persist";
 
+/** Bind a primitive atom to browser storage so its value survives page reloads. */
 export function usePersistedAtom<T>(
   sourceAtom: PrimitiveAtom<T>,
   key: string,

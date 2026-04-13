@@ -1,16 +1,14 @@
 'use client';
 
-import type { CSSProperties } from "react";
 import { useSubscribe } from "../../../context";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
 import { resolveTemplate } from "../../../expressions/template";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import type { DividerConfig } from "./types";
 
-export interface DividerConfig {
-  label?: string;
-  orientation?: "horizontal" | "vertical";
-  className?: string;
-  style?: Record<string, string | number>;
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
 export function Divider({ config }: { config: DividerConfig }) {
@@ -37,71 +35,134 @@ export function Divider({ config }: { config: DividerConfig }) {
         },
       )
     : undefined;
+  const rootId = config.id ?? "divider";
+
   if (config.orientation === "vertical") {
-    return (
-      <div
-        role="separator"
-        aria-orientation="vertical"
-        className={config.className}
-        style={{
+    const rootSurface = resolveSurfacePresentation({
+      surfaceId: `${rootId}-root`,
+      implementationBase: {
+        style: {
           width: "1px",
           alignSelf: "stretch",
           background: "var(--sn-color-border)",
-          ...(config.style as CSSProperties | undefined),
-        }}
-      />
+        },
+      },
+      componentSurface: config,
+      itemSurface: config.slots?.root,
+    });
+
+    return (
+      <>
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          data-snapshot-component="divider"
+          data-snapshot-id={`${rootId}-root`}
+          className={rootSurface.className}
+          style={rootSurface.style}
+        />
+        <SurfaceStyles css={rootSurface.scopedCss} />
+      </>
     );
   }
 
   if (!resolvedLabel) {
+    const rootSurface = resolveSurfacePresentation({
+      surfaceId: `${rootId}-root`,
+      implementationBase: {
+        border: "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
+        style: { borderLeft: "none", borderRight: "none", borderBottom: "none" },
+      },
+      componentSurface: config,
+      itemSurface: config.slots?.root,
+    });
+
     return (
-      <div
-        role="separator"
-        className={config.className}
-        style={{
-          borderTop:
-            "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
-          ...(config.style as CSSProperties | undefined),
-        }}
-      />
+      <>
+        <div
+          role="separator"
+          data-snapshot-component="divider"
+          data-snapshot-id={`${rootId}-root`}
+          className={rootSurface.className}
+          style={rootSurface.style}
+        />
+        <SurfaceStyles css={rootSurface.scopedCss} />
+      </>
     );
   }
 
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "md",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const startLineSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-line-start`,
+    implementationBase: {
+      style: {
+        flex: 1,
+        height: 0,
+        borderTop: "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
+      },
+    },
+    componentSurface: config.slots?.lineStart,
+  });
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground)",
+      fontSize: "var(--sn-font-size-xs, 0.75rem)",
+    },
+    componentSurface: config.slots?.label,
+  });
+  const endLineSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-line-end`,
+    implementationBase: {
+      style: {
+        flex: 1,
+        height: 0,
+        borderTop: "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
+      },
+    },
+    componentSurface: config.slots?.lineEnd,
+  });
+
   return (
-    <div
-      role="separator"
-      className={config.className}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "var(--sn-spacing-md, 1rem)",
-        ...(config.style as CSSProperties | undefined),
-      }}
-    >
+    <>
       <div
-        style={{
-          flex: 1,
-          height: 0,
-          borderTop:
-            "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
-        }}
-      />
-      <span
-        style={{
-          color: "var(--sn-color-muted-foreground)",
-          fontSize: "var(--sn-font-size-xs, 0.75rem)",
-        }}
+        role="separator"
+        data-snapshot-component="divider"
+        data-snapshot-id={`${rootId}-root`}
+        className={rootSurface.className}
+        style={rootSurface.style}
       >
-        {resolvedLabel}
-      </span>
-      <div
-        style={{
-          flex: 1,
-          height: 0,
-          borderTop:
-            "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
-        }}
-      />
-    </div>
+        <div
+          data-snapshot-id={`${rootId}-line-start`}
+          className={startLineSurface.className}
+          style={startLineSurface.style}
+        />
+        <span
+          data-snapshot-id={`${rootId}-label`}
+          className={labelSurface.className}
+          style={labelSurface.style}
+        >
+          {resolvedLabel}
+        </span>
+        <div
+          data-snapshot-id={`${rootId}-line-end`}
+          className={endLineSurface.className}
+          style={endLineSurface.style}
+        />
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={startLineSurface.scopedCss} />
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={endLineSurface.scopedCss} />
+    </>
   );
 }

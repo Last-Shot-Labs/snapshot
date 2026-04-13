@@ -45,5 +45,12 @@ The normal SDK path is:
 ## Where SDK Builders Usually Need More Context
 
 - [Community and Realtime](/integrate/community-and-realtime/) for threads, notifications, push, websocket, and SSE boundaries
-- [Content and Media](/integrate/content-and-media/) when custom React still needs Snapshot’s media and rich-input surfaces
+- [Content and Media](/integrate/content-and-media/) when custom React still needs Snapshot's media and rich-input surfaces
 - [Examples and Showcase](/examples/) for the current component compositions and interaction patterns in `playground/src/showcase.tsx`
+
+For the quickest source-backed examples, use these showcase sections:
+
+- `communication` for chat, comments, reactions, emoji, GIF, presence, and typing
+- `content` for markdown, editors, uploads, embeds, and comparison views
+- `overlay` for toast, confirm, modal, drawer, context-menu, and command interactions
+- `feed-chart-wizard` for chart, feed, and multistep flow behavior that often gets embedded into custom React

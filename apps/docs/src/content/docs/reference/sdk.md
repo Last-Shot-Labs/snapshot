@@ -4,8 +4,6 @@ description: Generated from src/index.ts and the declarations it re-exports.
 draft: false
 ---
 
-Generated from src/index.ts and the declarations it re-exports.
-
 Generated from `src/index.ts`.
 
 | Export | Kind | Source | Description |

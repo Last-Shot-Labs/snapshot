@@ -13,6 +13,7 @@ export type Platform =
   | "gif"
   | "generic";
 
+/** Resolved platform metadata used to render a platform-specific embedded preview. */
 export interface PlatformInfo {
   platform: Platform;
   embedId: string;

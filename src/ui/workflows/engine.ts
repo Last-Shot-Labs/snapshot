@@ -76,6 +76,7 @@ function setContextPath(
   return next;
 }
 
+/** Execute a workflow definition against the supplied runtime hooks and mutable context. */
 export async function runWorkflow(
   definition: WorkflowDefinition,
   options: {
@@ -119,7 +120,11 @@ export async function runWorkflow(
       }
 
       if (isIfWorkflowNode(node)) {
-        const branch = evaluateCondition(node.condition, runtime, currentContext)
+        const branch = evaluateCondition(
+          node.condition,
+          runtime,
+          currentContext,
+        )
           ? node.then
           : node.else;
         if (branch) {

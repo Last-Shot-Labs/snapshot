@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from "react";
-import { useSubscribe } from "../../../context";
-import { resolveRuntimeLocale } from "../../../i18n/resolve";
-import { useManifestRuntime } from "../../../manifest/runtime";
-import { useRouteRuntime } from "../../../manifest/runtime";
 import { useActionExecutor } from "../../../actions/executor";
+import { useSubscribe } from "../../../context";
 import { resolveTemplate } from "../../../expressions/template";
+import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { renderIcon } from "../../../icons/render";
+import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
+import type { OAuthButtonsConfig } from "./types";
 
 const PROVIDER_ICON_MAP: Record<string, string> = {
   google: "mail",
@@ -18,9 +20,8 @@ const PROVIDER_ICON_MAP: Record<string, string> = {
   discord: "globe",
 };
 
-export interface OAuthButtonsConfig {
-  heading?: string;
-  onSuccess?: unknown[];
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
 function titleCase(value: string): string {
@@ -37,6 +38,7 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
   const autoRedirectedRef = useRef(false);
   const activeLocale = resolveRuntimeLocale(manifest?.raw.i18n, localeState);
   const routeId = routeRuntime?.currentRoute?.id;
+  const rootId = config.id ?? "oauth-buttons";
   const screenOptions = useMemo(
     () =>
       routeId &&
@@ -171,84 +173,129 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
     } as never);
   }, [execute, providerMode, resolvedProviders]);
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--sn-spacing-sm, 0.5rem)",
-      }}
-    >
-      {heading ? (
-        <div
-          style={{
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            fontWeight: "var(--sn-font-weight-medium, 500)",
-            color: "var(--sn-color-foreground, #111827)",
-          }}
-        >
-          {resolveTemplate(heading, templateContext, templateOptions)}
-        </div>
-      ) : null}
-      {resolvedProviders.map((provider) => {
-        const descriptionId = `sn-oauth-provider-${provider.providerName}`;
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "sm",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const headingSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-heading`,
+    implementationBase: {
+      fontSize: "var(--sn-font-size-sm, 0.875rem)",
+      fontWeight: 500,
+      color: "var(--sn-color-foreground, #111827)",
+    },
+    componentSurface: config.slots?.heading,
+  });
+  const providerButtonSurface = config.slots?.provider;
+  const providerIconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-provider-icon`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      style: { flexShrink: 0 },
+    },
+    componentSurface: config.slots?.providerIcon,
+  });
+  const providerLabelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-provider-label`,
+    componentSurface: config.slots?.providerLabel,
+  });
+  const providerDescriptionSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-provider-description`,
+    implementationBase: {
+      fontSize: "var(--sn-font-size-xs, 0.75rem)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      textAlign: "center",
+    },
+    componentSurface: config.slots?.providerDescription,
+  });
 
-        return (
+  return (
+    <>
+      <div
+        data-snapshot-component="oauth-buttons"
+        data-snapshot-id={`${rootId}-root`}
+        className={rootSurface.className}
+        style={rootSurface.style}
+      >
+        {heading ? (
           <div
-            key={provider.providerName}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--sn-spacing-2xs, 0.125rem)",
-            }}
+            data-snapshot-id={`${rootId}-heading`}
+            className={headingSurface.className}
+            style={headingSurface.style}
           >
-            <button
-              type="button"
-              aria-describedby={provider.description ? descriptionId : undefined}
-              onClick={() =>
-                void execute({
-                  type: "navigate-external",
-                  to: provider.url,
-                } as never)
-              }
+            {resolveTemplate(heading, templateContext, templateOptions)}
+          </div>
+        ) : null}
+        {resolvedProviders.map((provider, index) => {
+          const descriptionId = `sn-oauth-provider-${provider.providerName}`;
+
+          return (
+            <div
+              key={provider.providerName}
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "var(--sn-spacing-sm, 0.5rem)",
-                padding:
-                  "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
-                borderRadius: "var(--sn-radius-md, 0.375rem)",
-                border:
-                  "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
-                background: "var(--sn-color-secondary, var(--sn-color-card))",
-                color:
-                  "var(--sn-color-secondary-foreground, var(--sn-color-foreground))",
-                font: "inherit",
-                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--sn-spacing-2xs, 0.125rem)",
               }}
             >
-              {renderIcon(
-                PROVIDER_ICON_MAP[provider.providerName] ?? "globe",
-                16,
-              )}
-              <span>{provider.label}</span>
-            </button>
-            {provider.description ? (
-              <div
-                id={descriptionId}
-                style={{
-                  fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                  color: "var(--sn-color-muted-foreground, #6b7280)",
-                  textAlign: "center",
-                }}
+              <ButtonControl
+                surfaceId={`${rootId}-provider-${index}`}
+                surfaceConfig={providerButtonSurface}
+                variant="outline"
+                size="sm"
+                ariaLabel={provider.label}
+                ariaHasPopup={false}
+                onClick={() =>
+                  void execute({
+                    type: "navigate-external",
+                    to: provider.url,
+                  } as never)
+                }
               >
-                {provider.description}
-              </div>
-            ) : null}
-          </div>
-        );
-      })}
-    </div>
+                <span
+                  data-snapshot-id={`${rootId}-provider-icon-${index}`}
+                  className={providerIconSurface.className}
+                  style={providerIconSurface.style}
+                >
+                  {renderIcon(
+                    PROVIDER_ICON_MAP[provider.providerName] ?? "globe",
+                    16,
+                  )}
+                </span>
+                <span
+                  data-snapshot-id={`${rootId}-provider-label-${index}`}
+                  className={providerLabelSurface.className}
+                  style={providerLabelSurface.style}
+                >
+                  {provider.label}
+                </span>
+              </ButtonControl>
+              {provider.description ? (
+                <div
+                  id={descriptionId}
+                  data-snapshot-id={`${rootId}-provider-description-${index}`}
+                  className={providerDescriptionSurface.className}
+                  style={providerDescriptionSurface.style}
+                >
+                  {provider.description}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={headingSurface.scopedCss} />
+      <SurfaceStyles css={providerIconSurface.scopedCss} />
+      <SurfaceStyles css={providerLabelSurface.scopedCss} />
+      <SurfaceStyles css={providerDescriptionSurface.scopedCss} />
+    </>
   );
 }

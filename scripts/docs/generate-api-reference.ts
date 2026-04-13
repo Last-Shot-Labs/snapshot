@@ -26,7 +26,7 @@ const surfaces: Surface[] = [
   {
     label: "UI",
     file: repoPath("src", "ui.ts"),
-    output: "reference/ui.md",
+    output: "reference/ui/index.md",
     description: "Generated from src/ui.ts and the declarations it re-exports.",
   },
   {
@@ -145,8 +145,6 @@ function renderSurface(program: ts.Program, surface: Surface): void {
       `${surface.label} Reference`,
       surface.description,
       [
-        surface.description,
-        "",
         `Generated from \`${relToRepo(surface.file)}\`.`,
         "",
         "| Export | Kind | Source | Description |",

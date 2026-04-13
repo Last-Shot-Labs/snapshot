@@ -6,6 +6,7 @@
  */
 
 import type { CSSProperties } from "react";
+import { resolveComponentBackgroundStyle } from "./background-style";
 
 // ── Token Maps ────────────────────────────��─────────────────────────────────
 
@@ -243,7 +244,14 @@ export function resolveStyleProps(
     if (typeof config.bg === "string") {
       s.background = resolveColor(config.bg);
     }
-    // Object backgrounds (gradient, image) handled by existing resolveBackgroundStyle
+    if (typeof config.bg === "object" && !Array.isArray(config.bg)) {
+      Object.assign(
+        s,
+        resolveComponentBackgroundStyle(
+          config.bg as Parameters<typeof resolveComponentBackgroundStyle>[0],
+        ),
+      );
+    }
   }
 
   if (config.color != null) {

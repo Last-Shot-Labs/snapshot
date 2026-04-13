@@ -15,7 +15,9 @@ import { registerBuiltInGuards } from "./guard-registry";
 let booted = false;
 
 export function registerLegacyStructuralComponents(): void {
-  for (const [type, component] of Object.entries(LEGACY_STRUCTURAL_COMPONENTS)) {
+  for (const [type, component] of Object.entries(
+    LEGACY_STRUCTURAL_COMPONENTS,
+  )) {
     registerComponent(type, component);
   }
 }
@@ -38,6 +40,7 @@ export function bootBuiltins(): void {
   registerBuiltInGuards();
 }
 
+/** Reset the boot flag so tests can re-run built-in registration deterministically. */
 export function resetBootBuiltins(): void {
   booted = false;
 }

@@ -54,3 +54,11 @@ Current high-signal manifest compositions live in:
 - `src/ui/components/**/schema.ts`
 
 The playground is especially useful when you need to see how data, forms, overlays, navigation, content, communication, and workflow components are composed together on `main`.
+
+If you want the shortest path to a concrete composition, use these showcase sections:
+
+- `dashboard` for KPI shells, stat cards, and summary layouts
+- `data` for operational tables, filters, detail cards, and row actions
+- `forms` for input contracts, quick-entry flows, and manifest-driven field states
+- `navigation` and `overlay` for app shell interactions
+- `workflow` and `presets` for larger composed screens

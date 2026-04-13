@@ -5,7 +5,10 @@
  * stays side-effect free.
  */
 import { registerComponent } from "../manifest/component-registry";
-import { buttonConfigSchema, registerComponentSchema } from "../manifest/schema";
+import {
+  buttonConfigSchema,
+  registerComponentSchema,
+} from "../manifest/schema";
 import { StatCard, statCardConfigSchema } from "./data/stat-card/index";
 import { DataTable } from "./data/data-table/index";
 import { dataTableConfigSchema } from "./data/data-table/schema";
@@ -184,10 +187,7 @@ import {
   PasskeyButton,
   passkeyButtonConfigSchema,
 } from "./primitives/passkey-button";
-import {
-  Carousel,
-  carouselConfigSchema,
-} from "./media/carousel/index";
+import { Carousel, carouselConfigSchema } from "./media/carousel/index";
 import { SnapshotImage, snapshotImageSchema } from "./media/image";
 import { Video } from "./media/video/index";
 import { videoConfigSchema } from "./media/video/schema";
@@ -214,14 +214,8 @@ import {
   Collapsible,
   collapsibleConfigSchema,
 } from "./layout/collapsible/index";
-import {
-  IconButton,
-  iconButtonConfigSchema,
-} from "./forms/icon-button/index";
-import {
-  HoverCard,
-  hoverCardConfigSchema,
-} from "./overlay/hover-card/index";
+import { IconButton, iconButtonConfigSchema } from "./forms/icon-button/index";
+import { HoverCard, hoverCardConfigSchema } from "./overlay/hover-card/index";
 import {
   ToggleGroup,
   toggleGroupConfigSchema,
@@ -232,14 +226,8 @@ import {
   NavDropdown,
   navDropdownConfigSchema,
 } from "./layout/nav-dropdown/index";
-import {
-  NavSection,
-  navSectionConfigSchema,
-} from "./layout/nav-section/index";
-import {
-  NavSearch,
-  navSearchConfigSchema,
-} from "./layout/nav-search/index";
+import { NavSection, navSectionConfigSchema } from "./layout/nav-section/index";
+import { NavSearch, navSearchConfigSchema } from "./layout/nav-search/index";
 import {
   NavUserMenu,
   navUserMenuConfigSchema,
@@ -323,7 +311,10 @@ export function registerBuiltInComponents(force = false): void {
   );
   registerComponentSchema("passkey-button", passkeyButtonConfigSchema);
 
-  registerComponent("button", Button as Parameters<typeof registerComponent>[1]);
+  registerComponent(
+    "button",
+    Button as Parameters<typeof registerComponent>[1],
+  );
   registerComponentSchema("button", buttonConfigSchema);
 
   registerComponent(
@@ -870,6 +861,7 @@ export function registerBuiltInComponents(force = false): void {
   registerComponentSchema("component-group", componentGroupConfigSchema);
 }
 
+/** Reset the built-in component registration guard so tests can rebuild the registry. */
 export function resetBuiltInComponentRegistration(): void {
   builtInComponentsRegistered = false;
 }

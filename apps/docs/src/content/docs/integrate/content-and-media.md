@@ -34,4 +34,10 @@ Canonical source for this surface lives in:
 
 The highest-signal showcase coverage is currently in the `content` and `communication` page groups inside `playground/src/showcase.tsx`.
 
+Use those groups when you want concrete examples for:
+
+- markdown, code, timeline, compare, and rich-editor surfaces
+- file upload, embed, emoji, and GIF composition
+- user-facing content workflows that mix content and communication primitives
+
 Use the [Examples and Showcase](/examples/) page when you want to see the current component coverage that Snapshot ships on `main`.

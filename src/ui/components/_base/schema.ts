@@ -338,6 +338,7 @@ export const extendedBaseComponentSchema = z.object({
   background: componentBackgroundSchema.optional(),
   transition: componentTransitionSchema.optional(),
   exitAnimation: exitAnimationSchema.optional(),
+  slots: slotsSchema(["root"]).optional(),
   ...styleableElementFields,
 });
 

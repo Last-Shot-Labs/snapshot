@@ -105,8 +105,15 @@ function collectUserRoles(user: Record<string, unknown> | null): string[] {
 }
 
 function evaluateInlineGuard(context: GuardContext): GuardResult {
-  const { guard, manifest, parentPolicies, policies, route, routeContext, user } =
-    context;
+  const {
+    guard,
+    manifest,
+    parentPolicies,
+    policies,
+    route,
+    routeContext,
+    user,
+  } = context;
 
   if (guard.authenticated === true && !user) {
     return applyFallbacks({ allow: false }, guard);
@@ -154,14 +161,17 @@ function evaluateInlineGuard(context: GuardContext): GuardResult {
   return { allow: true };
 }
 
+/** Register a named route guard implementation for manifest resolution. */
 export function registerGuard(name: string, def: GuardDef): void {
   guardRegistry.set(name, def);
 }
 
+/** Resolve a previously registered route guard by name. */
 export function resolveGuard(name: string): GuardDef | undefined {
   return guardRegistry.get(name);
 }
 
+/** List the names of all currently registered route guards. */
 export function getRegisteredGuards(): string[] {
   return [...guardRegistry.keys()];
 }

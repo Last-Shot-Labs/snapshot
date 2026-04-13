@@ -40,7 +40,11 @@ const PRESET_REGISTRY: Record<
   },
 };
 
-export function expandPreset(preset: string, presetConfig: unknown): PageConfig {
+/** Validate a named preset config and expand it into the equivalent page config. */
+export function expandPreset(
+  preset: string,
+  presetConfig: unknown,
+): PageConfig {
   const entry = PRESET_REGISTRY[preset as PresetName];
   if (!entry) {
     throw new Error(

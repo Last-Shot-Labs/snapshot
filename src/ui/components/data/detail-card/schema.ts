@@ -5,12 +5,38 @@ import {
   loadingConfigSchema,
 } from "../../../manifest/schema";
 import {
-  baseComponentConfigSchema,
   dataSourceSchema,
   fromRefSchema,
   orFromRef,
 } from "../../_base/types";
 import { actionSchema } from "../../../actions/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+export const detailCardSlotNames = [
+  "root",
+  "panel",
+  "header",
+  "title",
+  "actions",
+  "actionButton",
+  "fields",
+  "field",
+  "fieldLabel",
+  "fieldValue",
+  "copyButton",
+  "emptyState",
+  "loadingState",
+  "errorState",
+] as const;
+
+export const detailCardFieldSlotNames = [
+  "field",
+  "fieldLabel",
+  "fieldValue",
+  "copyButton",
+] as const;
+
+export const detailCardActionSlotNames = ["actionButton"] as const;
 
 /**
  * Supported field format types for detail card fields.
@@ -43,6 +69,8 @@ export const detailFieldConfigSchema = z.object({
   format: detailFieldFormatSchema.optional(),
   /** Whether to show a copy-to-clipboard button next to the value. */
   copyable: z.boolean().optional(),
+  /** Field-level slot overrides. */
+  slots: slotsSchema(detailCardFieldSlotNames).optional(),
 });
 
 /**
@@ -55,6 +83,8 @@ export const detailCardActionSchema = z.object({
   icon: z.string().optional(),
   /** Action(s) to execute when clicked. */
   action: z.union([actionSchema, z.array(actionSchema)]),
+  /** Action button slot overrides. */
+  slots: slotsSchema(detailCardActionSlotNames).optional(),
 });
 
 /**
@@ -82,7 +112,7 @@ export const detailCardActionSchema = z.object({
  * }
  * ```
  */
-export const detailCardConfigSchema = baseComponentConfigSchema.extend({
+export const detailCardConfigSchema = extendComponentSchema({
   /** Component type discriminator. */
   type: z.literal("detail-card"),
   /** Endpoint string (e.g. "GET /api/users/1") or FromRef to get the record data. */
@@ -106,15 +136,9 @@ export const detailCardConfigSchema = baseComponentConfigSchema.extend({
   error: errorStateConfigSchema.optional(),
   /** Automatic loading placeholder config. */
   loading: loadingConfigSchema.optional(),
-  /** Component id for publishing/subscribing. */
-  id: z.string().optional(),
-  /** Visibility toggle. */
-  visible: z.union([z.boolean(), fromRefSchema]).optional(),
-  /** Inline style overrides. */
-  style: z.record(z.union([z.string(), z.number()])).optional(),
-  /** Additional CSS class name. */
-  className: z.string().optional(),
-});
+  /** Detail-card surface slots. */
+  slots: slotsSchema(detailCardSlotNames).optional(),
+}).strict();
 
 /** DetailCard configuration type inferred from the schema. */
 export type DetailCardConfig = z.infer<typeof detailCardConfigSchema>;
@@ -127,3 +151,6 @@ export type DetailCardAction = z.infer<typeof detailCardActionSchema>;
 
 /** Field format type. */
 export type DetailFieldFormat = z.infer<typeof detailFieldFormatSchema>;
+export type DetailCardSlotNames = typeof detailCardSlotNames;
+export type DetailCardFieldSlotNames = typeof detailCardFieldSlotNames;
+export type DetailCardActionSlotNames = typeof detailCardActionSlotNames;

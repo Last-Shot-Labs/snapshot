@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { componentConfigSchema } from "../../../manifest/schema";
-import { extendComponentSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+export const stackSlotNames = ["root", "item"] as const;
 
 export const stackConfigSchema = extendComponentSchema({
   type: z.literal("stack"),
@@ -14,4 +16,5 @@ export const stackConfigSchema = extendComponentSchema({
   padding: z.enum(["none", "sm", "md", "lg", "xl"]).optional(),
   overflow: z.enum(["auto", "hidden", "scroll", "visible"]).optional(),
   maxHeight: z.string().optional(),
+  slots: slotsSchema(stackSlotNames).optional(),
 }).strict();

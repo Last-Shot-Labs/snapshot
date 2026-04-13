@@ -21,8 +21,16 @@ For manifest UI work, treat these files as the canonical styling pattern library
 - `src/ui/components/_base/style-surfaces.ts`
 - `src/ui/components/forms/button/schema.ts`
 - `src/ui/components/forms/button/component.tsx`
-- `src/ui/components/primitives/floating-menu/schema.ts`
-- `src/ui/components/primitives/floating-menu/component.tsx`
+- `src/ui/components/overlay/popover/schema.ts`
+- `src/ui/components/overlay/popover/component.tsx`
+- `playground/src/showcase.tsx`
+
+For app-builder-facing example truth, treat these files as canonical:
+
+- `playground/src/showcase.tsx`
+- `playground/src/app.tsx`
+- `apps/docs/src/content/docs/examples/index.md`
+- `apps/docs/src/content/docs/start-here/capabilities.md`
 
 Then execute the change in one pass:
 

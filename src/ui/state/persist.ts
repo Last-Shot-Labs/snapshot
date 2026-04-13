@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 export type PersistStorage = "localStorage" | "sessionStorage";
 
@@ -7,13 +7,17 @@ function getStorage(storage: PersistStorage): Storage | null {
     return null;
   }
 
-  return storage === "localStorage" ? window.localStorage : window.sessionStorage;
+  return storage === "localStorage"
+    ? window.localStorage
+    : window.sessionStorage;
 }
 
+/** Build the storage key used for persisted Snapshot state entries. */
 export function toPersistedStateKey(key: string): string {
   return `sn-state:${key}`;
 }
 
+/** Read and JSON-decode a persisted state value, returning `undefined` on failure or absence. */
 export function readPersistedState(
   key: string,
   storage: PersistStorage,
@@ -31,6 +35,7 @@ export function readPersistedState(
   }
 }
 
+/** Serialize and store a persisted state value, ignoring browser storage failures. */
 export function writePersistedState(
   key: string,
   value: unknown,
@@ -48,6 +53,7 @@ export function writePersistedState(
   }
 }
 
+/** Remove a persisted state value from the selected browser storage area. */
 export function clearPersistedState(
   key: string,
   storage: PersistStorage,

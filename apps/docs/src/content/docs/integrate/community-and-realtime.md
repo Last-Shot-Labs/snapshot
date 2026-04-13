@@ -38,6 +38,12 @@ Canonical source for this surface lives in:
 
 High-signal showcase coverage currently lives in the `communication` page group inside `playground/src/showcase.tsx`.
 
+That section is the fastest way to inspect current examples for:
+
+- chat window and message thread composition
+- comment and reaction behavior
+- emoji, GIF, presence, and typing surfaces
+
 Use this guide when you need to keep the boundaries clear:
 
 - SDK hooks and contracts own network primitives and browser subscriptions

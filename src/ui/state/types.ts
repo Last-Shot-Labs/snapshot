@@ -14,16 +14,14 @@ export type StateAtom = WritableAtom<unknown, [unknown], void>;
  * Backing store is shared per scope (app or route).
  */
 export interface AtomRegistry {
-  register(
-    id: string,
-    atomOverride?: StateAtom,
-  ): StateAtom;
+  register(id: string, atomOverride?: StateAtom): StateAtom;
   get(id: string): StateAtom | undefined;
   unregister(id: string): void;
   keys(): string[];
   readonly store: JotaiStore;
 }
 
+/** Lifetime scope for manifest state: shared across the app or recreated per route. */
 export type StateScope = "app" | "route";
 
 /**
@@ -46,8 +44,10 @@ export interface StateConfig {
       };
 }
 
+/** Map of named state definitions declared by the manifest runtime. */
 export type StateConfigMap = Record<string, StateConfig>;
 
+/** Props accepted by the provider layer that wires manifest state into a React tree. */
 export interface StateProviderProps {
   state?: StateConfigMap;
   resources?: ResourceMap;

@@ -1,8 +1,8 @@
 'use client';
 
-import type { CSSProperties } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
-import type { ComponentConfig } from "../../../manifest/types";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import type { StackConfig } from "./types";
 
 const GAP_MAP: Record<string, string> = {
   none: "0",
@@ -48,55 +48,65 @@ const PADDING_MAP: Record<string, string> = {
   xl: "var(--sn-spacing-xl, 2rem)",
 };
 
-export interface StackConfig {
-  type: "stack";
-  children: ComponentConfig[];
-  gap?: keyof typeof GAP_MAP;
-  align?: keyof typeof ALIGN_MAP;
-  justify?: keyof typeof JUSTIFY_MAP;
-  maxWidth?: keyof typeof MAX_WIDTH_MAP;
-  padding?: keyof typeof PADDING_MAP;
-  overflow?: "auto" | "hidden" | "scroll" | "visible";
-  maxHeight?: string;
-  animation?: {
-    stagger?: number;
-  };
-  className?: string;
-  style?: Record<string, string | number>;
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
 export function Stack({ config }: { config: StackConfig }) {
-  const style: CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    gap: GAP_MAP[config.gap ?? "md"],
-    alignItems: ALIGN_MAP[config.align ?? "stretch"],
-    justifyContent: JUSTIFY_MAP[config.justify ?? "start"],
-    padding: config.padding ? PADDING_MAP[config.padding] : undefined,
-    maxWidth: config.maxWidth ? MAX_WIDTH_MAP[config.maxWidth] : undefined,
-    marginInline: config.maxWidth ? "auto" : undefined,
-    overflow: config.overflow,
-    maxHeight: config.maxHeight,
-    width: "100%",
-    ...(config.style as CSSProperties | undefined),
-  };
+  const rootId = config.id ?? "stack";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      gap: GAP_MAP[config.gap ?? "md"],
+      alignItems: ALIGN_MAP[config.align ?? "stretch"],
+      justifyContent: JUSTIFY_MAP[config.justify ?? "start"],
+      width: "100%",
+      maxWidth: config.maxWidth ? MAX_WIDTH_MAP[config.maxWidth] : undefined,
+      overflow: config.overflow,
+      maxHeight: config.maxHeight,
+      style: {
+        padding: config.padding ? PADDING_MAP[config.padding] : undefined,
+        marginInline: config.maxWidth ? "auto" : undefined,
+      },
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const itemSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-item`,
+    componentSurface: config.slots?.item,
+  });
 
   return (
-    <div className={config.className} style={style}>
-      {config.children.map((child, index) => (
-        <div
-          key={child.id ?? `stack-child-${index}`}
-          style={
-            typeof config.animation?.stagger === "number"
-              ? ({
-                  ["--sn-stagger-index" as "--sn-stagger-index"]: index,
-                } as CSSProperties)
-              : undefined
-          }
-        >
-          <ComponentRenderer config={child} />
-        </div>
-      ))}
-    </div>
+    <>
+      <div
+        data-snapshot-component="stack"
+        data-snapshot-id={`${rootId}-root`}
+        className={rootSurface.className}
+        style={rootSurface.style}
+      >
+        {config.children.map((child, index) => (
+          <div
+            key={child.id ?? `stack-child-${index}`}
+            data-snapshot-id={`${rootId}-item-${index}`}
+            className={itemSurface.className}
+            style={{
+              ...(typeof config.animation?.stagger === "number"
+                ? {
+                    ["--sn-stagger-index" as "--sn-stagger-index"]: index,
+                  }
+                : undefined),
+              ...(itemSurface.style ?? {}),
+            }}
+          >
+            <ComponentRenderer config={child} />
+          </div>
+        ))}
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={itemSurface.scopedCss} />
+    </>
   );
 }

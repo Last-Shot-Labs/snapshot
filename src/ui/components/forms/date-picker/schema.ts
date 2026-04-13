@@ -19,6 +19,7 @@ const presetSchema = z
   })
   .strict();
 
+/** Schema for date picker components covering single, range, and multi-date selection. */
 export const datePickerConfigSchema = baseComponentConfigSchema
   .extend({
     type: z.literal("date-picker"),

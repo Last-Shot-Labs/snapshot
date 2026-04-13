@@ -4,8 +4,6 @@ description: Generated from src/ui.ts and the declarations it re-exports.
 draft: false
 ---
 
-Generated from src/ui.ts and the declarations it re-exports.
-
 Generated from `src/ui.ts`.
 
 | Export | Kind | Source | Description |
@@ -32,7 +30,7 @@ Generated from `src/ui.ts`.
 | `AuthBrandingDef` | interface | `src/ui/presets/types.ts` | Branding and background options for the auth page preset. |
 | `authPage` | function | `src/ui/presets/auth-page.ts` | Build a manifest page config for a common auth screen. |
 | `AuthPageOptions` | interface | `src/ui/presets/types.ts` | Options for the `authPage` preset factory. |
-| `authPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | No JSDoc description. |
+| `authPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | Validate preset config for auth screens such as login, register, and password recovery. |
 | `AuthProviderConfig` | typealias | `src/ui/manifest/types.ts` | Resolved runtime view of `authProviderSchema`. |
 | `authProviderSchema` | variable | `src/ui/manifest/schema.ts` | Auth provider declaration schema. Declared at `manifest.auth.providers.<name>`. |
 | `AuthScreenConfig` | typealias | `src/ui/manifest/types.ts` | Resolved runtime view of `authScreenConfigSchema`. |
@@ -46,8 +44,8 @@ Generated from `src/ui.ts`.
 | `BaseComponentConfig` | typealias | `src/ui/manifest/types.ts` | Resolved runtime view of `baseComponentConfigSchema`. |
 | `baseComponentConfigSchema` | variable | `src/ui/manifest/schema.ts` | Shared base schema applied to all manifest-driven components. |
 | `bootBuiltins` | function | `src/ui/manifest/boot-builtins.ts` | Register all built-in manifest registries exactly once. |
-| `BreadcrumbAutoConfig` | interface | `src/ui/manifest/breadcrumbs.ts` | No JSDoc description. |
-| `BreadcrumbItem` | interface | `src/ui/manifest/breadcrumbs.ts` | No JSDoc description. |
+| `BreadcrumbAutoConfig` | interface | `src/ui/manifest/breadcrumbs.ts` | Auto-breadcrumb configuration used to derive labels and optional home state from routes. |
+| `BreadcrumbItem` | interface | `src/ui/manifest/breadcrumbs.ts` | A single breadcrumb entry rendered from the matched route stack. |
 | `Breakpoint` | typealias | `src/ui/hooks/use-breakpoint.ts` | All breakpoint names including `"default"` (below `sm`). |
 | `buildEmojiMap` | function | `src/ui/components/communication/emoji-picker/custom-emoji.ts` | Builds a shortcode lookup map from an array of custom emojis. |
 | `buildRequestUrl` | function | `src/ui/manifest/resources.ts` | Interpolate path params and append remaining params as a query string. |
@@ -63,12 +61,12 @@ Generated from `src/ui.ts`.
 | `ChatWindow` | function | `src/ui/components/communication/chat-window/component.tsx` | ChatWindow — full chat interface composing a message thread, rich input, and typing indicator. Provides a Discord/Slack-style chat experience in a single config-driven component. |
 | `ChatWindowConfig` | typealias | `src/ui/components/communication/chat-window/types.ts` | Inferred config type from the ChatWindow Zod schema. |
 | `chatWindowConfigSchema` | variable | `src/ui/components/communication/chat-window/schema.ts` | Zod config schema for the ChatWindow component. A full chat interface composing a message thread, rich input, and typing indicator into a single component. |
-| `clearPersistedState` | function | `src/ui/state/persist.ts` | No JSDoc description. |
+| `clearPersistedState` | function | `src/ui/state/persist.ts` | Remove a persisted state value from the selected browser storage area. |
 | `CloseModalAction` | interface | `src/ui/actions/types.ts` | Close a modal or drawer. |
 | `closeModalActionSchema` | variable | `src/ui/actions/types.ts` | Schema for close-modal action. |
 | `ColorPicker` | function | `src/ui/components/forms/color-picker/component.tsx` | Render a manifest-driven color picker input. |
-| `ColorPickerConfig` | typealias | `src/ui/components/forms/color-picker/types.ts` | No JSDoc description. |
-| `colorPickerConfigSchema` | variable | `src/ui/components/forms/color-picker/schema.ts` | No JSDoc description. |
+| `ColorPickerConfig` | typealias | `src/ui/components/forms/color-picker/types.ts` | Config for the manifest-driven color picker component. |
+| `colorPickerConfigSchema` | variable | `src/ui/components/forms/color-picker/schema.ts` | Schema for color picker components with optional swatches, alpha, and change actions. |
 | `colorToOklch` | function | `src/ui/tokens/color.ts` | Convert any supported color string to OKLCH values. Supports: hex (#rgb, #rrggbb), oklch strings ("L C H"), and oklch() CSS function. |
 | `ColumnConfig` | typealias | `src/ui/components/data/data-table/types.ts` | Inferred column configuration type. |
 | `columnConfigSchema` | variable | `src/ui/components/data/data-table/schema.ts` | Schema for individual column configuration. |
@@ -96,34 +94,34 @@ Generated from `src/ui.ts`.
 | `ConfigDrivenComponent` | typealias | `src/ui/manifest/types.ts` | React component type that can participate in the config-driven manifest runtime. |
 | `ConfirmAction` | interface | `src/ui/actions/types.ts` | Show a confirmation dialog. Stops the chain if cancelled. |
 | `confirmActionSchema` | variable | `src/ui/actions/types.ts` | Schema for confirm action. |
-| `ConfirmDialog` | function | `src/ui/actions/confirm.tsx` | No JSDoc description. |
-| `ConfirmManager` | interface | `src/ui/actions/confirm.tsx` | No JSDoc description. |
-| `ConfirmOptions` | typealias | `src/ui/actions/confirm.tsx` | No JSDoc description. |
-| `ConfirmRequest` | interface | `src/ui/actions/confirm.tsx` | No JSDoc description. |
+| `ConfirmDialog` | function | `src/ui/actions/confirm.tsx` | Render the global confirmation dialog for requests queued through `useConfirmManager`. |
+| `ConfirmManager` | interface | `src/ui/actions/confirm.tsx` | Imperative API for opening a confirmation dialog from manifest actions or custom UI. |
+| `ConfirmOptions` | typealias | `src/ui/actions/confirm.tsx` | Options accepted when opening a confirmation dialog. |
+| `ConfirmRequest` | interface | `src/ui/actions/confirm.tsx` | Internal confirm-dialog request stored in the atom-backed manager queue. |
 | `ContextMenu` | function | `src/ui/components/overlay/context-menu/component.tsx` | Render a right-click context menu backed by the shared context-menu portal runtime. |
 | `ContextMenuConfig` | typealias | `src/ui/components/overlay/context-menu/types.ts` | Inferred config type for the ContextMenu component. |
 | `contextMenuConfigSchema` | variable | `src/ui/components/overlay/context-menu/schema.ts` | Zod schema for the ContextMenu component. Defines a right-click menu with styleable trigger, panel, item, label, and separator surfaces. Visibility can be driven by a boolean or a binding reference. |
-| `contrastRatio` | function | `src/ui/tokens/color.ts` | No JSDoc description. |
+| `contrastRatio` | function | `src/ui/tokens/color.ts` | Calculate the WCAG contrast ratio between two supported color values. |
 | `CopyAction` | interface | `src/ui/actions/types.ts` | Copy plain text and optionally continue with follow-up actions. |
 | `CopyToClipboardAction` | interface | `src/ui/actions/types.ts` | Copy plain text and optionally show a simple confirmation toast. |
 | `copyToClipboardActionSchema` | variable | `src/ui/actions/types.ts` | Schema for the `copy-to-clipboard` action. |
 | `crudPage` | function | `src/ui/presets/crud-page.ts` | Builds a manifest `PageConfig` for a standard CRUD page.  Consumers drop the result into their manifest's `pages` record:  ```ts const manifest = {   pages: {     "/users": crudPage({       title: "Users",       listEndpoint: "GET /api/users",       createEndpoint: "POST /api/users",       deleteEndpoint: "DELETE /api/users/{id}",       columns: [         { key: "name", label: "Name" },         { key: "email", label: "Email" },         { key: "role", label: "Role", badge: true },       ],       createForm: {         fields: [           { key: "name", type: "text", label: "Name", required: true },           { key: "email", type: "email", label: "Email", required: true },         ],       },     }),   }, }; ``` |
 | `CrudPageOptions` | interface | `src/ui/presets/types.ts` | Options for the `crudPage` preset factory. Produces a full CRUD page with a data table, create/edit modals, and row actions. |
-| `crudPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | No JSDoc description. |
+| `crudPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | Validate preset config for a CRUD page assembled from list/form primitives. |
 | `CUSTOM_EMOJI_CSS` | variable | `src/ui/components/communication/emoji-picker/custom-emoji.ts` | CSS for custom emoji sizing. Custom emojis render as inline images sized to match surrounding text. |
 | `customComponentDeclarationSchema` | variable | `src/ui/manifest/schema.ts` | Schema for a custom component declaration under `components.custom`. |
 | `customComponentPropSchema` | variable | `src/ui/manifest/schema.ts` | Schema for a declared prop on a manifest custom component registration. |
 | `CustomEmoji` | interface | `src/ui/components/communication/emoji-picker/custom-emoji.ts` | Shape of a custom emoji entry. |
 | `dashboardPage` | function | `src/ui/presets/dashboard-page.ts` | Builds a manifest `PageConfig` for a dashboard page.  Consumers drop the result into their manifest's `pages` record:  ```ts const manifest = {   pages: {     "/dashboard": dashboardPage({       title: "Overview",       stats: [         { label: "Total Users", endpoint: "GET /api/stats/users", valueKey: "count" },         { label: "Revenue", endpoint: "GET /api/stats/revenue", valueKey: "total", format: "currency" },         { label: "Orders", endpoint: "GET /api/stats/orders", valueKey: "total", format: "number" },         { label: "Conversion", endpoint: "GET /api/stats/conversion", valueKey: "rate", format: "percent" },       ],       recentActivity: "GET /api/activity",     }),   }, }; ``` |
 | `DashboardPageOptions` | interface | `src/ui/presets/types.ts` | Options for the `dashboardPage` preset factory. Produces a dashboard with stat cards and an optional activity feed. |
-| `dashboardPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | No JSDoc description. |
+| `dashboardPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | Validate preset config for a dashboard page with stats, charts, and activity sections. |
 | `dataSourceSchema` | variable | `src/ui/manifest/resources.ts` | Data source accepted by data-aware manifest components. |
 | `DataTable` | function | `src/ui/components/data/data-table/component.tsx` | Config-driven DataTable component.  Renders an HTML table with sorting, pagination, filtering, selection, search, row actions, and bulk actions. All behavior is driven by the `DataTableConfig` schema.  Publishes state via `usePublish` when `id` is set: `{ selected, selectedRows, selectedIds, filters, sort, page, search, data }` |
 | `DataTableConfig` | typealias | `src/ui/components/data/data-table/types.ts` | Inferred DataTable configuration type from the Zod schema. |
 | `dataTableConfigSchema` | variable | `src/ui/components/data/data-table/schema.ts` | Zod schema for the DataTable component configuration.  Defines a config-driven data table with sorting, pagination, filtering, selection, search, row actions, and bulk actions. |
 | `DatePicker` | function | `src/ui/components/forms/date-picker/component.tsx` | Render a manifest-driven date picker input. |
-| `DatePickerConfig` | typealias | `src/ui/components/forms/date-picker/types.ts` | No JSDoc description. |
-| `datePickerConfigSchema` | variable | `src/ui/components/forms/date-picker/schema.ts` | No JSDoc description. |
+| `DatePickerConfig` | typealias | `src/ui/components/forms/date-picker/types.ts` | Config for the manifest-driven date picker component. |
+| `datePickerConfigSchema` | variable | `src/ui/components/forms/date-picker/schema.ts` | Schema for date picker components covering single, range, and multi-date selection. |
 | `debounceAction` | function | `src/ui/actions/timing.ts` | Debounce async or sync action execution by key and resolve all pending callers with the final invocation result. |
 | `defineFlavor` | function | `src/ui/tokens/flavors.ts` | Define and register a new flavor. If a flavor with the same name already exists, it is replaced. |
 | `defineManifest` | function | `src/ui/manifest/compiler.ts` | Define a manifest without compiling it. |
@@ -146,7 +144,7 @@ Generated from `src/ui.ts`.
 | `EntityPicker` | function | `src/ui/components/data/entity-picker/component.tsx` | Render a searchable entity picker from manifest-provided options or data. |
 | `EntityPickerConfig` | typealias | `src/ui/components/data/entity-picker/types.ts` | Inferred config type from the EntityPicker Zod schema. |
 | `entityPickerConfigSchema` | variable | `src/ui/components/data/entity-picker/schema.ts` | Zod config schema for the EntityPicker component. A searchable dropdown for selecting entities (users, documents, items) from an API endpoint. Supports single and multi-select. |
-| `expandPreset` | function | `src/ui/presets/expand.ts` | No JSDoc description. |
+| `expandPreset` | function | `src/ui/presets/expand.ts` | Validate a named preset config and expand it into the equivalent page config. |
 | `FavoriteButton` | function | `src/ui/components/data/favorite-button/component.tsx` | FavoriteButton component — a config-driven star toggle for marking favorites. Renders a star icon that toggles between active (filled/warning color) and inactive (muted foreground) states. Dispatches an optional action on toggle and publishes its active state. |
 | `FavoriteButtonConfig` | typealias | `src/ui/components/data/favorite-button/types.ts` | Inferred config type from the FavoriteButton Zod schema. |
 | `favoriteButtonConfigSchema` | variable | `src/ui/components/data/favorite-button/schema.ts` | Zod config schema for the FavoriteButton component. Defines all manifest-settable fields for a star toggle button used to mark items as favorites. |
@@ -175,8 +173,8 @@ Generated from `src/ui.ts`.
 | `getAllFlavors` | function | `src/ui/tokens/flavors.ts` | Get all registered flavors as a record. |
 | `getFlavor` | function | `src/ui/tokens/flavors.ts` | Retrieve a registered flavor by name. |
 | `getRegisteredClient` | function | `src/api/client.ts` | Look up a previously registered custom client factory. |
-| `getRegisteredGuards` | function | `src/ui/manifest/guard-registry.ts` | No JSDoc description. |
-| `getRegisteredLayouts` | function | `src/ui/layouts/registry.tsx` | No JSDoc description. |
+| `getRegisteredGuards` | function | `src/ui/manifest/guard-registry.ts` | List the names of all currently registered route guards. |
+| `getRegisteredLayouts` | function | `src/ui/layouts/registry.tsx` | List the names of all currently registered manifest layouts. |
 | `getRegisteredSchemaTypes` | function | `src/ui/manifest/schema.ts` | Return the currently registered manifest component type names. |
 | `getRegisteredWorkflowAction` | function | `src/ui/workflows/registry.ts` | Retrieve a registered runtime handler for a custom workflow action type. |
 | `getSortableStyle` | function | `src/ui/hooks/use-drag-drop.ts` | CSS transform helper for sortable items. Converts the dnd-kit transform into a CSS transform string. |
@@ -227,7 +225,7 @@ Generated from `src/ui.ts`.
 | `Markdown` | function | `src/ui/components/content/markdown/component.tsx` | Markdown component — renders markdown content with full GFM support and syntax highlighting powered by rehype-highlight. Uses `--sn-*` design tokens for all typography, colors, and spacing. |
 | `MarkdownConfig` | typealias | `src/ui/components/content/markdown/types.ts` | Inferred config type from the Markdown Zod schema. |
 | `markdownConfigSchema` | variable | `src/ui/components/content/markdown/schema.ts` | Zod config schema for the Markdown component. Renders markdown content with full GFM support and syntax highlighting. |
-| `meetsWcagAA` | function | `src/ui/tokens/color.ts` | No JSDoc description. |
+| `meetsWcagAA` | function | `src/ui/tokens/color.ts` | Check whether two colors satisfy WCAG AA contrast for normal or large text. |
 | `MessageThread` | function | `src/ui/components/communication/message-thread/component.tsx` | MessageThread — scrollable message list with avatars, timestamps, message grouping, and date separators. Renders HTML content from TipTap or other sources with sanitization. |
 | `MessageThreadConfig` | typealias | `src/ui/components/communication/message-thread/types.ts` | Inferred config type from the MessageThread Zod schema. |
 | `messageThreadConfigSchema` | variable | `src/ui/components/communication/message-thread/schema.ts` | Zod config schema for the MessageThread component. Renders a scrollable message list with avatars, timestamps, message grouping, date separators, and optional reactions/threading. |
@@ -274,7 +272,7 @@ Generated from `src/ui.ts`.
 | `Platform` | typealias | `src/ui/components/content/link-embed/platform.ts` | Platform detection and embed URL extraction. Identifies known platforms from URLs and extracts the embed-compatible URL or ID needed to render platform-specific iframes. |
 | `PLATFORM_COLORS` | variable | `src/ui/components/content/link-embed/platform.ts` | Platform accent colors. |
 | `PLATFORM_NAMES` | variable | `src/ui/components/content/link-embed/platform.ts` | Platform display names. |
-| `PlatformInfo` | interface | `src/ui/components/content/link-embed/platform.ts` | No JSDoc description. |
+| `PlatformInfo` | interface | `src/ui/components/content/link-embed/platform.ts` | Resolved platform metadata used to render a platform-specific embedded preview. |
 | `Popover` | function | `src/ui/components/overlay/popover/component.tsx` | Floating panel component triggered by a button-like control. Uses the shared floating panel primitive, applies canonical slot styling to trigger and content surfaces, and publishes `{ isOpen }` when an `id` is configured. |
 | `PopoverConfig` | typealias | `src/ui/components/overlay/popover/types.ts` | Inferred config type for the Popover component. |
 | `popoverConfigSchema` | variable | `src/ui/components/overlay/popover/schema.ts` | Zod schema for the Popover component. Defines a trigger-driven floating panel with optional title, description, footer content, width, placement, and canonical slot-based styling for the trigger and panel sub-surfaces. |
@@ -294,27 +292,27 @@ Generated from `src/ui.ts`.
 | `ReactionBar` | function | `src/ui/components/communication/reaction-bar/component.tsx` | ReactionBar — displays emoji reactions with counts and an optional add button that opens an emoji picker popover. |
 | `ReactionBarConfig` | typealias | `src/ui/components/communication/reaction-bar/types.ts` | Inferred config type from the ReactionBar Zod schema. |
 | `reactionBarConfigSchema` | variable | `src/ui/components/communication/reaction-bar/schema.ts` | Zod config schema for the ReactionBar component. Displays emoji reactions with counts and an add button. |
-| `readPersistedState` | function | `src/ui/state/persist.ts` | No JSDoc description. |
+| `readPersistedState` | function | `src/ui/state/persist.ts` | Read and JSON-decode a persisted state value, returning `undefined` on failure or absence. |
 | `RefreshAction` | interface | `src/ui/actions/types.ts` | Re-fetch a component's data. |
 | `refreshActionSchema` | variable | `src/ui/actions/types.ts` | Schema for refresh action. |
 | `registerAnalyticsProvider` | function | `src/ui/analytics/registry.ts` | Register a custom analytics provider factory by name. |
-| `registerBuiltInComponents` | function | `src/ui/components/register.ts` | Register all built-in config-driven components with the manifest system.  The function is idempotent so boot code can call it safely without worrying about duplicate registrations. |
+| `registerBuiltInComponents` | function | `src/ui/components/register.ts` | Register all built-in config-driven components with the manifest system. The function is idempotent so boot code can call it safely without worrying about duplicate registrations. |
 | `registerClient` | function | `src/api/client.ts` | Register a named custom client factory. |
 | `registerComponent` | function | `src/ui/manifest/component-registry.tsx` | Register a React component for a manifest component type string. Used by the framework for built-in components and by consumers for custom components.  Emits a dev warning if overriding an existing registration. |
 | `registerComponentSchema` | function | `src/ui/manifest/schema.ts` | Register a component-specific manifest schema by component `type`. |
-| `registerGuard` | function | `src/ui/manifest/guard-registry.ts` | No JSDoc description. |
-| `registerLayout` | function | `src/ui/layouts/registry.tsx` | No JSDoc description. |
+| `registerGuard` | function | `src/ui/manifest/guard-registry.ts` | Register a named route guard implementation for manifest resolution. |
+| `registerLayout` | function | `src/ui/layouts/registry.tsx` | Register a named layout component for manifest layout resolution. |
 | `registerWorkflowAction` | function | `src/ui/workflows/registry.ts` | Register a runtime handler for a custom workflow action type. |
 | `relativeLuminance` | function | `src/ui/tokens/color.ts` | Compute relative luminance from OKLCH for WCAG contrast calculations. Uses sRGB relative luminance (rec. 709) from the linear RGB values. |
-| `resetBootBuiltins` | function | `src/ui/manifest/boot-builtins.ts` | No JSDoc description. |
-| `resetBuiltInComponentRegistration` | function | `src/ui/components/register.ts` | No JSDoc description. |
+| `resetBootBuiltins` | function | `src/ui/manifest/boot-builtins.ts` | Reset the boot flag so tests can re-run built-in registration deterministically. |
+| `resetBuiltInComponentRegistration` | function | `src/ui/components/register.ts` | Reset the built-in component registration guard so tests can rebuild the registry. |
 | `ResolvedColumn` | interface | `src/ui/components/data/data-table/types.ts` | Resolved column definition used internally by the hook and component. |
 | `ResolvedConfig` | typealias | `src/ui/context/types.ts` | Resolves a type where FromRef values are replaced with their resolved types. Used internally — consumers don't need to use this directly. |
 | `ResolvedNavItem` | interface | `src/ui/components/layout/nav/types.ts` | A nav item enriched with computed state: active detection, visibility based on role, and resolved badge value. |
 | `resolveEmojiRecords` | function | `src/ui/components/communication/emoji-picker/custom-emoji.ts` | Resolves emoji records from the API into CustomEmoji entries. Handles the `uploadKey` → `url` resolution using a URL prefix or field mapping. |
 | `resolveFrameworkStyles` | function | `src/ui/tokens/resolve.ts` | Returns a CSS string containing framework-level styles:  1. CSS reset (box-sizing, margin, padding, body defaults, font inherit) 2. Component polish CSS — data-attribute-driven styles for page layout,    data-table, stat-card, form, detail-card, and focus rings.  All values are parameterized via `--sn-*` token custom properties so the output adapts to whatever theme tokens are active. |
-| `resolveGuard` | function | `src/ui/manifest/guard-registry.ts` | No JSDoc description. |
-| `resolveLayout` | function | `src/ui/layouts/registry.tsx` | No JSDoc description. |
+| `resolveGuard` | function | `src/ui/manifest/guard-registry.ts` | Resolve a previously registered route guard by name. |
+| `resolveLayout` | function | `src/ui/layouts/registry.tsx` | Resolve a previously registered layout by name. |
 | `resolveResponsiveValue` | function | `src/ui/hooks/use-breakpoint.ts` | Resolve a responsive value for a given breakpoint. Cascades down: if the active breakpoint isn't defined, falls back to the next smaller breakpoint, then `default`. For flat (non-object) values, returns the value directly. |
 | `resolveTokens` | function | `src/ui/tokens/resolve.ts` | Resolve a theme configuration into a complete CSS string.  Pipeline: 1. Load base flavor (default: neutral) 2. Deep merge overrides onto flavor defaults 3. Convert all colors to oklch 4. Auto-derive foreground colors (contrast-aware) 5. Auto-derive dark mode colors if not provided 6. Map radius/spacing/font to CSS 7. Generate component-level tokens 8. Output CSS string with :root, .dark, and component selectors |
 | `ResourceConfigMap` | typealias | `src/ui/manifest/types.ts` | Named manifest resource map keyed by resource id. |
@@ -342,7 +340,7 @@ Generated from `src/ui.ts`.
 | `RowConfig` | interface | `src/ui/manifest/types.ts` | Runtime config for the built-in `row` layout component. |
 | `rowConfigSchema` | variable | `src/ui/manifest/schema.ts` | Schema for the built-in `row` layout component. |
 | `RuntimeStateConfig` | interface | `src/ui/state/types.ts` | Named state definition from the manifest. App-scope state persists for the app lifetime. Route-scope state is recreated whenever the active route changes. |
-| `runWorkflow` | function | `src/ui/workflows/engine.ts` | No JSDoc description. |
+| `runWorkflow` | function | `src/ui/workflows/engine.ts` | Execute a workflow definition against the supplied runtime hooks and mutable context. |
 | `RunWorkflowAction` | interface | `src/ui/actions/types.ts` | Run a named manifest workflow. |
 | `runWorkflowActionSchema` | variable | `src/ui/actions/types.ts` | Schema for run-workflow action. |
 | `SaveIndicator` | function | `src/ui/components/data/save-indicator/component.tsx` | SaveIndicator component — a config-driven inline status indicator showing idle, saving, saved, or error states. - idle: nothing rendered - saving: spinning loader icon + saving text - saved: check icon + saved text (success color) - error: alert-circle icon + error text (destructive color) |
@@ -362,18 +360,18 @@ Generated from `src/ui.ts`.
 | `seriesConfigSchema` | variable | `src/ui/components/data/chart/schema.ts` | Schema for a single data series in the chart. |
 | `settingsPage` | function | `src/ui/presets/settings-page.ts` | Builds a manifest `PageConfig` for a settings page.  Consumers drop the result into their manifest's `pages` record:  ```ts const manifest = {   pages: {     "/settings": settingsPage({       title: "Settings",       sections: [         {           label: "Profile",           submitEndpoint: "PATCH /api/me/profile",           dataEndpoint: "GET /api/me/profile",           fields: [             { key: "name", type: "text", label: "Name", required: true },             { key: "bio", type: "textarea", label: "Bio" },           ],         },         {           label: "Password",           submitEndpoint: "POST /api/me/password",           fields: [             { key: "currentPassword", type: "password", label: "Current Password", required: true },             { key: "newPassword", type: "password", label: "New Password", required: true },           ],         },       ],     }),   }, }; ``` |
 | `SettingsPageOptions` | interface | `src/ui/presets/types.ts` | Options for the `settingsPage` preset factory. Produces a settings page with a tab per section, each containing an AutoForm. |
-| `settingsPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | No JSDoc description. |
+| `settingsPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | Validate preset config for a settings page composed from one or more submitted sections. |
 | `SettingsSectionDef` | interface | `src/ui/presets/types.ts` | A single settings section (one tab in the settings page). |
 | `SetValueAction` | interface | `src/ui/actions/types.ts` | Set another component's published value. |
 | `setValueActionSchema` | variable | `src/ui/actions/types.ts` | Schema for set-value action. |
-| `ShowToastOptions` | interface | `src/ui/actions/toast.tsx` | No JSDoc description. |
+| `ShowToastOptions` | interface | `src/ui/actions/toast.tsx` | User-facing toast options accepted by the toast manager. |
 | `Slider` | function | `src/ui/components/forms/slider/component.tsx` | Render a manifest-driven slider input. |
-| `SliderConfig` | typealias | `src/ui/components/forms/slider/types.ts` | No JSDoc description. |
-| `sliderConfigSchema` | variable | `src/ui/components/forms/slider/schema.ts` | No JSDoc description. |
-| `SnapshotApiContext` | variable | `src/ui/actions/executor.ts` | No JSDoc description. |
+| `SliderConfig` | typealias | `src/ui/components/forms/slider/types.ts` | Config for the manifest-driven slider component. |
+| `sliderConfigSchema` | variable | `src/ui/components/forms/slider/schema.ts` | Schema for single-value and ranged slider controls with optional value display/actions. |
+| `SnapshotApiContext` | variable | `src/ui/actions/executor.ts` | API client context consumed by built-in `api`, `download`, and related runtime actions. |
 | `SnapshotImage` | function | `src/ui/components/media/image/component.tsx` | Render a manifest-driven image component with Snapshot styling tokens. |
 | `SnapshotImageConfig` | typealias | `src/ui/components/media/image/types.ts` | Inferred config type from the SnapshotImage Zod schema. This is the single source of truth for what props the `<SnapshotImage>` component accepts. Never define this type manually. |
-| `snapshotImageSchema` | variable | `src/ui/components/media/image/schema.ts` | No JSDoc description. |
+| `snapshotImageSchema` | variable | `src/ui/components/media/image/schema.ts` | Schema for optimized image components rendered through Snapshot's image route. |
 | `SortState` | interface | `src/ui/components/data/data-table/types.ts` | Sort state for the data table. |
 | `SpacingScale` | typealias | `src/ui/tokens/types.ts` | Spacing density. Affects padding, gaps, and margins globally. |
 | `spacingSchema` | variable | `src/ui/tokens/schema.ts` | Zod schema for spacing density. |
@@ -382,10 +380,10 @@ Generated from `src/ui.ts`.
 | `statCardConfigSchema` | variable | `src/ui/components/data/stat-card/schema.ts` | Zod config schema for the StatCard component.  Defines all manifest-settable fields for a stat card that displays a single metric with optional trend indicator. |
 | `StatDef` | interface | `src/ui/presets/types.ts` | A single stat card definition for the dashboard page. |
 | `StateConfig` | typealias | `src/ui/manifest/types.ts` | Named manifest state map keyed by state id. |
-| `StateConfigMap` | typealias | `src/ui/state/types.ts` | No JSDoc description. |
-| `StateHookScope` | typealias | `src/ui/state/hooks.ts` | No JSDoc description. |
-| `StateProviderProps` | interface | `src/ui/state/types.ts` | No JSDoc description. |
-| `StateScope` | typealias | `src/ui/state/types.ts` | No JSDoc description. |
+| `StateConfigMap` | typealias | `src/ui/state/types.ts` | Map of named state definitions declared by the manifest runtime. |
+| `StateHookScope` | typealias | `src/ui/state/hooks.ts` | Hook-level scope override that can force app, route, or auto-discovered state resolution. |
+| `StateProviderProps` | interface | `src/ui/state/types.ts` | Props accepted by the provider layer that wires manifest state into a React tree. |
+| `StateScope` | typealias | `src/ui/state/types.ts` | Lifetime scope for manifest state: shared across the app or recreated per route. |
 | `StateValueConfig` | typealias | `src/ui/manifest/types.ts` | Runtime state declaration for a single named manifest state value. |
 | `stateValueConfigSchema` | variable | `src/ui/manifest/schema.ts` | Schema for a named manifest state value declaration. |
 | `TabConfig` | typealias | `src/ui/components/navigation/tabs/schema.ts` | Inferred type for a single tab config. |
@@ -408,31 +406,31 @@ Generated from `src/ui.ts`.
 | `toastActionSchema` | variable | `src/ui/actions/types.ts` | Schema for toast action. Uses z.lazy() for recursive action. |
 | `ToastConfig` | typealias | `src/ui/manifest/types.ts` | Resolved runtime view of `toastConfigSchema`. |
 | `toastConfigSchema` | variable | `src/ui/manifest/schema.ts` | Manifest toast defaults used by the `toast` action runtime. |
-| `ToastContainer` | function | `src/ui/actions/toast.tsx` | No JSDoc description. |
-| `ToastItem` | interface | `src/ui/actions/toast.tsx` | No JSDoc description. |
-| `ToastManager` | interface | `src/ui/actions/toast.tsx` | No JSDoc description. |
+| `ToastContainer` | function | `src/ui/actions/toast.tsx` | Render the active toast queue using runtime-configured placement defaults. |
+| `ToastItem` | interface | `src/ui/actions/toast.tsx` | Resolved toast entry stored in the runtime queue. |
+| `ToastManager` | interface | `src/ui/actions/toast.tsx` | Imperative API for enqueueing and dismissing transient toast messages. |
 | `Toggle` | function | `src/ui/components/forms/toggle/component.tsx` | Config-driven Toggle component — a pressed/unpressed toggle button. When pressed, displays with primary background and foreground colors. When unpressed, uses transparent background. Publishes `{ pressed: boolean }` to the page context when an `id` is set. |
 | `ToggleConfig` | typealias | `src/ui/components/forms/toggle/types.ts` | Inferred config type from the Toggle Zod schema. |
 | `toggleConfigSchema` | variable | `src/ui/components/forms/toggle/schema.ts` | Zod config schema for the Toggle component. Defines a pressed/unpressed toggle button that publishes its state. Can display text, an icon, or both. |
 | `TokenEditor` | interface | `src/ui/tokens/types.ts` | Return type of useTokenEditor(). |
-| `toPersistedStateKey` | function | `src/ui/state/persist.ts` | No JSDoc description. |
+| `toPersistedStateKey` | function | `src/ui/state/persist.ts` | Build the storage key used for persisted Snapshot state entries. |
 | `TouchedFields` | typealias | `src/ui/components/forms/auto-form/types.ts` | Tracks which fields have been interacted with. |
 | `TrackAction` | interface | `src/ui/actions/types.ts` | Track an analytics event through all manifest-configured providers. |
 | `trackActionSchema` | variable | `src/ui/actions/types.ts` | Schema for track action. |
-| `TransitionWrapper` | function | `src/ui/manifest/transition-wrapper.tsx` | No JSDoc description. |
+| `TransitionWrapper` | function | `src/ui/manifest/transition-wrapper.tsx` | Apply enter transitions around routed content when a route transition config is present. |
 | `trendConfigSchema` | variable | `src/ui/components/data/stat-card/schema.ts` | Schema for the trend indicator configuration. |
 | `TryWorkflowNode` | interface | `src/ui/workflows/types.ts` | Execute a workflow definition with optional catch and finally handlers. |
 | `TypingIndicator` | function | `src/ui/components/communication/typing-indicator/component.tsx` | TypingIndicator — shows animated bouncing dots with user names to indicate who is currently typing. |
 | `TypingIndicatorConfig` | typealias | `src/ui/components/communication/typing-indicator/types.ts` | Inferred config type from the TypingIndicator Zod schema. |
 | `typingIndicatorConfigSchema` | variable | `src/ui/components/communication/typing-indicator/schema.ts` | Zod config schema for the TypingIndicator component. Displays an animated "User is typing..." indicator with bouncing dots. |
 | `UI_BREAKPOINTS` | variable | `src/ui/hooks/use-breakpoint.ts` | Breakpoint pixel thresholds (mobile-first, min-width). |
-| `useActionExecutor` | function | `src/ui/actions/executor.ts` | No JSDoc description. |
+| `useActionExecutor` | function | `src/ui/actions/executor.ts` | Return the action executor bound to the active runtime, registries, overlays, workflows, and optional API client. |
 | `useAutoBreadcrumbs` | function | `src/ui/hooks/use-auto-breadcrumbs.ts` | Resolve auto-generated breadcrumb items for the current route match. |
 | `useAutoForm` | function | `src/ui/components/forms/auto-form/hook.ts` | Headless hook for form state management.  Tracks field values, validation errors, and touched state. Validates on blur (per-field) and on submit (all fields). |
 | `UseAutoFormResult` | interface | `src/ui/components/forms/auto-form/types.ts` | Return type for the useAutoForm headless hook. |
 | `useBreakpoint` | function | `src/ui/hooks/use-breakpoint.ts` | Returns the currently active breakpoint based on window width. Uses `matchMedia` for efficient, event-driven updates (no resize polling). Returns `"default"` during SSR. |
 | `useComponentData` | function | `src/ui/components/_base/use-component-data.ts` | Shared data-fetching hook for config-driven components.  Parses a data config string like `"GET /api/stats/revenue"` into method + endpoint, resolves any `FromRef` values in params via `useSubscribe`, and fetches data using the API client from `SnapshotApiContext`.  When the API client is not available (e.g., in tests or before ManifestApp provides it), the hook returns a loading state without throwing. |
-| `useConfirmManager` | function | `src/ui/actions/confirm.tsx` | No JSDoc description. |
+| `useConfirmManager` | function | `src/ui/actions/confirm.tsx` | Return the shared confirmation manager for the current Snapshot UI tree. |
 | `useDataTable` | function | `src/ui/components/data/data-table/hook.ts` | Headless hook for managing data table state.  Provides sorting, pagination, filtering, selection, and search functionality without any rendering. Resolves `FromRef` values in the `data` and `params` fields via `useSubscribe`. |
 | `UseDataTableResult` | interface | `src/ui/components/data/data-table/types.ts` | Return type of the `useDataTable` headless hook. Provides all state and handlers needed to render a data table. |
 | `useDetailCard` | function | `src/ui/components/data/detail-card/hook.ts` | Hook that powers the DetailCard component. Resolves FromRefs, fetches data from endpoints, formats fields, and publishes the record data for other components to subscribe to. |
@@ -440,7 +438,7 @@ Generated from `src/ui.ts`.
 | `useDndSensors` | function | `src/ui/hooks/use-drag-drop.ts` | Pre-configured sensor setup for pointer + keyboard DnD. Pointer requires 5px distance to activate (prevents click hijacking). Keyboard uses standard coordinates for arrow key navigation. |
 | `UseFeedResult` | interface | `src/ui/components/data/feed/types.ts` | Return type of the useFeed headless hook. |
 | `useInfiniteScroll` | function | `src/ui/hooks/use-infinite-scroll.ts` | Observe a sentinel element and load the next page when it enters the viewport. |
-| `UseInfiniteScrollOptions` | interface | `src/ui/hooks/use-infinite-scroll.ts` | No JSDoc description. |
+| `UseInfiniteScrollOptions` | interface | `src/ui/hooks/use-infinite-scroll.ts` | Options for loading additional items when a sentinel approaches the viewport. |
 | `useManifestResourceCache` | function | `src/ui/manifest/runtime.tsx` | Access the manifest resource cache runtime for loads, invalidation, and resource-driven mutations. |
 | `useManifestResourceFocusRefetch` | function | `src/ui/manifest/runtime.tsx` | Invalidate a manifest resource when the window regains focus. |
 | `useManifestResourceMountRefetch` | function | `src/ui/manifest/runtime.tsx` | Invalidate a manifest resource on mount when the resource opts into it. |
@@ -449,23 +447,23 @@ Generated from `src/ui.ts`.
 | `useNav` | function | `src/ui/components/layout/nav/hook.ts` | Headless hook for nav component logic. Resolves nav items with active state, role-based visibility, badge resolution from FromRefs, and collapse toggle. |
 | `UseNavResult` | interface | `src/ui/components/layout/nav/types.ts` | Return type of the useNav headless hook. |
 | `useOverlayRuntime` | function | `src/ui/manifest/runtime.tsx` | Access the current overlay runtime state. |
-| `usePersistedAtom` | function | `src/ui/state/use-persisted-atom.ts` | No JSDoc description. |
+| `usePersistedAtom` | function | `src/ui/state/use-persisted-atom.ts` | Bind a primitive atom to browser storage so its value survives page reloads. |
 | `usePoll` | function | `src/ui/hooks/use-poll.ts` | Invoke a callback on an interval with optional document-visibility pausing. |
-| `UsePollOptions` | interface | `src/ui/hooks/use-poll.ts` | No JSDoc description. |
+| `UsePollOptions` | interface | `src/ui/hooks/use-poll.ts` | Options controlling interval-based polling from client components. |
 | `usePublish` | function | `src/ui/context/hooks.ts` | Registers a component in the page context and returns a setter function to publish values that other components can subscribe to via `{ from: "id" }`. |
-| `useResetStateValue` | function | `src/ui/state/hooks.ts` | No JSDoc description. |
+| `useResetStateValue` | function | `src/ui/state/hooks.ts` | Return a callback that resets a named manifest state entry to its configured default. |
 | `useResolveFrom` | function | `src/ui/context/hooks.ts` | Resolves all `FromRef` values in a config object at once. |
 | `useResponsiveValue` | function | `src/ui/hooks/use-breakpoint.ts` | Resolve a responsive value to the appropriate value for the current breakpoint. Accepts either a flat value (returned as-is) or a responsive map with breakpoint keys. Falls back to the next smaller defined breakpoint. |
-| `useRoutePrefetch` | function | `src/ui/manifest/use-route-prefetch.ts` | No JSDoc description. |
+| `useRoutePrefetch` | function | `src/ui/manifest/use-route-prefetch.ts` | Prefetch route-scoped resources when a compiled route advertises eager endpoints. |
 | `useRouteRuntime` | function | `src/ui/manifest/runtime.tsx` | Access the current route runtime state. |
-| `useSetStateValue` | function | `src/ui/state/hooks.ts` | No JSDoc description. |
+| `useSetStateValue` | function | `src/ui/state/hooks.ts` | Return a setter that writes to a named manifest state entry in the resolved scope. |
 | `UseStatCardResult` | interface | `src/ui/components/data/stat-card/types.ts` | Result returned by the StatCard headless hook or internal logic. Provides all the data needed to render a stat card. |
-| `useStateValue` | function | `src/ui/state/hooks.ts` | No JSDoc description. |
+| `useStateValue` | function | `src/ui/state/hooks.ts` | Read the current value for a named manifest state entry. |
 | `useSubscribe` | function | `src/ui/context/hooks.ts` | Subscribes to a value from the shared binding/state registry system. |
-| `useToastManager` | function | `src/ui/actions/toast.tsx` | No JSDoc description. |
+| `useToastManager` | function | `src/ui/actions/toast.tsx` | Return the toast manager bound to the active manifest runtime configuration. |
 | `useTokenEditor` | function | `src/ui/tokens/editor.ts` | React hook for runtime token editing. Provides setToken/setFlavor/resetTokens/getTokens/subscribe for live theme customization. Changes are applied instantly via inline styles on document.documentElement. |
-| `useUrlSync` | function | `src/ui/hooks/use-url-sync.ts` | No JSDoc description. |
-| `useVirtualList` | function | `src/ui/hooks/use-virtual-list.ts` | No JSDoc description. |
+| `useUrlSync` | function | `src/ui/hooks/use-url-sync.ts` | Keep a slice of local state synchronized with URL query parameters. |
+| `useVirtualList` | function | `src/ui/hooks/use-virtual-list.ts` | Compute the visible slice for a fixed-height virtualized list container. |
 | `useWizard` | function | `src/ui/components/forms/wizard/hook.ts` | Manage wizard step state, validation, submission, and transition flow. |
 | `UseWizardResult` | interface | `src/ui/components/forms/wizard/types.ts` | Return type of the useWizard headless hook. |
 | `validateContrast` | function | `src/ui/tokens/contrast-checker.ts` | Warn when manifest theme color pairs fail WCAG AA contrast. |
@@ -478,10 +476,10 @@ Generated from `src/ui.ts`.
 | `WorkflowActionHandler` | typealias | `src/ui/workflows/types.ts` | Handler signature for registered custom workflow actions. |
 | `WorkflowCondition` | interface | `src/ui/workflows/types.ts` | Simple conditional expression used by workflow nodes. |
 | `WorkflowConditionOperator` | typealias | `src/ui/workflows/types.ts` | Supported condition operators for manifest workflows. |
-| `workflowConditionSchema` | variable | `src/ui/workflows/schema.ts` | No JSDoc description. |
+| `workflowConditionSchema` | variable | `src/ui/workflows/schema.ts` | Schema for conditional expressions used by workflow control-flow nodes. |
 | `WorkflowDefinition` | typealias | `src/ui/workflows/types.ts` | A single workflow node or a sequential list of nodes. |
-| `workflowDefinitionSchema` | variable | `src/ui/workflows/schema.ts` | No JSDoc description. |
+| `workflowDefinitionSchema` | variable | `src/ui/workflows/schema.ts` | Schema for a workflow definition expressed as one node or a sequential node list. |
 | `WorkflowMap` | typealias | `src/ui/workflows/types.ts` | Named workflow map keyed by workflow id. |
 | `WorkflowNode` | typealias | `src/ui/workflows/types.ts` | Any node that can appear inside a workflow definition. |
-| `workflowNodeSchema` | variable | `src/ui/workflows/schema.ts` | No JSDoc description. |
-| `writePersistedState` | function | `src/ui/state/persist.ts` | No JSDoc description. |
+| `workflowNodeSchema` | variable | `src/ui/workflows/schema.ts` | Recursive schema describing every built-in workflow node and action node shape. |
+| `writePersistedState` | function | `src/ui/state/persist.ts` | Serialize and store a persisted state value, ignoring browser storage failures. |

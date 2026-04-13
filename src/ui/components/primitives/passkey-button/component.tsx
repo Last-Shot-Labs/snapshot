@@ -1,17 +1,21 @@
 'use client';
 
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { useSubscribe } from "../../../context";
-import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { SnapshotApiContext, useActionExecutor } from "../../../actions/executor";
-import { startPasskeyAuthentication, isPasskeySupported } from "../../../manifest/passkey";
-import { useManifestRuntime } from "../../../manifest/runtime";
-import { useRouteRuntime } from "../../../manifest/runtime";
+import { useSubscribe } from "../../../context";
 import { resolveTemplate } from "../../../expressions/template";
+import { resolveRuntimeLocale } from "../../../i18n/resolve";
+import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
+import {
+  isPasskeySupported,
+  startPasskeyAuthentication,
+} from "../../../manifest/passkey";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
+import type { PasskeyButtonConfig } from "./types";
 
-export interface PasskeyButtonConfig {
-  label?: string;
-  onSuccess?: unknown[];
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
 export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
@@ -29,6 +33,7 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
   }
 
   const routeId = routeRuntime?.currentRoute?.id;
+  const rootId = config.id ?? "passkey-button";
   const screenOptions = useMemo(
     () =>
       routeId &&
@@ -41,9 +46,10 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
     [manifest?.auth?.screenOptions, routeId],
   );
   const screenPasskey = screenOptions?.passkey;
-  const screenPasskeyConfig = screenPasskey && typeof screenPasskey === "object"
-    ? (screenPasskey as Record<string, unknown>)
-    : undefined;
+  const screenPasskeyConfig =
+    screenPasskey && typeof screenPasskey === "object"
+      ? (screenPasskey as Record<string, unknown>)
+      : undefined;
   const manifestPasskeyConfig =
     manifest?.auth?.passkey && typeof manifest.auth.passkey === "object"
       ? (manifest.auth.passkey as Record<string, unknown>)
@@ -61,7 +67,8 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
   }
 
   const endpoints = manifest?.auth?.contract?.endpoints;
-  const loginOptionsEndpoint = endpoints?.passkeyLoginOptions ?? "/auth/passkey/login-options";
+  const loginOptionsEndpoint =
+    endpoints?.passkeyLoginOptions ?? "/auth/passkey/login-options";
   const loginEndpoint = endpoints?.passkeyLogin ?? "/auth/passkey/login";
   const templateContext = {
     app: manifest?.app ?? {},
@@ -84,6 +91,15 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
       "string"
       ? String((screenOptions.labels as Record<string, unknown>).passkeyButton)
       : config.label) ?? "Sign in with passkey";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    componentSurface: config,
+    activeStates: isLoading ? ["active"] : [],
+  });
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label`,
+    componentSurface: config.slots?.label,
+  });
 
   const handleClick = async () => {
     if (!api || isLoading) {
@@ -107,10 +123,7 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
         });
       }
     } catch (error) {
-      if (
-        error instanceof DOMException &&
-        error.name === "NotAllowedError"
-      ) {
+      if (error instanceof DOMException && error.name === "NotAllowedError") {
         return;
       }
       throw error;
@@ -132,27 +145,30 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
   }, [isLoading, manifestPasskeyConfig, screenPasskeyConfig]);
 
   return (
-    <button
-      type="button"
-      onClick={() => void handleClick()}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "100%",
-        padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
-        borderRadius: "var(--sn-radius-md, 0.375rem)",
-        border: "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
-        background: "var(--sn-color-secondary, var(--sn-color-card))",
-        color:
-          "var(--sn-color-secondary-foreground, var(--sn-color-foreground))",
-        cursor: isLoading ? "progress" : "pointer",
-        font: "inherit",
-      }}
-    >
-      {isLoading
-        ? "Preparing passkey..."
-        : resolveTemplate(label, templateContext, templateOptions)}
-    </button>
+    <>
+      <ButtonControl
+        surfaceId={`${rootId}-root`}
+        surfaceConfig={config.slots?.root}
+        variant="outline"
+        size="sm"
+        fullWidth
+        onClick={() => void handleClick()}
+        disabled={isLoading}
+        className={rootSurface.className}
+        style={rootSurface.style}
+      >
+        <span
+          data-snapshot-id={`${rootId}-label`}
+          className={labelSurface.className}
+          style={labelSurface.style}
+        >
+          {isLoading
+            ? "Preparing passkey..."
+            : resolveTemplate(label, templateContext, templateOptions)}
+        </span>
+      </ButtonControl>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={labelSurface.scopedCss} />
+    </>
   );
 }

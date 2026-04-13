@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { actionSchema } from "../actions/types";
 
+/** Schema for conditional expressions used by workflow control-flow nodes. */
 export const workflowConditionSchema: z.ZodType = z
   .object({
     left: z.unknown(),
@@ -11,6 +12,7 @@ export const workflowConditionSchema: z.ZodType = z
   })
   .strict();
 
+/** Recursive schema describing every built-in workflow node and action node shape. */
 export const workflowNodeSchema: z.ZodType = z.lazy(() =>
   z.union([
     actionSchema,
@@ -92,6 +94,7 @@ export const workflowNodeSchema: z.ZodType = z.lazy(() =>
   ]),
 );
 
+/** Schema for a workflow definition expressed as one node or a sequential node list. */
 export const workflowDefinitionSchema: z.ZodType = z.union([
   workflowNodeSchema,
   z.array(workflowNodeSchema),

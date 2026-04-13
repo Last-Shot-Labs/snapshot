@@ -1,10 +1,13 @@
-'use client';
+"use client";
 
 import { useEffect, useRef } from "react";
 import type { EndpointTarget } from "./resources";
 import { useManifestResourceCache } from "./runtime";
 
-export function useRoutePrefetch(endpoints: EndpointTarget[] | undefined): void {
+/** Prefetch route-scoped resources when a compiled route advertises eager endpoints. */
+export function useRoutePrefetch(
+  endpoints: EndpointTarget[] | undefined,
+): void {
   const cache = useManifestResourceCache();
   const cacheRef = useRef(cache);
   cacheRef.current = cache;
@@ -18,7 +21,9 @@ export function useRoutePrefetch(endpoints: EndpointTarget[] | undefined): void 
     const controller = new AbortController();
 
     for (const endpoint of endpoints) {
-      void currentCache.loadTarget(endpoint, undefined, { signal: controller.signal }).catch(() => undefined);
+      void currentCache
+        .loadTarget(endpoint, undefined, { signal: controller.signal })
+        .catch(() => undefined);
     }
 
     return () => {

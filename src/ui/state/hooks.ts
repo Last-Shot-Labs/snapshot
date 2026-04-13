@@ -11,6 +11,7 @@ import type { AtomRegistry, StateConfigMap, StateScope } from "./types";
 
 const UNDEFINED_ATOM = atom<unknown>(undefined);
 
+/** Hook-level scope override that can force app, route, or auto-discovered state resolution. */
 export type StateHookScope = StateScope | "auto";
 
 function resolveStateRegistry(
@@ -65,6 +66,7 @@ function resolveStateDefinition(
   return routeState[id] ?? appState[id];
 }
 
+/** Read the current value for a named manifest state entry. */
 export function useStateValue(
   id: string,
   options?: { scope?: StateHookScope },
@@ -89,6 +91,7 @@ export function useStateValue(
   });
 }
 
+/** Return a setter that writes to a named manifest state entry in the resolved scope. */
 export function useSetStateValue(
   id: string,
   options?: { scope?: StateHookScope },
@@ -120,6 +123,7 @@ export function useSetStateValue(
   );
 }
 
+/** Return a callback that resets a named manifest state entry to its configured default. */
 export function useResetStateValue(
   id: string,
   options?: { scope?: StateHookScope },

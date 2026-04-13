@@ -16,6 +16,10 @@ Use this path if you want the app to be driven mostly by `snapshot.manifest.json
 - Then use [UI Reference](/reference/ui/), [Components](/reference/components/), and [Content and Media](/integrate/content-and-media/)
 - Then use [Examples and Showcase](/examples/)
 
+Most manifest builders will end up using these canonical example sections:
+
+- `dashboard`, `data`, `forms`, `navigation`, `overlay`, `workflow`, `presets`
+
 ## SDK App Builder
 
 Use this path if you want custom React while Snapshot handles auth, generated API access, community/webhook integrations, realtime plumbing, and sync output.
@@ -25,6 +29,10 @@ Use this path if you want custom React while Snapshot handles auth, generated AP
 - Then read [Vite Reference](/reference/vite/) if your app bootstraps or syncs through Vite
 - Then look at [Community and Realtime](/integrate/community-and-realtime/) and [Content and Media](/integrate/content-and-media/)
 - Then use [CLI Reference](/reference/cli/) and [Examples and Showcase](/examples/)
+
+Most SDK builders will care most about these example sections:
+
+- `communication`, `content`, `overlay`, `feed-chart-wizard`
 
 ## SSR / Platform Integrator
 
@@ -41,3 +49,4 @@ Use this path if you are implementing Snapshot itself and need the repo-native d
 - Start with [Contributor Flow](/contribute/overview/)
 - Then read [Agent Flow](/contribute/agent-flow/)
 - Then read the relevant surface `CLAUDE.md` plus generated reference for the area you are changing
+- Then update the canonical showcase or docs example that proves the visible behavior on `main`

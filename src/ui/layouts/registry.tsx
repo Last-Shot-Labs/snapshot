@@ -13,17 +13,17 @@ export interface RegisteredLayout {
 
 const layoutRegistry = new Map<string, RegisteredLayout>();
 
-export function registerLayout(
-  name: string,
-  layout: RegisteredLayout,
-): void {
+/** Register a named layout component for manifest layout resolution. */
+export function registerLayout(name: string, layout: RegisteredLayout): void {
   layoutRegistry.set(name, layout);
 }
 
+/** Resolve a previously registered layout by name. */
 export function resolveLayout(name: string): RegisteredLayout | undefined {
   return layoutRegistry.get(name);
 }
 
+/** List the names of all currently registered manifest layouts. */
 export function getRegisteredLayouts(): string[] {
   return [...layoutRegistry.keys()];
 }

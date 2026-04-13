@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useRef } from "react";
 
@@ -10,6 +10,7 @@ export interface UseUrlSyncOptions {
   enabled: boolean;
 }
 
+/** Keep a slice of local state synchronized with URL query parameters. */
 export function useUrlSync(options: UseUrlSyncOptions): void {
   const { params, state, onStateFromUrl, replace = true, enabled } = options;
   const initializedRef = useRef(false);
@@ -36,11 +37,7 @@ export function useUrlSync(options: UseUrlSyncOptions): void {
   }, [enabled, onStateFromUrl, params]);
 
   useEffect(() => {
-    if (
-      !enabled ||
-      !initializedRef.current ||
-      typeof window === "undefined"
-    ) {
+    if (!enabled || !initializedRef.current || typeof window === "undefined") {
       return;
     }
 

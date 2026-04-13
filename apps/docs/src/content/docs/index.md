@@ -23,6 +23,13 @@ Those two paths sit on top of the same underlying capabilities now shipping on `
 - [Capabilities](/start-here/capabilities/) is the generated high-level inventory of what exists on `main`.
 - [Examples and Showcase](/examples/) maps the current playground sections to real framework features.
 
+The fastest top-level jumps for most readers are:
+
+- manifest builders: [Manifest Apps](/build/manifest-apps/) then `dashboard`, `data`, `forms`, `navigation`, `overlay`, and `presets` in the showcase
+- SDK builders: [SDK Apps](/build/sdk-apps/) then `communication`, `content`, and `feed-chart-wizard` in the showcase
+- platform integrators: [SSR and RSC](/integrate/ssr-rsc/) then [Capabilities](/start-here/capabilities/)
+- contributors: [Contributor Flow](/contribute/overview/) then [Agent Flow](/contribute/agent-flow/)
+
 ## Canonical Source
 
 The public docs are grounded in these source surfaces:

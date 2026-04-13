@@ -2,13 +2,16 @@ import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
 import { baseComponentConfigSchema } from "../../_base/types";
 
+/** Schema for single-value and ranged slider controls with optional value display/actions. */
 export const sliderConfigSchema = baseComponentConfigSchema
   .extend({
     type: z.literal("slider"),
     min: z.number().default(0),
     max: z.number().default(100),
     step: z.number().positive().default(1),
-    defaultValue: z.union([z.number(), z.tuple([z.number(), z.number()])]).optional(),
+    defaultValue: z
+      .union([z.number(), z.tuple([z.number(), z.number()])])
+      .optional(),
     range: z.boolean().default(false),
     label: z.string().optional(),
     showValue: z.boolean().default(false),

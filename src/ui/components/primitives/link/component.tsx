@@ -2,19 +2,15 @@
 
 import type { CSSProperties } from "react";
 import { useSubscribe } from "../../../context";
-import { resolveRuntimeLocale } from "../../../i18n/resolve";
-import { useRouteRuntime } from "../../../manifest/runtime";
-import { useManifestRuntime } from "../../../manifest/runtime";
 import { resolveTemplate } from "../../../expressions/template";
+import { resolveRuntimeLocale } from "../../../i18n/resolve";
+import { renderIcon } from "../../../icons/render";
+import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import type { LinkConfig } from "./types";
 
-export interface LinkConfig {
-  text: string;
-  to: string;
-  external?: boolean;
-  align?: "left" | "center" | "right";
-  variant?: "default" | "muted" | "button";
-  className?: string;
-  style?: Record<string, string | number>;
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
 function getVariantStyle(
@@ -31,10 +27,14 @@ function getVariantStyle(
       background: "var(--sn-color-primary)",
       color: "var(--sn-color-primary-foreground)",
       textDecoration: "none",
+      gap: "var(--sn-spacing-xs, 0.25rem)",
     };
   }
 
   return {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "var(--sn-spacing-xs, 0.25rem)",
     color:
       variant === "muted"
         ? "var(--sn-color-muted-foreground)"
@@ -48,81 +48,148 @@ export function Link({ config }: { config: LinkConfig }) {
   const manifest = useManifestRuntime();
   const localeState = useSubscribe({ from: "global.locale" });
   const activeLocale = resolveRuntimeLocale(manifest?.raw.i18n, localeState);
-  const text = resolveTemplate(
-    config.text,
-    {
-      app: manifest?.app ?? {},
-      auth: manifest?.auth ?? {},
-      route: {
-        ...(routeRuntime?.currentRoute ?? {}),
-        path: routeRuntime?.currentPath,
-        params: routeRuntime?.params,
-        query: routeRuntime?.query,
-      },
+  const templateContext = {
+    app: manifest?.app ?? {},
+    auth: manifest?.auth ?? {},
+    route: {
+      ...(routeRuntime?.currentRoute ?? {}),
+      path: routeRuntime?.currentPath,
+      params: routeRuntime?.params,
+      query: routeRuntime?.query,
     },
-    {
-      locale: activeLocale,
-      i18n: manifest?.raw.i18n,
-    },
-  );
-  const to = resolveTemplate(
-    config.to,
-    {
-      app: manifest?.app ?? {},
-      auth: manifest?.auth ?? {},
-      route: {
-        ...(routeRuntime?.currentRoute ?? {}),
-        path: routeRuntime?.currentPath,
-        params: routeRuntime?.params,
-        query: routeRuntime?.query,
-      },
-    },
-    {
-      locale: activeLocale,
-      i18n: manifest?.raw.i18n,
-    },
-  );
-  const align = config.align ?? "left";
-  const style: CSSProperties = {
-    ...(align !== "left"
-      ? {
-          display: "block",
-          textAlign: align,
-        }
-      : {}),
-    ...getVariantStyle(config.variant ?? "default"),
-    ...(config.style as CSSProperties | undefined),
   };
+  const templateOptions = {
+    locale: activeLocale,
+    i18n: manifest?.raw.i18n,
+  };
+  const text = resolveTemplate(config.text, templateContext, templateOptions);
+  const to = resolveTemplate(config.to, templateContext, templateOptions);
+  const rootId = config.id ?? "link";
+  const align = config.align ?? "left";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: {
+      style: {
+        ...(align !== "left"
+          ? {
+              display: "block",
+              textAlign: align,
+            }
+          : {}),
+        ...getVariantStyle(config.variant ?? "default"),
+      },
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+    activeStates: [routeRuntime?.currentPath === to ? "current" : undefined].filter(
+      Boolean,
+    ) as Array<"current">,
+  });
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label`,
+    componentSurface: config.slots?.label,
+  });
+  const iconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-icon`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      style: { flexShrink: 0 },
+    },
+    componentSurface: config.slots?.icon,
+  });
+  const badgeSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-badge`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      style: {
+        padding: "0 var(--sn-spacing-xs, 0.25rem)",
+        borderRadius: "var(--sn-radius-full, 9999px)",
+        backgroundColor: "var(--sn-color-secondary, #f1f5f9)",
+        color: "var(--sn-color-secondary-foreground, #0f172a)",
+        fontSize: "var(--sn-font-size-xs, 0.75rem)",
+      },
+    },
+    componentSurface: config.slots?.badge,
+  });
+
+  const contents = (
+    <>
+      {config.icon ? (
+        <span
+          data-snapshot-id={`${rootId}-icon`}
+          className={iconSurface.className}
+          style={iconSurface.style}
+        >
+          {renderIcon(config.icon, 16)}
+        </span>
+      ) : null}
+      <span
+        data-snapshot-id={`${rootId}-label`}
+        className={labelSurface.className}
+        style={labelSurface.style}
+      >
+        {text}
+      </span>
+      {config.badge ? (
+        <span
+          data-snapshot-id={`${rootId}-badge`}
+          className={badgeSurface.className}
+          style={badgeSurface.style}
+        >
+          {config.badge}
+        </span>
+      ) : null}
+    </>
+  );
 
   if (config.external) {
     return (
-      <a
-        className={config.className}
-        href={to}
-        target="_blank"
-        rel="noreferrer noopener"
-        style={style}
-      >
-        {text}
-      </a>
+      <>
+        <a
+          data-snapshot-component="link"
+          data-snapshot-id={`${rootId}-root`}
+          href={to}
+          target="_blank"
+          rel="noreferrer noopener"
+          className={rootSurface.className}
+          style={rootSurface.style}
+        >
+          {contents}
+        </a>
+        <SurfaceStyles css={rootSurface.scopedCss} />
+        <SurfaceStyles css={labelSurface.scopedCss} />
+        <SurfaceStyles css={iconSurface.scopedCss} />
+        <SurfaceStyles css={badgeSurface.scopedCss} />
+      </>
     );
   }
 
   return (
-    <button
-      type="button"
-      className={config.className}
-      onClick={() => routeRuntime?.navigate(to)}
-      style={{
-        background: "none",
-        border: "none",
-        padding: 0,
-        cursor: "pointer",
-        font: "inherit",
-        ...style,
-      }}
-    >
-      {text}
-    </button>
+    <>
+      <button
+        type="button"
+        data-snapshot-component="link"
+        data-snapshot-id={`${rootId}-root`}
+        onClick={() => routeRuntime?.navigate(to)}
+        className={rootSurface.className}
+        style={{
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          font: "inherit",
+          ...(rootSurface.style ?? {}),
+        }}
+      >
+        {contents}
+      </button>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={iconSurface.scopedCss} />
+      <SurfaceStyles css={badgeSurface.scopedCss} />
+    </>
   );
 }

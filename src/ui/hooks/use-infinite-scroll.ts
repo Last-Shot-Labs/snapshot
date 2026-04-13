@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
 import { useEffect, useRef } from "react";
 
+/** Options for loading additional items when a sentinel approaches the viewport. */
 export interface UseInfiniteScrollOptions {
   hasNextPage: boolean;
   isLoading: boolean;
