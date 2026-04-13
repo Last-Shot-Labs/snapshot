@@ -1,6 +1,6 @@
 import { readdirSync, statSync } from "node:fs";
 import path from "node:path";
-import { markdownPage, repoPath, writeDoc } from "./_common";
+import { markdownPage, repoPath, writeDoc } from "./_common.ts";
 
 type DomainMap = Record<string, string[]>;
 

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { repoPath } from "./_common";
+import { repoPath } from "./_common.ts";
 
 type ImpactMap = {
   surfaces: Record<

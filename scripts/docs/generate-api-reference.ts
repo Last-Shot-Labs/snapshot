@@ -6,7 +6,7 @@ import {
   repoPath,
   relToRepo,
   writeDoc,
-} from "./_common";
+} from "./_common.ts";
 
 type Surface = {
   label: string;

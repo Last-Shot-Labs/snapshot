@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { markdownPage, repoPath, writeDoc } from "./_common";
+import { markdownPage, repoPath, writeDoc } from "./_common.ts";
 
 type Capability = {
   name: string;

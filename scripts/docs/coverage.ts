@@ -1,6 +1,6 @@
 import path from "node:path";
 import * as ts from "typescript";
-import { repoPath } from "./_common";
+import { repoPath } from "./_common.ts";
 
 const requiredExports = [
   { file: repoPath("src", "create-snapshot.tsx"), exportName: "createSnapshot" },

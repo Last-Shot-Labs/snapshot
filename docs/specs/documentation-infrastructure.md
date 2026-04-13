@@ -7,7 +7,7 @@
 > | 1 | Governance, Personas, and Agent Discovery | Completed | A |
 > | 2 | Astro Public Docs App Foundation | Completed | B |
 > | 3 | Source-Backed Reference Generation | Completed | C |
-> | 4 | Capability Map and Core Guides | In progress | B |
+> | 4 | Capability Map and Core Guides | Completed | B |
 > | 5 | Canonical Examples and Playground Integration | In progress | D |
 > | 6 | Drift Automation and Required CI Path | In progress | E |
 > | 7 | Coverage Hardening and README Reduction | In progress | A + B + C + D + E |
