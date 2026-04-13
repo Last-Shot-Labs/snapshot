@@ -1,124 +1,98 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
 
-/**
- * Base nav item schema (without recursive children).
- */
-const navItemBaseSchema = z
-  .object({
-    /** Display label for the nav item. */
-    label: z.string(),
-    /** Route path to navigate to when clicked. */
-    path: z.string().optional(),
-    /** Icon name (rendered as a placeholder span; full icon integration comes later). */
-    icon: z.string().optional(),
-    /** Badge count or FromRef to resolve badge dynamically. */
-    badge: z.union([z.number(), fromRefSchema]).optional(),
-    /** Whether the item is visible. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Whether the item is disabled. */
-    disabled: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Whether the item requires an authenticated or guest user. */
-    authenticated: z.boolean().optional(),
-    /** Roles that can see this item. If omitted, visible to all. */
-    roles: z.array(z.string()).optional(),
-  })
-  .strict();
+export const navSlotNames = [
+  "root",
+  "brand",
+  "brandIcon",
+  "brandLabel",
+  "list",
+  "item",
+  "itemLabel",
+  "itemIcon",
+  "itemBadge",
+  "dropdown",
+  "dropdownItem",
+  "dropdownItemLabel",
+  "dropdownItemIcon",
+  "userMenu",
+  "userMenuTrigger",
+  "userMenuItem",
+  "userAvatar",
+] as const;
 
-/** Nav item config type (with optional recursive children). */
-export interface NavItemConfig extends z.infer<typeof navItemBaseSchema> {
-  /** Nested sub-items for grouped navigation. */
-  children?: NavItemConfig[];
-}
+const navItemSlotNames = [
+  "item",
+  "itemLabel",
+  "itemIcon",
+  "itemBadge",
+  "dropdownItem",
+  "dropdownItemLabel",
+  "dropdownItemIcon",
+] as const;
 
-/**
- * Zod schema for a single nav item (with recursive children support).
- */
-export const navItemSchema: z.ZodType<NavItemConfig> = navItemBaseSchema
-  .extend({
-    children: z.lazy(() => z.array(navItemSchema)).optional(),
-  })
-  .strict();
-
-/**
- * Zod schema for user menu item (additional items beyond the defaults).
- */
 const userMenuItemSchema = z
   .object({
-    /** Menu item label. */
     label: z.string(),
-    /** Icon name. */
     icon: z.string().optional(),
-    /** Action to execute when clicked. */
     action: actionSchema,
+    roles: z.array(z.string()).optional(),
+    slots: slotsSchema(["item", "itemLabel", "itemIcon"]).optional(),
   })
   .strict();
 
-/**
- * Zod schema for the user menu configuration.
- */
 const userMenuConfigSchema = z
   .object({
-    /** Show user avatar. Default: true. */
     showAvatar: z.boolean().optional(),
-    /** Show user email. Default: false. */
     showEmail: z.boolean().optional(),
-    /** Additional menu items. */
     items: z.array(userMenuItemSchema).optional(),
   })
   .strict();
 
-/**
- * Zod schema for the logo/brand configuration.
- */
 const logoConfigSchema = z
   .object({
-    /** Logo image source URL. */
     src: z.string().optional(),
-    /** Text to display as brand name. */
     text: z.string().optional(),
-    /** Path to navigate when logo is clicked. */
     path: z.string().optional(),
   })
   .strict();
 
-/**
- * Zod schema for the full Nav component configuration.
- */
-/**
- * Schema for the component config type used in template mode.
- * Imported lazily to avoid circular dependency issues.
- */
 const templateComponentSchema: z.ZodType = z.lazy(() =>
   z.object({ type: z.string() }).passthrough(),
 );
 
-/**
- * Zod schema for the full Nav component configuration.
- */
-export const navConfigSchema = z
+const navItemBaseSchema = z
   .object({
-    /** Component type discriminator. */
-    type: z.literal("nav"),
-    /** Optional component id for context publishing. */
-    id: z.string().optional(),
-    /** Navigation items (legacy items-based mode). */
-    items: z.array(navItemSchema).optional(),
-    /** Composable template — array of component configs rendered inside the nav. */
-    template: z.array(templateComponentSchema).optional(),
-    /** Whether the sidebar is collapsible on mobile. Default: true. */
-    collapsible: z.boolean().optional(),
-    /** Show user menu. `true` uses defaults; object allows customization. */
-    userMenu: z.union([z.boolean(), userMenuConfigSchema]).optional(),
-    /** Logo / brand element. */
-    logo: logoConfigSchema.optional(),
-    /** Optional CSS class name. */
-    className: z.string().optional(),
-    /** Optional inline styles applied to the root nav element. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
+    label: z.string(),
+    path: z.string().optional(),
+    icon: z.string().optional(),
+    badge: z.union([z.number(), fromRefSchema]).optional(),
+    visible: z.union([z.boolean(), fromRefSchema]).optional(),
+    disabled: z.union([z.boolean(), fromRefSchema]).optional(),
+    authenticated: z.boolean().optional(),
+    roles: z.array(z.string()).optional(),
+    slots: slotsSchema(navItemSlotNames).optional(),
   })
   .strict();
 
-/** Inferred nav config type from the Zod schema. */
+export const navItemSchema: z.ZodType = z.lazy(() =>
+  navItemBaseSchema.extend({
+    children: z.array(navItemSchema).optional(),
+  }).strict(),
+);
+
+export type NavItemConfig = z.infer<typeof navItemSchema>;
+
+export const navConfigSchema = extendComponentSchema({
+  type: z.literal("nav"),
+  items: z.array(navItemSchema).optional(),
+  template: z.array(templateComponentSchema).optional(),
+  collapsible: z.boolean().optional(),
+  userMenu: z.union([z.boolean(), userMenuConfigSchema]).optional(),
+  logo: logoConfigSchema.optional(),
+  slots: slotsSchema(navSlotNames).optional(),
+}).strict();
+
 export type NavConfig = z.infer<typeof navConfigSchema>;

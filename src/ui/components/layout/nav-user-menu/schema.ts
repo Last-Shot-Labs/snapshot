@@ -1,6 +1,20 @@
 import { z } from "zod";
-import { extendComponentSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { actionSchema } from "../../../actions/types";
+
+export const navUserMenuSlotNames = [
+  "root",
+  "trigger",
+  "triggerLabel",
+  "triggerIcon",
+  "avatar",
+  "panel",
+  "item",
+  "itemLabel",
+  "itemIcon",
+  "separator",
+  "label",
+] as const;
 
 export const navUserMenuConfigSchema = extendComponentSchema({
   type: z.literal("nav-user-menu"),
@@ -16,8 +30,10 @@ export const navUserMenuConfigSchema = extendComponentSchema({
           icon: z.string().optional(),
           action: actionSchema,
           roles: z.array(z.string()).optional(),
+          slots: slotsSchema(["item", "itemLabel", "itemIcon"]).optional(),
         })
         .strict(),
     )
     .optional(),
+  slots: slotsSchema(navUserMenuSlotNames).optional(),
 }).strict();

@@ -1,133 +1,117 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import { useRef, useState } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { useSubscribe } from "../../../context/index";
 import { renderIcon } from "../../../icons/render";
+import { ButtonControl } from "../../forms/button";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { FloatingPanel } from "../../primitives/floating-menu";
 import type { NavDropdownConfig } from "./types";
+
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
 
 export function NavDropdown({ config }: { config: NavDropdownConfig }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Role-based visibility
   const rawUser = useSubscribe({ from: "global.user" });
   const user = rawUser as { role?: string; roles?: string[] } | null;
-  if (config.authenticated === true && !user) return null;
-  if (config.authenticated === false && user) return null;
-  if (config.roles && config.roles.length > 0) {
-    const userRoles: string[] = [];
-    if (user?.role) userRoles.push(user.role);
-    if (user?.roles) userRoles.push(...user.roles);
-    if (!config.roles.some((r) => userRoles.includes(r))) return null;
+  if (config.authenticated === true && !user) {
+    return null;
+  }
+  if (config.authenticated === false && user) {
+    return null;
+  }
+  if (config.roles?.length) {
+    const userRoles = [...(user?.role ? [user.role] : []), ...(user?.roles ?? [])];
+    if (!config.roles.some((role) => userRoles.includes(role))) {
+      return null;
+    }
   }
 
-  // Outside click to close
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [isOpen]);
-
-  const align = config.align ?? "start";
-
-  const triggerStyle: CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: "var(--sn-spacing-xs, 0.25rem)",
-    padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-    border: "none",
-    background: "transparent",
-    color: "inherit",
-    borderRadius: "var(--sn-radius-md, 0.375rem)",
-    cursor: "pointer",
-    fontSize: "var(--sn-font-size-sm, 0.875rem)",
-    fontFamily: "inherit",
-    fontWeight: 500,
-    whiteSpace: "nowrap",
-    transition:
-      "background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-  };
-
-  const panelStyle: CSSProperties = {
-    position: "absolute",
-    top: "calc(100% + 4px)",
-    left: align === "end" ? undefined : "0",
-    right: align === "end" ? "0" : undefined,
-    minWidth: config.width ?? "11rem",
-    listStyle: "none",
-    margin: 0,
-    padding: "var(--sn-spacing-xs, 0.25rem)",
-    background: "var(--sn-color-popover, var(--sn-color-background))",
-    border: "1px solid var(--sn-color-border)",
-    borderRadius: "var(--sn-radius-md, 0.375rem)",
-    boxShadow:
-      "0 4px 16px -2px rgba(0,0,0,0.12), 0 2px 6px -1px rgba(0,0,0,0.07)",
-    zIndex: 200,
-  };
-
-  const handleTriggerClick = () => setIsOpen((v) => !v);
+  const rootId = config.id ?? "nav-dropdown";
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-trigger-label`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+    },
+    componentSurface: config.slots?.triggerLabel,
+  });
+  const iconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-trigger-icon`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      flexShrink: 0,
+    },
+    componentSurface: config.slots?.triggerIcon,
+  });
 
   return (
-    <div
-      ref={containerRef}
-      style={{ position: "relative", display: "flex" }}
-      onPointerEnter={
-        config.trigger === "hover" ? () => setIsOpen(true) : undefined
-      }
-      onPointerLeave={
-        config.trigger === "hover" ? () => setIsOpen(false) : undefined
-      }
-    >
-      <button
-        type="button"
-        onClick={handleTriggerClick}
-        aria-expanded={isOpen}
-        aria-haspopup="menu"
-        style={triggerStyle}
+    <div ref={containerRef} data-snapshot-component="nav-dropdown">
+      <ButtonControl
+        variant="ghost"
+        onClick={() => setIsOpen((value) => !value)}
+        surfaceId={`${rootId}-trigger`}
+        surfaceConfig={config.slots?.trigger}
+        activeStates={isOpen ? ["open"] : []}
       >
-        {config.icon && (
-          <span aria-hidden="true">{renderIcon(config.icon, 16)}</span>
-        )}
-        <span>{config.label}</span>
+        {config.icon ? (
+          <span
+            data-snapshot-id={`${rootId}-trigger-icon`}
+            className={iconSurface.className}
+            style={iconSurface.style}
+          >
+            {renderIcon(config.icon, 16)}
+          </span>
+        ) : null}
         <span
-          aria-hidden="true"
-          style={{
-            display: "inline-flex",
-            opacity: 0.6,
-            fontSize: "0.625rem",
-            transition: "transform var(--sn-duration-fast, 150ms)",
-            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-          }}
+          data-snapshot-id={`${rootId}-trigger-label`}
+          className={labelSurface.className}
+          style={labelSurface.style}
         >
-          ▾
+          {config.label}
         </span>
-      </button>
-      {isOpen && (
-        <div role="menu" style={panelStyle}>
-          {config.items.map((item, i) => (
+      </ButtonControl>
+
+      <FloatingPanel
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        containerRef={containerRef}
+        align={config.align ?? "start"}
+        surfaceId={`${rootId}-panel`}
+        slot={config.slots?.panel}
+        activeStates={isOpen ? ["open"] : []}
+      >
+        {config.items.map((item, index) => {
+          const itemSurface = resolveSurfacePresentation({
+            surfaceId: `${rootId}-item-${index}`,
+            implementationBase: {
+              display: "block",
+            },
+            componentSurface: config.slots?.item,
+          });
+
+          return (
             <div
-              key={(item as { id?: string }).id ?? i}
+              key={(item as { id?: string }).id ?? index}
               role="menuitem"
-              onClick={() => setIsOpen(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") setIsOpen(false);
-              }}
+              data-snapshot-id={`${rootId}-item-${index}`}
+              className={itemSurface.className}
+              style={itemSurface.style}
             >
               <ComponentRenderer config={item} />
+              <SurfaceStyles css={itemSurface.scopedCss} />
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </FloatingPanel>
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={iconSurface.scopedCss} />
     </div>
   );
 }

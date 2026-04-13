@@ -1,220 +1,171 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
-import { Icon } from "../../../icons/index";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
+import { renderIcon } from "../../../icons/render";
+import { ButtonControl } from "../../forms/button";
+import { FloatingPanel } from "../../primitives/floating-menu";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { PopoverConfig } from "./types";
 
-const ANIMATION_DURATION = 150;
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
 
-/**
- * Trigger button variant styles.
- */
-const TRIGGER_VARIANTS: Record<string, React.CSSProperties> = {
-  default: {
-    backgroundColor: "var(--sn-color-primary)",
-    color: "var(--sn-color-primary-foreground)",
-    border: "var(--sn-border-thin, 1px) solid transparent",
-  },
-  outline: {
-    backgroundColor: "transparent",
-    color: "var(--sn-color-foreground, #111)",
-    border: "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
-  },
-  ghost: {
-    backgroundColor: "transparent",
-    color: "var(--sn-color-foreground, #111)",
-    border: "var(--sn-border-thin, 1px) solid transparent",
-  },
-};
-
-/**
- * Placement → CSS positioning offsets for the popover panel.
- */
-const PLACEMENT_STYLES: Record<string, React.CSSProperties> = {
-  bottom: {
-    top: "100%",
-    left: "50%",
-    transform: "translateX(-50%)",
-    marginTop: "var(--sn-spacing-xs, 0.25rem)",
-  },
-  top: {
-    bottom: "100%",
-    left: "50%",
-    transform: "translateX(-50%)",
-    marginBottom: "var(--sn-spacing-xs, 0.25rem)",
-  },
-  left: {
-    right: "100%",
-    top: "50%",
-    transform: "translateY(-50%)",
-    marginRight: "var(--sn-spacing-xs, 0.25rem)",
-  },
-  right: {
-    left: "100%",
-    top: "50%",
-    transform: "translateY(-50%)",
-    marginLeft: "var(--sn-spacing-xs, 0.25rem)",
-  },
-};
-
-/**
- * Popover component — a floating content container triggered by a button click.
- *
- * Renders a trigger button and, when open, shows a floating panel positioned
- * relative to the trigger. Closes on outside click or Escape key.
- * Content is rendered via ComponentRenderer for recursive composition.
- *
- * @param props.config - The popover config from the manifest
- */
 export function Popover({ config }: { config: PopoverConfig }) {
   const triggerText = useSubscribe(config.trigger) as string;
   const visible = useSubscribe(config.visible ?? true);
   const publish = usePublish(config.id);
-
   const [isOpen, setIsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [animating, setAnimating] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const rootId = config.id ?? "popover";
 
-  const placement = config.placement ?? "bottom";
-  const triggerVariant = config.triggerVariant ?? "outline";
-  const width = config.width ?? "auto";
-
-  // Publish open state
   useEffect(() => {
-    if (publish) {
-      publish({ isOpen });
-    }
-  }, [publish, isOpen]);
+    publish?.({ isOpen });
+  }, [isOpen, publish]);
 
-  // Close on outside click
-  useEffect(() => {
-    if (!isOpen) return;
+  const triggerLabelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-trigger-label`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+    },
+    componentSurface: config.slots?.triggerLabel,
+  });
+  const triggerIconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-trigger-icon`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      flexShrink: 0,
+    },
+    componentSurface: config.slots?.triggerIcon,
+  });
+  const contentSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-content`,
+    implementationBase: {
+      display: "grid",
+      gap: "0.75rem",
+    },
+    componentSurface: config.slots?.content,
+  });
+  const titleSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-title`,
+    implementationBase: {
+      fontWeight: 600,
+    },
+    componentSurface: config.slots?.title,
+  });
+  const descriptionSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-description`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground)",
+    },
+    componentSurface: config.slots?.description,
+  });
+  const footerSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-footer`,
+    implementationBase: {
+      display: "grid",
+      gap: "0.5rem",
+    },
+    componentSurface: config.slots?.footer,
+  });
 
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
-
-  // Close on Escape
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      e.stopPropagation();
-      setIsOpen(false);
-    }
-  }, []);
-
-  // Mounted/animating pattern for enter/exit animation
-  useEffect(() => {
-    if (isOpen) {
-      setMounted(true);
-      const enterTimer = setTimeout(() => setAnimating(true), 10);
-      return () => clearTimeout(enterTimer);
-    } else if (mounted) {
-      setAnimating(false);
-      const exitTimer = setTimeout(() => setMounted(false), ANIMATION_DURATION);
-      return () => clearTimeout(exitTimer);
-    }
-  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const toggleOpen = useCallback(() => {
-    setIsOpen((prev) => !prev);
-  }, []);
-
-  if (visible === false) return null;
+  if (visible === false) {
+    return null;
+  }
 
   return (
-    <div
-      data-snapshot-component="popover"
-      ref={containerRef}
-      className={config.className}
-      onKeyDown={handleKeyDown}
-      style={{
-        position: "relative",
-        display: "inline-block",
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
-    >
-      <style>{`
-        [data-snapshot-component="popover"] [data-snapshot-popover-trigger]:focus { outline: none; }
-        [data-snapshot-component="popover"] [data-snapshot-popover-trigger]:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-      `}</style>
-
-      {/* Trigger button */}
-      <button
-        type="button"
-        data-snapshot-popover-trigger=""
-        onClick={toggleOpen}
-        aria-expanded={isOpen}
-        aria-haspopup="true"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "var(--sn-spacing-xs, 0.25rem)",
-          padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-          fontSize: "var(--sn-font-size-sm, 0.875rem)",
-          fontWeight: "var(--sn-font-weight-medium, 500)" as string,
-          borderRadius: "var(--sn-radius-md, 0.375rem)",
-          cursor: "pointer",
-          lineHeight: "var(--sn-leading-normal, 1.5)",
-          fontFamily: "inherit",
-          ...TRIGGER_VARIANTS[triggerVariant],
-        }}
+    <div data-snapshot-component="popover" ref={containerRef}>
+      <ButtonControl
+        variant={config.triggerVariant ?? "outline"}
+        onClick={() => setIsOpen((value) => !value)}
+        surfaceId={`${rootId}-trigger`}
+        surfaceConfig={config.slots?.trigger}
+        activeStates={isOpen ? ["open"] : []}
       >
-        {config.triggerIcon && (
-          <Icon name={config.triggerIcon} size={16} color="currentColor" />
-        )}
-        {triggerText}
-      </button>
-
-      {/* Floating panel */}
-      {mounted && (
-        <div
-          data-snapshot-popover-content=""
-          role="dialog"
-          style={{
-            position: "absolute",
-            zIndex: "var(--sn-z-index-popover, 40)" as string,
-            width,
-            minWidth: "8rem",
-            backgroundColor:
-              "var(--sn-color-popover, var(--sn-color-card, #fff))",
-            color:
-              "var(--sn-color-popover-foreground, var(--sn-color-foreground, #111))",
-            border:
-              "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
-            borderRadius: "var(--sn-radius-lg, 0.5rem)",
-            boxShadow:
-              "var(--sn-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1))",
-            padding: "var(--sn-spacing-md, 1rem)",
-            opacity: animating ? 1 : 0,
-            transform: animating ? "scale(1)" : "scale(0.95)",
-            transition: `opacity var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease), transform var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease)`,
-            ...PLACEMENT_STYLES[placement],
-          }}
+        {config.triggerIcon ? (
+          <span
+            data-snapshot-id={`${rootId}-trigger-icon`}
+            className={triggerIconSurface.className}
+            style={triggerIconSurface.style}
+          >
+            {renderIcon(config.triggerIcon, 16)}
+          </span>
+        ) : null}
+        <span
+          data-snapshot-id={`${rootId}-trigger-label`}
+          className={triggerLabelSurface.className}
+          style={triggerLabelSurface.style}
         >
-          {config.content?.map((child, i) => (
+          {triggerText}
+        </span>
+      </ButtonControl>
+
+      <FloatingPanel
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        containerRef={containerRef}
+        side={config.placement ?? "bottom"}
+        surfaceId={`${rootId}-panel`}
+        slot={config.slots?.panel}
+        activeStates={isOpen ? ["open"] : []}
+        style={config.width ? ({ width: config.width } as React.CSSProperties) : undefined}
+      >
+        <div
+          data-snapshot-id={`${rootId}-content`}
+          className={contentSurface.className}
+          style={contentSurface.style}
+        >
+          {config.title ? (
+            <div
+              data-snapshot-id={`${rootId}-title`}
+              className={titleSurface.className}
+              style={titleSurface.style}
+            >
+              {config.title}
+            </div>
+          ) : null}
+          {config.description ? (
+            <div
+              data-snapshot-id={`${rootId}-description`}
+              className={descriptionSurface.className}
+              style={descriptionSurface.style}
+            >
+              {config.description}
+            </div>
+          ) : null}
+          {config.content?.map((child, index) => (
             <ComponentRenderer
-              key={(child as ComponentConfig).id ?? `popover-child-${i}`}
+              key={(child as ComponentConfig).id ?? `popover-child-${index}`}
               config={child as ComponentConfig}
             />
           ))}
+          {config.footer?.length ? (
+            <div
+              data-snapshot-id={`${rootId}-footer`}
+              className={footerSurface.className}
+              style={footerSurface.style}
+            >
+              {config.footer.map((child, index) => (
+                <ComponentRenderer
+                  key={(child as ComponentConfig).id ?? `popover-footer-${index}`}
+                  config={child as ComponentConfig}
+                />
+              ))}
+            </div>
+          ) : null}
         </div>
-      )}
+      </FloatingPanel>
+      <SurfaceStyles css={triggerLabelSurface.scopedCss} />
+      <SurfaceStyles css={triggerIconSurface.scopedCss} />
+      <SurfaceStyles css={contentSurface.scopedCss} />
+      <SurfaceStyles css={titleSurface.scopedCss} />
+      <SurfaceStyles css={descriptionSurface.scopedCss} />
+      <SurfaceStyles css={footerSurface.scopedCss} />
     </div>
   );
 }

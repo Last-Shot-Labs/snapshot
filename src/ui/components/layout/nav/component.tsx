@@ -1,479 +1,332 @@
 'use client';
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import type { NavConfig } from "./schema";
-import { useNav } from "./hook";
+import { useEffect, useRef, useState } from "react";
+import { ComponentWrapper } from "../../_base/component-wrapper";
+import { resolveSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
+import {
+  FloatingMenuStyles,
+  FloatingPanel,
+  MenuItem,
+} from "../../primitives/floating-menu";
 import { useActionExecutor } from "../../../actions/executor";
 import { renderIcon } from "../../../icons/render";
-import type { ResolvedNavItem, AuthUser } from "./types";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
-import { FloatingPanel, FloatingMenuStyles } from "../../primitives/floating-menu";
+import { useNav } from "./hook";
+import type { NavConfig } from "./schema";
+import type { AuthUser, ResolvedNavItem } from "./types";
 
-/** Props for the Nav component. */
-interface NavComponentProps {
-  /** Nav configuration from the manifest. */
-  config: NavConfig;
-  /** Current URL pathname for active route detection. */
-  pathname?: string;
-  /** Callback when a nav item is clicked. */
-  onNavigate?: (path: string) => void;
-  /** Layout variant — controls horizontal (top-nav) vs vertical (sidebar) rendering. */
-  variant?: "sidebar" | "top-nav";
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
-/**
- * Renders a single nav item with active indicator, icon, badge, and children.
- */
-function NavItem({
-  item,
-  onNavigate,
-  isTopNav = false,
+function AvatarSurface({
+  user,
+  surfaceId,
+  slot,
 }: {
-  item: ResolvedNavItem;
-  onNavigate?: (path: string) => void;
-  isTopNav?: boolean;
+  user: AuthUser;
+  surfaceId: string;
+  slot?: Record<string, unknown>;
 }) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const containerRef = useRef<HTMLLIElement>(null);
-  const hasChildren = Boolean(item.children && item.children.length > 0);
-
-  if (!item.isVisible) return null;
-
-  const handleClick = () => {
-    if (item.isDisabled) return;
-    if (isTopNav && hasChildren) {
-      setDropdownOpen((v) => !v);
-      return;
-    }
-    if (item.path && onNavigate) {
-      onNavigate(item.path);
-    }
-  };
-
-  const bg = item.isActive
-    ? "var(--sn-nav-active-background, var(--sn-color-accent))"
-    : hovered
-      ? "var(--sn-nav-hover-background, var(--sn-color-accent, var(--sn-color-muted)))"
-      : "transparent";
-
-  const buttonStyle: CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: "var(--sn-spacing-sm, 0.5rem)",
-    width: isTopNav ? undefined : "100%",
-    whiteSpace: isTopNav ? "nowrap" : undefined,
-    padding: isTopNav
-      ? "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)"
-      : "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
-    border: "none",
-    background: bg,
-    color: item.isActive
-      ? "var(--sn-nav-active-foreground, var(--sn-color-accent-foreground))"
-      : "inherit",
-    opacity: item.isDisabled ? 0.55 : 1,
-    borderRadius: "var(--sn-nav-item-radius, var(--sn-radius-md, 0.375rem))",
-    boxShadow: item.isActive ? "inset 0 0 0 1px var(--sn-color-primary)" : "none",
-    cursor: item.isDisabled ? "not-allowed" : "pointer",
-    textAlign: "left",
-    fontSize: "var(--sn-font-size-sm, 0.875rem)",
-    fontFamily: "inherit",
-    fontWeight: item.isActive ? 600 : 500,
-    transition: "background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-  };
+  const avatarSurface = resolveSurfacePresentation({
+    surfaceId,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: "2rem",
+      height: "2rem",
+      borderRadius: "var(--sn-radius-full, 9999px)",
+      overflow: "hidden",
+      flexShrink: 0,
+      background: "var(--sn-color-muted)",
+      color: "var(--sn-color-muted-foreground)",
+    },
+    componentSurface: slot,
+  });
 
   return (
-    <li
-      ref={containerRef}
-      data-nav-item=""
-      data-active={item.isActive ? "true" : undefined}
-      style={isTopNav ? { display: "flex", position: "relative" } : undefined}
-    >
-      <button
-        type="button"
-        onClick={handleClick}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        data-nav-link=""
-        aria-current={item.isActive ? "page" : undefined}
-        aria-disabled={item.isDisabled || undefined}
-        disabled={item.isDisabled}
-        aria-expanded={isTopNav && hasChildren ? dropdownOpen : undefined}
-        aria-haspopup={isTopNav && hasChildren ? "menu" : undefined}
-        style={buttonStyle}
+    <>
+      <span
+        data-snapshot-id={surfaceId}
+        className={avatarSurface.className}
+        style={avatarSurface.style}
       >
-        {item.icon ? <span data-nav-icon="" aria-hidden="true">{renderIcon(item.icon, 16)}</span> : null}
+        {user.avatar ? (
+          <img
+            src={user.avatar}
+            alt={user.name ?? "User"}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          (user.name?.charAt(0)?.toUpperCase() ?? "U")
+        )}
+      </span>
+      <SurfaceStyles css={avatarSurface.scopedCss} />
+    </>
+  );
+}
+
+function NavEntry({
+  item,
+  rootId,
+  slots,
+  onNavigate,
+  isTopNav,
+}: {
+  item: ResolvedNavItem;
+  rootId: string;
+  slots: NavConfig["slots"];
+  onNavigate?: (path: string) => void;
+  isTopNav: boolean;
+}) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const containerRef = useRef<HTMLLIElement>(null);
+  const hasChildren = Boolean(item.children?.length);
+  const itemId = `${rootId}-${item.path ?? item.label.replace(/\s+/g, "-")}`;
+  const buttonSlot = slots?.item;
+  const labelSlot = slots?.itemLabel;
+  const iconSlot = slots?.itemIcon;
+  const badgeSlot = slots?.itemBadge;
+
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${itemId}-label`,
+    implementationBase: {
+      flex: 1,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
+    componentSurface: labelSlot,
+    itemSurface: item.slots?.itemLabel,
+  });
+  const iconSurface = resolveSurfacePresentation({
+    surfaceId: `${itemId}-icon`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      flexShrink: 0,
+    },
+    componentSurface: iconSlot,
+    itemSurface: item.slots?.itemIcon,
+  });
+  const badgeSurface = resolveSurfacePresentation({
+    surfaceId: `${itemId}-badge`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minWidth: "1.25rem",
+      height: "1.25rem",
+      borderRadius: "var(--sn-radius-full, 9999px)",
+      background: "var(--sn-color-primary)",
+      color: "var(--sn-color-primary-foreground)",
+    },
+    componentSurface: badgeSlot,
+    itemSurface: item.slots?.itemBadge,
+  });
+
+  if (!item.isVisible) {
+    return null;
+  }
+
+  return (
+    <li ref={containerRef} style={isTopNav ? { position: "relative" } : undefined}>
+      <ButtonControl
+        variant="ghost"
+        disabled={item.isDisabled}
+        ariaCurrent={item.isActive && item.path ? "page" : undefined}
+        onClick={() => {
+          if (item.isDisabled) {
+            return;
+          }
+
+          if (isTopNav && hasChildren) {
+            setDropdownOpen((value) => !value);
+            return;
+          }
+
+          if (item.path) {
+            onNavigate?.(item.path);
+          }
+        }}
+        surfaceId={`${itemId}-button`}
+        surfaceConfig={buttonSlot}
+        itemSurfaceConfig={item.slots?.item}
+        activeStates={[
+          ...(item.isActive ? (["current"] as const) : []),
+          ...(dropdownOpen ? (["open"] as const) : []),
+        ]}
+      >
+        {item.icon ? (
+          <span
+            data-snapshot-id={`${itemId}-icon`}
+            className={iconSurface.className}
+            style={iconSurface.style}
+          >
+            {renderIcon(item.icon, 16)}
+          </span>
+        ) : null}
         <span
-          data-nav-label=""
-          style={{
-            flex: isTopNav ? undefined : 1,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
+          data-snapshot-id={`${itemId}-label`}
+          className={labelSurface.className}
+          style={labelSurface.style}
         >
           {item.label}
         </span>
-        {item.resolvedBadge !== null && item.resolvedBadge > 0 && (
+        {item.resolvedBadge !== null && item.resolvedBadge > 0 ? (
           <span
-            data-nav-badge=""
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minWidth: "1.25rem",
-              height: "1.25rem",
-              padding: "0 0.375rem",
-              fontSize: "var(--sn-font-size-xs, 0.75rem)",
-              fontWeight: "var(--sn-font-weight-semibold, 600)" as CSSProperties["fontWeight"],
-              borderRadius: "var(--sn-radius-full, 9999px)",
-              background: "var(--sn-color-primary)",
-              color: "var(--sn-color-primary-foreground)",
-            }}
+            data-snapshot-id={`${itemId}-badge`}
+            className={badgeSurface.className}
+            style={badgeSurface.style}
           >
             {item.resolvedBadge}
           </span>
-        )}
-        {/* Caret indicator for items with children */}
-        {hasChildren && (
-          <span
-            aria-hidden="true"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              marginLeft: isTopNav ? "0.125rem" : "auto",
-              opacity: 0.6,
-              fontSize: "0.625rem",
-              transition: "transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-              transform: isTopNav
-                ? dropdownOpen ? "rotate(180deg)" : "rotate(0deg)"
-                : "rotate(0deg)",
-            }}
-          >
-            ▾
-          </span>
-        )}
-      </button>
+        ) : null}
+        {hasChildren ? <span aria-hidden="true">▾</span> : null}
+      </ButtonControl>
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={iconSurface.scopedCss} />
+      <SurfaceStyles css={badgeSurface.scopedCss} />
 
-      {/* Sidebar mode: inline nested list */}
-      {!isTopNav && hasChildren && (
-        <ul
-          data-nav-children=""
-          style={{
-            listStyle: "none",
-            margin: 0,
-            padding: 0,
-            paddingLeft: "var(--sn-spacing-md, 0.75rem)",
-          }}
-        >
-          {item.children!.map((child, index) => (
-            <NavItem
-              key={child.path ?? index}
+      {!isTopNav && hasChildren ? (
+        <ul style={{ listStyle: "none", margin: 0, paddingLeft: "0.75rem" }}>
+          {item.children?.map((child, index) => (
+            <NavEntry
+              key={child.path ?? `${itemId}-child-${index}`}
               item={child}
+              rootId={`${itemId}-child-${index}`}
+              slots={slots}
               onNavigate={onNavigate}
+              isTopNav={false}
             />
           ))}
         </ul>
-      )}
+      ) : null}
 
-      {/* Top-nav mode: floating dropdown */}
-      {isTopNav && hasChildren && (
+      {isTopNav && hasChildren ? (
         <FloatingPanel
           open={dropdownOpen}
           onClose={() => setDropdownOpen(false)}
           containerRef={containerRef}
           side="bottom"
           align="start"
-          dataAttributes={{ "data-nav-dropdown": "" }}
-          style={{
-            display: "flex",
-            flexDirection: "column" as const,
-            gap: "var(--sn-nav-dropdown-item-gap, 0)",
-          }}
+          surfaceId={`${itemId}-dropdown`}
+          slot={slots?.dropdown}
         >
-          {item.children!.filter((child) => child.isVisible).map((child, index) => (
-            <NavDropdownItem
-              key={child.path ?? index}
-              item={child}
-              onSelect={() => {
+          {item.children?.filter((child) => child.isVisible).map((child, index) => (
+            <MenuItem
+              key={child.path ?? `${itemId}-dropdown-${index}`}
+              label={child.label}
+              icon={child.icon}
+              onClick={() => {
                 setDropdownOpen(false);
-                if (child.path) onNavigate?.(child.path);
+                if (child.path) {
+                  onNavigate?.(child.path);
+                }
               }}
+              disabled={child.isDisabled}
+              current={child.isActive}
+              surfaceId={`${itemId}-dropdown-item-${index}`}
+              slot={slots?.dropdownItem ?? child.slots?.dropdownItem}
+              labelSlot={slots?.dropdownItemLabel ?? child.slots?.dropdownItemLabel}
+              iconSlot={slots?.dropdownItemIcon ?? child.slots?.dropdownItemIcon}
             />
           ))}
         </FloatingPanel>
-      )}
+      ) : null}
     </li>
   );
 }
 
-/** Simple dropdown item for nav — uses React state for hover, no CSS specificity issues. */
-function NavDropdownItem({
-  item,
-  onSelect,
-}: {
-  item: ResolvedNavItem;
-  onSelect: () => void;
-}) {
-  const [hovered, setHovered] = useState(false);
-
-  const bg = item.isActive
-    ? "var(--sn-nav-active-background, var(--sn-color-accent))"
-    : hovered
-      ? "var(--sn-nav-hover-background, var(--sn-color-accent, var(--sn-color-muted)))"
-      : "transparent";
-
-  return (
-    <button
-      type="button"
-      role="menuitem"
-      onClick={item.isDisabled ? undefined : onSelect}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      aria-disabled={item.isDisabled || undefined}
-      disabled={item.isDisabled}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "var(--sn-spacing-sm, 0.5rem)",
-        width: "100%",
-        padding: "var(--sn-nav-dropdown-item-padding, var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem))",
-        border: "none",
-        background: bg,
-        color: item.isActive
-          ? "var(--sn-nav-active-foreground, var(--sn-color-accent-foreground))"
-          : "inherit",
-        cursor: item.isDisabled ? "not-allowed" : "pointer",
-        opacity: item.isDisabled ? 0.5 : undefined,
-        borderRadius: "var(--sn-nav-item-radius, var(--sn-radius-sm, 0.25rem))",
-        fontSize: "var(--sn-font-size-sm, 0.875rem)",
-        fontFamily: "inherit",
-        fontWeight: item.isActive ? 600 : 500,
-        textAlign: "left",
-        transition: "background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-      }}
-    >
-      {item.icon ? (
-        <span aria-hidden="true" style={{ display: "inline-flex", flexShrink: 0 }}>
-          {renderIcon(item.icon, 16)}
-        </span>
-      ) : null}
-      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-        {item.label}
-      </span>
-    </button>
-  );
-}
-
-/**
- * Renders a user menu section with avatar, name, and optional email.
- */
 function UserMenu({
-  user,
+  rootId,
   config,
-  isTopNav = false,
+  user,
+  slots,
+  isTopNav,
 }: {
+  rootId: string;
+  config: Extract<NavConfig["userMenu"], Record<string, unknown>>;
   user: AuthUser;
-  config: NavConfig["userMenu"];
-  isTopNav?: boolean;
+  slots: NavConfig["slots"];
+  isTopNav: boolean;
 }) {
   const execute = useActionExecutor();
-  const showAvatar =
-    typeof config === "object" ? (config.showAvatar ?? true) : true;
-  const showEmail =
-    typeof config === "object" ? (config.showEmail ?? false) : false;
-  const menuItems = typeof config === "object" ? (config.items ?? []) : [];
-
-  // In top-nav, render a compact avatar-only button (no dropdown for now)
-  if (isTopNav) {
-    return (
-      <div
-        data-nav-user-menu=""
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: "0 var(--sn-spacing-sm, 0.5rem)",
-        }}
-      >
-        {showAvatar && (
-          <span
-            data-nav-avatar=""
-            title={user.name ?? undefined}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "2rem",
-              height: "2rem",
-              borderRadius: "var(--sn-radius-full, 9999px)",
-              background: "var(--sn-color-muted)",
-              color: "var(--sn-color-muted-foreground)",
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              fontWeight: "var(--sn-font-weight-semibold, 600)" as CSSProperties["fontWeight"],
-              overflow: "hidden",
-              cursor: "default",
-            }}
-          >
-            {user.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.name ?? "User"}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            ) : (
-              (user.name?.charAt(0)?.toUpperCase() ?? "U")
-            )}
-          </span>
-        )}
-      </div>
-    );
-  }
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const showAvatar = config.showAvatar !== false;
+  const showEmail = config.showEmail ?? false;
+  const menuItems = config.items ?? [];
 
   return (
-    <div
-      data-nav-user-menu=""
-      style={{
-        borderTop: "var(--sn-border-default, 1px) solid var(--sn-color-border)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "var(--sn-spacing-sm, 0.5rem)",
-          padding: "var(--sn-spacing-md, 0.75rem)",
-        }}
+    <div ref={containerRef} style={isTopNav ? { marginLeft: "auto" } : undefined}>
+      <ButtonControl
+        variant="ghost"
+        onClick={() => setOpen((value) => !value)}
+        surfaceId={`${rootId}-trigger`}
+        surfaceConfig={slots?.userMenuTrigger}
+        activeStates={open ? ["open"] : []}
       >
-        {showAvatar && (
-          <span
-            data-nav-avatar=""
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "2rem",
-              height: "2rem",
-              borderRadius: "var(--sn-radius-full, 9999px)",
-              background: "var(--sn-color-muted)",
-              color: "var(--sn-color-muted-foreground)",
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              fontWeight:
-                "var(--sn-font-weight-semibold, 600)" as CSSProperties["fontWeight"],
-              overflow: "hidden",
+        {showAvatar ? (
+          <AvatarSurface
+            user={user}
+            surfaceId={`${rootId}-avatar`}
+            slot={slots?.userAvatar}
+          />
+        ) : null}
+        {!isTopNav && user.name ? <span>{user.name}</span> : null}
+      </ButtonControl>
+      <FloatingPanel
+        open={open}
+        onClose={() => setOpen(false)}
+        containerRef={containerRef}
+        side="bottom"
+        align="end"
+        surfaceId={`${rootId}-panel`}
+        slot={slots?.userMenu}
+      >
+        {showEmail && user.email ? (
+          <div style={{ padding: "0.5rem 0.75rem", fontSize: "0.75rem" }}>
+            {user.email}
+          </div>
+        ) : null}
+        {menuItems.map((item, index) => (
+          <MenuItem
+            key={`${rootId}-item-${index}`}
+            label={item.label}
+            icon={item.icon}
+            onClick={() => {
+              setOpen(false);
+              void execute(item.action);
             }}
-          >
-            {user.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.name ?? "User"}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            ) : (
-              (user.name?.charAt(0)?.toUpperCase() ?? "U")
-            )}
-          </span>
-        )}
-        <div
-          style={{
-            flex: 1,
-            minWidth: 0,
-            overflow: "hidden",
-          }}
-        >
-          {user.name && (
-            <div
-              data-nav-user-name=""
-              style={{
-                fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                fontWeight:
-                  "var(--sn-font-weight-medium, 500)" as CSSProperties["fontWeight"],
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {user.name}
-            </div>
-          )}
-          {showEmail && user.email && (
-            <div
-              data-nav-user-email=""
-              style={{
-                fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                color: "var(--sn-color-muted-foreground)",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {user.email}
-            </div>
-          )}
-        </div>
-      </div>
-      {menuItems.length > 0 && (
-        <ul
-          data-nav-user-items=""
-          style={{
-            listStyle: "none",
-            margin: 0,
-            padding:
-              "0 var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-sm, 0.5rem)",
-          }}
-        >
-          {menuItems.map((item, i) => (
-            <li key={item.label ?? i}>
-              <button
-                type="button"
-                data-nav-user-action=""
-                onClick={() => {
-                  void execute(item.action as Parameters<typeof execute>[0]);
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--sn-spacing-sm, 0.5rem)",
-                  width: "100%",
-                  padding:
-                    "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-md, 0.75rem)",
-                  border: "none",
-                  background: "transparent",
-                  color: "inherit",
-                  borderRadius: "var(--sn-radius-md, 0.375rem)",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                  fontFamily: "inherit",
-                  transition: `background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)`,
-                }}
-              >
-                {renderIcon(item.icon, 16)}
-                <span>{item.label}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+            surfaceId={`${rootId}-item-${index}`}
+            slot={slots?.userMenuItem ?? item.slots?.item}
+            labelSlot={item.slots?.itemLabel}
+            iconSlot={item.slots?.itemIcon}
+          />
+        ))}
+      </FloatingPanel>
     </div>
   );
 }
 
-/**
- * Nav component renders navigation items with active state detection,
- * role-based visibility, badge counts, mobile collapse, and user menu.
- *
- * Uses the `useNav` headless hook for all logic. Renders semantic HTML
- * with design token-based styling.
- *
- * @param props - Nav configuration, pathname, and navigation callback
- */
-export function Nav({ config, pathname, onNavigate, variant = "sidebar" }: NavComponentProps) {
+interface NavComponentProps {
+  config: NavConfig;
+  pathname?: string;
+  onNavigate?: (path: string) => void;
+  variant?: "sidebar" | "top-nav";
+}
+
+export function Nav({
+  config,
+  pathname,
+  onNavigate,
+  variant = "sidebar",
+}: NavComponentProps) {
   const manifest = useManifestRuntime();
   const [currentPath, setCurrentPath] = useState(pathname ?? "/");
   const { items, isCollapsed, toggle, user } = useNav(config, currentPath);
@@ -485,7 +338,6 @@ export function Nav({ config, pathname, onNavigate, variant = "sidebar" }: NavCo
           path: manifest.app.home ?? "/",
         }
       : undefined);
-  const showUserMenu = config.userMenu !== false;
 
   useEffect(() => {
     if (pathname) {
@@ -500,215 +352,141 @@ export function Nav({ config, pathname, onNavigate, variant = "sidebar" }: NavCo
   }, [pathname]);
 
   const isTopNav = variant === "top-nav";
-  const hasTemplate = Array.isArray(
-    (config as Record<string, unknown>).template,
-  );
+  const hasTemplate = Array.isArray((config as Record<string, unknown>).template);
+  const rootConfig =
+    resolveSurfaceConfig({
+      componentSurface: config,
+      itemSurface: config.slots?.root,
+    }).resolvedConfigForWrapper ?? config;
+  const brandSurface = resolveSurfacePresentation({
+    surfaceId: `${config.id ?? "nav"}-brand`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.5rem",
+      cursor: effectiveLogo?.path ? "pointer" : undefined,
+    },
+    componentSurface: config.slots?.brand,
+  });
+  const brandIconSurface = resolveSurfacePresentation({
+    surfaceId: `${config.id ?? "nav"}-brand-icon`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      flexShrink: 0,
+    },
+    componentSurface: config.slots?.brandIcon,
+  });
+  const brandLabelSurface = resolveSurfacePresentation({
+    surfaceId: `${config.id ?? "nav"}-brand-label`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      fontWeight: 600,
+    },
+    componentSurface: config.slots?.brandLabel,
+  });
+  const listSurface = resolveSurfacePresentation({
+    surfaceId: `${config.id ?? "nav"}-list`,
+    implementationBase: {
+      listStyle: "none",
+      margin: 0,
+      padding: 0,
+      display: isTopNav ? "flex" : "block",
+      gap: isTopNav ? "0.25rem" : undefined,
+    },
+    componentSurface: config.slots?.list,
+  });
 
-  // ── Template mode: render composable component tree ──────────────────────
   if (hasTemplate) {
     const templateItems = (config as Record<string, unknown>).template as ComponentConfig[];
     return (
-      <nav
-        aria-label="Main navigation"
-        data-snapshot-component="nav"
-        data-variant={variant}
-        className={config.className}
-        style={{
-          display: "flex",
-          flexDirection: isTopNav ? "row" : "column",
-          alignItems: isTopNav ? "center" : undefined,
-          height: "100%",
-          ...((config.style as React.CSSProperties) ?? {}),
-        }}
-      >
-        {templateItems.map((child, i) => (
-          <ComponentRenderer
-            key={child.id ?? `nav-template-${i}`}
-            config={child}
-          />
-        ))}
-      </nav>
+      <ComponentWrapper type="nav" config={rootConfig}>
+        <nav aria-label="Main navigation">
+          {templateItems.map((child, index) => (
+            <ComponentRenderer key={child.id ?? `nav-template-${index}`} config={child} />
+          ))}
+        </nav>
+      </ComponentWrapper>
     );
   }
 
-  // ── Legacy items mode ────────────────────────────────────────────────────
   return (
-    <nav
-      aria-label="Main navigation"
-      data-snapshot-component="nav"
-      data-variant={variant}
-      className={config.className}
-      data-collapsed={isCollapsed ? "true" : undefined}
-      style={{
-        display: "flex",
-        flexDirection: isTopNav ? "row" : "column",
-        alignItems: isTopNav ? "center" : undefined,
-        height: isTopNav ? "100%" : "100%",
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
-    >
-      {/* Logo / Brand */}
-      {effectiveLogo && (
-        <div
-          data-nav-logo=""
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "var(--sn-spacing-sm, 0.5rem)",
-            padding: isTopNav
-              ? "0 var(--sn-spacing-md, 0.75rem)"
-              : "var(--sn-spacing-md, 0.75rem)",
-            borderBottom: isTopNav
-              ? undefined
-              : "var(--sn-border-default, 1px) solid var(--sn-color-border)",
-            borderRight: isTopNav
-              ? "var(--sn-border-default, 1px) solid var(--sn-color-border)"
-              : undefined,
-            flexShrink: 0,
-            cursor: effectiveLogo.path ? "pointer" : undefined,
-          }}
-          onClick={() => {
-            if (effectiveLogo?.path && onNavigate) {
-              onNavigate(effectiveLogo.path);
-            }
-          }}
-          onKeyDown={(e) => {
-            if (
-              (e.key === "Enter" || e.key === " ") &&
-              effectiveLogo?.path &&
-              onNavigate
-            ) {
-              e.preventDefault();
-              onNavigate(effectiveLogo.path);
-            }
-          }}
-          role={effectiveLogo.path ? "link" : undefined}
-          tabIndex={effectiveLogo.path ? 0 : undefined}
-        >
-          {effectiveLogo.src && (
-            <img
-              src={effectiveLogo.src}
-              alt={effectiveLogo.text ?? "Logo"}
-              style={{ height: "var(--sn-spacing-lg, 1.5rem)", width: "auto" }}
-            />
-          )}
-          {effectiveLogo.text && (
-            <span
-              style={{
-                fontSize: "var(--sn-font-size-lg, 1.125rem)",
-                fontWeight:
-                  "var(--sn-font-weight-semibold, 600)" as CSSProperties["fontWeight"],
-              }}
-            >
-              {effectiveLogo.text}
-            </span>
-          )}
-        </div>
-      )}
+    <ComponentWrapper type="nav" config={rootConfig}>
+      <nav aria-label="Main navigation" data-variant={variant} data-collapsed={isCollapsed ? "true" : undefined}>
+        {effectiveLogo ? (
+          <div
+            data-snapshot-id={`${config.id ?? "nav"}-brand`}
+            className={brandSurface.className}
+            style={brandSurface.style}
+            onClick={() => {
+              if (effectiveLogo.path) {
+                onNavigate?.(effectiveLogo.path);
+              }
+            }}
+          >
+            {effectiveLogo.src ? (
+              <img
+                src={effectiveLogo.src}
+                alt={effectiveLogo.text ?? "Logo"}
+                data-snapshot-id={`${config.id ?? "nav"}-brand-icon`}
+                className={brandIconSurface.className}
+                style={brandIconSurface.style}
+              />
+            ) : null}
+            {effectiveLogo.text ? (
+              <span
+                data-snapshot-id={`${config.id ?? "nav"}-brand-label`}
+                className={brandLabelSurface.className}
+                style={brandLabelSurface.style}
+              >
+                {effectiveLogo.text}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
 
-      {/* Mobile toggle button — hidden in top-nav */}
-      {config.collapsible !== false && !isTopNav && (
-        <button
-          type="button"
-          data-nav-toggle=""
-          onClick={toggle}
-          aria-label={isCollapsed ? "Open navigation" : "Close navigation"}
-          style={{
-            display: "none", // shown via media query
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "var(--sn-spacing-sm, 0.5rem)",
-            border: "none",
-            background: "transparent",
-            color: "inherit",
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}
-        >
-          {isCollapsed ? "\u2630" : "\u2715"}
-        </button>
-      )}
+        {config.collapsible !== false && !isTopNav ? (
+          <ButtonControl variant="ghost" onClick={toggle} surfaceId={`${config.id ?? "nav"}-toggle`}>
+            {isCollapsed ? "☰" : "✕"}
+          </ButtonControl>
+        ) : null}
 
-      {/* Nav items */}
-      <ul
-        data-nav-items=""
-        style={{
-          listStyle: "none",
-          margin: 0,
-          padding: isTopNav ? "0 var(--sn-spacing-xs, 0.25rem)" : "var(--sn-spacing-sm, 0.5rem)",
-          flex: isTopNav ? undefined : 1,
-          overflow: isTopNav ? "visible" : "auto",
-          display: isTopNav ? "flex" : undefined,
-          flexDirection: isTopNav ? "row" : undefined,
-          alignItems: isTopNav ? "center" : undefined,
-          gap: isTopNav ? "var(--sn-spacing-xs, 0.25rem)" : undefined,
-        }}
-      >
-        {items
-          .filter((item) => item.isVisible)
-          .map((item, index) => (
-            <NavItem
-              key={item.path ?? index}
+        <ul
+          data-snapshot-id={`${config.id ?? "nav"}-list`}
+          className={listSurface.className}
+          style={listSurface.style}
+        >
+          {items.filter((item) => item.isVisible).map((item, index) => (
+            <NavEntry
+              key={item.path ?? `${config.id ?? "nav"}-item-${index}`}
               item={item}
+              rootId={`${config.id ?? "nav"}-item-${index}`}
+              slots={config.slots}
               onNavigate={onNavigate}
               isTopNav={isTopNav}
             />
           ))}
-      </ul>
+        </ul>
 
-      {/* User menu — pushed to end in top-nav */}
-      {showUserMenu && user && (
-        <div style={isTopNav ? { marginLeft: "auto", flexShrink: 0 } : undefined}>
-          <UserMenu user={user} config={config.userMenu} isTopNav={isTopNav} />
-        </div>
-      )}
+        {user && config.userMenu !== false ? (
+          <UserMenu
+            rootId={`${config.id ?? "nav"}-user-menu`}
+            config={
+              typeof config.userMenu === "object" ? config.userMenu : {}
+            }
+            user={user}
+            slots={config.slots}
+            isTopNav={isTopNav}
+          />
+        ) : null}
 
-      <FloatingMenuStyles />
-      <style>{`
-        [data-snapshot-component="nav"] button[data-nav-link]:focus {
-          outline: none;
-        }
-        [data-snapshot-component="nav"] button[data-nav-link]:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-        [data-snapshot-component="nav"] [data-nav-logo][role="link"]:focus {
-          outline: none;
-        }
-        [data-snapshot-component="nav"] [data-nav-logo][role="link"]:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-        [data-snapshot-component="nav"] [data-nav-user-menu]:focus {
-          outline: none;
-        }
-        [data-snapshot-component="nav"] [data-nav-user-menu]:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-        [data-snapshot-component="nav"] [data-nav-toggle]:focus {
-          outline: none;
-        }
-        [data-snapshot-component="nav"] [data-nav-toggle]:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-        [data-snapshot-component="nav"] [data-nav-user-action]:hover {
-          background: var(--sn-color-accent, var(--sn-color-muted));
-        }
-        [data-snapshot-component="nav"] [data-nav-user-action]:focus {
-          outline: none;
-        }
-        [data-snapshot-component="nav"] [data-nav-user-action]:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-        @media (max-width: 768px) {
-          [data-nav-toggle] {
-            display: flex !important;
-          }
-        }
-      `}</style>
-    </nav>
+        <FloatingMenuStyles />
+        <SurfaceStyles css={brandSurface.scopedCss} />
+        <SurfaceStyles css={brandIconSurface.scopedCss} />
+        <SurfaceStyles css={brandLabelSurface.scopedCss} />
+        <SurfaceStyles css={listSurface.scopedCss} />
+      </nav>
+    </ComponentWrapper>
   );
 }

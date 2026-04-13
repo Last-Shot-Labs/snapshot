@@ -1,9 +1,8 @@
 import { z } from "zod";
-import { actionSchema } from "../../../actions/types";
 import { extendComponentSchema, slotsSchema } from "../../_base/schema";
-import { fromRefSchema } from "../../_base/types";
+import { actionSchema } from "../../../actions/types";
 
-export const contextMenuSlotNames = [
+export const floatingMenuSlotNames = [
   "root",
   "trigger",
   "panel",
@@ -14,15 +13,15 @@ export const contextMenuSlotNames = [
   "label",
 ] as const;
 
-export const contextMenuItemSchema = z.union([
+export const floatingMenuEntrySchema = z.union([
   z
     .object({
       type: z.literal("item"),
       label: z.string(),
       icon: z.string().optional(),
       action: actionSchema.optional(),
-      variant: z.enum(["default", "destructive"]).optional(),
       disabled: z.boolean().optional(),
+      destructive: z.boolean().optional(),
       slots: slotsSchema(["item", "itemLabel", "itemIcon"]).optional(),
     })
     .strict(),
@@ -41,10 +40,13 @@ export const contextMenuItemSchema = z.union([
     .strict(),
 ]);
 
-export const contextMenuConfigSchema = extendComponentSchema({
-  type: z.literal("context-menu"),
-  items: z.array(contextMenuItemSchema).optional(),
-  triggerText: z.string().optional(),
-  visible: z.union([z.boolean(), fromRefSchema]).optional(),
-  slots: slotsSchema(contextMenuSlotNames).optional(),
+export const floatingMenuConfigSchema = extendComponentSchema({
+  type: z.literal("floating-menu"),
+  open: z.boolean().optional(),
+  align: z.enum(["start", "center", "end"]).optional(),
+  side: z.enum(["top", "bottom"]).optional(),
+  triggerLabel: z.string().optional(),
+  triggerIcon: z.string().optional(),
+  items: z.array(floatingMenuEntrySchema).optional(),
+  slots: slotsSchema(floatingMenuSlotNames).optional(),
 }).strict();

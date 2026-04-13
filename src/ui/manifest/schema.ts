@@ -19,6 +19,7 @@ import {
   activeConfigSchema,
   exitAnimationSchema,
   spacingEnum,
+  slotsSchema,
 } from "../components/_base/schema";
 import {
   dataSourceSchema,
@@ -1249,6 +1250,15 @@ export const navItemSchema: z.ZodType = z.lazy(() =>
       authenticated: z.boolean().optional(),
       roles: z.array(z.string()).optional(),
       badge: z.union([z.number(), fromRefSchema]).optional(),
+      slots: slotsSchema([
+        "item",
+        "itemLabel",
+        "itemIcon",
+        "itemBadge",
+        "dropdownItem",
+        "dropdownItemLabel",
+        "dropdownItemIcon",
+      ]).optional(),
       children: z.array(navItemSchema).optional(),
     })
     .strict(),
@@ -1259,6 +1269,60 @@ export const navigationConfigSchema = z
     mode: z.enum(["sidebar", "top-nav"]).optional(),
     items: z.array(navItemSchema).optional(),
     template: z.array(componentConfigSchema).optional(),
+    collapsible: z.boolean().optional(),
+    userMenu: z
+      .union([
+        z.boolean(),
+        z
+          .object({
+            showAvatar: z.boolean().optional(),
+            showEmail: z.boolean().optional(),
+            items: z
+              .array(
+                z
+                  .object({
+                    label: plainTextOrTRefSchema,
+                    icon: z.string().optional(),
+                    action: actionConfigSchema,
+                    roles: z.array(z.string()).optional(),
+                    slots: slotsSchema(["item", "itemLabel", "itemIcon"]).optional(),
+                  })
+                  .strict(),
+              )
+              .optional(),
+          })
+          .strict(),
+      ])
+      .optional(),
+    logo: z
+      .object({
+        src: z.string().optional(),
+        text: plainTextOrTRefSchema.optional(),
+        path: z.string().startsWith("/").optional(),
+      })
+      .strict()
+      .optional(),
+    className: z.string().optional(),
+    style: z.record(z.union([z.string(), z.number()])).optional(),
+    slots: slotsSchema([
+      "root",
+      "brand",
+      "brandIcon",
+      "brandLabel",
+      "list",
+      "item",
+      "itemLabel",
+      "itemIcon",
+      "itemBadge",
+      "dropdown",
+      "dropdownItem",
+      "dropdownItemLabel",
+      "dropdownItemIcon",
+      "userMenu",
+      "userMenuTrigger",
+      "userMenuItem",
+      "userAvatar",
+    ]).optional(),
   })
   .strict()
   .superRefine((data, ctx) => {

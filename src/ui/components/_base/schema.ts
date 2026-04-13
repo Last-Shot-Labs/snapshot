@@ -107,8 +107,6 @@ export const componentTransitionSchema = z.union([
     .strict(),
 ]);
 
-// ── Token enum schemas for style props ──────────────────────────────────────
-
 export const spacingEnum = z.enum([
   "none",
   "2xs",
@@ -177,8 +175,6 @@ const responsiveFlexDirection = responsiveValue(
   z.enum(["row", "column", "row-reverse", "column-reverse"]),
 );
 
-// ── Interactive state schemas ───────────────────────────────────────────────
-
 export const hoverConfigSchema = z
   .object({
     bg: z.string().optional(),
@@ -211,57 +207,9 @@ export const activeConfigSchema = z
   })
   .strict();
 
-// ── Exit animation schema ───────────────────────────────────────────────────
-
-export const exitAnimationSchema = z
-  .object({
-    preset: z
-      .enum([
-        "fade",
-        "fade-up",
-        "fade-down",
-        "slide-left",
-        "slide-right",
-        "scale",
-      ])
-      .optional(),
-    duration: z.enum(["instant", "fast", "normal", "slow"]).optional(),
-  })
-  .strict();
-
-// ── Base component schema ───────────────────────────────────────────────────
-
-export const extendedBaseComponentSchema = z.object({
-  id: z.string().optional(),
-  tokens: componentTokenOverridesSchema.optional(),
-  visibleWhen: z.string().optional(),
-  visible: z
-    .union([
-      z.boolean(),
-      fromRefSchema,
-      z.object({ expr: z.string() }).strict(),
-    ])
-    .optional(),
+export const styleableElementFields = {
   className: z.string().optional(),
   style: z.record(z.union([z.string(), z.number()])).optional(),
-  sticky: z
-    .union([
-      z.boolean(),
-      z
-        .object({
-          top: z.string().optional(),
-          zIndex: componentZIndexSchema.optional(),
-        })
-        .strict(),
-    ])
-    .optional(),
-  zIndex: componentZIndexSchema.optional(),
-  animation: componentAnimationSchema.optional(),
-  glass: z.boolean().optional(),
-  background: componentBackgroundSchema.optional(),
-  transition: componentTransitionSchema.optional(),
-
-  // ── Universal style props ───────────────────────────────────────────────
   padding: responsiveSpacing.optional(),
   paddingX: responsiveSpacing.optional(),
   paddingY: responsiveSpacing.optional(),
@@ -283,9 +231,7 @@ export const extendedBaseComponentSchema = z.object({
   opacity: z.number().min(0).max(1).optional(),
   overflow: z.enum(["auto", "hidden", "scroll", "visible"]).optional(),
   cursor: z.string().optional(),
-  position: z
-    .enum(["relative", "absolute", "fixed", "sticky"])
-    .optional(),
+  position: z.enum(["relative", "absolute", "fixed", "sticky"]).optional(),
   inset: z.string().optional(),
   display: responsiveDisplay.optional(),
   flexDirection: responsiveFlexDirection.optional(),
@@ -313,14 +259,86 @@ export const extendedBaseComponentSchema = z.object({
   letterSpacing: z
     .union([z.enum(["tight", "normal", "wide"]), z.string()])
     .optional(),
-
-  // ── Interactive state props ─────────────────────────────────────────────
   hover: hoverConfigSchema.optional(),
   focus: focusConfigSchema.optional(),
   active: activeConfigSchema.optional(),
+} as const;
 
-  // ── Exit animation (Phase 8) ────────────────────────────────────────────
+export const styleableElementSchema = z.object(styleableElementFields).strict();
+
+export const slotStateNameSchema = z.enum([
+  "hover",
+  "focus",
+  "open",
+  "selected",
+  "current",
+  "active",
+  "completed",
+  "invalid",
+  "disabled",
+]);
+
+export const statefulElementSchema = styleableElementSchema.extend({
+  states: z.record(slotStateNameSchema, styleableElementSchema.partial()).optional(),
+});
+
+export function slotsSchema<const T extends readonly [string, ...string[]]>(
+  slotNames: T,
+) {
+  return z
+    .object(
+      Object.fromEntries(
+        slotNames.map((slot) => [slot, statefulElementSchema.optional()]),
+      ) as Record<T[number], z.ZodOptional<typeof statefulElementSchema>>,
+    )
+    .strict();
+}
+
+export const exitAnimationSchema = z
+  .object({
+    preset: z
+      .enum([
+        "fade",
+        "fade-up",
+        "fade-down",
+        "slide-left",
+        "slide-right",
+        "scale",
+      ])
+      .optional(),
+    duration: z.enum(["instant", "fast", "normal", "slow"]).optional(),
+  })
+  .strict();
+
+export const extendedBaseComponentSchema = z.object({
+  id: z.string().optional(),
+  tokens: componentTokenOverridesSchema.optional(),
+  visibleWhen: z.string().optional(),
+  visible: z
+    .union([
+      z.boolean(),
+      fromRefSchema,
+      z.object({ expr: z.string() }).strict(),
+    ])
+    .optional(),
+  sticky: z
+    .union([
+      z.boolean(),
+      z
+        .object({
+          top: z.string().optional(),
+          zIndex: componentZIndexSchema.optional(),
+        })
+        .strict(),
+    ])
+    .optional(),
+  zIndex: componentZIndexSchema.optional(),
+  animation: componentAnimationSchema.optional(),
+  glass: z.boolean().optional(),
+  background: componentBackgroundSchema.optional(),
+  transition: componentTransitionSchema.optional(),
   exitAnimation: exitAnimationSchema.optional(),
+  ...styleableElementFields,
 });
 
 export function extendComponentSchema<T extends z.ZodRawShape>(shape: T) {

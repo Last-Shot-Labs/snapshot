@@ -150,27 +150,6 @@ export const componentTokensSchema = z
       })
       .strict()
       .optional(),
-    nav: z
-      .object({
-        variant: z.enum(["minimal", "bordered", "filled"]).optional(),
-        activeIndicator: z
-          .enum(["background", "border-left", "border-bottom", "dot"])
-          .optional(),
-        /** Background color of the active nav item. Accepts any CSS color value or token reference. */
-        activeBackground: z.string().optional(),
-        /** Foreground color of the active nav item. */
-        activeForeground: z.string().optional(),
-        /** Background color on hover. Defaults to accent. */
-        hoverBackground: z.string().optional(),
-        /** Border-radius of nav item buttons. Defaults to --sn-radius-md. */
-        itemRadius: z.string().optional(),
-        /** Padding for dropdown menu items inside nav. Defaults to spacing-xs spacing-sm. */
-        dropdownItemPadding: z.string().optional(),
-        /** Gap between dropdown menu items inside nav. */
-        dropdownItemGap: z.string().optional(),
-      })
-      .strict()
-      .optional(),
     badge: z
       .object({
         variant: z.enum(["solid", "outline", "soft"]).optional(),

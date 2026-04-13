@@ -31,6 +31,7 @@ import {
 import { SkipLinks } from "../components/_base/skip-links";
 import { Layout } from "../components/layout/layout";
 import { Nav } from "../components/layout/nav";
+import type { NavConfig as ShellNavConfig } from "../components/layout/nav";
 import { DrawerComponent } from "../components/overlay/drawer";
 import { ModalComponent } from "../components/overlay/modal";
 import { SnapshotDragDropProvider } from "../components/_base/drag-drop-provider";
@@ -868,17 +869,22 @@ function AppShell({
       ? manifest.raw.app.title.trim()
       : "") ||
     "Snapshot";
-  const navConfig = manifest.navigation
+  const navConfig: ShellNavConfig | null = manifest.navigation
     ? ({
         type: "nav",
         items: manifest.navigation.items,
-        collapsible: true,
-        userMenu: true,
-        logo: {
-          text: fallbackLogoText,
-          path: manifest.app.home ?? manifest.firstRoute?.path ?? "/",
-        },
-      } as const)
+        template: manifest.navigation.template,
+        collapsible: manifest.navigation.collapsible ?? true,
+        userMenu: manifest.navigation.userMenu ?? true,
+        logo:
+          manifest.navigation.logo ?? {
+            text: fallbackLogoText,
+            path: manifest.app.home ?? manifest.firstRoute?.path ?? "/",
+          },
+        className: manifest.navigation.className,
+        style: manifest.navigation.style,
+        slots: manifest.navigation.slots,
+      } as unknown as ShellNavConfig)
     : null;
 
   const loadingFallback = (

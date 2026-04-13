@@ -632,39 +632,6 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
     return trimmed;
   }
 
-  if (components.nav) {
-    const lines: string[] = [];
-    if (components.nav.variant) {
-      lines.push(`  --sn-nav-variant: ${components.nav.variant};`);
-    }
-    if (components.nav.activeIndicator) {
-      lines.push(
-        `  --sn-nav-active-indicator: ${components.nav.activeIndicator};`,
-      );
-    }
-    if (components.nav.activeBackground) {
-      lines.push(`  --sn-nav-active-background: ${resolveColorRef(components.nav.activeBackground)};`);
-    }
-    if (components.nav.activeForeground) {
-      lines.push(`  --sn-nav-active-foreground: ${resolveColorRef(components.nav.activeForeground)};`);
-    }
-    if (components.nav.hoverBackground) {
-      lines.push(`  --sn-nav-hover-background: ${resolveColorRef(components.nav.hoverBackground)};`);
-    }
-    if (components.nav.itemRadius) {
-      lines.push(`  --sn-nav-item-radius: ${components.nav.itemRadius};`);
-    }
-    if (components.nav.dropdownItemPadding) {
-      lines.push(`  --sn-nav-dropdown-item-padding: ${resolveSpacingRef(components.nav.dropdownItemPadding)};`);
-    }
-    if (components.nav.dropdownItemGap) {
-      lines.push(`  --sn-nav-dropdown-item-gap: ${resolveSpacingRef(components.nav.dropdownItemGap)};`);
-    }
-    if (lines.length > 0) {
-      blocks.push(`:root {\n${lines.join("\n")}\n}`);
-    }
-  }
-
   if (components.badge) {
     const lines: string[] = [];
     if (components.badge.variant) {

@@ -218,11 +218,12 @@ describe("componentTokensSchema", () => {
     expect(result.modal?.overlay).toBe("blur");
   });
 
-  it("accepts valid nav config", () => {
-    const result = componentTokensSchema.parse({
-      nav: { variant: "bordered", activeIndicator: "dot" },
-    });
-    expect(result.nav?.activeIndicator).toBe("dot");
+  it("rejects obsolete nav visual config", () => {
+    expect(() =>
+      componentTokensSchema.parse({
+        nav: { variant: "bordered" },
+      }),
+    ).toThrow();
   });
 
   it("accepts valid badge config", () => {

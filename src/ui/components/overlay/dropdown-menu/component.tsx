@@ -2,65 +2,22 @@
 
 import React, { useCallback, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import { Icon } from "../../../icons/index";
-import type { DropdownMenuConfig } from "./types";
+import { renderIcon } from "../../../icons/render";
+import { ButtonControl } from "../../forms/button";
 import {
+  FloatingMenuStyles,
   FloatingPanel,
   MenuItem,
-  MenuSeparator,
   MenuLabel,
-  FloatingMenuStyles,
+  MenuSeparator,
 } from "../../primitives/floating-menu";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import type { DropdownMenuConfig } from "./types";
 
-/**
- * Style map for trigger button variants.
- */
-const VARIANT_STYLES: Record<string, React.CSSProperties> = {
-  default: {
-    backgroundColor: "var(--sn-color-primary, #2563eb)",
-    color: "var(--sn-color-primary-foreground, #fff)",
-    border: "var(--sn-border-default, 1px) solid transparent",
-  },
-  secondary: {
-    backgroundColor: "var(--sn-color-secondary, #f1f5f9)",
-    color: "var(--sn-color-secondary-foreground, #0f172a)",
-    border: "var(--sn-border-default, 1px) solid transparent",
-  },
-  outline: {
-    backgroundColor: "transparent",
-    color: "var(--sn-color-foreground, #111827)",
-    border:
-      "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-  },
-  ghost: {
-    backgroundColor: "transparent",
-    color: "var(--sn-color-foreground, #111827)",
-    border: "var(--sn-border-default, 1px) solid transparent",
-  },
-};
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
 
-/**
- * DropdownMenu component — a trigger button that opens a positioned dropdown
- * with items, separators, labels, and keyboard navigation.
- *
- * Uses the shared FloatingPanel primitive for positioning, animation, and
- * dismiss behavior, and MenuItem for consistent item rendering.
- *
- * @param props.config - The dropdown menu config from the manifest
- *
- * @example
- * ```json
- * {
- *   "type": "dropdown-menu",
- *   "trigger": { "label": "Actions", "variant": "outline" },
- *   "items": [
- *     { "type": "item", "label": "Edit", "action": { "type": "navigate", "to": "/edit" } },
- *     { "type": "separator" },
- *     { "type": "item", "label": "Delete", "destructive": true, "action": { "type": "api", "method": "DELETE", "endpoint": "/items/1" } }
- *   ]
- * }
- * ```
- */
 export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
   const execute = useActionExecutor();
   const [isOpen, setIsOpen] = useState(false);
@@ -70,11 +27,38 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
   const variant = config.trigger.variant ?? "default";
   const align = config.align ?? "start";
   const side = config.side ?? "bottom";
+  const rootId = config.id ?? "dropdown-menu";
 
-  // Collect actionable item indices for keyboard navigation
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: {
+      position: "relative",
+      display: "inline-block",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const triggerLabelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-trigger-label`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+    },
+    componentSurface: config.slots?.triggerLabel,
+  });
+  const triggerIconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-trigger-icon`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      flexShrink: 0,
+    },
+    componentSurface: config.slots?.triggerIcon,
+  });
+
   const actionableIndices = config.items
-    .map((item, i) => (item.type === "item" && !item.disabled ? i : -1))
-    .filter((i) => i !== -1);
+    .map((item, index) => (item.type === "item" && !item.disabled ? index : -1))
+    .filter((index) => index !== -1);
 
   const open = useCallback(() => {
     setIsOpen(true);
@@ -86,52 +70,53 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
     setFocusedIndex(-1);
   }, []);
 
-  const toggle = useCallback(() => {
-    if (isOpen) close();
-    else open();
-  }, [isOpen, open, close]);
-
   const handleItemClick = useCallback(
     (index: number) => {
       const item = config.items[index];
-      if (!item || item.type !== "item" || item.disabled) return;
+      if (!item || item.type !== "item" || item.disabled) {
+        return;
+      }
+
       void execute(item.action);
       close();
     },
-    [config.items, execute, close],
+    [close, config.items, execute],
   );
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (event: React.KeyboardEvent) => {
       if (!isOpen) {
-        if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
+        if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
           open();
-          return;
         }
         return;
       }
 
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        const currentPos = actionableIndices.indexOf(focusedIndex);
-        const nextPos =
-          currentPos < actionableIndices.length - 1 ? currentPos + 1 : 0;
-        setFocusedIndex(actionableIndices[nextPos] ?? 0);
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        const currentPos = actionableIndices.indexOf(focusedIndex);
-        const prevPos =
-          currentPos > 0 ? currentPos - 1 : actionableIndices.length - 1;
-        setFocusedIndex(actionableIndices[prevPos] ?? 0);
-      } else if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        if (focusedIndex >= 0) {
-          handleItemClick(focusedIndex);
-        }
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        const currentPosition = actionableIndices.indexOf(focusedIndex);
+        const nextPosition =
+          currentPosition < actionableIndices.length - 1 ? currentPosition + 1 : 0;
+        setFocusedIndex(actionableIndices[nextPosition] ?? 0);
+        return;
+      }
+
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        const currentPosition = actionableIndices.indexOf(focusedIndex);
+        const previousPosition =
+          currentPosition > 0 ? currentPosition - 1 : actionableIndices.length - 1;
+        setFocusedIndex(actionableIndices[previousPosition] ?? 0);
+        return;
+      }
+
+      if ((event.key === "Enter" || event.key === " ") && focusedIndex >= 0) {
+        event.preventDefault();
+        handleItemClick(focusedIndex);
       }
     },
-    [isOpen, focusedIndex, actionableIndices, open, handleItemClick],
+    [actionableIndices, focusedIndex, handleItemClick, isOpen, open],
   );
 
   return (
@@ -139,84 +124,95 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
       ref={containerRef}
       data-snapshot-component="dropdown-menu"
       data-testid="dropdown-menu"
-      className={config.className}
-      style={{
-        position: "relative",
-        display: "inline-block",
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
+      data-snapshot-id={`${rootId}-root`}
+      className={rootSurface.className}
+      style={rootSurface.style}
     >
       <FloatingMenuStyles />
-      <style>{`
-        [data-snapshot-component="dropdown-menu"] > button:focus { outline: none; }
-        [data-snapshot-component="dropdown-menu"] > button:hover {
-          filter: brightness(0.95);
-        }
-        [data-snapshot-component="dropdown-menu"] > button:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-      `}</style>
-
-      {/* Trigger button */}
-      <button
-        type="button"
-        data-testid="dropdown-menu-trigger"
-        onClick={toggle}
-        onKeyDown={handleKeyDown}
-        aria-haspopup="true"
-        aria-expanded={isOpen}
-        style={{
-          ...VARIANT_STYLES[variant],
-          padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-          borderRadius: "var(--sn-radius-md, 0.375rem)",
-          fontSize: "var(--sn-font-size-sm, 0.875rem)",
-          cursor: "pointer",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "var(--sn-spacing-xs, 0.25rem)",
-          fontFamily: "inherit",
-          lineHeight: "var(--sn-leading-normal, 1.5)",
-        }}
+      <ButtonControl
+        variant={variant}
+        onClick={() => (isOpen ? close() : open())}
+        surfaceId={`${rootId}-trigger`}
+        surfaceConfig={config.slots?.trigger}
+        testId="dropdown-menu-trigger"
+        ariaExpanded={isOpen}
+        ariaHasPopup="menu"
+        activeStates={isOpen ? ["open"] : []}
       >
-        {config.trigger.icon && <Icon name={config.trigger.icon} size={16} />}
-        {config.trigger.label && <span>{config.trigger.label}</span>}
-      </button>
+        {config.trigger.icon ? (
+          <span
+            data-snapshot-id={`${rootId}-trigger-icon`}
+            className={triggerIconSurface.className}
+            style={triggerIconSurface.style}
+          >
+            {renderIcon(config.trigger.icon, 16)}
+          </span>
+        ) : null}
+        {config.trigger.label ? (
+          <span
+            data-snapshot-id={`${rootId}-trigger-label`}
+            className={triggerLabelSurface.className}
+            style={triggerLabelSurface.style}
+          >
+            {config.trigger.label}
+          </span>
+        ) : null}
+      </ButtonControl>
 
-      {/* Menu — positioning, animation, dismiss all handled by FloatingPanel */}
       <FloatingPanel
         open={isOpen}
         onClose={close}
         containerRef={containerRef}
         side={side}
         align={align}
-        minWidth="180px"
+        surfaceId={`${rootId}-panel`}
+        slot={config.slots?.panel}
+        activeStates={isOpen ? ["open"] : []}
       >
         <div onKeyDown={handleKeyDown} data-testid="dropdown-menu-content">
-          {config.items.map((entry, i) => {
+          {config.items.map((entry, index) => {
             if (entry.type === "separator") {
-              return <MenuSeparator key={`sep-${i}`} />;
+              return (
+                <MenuSeparator
+                  key={`separator-${index}`}
+                  surfaceId={`${rootId}-separator-${index}`}
+                  slot={config.slots?.separator}
+                />
+              );
             }
 
             if (entry.type === "label") {
-              return <MenuLabel key={`label-${i}`} text={entry.text} />;
+              return (
+                <MenuLabel
+                  key={`label-${index}`}
+                  text={entry.text}
+                  surfaceId={`${rootId}-label-${index}`}
+                  slot={entry.slots?.label ?? config.slots?.label}
+                />
+              );
             }
 
-            // type === "item"
             return (
               <MenuItem
-                key={`item-${i}`}
+                key={`item-${index}`}
                 label={entry.label}
                 icon={entry.icon}
-                onClick={() => handleItemClick(i)}
+                onClick={() => handleItemClick(index)}
                 disabled={entry.disabled}
                 destructive={entry.destructive}
-                active={focusedIndex === i}
+                active={focusedIndex === index}
+                surfaceId={`${rootId}-item-${index}`}
+                slot={entry.slots?.item ?? config.slots?.item}
+                labelSlot={entry.slots?.itemLabel ?? config.slots?.itemLabel}
+                iconSlot={entry.slots?.itemIcon ?? config.slots?.itemIcon}
               />
             );
           })}
         </div>
       </FloatingPanel>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={triggerLabelSurface.scopedCss} />
+      <SurfaceStyles css={triggerIconSurface.scopedCss} />
     </div>
   );
 }

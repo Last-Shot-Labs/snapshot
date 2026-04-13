@@ -17,11 +17,7 @@ import type {
   ActiveConfig,
   ExitAnimationConfig,
 } from "./types";
-import {
-  resolveStyleProps,
-  resolveInteractiveCSS,
-  resolveResponsiveCSS,
-} from "./style-props";
+import { mergeClassNames, resolveSurfacePresentation } from "./style-surfaces";
 
 /**
  * Props for ComponentWrapper.
@@ -362,22 +358,23 @@ export function ComponentWrapper({
   const id = explicitId ?? autoIdRef.current;
 
   // ── Style prop resolution ─────────────────────────────────────────────
-  const styleProps = config ? resolveStyleProps(config) : undefined;
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: id,
+    componentSurface:
+      config ??
+      ({
+        className,
+        style,
+        hover,
+        focus,
+        active,
+      } as Record<string, unknown>),
+  });
 
   // ── Interactive CSS (hover/focus/active) ───────────────────────────────
-  const interactiveCSS =
-    id && (hover || focus || active)
-      ? resolveInteractiveCSS(id, hover, focus, active)
-      : null;
+  const scopedCSS = rootSurface.scopedCss ?? null;
 
   // ── Responsive CSS (media queries) ────────────────────────────────────
-  const responsiveCSS =
-    id && config ? resolveResponsiveCSS(id, config) : null;
-
-  const scopedCSS =
-    interactiveCSS || responsiveCSS
-      ? [interactiveCSS, responsiveCSS].filter(Boolean).join("\n")
-      : null;
 
   // ── Exit animation lifecycle ──────────────────────────────────────────
   const visibleExpr =
@@ -458,7 +455,7 @@ export function ComponentWrapper({
 
   // Priority: style props → feature styles → token overrides → raw style
   const mergedStyle: CSSProperties = {
-    ...(styleProps ?? {}),
+    ...(rootSurface.style ?? {}),
     ...(backgroundStyle ?? {}),
     ...(glassStyle ?? {}),
     ...(stickyStyle ?? {}),
@@ -478,7 +475,7 @@ export function ComponentWrapper({
       data-snapshot-id={id}
       data-component-id={id}
       data-snapshot-config={devConfig}
-      className={className}
+      className={mergeClassNames(rootSurface.className, className)}
       aria-label={ariaLabel}
       aria-describedby={ariaDescribedBy}
       role={role}

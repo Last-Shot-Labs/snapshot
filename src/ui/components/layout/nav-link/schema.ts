@@ -1,6 +1,8 @@
 import { z } from "zod";
-import { extendComponentSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
+
+export const navLinkSlotNames = ["root", "label", "icon", "badge"] as const;
 
 export const navLinkConfigSchema = extendComponentSchema({
   type: z.literal("nav-link"),
@@ -13,4 +15,5 @@ export const navLinkConfigSchema = extendComponentSchema({
   disabled: z.union([z.boolean(), fromRefSchema]).optional(),
   roles: z.array(z.string()).optional(),
   authenticated: z.boolean().optional(),
+  slots: slotsSchema(navLinkSlotNames).optional(),
 }).strict();

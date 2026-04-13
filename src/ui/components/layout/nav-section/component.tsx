@@ -1,82 +1,82 @@
 "use client";
 
 import { useState } from "react";
-import type { CSSProperties } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
+import { ButtonControl } from "../../forms/button";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { NavSectionConfig } from "./types";
 
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
+
 export function NavSection({ config }: { config: NavSectionConfig }) {
-  const [isCollapsed, setIsCollapsed] = useState(
-    config.defaultCollapsed ?? false,
-  );
+  const [isCollapsed, setIsCollapsed] = useState(config.defaultCollapsed ?? false);
   const showItems = !config.collapsible || !isCollapsed;
+  const rootId = config.id ?? "nav-section";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const headerLabelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-header-label`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      width: "100%",
+    },
+    componentSurface: config.slots?.headerLabel,
+  });
+  const contentSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-content`,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+    },
+    componentSurface: config.slots?.content,
+    activeStates: showItems ? ["open"] : [],
+  });
 
   return (
-    <div data-nav-section="">
-      {config.label && (
-        <div
-          data-nav-section-label=""
-          onClick={
-            config.collapsible ? () => setIsCollapsed((v) => !v) : undefined
-          }
-          onKeyDown={
-            config.collapsible
-              ? (e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setIsCollapsed((v) => !v);
-                  }
-                }
-              : undefined
-          }
-          role={config.collapsible ? "button" : undefined}
-          tabIndex={config.collapsible ? 0 : undefined}
-          aria-expanded={config.collapsible ? !isCollapsed : undefined}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding:
-              "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
-            fontSize: "var(--sn-font-size-xs, 0.75rem)",
-            fontWeight: 600,
-            textTransform: "uppercase" as const,
-            letterSpacing: "0.05em",
-            color: "var(--sn-color-muted-foreground)",
-            cursor: config.collapsible ? "pointer" : undefined,
-            userSelect: "none",
-          }}
+    <div
+      data-snapshot-component="nav-section"
+      data-snapshot-id={`${rootId}-root`}
+      className={rootSurface.className}
+      style={rootSurface.style}
+    >
+      {config.label ? (
+        <ButtonControl
+          variant="ghost"
+          onClick={config.collapsible ? () => setIsCollapsed((value) => !value) : undefined}
+          surfaceId={`${rootId}-header`}
+          surfaceConfig={config.slots?.header}
+          activeStates={showItems ? ["open"] : []}
         >
-          <span>{config.label}</span>
-          {config.collapsible && (
-            <span
-              aria-hidden="true"
-              style={{
-                display: "inline-flex",
-                opacity: 0.6,
-                fontSize: "0.625rem",
-                transition: "transform var(--sn-duration-fast, 150ms)",
-                transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)",
-              }}
-            >
-              ▾
-            </span>
-          )}
-        </div>
-      )}
-      {showItems && (
+          <span
+            data-snapshot-id={`${rootId}-header-label`}
+            className={headerLabelSurface.className}
+            style={headerLabelSurface.style}
+          >
+            {config.label}
+          </span>
+        </ButtonControl>
+      ) : null}
+      {showItems ? (
         <div
-          data-nav-section-items=""
-          style={{ display: "flex", flexDirection: "column" }}
+          data-snapshot-id={`${rootId}-content`}
+          className={contentSurface.className}
+          style={contentSurface.style}
         >
-          {config.items.map((item, i) => (
-            <ComponentRenderer
-              key={(item as { id?: string }).id ?? i}
-              config={item}
-            />
+          {config.items.map((item, index) => (
+            <ComponentRenderer key={(item as { id?: string }).id ?? index} config={item} />
           ))}
         </div>
-      )}
+      ) : null}
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={headerLabelSurface.scopedCss} />
+      <SurfaceStyles css={contentSurface.scopedCss} />
     </div>
   );
 }

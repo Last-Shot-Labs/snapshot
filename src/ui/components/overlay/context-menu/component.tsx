@@ -2,8 +2,16 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
-import { ContextMenuPortal } from "../../_base/context-menu-portal";
+import {
+  ContextMenuPortal,
+  type ContextMenuPortalItem,
+} from "../../_base/context-menu-portal";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { ContextMenuConfig } from "./types";
+
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
 
 export function ContextMenu({ config }: { config: ContextMenuConfig }) {
   const visible = useSubscribe(config.visible ?? true);
@@ -27,6 +35,24 @@ export function ContextMenu({ config }: { config: ContextMenuConfig }) {
     });
   }, []);
 
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${config.id ?? "context-menu"}-root`,
+    implementationBase: {
+      position: "relative",
+      display: "inline-block",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const triggerSurface = resolveSurfacePresentation({
+    surfaceId: `${config.id ?? "context-menu"}-trigger`,
+    implementationBase: {
+      cursor: "context-menu",
+      userSelect: "none",
+    },
+    componentSurface: config.slots?.trigger,
+  });
+
   if (visible === false) {
     return null;
   }
@@ -34,38 +60,28 @@ export function ContextMenu({ config }: { config: ContextMenuConfig }) {
   return (
     <div
       data-snapshot-component="context-menu"
-      className={config.className}
-      style={{
-        position: "relative",
-        display: "inline-block",
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
+      data-snapshot-id={`${config.id ?? "context-menu"}-root`}
+      className={rootSurface.className}
+      style={rootSurface.style}
     >
       <div
         data-testid="context-menu-area"
+        data-snapshot-id={`${config.id ?? "context-menu"}-trigger`}
         onContextMenu={handleContextMenu}
-        style={{
-          cursor: "context-menu",
-          padding: "var(--sn-spacing-sm, 0.5rem)",
-          userSelect: "none",
-        }}
+        className={triggerSurface.className}
+        style={triggerSurface.style}
       >
-        {config.triggerText ? (
-          <span
-            style={{
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-            }}
-          >
-            {config.triggerText}
-          </span>
-        ) : null}
+        {config.triggerText ?? null}
       </div>
       <ContextMenuPortal
-        items={config.items ?? []}
+        items={(config.items ?? []) as ContextMenuPortalItem[]}
         state={menuState}
         onClose={() => setMenuState(null)}
+        slots={config.slots}
+        idBase={config.id ?? "context-menu"}
       />
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={triggerSurface.scopedCss} />
     </div>
   );
 }

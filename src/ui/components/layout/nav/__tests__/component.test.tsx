@@ -71,6 +71,10 @@ function renderWithContext(
   };
 }
 
+function queryBySnapshotId(container: HTMLElement, id: string) {
+  return container.querySelector(`[data-snapshot-id="${id}"]`);
+}
+
 describe("Nav component", () => {
   afterEach(() => {
     cleanup();
@@ -120,7 +124,7 @@ describe("Nav component", () => {
     const { container } = renderWithContext(
       <Nav config={config} pathname="/" />,
     );
-    const icon = container.querySelector("[data-nav-icon]");
+    const icon = queryBySnapshotId(container, "nav-item-0-/-icon");
     expect(icon).not.toBeNull();
     expect(icon?.querySelector("svg")).not.toBeNull();
   });
@@ -133,7 +137,7 @@ describe("Nav component", () => {
     const { container } = renderWithContext(
       <Nav config={config} pathname="/" />,
     );
-    const badge = container.querySelector("[data-nav-badge]");
+    const badge = queryBySnapshotId(container, "nav-item-0-/inbox-badge");
     expect(badge).not.toBeNull();
     expect(badge?.textContent).toBe("3");
   });
@@ -146,7 +150,7 @@ describe("Nav component", () => {
     const { container } = renderWithContext(
       <Nav config={config} pathname="/" />,
     );
-    const badge = container.querySelector("[data-nav-badge]");
+    const badge = queryBySnapshotId(container, "nav-item-0-/inbox-badge");
     expect(badge).toBeNull();
   });
 
@@ -300,7 +304,7 @@ describe("Nav component", () => {
       const { container } = renderWithContext(
         <Nav config={baseConfig} pathname="/users" />,
       );
-      const activeItem = container.querySelector('[data-active="true"]');
+      const activeItem = container.querySelector('[data-current="true"]');
       expect(activeItem).not.toBeNull();
       expect(activeItem?.textContent).toContain("Users");
     });
@@ -309,7 +313,7 @@ describe("Nav component", () => {
       const { container } = renderWithContext(
         <Nav config={baseConfig} pathname="/other" />,
       );
-      const activeItems = container.querySelectorAll('[data-active="true"]');
+      const activeItems = container.querySelectorAll('[data-current="true"]');
       expect(activeItems.length).toBe(0);
     });
   });
@@ -319,7 +323,7 @@ describe("Nav component", () => {
       const { container } = renderWithContext(
         <Nav config={baseConfig} pathname="/" />,
       );
-      const toggle = container.querySelector("[data-nav-toggle]");
+      const toggle = queryBySnapshotId(container, "nav-toggle");
       expect(toggle).not.toBeNull();
     });
 
@@ -331,7 +335,7 @@ describe("Nav component", () => {
       const { container } = renderWithContext(
         <Nav config={config} pathname="/" />,
       );
-      const toggle = container.querySelector("[data-nav-toggle]");
+      const toggle = queryBySnapshotId(container, "nav-toggle");
       expect(toggle).toBeNull();
     });
 
@@ -339,9 +343,7 @@ describe("Nav component", () => {
       const { container } = renderWithContext(
         <Nav config={baseConfig} pathname="/" />,
       );
-      const toggle = container.querySelector(
-        "[data-nav-toggle]",
-      ) as HTMLButtonElement;
+      const toggle = queryBySnapshotId(container, "nav-toggle") as HTMLButtonElement;
       const nav = container.querySelector('[data-snapshot-component="nav"]');
 
       // Initially expanded (isCollapsed defaults to false)
@@ -367,7 +369,7 @@ describe("Nav component", () => {
         <Nav config={config} pathname="/" />,
         { user: { name: "Alice", email: "alice@test.com" } },
       );
-      const userMenu = container.querySelector("[data-nav-user-menu]");
+      const userMenu = queryBySnapshotId(container, "nav-user-menu-trigger");
       expect(userMenu).not.toBeNull();
     });
 
@@ -379,7 +381,7 @@ describe("Nav component", () => {
       const { container } = renderWithContext(
         <Nav config={config} pathname="/" />,
       );
-      const userMenu = container.querySelector("[data-nav-user-menu]");
+      const userMenu = queryBySnapshotId(container, "nav-user-menu-trigger");
       expect(userMenu).toBeNull();
     });
 
@@ -404,6 +406,7 @@ describe("Nav component", () => {
         <Nav config={config} pathname="/" />,
         { user: { name: "Alice", email: "alice@test.com" } },
       );
+      fireEvent.click(getByText("Alice"));
       expect(getByText("alice@test.com")).not.toBeNull();
     });
 

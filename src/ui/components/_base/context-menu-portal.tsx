@@ -1,19 +1,38 @@
 'use client';
 
 import { useEffect } from "react";
-import type { CSSProperties } from "react";
 import { useActionExecutor } from "../../actions/executor";
-import { Icon } from "../../icons/index";
+import {
+  MenuItem,
+  MenuLabel,
+  MenuSeparator,
+} from "../primitives/floating-menu";
+import { resolveSurfacePresentation } from "./style-surfaces";
 import type { ActionConfig } from "../../actions/types";
 
-export interface ContextMenuPortalItem {
-  label: string;
-  icon?: string;
-  action?: ActionConfig;
-  variant?: "default" | "destructive";
-  separator?: boolean;
-  disabled?: boolean;
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
+
+export type ContextMenuPortalItem =
+  | {
+      type?: "item";
+      label: string;
+      icon?: string;
+      action?: ActionConfig;
+      variant?: "default" | "destructive";
+      disabled?: boolean;
+      slots?: Record<string, unknown>;
+    }
+  | {
+      type: "separator";
+      slots?: Record<string, unknown>;
+    }
+  | {
+      type: "label";
+      text: string;
+      slots?: Record<string, unknown>;
+    };
 
 export interface ContextMenuPortalState {
   x: number;
@@ -21,7 +40,7 @@ export interface ContextMenuPortalState {
   context?: Record<string, unknown>;
 }
 
-function clampPosition(state: ContextMenuPortalState): CSSProperties {
+function clampPosition(state: ContextMenuPortalState) {
   return {
     left: `min(${state.x}px, calc(100vw - var(--sn-spacing-xl, 2rem) - 12rem))`,
     top: `min(${state.y}px, calc(100vh - var(--sn-spacing-xl, 2rem) - 12rem))`,
@@ -32,10 +51,14 @@ export function ContextMenuPortal({
   items,
   state,
   onClose,
+  slots,
+  idBase = "context-menu",
 }: {
   items: ContextMenuPortalItem[];
   state: ContextMenuPortalState | null;
   onClose: () => void;
+  slots?: Record<string, unknown>;
+  idBase?: string;
 }) {
   const execute = useActionExecutor();
 
@@ -44,9 +67,7 @@ export function ContextMenuPortal({
       return;
     }
 
-    const handlePointerDown = () => {
-      onClose();
-    };
+    const handlePointerDown = () => onClose();
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
@@ -65,72 +86,74 @@ export function ContextMenuPortal({
     return null;
   }
 
+  const panelSurface = resolveSurfacePresentation({
+    surfaceId: `${idBase}-panel`,
+    implementationBase: {
+      position: "fixed",
+      zIndex: "var(--sn-z-index-popover, 50)",
+      minWidth: "12rem",
+      display: "grid",
+      gap: "var(--sn-spacing-2xs, 0.125rem)",
+    },
+    componentSurface: slots?.panel as Record<string, unknown> | undefined,
+  });
+
   return (
-    <div
-      role="menu"
-      style={{
-        position: "fixed",
-        zIndex: "var(--sn-z-index-popover, 50)" as unknown as number,
-        minWidth: "12rem",
-        display: "grid",
-        gap: "var(--sn-spacing-2xs, 0.125rem)",
-        padding: "var(--sn-spacing-2xs, 0.125rem)",
-        background: "var(--sn-color-popover, #fff)",
-        color: "var(--sn-color-popover-foreground, #111)",
-        border: "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
-        borderRadius: "var(--sn-radius-md, 0.5rem)",
-        boxShadow: "var(--sn-shadow-xl, 0 25px 50px -12px rgba(0,0,0,0.25))",
-        ...clampPosition(state),
-      }}
-      onPointerDown={(event) => event.stopPropagation()}
-    >
-      {items.map((item, index) =>
-        item.separator ? (
-          <div
-            key={`separator-${index}`}
-            role="separator"
-            style={{
-              height: "1px",
-              margin: "var(--sn-spacing-2xs, 0.125rem) 0",
-              background: "var(--sn-color-border, #e5e7eb)",
-            }}
-          />
-        ) : (
-          <button
-            key={`item-${index}`}
-            type="button"
-            role="menuitem"
-            disabled={item.disabled}
-            onClick={() => {
-              onClose();
-              if (item.action) {
-                void execute(item.action, state.context);
-              }
-            }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "var(--sn-spacing-sm, 0.5rem)",
-              width: "100%",
-              padding:
-                "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
-              border: "none",
-              borderRadius: "var(--sn-radius-sm, 0.25rem)",
-              background: "transparent",
-              color:
-                item.variant === "destructive"
-                  ? "var(--sn-color-destructive, #ef4444)"
-                  : "inherit",
-              opacity: item.disabled ? "var(--sn-opacity-disabled, 0.5)" : 1,
-              cursor: item.disabled ? "not-allowed" : "pointer",
-              textAlign: "left",
-            }}
-          >
-            {item.icon ? <Icon name={item.icon} size={14} /> : null}
-            <span>{item.label}</span>
-          </button>
-        ),
-      )}
-    </div>
+    <>
+      <div
+        role="menu"
+        data-snapshot-id={`${idBase}-panel`}
+        className={panelSurface.className}
+        style={{
+          ...panelSurface.style,
+          ...clampPosition(state),
+        }}
+        onPointerDown={(event) => event.stopPropagation()}
+      >
+        {items.map((item, index) => {
+          if (item.type === "separator") {
+            return (
+              <MenuSeparator
+                key={`${idBase}-separator-${index}`}
+                surfaceId={`${idBase}-separator-${index}`}
+                slot={(item.slots?.separator as Record<string, unknown> | undefined) ?? (slots?.separator as Record<string, unknown> | undefined)}
+              />
+            );
+          }
+
+          if (item.type === "label") {
+            return (
+              <MenuLabel
+                key={`${idBase}-label-${index}`}
+                text={item.text}
+                surfaceId={`${idBase}-label-${index}`}
+                slot={(item.slots?.label as Record<string, unknown> | undefined) ?? (slots?.label as Record<string, unknown> | undefined)}
+              />
+            );
+          }
+
+          return (
+            <MenuItem
+              key={`${idBase}-item-${index}`}
+              label={item.label}
+              icon={item.icon}
+              disabled={item.disabled}
+              destructive={item.variant === "destructive"}
+              onClick={() => {
+                onClose();
+                if (item.action) {
+                  void execute(item.action, state.context);
+                }
+              }}
+              surfaceId={`${idBase}-item-${index}`}
+              slot={(item.slots?.item as Record<string, unknown> | undefined) ?? (slots?.item as Record<string, unknown> | undefined)}
+              labelSlot={(item.slots?.itemLabel as Record<string, unknown> | undefined) ?? (slots?.itemLabel as Record<string, unknown> | undefined)}
+              iconSlot={(item.slots?.itemIcon as Record<string, unknown> | undefined) ?? (slots?.itemIcon as Record<string, unknown> | undefined)}
+            />
+          );
+        })}
+      </div>
+      <SurfaceStyles css={panelSurface.scopedCss} />
+    </>
   );
 }
