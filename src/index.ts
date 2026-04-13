@@ -1,3 +1,10 @@
+/**
+ * @lastshotlabs/snapshot
+ *
+ * Public SDK entry point for Snapshot. Exposes the runtime factory, core
+ * types, auth/community/webhook primitives, plugin support, and schema
+ * generation helpers used by downstream apps and framework tooling.
+ */
 export { createSnapshot } from "./create-snapshot";
 export { ApiError } from "./api/error";
 export { registerClient, getRegisteredClient } from "./api/client";

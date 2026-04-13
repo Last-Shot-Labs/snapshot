@@ -1,0 +1,66 @@
+{
+  "surfaces": {
+    "sdk-core": {
+      "sources": [
+        "src/index.ts",
+        "src/create-snapshot.tsx",
+        "src/api/client.ts",
+        "src/plugin.ts",
+        "src/schema-generator.ts"
+      ],
+      "docs": [
+        "apps/docs/src/content/docs/build/sdk-apps.md",
+        "apps/docs/src/content/docs/reference/sdk.md",
+        "apps/docs/src/content/docs/start-here/capabilities.md"
+      ]
+    },
+    "ui-manifest": {
+      "sources": [
+        "src/ui.ts",
+        "src/ui/manifest/schema.ts",
+        "src/ui/manifest/index.ts",
+        "src/ui/components"
+      ],
+      "docs": [
+        "apps/docs/src/content/docs/build/manifest-apps.md",
+        "apps/docs/src/content/docs/reference/ui.md",
+        "apps/docs/src/content/docs/reference/manifest.md",
+        "apps/docs/src/content/docs/reference/components.md",
+        "apps/docs/src/content/docs/start-here/capabilities.md"
+      ]
+    },
+    "ssr-vite": {
+      "sources": [
+        "src/ssr",
+        "src/vite"
+      ],
+      "docs": [
+        "apps/docs/src/content/docs/integrate/ssr-rsc.md",
+        "apps/docs/src/content/docs/reference/ssr.md",
+        "apps/docs/src/content/docs/reference/vite.md",
+        "apps/docs/src/content/docs/start-here/capabilities.md"
+      ]
+    },
+    "cli-sync": {
+      "sources": [
+        "src/cli"
+      ],
+      "docs": [
+        "apps/docs/src/content/docs/build/sdk-apps.md",
+        "apps/docs/src/content/docs/reference/cli.md",
+        "apps/docs/src/content/docs/start-here/capabilities.md"
+      ]
+    },
+    "playground-examples": {
+      "sources": [
+        "playground/src/showcase.tsx",
+        "playground/src/app.tsx",
+        "playground/src/token-editor.tsx"
+      ],
+      "docs": [
+        "apps/docs/src/content/docs/examples/index.md",
+        "apps/docs/src/content/docs/reference/components.md"
+      ]
+    }
+  }
+}

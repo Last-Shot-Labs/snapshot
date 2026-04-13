@@ -233,7 +233,7 @@ export function MenuItem({
         padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
         border: "none",
         background: active
-          ? "var(--sn-color-accent, var(--sn-color-muted, #f3f4f6))"
+          ? "var(--sn-menu-item-active-bg, var(--sn-color-accent, var(--sn-color-muted, #f3f4f6)))"
           : undefined,
         color: destructive
           ? "var(--sn-color-destructive, #dc2626)"
@@ -318,7 +318,7 @@ export function FloatingMenuStyles() {
   return (
     <style>{`
       [data-floating-panel] [data-menu-item]:hover:not(:disabled) {
-        background-color: var(--sn-color-accent, var(--sn-color-muted, #f3f4f6));
+        background-color: var(--sn-menu-item-hover-bg, var(--sn-color-accent, var(--sn-color-muted, #f3f4f6)));
       }
       [data-floating-panel] [data-menu-item]:focus { outline: none; }
       [data-floating-panel] [data-menu-item]:focus-visible {

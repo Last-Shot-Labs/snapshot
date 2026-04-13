@@ -589,6 +589,49 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
     }
   }
 
+  /**
+   * Resolve a color shorthand to a CSS value.
+   *   "primary"    → var(--sn-color-primary)
+   *   "muted"      → var(--sn-color-muted)
+   *   "primary/20" → color-mix(in oklch, var(--sn-color-primary) 20%, var(--sn-color-background))
+   *   raw CSS      → passed through as-is
+   */
+  /**
+   * Resolve a spacing shorthand to CSS.
+   *   "xs"       → var(--sn-spacing-xs)
+   *   "xs sm"    → var(--sn-spacing-xs) var(--sn-spacing-sm)
+   *   raw CSS    → passed through as-is
+   */
+  const SPACING_TOKENS = new Set(["2xs", "xs", "sm", "md", "lg", "xl", "2xl", "3xl"]);
+  function resolveSpacingRef(value: string): string {
+    const trimmed = value.trim();
+    // Already raw CSS (contains parens, px, rem, etc.)
+    if (/[().]/.test(trimmed)) return trimmed;
+    // Split on whitespace — each part could be a token name
+    const parts = trimmed.split(/\s+/);
+    if (parts.every((p) => SPACING_TOKENS.has(p))) {
+      return parts.map((p) => `var(--sn-spacing-${p})`).join(" ");
+    }
+    return trimmed;
+  }
+
+  function resolveColorRef(value: string): string {
+    const trimmed = value.trim();
+    // Already raw CSS (contains parens, #hex, oklch, etc.)
+    if (/[()#]/.test(trimmed)) return trimmed;
+    // token/percentage shorthand
+    const slashMatch = trimmed.match(/^([a-z][\w-]*)\s*\/\s*(\d{1,3})$/i);
+    if (slashMatch) {
+      const [, token, pct] = slashMatch;
+      return `color-mix(in oklch, var(--sn-color-${token}) ${pct}%, var(--sn-color-background))`;
+    }
+    // bare token name
+    if (/^[a-z][\w-]*$/i.test(trimmed)) {
+      return `var(--sn-color-${trimmed})`;
+    }
+    return trimmed;
+  }
+
   if (components.nav) {
     const lines: string[] = [];
     if (components.nav.variant) {
@@ -600,10 +643,22 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
       );
     }
     if (components.nav.activeBackground) {
-      lines.push(`  --sn-nav-active-background: ${components.nav.activeBackground};`);
+      lines.push(`  --sn-nav-active-background: ${resolveColorRef(components.nav.activeBackground)};`);
     }
     if (components.nav.activeForeground) {
-      lines.push(`  --sn-nav-active-foreground: ${components.nav.activeForeground};`);
+      lines.push(`  --sn-nav-active-foreground: ${resolveColorRef(components.nav.activeForeground)};`);
+    }
+    if (components.nav.hoverBackground) {
+      lines.push(`  --sn-nav-hover-background: ${resolveColorRef(components.nav.hoverBackground)};`);
+    }
+    if (components.nav.itemRadius) {
+      lines.push(`  --sn-nav-item-radius: ${components.nav.itemRadius};`);
+    }
+    if (components.nav.dropdownItemPadding) {
+      lines.push(`  --sn-nav-dropdown-item-padding: ${resolveSpacingRef(components.nav.dropdownItemPadding)};`);
+    }
+    if (components.nav.dropdownItemGap) {
+      lines.push(`  --sn-nav-dropdown-item-gap: ${resolveSpacingRef(components.nav.dropdownItemGap)};`);
     }
     if (lines.length > 0) {
       blocks.push(`:root {\n${lines.join("\n")}\n}`);

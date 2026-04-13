@@ -1,0 +1,36 @@
+---
+title: Community and Realtime
+description: Use Snapshot's community contracts, notifications, websocket hooks, SSE, and push primitives without guessing where the boundaries live.
+draft: false
+---
+
+Use this path when your app needs social features, live updates, or notification delivery.
+
+Snapshot already ships the main building blocks for this surface:
+
+- community contracts and hooks for threads, replies, reactions, reports, bans, and notifications
+- websocket and SSE managers for live transport
+- push notification hooks for browser registration flows
+- UI components for chat, comments, message threads, reactions, presence, typing, emoji, and GIFs
+
+Start with these source-backed references:
+
+- [SDK Reference](/reference/sdk/)
+- [UI Reference](/reference/ui/)
+- [Component Catalog](/reference/components/)
+- [Capabilities](/start-here/capabilities/)
+
+Canonical source for this surface lives in:
+
+- `src/community/index.ts`
+- `src/community/contract.ts`
+- `src/community/hooks.ts`
+- `src/webhooks/index.ts`
+- `src/ws/manager.ts`
+- `src/ws/hook.ts`
+- `src/sse/manager.ts`
+- `src/sse/hook.ts`
+- `src/push/hook.ts`
+- `src/ui/components/communication/**`
+
+Use the [Examples and Showcase](/examples/) page to jump into the current playground-backed communication examples while the dedicated runnable example registry is still being built out.

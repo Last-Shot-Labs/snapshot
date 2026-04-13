@@ -112,6 +112,17 @@ function withBase(base: string, fileName: string): string {
   return `${normalizedBase}${fileName}`.replace(/\/{2,}/g, "/");
 }
 
+/**
+ * Vite plugin that boots a manifest-driven Snapshot app from
+ * `snapshot.manifest.json`.
+ *
+ * The plugin injects a virtual app entry, wires `ManifestApp`, handles
+ * manifest hot reload during development, and emits a static `index.html`
+ * during build.
+ *
+ * @param opts - Manifest app bootstrap options
+ * @returns A Vite plugin for serving or building a Snapshot manifest app
+ */
 export function snapshotApp(opts: SnapshotAppOptions = {}): Plugin {
   const manifestFile = opts.manifestFile ?? "snapshot.manifest.json";
   const manifestUrl = normalizeManifestUrl(
@@ -354,6 +365,16 @@ if (import.meta.hot) {
   };
 }
 
+/**
+ * Vite plugin that runs Snapshot's OpenAPI sync step during the Vite
+ * lifecycle.
+ *
+ * Use this when a frontend project should regenerate API types and hooks
+ * from a Bunshot schema file or backend endpoint at startup.
+ *
+ * @param opts - Sync source and generation options
+ * @returns A Vite plugin that invokes Snapshot sync at build start
+ */
 export function snapshotSync(opts: SnapshotSyncOptions = {}): Plugin {
   const syncOpts: SyncOptions = {
     apiUrl: opts.apiUrl,

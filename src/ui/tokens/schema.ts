@@ -160,6 +160,14 @@ export const componentTokensSchema = z
         activeBackground: z.string().optional(),
         /** Foreground color of the active nav item. */
         activeForeground: z.string().optional(),
+        /** Background color on hover. Defaults to accent. */
+        hoverBackground: z.string().optional(),
+        /** Border-radius of nav item buttons. Defaults to --sn-radius-md. */
+        itemRadius: z.string().optional(),
+        /** Padding for dropdown menu items inside nav. Defaults to spacing-xs spacing-sm. */
+        dropdownItemPadding: z.string().optional(),
+        /** Gap between dropdown menu items inside nav. */
+        dropdownItemGap: z.string().optional(),
       })
       .strict()
       .optional(),

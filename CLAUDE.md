@@ -29,6 +29,22 @@ no TypeScript?" If no, the design is wrong.
 
 All engineering rules, code patterns, component conventions, token rules, SSR rules,
 testing patterns, and definition of done live in [`docs/engineering-rules.md`](docs/engineering-rules.md).
+Documentation workflow rules live in [`docs/documentation-policy.md`](docs/documentation-policy.md).
+
+Before changing Snapshot, contributors and implementation agents must read:
+
+1. `docs/engineering-rules.md`
+2. `docs/documentation-policy.md`
+3. this file
+4. the nearest surface `CLAUDE.md`
+
+Surface guides:
+
+- `src/ui/CLAUDE.md`
+- `src/ssr/CLAUDE.md`
+- `src/cli/CLAUDE.md`
+- `playground/CLAUDE.md`
+- `apps/docs/CLAUDE.md`
 
 ## Writing Specs
 

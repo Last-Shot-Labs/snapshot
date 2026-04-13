@@ -9,7 +9,7 @@ import type { ResolvedNavItem, AuthUser } from "./types";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
-import { FloatingPanel, FloatingMenuStyles, MenuItem } from "../../primitives/floating-menu";
+import { FloatingPanel, FloatingMenuStyles } from "../../primitives/floating-menu";
 
 /** Props for the Nav component. */
 interface NavComponentProps {
@@ -36,6 +36,7 @@ function NavItem({
   isTopNav?: boolean;
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const containerRef = useRef<HTMLLIElement>(null);
   const hasChildren = Boolean(item.children && item.children.length > 0);
 
@@ -52,6 +53,12 @@ function NavItem({
     }
   };
 
+  const bg = item.isActive
+    ? "var(--sn-nav-active-background, var(--sn-color-accent))"
+    : hovered
+      ? "var(--sn-nav-hover-background, var(--sn-color-accent, var(--sn-color-muted)))"
+      : "transparent";
+
   const buttonStyle: CSSProperties = {
     display: "flex",
     alignItems: "center",
@@ -62,14 +69,12 @@ function NavItem({
       ? "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)"
       : "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
     border: "none",
-    background: item.isActive
-      ? "var(--sn-nav-active-background, var(--sn-color-accent))"
-      : "transparent",
+    background: bg,
     color: item.isActive
       ? "var(--sn-nav-active-foreground, var(--sn-color-accent-foreground))"
       : "inherit",
     opacity: item.isDisabled ? 0.55 : 1,
-    borderRadius: "var(--sn-radius-md, 0.375rem)",
+    borderRadius: "var(--sn-nav-item-radius, var(--sn-radius-md, 0.375rem))",
     boxShadow: item.isActive ? "inset 0 0 0 1px var(--sn-color-primary)" : "none",
     cursor: item.isDisabled ? "not-allowed" : "pointer",
     textAlign: "left",
@@ -89,6 +94,8 @@ function NavItem({
       <button
         type="button"
         onClick={handleClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         data-nav-link=""
         aria-current={item.isActive ? "page" : undefined}
         aria-disabled={item.isDisabled || undefined}
@@ -180,16 +187,17 @@ function NavItem({
           side="bottom"
           align="start"
           dataAttributes={{ "data-nav-dropdown": "" }}
+          style={{
+            display: "flex",
+            flexDirection: "column" as const,
+            gap: "var(--sn-nav-dropdown-item-gap, 0)",
+          }}
         >
           {item.children!.filter((child) => child.isVisible).map((child, index) => (
-            <MenuItem
+            <NavDropdownItem
               key={child.path ?? index}
-              label={child.label}
-              icon={child.icon}
-              disabled={child.isDisabled}
-              active={child.isActive}
-              onClick={() => {
-                if (child.isDisabled) return;
+              item={child}
+              onSelect={() => {
                 setDropdownOpen(false);
                 if (child.path) onNavigate?.(child.path);
               }}
@@ -198,6 +206,64 @@ function NavItem({
         </FloatingPanel>
       )}
     </li>
+  );
+}
+
+/** Simple dropdown item for nav — uses React state for hover, no CSS specificity issues. */
+function NavDropdownItem({
+  item,
+  onSelect,
+}: {
+  item: ResolvedNavItem;
+  onSelect: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  const bg = item.isActive
+    ? "var(--sn-nav-active-background, var(--sn-color-accent))"
+    : hovered
+      ? "var(--sn-nav-hover-background, var(--sn-color-accent, var(--sn-color-muted)))"
+      : "transparent";
+
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={item.isDisabled ? undefined : onSelect}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      aria-disabled={item.isDisabled || undefined}
+      disabled={item.isDisabled}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "var(--sn-spacing-sm, 0.5rem)",
+        width: "100%",
+        padding: "var(--sn-nav-dropdown-item-padding, var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem))",
+        border: "none",
+        background: bg,
+        color: item.isActive
+          ? "var(--sn-nav-active-foreground, var(--sn-color-accent-foreground))"
+          : "inherit",
+        cursor: item.isDisabled ? "not-allowed" : "pointer",
+        opacity: item.isDisabled ? 0.5 : undefined,
+        borderRadius: "var(--sn-nav-item-radius, var(--sn-radius-sm, 0.25rem))",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        fontFamily: "inherit",
+        fontWeight: item.isActive ? 600 : 500,
+        textAlign: "left",
+        transition: "background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+      }}
+    >
+      {item.icon ? (
+        <span aria-hidden="true" style={{ display: "inline-flex", flexShrink: 0 }}>
+          {renderIcon(item.icon, 16)}
+        </span>
+      ) : null}
+      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        {item.label}
+      </span>
+    </button>
   );
 }
 
@@ -599,9 +665,6 @@ export function Nav({ config, pathname, onNavigate, variant = "sidebar" }: NavCo
 
       <FloatingMenuStyles />
       <style>{`
-        [data-snapshot-component="nav"] button[data-nav-link]:hover {
-          background: var(--sn-color-accent, var(--sn-color-muted));
-        }
         [data-snapshot-component="nav"] button[data-nav-link]:focus {
           outline: none;
         }

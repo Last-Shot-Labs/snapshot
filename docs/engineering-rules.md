@@ -227,6 +227,8 @@ Build the config-driven component first, extract the hook second.
 
 - **JSDoc on public API.** Update when you change behavior. Stale docs = bug.
 - **`docs/` parity.** Any public API or behavior change reflected in docs in same commit.
+- **Documentation policy is mandatory.** Read `docs/documentation-policy.md` before contributor work.
+- **`bun run docs:ci` is the default docs validation path.** If public behavior changed, run it before closing work.
 
 ## Definition of Done
 
