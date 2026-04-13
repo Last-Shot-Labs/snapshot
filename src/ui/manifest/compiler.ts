@@ -788,7 +788,7 @@ function buildCompiledManifest(
     resources: runtimeManifest.resources,
     workflows: resolveWorkflowMap(runtimeManifest.workflows),
     overlays: runtimeManifest.overlays,
-    navigation: runtimeManifest.navigation as CompiledManifest["navigation"],
+    navigation: runtimeManifest.navigation,
     auth,
     realtime: runtimeManifest.realtime,
     routes,

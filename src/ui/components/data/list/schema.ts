@@ -6,12 +6,33 @@ import {
   errorStateConfigSchema,
   liveConfigSchema,
   loadingConfigSchema,
-  baseComponentConfigSchema,
 } from "../../../manifest/schema";
 import { dataSourceSchema } from "../../../manifest/resources";
 import { pollConfigSchema } from "../../_base/types";
 import { actionSchema } from "../../../actions/types";
 import { contextMenuItemSchema } from "../../overlay/context-menu/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+export const listSlotNames = [
+  "root",
+  "list",
+  "item",
+  "itemTitle",
+  "itemDescription",
+  "itemIcon",
+  "itemBadge",
+  "emptyState",
+  "loadingState",
+  "errorState",
+] as const;
+
+export const listItemSlotNames = [
+  "item",
+  "itemTitle",
+  "itemDescription",
+  "itemIcon",
+  "itemBadge",
+] as const;
 
 /**
  * Schema for a static list item.
@@ -35,6 +56,7 @@ export const listItemSchema = z.object({
   action: actionSchema.optional(),
   /** Link href for the item. */
   href: z.string().optional(),
+  slots: slotsSchema(listItemSlotNames).optional(),
 });
 
 /**
@@ -55,7 +77,7 @@ export const listItemSchema = z.object({
  * }
  * ```
  */
-export const listConfigSchema = baseComponentConfigSchema.extend({
+export const listConfigSchema = extendComponentSchema({
   /** Component type discriminator. */
   type: z.literal("list"),
   /** API endpoint to fetch list data. Supports FromRef for dependent data. */
@@ -120,8 +142,5 @@ export const listConfigSchema = baseComponentConfigSchema.extend({
   emptyMessage: z.string().optional(),
   /** Error state config. */
   error: errorStateConfigSchema.optional(),
-  /** Inline style overrides. */
-  style: z.record(z.union([z.string(), z.number()])).optional(),
-  /** Additional CSS class name. */
-  className: z.string().optional(),
+  slots: slotsSchema(listSlotNames).optional(),
 });

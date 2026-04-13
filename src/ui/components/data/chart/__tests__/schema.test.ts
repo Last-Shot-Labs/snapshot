@@ -78,6 +78,19 @@ describe("chartSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts canonical chart slots", () => {
+    const result = chartSchema.safeParse({
+      ...baseConfig,
+      slots: {
+        root: { className: "chart-root" },
+        legend: { className: "chart-legend" },
+        tooltip: { className: "chart-tooltip" },
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it("accepts data as a FromRef", () => {
     const result = chartSchema.safeParse({
       ...baseConfig,

@@ -5,7 +5,32 @@ import {
   endpointTargetSchema,
   fromRefSchema,
 } from "../../_base/types";
-import { extendComponentSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+export const autoFormSlotNames = [
+  "root",
+  "section",
+  "sectionTitle",
+  "field",
+  "label",
+  "description",
+  "input",
+  "helper",
+  "error",
+  "requiredIndicator",
+  "actions",
+  "submitButton",
+] as const;
+
+export const autoFormFieldSlotNames = [
+  "field",
+  "label",
+  "description",
+  "input",
+  "helper",
+  "error",
+  "requiredIndicator",
+] as const;
 
 /**
  * Schema for select/radio option entries.
@@ -121,6 +146,7 @@ export const fieldConfigSchema = z
       .strict()
       .optional(),
     readOnly: z.boolean().optional(),
+    slots: slotsSchema(autoFormFieldSlotNames).optional(),
   })
   .strict();
 
@@ -138,6 +164,7 @@ export const fieldSectionSchema = z.object({
   collapsible: z.boolean().optional(),
   /** Whether the section starts collapsed. */
   defaultCollapsed: z.boolean().optional(),
+  slots: slotsSchema(["section", "sectionTitle"]).optional(),
 });
 
 /**
@@ -218,6 +245,7 @@ export const autoFormConfigSchema = extendComponentSchema({
     autoSubmitWhen: z.string().optional(),
     autoSubmitDelay: z.number().int().nonnegative().optional(),
     layout: z.enum(["vertical", "horizontal", "grid"]).default("vertical"),
+    slots: slotsSchema(autoFormSlotNames).optional(),
   })
   .strict()
   .superRefine((value, ctx) => {

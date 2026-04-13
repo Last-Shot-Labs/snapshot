@@ -35,8 +35,12 @@ vi.mock("recharts", () => ({
   XAxis: () => null,
   YAxis: () => null,
   CartesianGrid: () => null,
-  Tooltip: () => null,
-  Legend: () => <div data-testid="legend" />,
+  Tooltip: ({ content }: { content?: (props: unknown) => React.ReactNode }) => (
+    <div data-testid="tooltip">{content?.({ active: true, label: "Jan", payload: [{ name: "Revenue", value: 4000, color: "#2563eb" }] })}</div>
+  ),
+  Legend: ({ content }: { content?: (props: unknown) => React.ReactNode }) => (
+    <div data-testid="legend">{content?.({ payload: [{ value: "Revenue", color: "#2563eb" }] })}</div>
+  ),
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="responsive-container">{children}</div>
   ),
@@ -188,5 +192,29 @@ describe("Chart component", () => {
     expect(
       container.querySelector('[data-testid="responsive-container"]'),
     ).not.toBeNull();
+  });
+
+  it("applies canonical root and legend slots", () => {
+    const { Wrapper } = createWrapper();
+    const { container } = render(
+      <Wrapper>
+        <Chart
+          config={baseConfig({
+            id: "revenue-chart",
+            slots: {
+              root: { className: "chart-root-slot" },
+              legend: { className: "chart-legend-slot" },
+            },
+          })}
+        />
+      </Wrapper>,
+    );
+
+    expect(
+      container.querySelector('[data-snapshot-id="revenue-chart-root"]')?.className,
+    ).toContain("chart-root-slot");
+    expect(
+      container.querySelector('[data-snapshot-id="revenue-chart-legend"]')?.className,
+    ).toContain("chart-legend-slot");
   });
 });

@@ -2,6 +2,19 @@ import { z } from "zod";
 import { errorStateConfigSchema, fromRefSchema } from "../../../manifest/schema";
 import { dataSourceSchema } from "../../_base/types";
 import { actionSchema } from "../../../actions/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+export const treeViewSlotNames = [
+  "root",
+  "item",
+  "row",
+  "label",
+  "icon",
+  "badge",
+  "connector",
+  "disclosure",
+  "children",
+] as const;
 
 /**
  * Recursive schema for a tree node item.
@@ -14,6 +27,8 @@ export const treeItemSchema: z.ZodType<TreeItemInput[]> = z.lazy(() =>
       label: z.string(),
       /** Lucide icon name. */
       icon: z.string().optional(),
+      /** Optional badge displayed at the end of the row. */
+      badge: z.string().optional(),
       /** Value associated with this node (published on selection). */
       value: z.string().optional(),
       /** Child nodes. */
@@ -22,6 +37,7 @@ export const treeItemSchema: z.ZodType<TreeItemInput[]> = z.lazy(() =>
       disabled: z.boolean().optional(),
       /** Whether this node starts expanded. */
       expanded: z.boolean().optional(),
+      slots: slotsSchema(["item", "row", "label", "icon", "badge", "connector", "disclosure", "children"]).optional(),
     }),
   ),
 );
@@ -33,10 +49,12 @@ export const treeItemSchema: z.ZodType<TreeItemInput[]> = z.lazy(() =>
 export interface TreeItemInput {
   label: string;
   icon?: string;
+  badge?: string;
   value?: string;
   children?: TreeItemInput[];
   disabled?: boolean;
   expanded?: boolean;
+  slots?: Partial<Record<(typeof treeViewSlotNames)[number], Record<string, unknown>>>;
 }
 
 /**
@@ -60,8 +78,7 @@ export interface TreeItemInput {
  * }
  * ```
  */
-export const treeViewConfigSchema = z
-  .object({
+export const treeViewConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("tree-view"),
     /** API endpoint to fetch tree data. */
@@ -80,14 +97,5 @@ export const treeViewConfigSchema = z
     action: actionSchema.optional(),
     /** Error state config. */
     error: errorStateConfigSchema.optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-  })
-  .strict();
+    slots: slotsSchema(treeViewSlotNames).optional(),
+  }).strict();

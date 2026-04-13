@@ -18,9 +18,13 @@ export interface ButtonControlProps {
   surfaceConfig?: Record<string, unknown>;
   itemSurfaceConfig?: Record<string, unknown>;
   testId?: string;
+  ariaLabel?: string;
   ariaCurrent?: "page" | "step" | "location" | "date" | "time" | true;
+  ariaSelected?: boolean;
   ariaExpanded?: boolean;
   ariaHasPopup?: boolean | "menu" | "listbox" | "tree" | "grid" | "dialog";
+  role?: "button" | "tab";
+  tabIndex?: number;
   activeStates?: Array<
     | "hover"
     | "focus"

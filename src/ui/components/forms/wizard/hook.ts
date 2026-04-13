@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { usePublish } from "../../../context/hooks";
 import { evaluateExpression } from "../../../expressions/parser";
 import { useEvaluateExpression } from "../../../expressions/use-expression";
@@ -25,16 +32,30 @@ function validateField(field: FieldConfig, value: unknown): string | undefined {
   }
   if (validation) {
     const str = typeof value === "string" ? value : String(value ?? "");
-    if (validation.minLength !== undefined && str.length < validation.minLength) {
+    if (
+      validation.minLength !== undefined &&
+      str.length < validation.minLength
+    ) {
       return validation.message ?? `Minimum length is ${validation.minLength}`;
     }
-    if (validation.maxLength !== undefined && str.length > validation.maxLength) {
+    if (
+      validation.maxLength !== undefined &&
+      str.length > validation.maxLength
+    ) {
       return validation.message ?? `Maximum length is ${validation.maxLength}`;
     }
-    if (validation.min !== undefined && typeof value === "number" && value < validation.min) {
+    if (
+      validation.min !== undefined &&
+      typeof value === "number" &&
+      value < validation.min
+    ) {
       return validation.message ?? `Minimum value is ${validation.min}`;
     }
-    if (validation.max !== undefined && typeof value === "number" && value > validation.max) {
+    if (
+      validation.max !== undefined &&
+      typeof value === "number" &&
+      value > validation.max
+    ) {
       return validation.message ?? `Maximum value is ${validation.max}`;
     }
     if (validation.equals !== undefined && str !== validation.equals) {
@@ -61,12 +82,13 @@ function hasErrors(errors: Record<string, string | undefined>): boolean {
   return Object.values(errors).some((error) => error != null);
 }
 
-function isPromiseLike<T>(
-  value: T | Promise<T> | void,
-): value is Promise<T> {
+function isPromiseLike<T>(value: T | Promise<T> | void): value is Promise<T> {
   return value instanceof Promise;
 }
 
+/**
+ * Manage wizard step state, validation, submission, and transition flow.
+ */
 export function useWizard(config: WizardConfig): UseWizardResult {
   const api = useContext(SnapshotApiContext);
   const execute = useActionExecutor();
@@ -74,13 +96,15 @@ export function useWizard(config: WizardConfig): UseWizardResult {
   const runtime = useManifestRuntime();
   const routeRuntime = useRouteRuntime();
   const [currentStep, setCurrentStep] = useState(0);
-  const [stepData, setStepData] = useState<Record<number, Record<string, unknown>>>({});
+  const [stepData, setStepData] = useState<
+    Record<number, Record<string, unknown>>
+  >({});
   const [errorsByStep, setErrorsByStep] = useState<
     Record<number, Record<string, string | undefined>>
   >({});
-  const [touchedByStep, setTouchedByStep] = useState<Record<number, Record<string, boolean>>>(
-    {},
-  );
+  const [touchedByStep, setTouchedByStep] = useState<
+    Record<number, Record<string, boolean>>
+  >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<Error | null>(null);
   const [isComplete, setIsComplete] = useState(false);
@@ -177,34 +201,46 @@ export function useWizard(config: WizardConfig): UseWizardResult {
       step: currentStep,
       values: { ...accumulatedData, ...stepValues },
     });
-  }, [accumulatedData, currentStep, currentStepConfig?.onEnter, execute, stepValues]);
+  }, [
+    accumulatedData,
+    currentStep,
+    currentStepConfig?.onEnter,
+    execute,
+    stepValues,
+  ]);
 
-  const setStepValue = useCallback((name: string, value: unknown) => {
-    setStepData((currentData) => ({
-      ...currentData,
-      [currentStep]: {
-        ...(currentData[currentStep] ?? {}),
-        [name]: value,
-      },
-    }));
-    setErrorsByStep((currentErrors) => ({
-      ...currentErrors,
-      [currentStep]: {
-        ...(currentErrors[currentStep] ?? {}),
-        [name]: undefined,
-      },
-    }));
-  }, [currentStep]);
+  const setStepValue = useCallback(
+    (name: string, value: unknown) => {
+      setStepData((currentData) => ({
+        ...currentData,
+        [currentStep]: {
+          ...(currentData[currentStep] ?? {}),
+          [name]: value,
+        },
+      }));
+      setErrorsByStep((currentErrors) => ({
+        ...currentErrors,
+        [currentStep]: {
+          ...(currentErrors[currentStep] ?? {}),
+          [name]: undefined,
+        },
+      }));
+    },
+    [currentStep],
+  );
 
-  const touchField = useCallback((name: string) => {
-    setTouchedByStep((currentTouched) => ({
-      ...currentTouched,
-      [currentStep]: {
-        ...(currentTouched[currentStep] ?? {}),
-        [name]: true,
-      },
-    }));
-  }, [currentStep]);
+  const touchField = useCallback(
+    (name: string) => {
+      setTouchedByStep((currentTouched) => ({
+        ...currentTouched,
+        [currentStep]: {
+          ...(currentTouched[currentStep] ?? {}),
+          [name]: true,
+        },
+      }));
+    },
+    [currentStep],
+  );
 
   const validateCurrentStep = useCallback(() => {
     const errors: Record<string, string | undefined> = {};
@@ -250,7 +286,13 @@ export function useWizard(config: WizardConfig): UseWizardResult {
       step: currentStep,
       values: { ...accumulatedData, ...stepValues },
     });
-  }, [accumulatedData, currentStep, currentStepConfig?.onLeave, execute, stepValues]);
+  }, [
+    accumulatedData,
+    currentStep,
+    currentStepConfig?.onLeave,
+    execute,
+    stepValues,
+  ]);
 
   const runAsyncValidation = useCallback(
     async (values: Record<string, unknown>): Promise<boolean> => {
@@ -287,7 +329,9 @@ export function useWizard(config: WizardConfig): UseWizardResult {
           ...currentTouched,
           [currentStep]: {
             ...(currentTouched[currentStep] ?? {}),
-            ...Object.fromEntries(Object.keys(asyncErrors).map((key) => [key, true])),
+            ...Object.fromEntries(
+              Object.keys(asyncErrors).map((key) => [key, true]),
+            ),
           },
         }));
         return false;

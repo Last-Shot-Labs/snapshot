@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider as JotaiProvider, createStore } from "jotai";
 import {
+  bootBuiltins,
   resolveTokens,
   SnapshotApiContext,
   ToastContainer,
@@ -11,6 +12,7 @@ import { TokenEditorSidebar } from "./token-editor";
 import { ComponentShowcase } from "./showcase";
 
 // Inject initial tokens
+bootBuiltins();
 const initialCss = resolveTokens({ flavor: "neutral" });
 const style = document.createElement("style");
 style.id = "snapshot-tokens";

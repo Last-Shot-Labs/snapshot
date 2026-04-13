@@ -30,6 +30,9 @@ export const ACTION_TYPES = [
   "ws-send",
 ] as const;
 
+/**
+ * Shared timing controls available on every action.
+ */
 export interface ActionBase {
   debounce?: number;
   throttle?: number;
@@ -139,12 +142,18 @@ export interface DownloadAction extends ActionBase {
   filename?: string;
 }
 
+/**
+ * Copy plain text and optionally continue with follow-up actions.
+ */
 export interface CopyAction extends ActionBase {
   type: "copy";
   text: string;
   onSuccess?: ActionConfig | ActionConfig[];
 }
 
+/**
+ * Copy plain text and optionally show a simple confirmation toast.
+ */
 export interface CopyToClipboardAction extends ActionBase {
   type: "copy-to-clipboard";
   text: string;
@@ -240,6 +249,9 @@ export interface TrackAction extends ActionBase {
   props?: Record<string, unknown>;
 }
 
+/**
+ * Emit a structured client-side log entry.
+ */
 export interface LogAction extends ActionBase {
   type: "log";
   level: "info" | "warn" | "error" | "debug";
@@ -398,13 +410,19 @@ export const copyActionSchema: z.ZodType<CopyAction> = z.lazy(() =>
       type: z.literal("copy"),
       text: z.string(),
       onSuccess: z
-        .union([z.lazy(() => actionSchema), z.array(z.lazy(() => actionSchema))])
+        .union([
+          z.lazy(() => actionSchema),
+          z.array(z.lazy(() => actionSchema)),
+        ])
         .optional(),
     })
     .extend(actionTimingFields)
     .strict(),
 );
 
+/**
+ * Schema for the `copy-to-clipboard` action.
+ */
 export const copyToClipboardActionSchema = z
   .object({
     type: z.literal("copy-to-clipboard"),
@@ -469,6 +487,9 @@ export const confirmActionSchema = z
   .extend(actionTimingFields)
   .strict();
 
+/**
+ * Schema for the `scroll-to` action.
+ */
 export const scrollToActionSchema = z
   .object({
     type: z.literal("scroll-to"),
@@ -494,9 +515,15 @@ export const branchActionSchema: z.ZodType<BranchAction> = z.lazy(() =>
     .object({
       type: z.literal("branch"),
       condition: z.string().min(1),
-      then: z.union([z.lazy(() => actionSchema), z.array(z.lazy(() => actionSchema))]),
+      then: z.union([
+        z.lazy(() => actionSchema),
+        z.array(z.lazy(() => actionSchema)),
+      ]),
       else: z
-        .union([z.lazy(() => actionSchema), z.array(z.lazy(() => actionSchema))])
+        .union([
+          z.lazy(() => actionSchema),
+          z.array(z.lazy(() => actionSchema)),
+        ])
         .optional(),
     })
     .extend(actionTimingFields)

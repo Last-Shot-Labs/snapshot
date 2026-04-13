@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import type { SnapshotImageConfig } from "./types";
@@ -23,6 +23,9 @@ function buildImageUrl(
   return `${IMAGE_ROUTE}?${params.toString()}`;
 }
 
+/**
+ * Render a manifest-driven image component with Snapshot styling tokens.
+ */
 export function SnapshotImage({ config }: { config: SnapshotImageConfig }) {
   const {
     src,

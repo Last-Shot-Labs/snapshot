@@ -2,6 +2,9 @@ import { z } from "zod";
 import type { FromRef } from "../context/types";
 import { parseDataString } from "../context/utils";
 
+/**
+ * Supported HTTP methods for manifest resources and endpoint targets.
+ */
 export const httpMethodSchema = z.enum([
   "GET",
   "POST",
@@ -43,6 +46,9 @@ export const resourceParamSchema: z.ZodType<unknown | FromRef> = z.lazy(() =>
   ]),
 );
 
+/**
+ * Reference to a named manifest resource with optional parameter overrides.
+ */
 export const resourceRefSchema = z
   .object({
     resource: z.string().min(1),
@@ -103,7 +109,13 @@ export const optimisticConfigSchema = z
     }
   });
 
+/**
+ * Endpoint target accepted by actions and resource-aware components.
+ */
 export const endpointTargetSchema = z.union([z.string(), resourceRefSchema]);
+/**
+ * Data source accepted by data-aware manifest components.
+ */
 export const dataSourceSchema = z.union([
   z.string(),
   z
@@ -171,6 +183,9 @@ export type ResourceConfig = z.infer<typeof resourceConfigSchema>;
 export type ResourceMap = Record<string, ResourceConfig>;
 export type EndpointTarget = z.infer<typeof endpointTargetSchema>;
 
+/**
+ * Fully resolved request details after expanding an endpoint target.
+ */
 export interface ResolvedRequest {
   method: HttpMethod;
   endpoint: string;
@@ -179,6 +194,9 @@ export interface ResolvedRequest {
   client: string;
 }
 
+/**
+ * Return `true` when a value is a manifest resource reference object.
+ */
 export function isResourceRef(value: unknown): value is ResourceRef {
   return (
     typeof value === "object" &&
@@ -254,29 +272,35 @@ export function resolveEndpointTarget(
   };
 }
 
+/**
+ * Interpolate path params and append remaining params as a query string.
+ */
 export function buildRequestUrl(
   endpoint: string,
   params: Record<string, unknown> = {},
   pathParams: Record<string, unknown> = params,
 ): string {
   const usedPathParams = new Set<string>();
-  const interpolatedPath = endpoint.replace(/\{([^}]+)\}/g, (_, token: string) => {
-    const [rawName, ...templateParts] = token.split(':');
-    const name = rawName ?? "";
-    const template = templateParts.join(':');
+  const interpolatedPath = endpoint.replace(
+    /\{([^}]+)\}/g,
+    (_, token: string) => {
+      const [rawName, ...templateParts] = token.split(":");
+      const name = rawName ?? "";
+      const template = templateParts.join(":");
 
-    if ((name === 'date' || name === 'today') && template) {
-      return formatDateTemplate(new Date(), template);
-    }
+      if ((name === "date" || name === "today") && template) {
+        return formatDateTemplate(new Date(), template);
+      }
 
-    if (name === 'date' || name === 'today') {
-      return formatDateTemplate(new Date(), 'YYYY-MM-DD');
-    }
+      if (name === "date" || name === "today") {
+        return formatDateTemplate(new Date(), "YYYY-MM-DD");
+      }
 
-    usedPathParams.add(name);
-    const value = pathParams[name];
-    return value == null ? `{${token}}` : encodeURIComponent(String(value));
-  });
+      usedPathParams.add(name);
+      const value = pathParams[name];
+      return value == null ? `{${token}}` : encodeURIComponent(String(value));
+    },
+  );
 
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -292,21 +316,27 @@ function formatDateTemplate(date: Date, template: string): string {
   const parts: Record<string, string> = {
     YYYY: String(date.getUTCFullYear()),
     YY: String(date.getUTCFullYear()).slice(-2),
-    MM: String(date.getUTCMonth() + 1).padStart(2, '0'),
+    MM: String(date.getUTCMonth() + 1).padStart(2, "0"),
     M: String(date.getUTCMonth() + 1),
-    DD: String(date.getUTCDate()).padStart(2, '0'),
+    DD: String(date.getUTCDate()).padStart(2, "0"),
     D: String(date.getUTCDate()),
-    HH: String(date.getUTCHours()).padStart(2, '0'),
+    HH: String(date.getUTCHours()).padStart(2, "0"),
     H: String(date.getUTCHours()),
-    mm: String(date.getUTCMinutes()).padStart(2, '0'),
+    mm: String(date.getUTCMinutes()).padStart(2, "0"),
     m: String(date.getUTCMinutes()),
-    ss: String(date.getUTCSeconds()).padStart(2, '0'),
+    ss: String(date.getUTCSeconds()).padStart(2, "0"),
     s: String(date.getUTCSeconds()),
   };
 
-  return template.replace(/YYYY|YY|MM|M|DD|D|HH|H|mm|m|ss|s/g, token => parts[token] ?? token);
+  return template.replace(
+    /YYYY|YY|MM|M|DD|D|HH|H|mm|m|ss|s/g,
+    (token) => parts[token] ?? token,
+  );
 }
 
+/**
+ * Recursively collect manifest resource references from an arbitrary value tree.
+ */
 export function extractResourceRefs(
   value: unknown,
   results: ResourceRef[] = [],
@@ -335,6 +365,9 @@ export function extractResourceRefs(
   return results;
 }
 
+/**
+ * Collect resources that depend on a named manifest resource.
+ */
 export function collectDependentResources(
   resourceName: string,
   resources?: ResourceMap,

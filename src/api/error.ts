@@ -6,6 +6,9 @@ function extractMessage(body: unknown): string | undefined {
   }
 }
 
+/**
+ * HTTP error thrown by Snapshot API clients for non-success responses.
+ */
 export class ApiError extends Error {
   constructor(
     public readonly status: number,

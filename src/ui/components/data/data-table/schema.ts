@@ -7,12 +7,33 @@ import {
   liveConfigSchema,
   loadingConfigSchema,
   urlSyncConfigSchema,
-  baseComponentConfigSchema,
   fromRefSchema,
 } from "../../../manifest/schema";
 import { dataSourceSchema } from "../../../manifest/resources";
 import { pollConfigSchema } from "../../_base/types";
 import { contextMenuItemSchema } from "../../overlay/context-menu/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+export const dataTableSlotNames = [
+  "root",
+  "toolbar",
+  "headerRow",
+  "headerCell",
+  "row",
+  "cell",
+  "actionsCell",
+  "bulkActions",
+  "emptyState",
+  "loadingState",
+  "errorState",
+  "pagination",
+] as const;
+
+export const dataTableRowSlotNames = [
+  "row",
+  "cell",
+  "actionsCell",
+] as const;
 
 /**
  * Schema for badge color mapping. Maps values to semantic color names.
@@ -98,6 +119,7 @@ export const rowActionSchema = z
     action: z.union([actionSchema, z.array(actionSchema)]),
     /** Controls visibility. Can be a static boolean or a FromRef. */
     visible: z.union([z.boolean(), fromRefSchema]).optional(),
+    slots: slotsSchema(["item", "itemLabel", "itemIcon"]).optional(),
   })
   .strict();
 
@@ -112,6 +134,7 @@ export const bulkActionSchema = z
     icon: z.string().optional(),
     /** Action(s) to execute. Selected rows available in action context. */
     action: z.union([actionSchema, z.array(actionSchema)]),
+    slots: slotsSchema(["item", "itemLabel", "itemIcon"]).optional(),
   })
   .strict();
 
@@ -166,8 +189,7 @@ const searchConfigSchema = z
  * }
  * ```
  */
-export const dataTableConfigSchema = baseComponentConfigSchema
-  .extend({
+export const dataTableConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("data-table"),
     /** Grid column span (1-12). */
@@ -249,8 +271,10 @@ export const dataTableConfigSchema = baseComponentConfigSchema
             .optional(),
           action: actionSchema,
           disabled: z.union([z.boolean(), fromRefSchema]).optional(),
+          slots: slotsSchema(["item", "itemLabel", "itemIcon"]).optional(),
         }).strict(),
       )
       .optional(),
-  })
+    slots: slotsSchema(dataTableSlotNames).optional(),
+})
   .strict();

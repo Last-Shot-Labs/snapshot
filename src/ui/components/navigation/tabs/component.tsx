@@ -4,8 +4,14 @@ import React, { useRef, useCallback } from "react";
 import { Icon } from "../../../icons/icon";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
+import { ButtonControl } from "../../forms/button";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { useTabs } from "./hook";
 import type { TabsConfig } from "./schema";
+
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
 
 /**
  * Variant-specific styles for the tab bar and individual tabs.
@@ -122,6 +128,17 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
   const resolvedStyles = VARIANT_STYLES[variant];
   const barStyle = resolvedStyles?.bar ?? VARIANT_STYLES["default"]!.bar;
   const tabStyle = resolvedStyles?.tab ?? VARIANT_STYLES["default"]!.tab;
+  const rootId = config.id ?? "tabs";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const listSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-list`,
+    implementationBase: barStyle as Record<string, unknown>,
+    componentSurface: config.slots?.list,
+  });
 
   // Track which tabs have been mounted (for lazy rendering)
   const mountedRef = useRef<Set<number>>(new Set([config.defaultTab ?? 0]));
@@ -162,10 +179,9 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
     <div
       data-snapshot-component="tabs"
       data-testid="tabs"
-      className={config.className}
-      style={{
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
+      data-snapshot-id={`${rootId}-root`}
+      className={rootSurface.className}
+      style={rootSurface.style}
     >
       <style>{`
         [data-snapshot-component="tabs"] [role="tab"]:not([aria-disabled="true"]):hover {
@@ -183,43 +199,97 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
       <div
         role="tablist"
         data-tab-list=""
-        style={barStyle}
+        data-snapshot-id={`${rootId}-list`}
+        className={listSurface.className}
+        style={listSurface.style}
         onKeyDown={handleTablistKeyDown}
       >
-        {tabs.map((tab, index) => (
-          <button
+        {tabs.map((tab, index) => {
+          const isActive = index === activeTab;
+          const tabSurface = resolveSurfacePresentation({
+            surfaceId: `${rootId}-tab-${index}`,
+            implementationBase: tabStyle(isActive, !!tab.disabled) as Record<string, unknown>,
+            componentSurface: config.slots?.tab,
+            itemSurface: tab.slots?.tab,
+            activeStates: [
+              ...(isActive ? ["selected", "current"] : []),
+              ...(tab.disabled ? ["disabled"] : []),
+            ] as Array<"selected" | "current" | "disabled">,
+          });
+          const labelSurface = resolveSurfacePresentation({
+            surfaceId: `${rootId}-tab-label-${index}`,
+            componentSurface: config.slots?.tabLabel,
+            itemSurface: tab.slots?.tabLabel,
+          });
+          const iconSurface = resolveSurfacePresentation({
+            surfaceId: `${rootId}-tab-icon-${index}`,
+            implementationBase: {
+              marginRight: "var(--sn-spacing-xs, 0.25rem)",
+              display: "inline-flex",
+              alignItems: "center",
+            },
+            componentSurface: config.slots?.tabIcon,
+            itemSurface: tab.slots?.tabIcon,
+          });
+
+          return (
+          <React.Fragment key={index}>
+          <ButtonControl
             key={index}
-            role="tab"
             type="button"
-            aria-selected={index === activeTab}
-            aria-disabled={tab.disabled}
             disabled={tab.disabled}
-            tabIndex={index === activeTab ? 0 : -1}
+            role="tab"
+            ariaSelected={isActive}
+            ariaCurrent={isActive ? "page" : undefined}
+            tabIndex={isActive ? 0 : -1}
             onClick={() => setActiveTab(index)}
-            data-tab-trigger=""
-            data-active={index === activeTab ? "" : undefined}
-            style={tabStyle(index === activeTab, !!tab.disabled)}
+            surfaceId={`${rootId}-tab-${index}`}
+            surfaceConfig={tab.slots?.tab ?? config.slots?.tab}
+            activeStates={[
+              ...(isActive ? ["selected", "current"] : []),
+              ...(tab.disabled ? ["disabled"] : []),
+            ] as Array<"selected" | "current" | "disabled">}
           >
             {tab.icon && (
               <span
                 data-tab-icon=""
-                style={{
-                  marginRight: "var(--sn-spacing-xs, 0.25rem)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                }}
+                data-snapshot-id={`${rootId}-tab-icon-${index}`}
+                className={iconSurface.className}
+                style={iconSurface.style}
               >
                 <Icon name={tab.icon} size={16} />
               </span>
             )}
-            {tab.label}
-          </button>
-        ))}
+            <span
+              data-snapshot-id={`${rootId}-tab-label-${index}`}
+              className={labelSurface.className}
+              style={labelSurface.style}
+            >
+              {tab.label}
+            </span>
+          </ButtonControl>
+          <SurfaceStyles css={tabSurface.scopedCss} />
+          <SurfaceStyles css={labelSurface.scopedCss} />
+          <SurfaceStyles css={iconSurface.scopedCss} />
+          </React.Fragment>
+        )})}
       </div>
 
       {/* Tab Panels — lazy mounted, stays mounted after first activation */}
       {tabs.map((tab, index) => {
         if (!mountedRef.current.has(index)) return null;
+
+        const panelSurface = resolveSurfacePresentation({
+          surfaceId: `${rootId}-panel-${index}`,
+          implementationBase: {
+            display: index === activeTab ? "flex" : "none",
+            flexDirection: "column",
+            gap: "var(--sn-spacing-md, 1rem)",
+          } as Record<string, unknown>,
+          componentSurface: config.slots?.panel,
+          itemSurface: tab.slots?.panel,
+          activeStates: index === activeTab ? ["active"] : [],
+        });
 
         return (
           <div
@@ -227,11 +297,9 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
             role="tabpanel"
             data-tab-content=""
             aria-hidden={index !== activeTab}
-            style={{
-              display: index === activeTab ? "flex" : "none",
-              flexDirection: "column",
-              gap: "var(--sn-spacing-md, 1rem)",
-            }}
+            data-snapshot-id={`${rootId}-panel-${index}`}
+            className={panelSurface.className}
+            style={panelSurface.style}
           >
             {tab.content.map((child, childIndex) => (
               <ComponentRenderer
@@ -242,9 +310,12 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
                 config={child as ComponentConfig}
               />
             ))}
+            <SurfaceStyles css={panelSurface.scopedCss} />
           </div>
         );
       })}
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={listSurface.scopedCss} />
     </div>
   );
 }

@@ -16,6 +16,12 @@ export const popoverSlotNames = [
   "closeButton",
 ] as const;
 
+/**
+ * Zod schema for the Popover component.
+ *
+ * Defines a trigger-driven floating panel with optional title, description, footer content, width,
+ * placement, and canonical slot-based styling for the trigger and panel sub-surfaces.
+ */
 export const popoverConfigSchema = extendComponentSchema({
   type: z.literal("popover"),
   trigger: z.union([z.string(), fromRefSchema]),

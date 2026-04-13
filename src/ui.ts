@@ -155,12 +155,18 @@ export type {
 // Shared component utilities
 export { useComponentData } from "./ui/components/_base/use-component-data";
 export type { ComponentDataResult } from "./ui/components/_base/use-component-data";
+export {
+  registerBuiltInComponents,
+  resetBuiltInComponentRegistration,
+} from "./ui/components/register";
 
 // Manifest & Rendering
 export {
   ManifestApp,
   PageRenderer,
   ComponentRenderer,
+  bootBuiltins,
+  resetBootBuiltins,
   TransitionWrapper,
   compileManifest,
   defineManifest,

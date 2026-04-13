@@ -125,4 +125,35 @@ describe("wizardSchema", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("accepts canonical wizard slots and field primitive slots", () => {
+    const result = wizardSchema.safeParse({
+      type: "wizard",
+      steps: [
+        {
+          title: "Account",
+          slots: {
+            step: { className: "wizard-step" },
+            panel: { className: "wizard-panel" },
+          },
+          fields: [
+            {
+              name: "email",
+              type: "email",
+              slots: {
+                field: { className: "field-slot" },
+                input: { className: "input-slot" },
+              },
+            },
+          ],
+        },
+      ],
+      slots: {
+        root: { className: "wizard-root" },
+        nextButton: { className: "next-slot" },
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
 });

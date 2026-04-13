@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, {
   useCallback,
@@ -10,10 +10,16 @@ import React, {
   type CSSProperties,
 } from "react";
 import { usePublish, useSubscribe } from "../../../context/hooks";
-import { useActionExecutor, SnapshotApiContext } from "../../../actions/executor";
+import {
+  useActionExecutor,
+  SnapshotApiContext,
+} from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
 import { useComponentData } from "../../_base/use-component-data";
-import { buildRequestUrl, resolveEndpointTarget } from "../../../manifest/resources";
+import {
+  buildRequestUrl,
+  resolveEndpointTarget,
+} from "../../../manifest/resources";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { matchesCombo, parseChord } from "../../../shortcuts";
 import type { ActionConfig } from "../../../actions/types";
@@ -38,7 +44,11 @@ interface CommandGroup {
 function flattenItems(
   groups: CommandGroup[],
 ): Array<{ item: CommandItem; groupIndex: number; itemIndex: number }> {
-  const flat: Array<{ item: CommandItem; groupIndex: number; itemIndex: number }> = [];
+  const flat: Array<{
+    item: CommandItem;
+    groupIndex: number;
+    itemIndex: number;
+  }> = [];
   groups.forEach((group, groupIndex) => {
     group.items.forEach((item, itemIndex) => {
       flat.push({ item, groupIndex, itemIndex });
@@ -67,6 +77,9 @@ function normalizeSearchGroups(data: unknown): CommandGroup[] {
   return [];
 }
 
+/**
+ * Render a searchable command palette with static groups, runtime search, and manifest shortcuts.
+ */
 export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
   const visible = useSubscribe(config.visible ?? false);
   const publish = usePublish(config.id);
@@ -94,14 +107,20 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
     }
 
     const manifestShortcuts = runtime?.raw.shortcuts as
-      | Record<string, { label?: string; action: ActionConfig; disabled?: boolean }>
+      | Record<
+          string,
+          { label?: string; action: ActionConfig; disabled?: boolean }
+        >
       | undefined;
     if (!manifestShortcuts) {
       return [];
     }
 
     return Object.entries(manifestShortcuts)
-      .filter(([, shortcutConfig]) => shortcutConfig.label && shortcutConfig.disabled !== true)
+      .filter(
+        ([, shortcutConfig]) =>
+          shortcutConfig.label && shortcutConfig.disabled !== true,
+      )
       .map(([shortcut, shortcutConfig]) => ({
         label: shortcutConfig.label!,
         shortcut,
@@ -242,7 +261,11 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
 
   const allGroups: CommandGroup[] = useMemo(() => {
     const groups: CommandGroup[] = [];
-    if (config.recentItems?.enabled && recentItems.length > 0 && query.trim().length === 0) {
+    if (
+      config.recentItems?.enabled &&
+      recentItems.length > 0 &&
+      query.trim().length === 0
+    ) {
       groups.push({
         label: "Recent",
         items: recentItems.slice(0, config.recentItems.maxItems),
@@ -282,7 +305,10 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
       .filter((group) => group.items.length > 0);
   }, [allGroups, query]);
 
-  const flatItems = useMemo(() => flattenItems(filteredGroups), [filteredGroups]);
+  const flatItems = useMemo(
+    () => flattenItems(filteredGroups),
+    [filteredGroups],
+  );
 
   useEffect(() => {
     setActiveIndex(0);
@@ -404,7 +430,8 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
         display: "flex",
         flexDirection: "column",
         ...animationStyle,
-        backgroundColor: "var(--sn-color-popover, var(--sn-color-card, #ffffff))",
+        backgroundColor:
+          "var(--sn-color-popover, var(--sn-color-card, #ffffff))",
         color:
           "var(--sn-color-popover-foreground, var(--sn-color-foreground, #111827))",
         border:
@@ -468,7 +495,8 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
             fontFamily: "var(--sn-font-mono, monospace)",
             color: "var(--sn-color-muted-foreground, #6b7280)",
             backgroundColor: "var(--sn-color-muted, #f3f4f6)",
-            padding: "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-xs, 0.25rem)",
+            padding:
+              "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-xs, 0.25rem)",
             borderRadius: "var(--sn-radius-xs, 0.125rem)",
             border:
               "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
@@ -492,7 +520,8 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
           <div
             data-snapshot-command-empty=""
             style={{
-              padding: "var(--sn-spacing-lg, 1.5rem) var(--sn-spacing-md, 1rem)",
+              padding:
+                "var(--sn-spacing-lg, 1.5rem) var(--sn-spacing-md, 1rem)",
               textAlign: "center",
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
               color: "var(--sn-color-muted-foreground, #6b7280)",
@@ -502,11 +531,15 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
           </div>
         ) : (
           filteredGroups.map((group, groupIndex) => (
-            <div key={`group-${group.label}-${groupIndex}`} data-snapshot-command-group="">
+            <div
+              key={`group-${group.label}-${groupIndex}`}
+              data-snapshot-command-group=""
+            >
               <div
                 data-snapshot-command-group-heading=""
                 style={{
-                  padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+                  padding:
+                    "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
                   fontSize: "var(--sn-font-size-xs, 0.75rem)",
                   fontWeight: "var(--sn-font-weight-semibold, 600)" as string,
                   color: "var(--sn-color-muted-foreground, #6b7280)",
@@ -532,7 +565,8 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
                       display: "flex",
                       alignItems: "center",
                       gap: "var(--sn-spacing-sm, 0.5rem)",
-                      padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+                      padding:
+                        "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
                       borderRadius: "var(--sn-radius-sm, 0.25rem)",
                       cursor: "pointer",
                       backgroundColor: isActive
@@ -556,7 +590,8 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
                       <div
                         style={{
                           fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                          fontWeight: "var(--sn-font-weight-normal, 400)" as string,
+                          fontWeight:
+                            "var(--sn-font-weight-normal, 400)" as string,
                           lineHeight: "var(--sn-leading-normal, 1.5)",
                           overflow: "hidden",
                           textOverflow: "ellipsis",

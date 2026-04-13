@@ -90,6 +90,7 @@ describe("Popover", () => {
     fireEvent.click(screen.getByRole("button", { name: "More" }));
     expect(screen.getByText("Details")).toBeTruthy();
     expect(screen.getByText("Context")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Close popover" })).toBeTruthy();
     expect(screen.getByTestId("popover-child-body")).toBeTruthy();
     expect(screen.getByTestId("popover-child-footer")).toBeTruthy();
   });

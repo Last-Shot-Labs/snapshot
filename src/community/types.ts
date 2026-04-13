@@ -1,5 +1,8 @@
 // ── Container ──────────────────────────────────────────────────────────────────
 
+/**
+ * Community container returned by the community API.
+ */
 export interface ContainerResponse {
   id: string;
   slug: string;
@@ -11,6 +14,9 @@ export interface ContainerResponse {
   updatedAt: string;
 }
 
+/**
+ * Request body for creating a community container.
+ */
 export interface CreateContainerBody {
   slug: string;
   name: string;
@@ -18,6 +24,9 @@ export interface CreateContainerBody {
   isPrivate?: boolean;
 }
 
+/**
+ * Request body for updating a community container.
+ */
 export interface UpdateContainerBody {
   name?: string;
   description?: string;
@@ -27,6 +36,9 @@ export interface UpdateContainerBody {
 
 // ── Thread ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Thread record returned by the community API.
+ */
 export interface ThreadResponse {
   id: string;
   containerId: string;
@@ -41,11 +53,17 @@ export interface ThreadResponse {
   updatedAt: string;
 }
 
+/**
+ * Request body for creating a thread in a container.
+ */
 export interface CreateThreadBody {
   title: string;
   body: string;
 }
 
+/**
+ * Request body for updating or moderating a thread.
+ */
 export interface UpdateThreadBody {
   title?: string;
   body?: string;
@@ -55,6 +73,9 @@ export interface UpdateThreadBody {
 
 // ── Reply ──────────────────────────────────────────────────────────────────────
 
+/**
+ * Reply record returned by the community API.
+ */
 export interface ReplyResponse {
   id: string;
   threadId: string;
@@ -65,28 +86,43 @@ export interface ReplyResponse {
   updatedAt: string;
 }
 
+/**
+ * Request body for creating a reply.
+ */
 export interface CreateReplyBody {
   body: string;
 }
 
+/**
+ * Request body for updating an existing reply.
+ */
 export interface UpdateReplyBody {
   body: string;
 }
 
 // ── Reactions ──────────────────────────────────────────────────────────────────
 
+/**
+ * Emoji reaction payload for thread and reply reaction endpoints.
+ */
 export interface ReactionBody {
   emoji: string;
 }
 
 // ── Reports ───────────────────────────────────────────────────────────────────
 
+/**
+ * Request body for filing a community moderation report.
+ */
 export interface ReportBody {
   reason: string;
   targetType: string;
   targetId: string;
 }
 
+/**
+ * Report record returned by moderation endpoints.
+ */
 export interface ReportResponse {
   id: string;
   targetType: string;
@@ -98,12 +134,18 @@ export interface ReportResponse {
   updatedAt: string;
 }
 
+/**
+ * Request body for resolving a moderation report.
+ */
 export interface ResolveReportBody {
   action: string;
 }
 
 // ── Bans ──────────────────────────────────────────────────────────────────────
 
+/**
+ * Request body for creating a user ban.
+ */
 export interface BanBody {
   userId: string;
   containerId?: string;
@@ -111,6 +153,9 @@ export interface BanBody {
   expiresAt?: string;
 }
 
+/**
+ * Ban record returned by moderation endpoints.
+ */
 export interface BanResponse {
   id: string;
   userId: string;
@@ -120,6 +165,9 @@ export interface BanResponse {
   createdAt: string;
 }
 
+/**
+ * Result returned when checking whether a user is banned.
+ */
 export interface BanCheckResponse {
   banned: boolean;
   ban?: BanResponse;
@@ -127,6 +175,9 @@ export interface BanCheckResponse {
 
 // ── Notifications ─────────────────────────────────────────────────────────────
 
+/**
+ * Notification record returned by community notification endpoints.
+ */
 export interface NotificationResponse {
   id: string;
   userId: string;
@@ -138,6 +189,9 @@ export interface NotificationResponse {
 
 // ── Pagination / Search ────────────────────────────────────────────────────────
 
+/**
+ * Generic paginated list response used by community and webhook list endpoints.
+ */
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;
@@ -145,12 +199,18 @@ export interface PaginatedResponse<T> {
   pageSize: number;
 }
 
+/**
+ * Search parameters accepted by the community search hooks.
+ */
 export interface CommunitySearchParams {
   limit?: number;
   cursor?: string;
   containerId?: string;
 }
 
+/**
+ * Search results returned by the thread and reply search endpoints.
+ */
 export interface SearchResponse {
   threads?: PaginatedResponse<ThreadResponse>;
   replies?: PaginatedResponse<ReplyResponse>;
@@ -158,15 +218,24 @@ export interface SearchResponse {
 
 // ── Param types ───────────────────────────────────────────────────────────────
 
+/**
+ * Shared page-based pagination parameters.
+ */
 export interface ListParams {
   page?: number;
   pageSize?: number;
 }
 
+/**
+ * List parameters for fetching threads in a specific container.
+ */
 export interface ThreadListParams extends ListParams {
   containerId: string;
 }
 
+/**
+ * List parameters for fetching replies in a specific thread.
+ */
 export interface ReplyListParams extends ListParams {
   threadId: string;
 }

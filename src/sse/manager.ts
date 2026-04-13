@@ -1,3 +1,6 @@
+/**
+ * Lifecycle state of a managed SSE connection.
+ */
 export type SseConnectionStatus = "connecting" | "open" | "closed";
 
 interface SseManagerConfig {

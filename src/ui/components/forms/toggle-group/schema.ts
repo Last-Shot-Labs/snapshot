@@ -1,7 +1,15 @@
 import { z } from "zod";
-import { extendComponentSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
 import { actionSchema } from "../../../actions/types";
+
+export const toggleGroupSlotNames = [
+  "root",
+  "item",
+  "itemLabel",
+  "itemIcon",
+  "indicator",
+] as const;
 
 export const toggleGroupConfigSchema = extendComponentSchema({
   type: z.literal("toggle-group"),
@@ -13,6 +21,7 @@ export const toggleGroupConfigSchema = extendComponentSchema({
         label: z.string().optional(),
         icon: z.string().optional(),
         disabled: z.union([z.boolean(), fromRefSchema]).optional(),
+        slots: slotsSchema(["item", "itemLabel", "itemIcon"]).optional(),
       })
       .strict(),
   ),
@@ -22,4 +31,5 @@ export const toggleGroupConfigSchema = extendComponentSchema({
   variant: z.enum(["outline", "ghost"]).optional(),
   publishTo: z.string().optional(),
   onChange: actionSchema.optional(),
+  slots: slotsSchema(toggleGroupSlotNames).optional(),
 }).strict();

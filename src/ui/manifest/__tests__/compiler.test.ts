@@ -578,4 +578,55 @@ describe("compiler", () => {
 
     expect(result.success).toBe(false);
   });
+
+  it("preserves translated navigation labels without nav-specific casts", () => {
+    const compiled = compileManifest({
+      i18n: {
+        default: "en",
+        locales: ["en"],
+        strings: {
+          en: {
+            nav: {
+              home: "Home",
+              logout: "Logout",
+              brand: "Snapshot",
+            },
+          },
+        },
+      },
+      navigation: {
+        mode: "sidebar",
+        items: [{ label: { t: "nav.home" }, path: "/" }],
+        userMenu: {
+          items: [
+            {
+              label: { t: "nav.logout" },
+              action: { type: "navigate", to: "/logout" },
+            },
+          ],
+        },
+        logo: {
+          text: { t: "nav.brand" },
+        },
+      },
+      routes: [
+        {
+          id: "home",
+          path: "/",
+          content: [{ type: "heading", text: "Home" }],
+        },
+      ],
+    });
+
+    expect(compiled.navigation?.items?.[0]?.label).toEqual({ t: "nav.home" });
+
+    const userMenu =
+      compiled.navigation?.userMenu &&
+      typeof compiled.navigation.userMenu === "object"
+        ? compiled.navigation.userMenu
+        : undefined;
+
+    expect(userMenu?.items?.[0]?.label).toEqual({ t: "nav.logout" });
+    expect(compiled.navigation?.logo?.text).toEqual({ t: "nav.brand" });
+  });
 });

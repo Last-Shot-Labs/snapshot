@@ -86,11 +86,17 @@ export interface FilterDef {
   options?: FilterOption[];
 }
 
+/**
+ * Pagination settings for preset-generated list surfaces.
+ */
 export interface PaginationDef {
   pageSize?: number;
   type?: "offset" | "cursor";
 }
 
+/**
+ * Empty-state content shown by preset-generated pages.
+ */
 export interface EmptyStateDef {
   title: string;
   description?: string;
@@ -122,6 +128,9 @@ export interface StatDef {
   icon?: string;
 }
 
+/**
+ * Chart section definition for dashboard-style presets.
+ */
 export interface ChartDef {
   variant:
     | "line"
@@ -144,6 +153,9 @@ export interface ChartDef {
   span?: number;
 }
 
+/**
+ * Feed section definition for dashboard-style presets.
+ */
 export interface ActivityFeedDef {
   endpoint: string;
   limit?: number;
@@ -174,6 +186,9 @@ export interface SettingsSectionDef {
   autoSaveDelay?: number;
 }
 
+/**
+ * Branding and background options for the auth page preset.
+ */
 export interface AuthBrandingDef {
   logo?: string;
   appName?: string;
@@ -301,6 +316,9 @@ export interface SettingsPageOptions {
   id?: string;
 }
 
+/**
+ * Options for the `authPage` preset factory.
+ */
 export interface AuthPageOptions {
   screen:
     | "login"

@@ -24,12 +24,18 @@ import {
   getButtonStyle,
   BUTTON_INTERACTIVE_CSS,
 } from "../../_base/button-styles";
+import { ButtonControl } from "../button";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useEvaluateExpression } from "../../../expressions/use-expression";
 import { resolveTemplateValue } from "../../../expressions/template";
 import { useAutoForm } from "./hook";
 import type { AutoFormConfig, FieldConfig, FieldSectionConfig } from "./types";
 import type { ApiClient } from "../../../../api/client";
+
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
 
 // ── Gap map ───────────────────────────────────────────────────────────────
 
@@ -160,6 +166,7 @@ function resolveFields(config: AutoFormConfig): FieldConfig[] {
 // ── Field renderer ────────────────────────────────────────────────────────
 
 function FieldRenderer({
+  rootId,
   field,
   value,
   required,
@@ -167,7 +174,9 @@ function FieldRenderer({
   showError,
   onChange,
   onBlur,
+  slots,
 }: {
+  rootId: string;
   field: FieldConfig;
   value: unknown;
   required: boolean;
@@ -175,6 +184,7 @@ function FieldRenderer({
   showError: boolean;
   onChange: (value: unknown) => void;
   onBlur: () => void;
+  slots?: AutoFormConfig["slots"];
 }) {
   const executeAction = useActionExecutor();
   const manifest = useManifestRuntime();
@@ -184,6 +194,49 @@ function FieldRenderer({
   const label = field.label ?? field.name;
   const fieldId = `sn-field-${field.name}`;
   const hasError = showError && !!error;
+  const activeStates = [
+    ...(hasError ? ["invalid"] : []),
+    ...(field.disabled ? ["disabled"] : []),
+  ] as Array<"invalid" | "disabled">;
+  const fieldSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-field-${field.name}`,
+    componentSurface: slots?.field,
+    itemSurface: field.slots?.field,
+    activeStates,
+  });
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label-${field.name}`,
+    componentSurface: slots?.label,
+    itemSurface: field.slots?.label,
+    activeStates,
+  });
+  const descriptionSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-description-${field.name}`,
+    componentSurface: slots?.description,
+    itemSurface: field.slots?.description,
+  });
+  const inputSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-input-${field.name}`,
+    componentSurface: slots?.input,
+    itemSurface: field.slots?.input,
+    activeStates,
+  });
+  const helperSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-helper-${field.name}`,
+    componentSurface: slots?.helper,
+    itemSurface: field.slots?.helper,
+  });
+  const errorSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-error-${field.name}`,
+    componentSurface: slots?.error,
+    itemSurface: field.slots?.error,
+    activeStates: hasError ? ["invalid"] : [],
+  });
+  const requiredIndicatorSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-required-${field.name}`,
+    componentSurface: slots?.requiredIndicator,
+    itemSurface: field.slots?.requiredIndicator,
+  });
 
   const inputStyle: React.CSSProperties = {
     width: "100%",
@@ -199,6 +252,7 @@ function FieldRenderer({
     transition:
       "border-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
     boxSizing: "border-box" as const,
+    ...(inputSurface.style as React.CSSProperties),
   };
 
   const commonProps = {
@@ -234,6 +288,7 @@ function FieldRenderer({
           placeholder={field.placeholder}
           onChange={(e) => onChange(e.target.value)}
           rows={3}
+          className={inputSurface.className}
           style={{ ...inputStyle, resize: "vertical" }}
         />
       );
@@ -253,6 +308,7 @@ function FieldRenderer({
           {...commonProps}
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
+          className={inputSurface.className}
           style={inputStyle}
         >
           <option value="">{field.placeholder ?? "Select..."}</option>
@@ -273,10 +329,12 @@ function FieldRenderer({
           type="checkbox"
           checked={!!value}
           onChange={(e) => onChange(e.target.checked)}
+          className={inputSurface.className}
           style={{
             width: "16px",
             height: "16px",
             accentColor: "var(--sn-color-primary, #2563eb)",
+            ...(inputSurface.style as React.CSSProperties),
           }}
         />
       );
@@ -297,10 +355,12 @@ function FieldRenderer({
             type="checkbox"
             checked={!!value}
             onChange={(e) => onChange(e.target.checked)}
+            className={inputSurface.className}
             style={{
               width: "2.5rem",
               height: "1.25rem",
               accentColor: "var(--sn-color-primary, #2563eb)",
+              ...(inputSurface.style as React.CSSProperties),
             }}
           />
           <span style={{ fontSize: "var(--sn-font-size-sm, 0.875rem)" }}>
@@ -325,6 +385,7 @@ function FieldRenderer({
             const v = e.target.value;
             onChange(v === "" ? "" : Number(v));
           }}
+          className={inputSurface.className}
           style={inputStyle}
         />
       );
@@ -339,6 +400,7 @@ function FieldRenderer({
             const files = e.target.files;
             onChange(files && files.length > 0 ? files[0] : null);
           }}
+          className={inputSurface.className}
           style={inputStyle}
         />
       );
@@ -379,6 +441,7 @@ function FieldRenderer({
                 value={opt.value}
                 checked={String(value ?? "") === opt.value}
                 onChange={() => onChange(opt.value)}
+                className={inputSurface.className}
               />
               <span>{opt.label}</span>
             </label>
@@ -401,6 +464,7 @@ function FieldRenderer({
           min={field.validation?.min}
           max={field.validation?.max}
           onChange={(e) => onChange(Number(e.target.value))}
+          className={inputSurface.className}
           style={inputStyle}
         />
       );
@@ -413,6 +477,7 @@ function FieldRenderer({
           type="color"
           value={typeof value === "string" && value ? value : "#2563eb"}
           onChange={(e) => onChange(e.target.value)}
+          className={inputSurface.className}
           style={{
             ...inputStyle,
             minHeight: "2.75rem",
@@ -440,6 +505,7 @@ function FieldRenderer({
             value={(value as string) ?? ""}
             placeholder={field.placeholder}
             onChange={(e) => onChange(e.target.value)}
+            className={inputSurface.className}
             style={inputStyle}
           />
           <datalist id={listId}>
@@ -469,6 +535,7 @@ function FieldRenderer({
                 .filter(Boolean),
             )
           }
+          className={inputSurface.className}
           style={inputStyle}
         />
       );
@@ -490,6 +557,7 @@ function FieldRenderer({
             placeholder={field.placeholder}
             autoComplete={field.autoComplete}
             onChange={(e) => onChange(e.target.value)}
+            className={inputSurface.className}
             style={{
               ...inputStyle,
               paddingRight:
@@ -526,9 +594,16 @@ function FieldRenderer({
   // Checkbox has label inline
   if (field.type === "checkbox") {
     return (
-      <div data-sn-field={field.name}>
+      <div
+        data-sn-field={field.name}
+        data-snapshot-id={`${rootId}-field-${field.name}`}
+        className={fieldSurface.className}
+        style={fieldSurface.style}
+      >
         <label
           htmlFor={fieldId}
+          data-snapshot-id={`${rootId}-label-${field.name}`}
+          className={labelSurface.className}
           style={{
             display: "flex",
             alignItems: "center",
@@ -536,6 +611,7 @@ function FieldRenderer({
             cursor: field.disabled ? "not-allowed" : "pointer",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
             color: "var(--sn-color-foreground, #111827)",
+            ...(labelSurface.style as React.CSSProperties),
           }}
         >
           {input}
@@ -544,10 +620,13 @@ function FieldRenderer({
         {field.helperText && !hasError && (
           <div
             id={`${fieldId}-helper`}
+            data-snapshot-id={`${rootId}-helper-${field.name}`}
+            className={helperSurface.className}
             style={{
               fontSize: "var(--sn-font-size-xs, 0.75rem)",
               color: "var(--sn-color-muted-foreground, #6b7280)",
               marginTop: "var(--sn-spacing-xs, 0.25rem)",
+              ...(helperSurface.style as React.CSSProperties),
             }}
           >
             {field.helperText}
@@ -558,23 +637,38 @@ function FieldRenderer({
             id={`${fieldId}-error`}
             role="alert"
             data-sn-field-error
+            data-snapshot-id={`${rootId}-error-${field.name}`}
+            className={errorSurface.className}
             style={{
               fontSize: "var(--sn-font-size-xs, 0.75rem)",
               color: "var(--sn-color-destructive, #ef4444)",
               marginTop: "var(--sn-spacing-xs, 0.25rem)",
+              ...(errorSurface.style as React.CSSProperties),
             }}
           >
             {error}
           </div>
         )}
+        <SurfaceStyles css={fieldSurface.scopedCss} />
+        <SurfaceStyles css={labelSurface.scopedCss} />
+        <SurfaceStyles css={inputSurface.scopedCss} />
+        <SurfaceStyles css={helperSurface.scopedCss} />
+        <SurfaceStyles css={errorSurface.scopedCss} />
       </div>
     );
   }
 
   return (
-    <div data-sn-field={field.name}>
+    <div
+      data-sn-field={field.name}
+      data-snapshot-id={`${rootId}-field-${field.name}`}
+      className={fieldSurface.className}
+      style={fieldSurface.style}
+    >
       <label
         htmlFor={fieldId}
+        data-snapshot-id={`${rootId}-label-${field.name}`}
+        className={labelSurface.className}
         style={{
           display: field.inlineAction ? "flex" : "block",
           justifyContent: field.inlineAction ? "space-between" : undefined,
@@ -584,15 +678,19 @@ function FieldRenderer({
             "var(--sn-font-weight-medium, 500)" as React.CSSProperties["fontWeight"],
           color: "var(--sn-color-foreground, #111827)",
           marginBottom: "var(--sn-spacing-xs, 0.25rem)",
+          ...(labelSurface.style as React.CSSProperties),
         }}
       >
           <span>
             {label}
             {required && (
             <span
+              data-snapshot-id={`${rootId}-required-${field.name}`}
+              className={requiredIndicatorSurface.className}
               style={{
                 color: "var(--sn-color-destructive, #ef4444)",
                 marginLeft: "var(--sn-spacing-2xs, 2px)",
+                ...(requiredIndicatorSurface.style as React.CSSProperties),
               }}
             >
               *
@@ -621,10 +719,13 @@ function FieldRenderer({
       {input}
       {field.description && (
         <div
+          data-snapshot-id={`${rootId}-description-${field.name}`}
+          className={descriptionSurface.className}
           style={{
             fontSize: "var(--sn-font-size-xs, 0.75rem)",
             color: "var(--sn-color-muted-foreground, #6b7280)",
             marginTop: "var(--sn-spacing-xs, 0.25rem)",
+            ...(descriptionSurface.style as React.CSSProperties),
           }}
         >
           {field.description}
@@ -633,10 +734,13 @@ function FieldRenderer({
       {field.helperText && !hasError && (
         <div
           id={`${fieldId}-helper`}
+          data-snapshot-id={`${rootId}-helper-${field.name}`}
+          className={helperSurface.className}
           style={{
             fontSize: "var(--sn-font-size-xs, 0.75rem)",
             color: "var(--sn-color-muted-foreground, #6b7280)",
             marginTop: "var(--sn-spacing-xs, 0.25rem)",
+            ...(helperSurface.style as React.CSSProperties),
           }}
         >
           {field.helperText}
@@ -647,15 +751,25 @@ function FieldRenderer({
           id={`${fieldId}-error`}
           role="alert"
           data-sn-field-error
+          data-snapshot-id={`${rootId}-error-${field.name}`}
+          className={errorSurface.className}
           style={{
             fontSize: "var(--sn-font-size-xs, 0.75rem)",
             color: "var(--sn-color-destructive, #ef4444)",
             marginTop: "var(--sn-spacing-xs, 0.25rem)",
+            ...(errorSurface.style as React.CSSProperties),
           }}
         >
           {error}
         </div>
       )}
+      <SurfaceStyles css={fieldSurface.scopedCss} />
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={descriptionSurface.scopedCss} />
+      <SurfaceStyles css={inputSurface.scopedCss} />
+      <SurfaceStyles css={helperSurface.scopedCss} />
+      <SurfaceStyles css={errorSurface.scopedCss} />
+      <SurfaceStyles css={requiredIndicatorSurface.scopedCss} />
     </div>
   );
 }
@@ -726,26 +840,43 @@ function resolveEndpointTemplates<T>(
 // ── Section renderer ──────────────────────────────────────────────────────
 
 function SectionRenderer({
+  rootId,
   section,
   form,
   columns,
   gap,
+  slots,
 }: {
+  rootId: string;
   section: FieldSectionConfig;
   form: ReturnType<typeof useAutoForm>;
   columns: number;
   gap: string;
+  slots?: AutoFormConfig["slots"];
 }) {
   const [collapsed, setCollapsed] = useState(section.defaultCollapsed ?? false);
+  const sectionSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-section-${section.title}`,
+    componentSurface: slots?.section,
+    itemSurface: section.slots?.section,
+  });
+  const sectionTitleSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-section-title-${section.title}`,
+    componentSurface: slots?.sectionTitle,
+    itemSurface: section.slots?.sectionTitle,
+  });
 
   return (
     <fieldset
       data-sn-section={section.title}
+      data-snapshot-id={`${rootId}-section-${section.title}`}
+      className={sectionSurface.className}
       style={{
         border: "none",
         padding: 0,
         margin: 0,
         marginBottom: gap,
+        ...(sectionSurface.style as React.CSSProperties),
       }}
     >
       {/* Section header */}
@@ -775,11 +906,14 @@ function SectionRenderer({
         )}
         <div>
           <div
+            data-snapshot-id={`${rootId}-section-title-${section.title}`}
+            className={sectionTitleSurface.className}
             style={{
               fontSize: "var(--sn-font-size-md, 1rem)",
               fontWeight:
                 "var(--sn-font-weight-semibold, 600)" as React.CSSProperties["fontWeight"],
               color: "var(--sn-color-foreground, #111827)",
+              ...(sectionTitleSurface.style as React.CSSProperties),
             }}
           >
             {section.title}
@@ -800,12 +934,16 @@ function SectionRenderer({
       {/* Section fields */}
       {!collapsed && (
         <FieldGrid
+          rootId={rootId}
           fields={section.fields}
           form={form}
           columns={columns}
           gap={gap}
+          slots={slots}
         />
       )}
+      <SurfaceStyles css={sectionSurface.scopedCss} />
+      <SurfaceStyles css={sectionTitleSurface.scopedCss} />
     </fieldset>
   );
 }
@@ -813,15 +951,19 @@ function SectionRenderer({
 // ── Field grid ────────────────────────────────────────────────────────────
 
 function FieldGrid({
+  rootId,
   fields,
   form,
   columns,
   gap,
+  slots,
 }: {
+  rootId: string;
   fields: FieldConfig[];
   form: ReturnType<typeof useAutoForm>;
   columns: number;
   gap: string;
+  slots?: AutoFormConfig["slots"];
 }) {
   return (
     <div
@@ -844,6 +986,7 @@ function FieldGrid({
             }}
           >
             <FieldRenderer
+              rootId={rootId}
               field={field}
               value={form.values[field.name]}
               required={isFieldRequired(field, form.values)}
@@ -851,6 +994,7 @@ function FieldGrid({
               showError={!!form.touched[field.name]}
               onChange={(value) => form.setValue(field.name, value)}
               onBlur={() => form.touchField(field.name)}
+              slots={slots}
             />
           </div>
         );
@@ -1061,6 +1205,22 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
   );
   const columns = config.columns ?? 1;
   const gap = GAP_MAP[config.gap ?? "md"] ?? GAP_MAP.md!;
+  const rootId = config.id ?? "auto-form";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      gap,
+      alignItems: config.layout === "horizontal" ? "stretch" : undefined,
+    } as Record<string, unknown>,
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const actionsSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-actions`,
+    componentSurface: config.slots?.actions,
+  });
 
   const onSubmit = useCallback(
     async (values: Record<string, unknown>) => {
@@ -1319,52 +1479,56 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
     <form
       data-snapshot-component="form"
       data-testid="form"
-      className={config.className}
+      data-snapshot-id={`${rootId}-root`}
+      className={rootSurface.className}
       onSubmit={(e) => {
         e.preventDefault();
         void handleSubmit();
       }}
       noValidate
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap,
-        alignItems: config.layout === "horizontal" ? "stretch" : undefined,
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
+      style={rootSurface.style}
     >
       {/* Sections mode */}
       {resolvedSections ? (
         resolvedSections.map((section) => (
           <SectionRenderer
             key={section.title}
+            rootId={rootId}
             section={section}
             form={form}
             columns={columns}
             gap={gap}
+            slots={config.slots}
           />
         ))
       ) : (
         /* Flat fields mode */
         <FieldGrid
+          rootId={rootId}
           fields={resolvedFields}
           form={form}
           columns={columns}
           gap={gap}
+          slots={config.slots}
         />
       )}
 
       {/* Submit button */}
-      <div>
-        <button
+      <div
+        data-snapshot-id={`${rootId}-actions`}
+        className={actionsSurface.className}
+        style={actionsSurface.style}
+      >
+        <ButtonControl
           type="submit"
           disabled={form.isSubmitting}
-          data-sn-button=""
-          data-variant="default"
-          style={getButtonStyle("default", "sm", form.isSubmitting)}
+          variant="default"
+          surfaceId={`${rootId}-submit`}
+          surfaceConfig={config.slots?.submitButton}
+          activeStates={form.isSubmitting ? ["disabled"] : []}
         >
           {form.isSubmitting ? submitLoadingLabel : submitLabel}
-        </button>
+        </ButtonControl>
       </div>
       <style>{`
         [data-snapshot-component="form"] input:focus,
@@ -1383,6 +1547,8 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
         }
         ${BUTTON_INTERACTIVE_CSS}
       `}</style>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={actionsSurface.scopedCss} />
     </form>
   );
 }

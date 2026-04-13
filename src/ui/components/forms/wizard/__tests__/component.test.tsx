@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import {
+  cleanup,
   render,
   screen,
   fireEvent,
@@ -63,6 +64,10 @@ async function waitForWizardTransition() {
 }
 
 describe("Wizard component", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("renders with data-snapshot-component attribute", () => {
     const { Wrapper } = createWrapper();
     const { container } = render(
@@ -251,7 +256,9 @@ describe("Wizard component", () => {
         />
       </Wrapper>,
     );
-    expect(screen.getByText("Fill in your details")).toBeDefined();
+    expect(screen.getAllByText("Fill in your details").length).toBeGreaterThan(
+      0,
+    );
   });
 
   it("shows Skip button when allowSkip is true and step has no required fields", () => {
@@ -318,5 +325,61 @@ describe("Wizard component", () => {
       "[data-wizard-step-indicator]",
     );
     expect(indicators.length).toBe(2);
+  });
+
+  it("applies canonical wizard and field primitive slots", () => {
+    const { Wrapper } = createWrapper();
+    const { container } = render(
+      <Wrapper>
+        <Wizard
+          config={baseConfig({
+            id: "profile-wizard",
+            steps: [
+              {
+                title: "Account Details",
+                slots: {
+                  step: { className: "wizard-step-slot" },
+                },
+                fields: [
+                  {
+                    name: "email",
+                    type: "email",
+                    label: "Email",
+                    slots: {
+                      field: { className: "wizard-field-slot" },
+                      input: { className: "wizard-input-slot" },
+                    },
+                  },
+                ],
+              },
+            ],
+            slots: {
+              root: { className: "wizard-root-slot" },
+              submitButton: { className: "wizard-submit-slot" },
+            },
+          })}
+        />
+      </Wrapper>,
+    );
+
+    expect(
+      container.querySelector('[data-snapshot-id="profile-wizard-root"]')
+        ?.className,
+    ).toContain("wizard-root-slot");
+    expect(
+      container.querySelector('[data-snapshot-id="profile-wizard-step-0"]')
+        ?.className,
+    ).toContain("wizard-step-slot");
+    expect(
+      container.querySelector(
+        '[data-snapshot-id="profile-wizard-field-0-email"]',
+      )?.className,
+    ).toContain("wizard-field-slot");
+    expect(screen.getByLabelText("Email").className).toContain(
+      "wizard-input-slot",
+    );
+    expect(screen.getByText("Submit").className).toContain(
+      "wizard-submit-slot",
+    );
   });
 });

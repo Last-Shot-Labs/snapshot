@@ -106,6 +106,7 @@ export { TransitionWrapper } from "./transition-wrapper";
 
 // App
 export { ManifestApp, injectStyleSheet } from "./app";
+export { bootBuiltins, resetBootBuiltins } from "./boot-builtins";
 export { generateBreadcrumbs } from "./breadcrumbs";
 export { generateJsonSchema } from "./json-schema";
 export {

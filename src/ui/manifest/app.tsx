@@ -869,22 +869,39 @@ function AppShell({
       ? manifest.raw.app.title.trim()
       : "") ||
     "Snapshot";
+  const navUserMenu: ShellNavConfig["userMenu"] =
+    manifest.navigation?.userMenu === undefined
+      ? true
+      : manifest.navigation.userMenu === true || manifest.navigation.userMenu === false
+        ? manifest.navigation.userMenu
+        : {
+            showAvatar: manifest.navigation.userMenu.showAvatar,
+            showEmail: manifest.navigation.userMenu.showEmail,
+            items: manifest.navigation.userMenu.items?.map((item) => ({
+              label: item.label,
+              icon: item.icon,
+              action: item.action,
+              roles: item.roles,
+              slots: item.slots,
+            })),
+          };
+  const navLogo: ShellNavConfig["logo"] =
+    manifest.navigation?.logo ?? {
+      text: fallbackLogoText,
+      path: manifest.app.home ?? manifest.firstRoute?.path ?? "/",
+    };
   const navConfig: ShellNavConfig | null = manifest.navigation
-    ? ({
+    ? {
         type: "nav",
         items: manifest.navigation.items,
         template: manifest.navigation.template,
         collapsible: manifest.navigation.collapsible ?? true,
-        userMenu: manifest.navigation.userMenu ?? true,
-        logo:
-          manifest.navigation.logo ?? {
-            text: fallbackLogoText,
-            path: manifest.app.home ?? manifest.firstRoute?.path ?? "/",
-          },
+        userMenu: navUserMenu,
+        logo: navLogo,
         className: manifest.navigation.className,
         style: manifest.navigation.style,
         slots: manifest.navigation.slots,
-      } as unknown as ShellNavConfig)
+      }
     : null;
 
   const loadingFallback = (

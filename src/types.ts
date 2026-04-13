@@ -11,29 +11,50 @@ import type { WebhookHooks } from "./webhooks/hooks";
 
 // ── Auth types ────────────────────────────────────────────────────────────────
 
+/**
+ * Minimal authenticated user shape returned by Snapshot auth hooks.
+ */
 export interface AuthUser {
   id: string;
   email: string;
   [key: string]: unknown;
 }
 
+/**
+ * Credentials posted to the login endpoint.
+ */
 export interface LoginBody {
   email: string;
   password: string;
 }
 
+/**
+ * Registration payload posted to the register endpoint.
+ */
 export interface RegisterBody {
   email: string;
   password: string;
   [key: string]: unknown;
 }
 
+/**
+ * Request body for the forgot-password endpoint.
+ */
 export interface ForgotPasswordBody {
   email: string;
 }
 
+/**
+ * Login variables accepted by `useLogin()`.
+ */
 export type LoginVars = LoginBody & { redirectTo?: string };
+/**
+ * Registration variables accepted by `useRegister()`.
+ */
 export type RegisterVars = RegisterBody & { redirectTo?: string };
+/**
+ * Logout options accepted by `useLogout()`.
+ */
 export interface LogoutVars {
   redirectTo?: string;
   force?: boolean;
@@ -41,6 +62,9 @@ export interface LogoutVars {
 
 // ── MFA types ────────────────────────────────────────────────────────────────
 
+/**
+ * MFA method identifiers supported by Snapshot's auth contract.
+ */
 export type MfaMethod = "totp" | "emailOtp" | "webauthn";
 
 /** Raw login response shape from bunshot (includes MFA fields) */
@@ -62,10 +86,16 @@ export interface MfaChallenge {
 /** useLogin resolves to either a user or an MFA challenge */
 export type LoginResult = AuthUser | MfaChallenge;
 
+/**
+ * Narrow a login result to the MFA challenge branch.
+ */
 export function isMfaChallenge(result: LoginResult): result is MfaChallenge {
   return "mfaToken" in result && !("id" in result);
 }
 
+/**
+ * Request body for verifying an MFA challenge.
+ */
 export interface MfaVerifyBody {
   mfaToken: string;
   code?: string;
@@ -73,72 +103,129 @@ export interface MfaVerifyBody {
   webauthnResponse?: unknown;
 }
 
+/**
+ * Setup payload returned when provisioning TOTP MFA.
+ */
 export interface MfaSetupResponse {
   secret: string;
   uri: string;
 }
+/**
+ * Verification body for confirming an MFA setup flow.
+ */
 export interface MfaVerifySetupBody {
   code: string;
 }
+/**
+ * Response returned after successful MFA setup verification.
+ */
 export interface MfaVerifySetupResponse {
   message: string;
   recoveryCodes: string[];
 }
+/**
+ * Request body for disabling MFA.
+ */
 export interface MfaDisableBody {
   code: string;
 }
+/**
+ * Request body for regenerating recovery codes.
+ */
 export interface MfaRecoveryCodesBody {
   code: string;
 }
+/**
+ * Recovery codes returned by the auth API.
+ */
 export interface MfaRecoveryCodesResponse {
   recoveryCodes: string[];
 }
+/**
+ * Response returned when email OTP MFA setup begins.
+ */
 export interface MfaEmailOtpEnableResponse {
   message: string;
   setupToken: string;
 }
+/**
+ * Request body for confirming email OTP MFA setup.
+ */
 export interface MfaEmailOtpVerifySetupBody {
   setupToken: string;
   code: string;
 }
+/**
+ * Request body for disabling email OTP MFA.
+ */
 export interface MfaEmailOtpDisableBody {
   code?: string;
   password?: string;
 }
+/**
+ * Request body for resending an MFA challenge.
+ */
 export interface MfaResendBody {
   mfaToken: string;
 }
+/**
+ * Response listing the enabled MFA methods for the current user.
+ */
 export interface MfaMethodsResponse {
   methods: MfaMethod[];
 }
 
 // ── Account types ─────────────────────────────────────────────────────────────
 
+/**
+ * Request body for completing a password reset flow.
+ */
 export interface ResetPasswordBody {
   token: string;
   password: string;
 }
+/**
+ * Request body for confirming email verification.
+ */
 export interface VerifyEmailBody {
   token: string;
 }
+/**
+ * Request body for sending a new verification email.
+ */
 export interface ResendVerificationBody {
   email: string;
 }
+/**
+ * Request body for setting or rotating an account password.
+ */
 export interface SetPasswordBody {
   password: string;
   currentPassword?: string;
 }
+/**
+ * Request body for deleting the current account.
+ */
 export interface DeleteAccountBody {
   password?: string;
 }
+/**
+ * Request body for refreshing auth tokens.
+ */
 export interface RefreshTokenBody {
   refreshToken?: string;
 }
+/**
+ * Token refresh response returned by the auth API.
+ */
 export interface RefreshTokenResponse {
   token: string;
   refreshToken?: string;
   userId: string;
 }
+/**
+ * Active session metadata returned by session-management hooks.
+ */
 export interface Session {
   sessionId: string;
   ipAddress?: string;
@@ -160,9 +247,15 @@ export type OAuthProvider =
   | "facebook"
   | "discord"
   | (string & {});
+/**
+ * Request body for exchanging an OAuth callback code.
+ */
 export interface OAuthExchangeBody {
   code: string;
 }
+/**
+ * Tokens returned after a successful OAuth exchange.
+ */
 export interface OAuthExchangeResponse {
   token: string;
   userId: string;
@@ -172,42 +265,69 @@ export interface OAuthExchangeResponse {
 
 // ── WebAuthn types ────────────────────────────────────────────────────────────
 
+/**
+ * Response returned when requesting WebAuthn registration options.
+ */
 export interface WebAuthnRegisterOptionsResponse {
   options: unknown;
   registrationToken: string;
 }
+/**
+ * Request body for registering a WebAuthn credential.
+ */
 export interface WebAuthnRegisterBody {
   registrationToken: string;
   attestationResponse: unknown;
   name?: string;
 }
+/**
+ * Registered WebAuthn credential metadata.
+ */
 export interface WebAuthnCredential {
   credentialId: string;
   name?: string;
   createdAt: number;
   transports?: string[];
 }
+/**
+ * Request body for removing a WebAuthn credential.
+ */
 export interface WebAuthnRemoveBody {
   credentialId: string;
 }
 
 // ── Passkey types (passwordless first-factor login) ───────────────────────
 
+/**
+ * Request body for retrieving passkey login options.
+ */
 export interface PasskeyLoginOptionsBody {
   identifier?: string;
 }
+/**
+ * Response returned when beginning a passkey login flow.
+ */
 export interface PasskeyLoginOptionsResponse {
   options: unknown;
   passkeyToken: string;
 }
+/**
+ * Request body for completing a passkey login.
+ */
 export interface PasskeyLoginBody {
   passkeyToken: string;
   assertionResponse: unknown;
 }
+/**
+ * Passkey login variables accepted by `usePasskeyLogin()`.
+ */
 export type PasskeyLoginVars = PasskeyLoginBody & { redirectTo?: string };
 
 // ── API client types ──────────────────────────────────────────────────────────
 
+/**
+ * Optional overrides for individual API client requests.
+ */
 export interface RequestOptions {
   headers?: Record<string, string>;
   signal?: AbortSignal;
@@ -216,6 +336,9 @@ export interface RequestOptions {
 
 // ── SSE types ─────────────────────────────────────────────────────────────────
 
+/**
+ * Per-endpoint SSE behavior configuration.
+ */
 export interface SseEndpointConfig {
   withCredentials?: boolean;
   onConnected?: () => void;
@@ -247,6 +370,9 @@ export interface SseEventHookResult<T> {
 
 // ── WebSocket types ───────────────────────────────────────────────────────────
 
+/**
+ * Realtime websocket control surface returned by `useSocket()`.
+ */
 export interface SocketHook<TEvents = Record<string, unknown>> {
   isConnected: boolean;
   send: (type: string, payload: unknown) => void;
@@ -266,6 +392,9 @@ export interface SocketHook<TEvents = Record<string, unknown>> {
 
 // ── Auth error formatting ──────────────────────────────────────────────────
 
+/**
+ * Auth UI contexts that can provide custom error messaging.
+ */
 export type AuthErrorContext =
   | "login"
   | "register"
@@ -273,6 +402,9 @@ export type AuthErrorContext =
   | "reset-password"
   | "verify-email";
 
+/**
+ * Optional configuration for auth error formatting.
+ */
 export interface AuthErrorConfig {
   verbose?: boolean;
   messages?: Partial<Record<AuthErrorContext, string>>;
@@ -281,8 +413,14 @@ export interface AuthErrorConfig {
 
 // ── Community notification types ──────────────────────────────────────────────
 
+/**
+ * Community notification types surfaced by Snapshot's notification helpers.
+ */
 export type CommunityNotificationType = "reply" | "mention" | "ban";
 
+/**
+ * Normalized notification shape used by `useCommunityNotifications()`.
+ */
 export interface CommunityNotification {
   id: string;
   userId: string;
@@ -295,11 +433,17 @@ export interface CommunityNotification {
   tenantId?: string;
 }
 
+/**
+ * Options for the community notifications hook.
+ */
 export interface UseCommunityNotificationsOpts {
   /** Base URL for community notification routes. Default: '/community/notifications' */
   apiBase?: string;
 }
 
+/**
+ * Return shape of `useCommunityNotifications()`.
+ */
 export interface UseCommunityNotificationsResult {
   notifications: CommunityNotification[];
   unreadCount: number;
@@ -310,6 +454,9 @@ export interface UseCommunityNotificationsResult {
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
+/**
+ * Bootstrap configuration for `createSnapshot()`.
+ */
 export interface SnapshotConfig {
   /** API base URL for this snapshot instance. */
   apiUrl: string;
@@ -328,6 +475,9 @@ export interface SnapshotConfig {
 
 // ── Instance ──────────────────────────────────────────────────────────────────
 
+/**
+ * Runtime surface returned by `createSnapshot()`.
+ */
 export interface SnapshotInstance<
   TWSEvents extends Record<string, unknown> = Record<string, unknown>,
 > {

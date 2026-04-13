@@ -12,6 +12,9 @@ const RESOLVED_VIRTUAL_APP_ENTRY_ID = "\0virtual:snapshot-entry";
 const VIRTUAL_GLOBALS_ID = "virtual:snapshot-globals.css";
 const RESOLVED_VIRTUAL_GLOBALS_ID = "\0virtual:snapshot-globals.css";
 
+/**
+ * Options for `snapshotSync()`, Snapshot's Vite-driven Bunshot sync plugin.
+ */
 export interface SnapshotSyncOptions {
   /** URL of the bunshot backend. Falls back to VITE_API_URL env var. */
   apiUrl?: string;
@@ -26,6 +29,9 @@ export interface SnapshotSyncOptions {
   zod?: boolean;
 }
 
+/**
+ * Options for `snapshotApp()`, the manifest-driven Snapshot app Vite plugin.
+ */
 export interface SnapshotAppOptions {
   /**
    * Snapshot manifest file to load from the project root.
@@ -125,9 +131,7 @@ function withBase(base: string, fileName: string): string {
  */
 export function snapshotApp(opts: SnapshotAppOptions = {}): Plugin {
   const manifestFile = opts.manifestFile ?? "snapshot.manifest.json";
-  const manifestUrl = normalizeManifestUrl(
-    manifestFile,
-  );
+  const manifestUrl = normalizeManifestUrl(manifestFile);
   const apiUrlExpression = opts.apiUrl
     ? JSON.stringify(opts.apiUrl)
     : "import.meta.env.VITE_API_URL ?? window.location.origin";
@@ -266,7 +270,10 @@ if (import.meta.hot) {
       // "$schema": "./snapshot-schema.json" without cross-directory path issues.
       try {
         const schemaSource = path.resolve(__dirname, "snapshot-schema.json");
-        const schemaDest = path.resolve(server.config.root, "snapshot-schema.json");
+        const schemaDest = path.resolve(
+          server.config.root,
+          "snapshot-schema.json",
+        );
         if (existsSync(schemaSource)) {
           copyFileSync(schemaSource, schemaDest);
         }
@@ -355,11 +362,14 @@ if (import.meta.hot) {
       this.emitFile({
         type: "asset",
         fileName: "index.html",
-        source: getSnapshotAppHtml(withBase(resolvedBase, entryChunk.fileName), {
-          includeViteClient: false,
-          manifestMode,
-          stylesheetHrefs,
-        }),
+        source: getSnapshotAppHtml(
+          withBase(resolvedBase, entryChunk.fileName),
+          {
+            includeViteClient: false,
+            manifestMode,
+            stylesheetHrefs,
+          },
+        ),
       });
     },
   };
@@ -650,7 +660,10 @@ export function staticParamsPlugin(opts: StaticParamsPluginOptions): Plugin {
         // Typed via structural cast — bunshot-ssr is an optional peer dep of snapshot.
         type StaticParamsModule = {
           scanStaticParams: (dir: string) => Promise<unknown[]>;
-          writeStaticParamsManifest: (routes: unknown[], outDir: string) => Promise<void>;
+          writeStaticParamsManifest: (
+            routes: unknown[],
+            outDir: string,
+          ) => Promise<void>;
         };
 
         const staticParamsModuleSpecifier =
@@ -987,7 +1000,10 @@ export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin[] {
     },
   };
 
-  const plugins: Plugin[] = [ssrPlugin, staticParamsPlugin({ serverRoutesDir: opts.serverRoutesDir, clientOutDir })];
+  const plugins: Plugin[] = [
+    ssrPlugin,
+    staticParamsPlugin({ serverRoutesDir: opts.serverRoutesDir, clientOutDir }),
+  ];
 
   // Prepend the server actions transform unless explicitly disabled.
   if (opts.serverActions !== false) {
@@ -1152,12 +1168,13 @@ export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin[] {
 
           // Derive the URL path from the file path relative to serverRoutesDir.
           // e.g. /app/server/routes/dashboard/index.ts → /dashboard
-          const relative = filePath
-            .slice(serverRoutesDir.length)
-            .replace(/\\/g, "/")
-            .replace(/\/(index)?\.(ts|tsx)$/, "")
-            .replace(/\/\[([^\]]+)\]/g, "/:$1") // [slug] → :slug
-            || "/";
+          const relative =
+            filePath
+              .slice(serverRoutesDir.length)
+              .replace(/\\/g, "/")
+              .replace(/\/(index)?\.(ts|tsx)$/, "")
+              .replace(/\/\[([^\]]+)\]/g, "/:$1") || // [slug] → :slug
+            "/";
 
           pprRoutes.push({ path: relative, filePath });
           console.log(`[snapshot-ssr] PPR:   found ppr:true in ${relative}`);
@@ -1176,7 +1193,9 @@ export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin[] {
         const manifest = Object.freeze({
           version: 1,
           generatedAt: new Date().toISOString(),
-          routes: pprRoutes.map((r) => Object.freeze({ path: r.path, filePath: r.filePath })),
+          routes: pprRoutes.map((r) =>
+            Object.freeze({ path: r.path, filePath: r.filePath }),
+          ),
         });
 
         try {
@@ -1194,7 +1213,10 @@ export function snapshotSsr(opts: SnapshotSsrOptions = {}): Plugin[] {
             "[snapshot-ssr] PPR: call prerenderPprShells() at server startup to pre-compute shells.",
           );
         } catch (err) {
-          console.warn("[snapshot-ssr] PPR: failed to write ppr-routes.json:", err);
+          console.warn(
+            "[snapshot-ssr] PPR: failed to write ppr-routes.json:",
+            err,
+          );
         }
       },
     };

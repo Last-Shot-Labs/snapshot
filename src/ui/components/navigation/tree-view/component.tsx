@@ -1,17 +1,20 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { AutoErrorState } from "../../_base/auto-error-state";
 import { renderIcon } from "../../../icons/render";
 import { useComponentData } from "../../_base/use-component-data";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { TreeViewConfig, TreeItemInput } from "./types";
 
-/**
- * Props for the internal TreeNode recursive renderer.
- */
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
+
 interface TreeNodeProps {
+  rootId: string;
   item: TreeItemInput;
   depth: number;
   selected: Set<string>;
@@ -21,21 +24,16 @@ interface TreeNodeProps {
   selectable: boolean;
   showIcon: boolean;
   showConnectors: boolean;
-  /** Path key for nodes without explicit values. */
   pathKey: string;
+  slots?: TreeViewConfig["slots"];
 }
 
-/**
- * Get a unique key for a tree node.
- */
 function getNodeKey(item: TreeItemInput, pathKey: string): string {
   return item.value ?? pathKey;
 }
 
-/**
- * Recursive tree node renderer.
- */
 function TreeNode({
+  rootId,
   item,
   depth,
   selected,
@@ -46,15 +44,150 @@ function TreeNode({
   showIcon,
   showConnectors,
   pathKey,
+  slots,
 }: TreeNodeProps) {
   const nodeKey = getNodeKey(item, pathKey);
-  const hasChildren = item.children && item.children.length > 0;
+  const hasChildren = Boolean(item.children?.length);
   const isExpanded = expanded.has(nodeKey);
   const isSelected = selected.has(nodeKey);
   const isDisabled = item.disabled ?? false;
+  const rowStates = [
+    ...(isSelected ? (["selected", "current"] as const) : []),
+    ...(isExpanded ? (["open"] as const) : []),
+    ...(isDisabled ? (["disabled"] as const) : []),
+  ];
+
+  const itemSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-item-${pathKey}`,
+    componentSurface: slots?.item,
+    itemSurface: item.slots?.item,
+    activeStates: rowStates,
+  });
+  const rowSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-row-${pathKey}`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--sn-spacing-xs, 0.25rem)",
+      width: "100%",
+      padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+      paddingLeft: `calc(${depth} * var(--sn-spacing-lg, 1.5rem) + var(--sn-spacing-sm, 0.5rem))`,
+      cursor: isDisabled ? "not-allowed" : "pointer",
+      opacity: isDisabled ? "var(--sn-opacity-disabled, 0.5)" : 1,
+      backgroundColor: isSelected
+        ? "var(--sn-color-accent, #f1f5f9)"
+        : "transparent",
+      color: isSelected
+        ? "var(--sn-color-accent-foreground, #0f172a)"
+        : "var(--sn-color-foreground, #111827)",
+      borderRadius: "var(--sn-radius-sm, 0.25rem)",
+      fontSize: "var(--sn-font-size-sm, 0.875rem)",
+      userSelect: "none",
+      position: "relative",
+      appearance: "none",
+      border: "none",
+      outline: "none",
+      textAlign: "left",
+      background: isSelected
+        ? "var(--sn-color-accent, #f1f5f9)"
+        : "transparent",
+    } as Record<string, unknown>,
+    componentSurface: slots?.row,
+    itemSurface: item.slots?.row,
+    activeStates: rowStates,
+  });
+  const connectorSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-connector-${pathKey}`,
+    implementationBase: {
+      position: "absolute",
+      left: `calc(${depth - 1} * var(--sn-spacing-lg, 1.5rem) + var(--sn-spacing-sm, 0.5rem) + 8px)`,
+      top: 0,
+      width: "var(--sn-spacing-md, 1rem)",
+      height: "50%",
+      borderLeft:
+        "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
+      borderBottom:
+        "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
+      borderBottomLeftRadius: "var(--sn-radius-xs, 0.125rem)",
+      pointerEvents: "none",
+    } as Record<string, unknown>,
+    componentSurface: slots?.connector,
+    itemSurface: item.slots?.connector,
+  });
+  const disclosureSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-disclosure-${pathKey}`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: 16,
+      height: 16,
+      flexShrink: 0,
+      transition:
+        "transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+      transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+      fontSize: "var(--sn-font-size-xs, 0.75rem)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+    } as Record<string, unknown>,
+    componentSurface: slots?.disclosure,
+    itemSurface: item.slots?.disclosure,
+    activeStates: [
+      ...(isExpanded ? (["open"] as const) : []),
+      ...(isDisabled ? (["disabled"] as const) : []),
+    ],
+  });
+  const iconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-icon-${pathKey}`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      flexShrink: 0,
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+    } as Record<string, unknown>,
+    componentSurface: slots?.icon,
+    itemSurface: item.slots?.icon,
+  });
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label-${pathKey}`,
+    implementationBase: {
+      flex: 1,
+      minWidth: 0,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    } as Record<string, unknown>,
+    componentSurface: slots?.label,
+    itemSurface: item.slots?.label,
+    activeStates: rowStates,
+  });
+  const badgeSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-badge-${pathKey}`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "0 var(--sn-spacing-xs, 0.25rem)",
+      borderRadius: "var(--sn-radius-full, 9999px)",
+      backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
+      color: "var(--sn-color-secondary-foreground, #374151)",
+      fontSize: "var(--sn-font-size-xs, 0.75rem)",
+      lineHeight: 1.5,
+    } as Record<string, unknown>,
+    componentSurface: slots?.badge,
+    itemSurface: item.slots?.badge,
+  });
+  const childrenSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-children-${pathKey}`,
+    componentSurface: slots?.children,
+    itemSurface: item.slots?.children,
+    activeStates: isExpanded ? ["open"] : [],
+  });
 
   const handleClick = () => {
-    if (isDisabled) return;
+    if (isDisabled) {
+      return;
+    }
+
     if (hasChildren) {
       onToggle(nodeKey);
     }
@@ -64,122 +197,99 @@ function TreeNode({
   };
 
   return (
-    <div data-testid="tree-node" data-depth={depth}>
-      {/* Node row */}
-      <div
+    <div
+      data-testid="tree-node"
+      data-depth={depth}
+      data-snapshot-id={`${rootId}-item-${pathKey}`}
+      className={itemSurface.className}
+      style={itemSurface.style}
+    >
+      <button
+        type="button"
         data-testid="tree-node-row"
         data-selected={isSelected ? "" : undefined}
+        data-snapshot-id={`${rootId}-row-${pathKey}`}
+        className={rowSurface.className}
+        style={rowSurface.style}
         onClick={handleClick}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleClick();
-          }
-        }}
-        role={selectable ? "treeitem" : undefined}
+        role="treeitem"
         tabIndex={isDisabled ? -1 : isSelected ? 0 : -1}
         aria-expanded={hasChildren ? isExpanded : undefined}
         aria-selected={selectable ? isSelected : undefined}
-        aria-disabled={isDisabled}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "var(--sn-spacing-xs, 0.25rem)",
-          padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-          paddingLeft: `calc(${depth} * var(--sn-spacing-lg, 1.5rem) + var(--sn-spacing-sm, 0.5rem))`,
-          cursor: isDisabled ? "not-allowed" : "pointer",
-          opacity: isDisabled ? "var(--sn-opacity-disabled, 0.5)" : 1,
-          backgroundColor: isSelected
-            ? "var(--sn-color-accent, #f1f5f9)"
-            : "transparent",
-          color: isSelected
-            ? "var(--sn-color-accent-foreground, #0f172a)"
-            : "var(--sn-color-foreground, #111827)",
-          borderRadius: "var(--sn-radius-sm, 0.25rem)",
-          fontSize: "var(--sn-font-size-sm, 0.875rem)",
-          userSelect: "none",
-          position: "relative",
-        }}
+        aria-disabled={isDisabled || undefined}
       >
-        {/* Connector lines */}
-        {showConnectors && depth > 0 && (
-          <div
+        {showConnectors && depth > 0 ? (
+          <span
             data-testid="tree-connector"
-            style={{
-              position: "absolute",
-              left: `calc(${depth - 1} * var(--sn-spacing-lg, 1.5rem) + var(--sn-spacing-sm, 0.5rem) + 8px)`,
-              top: 0,
-              bottom: 0,
-              width: "var(--sn-spacing-md, 1rem)",
-              borderLeft:
-                "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
-              borderBottom:
-                "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
-              borderBottomLeftRadius: "var(--sn-radius-xs, 0.125rem)",
-              height: "50%",
-              pointerEvents: "none",
-            }}
+            data-snapshot-id={`${rootId}-connector-${pathKey}`}
+            className={connectorSurface.className}
+            style={connectorSurface.style}
+            aria-hidden="true"
           />
-        )}
-
-        {/* Expand/collapse chevron */}
+        ) : null}
         {hasChildren ? (
           <span
             data-testid="tree-chevron"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 16,
-              height: 16,
-              flexShrink: 0,
-              transition:
-                "transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-              transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
-              fontSize: "var(--sn-font-size-xs, 0.75rem)",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-            }}
+            data-snapshot-id={`${rootId}-disclosure-${pathKey}`}
+            className={disclosureSurface.className}
+            style={disclosureSurface.style}
             aria-hidden="true"
           >
             {"\u25B6"}
           </span>
         ) : (
           <span
-            style={{
-              width: 16,
-              height: 16,
-              flexShrink: 0,
-            }}
+            data-snapshot-id={`${rootId}-disclosure-${pathKey}`}
+            className={disclosureSurface.className}
+            style={{ width: 16, height: 16, ...(disclosureSurface.style as React.CSSProperties) }}
+            aria-hidden="true"
           />
         )}
-
-        {/* Icon */}
-        {showIcon && item.icon && (
+        {showIcon && item.icon ? (
           <span
             data-testid="tree-icon"
-            style={{
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-              flexShrink: 0,
-            }}
+            data-snapshot-id={`${rootId}-icon-${pathKey}`}
+            className={iconSurface.className}
+            style={iconSurface.style}
             aria-hidden="true"
           >
             {renderIcon(item.icon, 14)}
           </span>
-        )}
+        ) : null}
+        <span
+          data-testid="tree-label"
+          data-snapshot-id={`${rootId}-label-${pathKey}`}
+          className={labelSurface.className}
+          style={labelSurface.style}
+        >
+          {item.label}
+        </span>
+        {item.badge ? (
+          <span
+            data-testid="tree-badge"
+            data-snapshot-id={`${rootId}-badge-${pathKey}`}
+            className={badgeSurface.className}
+            style={badgeSurface.style}
+          >
+            {item.badge}
+          </span>
+        ) : null}
+      </button>
 
-        {/* Label */}
-        <span data-testid="tree-label">{item.label}</span>
-      </div>
-
-      {/* Children */}
-      {hasChildren && isExpanded && (
-        <div data-testid="tree-children" role="group">
+      {hasChildren && isExpanded ? (
+        <div
+          data-testid="tree-children"
+          role="group"
+          data-snapshot-id={`${rootId}-children-${pathKey}`}
+          className={childrenSurface.className}
+          style={childrenSurface.style}
+        >
           {item.children!.map((child, childIndex) => {
             const childPathKey = `${pathKey}-${childIndex}`;
             return (
               <TreeNode
                 key={getNodeKey(child, childPathKey)}
+                rootId={rootId}
                 item={child}
                 depth={depth + 1}
                 selected={selected}
@@ -190,18 +300,24 @@ function TreeNode({
                 showIcon={showIcon}
                 showConnectors={showConnectors}
                 pathKey={childPathKey}
+                slots={slots}
               />
             );
           })}
         </div>
-      )}
+      ) : null}
+      <SurfaceStyles css={itemSurface.scopedCss} />
+      <SurfaceStyles css={rowSurface.scopedCss} />
+      <SurfaceStyles css={connectorSurface.scopedCss} />
+      <SurfaceStyles css={disclosureSurface.scopedCss} />
+      <SurfaceStyles css={iconSurface.scopedCss} />
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={badgeSurface.scopedCss} />
+      <SurfaceStyles css={childrenSurface.scopedCss} />
     </div>
   );
 }
 
-/**
- * Collect initially expanded node keys from item config.
- */
 function collectExpandedKeys(
   items: TreeItemInput[],
   parentPath: string,
@@ -222,51 +338,32 @@ function collectExpandedKeys(
   return keys;
 }
 
-/**
- * TreeView component — a hierarchical expandable tree with selectable nodes.
- *
- * Supports static items or dynamic data from an API endpoint.
- * Nodes can be expanded/collapsed, selected (single or multi),
- * and trigger actions on selection.
- *
- * @param props - Component props containing the tree view configuration
- *
- * @example
- * ```json
- * {
- *   "type": "tree-view",
- *   "items": [
- *     {
- *       "label": "Documents",
- *       "icon": "folder",
- *       "children": [
- *         { "label": "report.pdf", "icon": "file", "value": "report" }
- *       ]
- *     }
- *   ]
- * }
- * ```
- */
 export function TreeView({ config }: { config: TreeViewConfig }) {
   const hasEndpoint = config.data !== undefined;
   const { data, isLoading, error, refetch } = useComponentData(
     hasEndpoint ? config.data! : "",
   );
-
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
-
   const visible = useSubscribe(config.visible ?? true);
-
   const selectable = config.selectable ?? true;
   const multiSelect = config.multiSelect ?? false;
   const showIcon = config.showIcon ?? true;
   const showConnectors = config.showConnectors ?? true;
+  const rootId = config.id ?? "tree-view";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
 
-  // Resolve items from static config or API data
   const items = useMemo((): TreeItemInput[] => {
-    if (!hasEndpoint) return config.items ?? [];
-    if (!data) return [];
+    if (!hasEndpoint) {
+      return config.items ?? [];
+    }
+    if (!data) {
+      return [];
+    }
 
     const rawItems = Array.isArray(data)
       ? data
@@ -277,46 +374,43 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
           : [];
 
     return rawItems as TreeItemInput[];
-  }, [data, hasEndpoint, config.items]);
+  }, [config.items, data, hasEndpoint]);
 
-  // Expanded state
   const [expanded, setExpanded] = useState<Set<string>>(() =>
     collectExpandedKeys(items, "root"),
   );
-
-  // Selected state
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  // Re-compute expanded keys when items change
   useEffect(() => {
-    if (items.length > 0) {
-      setExpanded((prev) => {
-        const initial = collectExpandedKeys(items, "root");
-        // Merge: keep user toggled + initial
-        const merged = new Set(prev);
-        for (const key of initial) {
-          merged.add(key);
-        }
-        return merged;
-      });
+    if (items.length === 0) {
+      return;
     }
+
+    setExpanded((previous) => {
+      const next = new Set(previous);
+      for (const key of collectExpandedKeys(items, "root")) {
+        next.add(key);
+      }
+      return next;
+    });
   }, [items]);
 
-  // Publish selected value(s)
   useEffect(() => {
-    if (publish) {
-      const selectedArray = [...selected];
-      publish(
-        multiSelect
-          ? { selected: selectedArray }
-          : { selected: selectedArray[0] ?? null },
-      );
+    if (!publish) {
+      return;
     }
-  }, [publish, selected, multiSelect]);
+
+    const selectedArray = [...selected];
+    publish(
+      multiSelect
+        ? { selected: selectedArray }
+        : { selected: selectedArray[0] ?? null },
+    );
+  }, [multiSelect, publish, selected]);
 
   const handleToggle = useCallback((nodeKey: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
+    setExpanded((previous) => {
+      const next = new Set(previous);
       if (next.has(nodeKey)) {
         next.delete(nodeKey);
       } else {
@@ -328,10 +422,12 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
 
   const handleSelect = useCallback(
     (nodeKey: string) => {
-      if (!selectable) return;
+      if (!selectable) {
+        return;
+      }
 
-      setSelected((prev) => {
-        const next = new Set(multiSelect ? prev : []);
+      setSelected((previous) => {
+        const next = new Set(multiSelect ? previous : []);
         if (next.has(nodeKey)) {
           next.delete(nodeKey);
         } else {
@@ -344,32 +440,35 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
         void execute(config.action, { value: nodeKey });
       }
     },
-    [selectable, multiSelect, config.action, execute],
+    [config.action, execute, multiSelect, selectable],
   );
 
-  if (visible === false) return null;
+  if (visible === false) {
+    return null;
+  }
 
-  // Loading state
   if (isLoading && hasEndpoint) {
     return (
       <div
         data-snapshot-component="tree-view"
         data-testid="tree-view"
-        className={config.className}
+        data-snapshot-id={`${rootId}-root`}
+        className={rootSurface.className}
+        style={rootSurface.style}
       >
         <div
           data-testid="tree-view-loading"
           style={{ padding: "var(--sn-spacing-md, 1rem)" }}
         >
-          {[0, 1, 2].map((i) => (
+          {[0, 1, 2].map((index) => (
             <div
-              key={i}
+              key={index}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "var(--sn-spacing-sm, 0.5rem)",
                 padding: "var(--sn-spacing-xs, 0.25rem) 0",
-                paddingLeft: `calc(${i === 2 ? 1 : 0} * var(--sn-spacing-lg, 1.5rem))`,
+                paddingLeft: `calc(${index === 2 ? 1 : 0} * var(--sn-spacing-lg, 1.5rem))`,
               }}
             >
               <div
@@ -383,7 +482,7 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
               <div
                 style={{
                   height: "var(--sn-font-size-sm, 0.875rem)",
-                  width: `${40 + i * 20}%`,
+                  width: `${40 + index * 20}%`,
                   backgroundColor: "var(--sn-color-muted, #e5e7eb)",
                   borderRadius: "var(--sn-radius-sm, 0.25rem)",
                 }}
@@ -391,17 +490,19 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
             </div>
           ))}
         </div>
+        <SurfaceStyles css={rootSurface.scopedCss} />
       </div>
     );
   }
 
-  // Error state
   if (error && hasEndpoint) {
     return (
       <div
         data-snapshot-component="tree-view"
         data-testid="tree-view"
-        className={config.className}
+        data-snapshot-id={`${rootId}-root`}
+        className={rootSurface.className}
+        style={rootSurface.style}
       >
         <div data-testid="tree-view-error">
           <AutoErrorState
@@ -409,17 +510,19 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
             onRetry={config.error?.retry !== undefined ? refetch : undefined}
           />
         </div>
+        <SurfaceStyles css={rootSurface.scopedCss} />
       </div>
     );
   }
 
-  // Empty state
   if (items.length === 0) {
     return (
       <div
         data-snapshot-component="tree-view"
         data-testid="tree-view"
-        className={config.className}
+        data-snapshot-id={`${rootId}-root`}
+        className={rootSurface.className}
+        style={rootSurface.style}
       >
         <div
           data-testid="tree-view-empty"
@@ -432,6 +535,7 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
         >
           No items to display
         </div>
+        <SurfaceStyles css={rootSurface.scopedCss} />
       </div>
     );
   }
@@ -440,36 +544,17 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
     <div
       data-snapshot-component="tree-view"
       data-testid="tree-view"
-      className={config.className}
+      data-snapshot-id={`${rootId}-root`}
+      className={rootSurface.className}
+      style={rootSurface.style}
       role="tree"
-      style={{
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
     >
-      <style>{`
-        [data-snapshot-component="tree-view"] [data-testid="tree-node-row"]:not([aria-disabled="true"]):hover {
-          background: var(--sn-color-secondary, #f3f4f6);
-        }
-        [data-snapshot-component="tree-view"] [data-testid="tree-node-row"]:focus {
-          outline: none;
-        }
-        [data-snapshot-component="tree-view"] [data-testid="tree-node-row"]:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-        [data-snapshot-component="tree-view"] [data-testid="tree-chevron"]:focus {
-          outline: none;
-        }
-        [data-snapshot-component="tree-view"] [data-testid="tree-chevron"]:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-      `}</style>
       {items.map((item, index) => {
         const pathKey = `root-${index}`;
         return (
           <TreeNode
             key={getNodeKey(item, pathKey)}
+            rootId={rootId}
             item={item}
             depth={0}
             selected={selected}
@@ -480,9 +565,11 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
             showIcon={showIcon}
             showConnectors={showConnectors}
             pathKey={pathKey}
+            slots={config.slots}
           />
         );
       })}
+      <SurfaceStyles css={rootSurface.scopedCss} />
     </div>
   );
 }

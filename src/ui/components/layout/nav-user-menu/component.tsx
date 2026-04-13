@@ -2,6 +2,9 @@
 
 import { useRef, useState } from "react";
 import { useSubscribe } from "../../../context/index";
+import { resolveRuntimeLocale, resolveTRef } from "../../../i18n/resolve";
+import { isTRef, type I18nConfig, type TRef } from "../../../i18n/schema";
+import { useManifestRuntime } from "../../../manifest/runtime";
 import { ButtonControl } from "../../forms/button";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { FloatingPanel, MenuItem } from "../../primitives/floating-menu";
@@ -12,8 +15,26 @@ function SurfaceStyles({ css }: { css?: string }) {
   return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
+function resolveMenuText(
+  value: string | TRef,
+  locale: string | undefined,
+  i18n: I18nConfig | undefined,
+): string {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (isTRef(value)) {
+    return resolveTRef(value, locale, i18n);
+  }
+
+  return "";
+}
+
 export function NavUserMenu({ config }: { config: NavUserMenuConfig }) {
+  const manifest = useManifestRuntime();
   const rawUser = useSubscribe({ from: "global.user" });
+  const localeState = useSubscribe({ from: "global.locale" });
   const user = rawUser as {
     name?: string;
     email?: string;
@@ -24,6 +45,7 @@ export function NavUserMenu({ config }: { config: NavUserMenuConfig }) {
   const execute = useActionExecutor();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const activeLocale = resolveRuntimeLocale(manifest?.raw.i18n, localeState);
 
   if (!user) {
     return null;
@@ -102,7 +124,7 @@ export function NavUserMenu({ config }: { config: NavUserMenuConfig }) {
         {menuItems.map((item, index) => (
           <MenuItem
             key={`${rootId}-item-${index}`}
-            label={item.label}
+            label={resolveMenuText(item.label, activeLocale, manifest?.raw.i18n)}
             icon={item.icon}
             onClick={() => {
               setIsOpen(false);

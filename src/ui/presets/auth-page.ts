@@ -21,7 +21,12 @@ function buildAuthForm(
         method: "POST",
         fields: [
           { name: "email", type: "email", label: "Email", required: true },
-          { name: "password", type: "password", label: "Password", required: true },
+          {
+            name: "password",
+            type: "password",
+            label: "Password",
+            required: true,
+          },
           {
             name: "confirmPassword",
             type: "password",
@@ -58,7 +63,12 @@ function buildAuthForm(
         submit: "auth:resetPassword",
         method: "POST",
         fields: [
-          { name: "password", type: "password", label: "New Password", required: true },
+          {
+            name: "password",
+            type: "password",
+            label: "New Password",
+            required: true,
+          },
           {
             name: "confirmPassword",
             type: "password",
@@ -97,7 +107,12 @@ function buildAuthForm(
         method: "POST",
         fields: [
           { name: "email", type: "email", label: "Email", required: true },
-          { name: "password", type: "password", label: "Password", required: true },
+          {
+            name: "password",
+            type: "password",
+            label: "Password",
+            required: true,
+          },
         ],
         submitLabel: "Sign In",
         onSuccess: {
@@ -108,6 +123,9 @@ function buildAuthForm(
   }
 }
 
+/**
+ * Build a manifest page config for a common auth screen.
+ */
 export function authPage(options: AuthPageOptions): PageConfig {
   const slug = options.id ?? `auth-${slugify(options.screen)}`;
   const cardChildren: Record<string, unknown>[] = [];

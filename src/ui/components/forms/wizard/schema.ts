@@ -1,13 +1,28 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
 import {
-  baseComponentConfigSchema,
   endpointTargetSchema,
 } from "../../_base/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import {
   fieldConfigSchema,
   fieldValidationSchema,
 } from "../auto-form/schema";
+
+export const wizardSlotNames = [
+  "root",
+  "steps",
+  "step",
+  "stepLabel",
+  "stepDescription",
+  "stepMarker",
+  "stepConnector",
+  "panel",
+  "actions",
+  "backButton",
+  "nextButton",
+  "submitButton",
+] as const;
 
 /**
  * Re-export for consumers that want to import the field schema directly.
@@ -52,6 +67,7 @@ export const wizardStepSchema = z.object({
   onEnter: z.union([actionSchema, z.array(actionSchema)]).optional(),
   /** Actions fired before leaving this step. */
   onLeave: z.union([actionSchema, z.array(actionSchema)]).optional(),
+  slots: slotsSchema(["step", "stepLabel", "stepDescription", "stepMarker", "stepConnector", "panel"]).optional(),
 });
 
 /**
@@ -61,8 +77,7 @@ export const wizardStepSchema = z.object({
  * On the final step, all accumulated data is submitted to `submitEndpoint`
  * (if set) and published to the page context via `id`.
  */
-export const wizardSchema = baseComponentConfigSchema
-  .extend({
+export const wizardSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("wizard"),
     /** Ordered list of wizard steps. */
@@ -75,5 +90,6 @@ export const wizardSchema = baseComponentConfigSchema
     onComplete: actionSchema.optional(),
     /** Allow users to skip optional steps (steps with no required fields). */
     allowSkip: z.boolean().default(false),
+    slots: slotsSchema(wizardSlotNames).optional(),
   })
   .strict();

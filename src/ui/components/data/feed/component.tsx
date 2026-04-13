@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAtomValue } from "jotai/react";
@@ -79,7 +79,9 @@ function resolveItems(
     const key =
       typeof keyVal === "string" || typeof keyVal === "number" ? keyVal : index;
 
-    const avatar = config.avatar ? String(getField(item, config.avatar) ?? "") : undefined;
+    const avatar = config.avatar
+      ? String(getField(item, config.avatar) ?? "")
+      : undefined;
     const title = String(getField(item, config.title) ?? "");
     const description = config.description
       ? String(getField(item, config.description) ?? "")
@@ -241,7 +243,9 @@ function FeedItemRow({
         borderBottom:
           "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
         cursor: "pointer",
-        backgroundColor: isSelected ? "var(--sn-color-muted, #f3f4f6)" : undefined,
+        backgroundColor: isSelected
+          ? "var(--sn-color-muted, #f3f4f6)"
+          : undefined,
         transition:
           "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
       }}
@@ -377,7 +381,9 @@ function FeedItemRow({
                 cursor: "pointer",
               }}
             >
-              {itemAction.icon ? <Icon name={itemAction.icon} size={14} /> : null}
+              {itemAction.icon ? (
+                <Icon name={itemAction.icon} size={14} />
+              ) : null}
               <span>{itemAction.label}</span>
             </button>
           ))}
@@ -387,19 +393,32 @@ function FeedItemRow({
   );
 }
 
+/**
+ * Render an activity feed with grouping, empty states, live refresh, and optional infinite scrolling.
+ */
 export function Feed({ config }: { config: FeedConfig }) {
   const publish = usePublish(config.id);
   const wsManager = useAtomValue(wsManagerAtom);
   const isRef = isFromRef(config.data);
   const resolvedRef = useSubscribe(config.data);
-  const { data: fetchedData, isLoading, error, refetch } = useComponentData(config.data);
+  const {
+    data: fetchedData,
+    isLoading,
+    error,
+    refetch,
+  } = useComponentData(config.data);
   const [page, setPage] = useState(1);
-  const [selectedItem, setSelectedItem] = useState<Record<string, unknown> | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [, setRelativeTick] = useState(0);
 
   const rawRows = useMemo<Record<string, unknown>[]>(() => {
     if (isRef) {
-      return Array.isArray(resolvedRef) ? (resolvedRef as Record<string, unknown>[]) : [];
+      return Array.isArray(resolvedRef)
+        ? (resolvedRef as Record<string, unknown>[])
+        : [];
     }
     if (fetchedData == null) {
       return [];
@@ -417,7 +436,10 @@ export function Feed({ config }: { config: FeedConfig }) {
     return [];
   }, [fetchedData, isRef, resolvedRef]);
 
-  const resolvedItems = useMemo(() => resolveItems(rawRows, config), [config, rawRows]);
+  const resolvedItems = useMemo(
+    () => resolveItems(rawRows, config),
+    [config, rawRows],
+  );
   const pageSize = config.pageSize;
   const totalPages = Math.max(1, Math.ceil(resolvedItems.length / pageSize));
   const visibleItems = useMemo(
@@ -617,7 +639,11 @@ export function Feed({ config }: { config: FeedConfig }) {
             </React.Fragment>
           ))}
           {config.infinite && hasMore ? (
-            <div ref={infiniteScrollRef} aria-hidden="true" style={{ height: "1px" }} />
+            <div
+              ref={infiniteScrollRef}
+              aria-hidden="true"
+              style={{ height: "1px" }}
+            />
           ) : null}
         </div>
       ) : null}

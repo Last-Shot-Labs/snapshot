@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
@@ -65,11 +65,16 @@ function formatDisplayValue(value: string, format?: string): string {
     return value;
   }
   if (format) {
-    return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
+    return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
+      date,
+    );
   }
   return new Intl.DateTimeFormat().format(date);
 }
 
+/**
+ * Render a manifest-driven date picker input.
+ */
 export function DatePicker({ config }: { config: DatePickerConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
@@ -102,8 +107,17 @@ export function DatePicker({ config }: { config: DatePickerConfig }) {
       publish(toOutputValue(multipleValue, config.valueFormat));
       return;
     }
-    publish(singleValue ? toOutputValue(singleValue, config.valueFormat) : null);
-  }, [config.mode, config.valueFormat, multipleValue, publish, rangeValue, singleValue]);
+    publish(
+      singleValue ? toOutputValue(singleValue, config.valueFormat) : null,
+    );
+  }, [
+    config.mode,
+    config.valueFormat,
+    multipleValue,
+    publish,
+    rangeValue,
+    singleValue,
+  ]);
 
   if (visible === false) {
     return null;
@@ -183,7 +197,8 @@ export function DatePicker({ config }: { config: DatePickerConfig }) {
                   "var(--sn-border-thin, 1px) solid var(--sn-color-border, #d1d5db)",
                 backgroundColor: "var(--sn-color-card, #ffffff)",
                 borderRadius: "var(--sn-radius-sm, 0.25rem)",
-                padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+                padding:
+                  "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
                 cursor: "pointer",
               }}
             >
@@ -287,7 +302,9 @@ export function DatePicker({ config }: { config: DatePickerConfig }) {
                   return;
                 }
                 const nextValue = [...multipleValue, multipleInput]
-                  .filter((value, index, array) => array.indexOf(value) === index)
+                  .filter(
+                    (value, index, array) => array.indexOf(value) === index,
+                  )
                   .sort();
                 setMultipleValue(nextValue);
                 setMultipleInput("");
@@ -298,7 +315,8 @@ export function DatePicker({ config }: { config: DatePickerConfig }) {
                   "var(--sn-border-thin, 1px) solid var(--sn-color-border, #d1d5db)",
                 backgroundColor: "var(--sn-color-card, #ffffff)",
                 borderRadius: "var(--sn-radius-sm, 0.25rem)",
-                padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+                padding:
+                  "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
                 cursor: "pointer",
               }}
             >
@@ -317,7 +335,9 @@ export function DatePicker({ config }: { config: DatePickerConfig }) {
                 key={value}
                 type="button"
                 onClick={() => {
-                  const nextValue = multipleValue.filter((entry) => entry !== value);
+                  const nextValue = multipleValue.filter(
+                    (entry) => entry !== value,
+                  );
                   setMultipleValue(nextValue);
                   triggerChange(toOutputValue(nextValue, config.valueFormat));
                 }}
@@ -326,7 +346,8 @@ export function DatePicker({ config }: { config: DatePickerConfig }) {
                     "var(--sn-border-thin, 1px) solid var(--sn-color-border, #d1d5db)",
                   backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
                   borderRadius: "var(--sn-radius-full, 9999px)",
-                  padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+                  padding:
+                    "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
                   cursor: "pointer",
                 }}
               >
@@ -347,9 +368,13 @@ export function DatePicker({ config }: { config: DatePickerConfig }) {
           ? formatDisplayValue(singleValue, config.format)
           : config.mode === "range"
             ? `${formatDisplayValue(rangeValue.start, config.format)}${
-                rangeValue.end ? ` → ${formatDisplayValue(rangeValue.end, config.format)}` : ""
+                rangeValue.end
+                  ? ` → ${formatDisplayValue(rangeValue.end, config.format)}`
+                  : ""
               }`
-            : multipleValue.map((value) => formatDisplayValue(value, config.format)).join(", ")}
+            : multipleValue
+                .map((value) => formatDisplayValue(value, config.format))
+                .join(", ")}
       </div>
     </div>
   );

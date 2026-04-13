@@ -16,6 +16,9 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return outputArray;
 }
 
+/**
+ * High-level browser push subscription state reported by `usePushNotifications()`.
+ */
 export type PushState =
   | "unsupported"
   | "denied"
@@ -23,6 +26,9 @@ export type PushState =
   | "subscribed"
   | "unsubscribed";
 
+/**
+ * Optional overrides for the manifest-backed push configuration.
+ */
 export interface UsePushNotificationsOpts {
   /** Optional override for the manifest VAPID key. */
   vapidPublicKey?: string;
@@ -34,6 +40,9 @@ export interface UsePushNotificationsOpts {
   serviceWorkerPath?: string;
 }
 
+/**
+ * Return shape of `usePushNotifications()`.
+ */
 export interface UsePushNotificationsResult {
   /** Current push subscription state */
   state: PushState;
@@ -66,7 +75,8 @@ export function usePushNotifications(
     manifestPush?.applicationServerKey ??
     vapidPublicKey;
   const subscribeUrl = opts?.subscribeUrl ?? "/__push/subscribe";
-  const swPath = opts?.serviceWorkerPath ?? manifestPush?.serviceWorkerPath ?? "/sw.js";
+  const swPath =
+    opts?.serviceWorkerPath ?? manifestPush?.serviceWorkerPath ?? "/sw.js";
 
   const isSupported =
     typeof window !== "undefined" &&

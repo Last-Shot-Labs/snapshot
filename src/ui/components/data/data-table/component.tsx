@@ -27,6 +27,12 @@ import { wsManagerAtom } from "../../../../ws/atom";
 import { Icon } from "../../../icons/icon";
 import { useSubscribe } from "../../../context/hooks";
 import { BUTTON_INTERACTIVE_CSS, getButtonStyle } from "../../_base/button-styles";
+import { ButtonControl } from "../../forms/button";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
 
 // ── Formatting helpers ──────────────────────────────────────────────────────
 
@@ -345,37 +351,63 @@ function toAutoEmptyStateConfig(
 // ── Toolbar button ──────────────────────────────────────────────────────────
 
 function ToolbarButton({
+  rootId,
+  index,
   item,
   execute,
 }: {
+  rootId: string;
+  index: number;
   item: NonNullable<DataTableConfig["toolbar"]>[number];
   execute: ReturnType<typeof useActionExecutor>;
 }) {
   const disabled = useSubscribe(item.disabled ?? false) as boolean;
   const variant = item.variant ?? "outline";
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-toolbar-label-${index}`,
+    componentSurface: item.slots?.itemLabel,
+  });
+  const iconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-toolbar-icon-${index}`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+    },
+    componentSurface: item.slots?.itemIcon,
+  });
   return (
-    <button
-      type="button"
-      data-sn-button=""
-      data-variant={variant}
+    <>
+      <ButtonControl
+      variant={variant}
       disabled={disabled}
+      surfaceId={`${rootId}-toolbar-item-${index}`}
+      surfaceConfig={item.slots?.item}
+      activeStates={disabled ? ["disabled"] : []}
       onClick={() => {
         if (disabled) return;
         void execute(item.action as Parameters<typeof execute>[0]);
       }}
-      style={{
-        ...getButtonStyle(variant, "sm", disabled),
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "var(--sn-spacing-xs, 0.25rem)",
-        fontSize: "var(--sn-font-size-sm, 0.875rem)",
-        opacity: 1,
-        filter: disabled ? "saturate(0.55) brightness(0.97)" : undefined,
-      }}
     >
-      {item.icon && <Icon name={item.icon} size={14} />}
-      {item.label}
-    </button>
+      {item.icon ? (
+        <span
+          data-snapshot-id={`${rootId}-toolbar-icon-${index}`}
+          className={iconSurface.className}
+          style={iconSurface.style}
+        >
+          <Icon name={item.icon} size={14} />
+        </span>
+      ) : null}
+      <span
+        data-snapshot-id={`${rootId}-toolbar-label-${index}`}
+        className={labelSurface.className}
+        style={labelSurface.style}
+      >
+        {item.label}
+      </span>
+      </ButtonControl>
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={iconSurface.scopedCss} />
+    </>
   );
 }
 
@@ -540,6 +572,7 @@ export function DataTable({ config }: { config: DataTableConfig }) {
     () => config.id ?? `data-table-${generatedId.replace(/[:]/g, "")}`,
     [config.id, generatedId],
   );
+  const rootId = config.id ?? containerId;
   const [contextMenuState, setContextMenuState] = useState<{
     x: number;
     y: number;
@@ -651,6 +684,47 @@ export function DataTable({ config }: { config: DataTableConfig }) {
     () => toAutoEmptyStateConfig(config.empty),
     [config.empty],
   );
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const toolbarSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-toolbar`,
+    componentSurface: config.slots?.toolbar,
+  });
+  const bulkActionsSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-bulk-actions`,
+    componentSurface: config.slots?.bulkActions,
+  });
+  const loadingSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-loading`,
+    componentSurface: config.slots?.loadingState,
+  });
+  const errorSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-error`,
+    componentSurface: config.slots?.errorState,
+  });
+  const emptySurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-empty`,
+    componentSurface: config.slots?.emptyState,
+  });
+  const paginationSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-pagination`,
+    componentSurface: config.slots?.pagination,
+  });
+  const headerRowSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-header-row`,
+    componentSurface: config.slots?.headerRow,
+  });
+  const headerCellBaseSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-header-cell`,
+    componentSurface: config.slots?.headerCell,
+  });
 
   // Bulk actions toolbar
   const showBulkActions =
@@ -714,6 +788,32 @@ export function DataTable({ config }: { config: DataTableConfig }) {
           ? "pointer"
           : undefined,
     };
+    const rowSurface = resolveSurfacePresentation({
+      surfaceId: `${rootId}-row-${rowIndex}`,
+      implementationBase: rowStyle as Record<string, unknown>,
+      componentSurface: config.slots?.row,
+      activeStates: table.selection.has(rowId) ? ["selected"] : [],
+    });
+    const cellSurfaces = table.columns.map((col) =>
+      resolveSurfacePresentation({
+        surfaceId: `${rootId}-cell-${rowIndex}-${col.field}`,
+        implementationBase: {
+          padding: cellPadding,
+          textAlign: col.align ?? "left",
+        },
+        componentSurface: config.slots?.cell,
+        activeStates: table.selection.has(rowId) ? ["selected"] : [],
+      }),
+    );
+    const actionsCellSurface = resolveSurfacePresentation({
+      surfaceId: `${rootId}-actions-cell-${rowIndex}`,
+      implementationBase: {
+        padding: cellPadding,
+        textAlign: "right",
+      },
+      componentSurface: config.slots?.actionsCell,
+      activeStates: table.selection.has(rowId) ? ["selected"] : [],
+    });
 
     const rowChildren = (
       <>
@@ -758,16 +858,18 @@ export function DataTable({ config }: { config: DataTableConfig }) {
         {table.columns.map((col) => (
           <td
             key={col.field}
-            style={{
-              padding: cellPadding,
-              textAlign: col.align ?? "left",
-            }}
+            className={cellSurfaces[table.columns.indexOf(col)]?.className}
+            style={cellSurfaces[table.columns.indexOf(col)]?.style}
           >
             {formatCellValue(row[col.field], col, row)}
           </td>
         ))}
         {hasActions && (
-          <td style={{ padding: cellPadding, textAlign: "right" }}>
+          <td
+            data-snapshot-id={`${rootId}-actions-cell-${rowIndex}`}
+            className={actionsCellSurface.className}
+            style={actionsCellSurface.style}
+          >
             <div
               style={{
                 display: "flex",
@@ -775,7 +877,7 @@ export function DataTable({ config }: { config: DataTableConfig }) {
                 justifyContent: "flex-end",
               }}
             >
-              {config.actions!.map((action, actionIndex) => {
+              {config.actions!.map((action: NonNullable<DataTableConfig["actions"]>[number], actionIndex: number) => {
                 if (
                   action.visible === false ||
                   (typeof action.visible === "boolean" && !action.visible)
@@ -784,20 +886,21 @@ export function DataTable({ config }: { config: DataTableConfig }) {
                 }
 
                 return (
-                  <button
-                    type="button"
+                  <ButtonControl
                     key={actionIndex}
-                    data-row-action
+                    variant="ghost"
+                    surfaceId={`${rootId}-row-action-${rowIndex}-${actionIndex}`}
+                    surfaceConfig={action.slots?.item}
                     onClick={() =>
                       void execute(action.action, {
                         row,
                         ...row,
                       })
                     }
-                    style={{ cursor: "pointer" }}
                   >
+                    {action.icon ? <Icon name={action.icon} size={14} /> : null}
                     {action.label}
-                  </button>
+                  </ButtonControl>
                 );
               })}
             </div>
@@ -834,7 +937,7 @@ export function DataTable({ config }: { config: DataTableConfig }) {
             id={sortableId ?? String(rowId)}
             containerId={containerId}
             dataSelected={table.selection.has(rowId) ? "" : undefined}
-            style={rowStyle}
+            style={rowSurface.style}
             onClick={onRowClick}
             onContextMenu={onRowContextMenu}
           >
@@ -842,10 +945,12 @@ export function DataTable({ config }: { config: DataTableConfig }) {
           </SortableTableRow>
         ) : (
           <tr
+            data-snapshot-id={`${rootId}-row-${rowIndex}`}
             data-selected={table.selection.has(rowId) ? "" : undefined}
+            className={rowSurface.className}
             onClick={onRowClick}
             onContextMenu={onRowContextMenu}
-            style={rowStyle}
+            style={rowSurface.style}
           >
             {rowChildren}
           </tr>
@@ -869,6 +974,11 @@ export function DataTable({ config }: { config: DataTableConfig }) {
             </td>
           </tr>
         )}
+        <SurfaceStyles css={rowSurface.scopedCss} />
+        {cellSurfaces.map((surface, cellIndex) => (
+          <SurfaceStyles key={`${rowId}-cell-css-${cellIndex}`} css={surface.scopedCss} />
+        ))}
+        <SurfaceStyles css={actionsCellSurface.scopedCss} />
       </React.Fragment>
     );
   };
@@ -894,7 +1004,12 @@ export function DataTable({ config }: { config: DataTableConfig }) {
     : 0;
 
   return (
-    <>
+    <div
+      data-snapshot-component="data-table"
+      data-snapshot-id={`${rootId}-root`}
+      className={rootSurface.className}
+      style={rootSurface.style}
+    >
       <style>{`
 [data-snapshot-component="data-table"] tr[style*="cursor"]:hover,
 [data-snapshot-component="data-table"] tr[data-selected]:hover { background-color: var(--sn-color-secondary, #f3f4f6) !important; }
@@ -928,21 +1043,24 @@ export function DataTable({ config }: { config: DataTableConfig }) {
           }}
         >
           <span>New data available</span>
-          <button type="button" onClick={refresh}>
+          <ButtonControl variant="outline" onClick={refresh}>
             Refresh
-          </button>
+          </ButtonControl>
         </div>
       ) : null}
       {/* Table header: search + toolbar */}
       {(config.searchable || config.toolbar?.length) ? (
         <div
           data-table-search
+          data-snapshot-id={`${rootId}-toolbar`}
+          className={toolbarSurface.className}
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: config.searchable ? "space-between" : "flex-end",
             gap: "var(--sn-spacing-sm, 0.5rem)",
             marginBottom: "var(--sn-spacing-md, 12px)",
+            ...toolbarSurface.style,
           }}
         >
           {config.searchable && (
@@ -965,8 +1083,8 @@ export function DataTable({ config }: { config: DataTableConfig }) {
           {config.toolbar?.length ? (
             <div style={{ display: "flex", gap: "var(--sn-spacing-xs, 0.25rem)", flexShrink: 0 }}>
               <style>{BUTTON_INTERACTIVE_CSS}</style>
-              {config.toolbar.map((item, i) => (
-                <ToolbarButton key={i} item={item} execute={execute} />
+              {config.toolbar.map((item: NonNullable<DataTableConfig["toolbar"]>[number], i: number) => (
+                <ToolbarButton key={i} rootId={rootId} index={i} item={item} execute={execute} />
               ))}
             </div>
           ) : null}
@@ -977,6 +1095,8 @@ export function DataTable({ config }: { config: DataTableConfig }) {
       {showBulkActions && (
         <div
           data-table-bulk-actions
+          data-snapshot-id={`${rootId}-bulk-actions`}
+          className={bulkActionsSurface.className}
           role="toolbar"
           aria-label="Bulk actions"
           style={{
@@ -987,14 +1107,16 @@ export function DataTable({ config }: { config: DataTableConfig }) {
             marginBottom: "var(--sn-spacing-sm, 8px)",
             backgroundColor: "var(--sn-color-muted, #f3f4f6)",
             borderRadius: "var(--sn-radius-md, 6px)",
+            ...bulkActionsSurface.style,
           }}
         >
           <span>{table.selectedIds.length} selected</span>
-          {config.bulkActions!.map((bulkAction, i) => (
-            <button
-              type="button"
+          {config.bulkActions!.map((bulkAction: NonNullable<DataTableConfig["bulkActions"]>[number], i: number) => (
+            <ButtonControl
               key={i}
-              data-bulk-action
+              variant="ghost"
+              surfaceId={`${rootId}-bulk-action-${i}`}
+              surfaceConfig={bulkAction.slots?.item}
               onClick={() =>
                 void execute(bulkAction.action, {
                   selectedRows: table.selectedRows,
@@ -1002,13 +1124,12 @@ export function DataTable({ config }: { config: DataTableConfig }) {
                   count: table.selectedIds.length,
                 })
               }
-              style={{ cursor: "pointer" }}
             >
               {bulkAction.label.replace(
                 "{count}",
                 String(table.selectedIds.length),
               )}
-            </button>
+            </ButtonControl>
           ))}
         </div>
       )}
@@ -1030,7 +1151,11 @@ export function DataTable({ config }: { config: DataTableConfig }) {
           }}
         >
           <thead>
-            <tr>
+            <tr
+              data-snapshot-id={`${rootId}-header-row`}
+              className={headerRowSurface.className}
+              style={headerRowSurface.style}
+            >
               {/* Expand column header */}
               {config.expandable && (
                 <th style={{ padding: cellPadding, width: "32px" }} />
@@ -1040,7 +1165,11 @@ export function DataTable({ config }: { config: DataTableConfig }) {
               )}
               {/* Select all checkbox */}
               {config.selectable && (
-                <th style={{ padding: cellPadding, width: "40px" }}>
+                <th
+                  data-snapshot-id={`${rootId}-header-cell-select`}
+                  className={headerCellBaseSurface.className}
+                  style={{ padding: cellPadding, width: "40px", ...headerCellBaseSurface.style }}
+                >
                   <input
                     type="checkbox"
                     onChange={() => table.toggleAll()}
@@ -1064,12 +1193,15 @@ export function DataTable({ config }: { config: DataTableConfig }) {
               {table.columns.map((col) => (
                 <th
                   key={col.field}
+                  data-snapshot-id={`${rootId}-header-cell-${col.field}`}
+                  className={headerCellBaseSurface.className}
                   style={{
                     padding: cellPadding,
                     textAlign: col.align ?? "left",
                     cursor: col.sortable ? "pointer" : "default",
                     width: col.width,
                     userSelect: "none",
+                    ...headerCellBaseSurface.style,
                   }}
                   onClick={
                     col.sortable
@@ -1093,7 +1225,11 @@ export function DataTable({ config }: { config: DataTableConfig }) {
 
               {/* Actions column header */}
               {hasActions && (
-                <th style={{ padding: cellPadding, textAlign: "right" }}>
+                <th
+                  data-snapshot-id={`${rootId}-header-cell-actions`}
+                  className={headerCellBaseSurface.className}
+                  style={{ padding: cellPadding, textAlign: "right", ...headerCellBaseSurface.style }}
+                >
                   Actions
                 </th>
               )}
@@ -1106,7 +1242,13 @@ export function DataTable({ config }: { config: DataTableConfig }) {
               (config.loading && !config.loading.disabled ? (
                 <tr>
                   <td colSpan={totalColumns} style={{ padding: cellPadding }}>
-                    <AutoSkeleton componentType="data-table" config={config.loading} />
+                    <div
+                      data-snapshot-id={`${rootId}-loading`}
+                      className={loadingSurface.className}
+                      style={loadingSurface.style}
+                    >
+                      <AutoSkeleton componentType="data-table" config={config.loading} />
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -1120,7 +1262,13 @@ export function DataTable({ config }: { config: DataTableConfig }) {
                   colSpan={totalColumns}
                   style={{ padding: cellPadding, textAlign: "center" }}
                 >
-                  <div data-table-error role="alert">
+                  <div
+                    data-table-error
+                    role="alert"
+                    data-snapshot-id={`${rootId}-error`}
+                    className={errorSurface.className}
+                    style={errorSurface.style}
+                  >
                     Error: {table.error.message}
                   </div>
                 </td>
@@ -1135,9 +1283,20 @@ export function DataTable({ config }: { config: DataTableConfig }) {
                   style={{ padding: cellPadding, textAlign: "center" }}
                 >
                   {emptyStateConfig ? (
-                    <AutoEmptyState config={emptyStateConfig} />
+                    <div
+                      data-snapshot-id={`${rootId}-empty`}
+                      className={emptySurface.className}
+                      style={emptySurface.style}
+                    >
+                      <AutoEmptyState config={emptyStateConfig} />
+                    </div>
                   ) : (
-                    <div data-table-empty>
+                    <div
+                      data-table-empty
+                      data-snapshot-id={`${rootId}-empty`}
+                      className={emptySurface.className}
+                      style={emptySurface.style}
+                    >
                       {config.emptyMessage ?? "No data available"}
                     </div>
                   )}
@@ -1199,6 +1358,8 @@ export function DataTable({ config }: { config: DataTableConfig }) {
       {table.pagination && table.pagination.totalPages > 1 && !table.isInfiniteScroll && (
         <div
           data-table-pagination
+          data-snapshot-id={`${rootId}-pagination`}
+          className={paginationSurface.className}
           role="navigation"
           aria-label="Table pagination"
           style={{
@@ -1207,32 +1368,33 @@ export function DataTable({ config }: { config: DataTableConfig }) {
             justifyContent: "space-between",
             padding: "var(--sn-spacing-sm, 8px) 0",
             marginTop: "var(--sn-spacing-sm, 8px)",
+            ...paginationSurface.style,
           }}
         >
           <span>
             Page {table.pagination.currentPage} of {table.pagination.totalPages}
           </span>
           <div style={{ display: "flex", gap: "var(--sn-spacing-xs, 4px)" }}>
-            <button
-              type="button"
+            <ButtonControl
+              variant="ghost"
               onClick={() => table.prevPage()}
               disabled={table.pagination!.currentPage <= 1}
               aria-label="Previous page"
-              data-testid="table-pagination-prev"
+              testId="table-pagination-prev"
             >
               Previous
-            </button>
-            <button
-              type="button"
+            </ButtonControl>
+            <ButtonControl
+              variant="ghost"
               onClick={() => table.nextPage()}
               disabled={
                 table.pagination!.currentPage >= table.pagination!.totalPages
               }
               aria-label="Next page"
-              data-testid="table-pagination-next"
+              testId="table-pagination-next"
             >
               Next
-            </button>
+            </ButtonControl>
           </div>
         </div>
       )}
@@ -1243,6 +1405,15 @@ export function DataTable({ config }: { config: DataTableConfig }) {
           onClose={() => setContextMenuState(null)}
         />
       ) : null}
-    </>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={toolbarSurface.scopedCss} />
+      <SurfaceStyles css={bulkActionsSurface.scopedCss} />
+      <SurfaceStyles css={loadingSurface.scopedCss} />
+      <SurfaceStyles css={errorSurface.scopedCss} />
+      <SurfaceStyles css={emptySurface.scopedCss} />
+      <SurfaceStyles css={paginationSurface.scopedCss} />
+      <SurfaceStyles css={headerRowSurface.scopedCss} />
+      <SurfaceStyles css={headerCellBaseSurface.scopedCss} />
+    </div>
   );
 }

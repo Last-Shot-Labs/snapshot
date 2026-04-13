@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { actionSchema } from "../../../actions/types";
+import { tRefSchema } from "../../../i18n/schema";
 
 export const navUserMenuSlotNames = [
   "root",
@@ -26,7 +27,7 @@ export const navUserMenuConfigSchema = extendComponentSchema({
     .array(
       z
         .object({
-          label: z.string(),
+          label: z.union([z.string(), tRefSchema]),
           icon: z.string().optional(),
           action: actionSchema,
           roles: z.array(z.string()).optional(),

@@ -158,4 +158,7 @@ export function createWebhookHooks({
   };
 }
 
+/**
+ * Hook surface returned by `createWebhookHooks()`.
+ */
 export type WebhookHooks = ReturnType<typeof createWebhookHooks>;

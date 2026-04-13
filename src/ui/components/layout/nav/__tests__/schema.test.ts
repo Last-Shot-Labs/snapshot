@@ -52,6 +52,14 @@ describe("navItemSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts translation reference labels", () => {
+    const result = navItemSchema.safeParse({
+      label: { t: "nav.home" },
+      path: "/",
+    });
+    expect(result.success).toBe(true);
+  });
+
   it("rejects missing label", () => {
     const result = navItemSchema.safeParse({ path: "/home" });
     expect(result.success).toBe(false);
@@ -98,6 +106,25 @@ describe("navConfigSchema", () => {
         src: "/logo.png",
         text: "MyApp",
         path: "/",
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts translated user menu labels and logo text", () => {
+    const result = navConfigSchema.safeParse({
+      type: "nav",
+      items: [{ label: { t: "nav.home" }, path: "/" }],
+      userMenu: {
+        items: [
+          {
+            label: { t: "nav.logout" },
+            action: { type: "navigate", to: "/logout" },
+          },
+        ],
+      },
+      logo: {
+        text: { t: "nav.brand" },
       },
     });
     expect(result.success).toBe(true);

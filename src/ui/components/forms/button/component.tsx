@@ -16,7 +16,7 @@ export function ButtonControl({
   children,
   type = "button",
   variant = "default",
-  size = "md",
+  size = "sm",
   disabled,
   fullWidth,
   onClick,
@@ -26,11 +26,21 @@ export function ButtonControl({
   surfaceConfig,
   itemSurfaceConfig,
   testId,
+  ariaLabel,
   ariaCurrent,
+  ariaSelected,
   ariaExpanded,
   ariaHasPopup,
+  role,
+  tabIndex,
   activeStates,
 }: ButtonControlProps) {
+  const minHeightBySize: Record<string, string> = {
+    sm: "2.25rem",
+    md: "2.5rem",
+    lg: "2.875rem",
+    icon: "2.5rem",
+  };
   const resolvedStates = new Set([
     ...(activeStates ?? []),
     ...(disabled ? (["disabled"] as const) : []),
@@ -42,10 +52,12 @@ export function ButtonControl({
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
+      gap: "var(--sn-spacing-xs, 0.5rem)",
       width: fullWidth ? "100%" : "auto",
-      minHeight: size === "lg" ? "3.25rem" : "2.875rem",
+      minHeight: minHeightBySize[size] ?? minHeightBySize.sm,
       appearance: "none",
       textAlign: "center",
+      whiteSpace: "nowrap",
     },
     componentSurface: surfaceConfig,
     itemSurface: itemSurfaceConfig,
@@ -67,10 +79,14 @@ export function ButtonControl({
         data-current={resolvedStates.has("current") ? "true" : undefined}
         data-active={resolvedStates.has("active") ? "true" : undefined}
         data-disabled={resolvedStates.has("disabled") ? "true" : undefined}
+        aria-label={ariaLabel}
         aria-current={ariaCurrent}
+        aria-selected={ariaSelected}
         aria-expanded={ariaExpanded}
         aria-haspopup={ariaHasPopup}
         aria-disabled={disabled || undefined}
+        role={role}
+        tabIndex={tabIndex}
         className={[className, rootSurface.className].filter(Boolean).join(" ") || undefined}
         style={{
           ...(rootSurface.style ?? {}),
@@ -80,6 +96,7 @@ export function ButtonControl({
         {children}
       </button>
       <SurfaceStyles css={rootSurface.scopedCss} />
+      <style>{BUTTON_INTERACTIVE_CSS}</style>
     </>
   );
 }
@@ -166,7 +183,6 @@ export function Button({ config }: { config: ButtonConfig }) {
       </ButtonControl>
       <SurfaceStyles css={labelSurface.scopedCss} />
       <SurfaceStyles css={iconSurface.scopedCss} />
-      <style>{BUTTON_INTERACTIVE_CSS}</style>
     </div>
   );
 }

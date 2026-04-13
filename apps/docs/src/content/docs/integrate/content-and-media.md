@@ -14,6 +14,7 @@ Snapshot currently includes:
 - link embeds and compare views
 - image, video, carousel, and embed components
 - emoji and GIF selection that can be composed into communication experiences
+- manifest-addressable content and media surfaces that can still be reused from custom React
 
 Start with these source-backed references:
 
@@ -30,5 +31,7 @@ Canonical source for this surface lives in:
 - `src/ui/components/communication/gif-picker/**`
 - `src/ui/manifest/schema.ts`
 - `playground/src/showcase.tsx`
+
+The highest-signal showcase coverage is currently in the `content` and `communication` page groups inside `playground/src/showcase.tsx`.
 
 Use the [Examples and Showcase](/examples/) page when you want to see the current component coverage that Snapshot ships on `main`.

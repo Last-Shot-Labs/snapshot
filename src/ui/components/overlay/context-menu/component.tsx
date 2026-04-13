@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
@@ -13,6 +13,9 @@ function SurfaceStyles({ css }: { css?: string }) {
   return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
+/**
+ * Render a right-click context menu backed by the shared context-menu portal runtime.
+ */
 export function ContextMenu({ config }: { config: ContextMenuConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const publish = usePublish(config.id);

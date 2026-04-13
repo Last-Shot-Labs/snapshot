@@ -194,6 +194,28 @@ describe("dataTableConfigSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts canonical table slots", () => {
+    const result = dataTableConfigSchema.safeParse({
+      ...baseConfig,
+      slots: {
+        root: { className: "table-root" },
+        headerCell: { className: "header-cell" },
+        pagination: { className: "pagination-slot" },
+      },
+      actions: [
+        {
+          label: "Edit",
+          action: { type: "navigate", to: "/users/{id}" },
+          slots: {
+            item: { className: "row-action-slot" },
+          },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   // ── Invalid config tests ──────────────────────────────────────────────────
 
   it("rejects missing type", () => {

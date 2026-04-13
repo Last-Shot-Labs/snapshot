@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
+import { useSubscribe } from "../../../context";
 import { ComponentWrapper } from "../../_base/component-wrapper";
 import { resolveSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
@@ -11,6 +12,8 @@ import {
 } from "../../primitives/floating-menu";
 import { useActionExecutor } from "../../../actions/executor";
 import { renderIcon } from "../../../icons/render";
+import { resolveRuntimeLocale, resolveTRef } from "../../../i18n/resolve";
+import { isTRef, type I18nConfig, type TRef } from "../../../i18n/schema";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
@@ -20,6 +23,26 @@ import type { AuthUser, ResolvedNavItem } from "./types";
 
 function SurfaceStyles({ css }: { css?: string }) {
   return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
+
+function resolveNavText(
+  value: string | TRef | undefined,
+  locale: string | undefined,
+  i18n: I18nConfig | undefined,
+): string {
+  if (!value) {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (isTRef(value)) {
+    return resolveTRef(value, locale, i18n);
+  }
+
+  return "";
 }
 
 function AvatarSurface({
@@ -76,17 +99,22 @@ function NavEntry({
   slots,
   onNavigate,
   isTopNav,
+  locale,
+  i18n,
 }: {
   item: ResolvedNavItem;
   rootId: string;
   slots: NavConfig["slots"];
   onNavigate?: (path: string) => void;
   isTopNav: boolean;
+  locale: string | undefined;
+  i18n: I18nConfig | undefined;
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLLIElement>(null);
   const hasChildren = Boolean(item.children?.length);
-  const itemId = `${rootId}-${item.path ?? item.label.replace(/\s+/g, "-")}`;
+  const itemId = item.path ? `${rootId}-${item.path}` : rootId;
+  const label = resolveNavText(item.label, locale, i18n);
   const buttonSlot = slots?.item;
   const labelSlot = slots?.itemLabel;
   const iconSlot = slots?.itemIcon;
@@ -175,7 +203,7 @@ function NavEntry({
           className={labelSurface.className}
           style={labelSurface.style}
         >
-          {item.label}
+          {label}
         </span>
         {item.resolvedBadge !== null && item.resolvedBadge > 0 ? (
           <span
@@ -202,6 +230,8 @@ function NavEntry({
               slots={slots}
               onNavigate={onNavigate}
               isTopNav={false}
+              locale={locale}
+              i18n={i18n}
             />
           ))}
         </ul>
@@ -220,7 +250,7 @@ function NavEntry({
           {item.children?.filter((child) => child.isVisible).map((child, index) => (
             <MenuItem
               key={child.path ?? `${itemId}-dropdown-${index}`}
-              label={child.label}
+              label={resolveNavText(child.label, locale, i18n)}
               icon={child.icon}
               onClick={() => {
                 setDropdownOpen(false);
@@ -248,12 +278,16 @@ function UserMenu({
   user,
   slots,
   isTopNav,
+  locale,
+  i18n,
 }: {
   rootId: string;
   config: Extract<NavConfig["userMenu"], Record<string, unknown>>;
   user: AuthUser;
   slots: NavConfig["slots"];
   isTopNav: boolean;
+  locale: string | undefined;
+  i18n: I18nConfig | undefined;
 }) {
   const execute = useActionExecutor();
   const [open, setOpen] = useState(false);
@@ -297,7 +331,7 @@ function UserMenu({
         {menuItems.map((item, index) => (
           <MenuItem
             key={`${rootId}-item-${index}`}
-            label={item.label}
+            label={resolveNavText(item.label, locale, i18n)}
             icon={item.icon}
             onClick={() => {
               setOpen(false);
@@ -321,6 +355,13 @@ interface NavComponentProps {
   variant?: "sidebar" | "top-nav";
 }
 
+/**
+ * Grouped navigation component for manifest app shells.
+ *
+ * Renders either `navigation.items` or a composable nav template, resolves translated labels at
+ * render time, applies canonical slot/state styling, and optionally renders logo and user-menu
+ * surfaces.
+ */
 export function Nav({
   config,
   pathname,
@@ -328,8 +369,10 @@ export function Nav({
   variant = "sidebar",
 }: NavComponentProps) {
   const manifest = useManifestRuntime();
+  const localeState = useSubscribe({ from: "global.locale" });
   const [currentPath, setCurrentPath] = useState(pathname ?? "/");
   const { items, isCollapsed, toggle, user } = useNav(config, currentPath);
+  const activeLocale = resolveRuntimeLocale(manifest?.raw.i18n, localeState);
   const effectiveLogo =
     config.logo ??
     (manifest?.app?.title
@@ -338,6 +381,11 @@ export function Nav({
           path: manifest.app.home ?? "/",
         }
       : undefined);
+  const effectiveLogoText = resolveNavText(
+    effectiveLogo?.text,
+    activeLocale,
+    manifest?.raw.i18n,
+  );
 
   useEffect(() => {
     if (pathname) {
@@ -428,19 +476,19 @@ export function Nav({
             {effectiveLogo.src ? (
               <img
                 src={effectiveLogo.src}
-                alt={effectiveLogo.text ?? "Logo"}
+                alt={effectiveLogoText || "Logo"}
                 data-snapshot-id={`${config.id ?? "nav"}-brand-icon`}
                 className={brandIconSurface.className}
                 style={brandIconSurface.style}
               />
             ) : null}
-            {effectiveLogo.text ? (
+            {effectiveLogoText ? (
               <span
                 data-snapshot-id={`${config.id ?? "nav"}-brand-label`}
                 className={brandLabelSurface.className}
                 style={brandLabelSurface.style}
               >
-                {effectiveLogo.text}
+                {effectiveLogoText}
               </span>
             ) : null}
           </div>
@@ -465,6 +513,8 @@ export function Nav({
               slots={config.slots}
               onNavigate={onNavigate}
               isTopNav={isTopNav}
+              locale={activeLocale}
+              i18n={manifest?.raw.i18n}
             />
           ))}
         </ul>
@@ -478,6 +528,8 @@ export function Nav({
             user={user}
             slots={config.slots}
             isTopNav={isTopNav}
+            locale={activeLocale}
+            i18n={manifest?.raw.i18n}
           />
         ) : null}
 

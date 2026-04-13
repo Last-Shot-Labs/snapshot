@@ -5,7 +5,13 @@ import type { CSSProperties } from "react";
 import { useSubscribe, usePublish } from "../../../context/index";
 import { useActionExecutor } from "../../../actions/executor";
 import { renderIcon } from "../../../icons/render";
+import { ButtonControl } from "../button";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { ToggleGroupConfig } from "./types";
+
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
 
 const SIZE_MAP: Record<
   string,
@@ -32,6 +38,8 @@ const SIZE_MAP: Record<
 };
 
 function ToggleItem({
+  rootId,
+  index,
   item,
   selected,
   variant,
@@ -39,7 +47,11 @@ function ToggleItem({
   isLast,
   role,
   onToggle,
+  rootSlot,
+  indicatorSlot,
 }: {
+  rootId: string;
+  index: number;
   item: ToggleGroupConfig["items"][number];
   selected: boolean;
   variant: string;
@@ -47,6 +59,8 @@ function ToggleItem({
   isLast: boolean;
   role: "checkbox" | "radio";
   onToggle: () => void;
+  rootSlot?: ToggleGroupConfig["slots"];
+  indicatorSlot?: ToggleGroupConfig["slots"];
 }) {
   const subscribedDisabled = useSubscribe(
     item.disabled != null &&
@@ -60,45 +74,113 @@ function ToggleItem({
       ? item.disabled
       : subscribedDisabled === true;
 
-  const itemStyle: CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "var(--sn-spacing-xs, 0.25rem)",
-    height: sizeConfig.height,
-    padding: sizeConfig.padding,
-    fontSize: sizeConfig.fontSize,
-    fontFamily: "inherit",
-    fontWeight: selected ? 600 : 400,
-    background: selected ? "var(--sn-color-accent)" : "transparent",
-    color: selected ? "var(--sn-color-accent-foreground)" : "inherit",
-    border: "none",
-    borderRight:
-      variant === "outline" && !isLast
-        ? "1px solid var(--sn-color-border)"
-        : undefined,
-    cursor: itemDisabled ? "not-allowed" : "pointer",
-    opacity: itemDisabled ? 0.5 : 1,
-    transition:
-      "background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-  };
+  const itemSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-item-${index}`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "var(--sn-spacing-xs, 0.25rem)",
+      height: sizeConfig.height,
+      padding: sizeConfig.padding,
+      fontSize: sizeConfig.fontSize,
+      fontFamily: "inherit",
+      fontWeight: selected ? 600 : 400,
+      background: selected ? "var(--sn-color-accent)" : "transparent",
+      color: selected ? "var(--sn-color-accent-foreground)" : "inherit",
+      borderRight:
+        variant === "outline" && !isLast
+          ? "1px solid var(--sn-color-border)"
+          : undefined,
+      opacity: itemDisabled ? 0.5 : 1,
+    } as Record<string, unknown>,
+    componentSurface: rootSlot?.item,
+    itemSurface: item.slots?.item,
+    activeStates: [
+      ...(selected ? ["selected"] : []),
+      ...(itemDisabled ? ["disabled"] : []),
+    ] as Array<"selected" | "disabled">,
+  });
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-item-label-${index}`,
+    componentSurface: rootSlot?.itemLabel,
+    itemSurface: item.slots?.itemLabel,
+  });
+  const iconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-item-icon-${index}`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+    },
+    componentSurface: rootSlot?.itemIcon,
+    itemSurface: item.slots?.itemIcon,
+  });
+  const indicatorSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-indicator-${index}`,
+    implementationBase: {
+      position: "absolute",
+      inset: 0,
+      borderRadius: "inherit",
+      pointerEvents: "none",
+      boxShadow: selected
+        ? "inset 0 0 0 1px var(--sn-color-primary, #2563eb)"
+        : "none",
+    } as Record<string, unknown>,
+    componentSurface: indicatorSlot?.indicator,
+    activeStates: selected ? ["selected"] : [],
+  });
 
   return (
-    <button
-      type="button"
-      role={role}
-      aria-checked={selected}
-      aria-label={item.label ?? item.value}
-      disabled={itemDisabled}
-      onClick={onToggle}
-      style={itemStyle}
-    >
-      {item.icon && renderIcon(item.icon, sizeConfig.iconSize)}
-      {item.label && <span>{item.label}</span>}
-    </button>
+    <>
+      <ButtonControl
+        variant="ghost"
+        disabled={itemDisabled}
+        onClick={onToggle}
+        surfaceId={`${rootId}-item-${index}`}
+        surfaceConfig={item.slots?.item ?? rootSlot?.item}
+        activeStates={
+          [
+            ...(selected ? ["selected"] : []),
+            ...(itemDisabled ? ["disabled"] : []),
+          ] as Array<"selected" | "disabled">
+        }
+        ariaLabel={item.label ?? item.value}
+      >
+        <span
+          data-snapshot-id={`${rootId}-indicator-${index}`}
+          className={indicatorSurface.className}
+          style={indicatorSurface.style}
+        />
+        {item.icon ? (
+          <span
+            data-snapshot-id={`${rootId}-item-icon-${index}`}
+            className={iconSurface.className}
+            style={iconSurface.style}
+          >
+            {renderIcon(item.icon, sizeConfig.iconSize)}
+          </span>
+        ) : null}
+        {item.label ? (
+          <span
+            data-snapshot-id={`${rootId}-item-label-${index}`}
+            className={labelSurface.className}
+            style={labelSurface.style}
+          >
+            {item.label}
+          </span>
+        ) : null}
+      </ButtonControl>
+      <SurfaceStyles css={itemSurface.scopedCss} />
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={iconSurface.scopedCss} />
+      <SurfaceStyles css={indicatorSurface.scopedCss} />
+    </>
   );
 }
 
+/**
+ * Render a single- or multi-select toggle group that can publish selection state into the Snapshot context graph.
+ */
 export function ToggleGroup({ config }: { config: ToggleGroupConfig }) {
   const execute = useActionExecutor();
   const controlledValue = useSubscribe(
@@ -147,23 +229,33 @@ export function ToggleGroup({ config }: { config: ToggleGroupConfig }) {
   const variant = config.variant ?? "outline";
   const sizeConfig = SIZE_MAP[size] ?? SIZE_MAP["md"]!;
   const itemRole = config.mode === "multiple" ? "checkbox" : "radio";
+  const rootId = config.id ?? config.publishTo ?? "toggle-group";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: {
+      display: "inline-flex",
+      borderRadius: "var(--sn-radius-md, 0.375rem)",
+      border:
+        variant === "outline" ? "1px solid var(--sn-color-border)" : undefined,
+      overflow: "hidden",
+    } as Record<string, unknown>,
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
 
   return (
     <div
       role="group"
-      style={{
-        display: "inline-flex",
-        borderRadius: "var(--sn-radius-md, 0.375rem)",
-        border:
-          variant === "outline"
-            ? "1px solid var(--sn-color-border)"
-            : undefined,
-        overflow: "hidden",
-      }}
+      data-snapshot-component="toggle-group"
+      data-snapshot-id={`${rootId}-root`}
+      className={rootSurface.className}
+      style={rootSurface.style as CSSProperties}
     >
       {config.items.map((item, i) => (
         <ToggleItem
           key={item.value}
+          rootId={rootId}
+          index={i}
           item={item}
           selected={isSelected(item.value)}
           variant={variant}
@@ -171,8 +263,11 @@ export function ToggleGroup({ config }: { config: ToggleGroupConfig }) {
           isLast={i === config.items.length - 1}
           role={itemRole}
           onToggle={() => handleToggle(item.value)}
+          rootSlot={config.slots}
+          indicatorSlot={config.slots}
         />
       ))}
+      <SurfaceStyles css={rootSurface.scopedCss} />
     </div>
   );
 }

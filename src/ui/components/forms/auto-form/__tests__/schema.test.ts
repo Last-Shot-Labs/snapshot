@@ -257,4 +257,27 @@ describe("autoFormConfigSchema", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("accepts canonical form and field slots", () => {
+    const result = autoFormConfigSchema.safeParse({
+      ...baseConfig,
+      fields: [
+        {
+          name: "email",
+          type: "email",
+          slots: {
+            field: { className: "field-slot" },
+            input: { className: "input-slot" },
+          },
+        },
+      ],
+      slots: {
+        root: { className: "form-root" },
+        section: { className: "section-slot" },
+        submitButton: { className: "submit-slot" },
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
 });

@@ -1,17 +1,23 @@
-'use client';
+"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { usePublish, useSubscribe } from "../../../context/hooks";
 import type { SliderConfig } from "./types";
 
-function formatSliderValue(value: number | [number, number], suffix?: string): string {
+function formatSliderValue(
+  value: number | [number, number],
+  suffix?: string,
+): string {
   if (Array.isArray(value)) {
     return `${value[0]}${suffix ?? ""} - ${value[1]}${suffix ?? ""}`;
   }
   return `${value}${suffix ?? ""}`;
 }
 
+/**
+ * Render a manifest-driven slider input.
+ */
 export function Slider({ config }: { config: SliderConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
@@ -23,7 +29,9 @@ export function Slider({ config }: { config: SliderConfig }) {
         ? config.defaultValue
         : ([config.min, config.max] as [number, number]);
     }
-    return typeof config.defaultValue === "number" ? config.defaultValue : config.min;
+    return typeof config.defaultValue === "number"
+      ? config.defaultValue
+      : config.min;
   }, [config.defaultValue, config.max, config.min, config.range]);
   const [singleValue, setSingleValue] = useState(
     Array.isArray(initialValue) ? initialValue[0] : initialValue,
@@ -44,8 +52,10 @@ export function Slider({ config }: { config: SliderConfig }) {
   }
 
   const currentValue = config.range ? rangeValue : singleValue;
-  const trackStart = ((rangeValue[0] - config.min) / (config.max - config.min)) * 100;
-  const trackEnd = ((rangeValue[1] - config.min) / (config.max - config.min)) * 100;
+  const trackStart =
+    ((rangeValue[0] - config.min) / (config.max - config.min)) * 100;
+  const trackEnd =
+    ((rangeValue[1] - config.min) / (config.max - config.min)) * 100;
 
   const triggerChange = (value: number | [number, number]) => {
     if (config.onChange) {
@@ -95,7 +105,12 @@ export function Slider({ config }: { config: SliderConfig }) {
         </div>
       ) : null}
 
-      <div style={{ position: "relative", padding: "var(--sn-spacing-sm, 0.5rem) 0" }}>
+      <div
+        style={{
+          position: "relative",
+          padding: "var(--sn-spacing-sm, 0.5rem) 0",
+        }}
+      >
         <div
           aria-hidden="true"
           style={{
@@ -119,7 +134,9 @@ export function Slider({ config }: { config: SliderConfig }) {
             borderRadius: "var(--sn-radius-full, 9999px)",
             backgroundColor: "var(--sn-color-primary, #2563eb)",
             left: config.range ? `${trackStart}%` : "0%",
-            width: config.range ? `${trackEnd - trackStart}%` : `${((singleValue - config.min) / (config.max - config.min)) * 100}%`,
+            width: config.range
+              ? `${trackEnd - trackStart}%`
+              : `${((singleValue - config.min) / (config.max - config.min)) * 100}%`,
           }}
         />
         {config.range ? (
@@ -132,7 +149,10 @@ export function Slider({ config }: { config: SliderConfig }) {
               value={rangeValue[0]}
               disabled={disabled}
               onChange={(event) => {
-                const nextValue = Math.min(Number(event.target.value), rangeValue[1]);
+                const nextValue = Math.min(
+                  Number(event.target.value),
+                  rangeValue[1],
+                );
                 const updated: [number, number] = [nextValue, rangeValue[1]];
                 setRangeValue(updated);
                 triggerChange(updated);
@@ -147,7 +167,10 @@ export function Slider({ config }: { config: SliderConfig }) {
               value={rangeValue[1]}
               disabled={disabled}
               onChange={(event) => {
-                const nextValue = Math.max(Number(event.target.value), rangeValue[0]);
+                const nextValue = Math.max(
+                  Number(event.target.value),
+                  rangeValue[0],
+                );
                 const updated: [number, number] = [rangeValue[0], nextValue];
                 setRangeValue(updated);
                 triggerChange(updated);
@@ -182,8 +205,14 @@ export function Slider({ config }: { config: SliderConfig }) {
             color: "var(--sn-color-muted-foreground, #6b7280)",
           }}
         >
-          <span>{config.min}{config.suffix ?? ""}</span>
-          <span>{config.max}{config.suffix ?? ""}</span>
+          <span>
+            {config.min}
+            {config.suffix ?? ""}
+          </span>
+          <span>
+            {config.max}
+            {config.suffix ?? ""}
+          </span>
         </div>
       ) : null}
     </div>

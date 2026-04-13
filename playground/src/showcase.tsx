@@ -59,7 +59,7 @@ const PAGES: {
     key: "forms",
     label: "Forms",
     group: "Input",
-    count: 9,
+    count: 10,
     description:
       "Form inputs, creation flows, validation, inline editing, tagging, location search, and quick entry patterns.",
   },
@@ -239,6 +239,52 @@ const dataTable = {
       action: { type: "toast", message: "Bulk delete triggered" },
     },
   ],
+  slots: {
+    root: {
+      style: {
+        borderRadius: "1rem",
+        overflow: "hidden",
+        border: "1px solid var(--sn-color-border, #e5e7eb)",
+        boxShadow: "0 18px 40px rgba(15, 23, 42, 0.08)",
+      },
+    },
+    toolbar: {
+      style: {
+        padding: "1rem",
+        backgroundColor: "color-mix(in oklch, var(--sn-color-secondary, #f3f4f6) 72%, white)",
+      },
+    },
+    headerCell: {
+      style: {
+        textTransform: "uppercase",
+        letterSpacing: "0.08em",
+        fontSize: "0.72rem",
+      },
+    },
+    row: {
+      states: {
+        selected: {
+          style: {
+            backgroundColor:
+              "color-mix(in oklch, var(--sn-color-primary, #2563eb) 10%, white)",
+          },
+        },
+      },
+    },
+    pagination: {
+      style: {
+        padding: "0.875rem 1rem",
+        borderTop: "1px solid var(--sn-color-border, #e5e7eb)",
+      },
+    },
+    bulkActions: {
+      style: {
+        padding: "0.75rem 1rem",
+        backgroundColor:
+          "color-mix(in oklch, var(--sn-color-warning, #f59e0b) 10%, white)",
+      },
+    },
+  },
 };
 
 const detailCard = {
@@ -279,6 +325,22 @@ const autoForm = {
       required: true,
       placeholder: "Enter full name",
       validation: { minLength: 2 },
+      slots: {
+        field: {
+          style: {
+            padding: "0.875rem",
+            borderRadius: "0.875rem",
+            border: "1px solid var(--sn-color-border, #e5e7eb)",
+            backgroundColor: "white",
+          },
+        },
+        input: {
+          style: {
+            backgroundColor:
+              "color-mix(in oklch, var(--sn-color-secondary, #f3f4f6) 38%, white)",
+          },
+        },
+      },
     },
     {
       name: "email",
@@ -286,6 +348,20 @@ const autoForm = {
       label: "Email Address",
       required: true,
       placeholder: "user@example.com",
+      description: "We will use this for account notifications.",
+      helperText: "Use a work email if this user belongs to a team workspace.",
+      slots: {
+        description: {
+          style: {
+            color: "var(--sn-color-muted-foreground, #6b7280)",
+          },
+        },
+        helper: {
+          style: {
+            color: "var(--sn-color-info, #0ea5e9)",
+          },
+        },
+      },
     },
     {
       name: "role",
@@ -325,6 +401,108 @@ const autoForm = {
     type: "toast",
     message: "Failed to create user",
     variant: "error",
+  },
+  slots: {
+    root: {
+      style: {
+        padding: "1.25rem",
+        borderRadius: "1rem",
+        backgroundColor:
+          "color-mix(in oklch, var(--sn-color-card, #ffffff) 92%, var(--sn-color-secondary, #f3f4f6))",
+        border: "1px solid var(--sn-color-border, #e5e7eb)",
+      },
+    },
+    label: {
+      style: {
+        letterSpacing: "0.01em",
+      },
+    },
+    input: {
+      states: {
+        focus: {
+          style: {
+            boxShadow:
+              "0 0 0 3px color-mix(in oklch, var(--sn-color-primary, #2563eb) 18%, transparent)",
+          },
+        },
+      },
+    },
+    actions: {
+      style: {
+        marginTop: "0.5rem",
+        display: "flex",
+        justifyContent: "flex-end",
+      },
+    },
+    submitButton: {
+      style: {
+        minWidth: "11rem",
+      },
+    },
+  },
+};
+
+const toggleGroupDemo = {
+  type: "toggle-group",
+  id: "view-toggle",
+  mode: "single",
+  variant: "outline",
+  defaultValue: "board",
+  items: [
+    {
+      value: "board",
+      label: "Board",
+      icon: "layout-grid",
+      slots: {
+        itemLabel: {
+          style: {
+            fontWeight: 600,
+          },
+        },
+      },
+    },
+    {
+      value: "table",
+      label: "Table",
+      icon: "table-properties",
+    },
+    {
+      value: "timeline",
+      label: "Timeline",
+      icon: "gantt-chart",
+      disabled: true,
+    },
+  ],
+  slots: {
+    root: {
+      style: {
+        display: "inline-flex",
+        padding: "0.25rem",
+        borderRadius: "999px",
+        backgroundColor:
+          "color-mix(in oklch, var(--sn-color-secondary, #f3f4f6) 72%, white)",
+      },
+    },
+    item: {
+      states: {
+        selected: {
+          style: {
+            backgroundColor: "var(--sn-color-primary, #2563eb)",
+            color: "var(--sn-color-primary-foreground, #ffffff)",
+          },
+        },
+        disabled: {
+          style: {
+            opacity: 0.45,
+          },
+        },
+      },
+    },
+    itemIcon: {
+      style: {
+        marginRight: "0.35rem",
+      },
+    },
   },
 };
 
@@ -424,6 +602,7 @@ const tabs = {
   children: [
     {
       label: "Overview",
+      icon: "layout-dashboard",
       content: [
         { type: "heading", text: "Overview Tab", level: 3 },
         {
@@ -437,6 +616,7 @@ const tabs = {
     },
     {
       label: "Details",
+      icon: "file-text",
       content: [
         { type: "heading", text: "Details Tab", level: 3 },
         {
@@ -450,9 +630,50 @@ const tabs = {
     {
       label: "Settings",
       disabled: true,
+      icon: "settings",
       content: [{ type: "heading", text: "Disabled tab" }],
     },
   ],
+  slots: {
+    root: {
+      style: {
+        padding: "1rem",
+        borderRadius: "1rem",
+        border: "1px solid var(--sn-color-border, #e5e7eb)",
+        backgroundColor: "white",
+      },
+    },
+    list: {
+      style: {
+        gap: "0.5rem",
+      },
+    },
+    tab: {
+      states: {
+        selected: {
+          style: {
+            backgroundColor:
+              "color-mix(in oklch, var(--sn-color-primary, #2563eb) 10%, white)",
+          },
+        },
+        disabled: {
+          style: {
+            opacity: 0.45,
+          },
+        },
+      },
+    },
+    tabIcon: {
+      style: {
+        marginRight: "0.35rem",
+      },
+    },
+    panel: {
+      style: {
+        paddingTop: "0.5rem",
+      },
+    },
+  },
 };
 
 // ── Structural configs ──────────────────────────────────────────────────
@@ -1075,9 +1296,45 @@ const sortableListDemo = {
 // ── Navigation page configs ───────────────────────────────────────────
 
 const accordionDemo = {
+  id: "faq-accordion",
   type: "accordion",
   variant: "bordered",
   mode: "single",
+  slots: {
+    root: {
+      style: {
+        borderRadius: "1rem",
+        overflow: "hidden",
+        boxShadow: "0 16px 32px rgba(15, 23, 42, 0.08)",
+      },
+    },
+    item: {
+      states: {
+        open: {
+          style: {
+            backgroundColor:
+              "color-mix(in oklch, var(--sn-color-primary, #2563eb) 4%, white)",
+          },
+        },
+      },
+    },
+    trigger: {
+      style: {
+        justifyContent: "space-between",
+        width: "100%",
+      },
+    },
+    triggerLabel: {
+      style: {
+        fontWeight: 600,
+      },
+    },
+    content: {
+      style: {
+        borderTop: "1px solid var(--sn-color-border, #e5e7eb)",
+      },
+    },
+  },
   items: [
     {
       title: "What is Snapshot?",
@@ -1126,10 +1383,43 @@ const breadcrumbDemo = {
     { label: "Profile", path: "/settings/profile" },
     { label: "Notifications" },
   ],
+  slots: {
+    root: {
+      style: {
+        padding: "0.75rem 1rem",
+        borderRadius: "999px",
+        backgroundColor:
+          "color-mix(in oklch, var(--sn-color-secondary, #f3f4f6) 78%, white)",
+      },
+    },
+    link: {
+      style: {
+        fontWeight: 500,
+      },
+      states: {
+        current: {
+          style: {
+            color: "var(--sn-color-primary, #2563eb)",
+          },
+        },
+      },
+    },
+    current: {
+      style: {
+        fontWeight: 700,
+      },
+    },
+    separator: {
+      style: {
+        opacity: 0.55,
+      },
+    },
+  },
 };
 
 const stepperDemo = {
   type: "stepper",
+  id: "setup-stepper",
   activeStep: 1,
   orientation: "horizontal",
   steps: [
@@ -1138,16 +1428,103 @@ const stepperDemo = {
     { title: "Preferences", description: "Set your preferences" },
     { title: "Complete", description: "All done!" },
   ],
+  slots: {
+    root: {
+      style: {
+        padding: "1rem",
+        borderRadius: "1rem",
+        border: "1px solid var(--sn-color-border, #e5e7eb)",
+        backgroundColor: "white",
+      },
+    },
+    item: {
+      states: {
+        current: {
+          style: {
+            transform: "translateY(-1px)",
+          },
+        },
+      },
+    },
+    marker: {
+      states: {
+        completed: {
+          style: {
+            boxShadow:
+              "0 0 0 3px color-mix(in oklch, var(--sn-color-success, #16a34a) 16%, transparent)",
+          },
+        },
+        current: {
+          style: {
+            boxShadow:
+              "0 0 0 4px color-mix(in oklch, var(--sn-color-primary, #2563eb) 14%, transparent)",
+          },
+        },
+      },
+    },
+    connector: {
+      states: {
+        completed: {
+          style: {
+            backgroundColor: "var(--sn-color-success, #16a34a)",
+          },
+        },
+        active: {
+          style: {
+            backgroundColor: "var(--sn-color-primary, #2563eb)",
+          },
+        },
+      },
+    },
+  },
 };
 
 const treeViewDemo = {
   type: "tree-view",
+  id: "repo-tree",
   selectable: true,
   showConnectors: true,
+  slots: {
+    root: {
+      style: {
+        padding: "0.75rem",
+        borderRadius: "1rem",
+        border: "1px solid var(--sn-color-border, #e5e7eb)",
+        backgroundColor: "white",
+      },
+    },
+    row: {
+      states: {
+        selected: {
+          style: {
+            backgroundColor:
+              "color-mix(in oklch, var(--sn-color-primary, #2563eb) 10%, white)",
+          },
+        },
+        open: {
+          style: {
+            fontWeight: 600,
+          },
+        },
+      },
+    },
+    badge: {
+      style: {
+        backgroundColor:
+          "color-mix(in oklch, var(--sn-color-info, #0ea5e9) 16%, white)",
+      },
+    },
+    children: {
+      style: {
+        marginTop: "0.15rem",
+      },
+    },
+  },
   items: [
     {
       label: "Documents",
       icon: "folder",
+      badge: "2",
       value: "docs",
       expanded: true,
       children: [
@@ -1156,6 +1533,7 @@ const treeViewDemo = {
         {
           label: "Images",
           icon: "folder",
+          badge: "2",
           value: "images",
           children: [
             { label: "logo.png", icon: "image", value: "logo" },
@@ -1167,6 +1545,7 @@ const treeViewDemo = {
     {
       label: "Source Code",
       icon: "folder",
+      badge: "2",
       value: "src",
       children: [
         { label: "index.ts", icon: "code", value: "index" },
@@ -1521,6 +1900,9 @@ function FormsPage() {
         </ShowcaseSection>
         <ShowcaseSection title="Toggle">
           <RenderConfig config={toggleDemo2} />
+        </ShowcaseSection>
+        <ShowcaseSection title="Toggle Group">
+          <RenderConfig config={toggleGroupDemo} />
         </ShowcaseSection>
         <ShowcaseSection title="Multi-Select">
           <RenderConfig config={multiSelectDemo} />
@@ -2816,6 +3198,37 @@ const chartBarConfig = {
   legend: true,
   grid: true,
   emptyMessage: "No data",
+  slots: {
+    root: {
+      style: {
+        padding: "1rem",
+        borderRadius: "1rem",
+        border: "1px solid var(--sn-color-border, #e5e7eb)",
+        backgroundColor: "white",
+      },
+    },
+    legend: {
+      style: {
+        paddingTop: "0.5rem",
+      },
+    },
+    legendItem: {
+      style: {
+        fontWeight: 600,
+      },
+    },
+    tooltip: {
+      style: {
+        borderRadius: "0.75rem",
+        boxShadow: "0 16px 32px rgba(15, 23, 42, 0.12)",
+      },
+    },
+    axis: {
+      style: {
+        fontSize: "0.72rem",
+      },
+    },
+  },
 };
 
 const chartLineConfig = {
@@ -2831,6 +3244,7 @@ const chartLineConfig = {
   legend: true,
   grid: true,
   emptyMessage: "No data",
+  slots: chartBarConfig.slots,
 };
 
 const chartPieConfig = {
@@ -2843,6 +3257,7 @@ const chartPieConfig = {
   legend: true,
   grid: false,
   emptyMessage: "No data",
+  slots: chartBarConfig.slots,
 };
 
 const chartDonutConfig = {
@@ -2855,6 +3270,7 @@ const chartDonutConfig = {
   legend: true,
   grid: false,
   emptyMessage: "No data",
+  slots: chartBarConfig.slots,
 };
 
 const chartEmptyConfig = {
@@ -2867,6 +3283,7 @@ const chartEmptyConfig = {
   legend: true,
   grid: true,
   emptyMessage: "No chart data available yet.",
+  slots: chartBarConfig.slots,
 };
 
 // ── Wizard configs ────────────────────────────────────────────────────────────
@@ -2874,10 +3291,64 @@ const chartEmptyConfig = {
 const wizardOnboardingConfig = {
   type: "wizard",
   id: "demo-wizard",
+  slots: {
+    root: {
+      style: {
+        borderRadius: "1rem",
+        boxShadow: "0 20px 40px rgba(15, 23, 42, 0.08)",
+      },
+    },
+    step: {
+      states: {
+        current: {
+          style: {
+            transform: "translateY(-1px)",
+          },
+        },
+      },
+    },
+    stepConnector: {
+      states: {
+        completed: {
+          style: {
+            backgroundColor: "var(--sn-color-primary, #2563eb)",
+          },
+        },
+      },
+    },
+    actions: {
+      style: {
+        backgroundColor:
+          "color-mix(in oklch, var(--sn-color-secondary, #f3f4f6) 68%, white)",
+      },
+    },
+    backButton: {
+      style: {
+        minWidth: "6.5rem",
+      },
+    },
+    nextButton: {
+      style: {
+        minWidth: "8rem",
+      },
+    },
+    submitButton: {
+      style: {
+        minWidth: "8rem",
+      },
+    },
+  },
   steps: [
     {
       title: "Account Details",
       description: "Create your account credentials",
+      slots: {
+        stepLabel: {
+          style: {
+            fontWeight: 600,
+          },
+        },
+      },
       fields: [
         {
           name: "email",
@@ -2885,6 +3356,21 @@ const wizardOnboardingConfig = {
           label: "Email address",
           required: true,
           placeholder: "you@example.com",
+          slots: {
+            field: {
+              style: {
+                padding: "0.75rem",
+                borderRadius: "0.875rem",
+                border: "1px solid var(--sn-color-border, #e5e7eb)",
+              },
+            },
+            input: {
+              style: {
+                backgroundColor:
+                  "color-mix(in oklch, var(--sn-color-secondary, #f3f4f6) 35%, white)",
+              },
+            },
+          },
         },
         {
           name: "password",
@@ -2933,11 +3419,25 @@ const wizardOnboardingConfig = {
 
 const wizardSkippableConfig = {
   type: "wizard",
+  id: "skip-wizard",
   steps: [
     {
       title: "Required Step",
       fields: [
-        { name: "name", type: "text", label: "Your Name", required: true },
+        {
+          name: "name",
+          type: "text",
+          label: "Your Name",
+          required: true,
+          slots: {
+            input: {
+              style: {
+                backgroundColor:
+                  "color-mix(in oklch, var(--sn-color-secondary, #f3f4f6) 35%, white)",
+              },
+            },
+          },
+        },
       ],
     },
     {
@@ -2968,6 +3468,7 @@ const wizardSkippableConfig = {
   submitLabel: "Finish",
   allowSkip: true,
   onComplete: { type: "toast", message: "Done!", variant: "success" },
+  slots: wizardOnboardingConfig.slots,
 };
 
 function FeedChartWizardPage() {
@@ -3053,6 +3554,7 @@ const SECTION_INDEX: { title: string; page: Page }[] = [
   { title: "Input", page: "forms" },
   { title: "Textarea", page: "forms" },
   { title: "Toggle", page: "forms" },
+  { title: "Toggle Group", page: "forms" },
   { title: "Multi-Select", page: "forms" },
   { title: "Tag Selector", page: "forms" },
   { title: "Inline Edit", page: "forms" },

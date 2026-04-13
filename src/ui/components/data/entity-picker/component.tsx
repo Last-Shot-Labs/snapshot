@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
@@ -40,6 +40,9 @@ interface ResolvedEntity {
 /** Stable empty array to avoid re-render loops when config.value is unset. */
 const EMPTY_ARRAY: string[] = [];
 
+/**
+ * Render a searchable entity picker from manifest-provided options or data.
+ */
 export function EntityPicker({ config }: { config: EntityPickerConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   // Use a stable default so useSubscribe doesn't create a new ref each render
@@ -361,8 +364,11 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
               <div data-testid="entity-picker-error">
                 <AutoErrorState
                   config={config.error ?? {}}
-                  onRetry={config.error?.retry !== undefined ? dataRefetch : undefined}
-                /></div>
+                  onRetry={
+                    config.error?.retry !== undefined ? dataRefetch : undefined
+                  }
+                />
+              </div>
             )}
 
             {!isLoading && !dataError && filtered.length === 0 && (

@@ -30,13 +30,16 @@ export function getButtonVariantStyle(
   switch (variant) {
     case "secondary":
       return {
-        backgroundColor: "var(--sn-color-secondary, #f1f5f9)",
-        color: "var(--sn-color-secondary-foreground, #0f172a)",
-        border: "none",
+        backgroundColor:
+          "color-mix(in oklch, var(--sn-color-secondary, #f1f5f9) 84%, var(--sn-color-background, #ffffff))",
+        color: "var(--sn-color-foreground, #111827)",
+        border:
+          "1px solid color-mix(in oklch, var(--sn-color-border, #e5e7eb) 88%, var(--sn-color-background, #ffffff))",
       };
     case "outline":
       return {
-        backgroundColor: "transparent",
+        backgroundColor:
+          "color-mix(in oklch, var(--sn-color-background, #ffffff) 92%, transparent)",
         color: "var(--sn-color-foreground, #111827)",
         border:
           "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
@@ -49,7 +52,8 @@ export function getButtonVariantStyle(
       };
     case "destructive":
       return {
-        backgroundColor: "var(--sn-color-destructive, #dc2626)",
+        backgroundColor:
+          "color-mix(in oklch, var(--sn-color-destructive, #dc2626) 88%, var(--sn-color-background, #ffffff))",
         color: "var(--sn-color-destructive-foreground, #fff)",
         border: "none",
       };
@@ -63,9 +67,11 @@ export function getButtonVariantStyle(
       };
     default:
       return {
-        backgroundColor: "var(--sn-color-primary, #2563eb)",
+        backgroundColor:
+          "color-mix(in oklch, var(--sn-color-primary, #2563eb) 84%, var(--sn-color-background, #ffffff))",
         color: "var(--sn-color-primary-foreground, #fff)",
-        border: "none",
+        border:
+          "1px solid color-mix(in oklch, var(--sn-color-primary, #2563eb) 14%, var(--sn-color-background, #ffffff))",
       };
   }
 }
@@ -134,24 +140,30 @@ export function getButtonStyle(
  */
 export const BUTTON_INTERACTIVE_CSS = `
 [data-sn-button]:not(:disabled) {
-  transition: opacity var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
+  transition: background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
+              color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
+              border-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
               box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
-              filter var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease);
+              opacity var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease),
+              transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease);
 }
-[data-sn-button]:not(:disabled):hover {
-  filter: brightness(0.92);
+[data-sn-button][data-variant="default"]:not(:disabled):hover {
+  background-color: color-mix(in oklch, var(--sn-color-primary, #2563eb) 88%, var(--sn-color-background, #ffffff));
+  box-shadow: 0 1px 2px color-mix(in oklch, var(--sn-color-foreground, #111827) 12%, transparent);
+}
+[data-sn-button][data-variant="secondary"]:not(:disabled):hover {
+  background-color: color-mix(in oklch, var(--sn-color-secondary, #f1f5f9) 92%, var(--sn-color-background, #ffffff));
+  border-color: color-mix(in oklch, var(--sn-color-border, #e5e7eb) 100%, var(--sn-color-background, #ffffff));
 }
 [data-sn-button][data-variant="outline"]:not(:disabled):hover,
 [data-sn-button][data-variant="ghost"]:not(:disabled):hover {
   background-color: var(--sn-color-accent, #f3f4f6);
-  filter: none;
-}
-[data-sn-button][data-variant="secondary"]:not(:disabled):hover {
-  filter: brightness(0.95);
 }
 [data-sn-button][data-variant="link"]:not(:disabled):hover {
-  filter: none;
   opacity: var(--sn-opacity-hover, 0.8);
+}
+[data-sn-button][data-variant="destructive"]:not(:disabled):hover {
+  background-color: color-mix(in oklch, var(--sn-color-destructive, #dc2626) 92%, var(--sn-color-background, #ffffff));
 }
 [data-sn-button]:focus { outline: none; }
 [data-sn-button]:focus-visible {

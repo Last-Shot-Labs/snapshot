@@ -20,10 +20,20 @@ If you are implementing Snapshot through an agentic workflow, continue with [Age
 ## Then do the work
 
 1. implement the code change
-2. update JSDoc for public exports
+2. update JSDoc for public exports and important option shapes
 3. update generated docs inputs
 4. update impacted guides
 5. update impacted examples or playground coverage
 6. run `bun run docs:ci`
+
+## What Counts As Incomplete
+
+If you changed any public behavior and skipped one of these layers, the work is incomplete:
+
+- exported SDK, UI, SSR, or Vite surfaces
+- manifest schema or runtime behavior
+- component schema or component runtime behavior
+- CLI scaffold or sync behavior
+- examples or showcase coverage for a visible surface
 
 If any public behavior changed and docs did not move with it, the work is incomplete.

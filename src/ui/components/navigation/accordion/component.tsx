@@ -4,7 +4,13 @@ import React, { useState, useCallback } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
 import { renderIcon } from "../../../icons/render";
+import { ButtonControl } from "../../forms/button";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { AccordionConfig } from "./types";
+
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
 
 /**
  * Resolves the initial set of open indices from the config.
@@ -89,16 +95,21 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
             gap: "var(--sn-spacing-sm, 0.5rem)",
           }
         : {};
+  const rootId = config.id ?? "accordion";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: containerStyle as Record<string, unknown>,
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
 
   return (
     <div
       data-snapshot-component="accordion"
       data-testid="accordion"
-      className={config.className}
-      style={{
-        ...containerStyle,
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
+      data-snapshot-id={`${rootId}-root`}
+      className={rootSurface.className}
+      style={rootSurface.style}
     >
       <style>{`
         [data-snapshot-component="accordion"] button:not([disabled]):hover {
@@ -127,6 +138,32 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
                 overflow: "hidden",
               }
             : {};
+        const itemSurface = resolveSurfacePresentation({
+          surfaceId: `${rootId}-item-${index}`,
+          implementationBase: itemStyle as Record<string, unknown>,
+          componentSurface: config.slots?.item,
+          itemSurface: item.slots?.item,
+          activeStates: [
+            ...(isOpen ? ["open"] : []),
+            ...(isDisabled ? ["disabled"] : []),
+          ] as Array<"open" | "disabled">,
+        });
+        const triggerLabelSurface = resolveSurfacePresentation({
+          surfaceId: `${rootId}-trigger-label-${index}`,
+          componentSurface: config.slots?.triggerLabel,
+          itemSurface: item.slots?.triggerLabel,
+        });
+        const triggerIconSurface = resolveSurfacePresentation({
+          surfaceId: `${rootId}-trigger-icon-${index}`,
+          componentSurface: config.slots?.triggerIcon,
+          itemSurface: item.slots?.triggerIcon,
+        });
+        const contentSurface = resolveSurfacePresentation({
+          surfaceId: `${rootId}-content-${index}`,
+          componentSurface: config.slots?.content,
+          itemSurface: item.slots?.content,
+          activeStates: isOpen ? ["open"] : [],
+        });
 
         const showDivider =
           variant !== "separated" && index < config.items.length - 1;
@@ -135,53 +172,41 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
           <div
             key={index}
             data-testid={`accordion-item-${index}`}
-            style={itemStyle}
+            data-snapshot-id={`${rootId}-item-${index}`}
+            className={itemSurface.className}
+            style={itemSurface.style}
           >
             {/* Header */}
-            <button
+            <ButtonControl
               type="button"
-              id={`accordion-${config.id ?? "default"}-btn-${index}`}
               data-testid={`accordion-header-${index}`}
-              data-accordion-trigger=""
               onClick={() => !isDisabled && toggle(index)}
-              aria-expanded={isOpen}
-              aria-controls={`accordion-${config.id ?? "default"}-panel-${index}`}
-              aria-disabled={isDisabled}
               disabled={isDisabled}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                flexDirection: iconPosition === "left" ? "row-reverse" : "row",
-                width: "100%",
-                padding: "var(--sn-spacing-md, 1rem)",
-                border: "none",
-                background: "none",
-                cursor: isDisabled ? "not-allowed" : "pointer",
-                opacity: isDisabled ? "var(--sn-opacity-disabled, 0.5)" : 1,
-                fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                fontWeight:
-                  "var(--sn-font-weight-semibold, 600)" as unknown as number,
-                color: "var(--sn-color-foreground, #111827)",
-                textAlign: "left",
-                gap: "var(--sn-spacing-sm, 0.5rem)",
-              }}
+              ariaExpanded={isOpen}
+              surfaceId={`${rootId}-trigger-${index}`}
+              surfaceConfig={item.slots?.trigger ?? config.slots?.trigger}
+              activeStates={[
+                ...(isOpen ? ["open"] : []),
+                ...(isDisabled ? ["disabled"] : []),
+              ] as Array<"open" | "disabled">}
             >
               <span
+                data-snapshot-id={`${rootId}-trigger-label-${index}`}
+                className={triggerLabelSurface.className}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "var(--sn-spacing-xs, 0.25rem)",
                   flex: 1,
+                  ...(triggerLabelSurface.style as React.CSSProperties),
                 }}
               >
                 {item.icon && (
                   <span
                     aria-hidden="true"
-                    style={{
-                      color: "var(--sn-color-muted-foreground, #6b7280)",
-                      fontSize: "var(--sn-font-size-md, 1rem)",
-                    }}
+                    data-snapshot-id={`${rootId}-trigger-icon-${index}`}
+                    className={triggerIconSurface.className}
+                    style={triggerIconSurface.style}
                   >
                     {renderIcon(item.icon, 16)}
                   </span>
@@ -189,19 +214,20 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
                 {item.title}
               </span>
               <Chevron open={isOpen} />
-            </button>
+            </ButtonControl>
 
             {/* Content panel — uses CSS grid row trick for smooth height animation */}
             <div
-              id={`accordion-${config.id ?? "default"}-panel-${index}`}
               data-testid={`accordion-panel-${index}`}
               data-accordion-content=""
               role="region"
-              aria-labelledby={`accordion-${config.id ?? "default"}-btn-${index}`}
+              data-snapshot-id={`${rootId}-content-${index}`}
+              className={contentSurface.className}
               style={{
                 display: "grid",
                 gridTemplateRows: isOpen ? "1fr" : "0fr",
                 transition: `grid-template-rows var(--sn-duration-normal, 250ms) var(--sn-ease-out, ease-out)`,
+                ...(contentSurface.style as React.CSSProperties),
               }}
             >
               <div style={{ overflow: "hidden" }}>
@@ -234,9 +260,14 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
                 }}
               />
             )}
+            <SurfaceStyles css={itemSurface.scopedCss} />
+            <SurfaceStyles css={triggerLabelSurface.scopedCss} />
+            <SurfaceStyles css={triggerIconSurface.scopedCss} />
+            <SurfaceStyles css={contentSurface.scopedCss} />
           </div>
         );
       })}
+      <SurfaceStyles css={rootSurface.scopedCss} />
     </div>
   );
 }

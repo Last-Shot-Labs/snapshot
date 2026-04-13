@@ -1,8 +1,17 @@
 import { z } from "zod";
 import {
-  baseComponentConfigSchema,
   componentConfigSchema,
 } from "../../../manifest/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+export const accordionSlotNames = [
+  "root",
+  "item",
+  "trigger",
+  "triggerLabel",
+  "triggerIcon",
+  "content",
+] as const;
 
 /**
  * Schema for a single accordion item.
@@ -16,6 +25,7 @@ export const accordionItemSchema = z.object({
   icon: z.string().optional(),
   /** Whether this item is disabled (not expandable). */
   disabled: z.boolean().optional(),
+  slots: slotsSchema(["item", "trigger", "triggerLabel", "triggerIcon", "content"]).optional(),
 });
 
 /**
@@ -38,7 +48,7 @@ export const accordionItemSchema = z.object({
  * }
  * ```
  */
-export const accordionConfigSchema = baseComponentConfigSchema.extend({
+export const accordionConfigSchema = extendComponentSchema({
   /** Component type discriminator. */
   type: z.literal("accordion"),
   /** Array of accordion item definitions. */
@@ -51,8 +61,5 @@ export const accordionConfigSchema = baseComponentConfigSchema.extend({
   variant: z.enum(["default", "bordered", "separated"]).optional(),
   /** Position of the chevron icon. */
   iconPosition: z.enum(["left", "right"]).optional(),
-  /** Inline style overrides. */
-  style: z.record(z.union([z.string(), z.number()])).optional(),
-  /** Additional CSS class name. */
-  className: z.string().optional(),
+  slots: slotsSchema(accordionSlotNames).optional(),
 });

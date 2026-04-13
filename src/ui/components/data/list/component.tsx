@@ -26,6 +26,11 @@ import { useVirtualList } from "../../../hooks/use-virtual-list";
 import type { ListConfig, ListItemConfig } from "./types";
 import type { ActionConfig, ActionExecuteFn } from "../../../actions/types";
 import { wsManagerAtom } from "../../../../ws/atom";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
 
 /**
  * Badge pill component for list items.
@@ -49,6 +54,22 @@ function ListBadge({ text, color }: { text: string; color?: string }) {
       {text}
     </span>
   );
+}
+
+function resolveItemSurface(
+  rootId: string,
+  item: ListItemConfig,
+  index: number,
+  slotName: "item" | "itemTitle" | "itemDescription" | "itemIcon" | "itemBadge",
+  implementationBase?: React.CSSProperties,
+  fallbackSlot?: Record<string, unknown>,
+) {
+  return resolveSurfacePresentation({
+    surfaceId: `${rootId}-${slotName}-${index}`,
+    implementationBase: implementationBase as Record<string, unknown> | undefined,
+    componentSurface: fallbackSlot,
+    itemSurface: item.slots?.[slotName],
+  });
 }
 
 /**
@@ -123,6 +144,8 @@ function toAutoEmptyStateConfig(
  * Single list item renderer.
  */
 function ListItem({
+  rootId,
+  itemIndex,
   item,
   selectable,
   showDivider,
@@ -130,7 +153,10 @@ function ListItem({
   draggable,
   execute,
   onContextMenu,
+  slots,
 }: {
+  rootId: string;
+  itemIndex: number;
   item: ListItemConfig;
   selectable: boolean;
   showDivider: boolean;
@@ -138,8 +164,83 @@ function ListItem({
   draggable: boolean;
   execute: (action: ActionConfig | ActionConfig[]) => Promise<void>;
   onContextMenu?: (event: React.MouseEvent) => void;
+  slots?: ListConfig["slots"];
 }) {
   const isClickable = selectable && (item.action != null || item.href != null);
+  const itemSurface = resolveItemSurface(
+    rootId,
+    item,
+    itemIndex,
+    "item",
+    {
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
+      padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
+      transition: `background-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)`,
+      ...(isCard
+        ? {
+            border:
+              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+            borderRadius: "var(--sn-radius-md, 0.5rem)",
+            boxShadow: "var(--sn-shadow-sm, 0 1px 2px rgba(0,0,0,0.05))",
+            backgroundColor: "var(--sn-color-card, #ffffff)",
+          }
+        : {}),
+      ...(isClickable ? { cursor: "pointer" } : {}),
+    },
+    slots?.item,
+  );
+  const iconSurface = resolveItemSurface(
+    rootId,
+    item,
+    itemIndex,
+    "itemIcon",
+    {
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      flexShrink: 0,
+      display: "inline-flex",
+      alignItems: "center",
+    },
+    slots?.itemIcon,
+  );
+  const titleSurface = resolveItemSurface(
+    rootId,
+    item,
+    itemIndex,
+    "itemTitle",
+    {
+      fontSize: "var(--sn-font-size-sm, 0.875rem)",
+      fontWeight: "var(--sn-font-weight-medium, 500)" as unknown as number,
+      color: "var(--sn-color-foreground, #111827)",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
+    slots?.itemTitle,
+  );
+  const descriptionSurface = resolveItemSurface(
+    rootId,
+    item,
+    itemIndex,
+    "itemDescription",
+    {
+      fontSize: "var(--sn-font-size-xs, 0.75rem)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
+    slots?.itemDescription,
+  );
+  const badgeSurface = resolveItemSurface(
+    rootId,
+    item,
+    itemIndex,
+    "itemBadge",
+    undefined,
+    slots?.itemBadge,
+  );
 
   const handleClick = () => {
     if (item.action) {
@@ -162,23 +263,9 @@ function ListItem({
       }
       role={isClickable ? "button" : undefined}
       tabIndex={isClickable ? 0 : undefined}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "var(--sn-spacing-sm, 0.5rem)",
-        padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
-        cursor: isClickable ? "pointer" : undefined,
-        transition: `background-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)`,
-        ...(isCard
-          ? {
-              border:
-                "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-              borderRadius: "var(--sn-radius-md, 0.5rem)",
-              boxShadow: "var(--sn-shadow-sm, 0 1px 2px rgba(0,0,0,0.05))",
-              backgroundColor: "var(--sn-color-card, #ffffff)",
-            }
-          : {}),
-      }}
+      data-snapshot-id={`${rootId}-item-${itemIndex}`}
+      className={itemSurface.className}
+      style={itemSurface.style}
       onMouseEnter={
         isClickable
           ? (e) => {
@@ -200,10 +287,9 @@ function ListItem({
       {draggable ? (
         <span
           aria-hidden="true"
-          style={{
-            color: "var(--sn-color-muted-foreground, #6b7280)",
-            flexShrink: 0,
-          }}
+          data-snapshot-id={`${rootId}-item-icon-${itemIndex}`}
+          className={iconSurface.className}
+          style={iconSurface.style}
         >
           <Icon name="grip-vertical" size={16} />
         </span>
@@ -212,10 +298,9 @@ function ListItem({
       {item.icon && (
         <span
           aria-hidden="true"
-          style={{
-            color: "var(--sn-color-muted-foreground, #6b7280)",
-            flexShrink: 0,
-          }}
+          data-snapshot-id={`${rootId}-item-icon-${itemIndex}`}
+          className={iconSurface.className}
+          style={iconSurface.style}
         >
           <Icon name={item.icon} size={20} />
         </span>
@@ -224,27 +309,17 @@ function ListItem({
       {/* Title + Description */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
-          style={{
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            fontWeight:
-              "var(--sn-font-weight-medium, 500)" as unknown as number,
-            color: "var(--sn-color-foreground, #111827)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
+          data-snapshot-id={`${rootId}-item-title-${itemIndex}`}
+          className={titleSurface.className}
+          style={titleSurface.style}
         >
           {item.title}
         </div>
         {item.description && (
           <div
-            style={{
-              fontSize: "var(--sn-font-size-xs, 0.75rem)",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
+            data-snapshot-id={`${rootId}-item-description-${itemIndex}`}
+            className={descriptionSurface.className}
+            style={descriptionSurface.style}
           >
             {item.description}
           </div>
@@ -252,12 +327,20 @@ function ListItem({
       </div>
 
       {/* Badge */}
-      {item.badge && <ListBadge text={item.badge} color={item.badgeColor} />}
+      {item.badge && (
+        <span
+          data-snapshot-id={`${rootId}-item-badge-${itemIndex}`}
+          className={badgeSurface.className}
+          style={badgeSurface.style}
+        >
+          <ListBadge text={item.badge} color={item.badgeColor} />
+        </span>
+      )}
     </div>
   );
 
   return (
-    <>
+    <div>
       {item.href && !item.action ? (
         <a
           href={item.href}
@@ -276,7 +359,12 @@ function ListItem({
           }}
         />
       )}
-    </>
+      <SurfaceStyles css={itemSurface.scopedCss} />
+      <SurfaceStyles css={iconSurface.scopedCss} />
+      <SurfaceStyles css={titleSurface.scopedCss} />
+      <SurfaceStyles css={descriptionSurface.scopedCss} />
+      <SurfaceStyles css={badgeSurface.scopedCss} />
+    </div>
   );
 }
 
@@ -510,13 +598,6 @@ export function ListComponent({ config }: { config: ListConfig }) {
     () => toAutoEmptyStateConfig(config.empty),
     [config.empty],
   );
-  const renderedItems = virtualConfig
-    ? virtualList.visibleIndices.map((index) => ({
-        item: limitedItems[index]!,
-        index,
-      }))
-    : limitedItems.map((item, index) => ({ item, index }));
-
   const containerStyle: React.CSSProperties =
     variant === "bordered"
       ? {
@@ -532,13 +613,43 @@ export function ListComponent({ config }: { config: ListConfig }) {
             gap: "var(--sn-spacing-sm, 0.5rem)",
           }
         : {};
+  const rootId = config.id ?? containerId;
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: containerStyle as Record<string, unknown>,
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const listSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-list`,
+    componentSurface: config.slots?.list,
+  });
+  const loadingSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-loading`,
+    componentSurface: config.slots?.loadingState,
+  });
+  const errorSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-error`,
+    componentSurface: config.slots?.errorState,
+  });
+  const emptySurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-empty`,
+    componentSurface: config.slots?.emptyState,
+  });
+  const renderedItems = virtualConfig
+    ? virtualList.visibleIndices.map((index) => ({
+        item: limitedItems[index]!,
+        index,
+      }))
+    : limitedItems.map((item, index) => ({ item, index }));
 
   return (
     <div
       data-snapshot-component="list"
       data-testid="list"
-      className={config.className}
-      style={{ ...containerStyle, ...(config.style as React.CSSProperties) }}
+      data-snapshot-id={`${rootId}-root`}
+      className={rootSurface.className}
+      style={rootSurface.style}
     >
       <style>{`
 [data-snapshot-component="list"] [data-list-item][role="button"]:focus { outline: none; }
@@ -546,6 +657,8 @@ export function ListComponent({ config }: { config: ListConfig }) {
       `}</style>
       {hasNewData ? (
         <div
+          data-snapshot-id={`${rootId}-loading`}
+          className={loadingSurface.className}
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -555,6 +668,7 @@ export function ListComponent({ config }: { config: ListConfig }) {
             marginBottom: "0.75rem",
             borderRadius: "var(--sn-radius-md, 0.5rem)",
             backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
+            ...loadingSurface.style,
           }}
         >
           <span>New items available</span>
@@ -568,7 +682,12 @@ export function ListComponent({ config }: { config: ListConfig }) {
         config.loading && !config.loading.disabled ? (
           <AutoSkeleton componentType="list" config={config.loading} />
         ) : (
-          <div data-testid="list-loading">
+          <div
+            data-testid="list-loading"
+            data-snapshot-id={`${rootId}-loading`}
+            className={loadingSurface.className}
+            style={loadingSurface.style}
+          >
             {[0, 1, 2].map((i) => (
               <ListSkeleton key={i} />
             ))}
@@ -578,7 +697,12 @@ export function ListComponent({ config }: { config: ListConfig }) {
 
       {/* Error state */}
       {!isLoading && error && (
-        <div data-testid="list-error">
+        <div
+          data-testid="list-error"
+          data-snapshot-id={`${rootId}-error`}
+          className={errorSurface.className}
+          style={errorSurface.style}
+        >
           <AutoErrorState
             config={config.error ?? {}}
             onRetry={config.error?.retry !== undefined ? refetch : undefined}
@@ -589,15 +713,24 @@ export function ListComponent({ config }: { config: ListConfig }) {
       {/* Empty state */}
       {!isLoading && !error && limitedItems.length === 0 && (
         emptyStateConfig ? (
-          <AutoEmptyState config={emptyStateConfig} />
+          <div
+            data-snapshot-id={`${rootId}-empty`}
+            className={emptySurface.className}
+            style={emptySurface.style}
+          >
+            <AutoEmptyState config={emptyStateConfig} />
+          </div>
         ) : (
           <div
             data-testid="list-empty"
+            data-snapshot-id={`${rootId}-empty`}
+            className={emptySurface.className}
             style={{
               padding: "var(--sn-spacing-lg, 1.5rem)",
               color: "var(--sn-color-muted-foreground, #6b7280)",
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
               textAlign: "center",
+              ...emptySurface.style,
             }}
           >
             {emptyMessage}
@@ -607,10 +740,11 @@ export function ListComponent({ config }: { config: ListConfig }) {
 
       {/* Items */}
       {!isLoading && !error && dropEnabled ? (
-        <ManagedListItems
-          containerId={containerId}
-          items={renderedItems.map(({ item }) => item)}
-          selectable={selectable}
+          <ManagedListItems
+            rootId={rootId}
+            containerId={containerId}
+            items={renderedItems.map(({ item }) => item)}
+            selectable={selectable}
           showDivider={showDivider}
           isCard={variant === "card"}
           execute={execute}
@@ -618,31 +752,38 @@ export function ListComponent({ config }: { config: ListConfig }) {
           dragGroup={config.dragGroup}
           dropTargets={config.dropTargets}
           contextMenu={config.contextMenu}
-          onOpenContextMenu={setContextMenuState}
-          onDropAction={config.onDrop}
-          reorderAction={config.onReorder ?? config.reorderAction}
-        />
-      ) : (
+            onOpenContextMenu={setContextMenuState}
+            onDropAction={config.onDrop}
+            reorderAction={config.onReorder ?? config.reorderAction}
+            slots={config.slots}
+          />
+        ) : (
         !isLoading &&
         !error &&
         (
           <div
+            data-snapshot-id={`${rootId}-list`}
+            className={listSurface.className}
             ref={virtualConfig ? virtualList.containerRef : undefined}
             style={{
               overflowY: virtualConfig ? "auto" : undefined,
               maxHeight: virtualConfig ? `${(virtualConfig.itemHeight ?? 48) * 8}px` : undefined,
+              ...listSurface.style,
             }}
           >
             <div style={{ paddingTop: virtualConfig ? `${virtualList.offsetTop}px` : undefined }}>
               {renderedItems.map(({ item, index }) => (
                 <ListItem
                   key={index}
+                  rootId={rootId}
+                  itemIndex={index}
                   item={item}
                   selectable={selectable}
                   showDivider={showDivider && index < renderedItems.length - 1}
                   isCard={variant === "card"}
                   draggable={sortable}
                   execute={execute}
+                  slots={config.slots}
                   onContextMenu={
                     config.contextMenu
                       ? (event) => {
@@ -681,12 +822,18 @@ export function ListComponent({ config }: { config: ListConfig }) {
           onClose={() => setContextMenuState(null)}
         />
       ) : null}
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={listSurface.scopedCss} />
+      <SurfaceStyles css={loadingSurface.scopedCss} />
+      <SurfaceStyles css={errorSurface.scopedCss} />
+      <SurfaceStyles css={emptySurface.scopedCss} />
     </div>
   );
 }
 
 /** Managed list items wrapper with shared DnD registration. */
 function ManagedListItems({
+  rootId,
   containerId,
   items: initialItems,
   selectable,
@@ -700,7 +847,9 @@ function ManagedListItems({
   onOpenContextMenu,
   onDropAction,
   reorderAction,
+  slots,
 }: {
+  rootId: string;
   containerId: string;
   items: ListItemConfig[];
   selectable: boolean;
@@ -714,6 +863,7 @@ function ManagedListItems({
   onOpenContextMenu: (state: { x: number; y: number; context?: Record<string, unknown> } | null) => void;
   onDropAction?: ActionConfig;
   reorderAction?: ActionConfig;
+  slots?: ListConfig["slots"];
 }) {
   const sharedDragDrop = useSharedDragDrop();
   const { orderedItems, itemIds, insertItem, moveItem, removeItem } =
@@ -769,12 +919,15 @@ function ManagedListItems({
   const renderedItems = orderedItems.map((item, index) => {
     const content = (
       <ListItem
+        rootId={rootId}
+        itemIndex={index}
         item={item}
         selectable={selectable}
         showDivider={showDivider && index < orderedItems.length - 1}
         isCard={isCard}
         draggable={draggable}
         execute={execute}
+        slots={slots}
         onContextMenu={
           contextMenu
             ? (event) => {

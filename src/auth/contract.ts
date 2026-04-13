@@ -2,6 +2,9 @@ import type { OAuthProvider } from "../types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Relative auth endpoint paths used by Snapshot's built-in auth hooks.
+ */
 export interface AuthEndpoints {
   me: string;
   login: string;
@@ -37,11 +40,17 @@ export interface AuthEndpoints {
   oauthCallback: string;
 }
 
+/**
+ * Header names Snapshot sends for session and CSRF-aware auth requests.
+ */
 export interface AuthHeaders {
   userToken: string;
   csrf: string;
 }
 
+/**
+ * Full auth contract used by `createSnapshot()` to build auth URLs and requests.
+ */
 export interface AuthContract {
   endpoints: AuthEndpoints;
   sessionRevoke: (id: string) => string;
@@ -72,6 +81,9 @@ export interface AuthContractConfig {
 
 // ── Factory ───────────────────────────────────────────────────────────────────
 
+/**
+ * Create the built-in auth contract for a given API base URL.
+ */
 export function defaultContract(apiUrl: string): AuthContract {
   const base = apiUrl.replace(/\/$/, "");
   return {

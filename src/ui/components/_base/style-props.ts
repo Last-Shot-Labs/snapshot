@@ -174,6 +174,16 @@ export function resolveStyleProps(
 ): CSSProperties {
   const s: CSSProperties = {};
 
+  const background = baseValue(config.background);
+  if (background != null && typeof background === "string") {
+    s.background = resolveColor(background);
+  }
+
+  const backgroundColor = baseValue(config.backgroundColor);
+  if (backgroundColor != null && typeof backgroundColor === "string") {
+    s.backgroundColor = resolveColor(backgroundColor);
+  }
+
   const padding = baseValue(config.padding);
   if (padding != null) s.padding = resolve(padding, SPACING_MAP);
 

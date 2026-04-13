@@ -1,13 +1,23 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
 import {
-  baseComponentConfigSchema,
   emptyStateConfigSchema,
   liveConfigSchema,
   loadingConfigSchema,
 } from "../../../manifest/schema";
 import { dataSourceSchema } from "../../../manifest/resources";
 import { pollConfigSchema } from "../../_base/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+export const chartSlotNames = [
+  "root",
+  "legend",
+  "legendItem",
+  "tooltip",
+  "series",
+  "axis",
+  "grid",
+] as const;
 
 /**
  * Schema for a single data series in the chart.
@@ -30,8 +40,7 @@ export const seriesConfigSchema = z
  * or from-ref. Uses Recharts under the hood. Colors default to
  * `--sn-chart-1` through `--sn-chart-5` tokens.
  */
-export const chartSchema = baseComponentConfigSchema
-  .extend({
+export const chartSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("chart"),
     /** Data source: endpoint string (e.g. "GET /api/data") or a FromRef. */
@@ -77,5 +86,6 @@ export const chartSchema = baseComponentConfigSchema
     onClick: z.union([actionSchema, z.array(actionSchema)]).optional(),
     /** Polling behavior for endpoint-backed charts. */
     poll: pollConfigSchema.optional(),
-  })
+    slots: slotsSchema(chartSlotNames).optional(),
+})
   .strict();

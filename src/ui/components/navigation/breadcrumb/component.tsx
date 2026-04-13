@@ -6,7 +6,12 @@ import { interpolate } from "../../../actions/interpolate";
 import { useAutoBreadcrumbs } from "../../../hooks/use-auto-breadcrumbs";
 import { renderIcon } from "../../../icons/render";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { BreadcrumbConfig, BreadcrumbItemConfig } from "./types";
+
+function SurfaceStyles({ css }: { css?: string }) {
+  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
 
 const SEPARATORS: Record<string, string> = {
   slash: "/",
@@ -68,7 +73,7 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
 
   const resolvedItems = useMemo(() => {
     const baseItems = config.items?.length ? config.items : autoItems;
-    return baseItems.map((item) => ({
+    return baseItems.map((item: BreadcrumbItemConfig) => ({
       ...item,
       label: interpolate(item.label, context),
       path: item.path ? interpolate(item.path, context) : undefined,
@@ -79,6 +84,12 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
     config.maxItems != null
       ? collapseItems(resolvedItems, config.maxItems)
       : resolvedItems;
+  const rootId = config.id ?? "breadcrumb";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
 
   const handleNavigate = (
     event: React.MouseEvent<HTMLAnchorElement>,
@@ -101,10 +112,9 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
       aria-label="Breadcrumb"
       data-snapshot-component="breadcrumb"
       data-testid="breadcrumb"
-      className={config.className}
-      style={{
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
+      data-snapshot-id={`${rootId}-root`}
+      className={rootSurface.className}
+      style={rootSurface.style}
     >
       <style>{`
         [data-snapshot-component="breadcrumb"] a:focus {
@@ -128,26 +138,54 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
           flexWrap: "wrap",
         }}
       >
-        {visibleItems.map((item, index) => {
+        {visibleItems.map((item: BreadcrumbItemConfig | { label: "..."; collapsed: true }, index: number) => {
           const isLast = index === visibleItems.length - 1;
           const isCollapsed = "collapsed" in item;
+          const itemSurface = resolveSurfacePresentation({
+            surfaceId: `${rootId}-item-${index}`,
+            componentSurface: config.slots?.item,
+            itemSurface: !isCollapsed ? item.slots?.item : undefined,
+          });
+          const separatorSurface = resolveSurfacePresentation({
+            surfaceId: `${rootId}-separator-${index}`,
+            componentSurface: config.slots?.separator,
+          });
+          const iconSurface = resolveSurfacePresentation({
+            surfaceId: `${rootId}-icon-${index}`,
+            componentSurface: config.slots?.icon,
+            itemSurface: !isCollapsed ? item.slots?.icon : undefined,
+          });
+          const linkSurface = resolveSurfacePresentation({
+            surfaceId: `${rootId}-link-${index}`,
+            componentSurface: config.slots?.link,
+            itemSurface: !isCollapsed ? item.slots?.link : undefined,
+            activeStates: isLast ? ["current"] : [],
+          });
+          const currentSurface = resolveSurfacePresentation({
+            surfaceId: `${rootId}-current-${index}`,
+            componentSurface: config.slots?.current,
+            itemSurface: !isCollapsed ? item.slots?.current : undefined,
+            activeStates: isLast ? ["current"] : [],
+          });
 
           return (
             <li
               key={index}
+              data-snapshot-id={`${rootId}-item-${index}`}
+              className={itemSurface.className}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "var(--sn-spacing-xs, 0.25rem)",
+                ...(itemSurface.style as React.CSSProperties),
               }}
             >
               {index > 0 ? (
                 <span
                   aria-hidden="true"
-                  style={{
-                    color: "var(--sn-color-muted-foreground, #9ca3af)",
-                    userSelect: "none",
-                  }}
+                  data-snapshot-id={`${rootId}-separator-${index}`}
+                  className={separatorSurface.className}
+                  style={separatorSurface.style}
                 >
                   {separator}
                 </span>
@@ -155,27 +193,24 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
 
               {isCollapsed ? (
                 <span
-                  style={{
-                    color: "var(--sn-color-muted-foreground, #9ca3af)",
-                  }}
+                  className={linkSurface.className}
+                  style={linkSurface.style}
                 >
                   ...
                 </span>
               ) : isLast ? (
                 <span
                   aria-current="page"
-                  style={{
-                    color: "var(--sn-color-foreground, #111827)",
-                    fontWeight:
-                      "var(--sn-font-weight-medium, 500)" as unknown as number,
-                  }}
+                  data-snapshot-id={`${rootId}-current-${index}`}
+                  className={currentSurface.className}
+                  style={currentSurface.style}
                 >
                   {item.icon ? (
                     <span
                       aria-hidden="true"
-                      style={{
-                        marginRight: "var(--sn-spacing-xs, 0.25rem)",
-                      }}
+                      data-snapshot-id={`${rootId}-icon-${index}`}
+                      className={iconSurface.className}
+                      style={iconSurface.style}
                     >
                       {renderIcon(item.icon, 14)}
                     </span>
@@ -188,13 +223,9 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                   onClick={(event) =>
                     handleNavigate(event, item as BreadcrumbItemConfig)
                   }
-                  style={{
-                    color: "var(--sn-color-muted-foreground, #6b7280)",
-                    textDecoration: "none",
-                    cursor: "pointer",
-                    transition:
-                      "color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)",
-                  }}
+                  data-snapshot-id={`${rootId}-link-${index}`}
+                  className={linkSurface.className}
+                  style={linkSurface.style}
                   onMouseEnter={(event) => {
                     event.currentTarget.style.color =
                       "var(--sn-color-foreground, #111827)";
@@ -207,9 +238,9 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                   {(item as BreadcrumbItemConfig).icon ? (
                     <span
                       aria-hidden="true"
-                      style={{
-                        marginRight: "var(--sn-spacing-xs, 0.25rem)",
-                      }}
+                      data-snapshot-id={`${rootId}-icon-${index}`}
+                      className={iconSurface.className}
+                      style={iconSurface.style}
                     >
                       {renderIcon((item as BreadcrumbItemConfig).icon, 14)}
                     </span>
@@ -217,10 +248,16 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
                   {item.label}
                 </a>
               )}
+              <SurfaceStyles css={itemSurface.scopedCss} />
+              <SurfaceStyles css={separatorSurface.scopedCss} />
+              <SurfaceStyles css={iconSurface.scopedCss} />
+              <SurfaceStyles css={linkSurface.scopedCss} />
+              <SurfaceStyles css={currentSurface.scopedCss} />
             </li>
           );
         })}
       </ol>
+      <SurfaceStyles css={rootSurface.scopedCss} />
     </nav>
   );
 }

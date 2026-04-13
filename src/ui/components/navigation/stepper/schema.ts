@@ -1,5 +1,16 @@
 import { z } from "zod";
 import { fromRefSchema, componentConfigSchema } from "../../../manifest/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+export const stepperSlotNames = [
+  "root",
+  "item",
+  "marker",
+  "label",
+  "description",
+  "connector",
+  "content",
+] as const;
 
 /**
  * Schema for a single step within the stepper.
@@ -11,8 +22,11 @@ export const stepConfigSchema = z.object({
   description: z.string().optional(),
   /** Lucide icon name (overrides the step number). */
   icon: z.string().optional(),
+  /** Whether this step is non-interactive. */
+  disabled: z.boolean().optional(),
   /** Child components rendered when this step is active. */
   content: z.array(componentConfigSchema).optional(),
+  slots: slotsSchema(["item", "marker", "label", "description", "connector", "content"]).optional(),
 });
 
 /**
@@ -33,8 +47,7 @@ export const stepConfigSchema = z.object({
  * }
  * ```
  */
-export const stepperConfigSchema = z
-  .object({
+export const stepperConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("stepper"),
     /** Array of step definitions. At least one required. */
@@ -47,14 +60,5 @@ export const stepperConfigSchema = z
     variant: z.enum(["default", "simple", "dots"]).optional(),
     /** Whether steps are clickable to navigate. Default: false. */
     clickable: z.boolean().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-  })
-  .strict();
+    slots: slotsSchema(stepperSlotNames).optional(),
+  }).strict();

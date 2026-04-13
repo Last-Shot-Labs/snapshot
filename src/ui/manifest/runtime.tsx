@@ -25,10 +25,16 @@ import {
 } from "./resources";
 import type { CompiledManifest, CompiledRoute, RouteMatch } from "./types";
 
+/**
+ * Compiled manifest runtime context for config-driven apps.
+ */
 export const ManifestRuntimeContext = createContext<CompiledManifest | null>(
   null,
 );
 
+/**
+ * Cached manifest resource entry stored by the manifest runtime.
+ */
 export interface ResourceCacheEntry {
   status: "loading" | "ready" | "error";
   data?: unknown;
@@ -113,7 +119,10 @@ function toCacheKey(queryKey: string[]): string {
 function parseCacheKey(cacheKey: string): string[] {
   try {
     const parsed = JSON.parse(cacheKey);
-    if (Array.isArray(parsed) && parsed.every((segment) => typeof segment === "string")) {
+    if (
+      Array.isArray(parsed) &&
+      parsed.every((segment) => typeof segment === "string")
+    ) {
       return parsed;
     }
   } catch {
@@ -266,8 +275,7 @@ function applyOptimisticMerge(
       return {
         applied: true,
         next: previous.filter(
-          (item) =>
-            !isRecord(item) || item[optimistic.idField!] !== payloadId,
+          (item) => !isRecord(item) || item[optimistic.idField!] !== payloadId,
         ),
       };
     }
@@ -352,7 +360,11 @@ export function ManifestRuntimeProvider({
   const getCacheKey = useCallback(
     (target: EndpointTarget, params: Record<string, unknown> = {}) => {
       try {
-        const request = resolveEndpointTarget(target, manifest.resources, params);
+        const request = resolveEndpointTarget(
+          target,
+          manifest.resources,
+          params,
+        );
         const url = buildRequestUrl(request.endpoint, request.params);
         return toCacheKey(toQueryKey(request.client, request.method, url));
       } catch {
@@ -363,7 +375,11 @@ export function ManifestRuntimeProvider({
   );
 
   const loadTarget = useCallback(
-    async (target: EndpointTarget, params: Record<string, unknown> = {}, options?: { signal?: AbortSignal }) => {
+    async (
+      target: EndpointTarget,
+      params: Record<string, unknown> = {},
+      options?: { signal?: AbortSignal },
+    ) => {
       if (!resolvedClients["main"]) {
         throw new Error(
           "ManifestRuntimeProvider requires an API client for resource loading.",
@@ -408,22 +424,34 @@ export function ManifestRuntimeProvider({
 
         for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
           try {
-            const reqOptions = options?.signal ? { signal: options.signal } : undefined;
+            const reqOptions = options?.signal
+              ? { signal: options.signal }
+              : undefined;
             switch (request.method) {
               case "POST":
-                data = reqOptions ? await selectedClient.post(url, undefined, reqOptions) : await selectedClient.post(url, undefined);
+                data = reqOptions
+                  ? await selectedClient.post(url, undefined, reqOptions)
+                  : await selectedClient.post(url, undefined);
                 break;
               case "PUT":
-                data = reqOptions ? await selectedClient.put(url, undefined, reqOptions) : await selectedClient.put(url, undefined);
+                data = reqOptions
+                  ? await selectedClient.put(url, undefined, reqOptions)
+                  : await selectedClient.put(url, undefined);
                 break;
               case "PATCH":
-                data = reqOptions ? await selectedClient.patch(url, undefined, reqOptions) : await selectedClient.patch(url, undefined);
+                data = reqOptions
+                  ? await selectedClient.patch(url, undefined, reqOptions)
+                  : await selectedClient.patch(url, undefined);
                 break;
               case "DELETE":
-                data = reqOptions ? await selectedClient.delete(url, undefined, reqOptions) : await selectedClient.delete(url);
+                data = reqOptions
+                  ? await selectedClient.delete(url, undefined, reqOptions)
+                  : await selectedClient.delete(url);
                 break;
               default:
-                data = reqOptions ? await selectedClient.get(url, reqOptions) : await selectedClient.get(url);
+                data = reqOptions
+                  ? await selectedClient.get(url, reqOptions)
+                  : await selectedClient.get(url);
             }
             lastError = undefined;
             break;
@@ -493,12 +521,16 @@ export function ManifestRuntimeProvider({
 
   const invalidateResource = useCallback(
     (name: string) => {
-      const names = [name, ...collectDependentResources(name, manifest.resources)];
+      const names = [
+        name,
+        ...collectDependentResources(name, manifest.resources),
+      ];
       const nameSet = new Set(names);
       setEntries((current) =>
         Object.fromEntries(
           Object.entries(current).filter(
-            ([, entry]) => !entry.resourceName || !nameSet.has(entry.resourceName),
+            ([, entry]) =>
+              !entry.resourceName || !nameSet.has(entry.resourceName),
           ),
         ),
       );
@@ -576,11 +608,10 @@ export function ManifestRuntimeProvider({
         params,
         fallbackMethod,
       );
-      const endpoint = buildRequestUrl(
-        request.endpoint,
-        request.params,
-        { ...request.params, ...pathParams },
-      );
+      const endpoint = buildRequestUrl(request.endpoint, request.params, {
+        ...request.params,
+        ...pathParams,
+      });
       if (request.method === "GET") {
         throw new Error(
           "Manifest runtime mutations require POST, PUT, PATCH, or DELETE.",
@@ -702,7 +733,8 @@ export function ManifestRuntimeProvider({
         return isEntryFresh(entry) ? entry?.data : undefined;
       },
       loadTarget,
-      preloadResource: (name, params, options) => loadTarget({ resource: name }, params, options),
+      preloadResource: (name, params, options) =>
+        loadTarget({ resource: name }, params, options),
       invalidateResource,
       invalidateQueryKey,
       mutateTarget,
@@ -727,6 +759,9 @@ export function ManifestRuntimeProvider({
   );
 }
 
+/**
+ * Provide route runtime state to manifest-rendered components.
+ */
 export function RouteRuntimeProvider({
   value,
   children,
@@ -741,6 +776,9 @@ export function RouteRuntimeProvider({
   );
 }
 
+/**
+ * Provide the current overlay runtime payload and metadata.
+ */
 export function OverlayRuntimeProvider({
   value,
   children,
@@ -755,6 +793,9 @@ export function OverlayRuntimeProvider({
   );
 }
 
+/**
+ * Access the compiled manifest runtime.
+ */
 export function useManifestRuntime(): CompiledManifest | null {
   return useContext(ManifestRuntimeContext);
 }
@@ -767,14 +808,23 @@ export function useManifestResourceCache(): ManifestResourceCacheValue | null {
   return useContext(ManifestResourceCacheContext);
 }
 
+/**
+ * Access the current route runtime state.
+ */
 export function useRouteRuntime(): RouteRuntimeValue | null {
   return useContext(RouteRuntimeContext);
 }
 
+/**
+ * Access the current overlay runtime state.
+ */
 export function useOverlayRuntime(): OverlayRuntimeValue | null {
   return useContext(OverlayRuntimeContext);
 }
 
+/**
+ * Invalidate a manifest resource on an interval when polling is enabled.
+ */
 export function useManifestResourcePolling(
   resourceName?: string,
   enabled: boolean = true,
@@ -807,6 +857,9 @@ export function useManifestResourcePolling(
   }, [enabled, invalidateResource, pollMs, resourceName]);
 }
 
+/**
+ * Invalidate a manifest resource when the window regains focus.
+ */
 export function useManifestResourceFocusRefetch(
   resourceName?: string,
   enabled: boolean = true,
@@ -840,6 +893,9 @@ export function useManifestResourceFocusRefetch(
   }, [enabled, invalidateResource, refetchOnWindowFocus, resourceName]);
 }
 
+/**
+ * Invalidate a manifest resource on mount when the resource opts into it.
+ */
 export function useManifestResourceMountRefetch(
   resourceName?: string,
   enabled: boolean = true,

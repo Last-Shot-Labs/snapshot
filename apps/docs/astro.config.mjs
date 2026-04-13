@@ -27,6 +27,7 @@ export default defineConfig({
           label: "Build",
           items: [
             { label: "Manifest Apps", link: "/build/manifest-apps/" },
+            { label: "Styling and Slots", link: "/build/styling-and-slots/" },
             { label: "SDK Apps", link: "/build/sdk-apps/" },
           ],
         },

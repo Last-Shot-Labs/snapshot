@@ -888,4 +888,7 @@ export function createCommunityHooks({
   };
 }
 
+/**
+ * Hook surface returned by `createCommunityHooks()`.
+ */
 export type CommunityHooks = ReturnType<typeof createCommunityHooks>;

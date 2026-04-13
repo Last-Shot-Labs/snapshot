@@ -111,7 +111,7 @@ describe("TabsComponent", () => {
     });
     fireEvent.click(screen.getByText("Tab 3"));
     // Tab 1 should still be active (disabled tab click is ignored)
-    const tab1Button = screen.getByText("Tab 1");
+    const tab1Button = screen.getByRole("tab", { name: "Tab 1" });
     expect(tab1Button.getAttribute("aria-selected")).toBe("true");
   });
 
@@ -119,8 +119,8 @@ describe("TabsComponent", () => {
     render(createElement(TabsComponent, { config: baseConfig }), {
       wrapper: createWrapper(store),
     });
-    const tab1 = screen.getByText("Tab 1");
-    const tab2 = screen.getByText("Tab 2");
+    const tab1 = screen.getByRole("tab", { name: "Tab 1" });
+    const tab2 = screen.getByRole("tab", { name: "Tab 2" });
     expect(tab1.getAttribute("aria-selected")).toBe("true");
     expect(tab2.getAttribute("aria-selected")).toBe("false");
   });
@@ -165,7 +165,7 @@ describe("TabsComponent", () => {
     render(createElement(TabsComponent, { config }), {
       wrapper: createWrapper(store),
     });
-    const tab2 = screen.getByText("Tab 2");
+    const tab2 = screen.getByRole("tab", { name: "Tab 2" });
     expect(tab2.getAttribute("aria-selected")).toBe("true");
   });
 

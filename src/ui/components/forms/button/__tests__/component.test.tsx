@@ -126,4 +126,32 @@ describe("Button", () => {
     expect(button.getAttribute("aria-current")).toBe("page");
     expect(button.getAttribute("aria-expanded")).toBe("true");
   });
+
+  it("keeps the default variant fill on the primitive button surface", () => {
+    render(
+      <ButtonControl surfaceId="filled-button" variant="default" size="md">
+        Save Changes
+      </ButtonControl>,
+    );
+
+    const button = screen.getByRole("button", { name: "Save Changes" });
+    expect(button.getAttribute("style")).toContain(
+      "background-color: color-mix(in oklch, var(--sn-color-primary, #2563eb) 84%, var(--sn-color-background, #ffffff))",
+    );
+    expect(button.getAttribute("style")).toContain(
+      "color: var(--sn-color-primary-foreground, #fff)",
+    );
+  });
+
+  it("uses compact control density by default for internal button surfaces", () => {
+    render(
+      <ButtonControl surfaceId="default-density">
+        Compact Action
+      </ButtonControl>,
+    );
+
+    const button = screen.getByRole("button", { name: "Compact Action" });
+    expect(button.getAttribute("style")).toContain("min-height: 2.25rem");
+    expect(button.getAttribute("style")).toContain("gap: var(--sn-spacing-xs, 0.5rem)");
+  });
 });

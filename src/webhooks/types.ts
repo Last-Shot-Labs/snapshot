@@ -1,5 +1,8 @@
 // ── Webhook Endpoints ─────────────────────────────────────────────────────────
 
+/**
+ * Webhook endpoint record returned by the webhook API.
+ */
 export interface WebhookEndpointResponse {
   id: string;
   url: string;
@@ -10,11 +13,17 @@ export interface WebhookEndpointResponse {
   updatedAt: string;
 }
 
+/**
+ * Request body for creating a webhook endpoint.
+ */
 export interface CreateWebhookEndpointBody {
   url: string;
   events: string[];
 }
 
+/**
+ * Request body for updating a webhook endpoint.
+ */
 export interface UpdateWebhookEndpointBody {
   url?: string;
   events?: string[];
@@ -23,6 +32,9 @@ export interface UpdateWebhookEndpointBody {
 
 // ── Webhook Deliveries ────────────────────────────────────────────────────────
 
+/**
+ * Delivery record returned for a webhook endpoint event attempt.
+ */
 export interface WebhookDeliveryResponse {
   id: string;
   endpointId: string;
@@ -37,11 +49,17 @@ export interface WebhookDeliveryResponse {
 
 // ── Param types ───────────────────────────────────────────────────────────────
 
+/**
+ * Page-based pagination parameters for listing webhook endpoints.
+ */
 export interface ListWebhookEndpointsParams {
   page?: number;
   pageSize?: number;
 }
 
+/**
+ * Parameters for listing deliveries for a single webhook endpoint.
+ */
 export interface ListWebhookDeliveriesParams {
   endpointId: string;
   page?: number;
@@ -50,6 +68,9 @@ export interface ListWebhookDeliveriesParams {
 
 // ── Test ──────────────────────────────────────────────────────────────────────
 
+/**
+ * Request body for sending a test delivery through a webhook endpoint.
+ */
 export interface TestWebhookBody {
   event: string;
 }

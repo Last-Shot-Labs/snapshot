@@ -1,8 +1,17 @@
 import { z } from "zod";
 import {
-  baseComponentConfigSchema,
   urlSyncConfigSchema,
 } from "../../../manifest/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+export const tabsSlotNames = [
+  "root",
+  "list",
+  "tab",
+  "tabLabel",
+  "tabIcon",
+  "panel",
+] as const;
 
 /**
  * Schema for a single tab within the tabs component.
@@ -16,6 +25,7 @@ export const tabConfigSchema = z.object({
   content: z.array(z.record(z.unknown())),
   /** Whether this tab is disabled. */
   disabled: z.boolean().optional(),
+  slots: slotsSchema(["tab", "tabLabel", "tabIcon", "panel"]).optional(),
 });
 
 /** Inferred type for a single tab config. */
@@ -26,7 +36,7 @@ export type TabConfig = z.infer<typeof tabConfigSchema>;
  * Tabs provide in-page navigation between content panels.
  * Each tab's content is rendered via ComponentRenderer.
  */
-export const tabsConfigSchema = baseComponentConfigSchema.extend({
+export const tabsConfigSchema = extendComponentSchema({
   type: z.literal("tabs"),
   /** Array of tab definitions. */
   children: z.array(tabConfigSchema).min(1),
@@ -36,10 +46,7 @@ export const tabsConfigSchema = baseComponentConfigSchema.extend({
   urlSync: urlSyncConfigSchema.optional(),
   /** Visual variant for the tab bar. */
   variant: z.enum(["default", "underline", "pills"]).default("default"),
-  /** Inline style overrides. */
-  style: z.record(z.union([z.string(), z.number()])).optional(),
-  /** Additional CSS class name. */
-  className: z.string().optional(),
+  slots: slotsSchema(tabsSlotNames).optional(),
 });
 
 /** Inferred type for tabs config. */

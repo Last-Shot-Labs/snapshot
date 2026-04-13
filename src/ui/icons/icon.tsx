@@ -1,6 +1,13 @@
 import React from "react";
 import { ICON_PATHS } from "./paths";
 
+const ICON_ALIASES: Record<string, string> = {
+  pencil: "edit",
+  trash: "trash-2",
+  "table-properties": "layout-list",
+  "gantt-chart": "bar-chart",
+};
+
 /** Props for the {@link Icon} component. */
 export interface IconProps {
   /** Lucide icon name in kebab-case (e.g. `"user"`, `"check"`, `"arrow-left"`). */
@@ -35,10 +42,17 @@ export interface IconProps {
  */
 function normalizeIconName(name: string): string {
   // Accept both kebab-case ("arrow-left") and PascalCase ("ArrowLeft")
-  if (name.includes("-")) return name;
-  return name.replace(/([A-Z])/g, (m, ch, i) => (i === 0 ? ch.toLowerCase() : `-${ch.toLowerCase()}`));
+  const kebabCase = name.includes("-")
+    ? name
+    : name.replace(/([A-Z])/g, (m, ch, i) =>
+        i === 0 ? ch.toLowerCase() : `-${ch.toLowerCase()}`,
+      );
+  return ICON_ALIASES[kebabCase] ?? kebabCase;
 }
 
+/**
+ * Render a Snapshot icon from the built-in icon registry.
+ */
 export function Icon({
   name,
   size = 16,

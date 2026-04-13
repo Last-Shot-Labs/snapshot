@@ -20,6 +20,7 @@ import {
 import { usePoll } from "../../../hooks/use-poll";
 import { useUrlSync } from "../../../hooks/use-url-sync";
 import type {
+  ColumnConfig,
   DataTableConfig,
   ResolvedColumn,
   UseDataTableResult,
@@ -77,7 +78,7 @@ function resolveColumns(
   rows: Record<string, unknown>[],
 ): ResolvedColumn[] {
   if (configs === "auto") return autoDetectColumns(rows);
-  return configs.map((col) => ({
+  return (configs as ColumnConfig[]).map((col) => ({
     field: col.field,
     label: col.label ?? humanizeFieldName(col.field),
     sortable: col.sortable ?? false,

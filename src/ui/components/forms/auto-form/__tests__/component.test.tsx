@@ -840,4 +840,40 @@ describe("AutoForm", () => {
 
     expect(mockApi.post).toHaveBeenCalledTimes(1);
   });
+
+  it("applies canonical field and submit button slots", () => {
+    const wrapper = createWrapper({ api: mockApi, pageRegistry });
+    const config: AutoFormConfig = {
+      ...baseConfig,
+      id: "user-form",
+      fields: [
+        {
+          name: "email",
+          type: "email",
+          label: "Email",
+          slots: {
+            field: { className: "field-slot" },
+            input: { className: "input-slot" },
+          },
+        },
+      ],
+      slots: {
+        root: { className: "form-root-slot" },
+        submitButton: { className: "submit-slot" },
+      },
+    };
+
+    const { container } = render(createElement(AutoForm, { config }), { wrapper });
+
+    expect(container.querySelector('[data-snapshot-id="user-form-root"]')?.className).toContain(
+      "form-root-slot",
+    );
+    expect(container.querySelector('[data-snapshot-id="user-form-field-email"]')?.className).toContain(
+      "field-slot",
+    );
+    expect(screen.getByLabelText("Email").className).toContain("input-slot");
+    expect(screen.getByText("Submit").closest("button")?.className).toContain(
+      "submit-slot",
+    );
+  });
 });

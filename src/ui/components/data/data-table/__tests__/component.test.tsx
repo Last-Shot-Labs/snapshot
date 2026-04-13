@@ -2,8 +2,9 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { cleanup, render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
+import { afterEach } from "vitest";
 import { AtomRegistryImpl } from "../../../../context/registry";
 import {
   PageRegistryContext,
@@ -12,6 +13,10 @@ import {
 import { SnapshotApiContext } from "../../../../actions/executor";
 import { DataTable } from "../component";
 import type { DataTableConfig } from "../types";
+
+afterEach(() => {
+  cleanup();
+});
 
 const testData = [
   { id: 1, name: "Alice", email: "alice@example.com", status: "active" },
@@ -372,5 +377,37 @@ describe("DataTable component", () => {
     );
 
     expect(screen.queryByText("Previous")).toBeNull();
+  });
+
+  it("applies canonical header and pagination slots", () => {
+    const manyRows = Array.from({ length: 25 }, (_, i) => ({
+      id: i + 1,
+      name: `User ${i + 1}`,
+    }));
+    const { Wrapper } = createWrapper(manyRows);
+    const { container } = render(
+      <Wrapper>
+        <DataTable
+          config={baseConfig({
+            id: "users-table",
+            slots: {
+              root: { className: "table-root-slot" },
+              headerCell: { className: "table-header-cell-slot" },
+              pagination: { className: "table-pagination-slot" },
+            },
+          })}
+        />
+      </Wrapper>,
+    );
+
+    expect(
+      container.querySelector('[data-snapshot-id="users-table-root"]')?.className,
+    ).toContain("table-root-slot");
+    expect(
+      container.querySelector('[data-snapshot-id="users-table-header-cell-name"]')?.className,
+    ).toContain("table-header-cell-slot");
+    expect(
+      container.querySelector('[data-snapshot-id="users-table-pagination"]')?.className,
+    ).toContain("table-pagination-slot");
   });
 });

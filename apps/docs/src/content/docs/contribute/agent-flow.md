@@ -15,6 +15,15 @@ Use this discovery order:
 5. Read the public entrypoint for the surface you are changing.
 6. Read the schema, runtime, registry, generator, and example files named by that surface guide.
 
+For manifest UI work, treat these files as the canonical styling pattern library:
+
+- `src/ui/components/_base/schema.ts`
+- `src/ui/components/_base/style-surfaces.ts`
+- `src/ui/components/forms/button/schema.ts`
+- `src/ui/components/forms/button/component.tsx`
+- `src/ui/components/primitives/floating-menu/schema.ts`
+- `src/ui/components/primitives/floating-menu/component.tsx`
+
 Then execute the change in one pass:
 
 1. update the code
@@ -24,6 +33,13 @@ Then execute the change in one pass:
 5. update impacted examples or playground showcase coverage
 6. update the documentation impact map if the surface is new
 7. run `bun run docs:ci`
+
+If you introduce or change a visible surface in manifest UI:
+
+- define or update named `slots`
+- use canonical runtime state names
+- update [Styling and Slots](/build/styling-and-slots/) when the platform pattern changed
+- update any persona guide that should send app builders to the new surface
 
 Canonical contributor instructions live in:
 

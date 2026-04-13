@@ -1,3 +1,6 @@
+/**
+ * Built-in route contract for Snapshot webhook APIs.
+ */
 export const webhooksContract = {
   listEndpoints: {
     method: "GET" as const,

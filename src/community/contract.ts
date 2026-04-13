@@ -1,3 +1,6 @@
+/**
+ * Built-in route contract for Snapshot community APIs.
+ */
 export const communityContract = {
   // ── Containers ──────────────────────────────────────────────────────────────
   listContainers: {

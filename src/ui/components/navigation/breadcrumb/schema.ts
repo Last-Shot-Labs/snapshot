@@ -1,6 +1,15 @@
 import { z } from "zod";
-import { baseComponentConfigSchema } from "../../../manifest/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { actionSchema } from "../../../actions/types";
+
+export const breadcrumbSlotNames = [
+  "root",
+  "item",
+  "link",
+  "current",
+  "separator",
+  "icon",
+] as const;
 
 /**
  * Schema for a single breadcrumb item.
@@ -12,6 +21,7 @@ export const breadcrumbItemSchema = z.object({
   path: z.string().optional(),
   /** Optional icon name displayed before the label. */
   icon: z.string().optional(),
+  slots: slotsSchema(["item", "link", "current", "icon"]).optional(),
 });
 
 /**
@@ -33,8 +43,7 @@ export const breadcrumbItemSchema = z.object({
  * }
  * ```
  */
-export const breadcrumbConfigSchema = baseComponentConfigSchema
-  .extend({
+export const breadcrumbConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("breadcrumb"),
     /** Source for breadcrumb items. */
@@ -49,12 +58,9 @@ export const breadcrumbConfigSchema = baseComponentConfigSchema
     maxItems: z.number().optional(),
     /** Action dispatched on breadcrumb item click. */
     action: actionSchema.optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    slots: slotsSchema(breadcrumbSlotNames).optional(),
   })
-  .superRefine((config, ctx) => {
+  .superRefine((config: { source?: "manual" | "route"; items?: unknown[] }, ctx: z.RefinementCtx) => {
     if ((config.source ?? "manual") !== "manual") {
       return;
     }

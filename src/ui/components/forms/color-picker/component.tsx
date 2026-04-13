@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
@@ -21,7 +21,11 @@ function hexToRgb(hex: string): [number, number, number] {
   ];
 }
 
-function rgbToHsl([red, green, blue]: [number, number, number]): [number, number, number] {
+function rgbToHsl([red, green, blue]: [number, number, number]): [
+  number,
+  number,
+  number,
+] {
   const r = red / 255;
   const g = green / 255;
   const b = blue / 255;
@@ -56,7 +60,11 @@ function rgbToHsl([red, green, blue]: [number, number, number]): [number, number
   ];
 }
 
-function formatColorValue(color: string, format: ColorPickerConfig["format"], alpha: number) {
+function formatColorValue(
+  color: string,
+  format: ColorPickerConfig["format"],
+  alpha: number,
+) {
   if (format === "hex") {
     return color;
   }
@@ -68,6 +76,9 @@ function formatColorValue(color: string, format: ColorPickerConfig["format"], al
   return `hsla(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%, ${alpha.toFixed(2)})`;
 }
 
+/**
+ * Render a manifest-driven color picker input.
+ */
 export function ColorPicker({ config }: { config: ColorPickerConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
@@ -93,7 +104,11 @@ export function ColorPicker({ config }: { config: ColorPickerConfig }) {
   const triggerChange = (nextColor: string, nextAlpha: number) => {
     if (config.onChange) {
       void execute(config.onChange, {
-        value: formatColorValue(nextColor, config.format, config.showAlpha ? nextAlpha : 1),
+        value: formatColorValue(
+          nextColor,
+          config.format,
+          config.showAlpha ? nextAlpha : 1,
+        ),
       });
     }
   };
@@ -154,7 +169,8 @@ export function ColorPicker({ config }: { config: ColorPickerConfig }) {
             }}
             style={{
               flex: 1,
-              padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+              padding:
+                "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
               borderRadius: "var(--sn-radius-md, 0.375rem)",
               border:
                 "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",

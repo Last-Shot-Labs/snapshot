@@ -582,3 +582,6 @@ export function registerBuiltInFlavors(): void {
   });
   builtInFlavorNames.add("sunset");
 }
+
+// Ensure built-in flavors are always available before any caller reads the registry.
+registerBuiltInFlavors();

@@ -14,6 +14,12 @@ function SurfaceStyles({ css }: { css?: string }) {
   return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
+/**
+ * Floating panel component triggered by a button-like control.
+ *
+ * Uses the shared floating panel primitive, applies canonical slot styling to trigger and content
+ * surfaces, and publishes `{ isOpen }` when an `id` is configured.
+ */
 export function Popover({ config }: { config: PopoverConfig }) {
   const triggerText = useSubscribe(config.trigger) as string;
   const visible = useSubscribe(config.visible ?? true);
@@ -51,6 +57,16 @@ export function Popover({ config }: { config: PopoverConfig }) {
     },
     componentSurface: config.slots?.content,
   });
+  const headerSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-header`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      gap: "0.75rem",
+    },
+    componentSurface: config.slots?.header,
+  });
   const titleSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-title`,
     implementationBase: {
@@ -72,6 +88,13 @@ export function Popover({ config }: { config: PopoverConfig }) {
       gap: "0.5rem",
     },
     componentSurface: config.slots?.footer,
+  });
+  const closeButtonSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-close-button`,
+    implementationBase: {
+      flexShrink: 0,
+    },
+    componentSurface: config.slots?.closeButton,
   });
 
   if (visible === false) {
@@ -120,22 +143,42 @@ export function Popover({ config }: { config: PopoverConfig }) {
           className={contentSurface.className}
           style={contentSurface.style}
         >
-          {config.title ? (
+          {config.title || config.description ? (
             <div
-              data-snapshot-id={`${rootId}-title`}
-              className={titleSurface.className}
-              style={titleSurface.style}
+              data-snapshot-id={`${rootId}-header`}
+              className={headerSurface.className}
+              style={headerSurface.style}
             >
-              {config.title}
-            </div>
-          ) : null}
-          {config.description ? (
-            <div
-              data-snapshot-id={`${rootId}-description`}
-              className={descriptionSurface.className}
-              style={descriptionSurface.style}
-            >
-              {config.description}
+              <div style={{ display: "grid", gap: "0.5rem", flex: 1 }}>
+                {config.title ? (
+                  <div
+                    data-snapshot-id={`${rootId}-title`}
+                    className={titleSurface.className}
+                    style={titleSurface.style}
+                  >
+                    {config.title}
+                  </div>
+                ) : null}
+                {config.description ? (
+                  <div
+                    data-snapshot-id={`${rootId}-description`}
+                    className={descriptionSurface.className}
+                    style={descriptionSurface.style}
+                  >
+                    {config.description}
+                  </div>
+                ) : null}
+              </div>
+              <ButtonControl
+                variant="ghost"
+                onClick={() => setIsOpen(false)}
+                surfaceId={`${rootId}-close-button`}
+                surfaceConfig={config.slots?.closeButton}
+                itemSurfaceConfig={closeButtonSurface.resolvedConfigForWrapper}
+                ariaLabel="Close popover"
+              >
+                x
+              </ButtonControl>
             </div>
           ) : null}
           {config.content?.map((child, index) => (
@@ -163,9 +206,11 @@ export function Popover({ config }: { config: PopoverConfig }) {
       <SurfaceStyles css={triggerLabelSurface.scopedCss} />
       <SurfaceStyles css={triggerIconSurface.scopedCss} />
       <SurfaceStyles css={contentSurface.scopedCss} />
+      <SurfaceStyles css={headerSurface.scopedCss} />
       <SurfaceStyles css={titleSurface.scopedCss} />
       <SurfaceStyles css={descriptionSurface.scopedCss} />
       <SurfaceStyles css={footerSurface.scopedCss} />
+      <SurfaceStyles css={closeButtonSurface.scopedCss} />
     </div>
   );
 }

@@ -8,32 +8,35 @@ Snapshot has four primary personas.
 
 ## Manifest App Builder
 
-Use this path if you want the app to be driven mostly by `snapshot.manifest.json`.
+Use this path if you want the app to be driven mostly by `snapshot.manifest.json`, built-in component schemas, workflows, and tokenized theme configuration.
 
 - Start with [Manifest Apps](/build/manifest-apps/)
+- Then read [Styling and Slots](/build/styling-and-slots/)
 - Then read [Manifest Reference](/reference/manifest/)
-- Then use [Components](/reference/components/) and [Content and Media](/integrate/content-and-media/)
+- Then use [UI Reference](/reference/ui/), [Components](/reference/components/), and [Content and Media](/integrate/content-and-media/)
 - Then use [Examples and Showcase](/examples/)
 
 ## SDK App Builder
 
-Use this path if you want custom React and want Snapshot handling auth, API access, routing helpers, and generated sync output.
+Use this path if you want custom React while Snapshot handles auth, generated API access, community/webhook integrations, realtime plumbing, and sync output.
 
 - Start with [SDK Apps](/build/sdk-apps/)
 - Then read [SDK Reference](/reference/sdk/)
+- Then read [Vite Reference](/reference/vite/) if your app bootstraps or syncs through Vite
 - Then look at [Community and Realtime](/integrate/community-and-realtime/) and [Content and Media](/integrate/content-and-media/)
-- Then use [CLI Reference](/reference/cli/)
+- Then use [CLI Reference](/reference/cli/) and [Examples and Showcase](/examples/)
 
 ## SSR / Platform Integrator
 
-Use this path if Snapshot is being integrated with Bunshot SSR, manifest rendering, or RSC.
+Use this path if Snapshot is being integrated with Bunshot SSR, manifest rendering, prefetch manifests, static params, or RSC.
 
 - Start with [SSR and RSC](/integrate/ssr-rsc/)
 - Then read [SSR Reference](/reference/ssr/) and [Vite Reference](/reference/vite/)
+- Then verify capability coverage in [Capabilities](/start-here/capabilities/)
 
 ## Snapshot Contributor
 
-Use this path if you are implementing Snapshot itself.
+Use this path if you are implementing Snapshot itself and need the repo-native discovery and docs-update workflow.
 
 - Start with [Contributor Flow](/contribute/overview/)
 - Then read [Agent Flow](/contribute/agent-flow/)

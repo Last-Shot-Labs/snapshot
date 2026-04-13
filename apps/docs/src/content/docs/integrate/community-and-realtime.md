@@ -12,6 +12,7 @@ Snapshot already ships the main building blocks for this surface:
 - websocket and SSE managers for live transport
 - push notification hooks for browser registration flows
 - UI components for chat, comments, message threads, reactions, presence, typing, emoji, and GIFs
+- webhook contracts and hooks for delivery-oriented backend integrations
 
 Start with these source-backed references:
 
@@ -26,11 +27,21 @@ Canonical source for this surface lives in:
 - `src/community/contract.ts`
 - `src/community/hooks.ts`
 - `src/webhooks/index.ts`
+- `src/webhooks/contract.ts`
+- `src/webhooks/hooks.ts`
 - `src/ws/manager.ts`
 - `src/ws/hook.ts`
 - `src/sse/manager.ts`
 - `src/sse/hook.ts`
 - `src/push/hook.ts`
 - `src/ui/components/communication/**`
+
+High-signal showcase coverage currently lives in the `communication` page group inside `playground/src/showcase.tsx`.
+
+Use this guide when you need to keep the boundaries clear:
+
+- SDK hooks and contracts own network primitives and browser subscriptions
+- communication components own user-facing messaging and interaction surfaces
+- SSE, websocket, and push are complementary transports, not interchangeable APIs
 
 Use the [Examples and Showcase](/examples/) page to jump into the current playground-backed communication examples while the dedicated runnable example registry is still being built out.

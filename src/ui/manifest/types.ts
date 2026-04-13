@@ -89,15 +89,16 @@ export type RouteTransitionConfig = Resolved<
   z.infer<typeof routeTransitionSchema>
 >;
 /** Resolved runtime view of `routeGuardConfigSchema`. */
-export type RouteGuardConfig = Resolved<
-  z.infer<typeof routeGuardConfigSchema>
->;
+export type RouteGuardConfig = Resolved<z.infer<typeof routeGuardConfigSchema>>;
 /** Resolved runtime view of `routeGuardSchema`. */
 export type RouteGuard = Resolved<z.infer<typeof routeGuardSchema>>;
-/** Resolved runtime view of `navigationConfigSchema`. */
-export type NavigationConfig = Resolved<z.infer<typeof navigationConfigSchema>>;
+/** Runtime view of `navigationConfigSchema`. Navigation labels remain locale-resolved at render time. */
+export type NavigationConfig = z.infer<typeof navigationConfigSchema>;
+/** Runtime state declaration for a single named manifest state value. */
 export type StateValueConfig = z.infer<typeof stateValueConfigSchema>;
+/** Named manifest state map keyed by state id. */
 export type StateConfig = Record<string, StateValueConfig>;
+/** Named manifest resource map keyed by resource id. */
 export type ResourceConfigMap = ResourceMap;
 /** Resolved runtime view of `overlayConfigSchema`. */
 export type OverlayConfig = Resolved<z.infer<typeof overlayConfigSchema>>;
@@ -141,6 +142,9 @@ export type Resolved<T> = T extends EnvRefLike
             }
           : T;
 
+/**
+ * Navigation item rendered by Snapshot navigation components.
+ */
 export interface NavItem {
   label: string;
   path: string;
@@ -153,6 +157,9 @@ export interface NavItem {
   children?: NavItem[];
 }
 
+/**
+ * Runtime config for the built-in `row` layout component.
+ */
 export interface RowConfig extends BaseComponentConfig {
   type: "row";
   gap?: Responsive<"none" | "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl">;
@@ -164,6 +171,9 @@ export interface RowConfig extends BaseComponentConfig {
   children: ComponentConfig[];
 }
 
+/**
+ * Runtime config union for manifest-renderable components.
+ */
 export type ComponentConfig =
   | RowConfig
   | HeadingConfig
@@ -224,12 +234,18 @@ export interface CompiledManifest {
   firstRoute: CompiledRoute | null;
 }
 
+/**
+ * Props accepted by the `ManifestApp` component.
+ */
 export interface ManifestAppProps {
   manifest: ManifestConfig;
   apiUrl: string;
   lazyComponents?: boolean;
 }
 
+/**
+ * React component type that can participate in the config-driven manifest runtime.
+ */
 export type ConfigDrivenComponent = React.ComponentType<{
   config: Record<string, unknown>;
 }>;

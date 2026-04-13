@@ -9,16 +9,40 @@ describe("listConfigSchema phase D", () => {
       draggable: true,
       dragGroup: "backlog",
       dropTargets: ["backlog"],
-      onReorder: { type: "api", method: "POST", endpoint: "/api/reorder" },
+      onReorder: { type: "toast", message: "Reordered" },
       onDrop: { type: "toast", message: "Dropped" },
       contextMenu: [
         {
+          type: "item",
           label: "Open",
           action: { type: "navigate", to: "/items/{id}" },
         },
       ],
       poll: { interval: 5000, pauseWhenHidden: true },
       items: [{ id: "1", title: "Item 1" }],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts canonical list and item slots", () => {
+    const result = listConfigSchema.safeParse({
+      type: "list",
+      items: [
+        {
+          id: "1",
+          title: "Item 1",
+          slots: {
+            item: { className: "item-slot" },
+            itemTitle: { className: "item-title-slot" },
+          },
+        },
+      ],
+      slots: {
+        root: { className: "root-slot" },
+        list: { className: "list-slot" },
+        emptyState: { className: "empty-slot" },
+      },
     });
 
     expect(result.success).toBe(true);

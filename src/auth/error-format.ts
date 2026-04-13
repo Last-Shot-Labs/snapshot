@@ -19,6 +19,9 @@ function isLocalhost(): boolean {
   );
 }
 
+/**
+ * Format a raw auth `ApiError` into the message shown to application code.
+ */
 export function formatAuthError(
   error: ApiError,
   context: AuthErrorContext,
@@ -36,6 +39,9 @@ export function formatAuthError(
   return config?.messages?.[context] ?? DEFAULT_MESSAGES[context];
 }
 
+/**
+ * Create a reusable auth error formatter with shared formatting rules.
+ */
 export function createAuthErrorFormatter(config?: AuthErrorConfig) {
   return (error: ApiError, context: AuthErrorContext): string =>
     formatAuthError(error, context, config);

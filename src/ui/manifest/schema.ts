@@ -214,10 +214,16 @@ function responsiveSchema<T extends z.ZodTypeAny>(
 
 const componentSchemaRegistry = new Map<string, z.ZodType>();
 
+/**
+ * Register a component-specific manifest schema by component `type`.
+ */
 export function registerComponentSchema(type: string, schema: z.ZodType): void {
   componentSchemaRegistry.set(type, schema);
 }
 
+/**
+ * Return the currently registered manifest component type names.
+ */
 export function getRegisteredSchemaTypes(): string[] {
   return [...componentSchemaRegistry.keys()];
 }
@@ -226,6 +232,9 @@ export function getRegisteredSchemas(): Map<string, z.ZodType> {
   return new Map(componentSchemaRegistry);
 }
 
+/**
+ * Shared base schema applied to all manifest-driven components.
+ */
 export const baseComponentConfigSchema = z.object({
   type: z.string(),
   id: z.string().optional(),
@@ -279,18 +288,38 @@ export const baseComponentConfigSchema = z.object({
   maxHeight: responsiveSchema(z.string()).optional(),
   bg: z.union([z.string(), componentBackgroundSchema]).optional(),
   color: z.string().optional(),
-  borderRadius: z.union([z.enum(["none", "xs", "sm", "md", "lg", "xl", "full"]), z.string()]).optional(),
+  borderRadius: z
+    .union([z.enum(["none", "xs", "sm", "md", "lg", "xl", "full"]), z.string()])
+    .optional(),
   border: z.string().optional(),
-  shadow: z.union([z.enum(["none", "xs", "sm", "md", "lg", "xl"]), z.string()]).optional(),
+  shadow: z
+    .union([z.enum(["none", "xs", "sm", "md", "lg", "xl"]), z.string()])
+    .optional(),
   opacity: z.number().min(0).max(1).optional(),
   overflow: z.enum(["auto", "hidden", "scroll", "visible"]).optional(),
   cursor: z.string().optional(),
   position: z.enum(["relative", "absolute", "fixed", "sticky"]).optional(),
   inset: z.string().optional(),
-  display: responsiveSchema(z.enum(["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"])).optional(),
-  flexDirection: responsiveSchema(z.enum(["row", "column", "row-reverse", "column-reverse"])).optional(),
-  alignItems: z.enum(["start", "center", "end", "stretch", "baseline"]).optional(),
-  justifyContent: z.enum(["start", "center", "end", "between", "around", "evenly"]).optional(),
+  display: responsiveSchema(
+    z.enum([
+      "flex",
+      "grid",
+      "block",
+      "inline",
+      "inline-flex",
+      "inline-grid",
+      "none",
+    ]),
+  ).optional(),
+  flexDirection: responsiveSchema(
+    z.enum(["row", "column", "row-reverse", "column-reverse"]),
+  ).optional(),
+  alignItems: z
+    .enum(["start", "center", "end", "stretch", "baseline"])
+    .optional(),
+  justifyContent: z
+    .enum(["start", "center", "end", "between", "around", "evenly"])
+    .optional(),
   flexWrap: z.enum(["wrap", "nowrap", "wrap-reverse"]).optional(),
   flex: z.string().optional(),
   gridTemplateColumns: z.string().optional(),
@@ -298,10 +327,27 @@ export const baseComponentConfigSchema = z.object({
   gridColumn: z.string().optional(),
   gridRow: z.string().optional(),
   textAlign: z.enum(["left", "center", "right", "justify"]).optional(),
-  fontSize: responsiveSchema(z.union([z.enum(["xs", "sm", "base", "lg", "xl", "2xl", "3xl", "4xl"]), z.string()])).optional(),
-  fontWeight: z.union([z.enum(["light", "normal", "medium", "semibold", "bold"]), z.number()]).optional(),
-  lineHeight: z.union([z.enum(["none", "tight", "snug", "normal", "relaxed", "loose"]), z.string()]).optional(),
-  letterSpacing: z.union([z.enum(["tight", "normal", "wide"]), z.string()]).optional(),
+  fontSize: responsiveSchema(
+    z.union([
+      z.enum(["xs", "sm", "base", "lg", "xl", "2xl", "3xl", "4xl"]),
+      z.string(),
+    ]),
+  ).optional(),
+  fontWeight: z
+    .union([
+      z.enum(["light", "normal", "medium", "semibold", "bold"]),
+      z.number(),
+    ])
+    .optional(),
+  lineHeight: z
+    .union([
+      z.enum(["none", "tight", "snug", "normal", "relaxed", "loose"]),
+      z.string(),
+    ])
+    .optional(),
+  letterSpacing: z
+    .union([z.enum(["tight", "normal", "wide"]), z.string()])
+    .optional(),
 
   // ── Interactive state props ─────────────────────────────────────────────
   hover: hoverConfigSchema.optional(),
@@ -430,6 +476,9 @@ export const suspenseFallbackSchema = z
   })
   .strict();
 
+/**
+ * Schema for the built-in `row` layout component.
+ */
 export const rowConfigSchema: z.ZodType = z.lazy(() =>
   baseComponentConfigSchema.extend({
     type: z.literal("row"),
@@ -446,6 +495,9 @@ export const rowConfigSchema: z.ZodType = z.lazy(() =>
   }),
 );
 
+/**
+ * Schema for the built-in `heading` component.
+ */
 export const headingConfigSchema = baseComponentConfigSchema.extend({
   type: z.literal("heading"),
   text: textWithFromRefSchema,
@@ -480,6 +532,9 @@ export const shortcutConfigSchema = z
 
 export const shortcutsConfigSchema = z.record(shortcutConfigSchema);
 
+/**
+ * Schema for the built-in `button` component.
+ */
 export const buttonConfigSchema = baseComponentConfigSchema.extend({
   type: z.literal("button"),
   label: textOrTRefSchema,
@@ -499,6 +554,9 @@ const selectOptionSchema = z.object({
   value: z.string(),
 });
 
+/**
+ * Schema for the built-in `select` component.
+ */
 export const selectConfigSchema = baseComponentConfigSchema.extend({
   type: z.literal("select"),
   options: z.union([z.array(selectOptionSchema), dataSourceSchema]),
@@ -508,81 +566,98 @@ export const selectConfigSchema = baseComponentConfigSchema.extend({
   placeholder: textOrTRefSchema.optional(),
 });
 
-export const cardConfigSchema = z.object({
-  type: z.literal("card"),
-  id: z.string().optional(),
-  title: z.string().optional(),
-  subtitle: z.string().optional(),
-  children: z.array(z.lazy(() => componentConfigSchema)).default([]),
-  gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
-  suspense: suspenseFallbackSchema.optional(),
-  className: z.string().optional(),
-  style: z.record(z.union([z.string(), z.number()])).optional(),
-  visible: z.union([z.boolean(), fromRefSchema]).optional(),
-}).strict();
+export const cardConfigSchema = z
+  .object({
+    type: z.literal("card"),
+    id: z.string().optional(),
+    title: z.string().optional(),
+    subtitle: z.string().optional(),
+    children: z.array(z.lazy(() => componentConfigSchema)).default([]),
+    gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
+    suspense: suspenseFallbackSchema.optional(),
+    className: z.string().optional(),
+    style: z.record(z.union([z.string(), z.number()])).optional(),
+    visible: z.union([z.boolean(), fromRefSchema]).optional(),
+  })
+  .strict();
 
-export const sectionConfigSchema = z.object({
-  type: z.literal("section"),
-  id: z.string().optional(),
-  heading: z.string().optional(),
-  description: z.string().optional(),
-  children: z.array(z.lazy(() => componentConfigSchema)).default([]),
-  gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
-  divider: z.boolean().optional(),
-  suspense: suspenseFallbackSchema.optional(),
-  className: z.string().optional(),
-  style: z.record(z.union([z.string(), z.number()])).optional(),
-  visible: z.union([z.boolean(), fromRefSchema]).optional(),
-}).strict();
+export const sectionConfigSchema = z
+  .object({
+    type: z.literal("section"),
+    id: z.string().optional(),
+    heading: z.string().optional(),
+    description: z.string().optional(),
+    children: z.array(z.lazy(() => componentConfigSchema)).default([]),
+    gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
+    divider: z.boolean().optional(),
+    suspense: suspenseFallbackSchema.optional(),
+    className: z.string().optional(),
+    style: z.record(z.union([z.string(), z.number()])).optional(),
+    visible: z.union([z.boolean(), fromRefSchema]).optional(),
+  })
+  .strict();
 
-export const containerConfigSchema = z.object({
-  type: z.literal("container"),
-  id: z.string().optional(),
-  maxWidth: z.string().optional(),
-  children: z.array(z.lazy(() => componentConfigSchema)).default([]),
-  suspense: suspenseFallbackSchema.optional(),
-  className: z.string().optional(),
-  style: z.record(z.union([z.string(), z.number()])).optional(),
-  visible: z.union([z.boolean(), fromRefSchema]).optional(),
-}).strict();
+export const containerConfigSchema = z
+  .object({
+    type: z.literal("container"),
+    id: z.string().optional(),
+    maxWidth: z.string().optional(),
+    children: z.array(z.lazy(() => componentConfigSchema)).default([]),
+    suspense: suspenseFallbackSchema.optional(),
+    className: z.string().optional(),
+    style: z.record(z.union([z.string(), z.number()])).optional(),
+    visible: z.union([z.boolean(), fromRefSchema]).optional(),
+  })
+  .strict();
 
-export const backgroundConfigSchema = z.object({
-  image: z.string().optional(),
-  position: z.string().optional(),
-  size: z.string().optional(),
-  overlay: z.string().optional(),
-}).strict();
+export const backgroundConfigSchema = z
+  .object({
+    image: z.string().optional(),
+    position: z.string().optional(),
+    size: z.string().optional(),
+    overlay: z.string().optional(),
+  })
+  .strict();
 
-export const gridConfigSchema = z.object({
-  type: z.literal("grid"),
-  id: z.string().optional(),
-  columns: z.union([
-    z.number(),
-    z.string(),
-    responsiveSchema(z.union([z.number(), z.string()])),
-  ]).optional(),
-  template: z.string().optional(),
-  rows: z.string().optional(),
-  areas: z.array(z.string()).optional(),
-  gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
-  children: z.array(z.lazy(() => componentConfigSchema)).default([]),
-  background: backgroundConfigSchema.optional(),
-  suspense: suspenseFallbackSchema.optional(),
-  className: z.string().optional(),
-  style: z.record(z.union([z.string(), z.number()])).optional(),
-  visible: z.union([z.boolean(), fromRefSchema]).optional(),
-}).strict();
+export const gridConfigSchema = z
+  .object({
+    type: z.literal("grid"),
+    id: z.string().optional(),
+    columns: z
+      .union([
+        z.number(),
+        z.string(),
+        responsiveSchema(z.union([z.number(), z.string()])),
+      ])
+      .optional(),
+    template: z.string().optional(),
+    rows: z.string().optional(),
+    areas: z.array(z.string()).optional(),
+    gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
+    children: z.array(z.lazy(() => componentConfigSchema)).default([]),
+    background: backgroundConfigSchema.optional(),
+    suspense: suspenseFallbackSchema.optional(),
+    className: z.string().optional(),
+    style: z.record(z.union([z.string(), z.number()])).optional(),
+    visible: z.union([z.boolean(), fromRefSchema]).optional(),
+  })
+  .strict();
 
-export const spacerConfigSchema = z.object({
-  type: z.literal("spacer"),
-  size: z.string().optional(),
-  flex: z.boolean().optional(),
-  className: z.string().optional(),
-  style: z.record(z.union([z.string(), z.number()])).optional(),
-}).strict();
+export const spacerConfigSchema = z
+  .object({
+    type: z.literal("spacer"),
+    size: z.string().optional(),
+    flex: z.boolean().optional(),
+    className: z.string().optional(),
+    style: z.record(z.union([z.string(), z.number()])).optional(),
+  })
+  .strict();
 
 const customComponentPropTypeSchema = z.enum(["string", "number", "boolean"]);
 
+/**
+ * Schema for a declared prop on a manifest custom component registration.
+ */
 export const customComponentPropSchema = z
   .object({
     type: customComponentPropTypeSchema,
@@ -593,6 +668,9 @@ export const customComponentPropSchema = z
   })
   .strict();
 
+/**
+ * Schema for a custom component declaration under `components.custom`.
+ */
 export const customComponentDeclarationSchema = z
   .object({
     props: z.record(customComponentPropSchema).optional(),
@@ -973,9 +1051,7 @@ export const realtimeWsSchema = z
       })
       .catchall(z.string())
       .optional(),
-    events: z
-      .record(z.union([z.string(), eventActionValueSchema]))
-      .optional(),
+    events: z.record(z.union([z.string(), eventActionValueSchema])).optional(),
     eventActions: z.record(eventActionValueSchema).optional(),
   })
   .strict()
@@ -984,15 +1060,13 @@ export const realtimeWsSchema = z
     autoReconnect: value.reconnect?.enabled ?? value.autoReconnect,
     maxReconnectAttempts:
       value.reconnect?.maxAttempts ?? value.maxReconnectAttempts,
-    reconnectBaseDelay:
-      value.reconnect?.baseDelay ?? value.reconnectBaseDelay,
-    reconnectMaxDelay:
-      value.reconnect?.maxDelay ?? value.reconnectMaxDelay,
+    reconnectBaseDelay: value.reconnect?.baseDelay ?? value.reconnectBaseDelay,
+    reconnectMaxDelay: value.reconnect?.maxDelay ?? value.reconnectMaxDelay,
     on: {
       ...(value.on ?? {}),
       ...Object.fromEntries(
-        Object.entries(value.events ?? {}).filter(([, eventValue]) =>
-          typeof eventValue === "string",
+        Object.entries(value.events ?? {}).filter(
+          ([, eventValue]) => typeof eventValue === "string",
         ),
       ),
     },
@@ -1023,9 +1097,7 @@ export const realtimeSseEndpointSchema = z
       })
       .catchall(z.string())
       .optional(),
-    events: z
-      .record(z.union([z.string(), eventActionValueSchema]))
-      .optional(),
+    events: z.record(z.union([z.string(), eventActionValueSchema])).optional(),
     eventActions: z.record(eventActionValueSchema).optional(),
   })
   .strict()
@@ -1034,8 +1106,8 @@ export const realtimeSseEndpointSchema = z
     on: {
       ...(value.on ?? {}),
       ...Object.fromEntries(
-        Object.entries(value.events ?? {}).filter(([, eventValue]) =>
-          typeof eventValue === "string",
+        Object.entries(value.events ?? {}).filter(
+          ([, eventValue]) => typeof eventValue === "string",
         ),
       ),
     },
@@ -1076,6 +1148,9 @@ export const realtimeConfigSchema = z
   })
   .strict();
 
+/**
+ * Schema for the top-level `components` section of a manifest.
+ */
 export const componentsConfigSchema = z
   .object({
     custom: z.record(customComponentDeclarationSchema).optional(),
@@ -1154,6 +1229,9 @@ function restoreComponentSchemaRegistry(
  */
 const baseFieldNames = new Set(Object.keys(baseComponentConfigSchema.shape));
 
+/**
+ * Union schema covering every component config Snapshot can render from a manifest.
+ */
 export const componentConfigSchema: z.ZodType = z
   .object({ type: z.string() })
   .passthrough()
@@ -1239,6 +1317,9 @@ registerComponentSchema("error-page", errorPageConfigSchema);
 registerComponentSchema("not-found", notFoundConfigSchema);
 registerComponentSchema("offline-banner", offlineBannerConfigSchema);
 
+/**
+ * Recursive schema for navigation items used by manifest navigation surfaces.
+ */
 export const navItemSchema: z.ZodType = z.lazy(() =>
   z
     .object({
@@ -1264,6 +1345,9 @@ export const navItemSchema: z.ZodType = z.lazy(() =>
     .strict(),
 );
 
+/**
+ * Schema for the top-level manifest navigation configuration.
+ */
 export const navigationConfigSchema = z
   .object({
     mode: z.enum(["sidebar", "top-nav"]).optional(),
@@ -1285,7 +1369,11 @@ export const navigationConfigSchema = z
                     icon: z.string().optional(),
                     action: actionConfigSchema,
                     roles: z.array(z.string()).optional(),
-                    slots: slotsSchema(["item", "itemLabel", "itemIcon"]).optional(),
+                    slots: slotsSchema([
+                      "item",
+                      "itemLabel",
+                      "itemIcon",
+                    ]).optional(),
                   })
                   .strict(),
               )
@@ -1483,6 +1571,9 @@ const authWorkflowHooksSchema = z
   })
   .strict();
 
+/**
+ * Schema for the manifest auth screen and auth workflow configuration.
+ */
 export const authScreenConfigSchema = z
   .object({
     screens: z
@@ -1559,6 +1650,9 @@ export const authScreenConfigSchema = z
 
 export const layoutSchema = z.string().min(1);
 
+/**
+ * Schema for a manifest page definition.
+ */
 export const pageConfigSchema = z
   .object({
     title: textOrTRefSchema.optional(),
@@ -1595,6 +1689,9 @@ export const routeLayoutSchema = z.union([
     .strict(),
 ]);
 
+/**
+ * Object-form route guard schema with auth, role, and policy controls.
+ */
 export const routeGuardConfigSchema = z
   .object({
     name: z.string().min(1).optional(),
@@ -1606,11 +1703,17 @@ export const routeGuardConfigSchema = z
   })
   .strict();
 
+/**
+ * Route guard schema, accepting either a named guard or inline guard config.
+ */
 export const routeGuardSchema = z.union([
   z.string().min(1),
   routeGuardConfigSchema,
 ]);
 
+/**
+ * Schema for route transition metadata.
+ */
 export const routeTransitionSchema = z
   .object({
     enter: z.string().default("fade-in"),
@@ -1620,6 +1723,9 @@ export const routeTransitionSchema = z
   })
   .strict();
 
+/**
+ * Schema for the built-in `outlet` component used by route layouts.
+ */
 export const outletComponentSchema = baseComponentConfigSchema
   .extend({
     type: z.literal("outlet"),
@@ -1629,6 +1735,9 @@ export const outletComponentSchema = baseComponentConfigSchema
 
 registerComponentSchema("outlet", outletComponentSchema);
 
+/**
+ * Recursive schema for a manifest route tree node.
+ */
 export const routeConfigSchema: z.ZodType = z.lazy(() =>
   z
     .object({
@@ -1672,6 +1781,9 @@ export const routeConfigSchema: z.ZodType = z.lazy(() =>
     ),
 );
 
+/**
+ * Schema for a named manifest state value declaration.
+ */
 export const stateValueConfigSchema = z
   .object({
     scope: z.enum(["app", "route"]).optional(),
@@ -1721,14 +1833,15 @@ export const appCacheSchema = z
   })
   .strict();
 
+/**
+ * Schema for the top-level manifest `app` section.
+ */
 export const appConfigSchema = z
   .object({
     apiUrl: stringOrEnvRef.optional(),
     title: textOrTRefSchema.optional(),
     shell: layoutSchema.default("full-width"),
-    headers: z
-      .record(z.union([stringOrEnvRef, fromRefSchema]))
-      .optional(),
+    headers: z.record(z.union([stringOrEnvRef, fromRefSchema])).optional(),
     cache: appCacheSchema.optional(),
     home: z.string().startsWith("/").optional(),
     loading: z.union([componentConfigSchema, stringOrEnvRef]).optional(),
@@ -1809,6 +1922,9 @@ const overlayFooterActionSchema = z
   })
   .strict();
 
+/**
+ * Schema for named modal and drawer overlay declarations.
+ */
 export const overlayConfigSchema: z.ZodType = z.union([
   z
     .object({
@@ -1934,11 +2050,10 @@ function flattenDeclaredRoutes(
 
     if (route.children?.length) {
       flattened.push(
-        ...flattenDeclaredRoutes(
-          route.children,
-          fullPath,
-          [...issuePath, "children"],
-        ),
+        ...flattenDeclaredRoutes(route.children, fullPath, [
+          ...issuePath,
+          "children",
+        ]),
       );
     }
   });
@@ -1976,6 +2091,9 @@ export const subAppConfigSchema = z
  */
 export const subAppsSchema = z.record(subAppConfigSchema);
 
+/**
+ * Top-level schema for `snapshot.manifest.json`.
+ */
 export const manifestConfigSchema = z
   .object({
     $schema: z.string().optional(),

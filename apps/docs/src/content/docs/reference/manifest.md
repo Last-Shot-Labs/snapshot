@@ -53,5 +53,11 @@ This page is generated from the current Zod schema definitions in `src/ui/manife
 - `mode`
 - `items`
 - `template`
+- `collapsible`
+- `userMenu`
+- `logo`
+- `className`
+- `style`
+- `slots`
 
 Use this page to verify the current top-level manifest shape before trusting older prose guides.
