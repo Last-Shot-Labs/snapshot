@@ -40,6 +40,7 @@ export function createAccountHooks({
   onUnauthenticated,
   queryClient: qc,
 }: AccountHooksOptions) {
+  /** Send a password-reset request for the given email or user. */
   function useResetPassword() {
     return useMutation<{ message: string }, ApiError, ResetPasswordBody>({
       mutationFn: (body) =>
@@ -47,6 +48,7 @@ export function createAccountHooks({
     });
   }
 
+  /** Submit an email-verification token to confirm the user's email address. */
   function useVerifyEmail() {
     return useMutation<{ message: string }, ApiError, VerifyEmailBody>({
       mutationFn: (body) =>
@@ -54,6 +56,7 @@ export function createAccountHooks({
     });
   }
 
+  /** Resend the email-verification message to the user's address. */
   function useResendVerification() {
     return useMutation<{ message: string }, ApiError, ResendVerificationBody>({
       mutationFn: (body) =>
@@ -64,6 +67,7 @@ export function createAccountHooks({
     });
   }
 
+  /** Set or update the user's password. */
   function useSetPassword() {
     return useMutation<{ message: string }, ApiError, SetPasswordBody>({
       mutationFn: (body) =>
@@ -71,6 +75,7 @@ export function createAccountHooks({
     });
   }
 
+  /** Delete the current user's account, clear all stored tokens, and navigate to the login page. */
   function useDeleteAccount() {
     const navigate = useNavigate();
     return useMutation<void, ApiError, DeleteAccountBody | void>({
@@ -86,6 +91,7 @@ export function createAccountHooks({
     });
   }
 
+  /** Cancel a pending account deletion request. */
   function useCancelDeletion() {
     return useMutation<{ message: string }, ApiError, void>({
       mutationFn: () =>
@@ -93,6 +99,7 @@ export function createAccountHooks({
     });
   }
 
+  /** Exchange a refresh token for a new access token and persist both in storage. */
   function useRefreshToken() {
     return useMutation<RefreshTokenResponse, ApiError, RefreshTokenBody | void>(
       {
@@ -111,6 +118,7 @@ export function createAccountHooks({
     );
   }
 
+  /** Query all active sessions for the current user. */
   function useSessions() {
     const { data, isLoading, isError } = useQuery<
       { sessions: Session[] },
@@ -123,6 +131,7 @@ export function createAccountHooks({
     return { sessions: data?.sessions ?? [], isLoading, isError };
   }
 
+  /** Revoke a specific session by ID and invalidate the sessions cache. */
   function useRevokeSession() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, string>({

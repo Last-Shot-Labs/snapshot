@@ -102,12 +102,26 @@ const COMPONENT_LOADERS: Record<string, () => Promise<void>> = {
       "Stack",
       "stackConfigSchema",
     ),
+  heading: () =>
+    registerFromModule(
+      "heading",
+      () => import("../components/content/heading/index"),
+      "Heading",
+      "headingConfigSchema",
+    ),
   text: () =>
     registerFromModule(
       "text",
       () => import("../components/primitives/text"),
       "Text",
       "textConfigSchema",
+    ),
+  code: () =>
+    registerFromModule(
+      "code",
+      () => import("../components/content/code/index"),
+      "Code",
+      "codeConfigSchema",
     ),
   link: () =>
     registerFromModule(
@@ -122,6 +136,13 @@ const COMPONENT_LOADERS: Record<string, () => Promise<void>> = {
       () => import("../components/primitives/divider"),
       "Divider",
       "dividerConfigSchema",
+    ),
+  "floating-menu": () =>
+    registerFromModule(
+      "floating-menu",
+      () => import("../components/primitives/floating-menu"),
+      "FloatingMenu",
+      "floatingMenuConfigSchema",
     ),
   "oauth-buttons": () =>
     registerFromModule(
@@ -395,6 +416,13 @@ const COMPONENT_LOADERS: Record<string, () => Promise<void>> = {
       "Popover",
       "popoverConfigSchema",
     ),
+  "hover-card": () =>
+    registerFromModule(
+      "hover-card",
+      () => import("../components/overlay/hover-card/index"),
+      "HoverCard",
+      "hoverCardConfigSchema",
+    ),
   separator: () =>
     registerFromModule(
       "separator",
@@ -415,6 +443,13 @@ const COMPONENT_LOADERS: Record<string, () => Promise<void>> = {
       () => import("../components/forms/input/index"),
       "Input",
       "inputConfigSchema",
+    ),
+  select: () =>
+    registerFromModule(
+      "select",
+      () => import("../components/forms/select/index"),
+      "Select",
+      "selectConfigSchema",
     ),
   "date-picker": () =>
     registerFromModule(
@@ -437,6 +472,13 @@ const COMPONENT_LOADERS: Record<string, () => Promise<void>> = {
       "ColorPicker",
       "colorPickerConfigSchema",
     ),
+  "icon-button": () =>
+    registerFromModule(
+      "icon-button",
+      () => import("../components/forms/icon-button/index"),
+      "IconButton",
+      "iconButtonConfigSchema",
+    ),
   textarea: () =>
     registerFromModule(
       "textarea",
@@ -450,6 +492,13 @@ const COMPONENT_LOADERS: Record<string, () => Promise<void>> = {
       () => import("../components/forms/toggle/index"),
       "Toggle",
       "toggleConfigSchema",
+    ),
+  "toggle-group": () =>
+    registerFromModule(
+      "toggle-group",
+      () => import("../components/forms/toggle-group/index"),
+      "ToggleGroup",
+      "toggleGroupConfigSchema",
     ),
   "multi-select": () =>
     registerFromModule(
@@ -680,6 +729,34 @@ const COMPONENT_LOADERS: Record<string, () => Promise<void>> = {
       () => import("../components/layout/row/schema"),
       "rowConfigSchema",
     ),
+  box: () =>
+    registerFromModule(
+      "box",
+      () => import("../components/layout/box/index"),
+      "Box",
+      "boxConfigSchema",
+    ),
+  card: () =>
+    registerFromModule(
+      "card",
+      () => import("../components/layout/card/index"),
+      "Card",
+      "cardConfigSchema",
+    ),
+  collapsible: () =>
+    registerFromModule(
+      "collapsible",
+      () => import("../components/layout/collapsible/index"),
+      "Collapsible",
+      "collapsibleConfigSchema",
+    ),
+  column: () =>
+    registerFromModule(
+      "column",
+      () => import("../components/layout/column/index"),
+      "Column",
+      "columnConfigSchema",
+    ),
   container: () =>
     registerFromSplitModules(
       "container",
@@ -712,6 +789,62 @@ const COMPONENT_LOADERS: Record<string, () => Promise<void>> = {
       () => import("../components/layout/spacer/schema"),
       "spacerConfigSchema",
     ),
+  "nav-dropdown": () =>
+    registerFromModule(
+      "nav-dropdown",
+      () => import("../components/layout/nav-dropdown/index"),
+      "NavDropdown",
+      "navDropdownConfigSchema",
+    ),
+  "nav-link": () =>
+    registerFromModule(
+      "nav-link",
+      () => import("../components/layout/nav-link/index"),
+      "NavLink",
+      "navLinkConfigSchema",
+    ),
+  "nav-logo": () =>
+    registerFromModule(
+      "nav-logo",
+      () => import("../components/layout/nav-logo/index"),
+      "NavLogo",
+      "navLogoConfigSchema",
+    ),
+  "nav-search": () =>
+    registerFromModule(
+      "nav-search",
+      () => import("../components/layout/nav-search/index"),
+      "NavSearch",
+      "navSearchConfigSchema",
+    ),
+  "nav-section": () =>
+    registerFromModule(
+      "nav-section",
+      () => import("../components/layout/nav-section/index"),
+      "NavSection",
+      "navSectionConfigSchema",
+    ),
+  "nav-user-menu": () =>
+    registerFromModule(
+      "nav-user-menu",
+      () => import("../components/layout/nav-user-menu/index"),
+      "NavUserMenu",
+      "navUserMenuConfigSchema",
+    ),
+  outlet: () =>
+    registerFromModule(
+      "outlet",
+      () => import("../components/layout/outlet/index"),
+      "Outlet",
+      "outletComponentSchema",
+    ),
+  "component-group": () =>
+    registerFromModule(
+      "component-group",
+      () => import("../components/_base/component-group/index"),
+      "ComponentGroup",
+      "componentGroupConfigSchema",
+    ),
   "split-pane": () =>
     registerFromSplitModules(
       "split-pane",
@@ -719,6 +852,13 @@ const COMPONENT_LOADERS: Record<string, () => Promise<void>> = {
       "SplitPane",
       () => import("../components/layout/split-pane/schema"),
       "splitPaneConfigSchema",
+    ),
+  "confirm-dialog": () =>
+    registerFromModule(
+      "confirm-dialog",
+      () => import("../components/overlay/confirm-dialog/index"),
+      "ConfirmDialogComponent",
+      "confirmDialogConfigSchema",
     ),
 };
 

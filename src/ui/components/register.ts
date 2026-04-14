@@ -48,6 +48,8 @@ import {
   NotificationFeed,
   notificationFeedConfigSchema,
 } from "./workflow/notification-feed/index";
+import { Code, codeConfigSchema } from "./content/code/index";
+import { Heading, headingConfigSchema } from "./content/heading/index";
 import {
   DropdownMenu,
   dropdownMenuConfigSchema,
@@ -100,6 +102,7 @@ import {
   commandPaletteConfigSchema,
 } from "./overlay/command-palette/index";
 import { Input, inputConfigSchema } from "./forms/input/index";
+import { Select, selectConfigSchema } from "./forms/select/index";
 import { Textarea, textareaConfigSchema } from "./forms/textarea/index";
 import { Toggle, toggleConfigSchema } from "./forms/toggle/index";
 import { DatePicker, datePickerConfigSchema } from "./forms/date-picker";
@@ -180,6 +183,10 @@ import { Text, textConfigSchema } from "./primitives/text";
 import { Link, linkConfigSchema } from "./primitives/link";
 import { Divider, dividerConfigSchema } from "./primitives/divider";
 import {
+  FloatingMenu,
+  floatingMenuConfigSchema,
+} from "./primitives/floating-menu";
+import {
   OAuthButtons,
   oauthButtonsConfigSchema,
 } from "./primitives/oauth-buttons";
@@ -197,6 +204,8 @@ import { Vote } from "./data/vote/index";
 import { voteConfigSchema } from "./data/vote/schema";
 import { Banner } from "./content/banner/index";
 import { bannerConfigSchema } from "./content/banner/schema";
+import { Card, cardConfigSchema } from "./layout/card/index";
+import { Column, columnConfigSchema } from "./layout/column/index";
 import { Container } from "./layout/container";
 import { containerConfigSchema } from "./layout/container/schema";
 import { Grid } from "./layout/grid";
@@ -207,6 +216,7 @@ import { Section } from "./layout/section";
 import { sectionConfigSchema } from "./layout/section/schema";
 import { Spacer } from "./layout/spacer";
 import { spacerConfigSchema } from "./layout/spacer/schema";
+import { Outlet, outletComponentSchema } from "./layout/outlet/index";
 import { SplitPane } from "./layout/split-pane/index";
 import { splitPaneConfigSchema } from "./layout/split-pane/schema";
 import { Box, boxConfigSchema } from "./layout/box/index";
@@ -220,6 +230,10 @@ import {
   ToggleGroup,
   toggleGroupConfigSchema,
 } from "./forms/toggle-group/index";
+import {
+  ConfirmDialogComponent,
+  confirmDialogConfigSchema,
+} from "./overlay/confirm-dialog/index";
 import { NavLogo, navLogoConfigSchema } from "./layout/nav-logo/index";
 import { NavLink, navLinkConfigSchema } from "./layout/nav-link/index";
 import {
@@ -282,10 +296,22 @@ export function registerBuiltInComponents(force = false): void {
   registerComponentSchema("stack", stackConfigSchema);
 
   registerComponent(
+    "heading",
+    Heading as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("heading", headingConfigSchema);
+
+  registerComponent(
     "text",
     Text as unknown as Parameters<typeof registerComponent>[1],
   );
   registerComponentSchema("text", textConfigSchema);
+
+  registerComponent(
+    "code",
+    Code as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("code", codeConfigSchema);
 
   registerComponent(
     "link",
@@ -298,6 +324,12 @@ export function registerBuiltInComponents(force = false): void {
     Divider as Parameters<typeof registerComponent>[1],
   );
   registerComponentSchema("divider", dividerConfigSchema);
+
+  registerComponent(
+    "floating-menu",
+    FloatingMenu as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("floating-menu", floatingMenuConfigSchema);
 
   registerComponent(
     "oauth-buttons",
@@ -543,6 +575,12 @@ export function registerBuiltInComponents(force = false): void {
   registerComponentSchema("input", inputConfigSchema);
 
   registerComponent(
+    "select",
+    Select as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("select", selectConfigSchema);
+
+  registerComponent(
     "date-picker",
     DatePicker as Parameters<typeof registerComponent>[1],
   );
@@ -759,6 +797,18 @@ export function registerBuiltInComponents(force = false): void {
   registerComponentSchema("row", rowConfigSchema);
 
   registerComponent(
+    "card",
+    Card as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("card", cardConfigSchema);
+
+  registerComponent(
+    "column",
+    Column as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("column", columnConfigSchema);
+
+  registerComponent(
     "container",
     Container as unknown as Parameters<typeof registerComponent>[1],
   );
@@ -781,6 +831,12 @@ export function registerBuiltInComponents(force = false): void {
     Spacer as unknown as Parameters<typeof registerComponent>[1],
   );
   registerComponentSchema("spacer", spacerConfigSchema);
+
+  registerComponent(
+    "outlet",
+    Outlet as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("outlet", outletComponentSchema);
 
   registerComponent(
     "split-pane",
@@ -811,6 +867,12 @@ export function registerBuiltInComponents(force = false): void {
     HoverCard as unknown as Parameters<typeof registerComponent>[1],
   );
   registerComponentSchema("hover-card", hoverCardConfigSchema);
+
+  registerComponent(
+    "confirm-dialog",
+    ConfirmDialogComponent as unknown as Parameters<typeof registerComponent>[1],
+  );
+  registerComponentSchema("confirm-dialog", confirmDialogConfigSchema);
 
   registerComponent(
     "toggle-group",

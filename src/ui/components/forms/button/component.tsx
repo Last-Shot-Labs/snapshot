@@ -20,13 +20,16 @@ export function ButtonControl({
   disabled,
   fullWidth,
   onClick,
+  onKeyDown,
   className,
   style,
+  buttonRef,
   surfaceId,
   surfaceConfig,
   itemSurfaceConfig,
   testId,
   ariaLabel,
+  ariaDescribedBy,
   ariaCurrent,
   ariaSelected,
   ariaExpanded,
@@ -67,9 +70,11 @@ export function ButtonControl({
   return (
     <>
       <button
+        ref={buttonRef}
         type={type}
         disabled={disabled}
         onClick={onClick}
+        onKeyDown={onKeyDown}
         data-sn-button=""
         data-variant={variant}
         data-snapshot-id={surfaceId}
@@ -80,6 +85,7 @@ export function ButtonControl({
         data-active={resolvedStates.has("active") ? "true" : undefined}
         data-disabled={resolvedStates.has("disabled") ? "true" : undefined}
         aria-label={ariaLabel}
+        aria-describedby={ariaDescribedBy}
         aria-current={ariaCurrent}
         aria-selected={ariaSelected}
         aria-expanded={ariaExpanded}

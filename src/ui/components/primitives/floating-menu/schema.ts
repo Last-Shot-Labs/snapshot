@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { actionSchema } from "../../../actions/types";
+import { primitiveTextValueSchema } from "../schema-helpers";
 
 export const floatingMenuSlotNames = [
   "root",
@@ -17,7 +18,7 @@ export const floatingMenuEntrySchema = z.union([
   z
     .object({
       type: z.literal("item"),
-      label: z.string(),
+      label: primitiveTextValueSchema,
       icon: z.string().optional(),
       action: actionSchema.optional(),
       disabled: z.boolean().optional(),
@@ -34,7 +35,7 @@ export const floatingMenuEntrySchema = z.union([
   z
     .object({
       type: z.literal("label"),
-      text: z.string(),
+      text: primitiveTextValueSchema,
       slots: slotsSchema(["label"]).optional(),
     })
     .strict(),
@@ -45,7 +46,7 @@ export const floatingMenuConfigSchema = extendComponentSchema({
   open: z.boolean().optional(),
   align: z.enum(["start", "center", "end"]).optional(),
   side: z.enum(["top", "bottom"]).optional(),
-  triggerLabel: z.string().optional(),
+  triggerLabel: primitiveTextValueSchema.optional(),
   triggerIcon: z.string().optional(),
   items: z.array(floatingMenuEntrySchema).optional(),
   slots: slotsSchema(floatingMenuSlotNames).optional(),

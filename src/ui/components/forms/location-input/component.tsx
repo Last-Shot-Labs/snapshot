@@ -79,7 +79,7 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
 
   useEffect(() => {
     if (!shouldSearch) {
-      setResults([]);
+      setResults((current) => (current.length === 0 ? current : []));
       setIsOpen(false);
       return;
     }

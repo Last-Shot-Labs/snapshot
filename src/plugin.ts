@@ -63,6 +63,14 @@ export interface SnapshotPlugin {
  *
  * @param plugin - The plugin definition
  * @returns The same plugin definition, typed
+ *
+ * @example
+ * ```ts
+ * const myPlugin = definePlugin({
+ *   name: 'my-plugin',
+ *   components: [{ type: 'my-widget', component: MyWidget, schema: myWidgetSchema }],
+ * });
+ * ```
  */
 export function definePlugin(plugin: SnapshotPlugin): SnapshotPlugin {
   return plugin;

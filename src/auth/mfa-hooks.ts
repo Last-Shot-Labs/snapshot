@@ -62,6 +62,7 @@ export function createMfaHooks({
   pendingMfaChallengeAtom,
   onLoginSuccess,
 }: MfaHooksOptions) {
+  /** Verify an MFA code against a pending challenge, store tokens, and navigate home on success. */
   function useMfaVerify() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -94,6 +95,7 @@ export function createMfaHooks({
     });
   }
 
+  /** Initiate MFA setup by posting issuer, period, and method preferences to the setup endpoint. */
   function useMfaSetup() {
     return useMutation<MfaSetupResponse, ApiError, void>({
       mutationFn: () =>
@@ -105,6 +107,7 @@ export function createMfaHooks({
     });
   }
 
+  /** Confirm MFA setup by verifying the initial TOTP code against the setup endpoint. */
   function useMfaVerifySetup() {
     return useMutation<MfaVerifySetupResponse, ApiError, MfaVerifySetupBody>({
       mutationFn: (body) =>
@@ -115,6 +118,7 @@ export function createMfaHooks({
     });
   }
 
+  /** Disable MFA for the current user by sending a DELETE to the MFA disable endpoint. */
   function useMfaDisable() {
     return useMutation<{ message: string }, ApiError, MfaDisableBody>({
       mutationFn: (body) =>
@@ -122,6 +126,7 @@ export function createMfaHooks({
     });
   }
 
+  /** Generate or regenerate MFA recovery codes for the current user. */
   function useMfaRecoveryCodes() {
     return useMutation<
       MfaRecoveryCodesResponse,
@@ -136,6 +141,7 @@ export function createMfaHooks({
     });
   }
 
+  /** Enable email-based OTP as an MFA method by posting to the email OTP enable endpoint. */
   function useMfaEmailOtpEnable() {
     return useMutation<MfaEmailOtpEnableResponse, ApiError, void>({
       mutationFn: () =>
@@ -146,6 +152,7 @@ export function createMfaHooks({
     });
   }
 
+  /** Confirm email OTP setup by verifying the initial code sent to the user's email. */
   function useMfaEmailOtpVerifySetup() {
     return useMutation<
       MfaVerifySetupResponse,
@@ -160,6 +167,7 @@ export function createMfaHooks({
     });
   }
 
+  /** Disable email-based OTP as an MFA method by sending a DELETE to the email OTP disable endpoint. */
   function useMfaEmailOtpDisable() {
     return useMutation<{ message: string }, ApiError, MfaEmailOtpDisableBody>({
       mutationFn: (body) =>
@@ -170,6 +178,7 @@ export function createMfaHooks({
     });
   }
 
+  /** Resend an MFA challenge code to the user via the configured delivery method. */
   function useMfaResend() {
     return useMutation<{ message: string }, ApiError, MfaResendBody>({
       mutationFn: (body) =>
@@ -177,6 +186,7 @@ export function createMfaHooks({
     });
   }
 
+  /** Query the available MFA methods for the current user, returning null on failure. */
   function useMfaMethods() {
     const {
       data: methods = null,

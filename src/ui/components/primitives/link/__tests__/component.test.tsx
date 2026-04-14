@@ -2,13 +2,14 @@
  * @vitest-environment jsdom
  */
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 const navigate = vi.fn();
 
 vi.mock("../../../../context", () => ({
   useSubscribe: () => null,
+  useResolveFrom: <T extends Record<string, unknown>>(value: T) => value,
 }));
 
 vi.mock("../../../../manifest/runtime", () => ({
@@ -22,6 +23,11 @@ vi.mock("../../../../manifest/runtime", () => ({
 import { Link } from "../component";
 
 describe("Link", () => {
+  afterEach(() => {
+    cleanup();
+    navigate.mockReset();
+  });
+
   it("renders label and badge slots and navigates through route runtime", () => {
     render(
       <Link
@@ -41,12 +47,63 @@ describe("Link", () => {
       />,
     );
 
-    const button = screen.getByRole("button", { name: "Dashboard Beta" });
-    expect(button.className).toContain("link-root-slot");
+    const link = screen.getByRole("link", { name: "Dashboard Beta" });
+    expect(link.className).toContain("link-root-slot");
+    expect(link.getAttribute("href")).toBe("/dashboard");
     expect(screen.getByText("Dashboard").className).toContain("link-label-slot");
     expect(screen.getByText("Beta")).toBeTruthy();
 
-    fireEvent.click(button);
+    fireEvent.click(link);
     expect(navigate).toHaveBeenCalledWith("/dashboard");
+  });
+
+  it("applies canonical current-state styling for the root surface", () => {
+    render(
+      <Link
+        config={{
+          type: "link",
+          text: "Current page",
+          to: "/current",
+          external: false,
+          align: "left",
+          variant: "default",
+          slots: {
+            root: {
+              states: {
+                current: {
+                  className: "link-current-slot",
+                },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    const link = screen.getByRole("link", { name: "Current page" });
+    expect(link.className).toContain("link-current-slot");
+    expect(link.getAttribute("aria-current")).toBe("page");
+  });
+
+  it.each([
+    ["mailto:support@example.com"],
+    ["https://example.com/docs"],
+    ["#details"],
+  ])("lets the browser handle non-router hrefs: %s", (to) => {
+    render(
+      <Link
+        config={{
+          type: "link",
+          text: "Open",
+          to,
+          external: false,
+          align: "left",
+          variant: "default",
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("link", { name: "Open" }));
+    expect(navigate).not.toHaveBeenCalled();
   });
 });

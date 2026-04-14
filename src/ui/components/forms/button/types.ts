@@ -1,4 +1,9 @@
-import type { CSSProperties, ReactNode } from "react";
+import type {
+  CSSProperties,
+  KeyboardEventHandler,
+  ReactNode,
+  Ref,
+} from "react";
 import type { z } from "zod";
 import type { buttonConfigSchema } from "./schema";
 
@@ -12,13 +17,16 @@ export interface ButtonControlProps {
   disabled?: boolean;
   fullWidth?: boolean;
   onClick?: () => void;
+  onKeyDown?: KeyboardEventHandler<HTMLButtonElement>;
   className?: string;
   style?: CSSProperties;
+  buttonRef?: Ref<HTMLButtonElement>;
   surfaceId?: string;
   surfaceConfig?: Record<string, unknown>;
   itemSurfaceConfig?: Record<string, unknown>;
   testId?: string;
   ariaLabel?: string;
+  ariaDescribedBy?: string;
   ariaCurrent?: "page" | "step" | "location" | "date" | "time" | true;
   ariaSelected?: boolean;
   ariaExpanded?: boolean;

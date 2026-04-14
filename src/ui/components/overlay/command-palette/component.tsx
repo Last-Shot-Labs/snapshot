@@ -86,6 +86,7 @@ function normalizeSearchGroups(data: unknown): CommandGroup[] {
   return [];
 }
 
+/** CommandPalette — search-driven command palette that renders static groups or fetches remote results, then dispatches manifest actions for the selected command. */
 export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
   const visible = useSubscribe(config.visible ?? false);
   const publish = usePublish(config.id);

@@ -1,10 +1,10 @@
 'use client';
 
-import { useSubscribe } from "../../../context";
+import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
-import { resolveTemplate } from "../../../expressions/template";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { resolveOptionalPrimitiveValue } from "../resolve-value";
 import type { DividerConfig } from "./types";
 
 function SurfaceStyles({ css }: { css?: string }) {
@@ -16,25 +16,24 @@ export function Divider({ config }: { config: DividerConfig }) {
   const routeRuntime = useRouteRuntime();
   const localeState = useSubscribe({ from: "global.locale" });
   const activeLocale = resolveRuntimeLocale(manifest?.raw.i18n, localeState);
-  const resolvedLabel = config.label
-    ? resolveTemplate(
-        config.label,
-        {
-          app: manifest?.app ?? {},
-          auth: manifest?.auth ?? {},
-          route: {
-            ...(routeRuntime?.currentRoute ?? {}),
-            path: routeRuntime?.currentPath,
-            params: routeRuntime?.params,
-            query: routeRuntime?.query,
-          },
-        },
-        {
-          locale: activeLocale,
-          i18n: manifest?.raw.i18n,
-        },
-      )
-    : undefined;
+  const resolvedConfig = useResolveFrom({
+    label: config.label,
+  });
+  const templateContext = {
+    app: manifest?.app ?? {},
+    auth: manifest?.auth ?? {},
+    route: {
+      ...(routeRuntime?.currentRoute ?? {}),
+      path: routeRuntime?.currentPath,
+      params: routeRuntime?.params,
+      query: routeRuntime?.query,
+    },
+  };
+  const resolvedLabel = resolveOptionalPrimitiveValue(resolvedConfig.label, {
+    context: templateContext,
+    locale: activeLocale,
+    i18n: manifest?.raw.i18n,
+  });
   const rootId = config.id ?? "divider";
 
   if (config.orientation === "vertical") {

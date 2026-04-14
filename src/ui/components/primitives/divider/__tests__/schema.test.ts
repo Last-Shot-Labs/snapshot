@@ -17,4 +17,28 @@ describe("dividerConfigSchema", () => {
 
     expect(result.success).toBe(true);
   });
+
+  it("accepts translated divider labels", () => {
+    const result = dividerConfigSchema.safeParse({
+      type: "divider",
+      label: {
+        t: "profile.section",
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects unknown divider slots", () => {
+    const result = dividerConfigSchema.safeParse({
+      type: "divider",
+      slots: {
+        separator: {
+          className: "not-supported",
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
 });

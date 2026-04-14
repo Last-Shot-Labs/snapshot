@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { actionSchema } from "../../../actions/types";
 import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import { primitiveTextValueSchema } from "../schema-helpers";
 
 export const oauthButtonsSlotNames = [
   "root",
@@ -13,7 +13,6 @@ export const oauthButtonsSlotNames = [
 
 export const oauthButtonsConfigSchema = extendComponentSchema({
   type: z.literal("oauth-buttons"),
-  heading: z.string().optional(),
-  onSuccess: z.array(actionSchema).optional(),
+  heading: primitiveTextValueSchema.optional(),
   slots: slotsSchema(oauthButtonsSlotNames).optional(),
 }).strict();

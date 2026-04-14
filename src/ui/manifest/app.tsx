@@ -34,6 +34,7 @@ import { Nav } from "../components/layout/nav";
 import type { NavConfig as ShellNavConfig } from "../components/layout/nav";
 import { DrawerComponent } from "../components/overlay/drawer";
 import { ModalComponent } from "../components/overlay/modal";
+import { ConfirmDialogComponent } from "../components/overlay/confirm-dialog";
 import { SnapshotDragDropProvider } from "../components/_base/drag-drop-provider";
 import { useSetStateValue, useStateValue } from "../state";
 import { resolveDetectedLocale, resolveI18nRefs } from "../i18n/resolve";
@@ -49,7 +50,6 @@ import { useEventBridge, useSseEventBridge } from "./event-bridge";
 import { TransitionWrapper } from "./transition-wrapper";
 import { ManifestErrorOverlay } from "./error-overlay";
 import { ComponentInspector } from "./inspector";
-import { registerLegacyStructuralComponents } from "./boot-builtins";
 import {
   evaluateManifestGuard,
   guardUsesAuthState,
@@ -825,6 +825,19 @@ function OverlayHost({
               config={
                 { ...overlay, id } as Parameters<
                   typeof DrawerComponent
+                >[0]["config"]
+              }
+            />
+          );
+        }
+
+        if (overlay.type === "confirm-dialog") {
+          return (
+            <ConfirmDialogComponent
+              key={id}
+              config={
+                { ...overlay, id } as Parameters<
+                  typeof ConfirmDialogComponent
                 >[0]["config"]
               }
             />
@@ -2091,12 +2104,10 @@ export function ManifestApp({
 
     if (lazyComponents) {
       resetRegisteredComponents();
-      registerLegacyStructuralComponents();
       return;
     }
 
     registerBuiltInComponents(true);
-    registerLegacyStructuralComponents();
   }, [lazyComponents, compiledManifest]);
 
   return (

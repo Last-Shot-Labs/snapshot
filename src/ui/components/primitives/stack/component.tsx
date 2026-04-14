@@ -52,6 +52,19 @@ function SurfaceStyles({ css }: { css?: string }) {
   return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
+function baseResponsiveValue<T>(value: T | { default: T } | undefined): T | undefined {
+  if (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "default" in value
+  ) {
+    return value.default;
+  }
+
+  return value;
+}
+
 export function Stack({ config }: { config: StackConfig }) {
   const rootId = config.id ?? "stack";
   const rootSurface = resolveSurfacePresentation({
@@ -65,7 +78,7 @@ export function Stack({ config }: { config: StackConfig }) {
       width: "100%",
       maxWidth: config.maxWidth ? MAX_WIDTH_MAP[config.maxWidth] : undefined,
       overflow: config.overflow,
-      maxHeight: config.maxHeight,
+      maxHeight: baseResponsiveValue(config.maxHeight),
       style: {
         padding: config.padding ? PADDING_MAP[config.padding] : undefined,
         marginInline: config.maxWidth ? "auto" : undefined,

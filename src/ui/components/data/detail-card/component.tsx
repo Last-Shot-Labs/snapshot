@@ -305,6 +305,7 @@ function FieldRow({
   );
 }
 
+/** DetailCard — data-driven detail view that resolves fields from a record resource and renders them inside a configurable card surface with formatted values, copy-to-clipboard, and header actions. */
 export function DetailCard({ config }: { config: DetailCardConfig }) {
   const { data, fields, title, isLoading, error } = useDetailCard(config);
   const execute = useActionExecutor();

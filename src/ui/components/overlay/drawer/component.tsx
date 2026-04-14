@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import type { ActionConfig } from "../../../actions/types";
 import { useSubscribe } from "../../../context/hooks";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { OverlayRuntimeProvider } from "../../../manifest/runtime";
@@ -351,7 +350,7 @@ function DrawerSurface({
                 data-variant={btn.variant ?? "default"}
                 onClick={() => {
                   if (btn.action) {
-                    execute(btn.action as ActionConfig);
+                    execute(btn.action as Parameters<typeof execute>[0]);
                   }
                   if (btn.dismiss) {
                     close();

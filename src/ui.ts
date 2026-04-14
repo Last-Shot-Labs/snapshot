@@ -230,6 +230,7 @@ export {
   headingConfigSchema,
   buttonConfigSchema,
   selectConfigSchema,
+  cardConfigSchema,
   componentsConfigSchema,
   customComponentDeclarationSchema,
   customComponentPropSchema,
@@ -274,6 +275,8 @@ export type {
   HeadingConfig,
   ButtonConfig,
   SelectConfig,
+  CardConfig,
+  OutletConfig,
   ComponentConfig,
   ManifestAppProps,
   ConfigDrivenComponent,
@@ -298,6 +301,15 @@ export type {
   ResolvedNavItem,
   UseNavResult,
 } from "./ui/components/layout/nav/index";
+export { Card } from "./ui/components/layout/card/index";
+export {
+  Column,
+  columnConfigSchema as layoutColumnConfigSchema,
+} from "./ui/components/layout/column/index";
+export type {
+  ColumnConfig as LayoutColumnConfig,
+} from "./ui/components/layout/column/index";
+export { Outlet } from "./ui/components/layout/outlet/index";
 
 // DataTable
 export { DataTable } from "./ui/components/data/data-table/index";
@@ -379,6 +391,16 @@ export {
 } from "./ui/components/content/rich-text-editor/index";
 export type { RichTextEditorConfig } from "./ui/components/content/rich-text-editor/index";
 
+// Components — Heading
+export { Heading } from "./ui/components/content/heading/index";
+
+// Components — Code
+export {
+  Code,
+  codeConfigSchema,
+} from "./ui/components/content/code/index";
+export type { CodeConfig } from "./ui/components/content/code/index";
+
 // Components — RichInput (TipTap WYSIWYG)
 export {
   RichInput,
@@ -459,6 +481,7 @@ export type { CommandPaletteConfig } from "./ui/components/overlay/command-palet
 // Components — Input
 export { Input, inputConfigSchema } from "./ui/components/forms/input/index";
 export type { InputConfig } from "./ui/components/forms/input/index";
+export { Select } from "./ui/components/forms/select/index";
 export {
   DatePicker,
   datePickerConfigSchema,
@@ -496,6 +519,15 @@ export {
   contextMenuConfigSchema,
 } from "./ui/components/overlay/context-menu/index";
 export type { ContextMenuConfig } from "./ui/components/overlay/context-menu/index";
+
+// Components — ConfirmDialog
+export {
+  ConfirmDialogComponent,
+  confirmDialogConfigSchema,
+} from "./ui/components/overlay/confirm-dialog/index";
+export type {
+  ConfirmDialogConfig,
+} from "./ui/components/overlay/confirm-dialog/index";
 
 // Components — ScrollArea
 export {

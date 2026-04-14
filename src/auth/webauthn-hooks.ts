@@ -57,6 +57,7 @@ export function createWebAuthnHooks({
   pendingMfaChallengeAtom,
   onLoginSuccess,
 }: WebAuthnHooksOptions) {
+  /** Fetch WebAuthn registration options (challenge, RP config) from the server. */
   function useWebAuthnRegisterOptions() {
     return useMutation<WebAuthnRegisterOptionsResponse, ApiError, void>({
       mutationFn: () =>
@@ -75,6 +76,7 @@ export function createWebAuthnHooks({
     });
   }
 
+  /** Complete WebAuthn registration by sending the attestation response and refresh the credentials cache. */
   function useWebAuthnRegister() {
     const queryClient = useQueryClient();
     return useMutation<{ message: string }, ApiError, WebAuthnRegisterBody>({
@@ -89,6 +91,7 @@ export function createWebAuthnHooks({
     });
   }
 
+  /** Query the user's registered WebAuthn credentials from the server. */
   function useWebAuthnCredentials() {
     const { data, isLoading, isError } = useQuery<
       { credentials: WebAuthnCredential[] },
@@ -103,6 +106,7 @@ export function createWebAuthnHooks({
     return { credentials: data?.credentials ?? [], isLoading, isError };
   }
 
+  /** Remove a specific WebAuthn credential by ID and invalidate the credentials cache. */
   function useWebAuthnRemoveCredential() {
     const queryClient = useQueryClient();
     return useMutation<{ message: string }, ApiError, string>({
@@ -116,6 +120,7 @@ export function createWebAuthnHooks({
     });
   }
 
+  /** Disable WebAuthn for the current user's account entirely. */
   function useWebAuthnDisable() {
     return useMutation<{ message: string }, ApiError, void>({
       mutationFn: () =>
@@ -123,6 +128,7 @@ export function createWebAuthnHooks({
     });
   }
 
+  /** Request passkey login options (challenge and allowed credentials) from the server. */
   function usePasskeyLoginOptions() {
     return useMutation<
       PasskeyLoginOptionsResponse,
@@ -137,6 +143,7 @@ export function createWebAuthnHooks({
     });
   }
 
+  /** Authenticate with a passkey assertion, handling MFA challenges, token storage, and post-login navigation. */
   function usePasskeyLogin() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();

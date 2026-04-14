@@ -20,4 +20,36 @@ describe("linkConfigSchema", () => {
 
     expect(result.success).toBe(true);
   });
+
+  it("accepts config-driven link text, href, and badges", () => {
+    const result = linkConfigSchema.safeParse({
+      type: "link",
+      text: {
+        t: "nav.dashboard",
+      },
+      to: {
+        expr: "route.path",
+      },
+      badge: {
+        from: "global.releaseChannel",
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects unknown link slots", () => {
+    const result = linkConfigSchema.safeParse({
+      type: "link",
+      text: "Dashboard",
+      to: "/dashboard",
+      slots: {
+        trigger: {
+          className: "not-supported",
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
 });

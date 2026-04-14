@@ -43,6 +43,7 @@ const commandGroupSchema = z
   })
   .strict();
 
+/** Zod config schema for the CommandPalette component. A keyboard-driven overlay that groups commands, supports search with remote endpoints, tracks recent items, and dispatches actions on selection. */
 export const commandPaletteConfigSchema = extendComponentSchema({
   type: z.literal("command-palette"),
   placeholder: z.string().optional(),

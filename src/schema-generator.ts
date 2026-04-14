@@ -380,6 +380,19 @@ function injectIconEnums(
  * call this with their plugins to get a schema that includes custom types.
  *
  * @param options - Generation options
+ *
+ * @example
+ * ```ts
+ * // Generate the built-in schema only
+ * generateManifestSchema({ outPath: './manifest.schema.json' });
+ *
+ * // Include custom plugin types in the schema
+ * generateManifestSchema({
+ *   plugins: [myPlugin],
+ *   outPath: './manifest.schema.json',
+ *   iconNames: ['home', 'settings', 'user'],
+ * });
+ * ```
  */
 export function generateManifestSchema(options: GenerateOptions): void {
   bootBuiltins();

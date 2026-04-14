@@ -2,18 +2,12 @@ import path from "node:path";
 import * as ts from "typescript";
 import { repoPath } from "./_common.ts";
 
-const requiredExports = [
-  { file: repoPath("src", "create-snapshot.tsx"), exportName: "createSnapshot" },
-  { file: repoPath("src", "api", "client.ts"), exportName: "registerClient" },
-  { file: repoPath("src", "api", "client.ts"), exportName: "getRegisteredClient" },
-  { file: repoPath("src", "plugin.ts"), exportName: "definePlugin" },
-  {
-    file: repoPath("src", "schema-generator.ts"),
-    exportName: "generateManifestSchema",
-  },
-  { file: repoPath("src", "vite", "index.ts"), exportName: "snapshotApp" },
-  { file: repoPath("src", "vite", "index.ts"), exportName: "snapshotSync" },
-  { file: repoPath("src", "vite", "index.ts"), exportName: "snapshotSsr" },
+const entrypoints = [
+  repoPath("src", "index.ts"),
+  repoPath("src", "ui.ts"),
+  repoPath("src", "ssr", "index.ts"),
+  repoPath("src", "vite", "index.ts"),
+  repoPath("src", "ui", "manifest", "index.ts"),
 ];
 
 const configPath = ts.findConfigFile(
@@ -24,6 +18,7 @@ const configPath = ts.findConfigFile(
 if (!configPath) {
   throw new Error("Could not locate tsconfig.json");
 }
+
 const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
 const parsed = ts.parseJsonConfigFileContent(
   configFile.config,
@@ -37,43 +32,45 @@ const program = ts.createProgram({
 const checker = program.getTypeChecker();
 
 let hasError = false;
+let verifiedExports = 0;
 
-for (const item of requiredExports) {
-  const sourceFile = program.getSourceFile(item.file);
+for (const entrypoint of entrypoints) {
+  const sourceFile = program.getSourceFile(entrypoint);
   if (!sourceFile) {
-    console.error(`[docs:coverage] Missing source file: ${item.file}`);
+    console.error(`[docs:coverage] Missing source file: ${entrypoint}`);
     hasError = true;
     continue;
   }
 
   const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
   if (!moduleSymbol) {
-    console.error(`[docs:coverage] Missing module symbol for: ${item.file}`);
+    console.error(`[docs:coverage] Missing module symbol for: ${entrypoint}`);
     hasError = true;
     continue;
   }
 
-  const symbol = checker
-    .getExportsOfModule(moduleSymbol)
-    .find((entry) => entry.getName() === item.exportName);
-  if (!symbol) {
-    console.error(
-      `[docs:coverage] Missing export ${item.exportName} in ${item.file}`,
-    );
-    hasError = true;
-    continue;
-  }
+  for (const symbol of checker.getExportsOfModule(moduleSymbol)) {
+    const target =
+      symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol;
+    const declarations = target.getDeclarations() ?? symbol.getDeclarations() ?? [];
+    const declarationFile = declarations[0]?.getSourceFile().fileName;
 
-  const target =
-    symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol;
-  const docs = ts
-    .displayPartsToString(target.getDocumentationComment(checker))
-    .trim();
-  if (!docs) {
-    console.error(
-      `[docs:coverage] Missing JSDoc for ${item.exportName} in ${item.file}`,
-    );
-    hasError = true;
+    if (!declarationFile || declarationFile.includes("node_modules")) {
+      continue;
+    }
+
+    const docs = ts
+      .displayPartsToString(target.getDocumentationComment(checker))
+      .trim();
+    if (!docs) {
+      console.error(
+        `[docs:coverage] Missing JSDoc for ${symbol.getName()} exported from ${path.relative(repoPath(), entrypoint).replace(/\\/g, "/")}`,
+      );
+      hasError = true;
+      continue;
+    }
+
+    verifiedExports += 1;
   }
 }
 
@@ -82,5 +79,5 @@ if (hasError) {
 }
 
 console.log(
-  `[docs:coverage] Verified JSDoc on ${requiredExports.length} required exports.`,
+  `[docs:coverage] Verified JSDoc on ${verifiedExports} local public exports across ${entrypoints.length} entrypoints.`,
 );

@@ -199,7 +199,7 @@ describe("Button", () => {
     renderWithContext(
       <ButtonComponent config={config as unknown as Record<string, unknown>} />,
     );
-    expect(screen.getByText("Click me")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Click me" })).toBeDefined();
   });
 
   it("dispatches action via action executor on click", () => {
@@ -214,8 +214,8 @@ describe("Button", () => {
       <ButtonComponent config={config as unknown as Record<string, unknown>} />,
     );
     // Should not throw — action executor handles the toast
-    fireEvent.click(screen.getByText("Fire"));
-    expect(screen.getByText("Fire")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "Fire" }));
+    expect(screen.getByRole("button", { name: "Fire" })).toBeDefined();
   });
 
   it("is disabled when disabled is true", () => {
@@ -230,7 +230,9 @@ describe("Button", () => {
     renderWithContext(
       <ButtonComponent config={config as unknown as Record<string, unknown>} />,
     );
-    const button = screen.getByText("Disabled") as HTMLButtonElement;
+    const button = screen.getByRole("button", {
+      name: "Disabled",
+    }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
   });
 
@@ -246,7 +248,7 @@ describe("Button", () => {
     renderWithContext(
       <ButtonComponent config={config as unknown as Record<string, unknown>} />,
     );
-    const button = screen.getByText("Ghost");
+    const button = screen.getByRole("button", { name: "Ghost" });
     expect(button.getAttribute("data-variant")).toBe("ghost");
   });
 });

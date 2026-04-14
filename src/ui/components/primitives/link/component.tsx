@@ -1,16 +1,23 @@
 'use client';
 
 import type { CSSProperties } from "react";
-import { useSubscribe } from "../../../context";
-import { resolveTemplate } from "../../../expressions/template";
+import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { renderIcon } from "../../../icons/render";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  resolvePrimitiveValue,
+} from "../resolve-value";
 import type { LinkConfig } from "./types";
 
 function SurfaceStyles({ css }: { css?: string }) {
   return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
+}
+
+function isClientNavigableHref(to: string): boolean {
+  return /^\/(?!\/)/.test(to);
 }
 
 function getVariantStyle(
@@ -62,8 +69,23 @@ export function Link({ config }: { config: LinkConfig }) {
     locale: activeLocale,
     i18n: manifest?.raw.i18n,
   };
-  const text = resolveTemplate(config.text, templateContext, templateOptions);
-  const to = resolveTemplate(config.to, templateContext, templateOptions);
+  const resolvedConfig = useResolveFrom({
+    text: config.text,
+    to: config.to,
+    badge: config.badge,
+  });
+  const text = resolvePrimitiveValue(resolvedConfig.text, {
+    context: templateContext,
+    ...templateOptions,
+  });
+  const to = resolvePrimitiveValue(resolvedConfig.to, {
+    context: templateContext,
+    ...templateOptions,
+  });
+  const badge = resolveOptionalPrimitiveValue(resolvedConfig.badge, {
+    context: templateContext,
+    ...templateOptions,
+  });
   const rootId = config.id ?? "link";
   const align = config.align ?? "left";
   const rootSurface = resolveSurfacePresentation({
@@ -133,59 +155,53 @@ export function Link({ config }: { config: LinkConfig }) {
       >
         {text}
       </span>
-      {config.badge ? (
+      {badge ? (
         <span
           data-snapshot-id={`${rootId}-badge`}
           className={badgeSurface.className}
           style={badgeSurface.style}
         >
-          {config.badge}
+          {badge}
         </span>
       ) : null}
     </>
   );
 
-  if (config.external) {
-    return (
-      <>
-        <a
-          data-snapshot-component="link"
-          data-snapshot-id={`${rootId}-root`}
-          href={to}
-          target="_blank"
-          rel="noreferrer noopener"
-          className={rootSurface.className}
-          style={rootSurface.style}
-        >
-          {contents}
-        </a>
-        <SurfaceStyles css={rootSurface.scopedCss} />
-        <SurfaceStyles css={labelSurface.scopedCss} />
-        <SurfaceStyles css={iconSurface.scopedCss} />
-        <SurfaceStyles css={badgeSurface.scopedCss} />
-      </>
-    );
-  }
-
   return (
     <>
-      <button
-        type="button"
+      <a
         data-snapshot-component="link"
         data-snapshot-id={`${rootId}-root`}
-        onClick={() => routeRuntime?.navigate(to)}
-        className={rootSurface.className}
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-          font: "inherit",
-          ...(rootSurface.style ?? {}),
+        href={to}
+        target={config.external ? "_blank" : undefined}
+        rel={config.external ? "noreferrer noopener" : undefined}
+        aria-current={routeRuntime?.currentPath === to ? "page" : undefined}
+        onClick={(event) => {
+          if (
+            config.external ||
+            !routeRuntime?.navigate ||
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey
+          ) {
+            return;
+          }
+
+          if (!isClientNavigableHref(to)) {
+            return;
+          }
+
+          event.preventDefault();
+          routeRuntime.navigate(to);
         }}
+        className={rootSurface.className}
+        style={rootSurface.style}
       >
         {contents}
-      </button>
+      </a>
       <SurfaceStyles css={rootSurface.scopedCss} />
       <SurfaceStyles css={labelSurface.scopedCss} />
       <SurfaceStyles css={iconSurface.scopedCss} />

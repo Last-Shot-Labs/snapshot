@@ -19,9 +19,11 @@ import type {
   stateValueConfigSchema,
   overlayConfigSchema,
   baseComponentConfigSchema,
+  cardConfigSchema,
   headingConfigSchema,
   buttonConfigSchema,
   selectConfigSchema,
+  outletComponentSchema,
   toastConfigSchema,
 } from "./schema";
 import type { FromRef } from "../context/types";
@@ -112,6 +114,10 @@ export type HeadingConfig = Resolved<z.infer<typeof headingConfigSchema>>;
 export type ButtonConfig = Resolved<z.infer<typeof buttonConfigSchema>>;
 /** Resolved runtime view of `selectConfigSchema`. */
 export type SelectConfig = Resolved<z.infer<typeof selectConfigSchema>>;
+/** Resolved runtime view of `cardConfigSchema`. */
+export type CardConfig = Resolved<z.infer<typeof cardConfigSchema>>;
+/** Resolved runtime view of `outletComponentSchema`. */
+export type OutletConfig = Resolved<z.infer<typeof outletComponentSchema>>;
 
 type EnvRefLike = {
   env: string;
@@ -179,6 +185,8 @@ export type ComponentConfig =
   | HeadingConfig
   | ButtonConfig
   | SelectConfig
+  | CardConfig
+  | OutletConfig
   | (BaseComponentConfig & Record<string, unknown>);
 
 /**

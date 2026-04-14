@@ -104,6 +104,10 @@ interface OverlayRuntimeValue {
 const ManifestResourceCacheContext =
   createContext<ManifestResourceCacheValue | null>(null);
 const RouteRuntimeContext = createContext<RouteRuntimeValue | null>(null);
+/**
+ * Runtime context exposed to components rendered inside modal and drawer
+ * overlays so they can access the active overlay id and payload.
+ */
 export const OverlayRuntimeContext = createContext<OverlayRuntimeValue | null>(
   null,
 );

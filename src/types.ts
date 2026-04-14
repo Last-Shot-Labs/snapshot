@@ -457,6 +457,17 @@ export interface UseCommunityNotificationsResult {
 /**
  * Bootstrap configuration for `createSnapshot()`.
  */
+/**
+ * Bootstrap configuration for `createSnapshot()`.
+ *
+ * @example
+ * ```ts
+ * const snap = createSnapshot({
+ *   apiUrl: 'https://api.example.com',
+ *   manifest: myManifest,
+ * });
+ * ```
+ */
 export interface SnapshotConfig {
   /** API base URL for this snapshot instance. */
   apiUrl: string;
@@ -487,26 +498,35 @@ export interface SnapshotInstance<
     bearerToken?: string;
   };
   // High-level hooks
+  /** Fetch the current authenticated user. Returns null when logged out. */
   useUser: () => {
     user: AuthUser | null;
     isLoading: boolean;
     isError: boolean;
   };
+  /** Post credentials and log in. Returns an MFA challenge instead of a user when MFA is required. */
   useLogin: () => UseMutationResult<LoginResult, ApiError, LoginVars>;
+  /** Clear the session, tokens, and query cache. Navigates to the login route on success. */
   useLogout: () => UseMutationResult<void, ApiError, LogoutVars | void>;
+  /** Create a new account. Auto-logs in on success when the backend allows it. */
   useRegister: () => UseMutationResult<AuthUser, ApiError, RegisterVars>;
+  /** Send a password-reset email to the given address. */
   useForgotPassword: () => UseMutationResult<
     void,
     ApiError,
     ForgotPasswordBody
   >;
+  /** Open and manage a WebSocket connection. Returns connection state and send/close helpers. */
   useSocket: () => SocketHook<TWSEvents>;
+  /** Subscribe to a WebSocket room. Returns whether the subscription is active. */
   useRoom: (room: string) => { isSubscribed: boolean };
+  /** Listen for a specific event on a WebSocket room. The handler fires on each matching message. */
   useRoomEvent: <T>(
     room: string,
     event: string,
     handler: (data: T) => void,
   ) => void;
+  /** Read and toggle the current color theme (light/dark). */
   useTheme: () => {
     theme: "light" | "dark";
     toggle: () => void;
@@ -514,139 +534,171 @@ export interface SnapshotInstance<
   };
 
   // MFA hooks
+  /** Read the pending MFA challenge set by a login that returned `mfaRequired: true`. */
   usePendingMfaChallenge: () => MfaChallenge | null;
+  /** Verify an MFA code against the pending challenge. Resolves to the authenticated user on success. */
   useMfaVerify: () => UseMutationResult<
     AuthUser,
     ApiError,
     Omit<MfaVerifyBody, "mfaToken">
   >;
+  /** Begin TOTP MFA provisioning. Returns a secret and QR URI for authenticator apps. */
   useMfaSetup: () => UseMutationResult<MfaSetupResponse, ApiError, void>;
+  /** Confirm TOTP MFA setup by verifying a code from the authenticator app. */
   useMfaVerifySetup: () => UseMutationResult<
     MfaVerifySetupResponse,
     ApiError,
     MfaVerifySetupBody
   >;
+  /** Disable MFA for the current user. Requires a valid code or recovery code. */
   useMfaDisable: () => UseMutationResult<
     { message: string },
     ApiError,
     MfaDisableBody
   >;
+  /** Regenerate MFA recovery codes. Returns the new codes. */
   useMfaRecoveryCodes: () => UseMutationResult<
     MfaRecoveryCodesResponse,
     ApiError,
     MfaRecoveryCodesBody
   >;
+  /** Begin email OTP MFA enrollment. Sends a verification code to the user's email. */
   useMfaEmailOtpEnable: () => UseMutationResult<
     MfaEmailOtpEnableResponse,
     ApiError,
     void
   >;
+  /** Confirm email OTP MFA setup by verifying the emailed code. */
   useMfaEmailOtpVerifySetup: () => UseMutationResult<
     MfaVerifySetupResponse,
     ApiError,
     MfaEmailOtpVerifySetupBody
   >;
+  /** Disable email OTP MFA for the current user. */
   useMfaEmailOtpDisable: () => UseMutationResult<
     { message: string },
     ApiError,
     MfaEmailOtpDisableBody
   >;
+  /** Resend the MFA challenge code (email OTP or SMS). */
   useMfaResend: () => UseMutationResult<
     { message: string },
     ApiError,
     MfaResendBody
   >;
+  /** List MFA methods currently enabled for the authenticated user. */
   useMfaMethods: () => {
     methods: MfaMethod[] | null;
     isLoading: boolean;
     isError: boolean;
   };
+  /** Type-narrowing guard: returns true when a login result is an MFA challenge. */
   isMfaChallenge: typeof isMfaChallenge;
 
   // Account hooks
+  /** Complete a password reset using the token from the reset email. */
   useResetPassword: () => UseMutationResult<
     { message: string },
     ApiError,
     ResetPasswordBody
   >;
+  /** Confirm the user's email address using a verification token. */
   useVerifyEmail: () => UseMutationResult<
     { message: string },
     ApiError,
     VerifyEmailBody
   >;
+  /** Request a new verification email for the current user. */
   useResendVerification: () => UseMutationResult<
     { message: string },
     ApiError,
     ResendVerificationBody
   >;
+  /** Set or rotate the account password. Requires the current password or a reset token. */
   useSetPassword: () => UseMutationResult<
     { message: string },
     ApiError,
     SetPasswordBody
   >;
+  /** Schedule the current account for deletion. */
   useDeleteAccount: () => UseMutationResult<
     void,
     ApiError,
     DeleteAccountBody | void
   >;
+  /** Cancel a pending account deletion before the grace period expires. */
   useCancelDeletion: () => UseMutationResult<
     { message: string },
     ApiError,
     void
   >;
+  /** Refresh the current access and refresh tokens. */
   useRefreshToken: () => UseMutationResult<
     RefreshTokenResponse,
     ApiError,
     RefreshTokenBody | void
   >;
+  /** List all active sessions for the authenticated user. */
   useSessions: () => {
     sessions: Session[];
     isLoading: boolean;
     isError: boolean;
   };
+  /** Revoke a session by its ID. Logs out that device. */
   useRevokeSession: () => UseMutationResult<void, ApiError, string>;
 
   // OAuth hooks
+  /** Exchange an OAuth callback code for session tokens. Called after the provider redirects back. */
   useOAuthExchange: () => UseMutationResult<
     OAuthExchangeResponse,
     ApiError,
     OAuthExchangeBody
   >;
+  /** Remove an OAuth provider link from the current account. */
   useOAuthUnlink: () => UseMutationResult<void, ApiError, OAuthProvider>;
+  /** Build the redirect URL for starting an OAuth login flow with the given provider. */
   getOAuthUrl: (provider: OAuthProvider) => string;
+  /** Build the redirect URL for linking an OAuth provider to the current account. */
   getLinkUrl: (provider: OAuthProvider) => string;
 
   // WebAuthn hooks
+  /** Request WebAuthn registration options (challenge, relying party info) from the server. */
   useWebAuthnRegisterOptions: () => UseMutationResult<
     WebAuthnRegisterOptionsResponse,
     ApiError,
     void
   >;
+  /** Complete WebAuthn credential registration with the attestation response from the authenticator. */
   useWebAuthnRegister: () => UseMutationResult<
     { message: string },
     ApiError,
     WebAuthnRegisterBody
   >;
+  /** List all registered WebAuthn credentials for the current user. */
   useWebAuthnCredentials: () => {
     credentials: WebAuthnCredential[];
     isLoading: boolean;
     isError: boolean;
   };
+  /** Remove a registered WebAuthn credential by its ID. */
   useWebAuthnRemoveCredential: () => UseMutationResult<
     { message: string },
     ApiError,
     string
   >;
+  /** Disable WebAuthn for the current user and remove all registered credentials. */
   useWebAuthnDisable: () => UseMutationResult<
     { message: string },
     ApiError,
     void
   >;
+  /** Request passkey login options (challenge) from the server to start a passwordless login. */
   usePasskeyLoginOptions: () => UseMutationResult<
     PasskeyLoginOptionsResponse,
     ApiError,
     PasskeyLoginOptionsBody
   >;
+  /** Complete a passkey login with the assertion response from the authenticator. */
   usePasskeyLogin: () => UseMutationResult<
     LoginResult,
     ApiError,
@@ -654,101 +706,177 @@ export interface SnapshotInstance<
   >;
 
   // Auth error formatting
+  /** Format an API error into a user-facing auth error message using optional per-context overrides. */
   formatAuthError: (error: ApiError, context: AuthErrorContext) => string;
 
   // SSE — per-endpoint hooks
+  /** Connect to a server-sent events endpoint. Returns connection status and a close function. */
   useSSE(endpoint: string): SseHookResult;
+  /** Subscribe to a named event on an SSE endpoint. Returns the latest payload and connection status. */
   useSseEvent<T = unknown>(
     endpoint: string,
     event: string,
   ): SseEventHookResult<T>;
+  /** Register a callback for a named SSE event. Returns an unsubscribe function. */
   onSseEvent(
     endpoint: string,
     event: string,
     handler: (payload: unknown) => void,
   ): () => void;
 
-  // Community notifications (requires sse.endpoints containing /__sse/notifications)
+  /** Subscribe to real-time community notifications via SSE. Requires an `/__sse/notifications` endpoint. */
   useCommunityNotifications(
     opts?: UseCommunityNotificationsOpts,
   ): UseCommunityNotificationsResult;
 
-  // Community hooks (always available)
+  // Community hooks — Containers
+  /** List community containers with optional pagination. */
   useContainers: CommunityHooks["useContainers"];
+  /** Fetch a single container by ID. */
   useContainer: CommunityHooks["useContainer"];
+  /** Create a new community container. */
   useCreateContainer: CommunityHooks["useCreateContainer"];
+  /** Update a container's metadata. */
   useUpdateContainer: CommunityHooks["useUpdateContainer"];
+  /** Delete a container and its contents. */
   useDeleteContainer: CommunityHooks["useDeleteContainer"];
+  // Community hooks — Threads
+  /** List threads in a container with pagination and optional filters. */
   useContainerThreads: CommunityHooks["useContainerThreads"];
+  /** Fetch a single thread by ID. */
   useContainerThread: CommunityHooks["useContainerThread"];
+  /** Create a new thread in a container. */
   useCreateThread: CommunityHooks["useCreateThread"];
+  /** Update a thread's content or metadata. */
   useUpdateThread: CommunityHooks["useUpdateThread"];
+  /** Delete a thread. */
   useDeleteThread: CommunityHooks["useDeleteThread"];
+  /** Publish a draft thread, making it visible to other users. */
   usePublishThread: CommunityHooks["usePublishThread"];
+  /** Lock a thread to prevent new replies. */
   useLockThread: CommunityHooks["useLockThread"];
+  /** Pin a thread to the top of its container. */
   usePinThread: CommunityHooks["usePinThread"];
+  /** Unpin a previously pinned thread. */
   useUnpinThread: CommunityHooks["useUnpinThread"];
+  // Community hooks — Replies
+  /** List replies in a thread with pagination. */
   useThreadReplies: CommunityHooks["useThreadReplies"];
+  /** Fetch a single reply by ID. */
   useReply: CommunityHooks["useReply"];
+  /** Post a new reply to a thread. */
   useCreateReply: CommunityHooks["useCreateReply"];
+  /** Update a reply's content. */
   useUpdateReply: CommunityHooks["useUpdateReply"];
+  /** Delete a reply. */
   useDeleteReply: CommunityHooks["useDeleteReply"];
+  // Community hooks — Reactions
+  /** List reactions on a thread. */
   useThreadReactions: CommunityHooks["useThreadReactions"];
+  /** List reactions on a reply. */
   useReplyReactions: CommunityHooks["useReplyReactions"];
+  /** Add an emoji reaction to a thread. */
   useAddThreadReaction: CommunityHooks["useAddThreadReaction"];
+  /** Remove an emoji reaction from a thread. */
   useRemoveThreadReaction: CommunityHooks["useRemoveThreadReaction"];
+  /** Add an emoji reaction to a reply. */
   useAddReplyReaction: CommunityHooks["useAddReplyReaction"];
+  /** Remove an emoji reaction from a reply. */
   useRemoveReplyReaction: CommunityHooks["useRemoveReplyReaction"];
+  // Community hooks — Members & Roles
+  /** List members of a container with pagination. */
   useContainerMembers: CommunityHooks["useContainerMembers"];
+  /** List moderators of a container. */
   useContainerModerators: CommunityHooks["useContainerModerators"];
+  /** List owners of a container. */
   useContainerOwners: CommunityHooks["useContainerOwners"];
+  /** Add a user as a member of a container. */
   useAddMember: CommunityHooks["useAddMember"];
+  /** Remove a member from a container. */
   useRemoveMember: CommunityHooks["useRemoveMember"];
+  /** Promote a member to moderator. */
   useAssignModerator: CommunityHooks["useAssignModerator"];
+  /** Remove moderator role from a user. */
   useRemoveModerator: CommunityHooks["useRemoveModerator"];
+  /** Promote a member to owner. */
   useAssignOwner: CommunityHooks["useAssignOwner"];
+  /** Remove owner role from a user. */
   useRemoveOwner: CommunityHooks["useRemoveOwner"];
+  // Community hooks — Notifications
+  /** List notifications for the current user with pagination. */
   useNotifications: CommunityHooks["useNotifications"];
+  /** Get the count of unread notifications. */
   useNotificationsUnreadCount: CommunityHooks["useNotificationsUnreadCount"];
+  /** Mark a single notification as read. */
   useMarkNotificationRead: CommunityHooks["useMarkNotificationRead"];
+  /** Mark all notifications as read. */
   useMarkAllNotificationsRead: CommunityHooks["useMarkAllNotificationsRead"];
+  // Community hooks — Reports & Moderation
+  /** List moderation reports with pagination. */
   useReports: CommunityHooks["useReports"];
+  /** Fetch a single report by ID. */
   useReport: CommunityHooks["useReport"];
+  /** File a moderation report against a thread or reply. */
   useCreateReport: CommunityHooks["useCreateReport"];
+  /** Resolve a moderation report with an action (e.g., warn, delete). */
   useResolveReport: CommunityHooks["useResolveReport"];
+  /** Dismiss a moderation report without taking action. */
   useDismissReport: CommunityHooks["useDismissReport"];
+  // Community hooks — Bans
+  /** List banned users with pagination. */
   useBans: CommunityHooks["useBans"];
+  /** Check whether a specific user is banned. */
   useCheckBan: CommunityHooks["useCheckBan"];
+  /** Ban a user from a container or globally. */
   useCreateBan: CommunityHooks["useCreateBan"];
+  /** Remove a ban, restoring the user's access. */
   useRemoveBan: CommunityHooks["useRemoveBan"];
+  // Community hooks — Search
+  /** Full-text search across threads. */
   useSearchThreads: CommunityHooks["useSearchThreads"];
+  /** Full-text search across replies. */
   useSearchReplies: CommunityHooks["useSearchReplies"];
 
-  // Webhook hooks (always available)
+  // Webhook hooks
+  /** List webhook endpoints with pagination. */
   useWebhookEndpoints: WebhookHooks["useWebhookEndpoints"];
+  /** Fetch a single webhook endpoint by ID. */
   useWebhookEndpoint: WebhookHooks["useWebhookEndpoint"];
+  /** Create a new webhook endpoint. */
   useCreateWebhookEndpoint: WebhookHooks["useCreateWebhookEndpoint"];
+  /** Update an existing webhook endpoint's URL, events, or status. */
   useUpdateWebhookEndpoint: WebhookHooks["useUpdateWebhookEndpoint"];
+  /** Delete a webhook endpoint. */
   useDeleteWebhookEndpoint: WebhookHooks["useDeleteWebhookEndpoint"];
+  /** List delivery attempts for a webhook endpoint. */
   useWebhookDeliveries: WebhookHooks["useWebhookDeliveries"];
+  /** Fetch a single delivery record by ID. */
   useWebhookDelivery: WebhookHooks["useWebhookDelivery"];
+  /** Send a test delivery through a webhook endpoint. */
   useTestWebhookEndpoint: WebhookHooks["useTestWebhookEndpoint"];
 
   // Primitives for composition
+  /** Low-level API client bound to this snapshot instance. */
   api: ApiClient;
+  /** Token storage used for session persistence (access + refresh tokens). */
   tokenStorage: TokenStorage;
+  /** TanStack Query client shared across all hooks in this snapshot instance. */
   queryClient: QueryClient;
+  /** Access the WebSocket connection manager. Returns null when WebSocket is not configured. */
   useWebSocketManager: () => WebSocketManager<TWSEvents> | null;
 
   // Routing
+  /** Route guard that redirects unauthenticated users to the login page. Use as a `beforeLoad` handler. */
   protectedBeforeLoad: (ctx: {
     context: { queryClient: QueryClient };
   }) => Promise<void>;
+  /** Route guard that redirects authenticated users away from guest-only pages. Use as a `beforeLoad` handler. */
   guestBeforeLoad: (ctx: {
     context: { queryClient: QueryClient };
   }) => Promise<void>;
 
   // Scaffold component
+  /** React provider that wraps children with the TanStack QueryClientProvider for this instance. */
   QueryProvider: React.FC<{ children: React.ReactNode }>;
 
   /** Config-driven ManifestApp component, available when `manifest` is provided in config. */

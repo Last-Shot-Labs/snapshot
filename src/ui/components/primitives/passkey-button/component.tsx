@@ -2,8 +2,7 @@
 
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { SnapshotApiContext, useActionExecutor } from "../../../actions/executor";
-import { useSubscribe } from "../../../context";
-import { resolveTemplate } from "../../../expressions/template";
+import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
 import {
@@ -12,6 +11,7 @@ import {
 } from "../../../manifest/passkey";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
+import { resolvePrimitiveValue } from "../resolve-value";
 import type { PasskeyButtonConfig } from "./types";
 
 function SurfaceStyles({ css }: { css?: string }) {
@@ -27,10 +27,7 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
   const [isLoading, setIsLoading] = useState(false);
   const autoPromptedRef = useRef(false);
   const activeLocale = resolveRuntimeLocale(manifest?.raw.i18n, localeState);
-
-  if (!isPasskeySupported()) {
-    return null;
-  }
+  const passkeySupported = isPasskeySupported();
 
   const routeId = routeRuntime?.currentRoute?.id;
   const rootId = config.id ?? "passkey-button";
@@ -61,10 +58,8 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
         ? screenPasskeyConfig["enabled"] !== false
         : manifestPasskeyConfig
           ? manifestPasskeyConfig["enabled"] !== false
-          : manifest?.auth?.passkey !== false;
-  if (!passkeyEnabled) {
-    return null;
-  }
+        : manifest?.auth?.passkey !== false;
+  const canRender = passkeySupported && passkeyEnabled;
 
   const endpoints = manifest?.auth?.contract?.endpoints;
   const loginOptionsEndpoint =
@@ -91,10 +86,8 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
       "string"
       ? String((screenOptions.labels as Record<string, unknown>).passkeyButton)
       : config.label) ?? "Sign in with passkey";
-  const rootSurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-root`,
-    componentSurface: config,
-    activeStates: isLoading ? ["active"] : [],
+  const resolvedConfig = useResolveFrom({
+    label,
   });
   const labelSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-label`,
@@ -126,36 +119,56 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
       if (error instanceof DOMException && error.name === "NotAllowedError") {
         return;
       }
-      throw error;
+
+      if (config.onError) {
+        await execute(config.onError as Parameters<typeof execute>[0], {
+          error,
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!canRender) {
+      return;
+    }
+
     const autoPrompt =
-      screenPasskeyConfig?.["autoPrompt"] === true ||
-      manifestPasskeyConfig?.["autoPrompt"] === true;
+      screenPasskeyConfig &&
+      Object.prototype.hasOwnProperty.call(screenPasskeyConfig, "autoPrompt")
+        ? screenPasskeyConfig["autoPrompt"] === true
+        : manifestPasskeyConfig?.["autoPrompt"] === true;
     if (!autoPrompt || autoPromptedRef.current || isLoading) {
       return;
     }
 
     autoPromptedRef.current = true;
     void handleClick();
-  }, [isLoading, manifestPasskeyConfig, screenPasskeyConfig]);
+  }, [canRender, isLoading, manifestPasskeyConfig, screenPasskeyConfig]);
+
+  if (!canRender) {
+    return null;
+  }
+
+  const resolvedLabel = resolvePrimitiveValue(resolvedConfig.label, {
+    context: templateContext,
+    ...templateOptions,
+  });
 
   return (
     <>
       <ButtonControl
         surfaceId={`${rootId}-root`}
-        surfaceConfig={config.slots?.root}
+        surfaceConfig={config}
+        itemSurfaceConfig={config.slots?.root}
         variant="outline"
         size="sm"
         fullWidth
         onClick={() => void handleClick()}
         disabled={isLoading}
-        className={rootSurface.className}
-        style={rootSurface.style}
+        activeStates={isLoading ? ["active"] : []}
       >
         <span
           data-snapshot-id={`${rootId}-label`}
@@ -164,10 +177,9 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
         >
           {isLoading
             ? "Preparing passkey..."
-            : resolveTemplate(label, templateContext, templateOptions)}
+            : resolvedLabel}
         </span>
       </ButtonControl>
-      <SurfaceStyles css={rootSurface.scopedCss} />
       <SurfaceStyles css={labelSurface.scopedCss} />
     </>
   );

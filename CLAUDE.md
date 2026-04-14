@@ -56,9 +56,10 @@ Use this order:
    - `apps/docs/src/content/docs/build/manifest-apps.md`
    - `apps/docs/src/content/docs/build/sdk-apps.md`
    - `apps/docs/src/content/docs/integrate/ssr-rsc.md`
-4. generated reference for the relevant surface
-5. `apps/docs/src/content/docs/examples/index.md`
-6. only then lower-level source
+4. `docs/api-cheatsheet.md` — auto-generated single-file API surface (all exports, hook signatures, grouped by domain)
+5. generated reference for the relevant surface
+6. `apps/docs/src/content/docs/examples/index.md`
+7. only then lower-level source
 
 ## Non-Negotiables
 

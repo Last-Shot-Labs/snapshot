@@ -53,6 +53,7 @@ export function createOAuthHooks({
   contract,
   onLoginSuccess,
 }: OAuthHooksOptions) {
+  /** Resolve a provider key to its canonical OAuth provider target using config overrides. */
   function resolveProviderTarget(provider: OAuthProvider): OAuthProvider {
     const providerConfig = config.providers?.[provider];
     if (!providerConfig) {
@@ -66,6 +67,7 @@ export function createOAuthHooks({
     return providerConfig.type as OAuthProvider;
   }
 
+  /** Append client_id, scope, and redirect_uri query params from provider config to a URL. */
   function appendProviderQuery(
     url: string,
     providerConfig:
@@ -109,12 +111,14 @@ export function createOAuthHooks({
     return parsed.toString();
   }
 
+  /** Build the full OAuth login URL for a given provider, including any configured query params. */
   function getOAuthUrl(provider: OAuthProvider): string {
     const providerConfig = config.providers?.[provider];
     const target = resolveProviderTarget(provider);
     return appendProviderQuery(contract.oauthUrl(target), providerConfig);
   }
 
+  /** Build the OAuth account-linking URL for a given provider, including any configured query params. */
   function getLinkUrl(provider: OAuthProvider): string {
     const providerConfig = config.providers?.[provider];
     const target = resolveProviderTarget(provider);
@@ -148,6 +152,7 @@ export function createOAuthHooks({
     });
   }
 
+  /** Unlink an OAuth provider from the current user's account and invalidate the auth cache. */
   function useOAuthUnlink() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, OAuthProvider>({

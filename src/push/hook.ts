@@ -63,6 +63,17 @@ export interface UsePushNotificationsResult {
  *
  * Service worker setup: copy sw.js from node_modules/@lastshotlabs/snapshot/dist/sw.js
  * to your project's public/sw.js, OR use `snapshot init` which scaffolds it automatically.
+ *
+ * @example
+ * ```ts
+ * const { state, subscribe, unsubscribe } = usePushNotifications();
+ *
+ * // With custom options
+ * const { state, subscribe, unsubscribe } = usePushNotifications({
+ *   vapidPublicKey: 'BEl62i...',
+ *   subscribeUrl: '/api/push/subscribe',
+ * });
+ * ```
  */
 export function usePushNotifications(
   opts?: UsePushNotificationsOpts,

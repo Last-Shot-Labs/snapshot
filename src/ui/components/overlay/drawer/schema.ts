@@ -52,7 +52,7 @@ export const drawerConfigSchema = baseComponentConfigSchema.extend({
             .enum(["default", "secondary", "destructive", "ghost"])
             .optional(),
           /** Action to dispatch on click. */
-          action: actionSchema.optional(),
+          action: z.union([actionSchema, z.array(actionSchema)]).optional(),
           /** Close the drawer after the action executes. Default: false. */
           dismiss: z.boolean().optional(),
         }),

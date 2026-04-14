@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import { useSubscribe } from "../../../context";
+import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveTemplate } from "../../../expressions/template";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { renderIcon } from "../../../icons/render";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
+import { resolveOptionalPrimitiveValue } from "../resolve-value";
 import type { OAuthButtonsConfig } from "./types";
 
 const PROVIDER_ICON_MAP: Record<string, string> = {
@@ -64,10 +65,7 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
       allowedProviders ? allowedProviders.has(providerName) : true,
     );
   }, [manifest?.auth?.providers, screenOptions?.providers]);
-
-  if (providers.length === 0) {
-    return null;
-  }
+  const hasProviders = providers.length > 0;
 
   const providerMode =
     (typeof screenOptions?.providerMode === "string"
@@ -89,6 +87,9 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
           (screenOptions.labels as Record<string, unknown>).providersHeading,
         )
       : undefined);
+  const resolvedConfig = useResolveFrom({
+    heading,
+  });
   const templateContext = {
     app: manifest?.app ?? {},
     auth: manifest?.auth ?? {},
@@ -103,6 +104,10 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
     locale: activeLocale,
     i18n: manifest?.raw.i18n,
   };
+  const resolvedHeading = resolveOptionalPrimitiveValue(resolvedConfig.heading, {
+    context: templateContext,
+    ...templateOptions,
+  });
   const resolvedProviders = providers.map(([providerName, provider]) => {
     const providerRecord = provider as Record<string, unknown>;
     const label = resolveTemplate(
@@ -143,6 +148,7 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
 
   useEffect(() => {
     if (
+      !hasProviders ||
       providerMode !== "auto" ||
       autoRedirectedRef.current ||
       resolvedProviders.length !== 1
@@ -152,8 +158,7 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
 
     const provider = resolvedProviders[0]!;
     const autoRedirect =
-      (provider.providerRecord["autoRedirect"] as boolean | undefined) !== false ||
-      providerMode === "auto";
+      (provider.providerRecord["autoRedirect"] as boolean | undefined) !== false;
     if (!autoRedirect) {
       return;
     }
@@ -171,7 +176,11 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
       type: "navigate-external",
       to: provider.url,
     } as never);
-  }, [execute, providerMode, resolvedProviders]);
+  }, [execute, hasProviders, providerMode, resolvedProviders]);
+
+  if (!hasProviders) {
+    return null;
+  }
 
   const rootSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-root`,
@@ -224,13 +233,13 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
         className={rootSurface.className}
         style={rootSurface.style}
       >
-        {heading ? (
+        {resolvedHeading ? (
           <div
             data-snapshot-id={`${rootId}-heading`}
             className={headingSurface.className}
             style={headingSurface.style}
           >
-            {resolveTemplate(heading, templateContext, templateOptions)}
+            {resolvedHeading}
           </div>
         ) : null}
         {resolvedProviders.map((provider, index) => {
@@ -251,6 +260,7 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
                 variant="outline"
                 size="sm"
                 ariaLabel={provider.label}
+                ariaDescribedBy={provider.description ? descriptionId : undefined}
                 ariaHasPopup={false}
                 onClick={() =>
                   void execute({

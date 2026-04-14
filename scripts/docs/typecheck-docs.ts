@@ -2,6 +2,7 @@ import { rmSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
 rmSync("apps/docs/.astro", { recursive: true, force: true });
+rmSync("apps/docs/node_modules/.astro", { recursive: true, force: true });
 
 const result = spawnSync(
   "bun",

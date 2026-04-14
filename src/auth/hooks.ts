@@ -57,6 +57,7 @@ export function createAuthHooks({
   onLoginSuccess,
   onLogoutSuccess,
 }: AuthHooksOptions) {
+  /** Fetch the current authenticated user via the `me` endpoint. Returns null when logged out or on error. */
   function useUser() {
     const {
       data: user = null,
@@ -83,6 +84,7 @@ export function createAuthHooks({
     return { user, isLoading, isError };
   }
 
+  /** Log in with credentials, handling MFA challenges, token storage, and post-login navigation. */
   function useLogin() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -127,6 +129,7 @@ export function createAuthHooks({
     });
   }
 
+  /** Log out the current user, clear tokens and query cache, and navigate to the login path. */
   function useLogout() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -153,6 +156,7 @@ export function createAuthHooks({
     });
   }
 
+  /** Register a new user, store auth tokens, fetch the created user, and navigate to the home path. */
   function useRegister() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -181,6 +185,7 @@ export function createAuthHooks({
     });
   }
 
+  /** Send a forgot-password request to the server for the given email. */
   function useForgotPassword() {
     return useMutation<void, ApiError, ForgotPasswordBody>({
       mutationFn: (body) =>

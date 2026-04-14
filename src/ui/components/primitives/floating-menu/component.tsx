@@ -6,14 +6,22 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
   type RefObject,
 } from "react";
+import { useActionExecutor } from "../../../actions/executor";
+import { useResolveFrom, useSubscribe } from "../../../context";
+import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { renderIcon } from "../../../icons/render";
+import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
+import { ButtonControl } from "../../forms/button";
 import {
   resolveSurfacePresentation,
   type RuntimeSurfaceState,
 } from "../../_base/style-surfaces";
+import { resolvePrimitiveValue } from "../resolve-value";
+import type { FloatingMenuConfig, FloatingMenuEntry } from "./types";
 
 const ANIMATION_DURATION = 150;
 
@@ -219,6 +227,246 @@ export function FloatingPanel({
   );
 }
 
+export function FloatingMenu({ config }: { config: FloatingMenuConfig }) {
+  const execute = useActionExecutor();
+  const [isOpen, setIsOpen] = useState(Boolean(config.open));
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const manifest = useManifestRuntime();
+  const routeRuntime = useRouteRuntime();
+  const localeState = useSubscribe({ from: "global.locale" });
+  const activeLocale = resolveRuntimeLocale(manifest?.raw.i18n, localeState);
+
+  useEffect(() => {
+    if (typeof config.open === "boolean") {
+      setIsOpen(config.open);
+      if (!config.open) {
+        setFocusedIndex(-1);
+      }
+    }
+  }, [config.open]);
+
+  const rootId = config.id ?? "floating-menu";
+  const resolvedConfig = useResolveFrom({
+    triggerLabel: config.triggerLabel,
+    items: config.items ?? [],
+  });
+  const items = (resolvedConfig.items ?? []) as FloatingMenuEntry[];
+  const align = config.align ?? "start";
+  const side = config.side ?? "bottom";
+  const templateOptions = {
+    context: {
+      app: manifest?.app ?? {},
+      auth: manifest?.auth ?? {},
+      route: {
+        ...(routeRuntime?.currentRoute ?? {}),
+        path: routeRuntime?.currentPath,
+        params: routeRuntime?.params,
+        query: routeRuntime?.query,
+      },
+    },
+    locale: activeLocale,
+    i18n: manifest?.raw.i18n,
+  };
+  const triggerLabel = resolvePrimitiveValue(
+    resolvedConfig.triggerLabel ?? config.triggerLabel ?? "Open menu",
+    templateOptions,
+  );
+  const rootSurface = resolveSlotSurface({
+    surfaceId: `${rootId}-root`,
+    implementationBase: {
+      position: "relative",
+      display: "inline-block",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+
+  const actionableIndices = items
+    .map((item, index) =>
+      item.type === "item" && item.disabled !== true ? index : -1,
+    )
+    .filter((index) => index !== -1);
+
+  const open = useCallback((nextFocusedIndex = -1) => {
+    setIsOpen(true);
+    setFocusedIndex(nextFocusedIndex);
+  }, []);
+
+  const close = useCallback((restoreFocus = true) => {
+    setIsOpen(false);
+    setFocusedIndex(-1);
+    if (restoreFocus) {
+      triggerRef.current?.focus();
+    }
+  }, []);
+
+  const handleItemClick = useCallback(
+    (entry: FloatingMenuEntry) => {
+      if (entry.type !== "item" || entry.disabled) {
+        return;
+      }
+
+      if (entry.action) {
+        void execute(entry.action as Parameters<typeof execute>[0]);
+      }
+      close();
+    },
+    [close, execute],
+  );
+
+  useEffect(() => {
+    if (!isOpen || focusedIndex < 0) {
+      return;
+    }
+
+    itemRefs.current[focusedIndex]?.focus();
+  }, [focusedIndex, isOpen]);
+
+  const handleKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLElement>) => {
+      if (!isOpen) {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          open(actionableIndices[0] ?? -1);
+          return;
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          open(actionableIndices[actionableIndices.length - 1] ?? -1);
+          return;
+        }
+
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open(actionableIndices[0] ?? -1);
+        }
+        return;
+      }
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        const currentPosition = actionableIndices.indexOf(focusedIndex);
+        const nextPosition =
+          currentPosition === -1 || currentPosition >= actionableIndices.length - 1
+            ? 0
+            : currentPosition + 1;
+        setFocusedIndex(actionableIndices[nextPosition] ?? -1);
+        return;
+      }
+
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        const currentPosition = actionableIndices.indexOf(focusedIndex);
+        const previousPosition =
+          currentPosition <= 0
+            ? actionableIndices.length - 1
+            : currentPosition - 1;
+        setFocusedIndex(actionableIndices[previousPosition] ?? -1);
+        return;
+      }
+
+      if ((event.key === "Enter" || event.key === " ") && focusedIndex >= 0) {
+        event.preventDefault();
+        const entry = items[focusedIndex];
+        if (entry) {
+          handleItemClick(entry);
+        }
+      }
+    },
+    [actionableIndices, focusedIndex, handleItemClick, isOpen, items, open],
+  );
+
+  return (
+    <>
+      <div
+        ref={containerRef}
+        data-snapshot-component="floating-menu"
+        data-snapshot-id={`${rootId}-root`}
+        className={rootSurface.className}
+        style={rootSurface.style}
+      >
+        <FloatingMenuStyles />
+        <ButtonControl
+          buttonRef={triggerRef}
+          variant="ghost"
+          onClick={() => (isOpen ? close() : open())}
+          onKeyDown={handleKeyDown}
+          surfaceId={`${rootId}-trigger`}
+          surfaceConfig={config.slots?.trigger}
+          ariaLabel={triggerLabel}
+          ariaExpanded={isOpen}
+          ariaHasPopup="menu"
+          activeStates={isOpen ? ["open"] : []}
+        >
+          {config.triggerIcon ? renderIcon(config.triggerIcon, 16) : null}
+          {triggerLabel}
+        </ButtonControl>
+
+        <FloatingPanel
+          open={isOpen}
+          onClose={close}
+          containerRef={containerRef}
+          side={side}
+          align={align}
+          surfaceId={`${rootId}-panel`}
+          slot={config.slots?.panel}
+          activeStates={isOpen ? ["open"] : []}
+        >
+          <div onKeyDown={handleKeyDown}>
+            {items.map((entry, index) => {
+              if (entry.type === "separator") {
+                return (
+                  <MenuSeparator
+                    key={`separator-${index}`}
+                    surfaceId={`${rootId}-separator-${index}`}
+                    slot={entry.slots?.separator ?? config.slots?.separator}
+                  />
+                );
+              }
+
+              if (entry.type === "label") {
+                return (
+                  <MenuLabel
+                    key={`label-${index}`}
+                    text={resolvePrimitiveValue(entry.text, templateOptions)}
+                    surfaceId={`${rootId}-label-${index}`}
+                    slot={entry.slots?.label ?? config.slots?.label}
+                  />
+                );
+              }
+
+              return (
+                <MenuItem
+                  key={`item-${index}`}
+                  label={resolvePrimitiveValue(entry.label, templateOptions)}
+                  icon={entry.icon}
+                  onClick={() => handleItemClick(entry)}
+                  disabled={entry.disabled}
+                  destructive={entry.destructive}
+                  active={focusedIndex === index}
+                  tabIndex={focusedIndex === index ? 0 : -1}
+                  buttonRef={(node) => {
+                    itemRefs.current[index] = node;
+                  }}
+                  surfaceId={`${rootId}-item-${index}`}
+                  slot={entry.slots?.item ?? config.slots?.item}
+                  labelSlot={entry.slots?.itemLabel ?? config.slots?.itemLabel}
+                  iconSlot={entry.slots?.itemIcon ?? config.slots?.itemIcon}
+                />
+              );
+            })}
+          </div>
+        </FloatingPanel>
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+    </>
+  );
+}
+
 export interface MenuItemProps {
   label: string;
   icon?: string;
@@ -235,6 +483,10 @@ export interface MenuItemProps {
   slot?: SurfaceConfig;
   labelSlot?: SurfaceConfig;
   iconSlot?: SurfaceConfig;
+  tabIndex?: number;
+  buttonRef?:
+    | RefObject<HTMLButtonElement | null>
+    | ((node: HTMLButtonElement | null) => void);
 }
 
 export function MenuItem({
@@ -253,6 +505,8 @@ export function MenuItem({
   slot,
   labelSlot,
   iconSlot,
+  tabIndex,
+  buttonRef,
 }: MenuItemProps) {
   const activeStates: RuntimeSurfaceState[] = [];
   if (selected) {
@@ -308,6 +562,7 @@ export function MenuItem({
   return (
     <>
       <button
+        ref={buttonRef}
         type="button"
         role={role}
         data-menu-item=""
@@ -316,6 +571,7 @@ export function MenuItem({
         aria-disabled={disabled || undefined}
         disabled={disabled}
         onClick={disabled ? undefined : onClick}
+        tabIndex={tabIndex}
         className={itemClassName || undefined}
         style={{
           ...(itemSurface.style ?? {}),

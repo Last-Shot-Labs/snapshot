@@ -119,6 +119,23 @@ function createManifestRealtimeCallback(
  *
  * @param config - Four-field bootstrap config
  * @returns A fully initialized snapshot instance
+ *
+ * @example
+ * ```ts
+ * import { createSnapshot } from '@lastshotlabs/snapshot';
+ * import manifest from './manifest.json';
+ *
+ * const snap = createSnapshot({
+ *   apiUrl: 'https://api.example.com',
+ *   manifest,
+ * });
+ *
+ * // Use hooks in your React components
+ * function App() {
+ *   const { user } = snap.useUser();
+ *   return user ? <div>Hello {user.email}</div> : <LoginForm />;
+ * }
+ * ```
  */
 export function createSnapshot<
   TWSEvents extends Record<string, unknown> = Record<string, unknown>,

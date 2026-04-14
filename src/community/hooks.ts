@@ -62,6 +62,14 @@ const keys = {
 
 // ── Factory ───────────────────────────────────────────────────────────────────
 
+/**
+ * Create a complete set of React Query hooks for the community API surface.
+ *
+ * @param options - Factory configuration.
+ * @param options.api - The API client used to make HTTP requests.
+ * @param options.queryClient - The React Query client used for cache invalidation.
+ * @returns An object containing all community hooks for containers, threads, replies, reactions, members, roles, notifications, reports, bans, and search.
+ */
 export function createCommunityHooks({
   api,
   queryClient: _qc,
@@ -71,6 +79,7 @@ export function createCommunityHooks({
 }) {
   // ── Containers ───────────────────────────────────────────────────────────────
 
+  /** Fetch all community containers with optional pagination. */
   function useContainers(params?: ListParams) {
     const query = params
       ? `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 20}`
@@ -84,6 +93,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Fetch a single community container by its ID. */
   function useContainer(containerId: string) {
     return useQuery<ContainerResponse, ApiError>({
       queryKey: keys.container(containerId),
@@ -93,6 +103,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Create a new community container. */
   function useCreateContainer() {
     const queryClient = useQueryClient();
     return useMutation<ContainerResponse, ApiError, CreateContainerBody>({
@@ -104,6 +115,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Update an existing community container by its ID. */
   function useUpdateContainer() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -125,6 +137,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Delete a community container by its ID. */
   function useDeleteContainer() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, { containerId: string }>({
@@ -138,6 +151,7 @@ export function createCommunityHooks({
 
   // ── Threads ───────────────────────────────────────────────────────────────────
 
+  /** Fetch paginated threads for a specific container. */
   function useContainerThreads({ containerId, ...params }: ThreadListParams) {
     const query = `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 20}`;
     return useQuery<PaginatedResponse<ThreadResponse>, ApiError>({
@@ -150,6 +164,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Fetch a single thread by its ID. */
   function useContainerThread(threadId: string) {
     return useQuery<ThreadResponse, ApiError>({
       queryKey: keys.threadDetail(threadId),
@@ -158,6 +173,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Create a new thread inside a container. */
   function useCreateThread() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -179,6 +195,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Update an existing thread by its ID. */
   function useUpdateThread() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -200,6 +217,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Delete a thread by its ID. */
   function useDeleteThread() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -218,6 +236,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Publish a draft thread, making it visible in the container. */
   function usePublishThread() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -238,6 +257,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Lock a thread to prevent further replies. */
   function useLockThread() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -258,6 +278,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Pin a thread to the top of its container. */
   function usePinThread() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -278,6 +299,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Unpin a previously pinned thread from its container. */
   function useUnpinThread() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -300,6 +322,7 @@ export function createCommunityHooks({
 
   // ── Replies ───────────────────────────────────────────────────────────────────
 
+  /** Fetch paginated replies for a specific thread. */
   function useThreadReplies({ threadId, ...params }: ReplyListParams) {
     const query = `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 20}`;
     return useQuery<PaginatedResponse<ReplyResponse>, ApiError>({
@@ -312,6 +335,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Fetch a single reply by its ID. */
   function useReply(replyId: string) {
     return useQuery<ReplyResponse, ApiError>({
       queryKey: keys.replyDetail(replyId),
@@ -320,6 +344,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Create a new reply on a thread. */
   function useCreateReply() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -338,6 +363,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Update an existing reply by its ID. */
   function useUpdateReply() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -359,6 +385,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Delete a reply by its ID. */
   function useDeleteReply() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, { replyId: string; threadId: string }>({
@@ -375,6 +402,7 @@ export function createCommunityHooks({
 
   // ── Thread Reactions ──────────────────────────────────────────────────────────
 
+  /** Fetch all reactions on a specific thread. */
   function useThreadReactions(threadId: string) {
     return useQuery<ReactionBody[], ApiError>({
       queryKey: ["community", "thread-reactions", threadId] as const,
@@ -384,6 +412,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Add an emoji reaction to a thread. */
   function useAddThreadReaction() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -404,6 +433,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Remove an emoji reaction from a thread. */
   function useRemoveThreadReaction() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -428,6 +458,7 @@ export function createCommunityHooks({
 
   // ── Reply Reactions ───────────────────────────────────────────────────────────
 
+  /** Fetch all reactions on a specific reply. */
   function useReplyReactions(replyId: string) {
     return useQuery<ReactionBody[], ApiError>({
       queryKey: ["community", "reply-reactions", replyId] as const,
@@ -437,6 +468,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Add an emoji reaction to a reply. */
   function useAddReplyReaction() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -458,6 +490,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Remove an emoji reaction from a reply. */
   function useRemoveReplyReaction() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -483,6 +516,7 @@ export function createCommunityHooks({
 
   // ── Members / Roles ───────────────────────────────────────────────────────────
 
+  /** Fetch paginated members of a container. */
   function useContainerMembers(containerId: string, params?: ListParams) {
     const query = params
       ? `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 20}`
@@ -497,6 +531,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Fetch paginated moderators of a container. */
   function useContainerModerators(containerId: string, params?: ListParams) {
     const query = params
       ? `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 20}`
@@ -511,6 +546,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Fetch paginated owners of a container. */
   function useContainerOwners(containerId: string, params?: ListParams) {
     const query = params
       ? `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 20}`
@@ -525,6 +561,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Add a user as a member of a container. */
   function useAddMember() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, { containerId: string; userId: string }>(
@@ -542,6 +579,7 @@ export function createCommunityHooks({
     );
   }
 
+  /** Remove a member from a container. */
   function useRemoveMember() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, { containerId: string; userId: string }>(
@@ -559,6 +597,7 @@ export function createCommunityHooks({
     );
   }
 
+  /** Assign moderator role to a user in a container. */
   function useAssignModerator() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, { containerId: string; userId: string }>(
@@ -576,6 +615,7 @@ export function createCommunityHooks({
     );
   }
 
+  /** Remove moderator role from a user in a container. */
   function useRemoveModerator() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, { containerId: string; userId: string }>(
@@ -593,6 +633,7 @@ export function createCommunityHooks({
     );
   }
 
+  /** Assign owner role to a user in a container. */
   function useAssignOwner() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, { containerId: string; userId: string }>(
@@ -610,6 +651,7 @@ export function createCommunityHooks({
     );
   }
 
+  /** Remove owner role from a user in a container. */
   function useRemoveOwner() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, { containerId: string; userId: string }>(
@@ -629,6 +671,7 @@ export function createCommunityHooks({
 
   // ── Notifications ─────────────────────────────────────────────────────────────
 
+  /** Fetch paginated community notifications for the current user. */
   function useNotifications(params?: ListParams) {
     const query = params
       ? `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 20}`
@@ -642,6 +685,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Fetch the count of unread community notifications. */
   function useNotificationsUnreadCount() {
     return useQuery<{ count: number }, ApiError>({
       queryKey: keys.notificationsUnread(),
@@ -650,6 +694,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Mark a single notification as read. */
   function useMarkNotificationRead() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, { notificationId: string }>({
@@ -664,6 +709,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Mark all community notifications as read. */
   function useMarkAllNotificationsRead() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, void>({
@@ -679,6 +725,7 @@ export function createCommunityHooks({
 
   // ── Reports ───────────────────────────────────────────────────────────────────
 
+  /** Fetch paginated community reports. */
   function useReports(params?: ListParams) {
     const query = params
       ? `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 20}`
@@ -692,6 +739,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Fetch a single report by its ID. */
   function useReport(reportId: string) {
     return useQuery<ReportResponse, ApiError>({
       queryKey: keys.report(reportId),
@@ -700,6 +748,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Submit a new community report. */
   function useCreateReport() {
     const queryClient = useQueryClient();
     return useMutation<ReportResponse, ApiError, ReportBody>({
@@ -711,6 +760,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Resolve a report with a resolution body. */
   function useResolveReport() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -730,6 +780,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Dismiss a report without taking action. */
   function useDismissReport() {
     const queryClient = useQueryClient();
     return useMutation<ReportResponse, ApiError, { reportId: string }>({
@@ -744,6 +795,7 @@ export function createCommunityHooks({
 
   // ── Bans ──────────────────────────────────────────────────────────────────────
 
+  /** Fetch paginated community bans. */
   function useBans(params?: ListParams) {
     const query = params
       ? `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 20}`
@@ -755,6 +807,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Check whether a user is banned, optionally scoped to a container. */
   function useCheckBan(userId: string, containerId?: string) {
     const params = containerId
       ? `?userId=${userId}&containerId=${containerId}`
@@ -767,6 +820,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Ban a user from the community or a specific container. */
   function useCreateBan() {
     const queryClient = useQueryClient();
     return useMutation<BanResponse, ApiError, BanBody>({
@@ -780,6 +834,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Remove an existing ban by its ID. */
   function useRemoveBan() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, { banId: string; userId: string }>({
@@ -795,6 +850,7 @@ export function createCommunityHooks({
 
   // ── Search ────────────────────────────────────────────────────────────────────
 
+  /** Search threads by query string with optional container and cursor-based pagination. */
   function useSearchThreads(params: CommunitySearchParams & { q: string }) {
     const qs = new URLSearchParams();
     if (params.q) qs.set("q", params.q);
@@ -809,6 +865,7 @@ export function createCommunityHooks({
     });
   }
 
+  /** Search replies by query string with optional container and cursor-based pagination. */
   function useSearchReplies(params: CommunitySearchParams & { q: string }) {
     const qs = new URLSearchParams();
     if (params.q) qs.set("q", params.q);

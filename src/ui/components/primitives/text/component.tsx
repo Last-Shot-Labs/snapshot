@@ -1,12 +1,12 @@
 'use client';
 
 import type { CSSProperties } from "react";
-import { useSubscribe } from "../../../context";
+import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { useRouteRuntime } from "../../../manifest/runtime";
-import { resolveTemplate } from "../../../expressions/template";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { resolvePrimitiveValue } from "../resolve-value";
 import type { TextConfig } from "./types";
 
 const COLOR_MAP: Record<NonNullable<TextConfig["variant"]>, string> = {
@@ -40,23 +40,24 @@ export function Text({ config }: { config: TextConfig }) {
   const routeRuntime = useRouteRuntime();
   const localeState = useSubscribe({ from: "global.locale" });
   const activeLocale = resolveRuntimeLocale(manifest?.raw.i18n, localeState);
-  const value = resolveTemplate(
-    config.value,
-    {
-      app: manifest?.app ?? {},
-      auth: manifest?.auth ?? {},
-      route: {
-        ...(routeRuntime?.currentRoute ?? {}),
-        path: routeRuntime?.currentPath,
-        params: routeRuntime?.params,
-        query: routeRuntime?.query,
-      },
+  const resolvedConfig = useResolveFrom({
+    value: config.value,
+  });
+  const templateContext = {
+    app: manifest?.app ?? {},
+    auth: manifest?.auth ?? {},
+    route: {
+      ...(routeRuntime?.currentRoute ?? {}),
+      path: routeRuntime?.currentPath,
+      params: routeRuntime?.params,
+      query: routeRuntime?.query,
     },
-    {
-      locale: activeLocale,
-      i18n: manifest?.raw.i18n,
-    },
-  );
+  };
+  const value = resolvePrimitiveValue(resolvedConfig.value, {
+    context: templateContext,
+    locale: activeLocale,
+    i18n: manifest?.raw.i18n,
+  });
   const rootId = config.id ?? "text";
   const rootSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-root`,

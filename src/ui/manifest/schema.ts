@@ -31,6 +31,7 @@ import { spinnerConfigSchema } from "../components/feedback/default-loading";
 import { errorPageConfigSchema } from "../components/feedback/default-error";
 import { notFoundConfigSchema } from "../components/feedback/default-not-found";
 import { offlineBannerConfigSchema } from "../components/feedback/default-offline";
+import { confirmDialogConfigSchema } from "../components/overlay/confirm-dialog/schema";
 import { envRefSchema } from "./env";
 import { i18nConfigSchema, tRefSchema } from "../i18n/schema";
 
@@ -467,6 +468,10 @@ export const errorStateConfigSchema = z
   })
   .strict();
 
+/**
+ * Suspense fallback descriptor used by layout-like manifest components.
+ * Supports built-in loading placeholders or a custom component payload.
+ */
 export const suspenseFallbackSchema = z
   .object({
     type: z.enum(["skeleton", "spinner", "custom"]),
@@ -566,18 +571,15 @@ export const selectConfigSchema = baseComponentConfigSchema.extend({
   placeholder: textOrTRefSchema.optional(),
 });
 
-export const cardConfigSchema = z
-  .object({
+/** Zod config schema for the Card component. Defines a card container with optional title, subtitle, children, gap, and suspense fallback. */
+export const cardConfigSchema = baseComponentConfigSchema
+  .extend({
     type: z.literal("card"),
-    id: z.string().optional(),
-    title: z.string().optional(),
-    subtitle: z.string().optional(),
+    title: textWithFromRefSchema.optional(),
+    subtitle: textWithFromRefSchema.optional(),
     children: z.array(z.lazy(() => componentConfigSchema)).default([]),
-    gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
+    gap: responsiveSchema(z.string()).optional(),
     suspense: suspenseFallbackSchema.optional(),
-    className: z.string().optional(),
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
   })
   .strict();
 
@@ -1923,7 +1925,7 @@ const overlayFooterActionSchema = z
   .strict();
 
 /**
- * Schema for named modal and drawer overlay declarations.
+ * Schema for named modal, drawer, and confirm-dialog overlay declarations.
  */
 export const overlayConfigSchema: z.ZodType = z.union([
   z
@@ -1979,6 +1981,7 @@ export const overlayConfigSchema: z.ZodType = z.union([
         .optional(),
     })
     .strict(),
+  confirmDialogConfigSchema,
 ]);
 
 function collectNavPaths(items: z.infer<typeof navItemSchema>[]): string[] {

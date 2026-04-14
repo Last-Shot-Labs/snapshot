@@ -1,4 +1,5 @@
 export {
+  FloatingMenu,
   FloatingPanel,
   MenuItem,
   MenuSeparator,

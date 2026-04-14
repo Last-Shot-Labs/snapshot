@@ -7,6 +7,7 @@ import { render, screen } from "@testing-library/react";
 
 vi.mock("../../../../context", () => ({
   useSubscribe: () => null,
+  useResolveFrom: <T extends Record<string, unknown>>(value: T) => value,
 }));
 
 vi.mock("../../../../manifest/runtime", () => ({

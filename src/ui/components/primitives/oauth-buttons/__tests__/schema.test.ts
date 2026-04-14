@@ -18,4 +18,40 @@ describe("oauthButtonsConfigSchema", () => {
 
     expect(result.success).toBe(true);
   });
+
+  it("accepts config-driven headings", () => {
+    const result = oauthButtonsConfigSchema.safeParse({
+      type: "oauth-buttons",
+      heading: {
+        t: "auth.providers.heading",
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects deprecated onSuccess actions", () => {
+    const result = oauthButtonsConfigSchema.safeParse({
+      type: "oauth-buttons",
+      onSuccess: {
+        type: "navigate",
+        to: "/dashboard",
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects unknown provider slot names", () => {
+    const result = oauthButtonsConfigSchema.safeParse({
+      type: "oauth-buttons",
+      slots: {
+        providerBadge: {
+          className: "not-supported",
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
 });

@@ -26,6 +26,14 @@ const keys = {
 
 // ── Factory ───────────────────────────────────────────────────────────────────
 
+/**
+ * Creates a set of React hooks for managing webhook endpoints, deliveries, and testing.
+ *
+ * @param options - Factory configuration.
+ * @param options.api - The API client used to make HTTP requests.
+ * @param options.queryClient - The TanStack Query client for cache management.
+ * @returns An object containing all webhook-related query and mutation hooks.
+ */
 export function createWebhookHooks({
   api,
   queryClient: _qc,
@@ -35,6 +43,7 @@ export function createWebhookHooks({
 }) {
   // ── Endpoints ─────────────────────────────────────────────────────────────────
 
+  /** Fetch all webhook endpoints for the current account. */
   function useWebhookEndpoints() {
     return useQuery<WebhookEndpointResponse[], ApiError>({
       queryKey: keys.endpoints(),
@@ -42,6 +51,7 @@ export function createWebhookHooks({
     });
   }
 
+  /** Fetch a single webhook endpoint by its ID. */
   function useWebhookEndpoint(endpointId: string) {
     return useQuery<WebhookEndpointResponse, ApiError>({
       queryKey: keys.endpoint(endpointId),
@@ -51,6 +61,7 @@ export function createWebhookHooks({
     });
   }
 
+  /** Create a new webhook endpoint and invalidate the endpoints cache. */
   function useCreateWebhookEndpoint() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -66,6 +77,7 @@ export function createWebhookHooks({
     });
   }
 
+  /** Update an existing webhook endpoint and invalidate related caches. */
   function useUpdateWebhookEndpoint() {
     const queryClient = useQueryClient();
     return useMutation<
@@ -87,6 +99,7 @@ export function createWebhookHooks({
     });
   }
 
+  /** Delete a webhook endpoint and invalidate the endpoints cache. */
   function useDeleteWebhookEndpoint() {
     const queryClient = useQueryClient();
     return useMutation<void, ApiError, { endpointId: string }>({
@@ -100,6 +113,7 @@ export function createWebhookHooks({
 
   // ── Deliveries ────────────────────────────────────────────────────────────────
 
+  /** List webhook deliveries for a given endpoint with pagination. */
   function useWebhookDeliveries({
     endpointId,
     page,
@@ -116,6 +130,7 @@ export function createWebhookHooks({
     });
   }
 
+  /** Fetch a single webhook delivery by its ID. */
   function useWebhookDelivery(deliveryId: string) {
     return useQuery<WebhookDeliveryResponse, ApiError>({
       queryKey: keys.deliveryDetail(deliveryId),
@@ -127,6 +142,7 @@ export function createWebhookHooks({
 
   // ── Test ──────────────────────────────────────────────────────────────────────
 
+  /** Send a test event to a webhook endpoint and refresh its deliveries. */
   function useTestWebhookEndpoint() {
     const queryClient = useQueryClient();
     return useMutation<
