@@ -19,7 +19,10 @@ import {
 import { useRouteRuntime } from "../../../manifest/runtime";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { ButtonControl } from "../button";
+import { InputControl } from "../input";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { SelectControl } from "../select";
+import { TextareaControl } from "../textarea";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useEvaluateExpression } from "../../../expressions/use-expression";
 import { resolveTemplateValue } from "../../../expressions/template";
@@ -283,12 +286,25 @@ function FieldRenderer({
   switch (field.type) {
     case "textarea":
       input = (
-        <textarea
-          {...commonProps}
+        <TextareaControl
+          textareaId={fieldId}
+          name={field.name}
           value={(value as string) ?? ""}
+          disabled={field.disabled}
+          readOnly={field.readOnly}
+          required={required}
+          ariaInvalid={hasError}
+          ariaDescribedBy={hasError
+            ? `${fieldId}-error`
+            : field.helperText
+              ? `${fieldId}-helper`
+              : undefined}
+          ariaLabel={label}
           placeholder={field.placeholder}
-          onChange={(e) => onChange(e.target.value)}
+          onChangeText={onChange}
+          onBlur={onBlur}
           rows={3}
+          surfaceId={`${rootId}-input-${field.name}`}
           className={inputSurface.className}
           style={{ ...inputStyle, resize: "vertical" }}
         />
@@ -305,10 +321,22 @@ function FieldRenderer({
           );
 
       input = (
-        <select
-          {...commonProps}
+        <SelectControl
+          selectId={fieldId}
+          name={field.name}
           value={(value as string) ?? ""}
-          onChange={(e) => onChange(e.target.value)}
+          disabled={field.disabled}
+          required={required}
+          ariaInvalid={hasError}
+          ariaDescribedBy={hasError
+            ? `${fieldId}-error`
+            : field.helperText
+              ? `${fieldId}-helper`
+              : undefined}
+          ariaLabel={label}
+          onChangeValue={onChange}
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${field.name}`}
           className={inputSurface.className}
           style={inputStyle}
         >
@@ -318,18 +346,31 @@ function FieldRenderer({
               {opt.label}
             </option>
           ))}
-        </select>
+        </SelectControl>
       );
       break;
     }
 
     case "checkbox":
       input = (
-        <input
-          {...commonProps}
+        <InputControl
+          inputId={fieldId}
+          name={field.name}
           type="checkbox"
           checked={!!value}
-          onChange={(e) => onChange(e.target.checked)}
+          disabled={field.disabled}
+          readOnly={field.readOnly}
+          required={required}
+          ariaInvalid={hasError}
+          ariaDescribedBy={hasError
+            ? `${fieldId}-error`
+            : field.helperText
+              ? `${fieldId}-helper`
+              : undefined}
+          ariaLabel={label}
+          onChangeChecked={onChange}
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${field.name}`}
           className={inputSurface.className}
           style={{
             width: "16px",
@@ -351,11 +392,24 @@ function FieldRenderer({
             cursor: field.disabled ? "not-allowed" : "pointer",
           }}
         >
-          <input
-            {...commonProps}
+          <InputControl
+            inputId={fieldId}
+            name={field.name}
             type="checkbox"
             checked={!!value}
-            onChange={(e) => onChange(e.target.checked)}
+            disabled={field.disabled}
+            readOnly={field.readOnly}
+            required={required}
+            ariaInvalid={hasError}
+            ariaDescribedBy={hasError
+              ? `${fieldId}-error`
+              : field.helperText
+                ? `${fieldId}-helper`
+                : undefined}
+            ariaLabel={label}
+            onChangeChecked={onChange}
+            onBlur={onBlur}
+            surfaceId={`${rootId}-input-${field.name}`}
             className={inputSurface.className}
             style={{
               width: "2.5rem",
@@ -373,19 +427,31 @@ function FieldRenderer({
 
     case "number":
       input = (
-        <input
-          {...commonProps}
+        <InputControl
+          inputId={fieldId}
+          name={field.name}
           type="number"
           value={
             value === "" || value === undefined || value === null
               ? ""
               : String(value)
           }
+          disabled={field.disabled}
+          readOnly={field.readOnly}
+          required={required}
+          ariaInvalid={hasError}
+          ariaDescribedBy={hasError
+            ? `${fieldId}-error`
+            : field.helperText
+              ? `${fieldId}-helper`
+              : undefined}
+          ariaLabel={label}
           placeholder={field.placeholder}
-          onChange={(e) => {
-            const v = e.target.value;
+          onChangeText={(v) => {
             onChange(v === "" ? "" : Number(v));
           }}
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${field.name}`}
           className={inputSurface.className}
           style={inputStyle}
         />
@@ -394,13 +460,24 @@ function FieldRenderer({
 
     case "file":
       input = (
-        <input
-          {...commonProps}
+        <InputControl
+          inputId={fieldId}
+          name={field.name}
           type="file"
-          onChange={(e) => {
-            const files = e.target.files;
+          disabled={field.disabled}
+          required={required}
+          ariaInvalid={hasError}
+          ariaDescribedBy={hasError
+            ? `${fieldId}-error`
+            : field.helperText
+              ? `${fieldId}-helper`
+              : undefined}
+          ariaLabel={label}
+          onChangeFiles={(files) => {
             onChange(files && files.length > 0 ? files[0] : null);
           }}
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${field.name}`}
           className={inputSurface.className}
           style={inputStyle}
         />
@@ -436,13 +513,34 @@ function FieldRenderer({
                 fontSize: "var(--sn-font-size-sm, 0.875rem)",
               }}
             >
-              <input
-                {...commonProps}
+              <InputControl
                 type="radio"
-                value={opt.value}
+                inputId={`${fieldId}-${opt.value}`}
+                name={field.name}
                 checked={String(value ?? "") === opt.value}
-                onChange={() => onChange(opt.value)}
+                disabled={field.disabled}
+                required={required}
+                ariaInvalid={hasError}
+                ariaDescribedBy={hasError
+                  ? `${fieldId}-error`
+                  : field.helperText
+                    ? `${fieldId}-helper`
+                    : undefined}
+                ariaLabel={opt.label}
+                onChangeChecked={(checked) => {
+                  if (checked) {
+                    onChange(opt.value);
+                  }
+                }}
+                onBlur={onBlur}
+                surfaceId={`${rootId}-input-${field.name}-${opt.value}`}
                 className={inputSurface.className}
+                style={{
+                  width: "16px",
+                  height: "16px",
+                  accentColor: "var(--sn-color-primary, #2563eb)",
+                  ...(inputSurface.style as React.CSSProperties),
+                }}
               />
               <span>{opt.label}</span>
             </label>
@@ -454,17 +552,29 @@ function FieldRenderer({
 
     case "slider":
       input = (
-        <input
-          {...commonProps}
+        <InputControl
+          inputId={fieldId}
+          name={field.name}
           type="range"
           value={
             value === "" || value === undefined || value === null
-              ? 0
-              : Number(value)
+              ? "0"
+              : String(Number(value))
           }
-          min={field.validation?.min}
-          max={field.validation?.max}
-          onChange={(e) => onChange(Number(e.target.value))}
+          disabled={field.disabled}
+          required={required}
+          min={field.validation?.min != null ? String(field.validation.min) : undefined}
+          max={field.validation?.max != null ? String(field.validation.max) : undefined}
+          ariaInvalid={hasError}
+          ariaDescribedBy={hasError
+            ? `${fieldId}-error`
+            : field.helperText
+              ? `${fieldId}-helper`
+              : undefined}
+          ariaLabel={label}
+          onChangeText={(nextValue) => onChange(Number(nextValue))}
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${field.name}`}
           className={inputSurface.className}
           style={inputStyle}
         />
@@ -473,11 +583,23 @@ function FieldRenderer({
 
     case "color":
       input = (
-        <input
-          {...commonProps}
+        <InputControl
+          inputId={fieldId}
+          name={field.name}
           type="color"
           value={typeof value === "string" && value ? value : "#2563eb"}
-          onChange={(e) => onChange(e.target.value)}
+          disabled={field.disabled}
+          required={required}
+          ariaInvalid={hasError}
+          ariaDescribedBy={hasError
+            ? `${fieldId}-error`
+            : field.helperText
+              ? `${fieldId}-helper`
+              : undefined}
+          ariaLabel={label}
+          onChangeText={onChange}
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${field.name}`}
           className={inputSurface.className}
           style={{
             ...inputStyle,
@@ -500,12 +622,25 @@ function FieldRenderer({
 
       input = (
         <>
-          <input
-            {...commonProps}
+          <InputControl
+            inputId={fieldId}
+            name={field.name}
             list={listId}
             value={(value as string) ?? ""}
+            disabled={field.disabled}
+            readOnly={field.readOnly}
+            required={required}
+            ariaInvalid={hasError}
+            ariaDescribedBy={hasError
+              ? `${fieldId}-error`
+              : field.helperText
+                ? `${fieldId}-helper`
+                : undefined}
+            ariaLabel={label}
             placeholder={field.placeholder}
-            onChange={(e) => onChange(e.target.value)}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            surfaceId={`${rootId}-input-${field.name}`}
             className={inputSurface.className}
             style={inputStyle}
           />
@@ -523,19 +658,32 @@ function FieldRenderer({
 
     case "tag-input":
       input = (
-        <input
-          {...commonProps}
+        <InputControl
+          inputId={fieldId}
+          name={field.name}
           type="text"
           value={Array.isArray(value) ? value.join(", ") : String(value ?? "")}
+          disabled={field.disabled}
+          readOnly={field.readOnly}
+          required={required}
+          ariaInvalid={hasError}
+          ariaDescribedBy={hasError
+            ? `${fieldId}-error`
+            : field.helperText
+              ? `${fieldId}-helper`
+              : undefined}
+          ariaLabel={label}
           placeholder={field.placeholder}
-          onChange={(e) =>
+          onChangeText={(nextValue) =>
             onChange(
-              e.target.value
+              nextValue
                 .split(",")
                 .map((item) => item.trim())
                 .filter(Boolean),
             )
           }
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${field.name}`}
           className={inputSurface.className}
           style={inputStyle}
         />
@@ -545,19 +693,32 @@ function FieldRenderer({
     default:
       input = (
         <div style={field.type === "password" ? { position: "relative" } : undefined}>
-          <input
-            {...commonProps}
-            type={
+          <InputControl
+            inputId={fieldId}
+            name={field.name}
+            type={(
               field.type === "password"
                 ? (passwordVisible ? "text" : "password")
                 : field.type === "datetime"
                   ? "datetime-local"
                   : field.type
-            }
+            ) as Parameters<typeof InputControl>[0]["type"]}
             value={(value as string) ?? ""}
+            disabled={field.disabled}
+            readOnly={field.readOnly}
+            required={required}
+            ariaInvalid={hasError}
+            ariaDescribedBy={hasError
+              ? `${fieldId}-error`
+              : field.helperText
+                ? `${fieldId}-helper`
+                : undefined}
+            ariaLabel={label}
             placeholder={field.placeholder}
             autoComplete={field.autoComplete}
-            onChange={(e) => onChange(e.target.value)}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            surfaceId={`${rootId}-input-${field.name}`}
             className={inputSurface.className}
             style={{
               ...inputStyle,

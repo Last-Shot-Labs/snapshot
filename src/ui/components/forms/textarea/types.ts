@@ -9,6 +9,7 @@ export type TextareaConfig = z.input<typeof textareaConfigSchema>;
 export interface TextareaControlProps {
   textareaRef?: Ref<HTMLTextAreaElement>;
   textareaId?: string;
+  name?: string;
   value: string;
   rows?: number;
   placeholder?: string;

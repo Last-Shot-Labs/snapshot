@@ -15,9 +15,13 @@ export type InputConfig = z.input<typeof inputConfigSchema>;
 export interface InputControlProps {
   inputRef?: Ref<HTMLInputElement>;
   inputId?: string;
+  name?: string;
   type?:
     | InputConfig["inputType"]
+    | "checkbox"
+    | "radio"
     | "date"
+    | "time"
     | "datetime-local"
     | "color"
     | "range"

@@ -11,6 +11,7 @@ import type { InputConfig, InputControlProps } from "./types";
 export function InputControl({
   inputRef,
   inputId,
+  name,
   type = "text",
   value,
   checked,
@@ -107,6 +108,7 @@ export function InputControl({
       <input
         ref={inputRef}
         id={inputId}
+        name={name}
         type={type}
         value={value}
         checked={checked}

@@ -3,6 +3,9 @@
 import React from "react";
 import { useWizard } from "./hook";
 import { ButtonControl } from "../button";
+import { InputControl } from "../input";
+import { SelectControl } from "../select";
+import { TextareaControl } from "../textarea";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { WizardConfig, WizardStepConfig } from "./types";
@@ -142,11 +145,24 @@ function WizardFieldRenderer({
   switch (field.type) {
     case "textarea":
       input = (
-        <textarea
-          {...commonProps}
+        <TextareaControl
+          textareaId={fieldId}
+          name={field.name}
           value={(value as string) ?? ""}
+          disabled={field.disabled}
+          ariaInvalid={hasError}
+          ariaDescribedBy={[
+            field.description ? `${fieldId}-description` : null,
+            field.helperText ? `${fieldId}-helper` : null,
+            hasError && error ? `${fieldId}-error` : null,
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined}
+          ariaLabel={label}
           placeholder={field.placeholder}
-          onChange={(event) => onChange(event.target.value)}
+          onChangeText={onChange}
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${stepIndex}-${field.name}`}
           className={inputSurface.className}
           style={{ ...inputStyle, resize: "vertical" }}
         />
@@ -154,10 +170,23 @@ function WizardFieldRenderer({
       break;
     case "select":
       input = (
-        <select
-          {...commonProps}
+        <SelectControl
+          selectId={fieldId}
+          name={field.name}
           value={(value as string) ?? ""}
-          onChange={(event) => onChange(event.target.value)}
+          disabled={field.disabled}
+          ariaInvalid={hasError}
+          ariaDescribedBy={[
+            field.description ? `${fieldId}-description` : null,
+            field.helperText ? `${fieldId}-helper` : null,
+            hasError && error ? `${fieldId}-error` : null,
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined}
+          ariaLabel={label}
+          onChangeValue={onChange}
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${stepIndex}-${field.name}`}
           className={inputSurface.className}
           style={inputStyle}
         >
@@ -169,17 +198,30 @@ function WizardFieldRenderer({
                 </option>
               ))
             : null}
-        </select>
+        </SelectControl>
       );
       break;
     case "checkbox":
     case "switch":
       input = (
-        <input
-          {...commonProps}
+        <InputControl
+          inputId={fieldId}
+          name={field.name}
           type="checkbox"
           checked={Boolean(value)}
-          onChange={(event) => onChange(event.target.checked)}
+          disabled={field.disabled}
+          ariaInvalid={hasError}
+          ariaDescribedBy={[
+            field.description ? `${fieldId}-description` : null,
+            field.helperText ? `${fieldId}-helper` : null,
+            hasError && error ? `${fieldId}-error` : null,
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined}
+          ariaLabel={label}
+          onChangeChecked={onChange}
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${stepIndex}-${field.name}`}
           className={inputSurface.className}
           style={{
             width: field.type === "switch" ? "2.5rem" : "16px",
@@ -192,19 +234,31 @@ function WizardFieldRenderer({
       break;
     case "number":
       input = (
-        <input
-          {...commonProps}
+        <InputControl
+          inputId={fieldId}
+          name={field.name}
           type="number"
           value={
             value === "" || value === undefined || value === null
               ? ""
               : String(value)
           }
+          disabled={field.disabled}
+          ariaInvalid={hasError}
+          ariaDescribedBy={[
+            field.description ? `${fieldId}-description` : null,
+            field.helperText ? `${fieldId}-helper` : null,
+            hasError && error ? `${fieldId}-error` : null,
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined}
+          ariaLabel={label}
           placeholder={field.placeholder}
-          onChange={(event) => {
-            const nextValue = event.target.value;
+          onChangeText={(nextValue) => {
             onChange(nextValue === "" ? "" : Number(nextValue));
           }}
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${stepIndex}-${field.name}`}
           className={inputSurface.className}
           style={inputStyle}
         />
@@ -212,12 +266,25 @@ function WizardFieldRenderer({
       break;
     default:
       input = (
-        <input
-          {...commonProps}
-          type={field.type === "datetime" ? "datetime-local" : field.type}
+        <InputControl
+          inputId={fieldId}
+          name={field.name}
+          type={(field.type === "datetime" ? "datetime-local" : field.type) as Parameters<typeof InputControl>[0]["type"]}
           value={(value as string) ?? ""}
+          disabled={field.disabled}
+          ariaInvalid={hasError}
+          ariaDescribedBy={[
+            field.description ? `${fieldId}-description` : null,
+            field.helperText ? `${fieldId}-helper` : null,
+            hasError && error ? `${fieldId}-error` : null,
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined}
+          ariaLabel={label}
           placeholder={field.placeholder}
-          onChange={(event) => onChange(event.target.value)}
+          onChangeText={onChange}
+          onBlur={onBlur}
+          surfaceId={`${rootId}-input-${stepIndex}-${field.name}`}
           className={inputSurface.className}
           style={inputStyle}
         />

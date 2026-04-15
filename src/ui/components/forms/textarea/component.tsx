@@ -10,6 +10,7 @@ import type { TextareaConfig, TextareaControlProps } from "./types";
 export function TextareaControl({
   textareaRef,
   textareaId,
+  name,
   value,
   rows = 3,
   placeholder,
@@ -94,6 +95,7 @@ export function TextareaControl({
       <textarea
         ref={textareaRef}
         id={textareaId}
+        name={name}
         value={value}
         rows={rows}
         placeholder={placeholder}

@@ -52,10 +52,15 @@ function toOptions(
 export function SelectControl({
   selectRef,
   selectId,
+  name,
   value,
   disabled,
+  required,
+  ariaInvalid,
+  ariaDescribedBy,
   ariaLabel,
   onChangeValue,
+  onBlur,
   className,
   style,
   surfaceId,
@@ -112,9 +117,14 @@ export function SelectControl({
       <select
         ref={selectRef}
         id={selectId}
+        name={name}
         value={value}
         disabled={disabled}
+        required={required}
         onChange={(event) => onChangeValue?.(event.target.value)}
+        onBlur={onBlur}
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
         aria-label={ariaLabel}
         data-snapshot-id={surfaceId}
         data-testid={testId}

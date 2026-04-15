@@ -1,3 +1,3 @@
 export { textareaConfigSchema } from "./schema";
-export { Textarea } from "./component";
-export type { TextareaConfig } from "./types";
+export { Textarea, TextareaControl } from "./component";
+export type { TextareaConfig, TextareaControlProps } from "./types";
