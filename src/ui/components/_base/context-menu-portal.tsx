@@ -7,12 +7,9 @@ import {
   MenuLabel,
   MenuSeparator,
 } from "../primitives/floating-menu";
+import { SurfaceStyles } from "./surface-styles";
 import { resolveSurfacePresentation } from "./style-surfaces";
 import type { ActionConfig } from "../../actions/types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 export type ContextMenuPortalItem =
   | {

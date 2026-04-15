@@ -3,12 +3,9 @@
 import type { CSSProperties } from "react";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { useActionExecutor } from "../../../actions/executor";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { NavLogoConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 export function NavLogo({
   config,

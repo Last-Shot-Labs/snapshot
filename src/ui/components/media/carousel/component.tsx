@@ -9,12 +9,9 @@ import {
   type CSSProperties,
 } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { CarouselConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 export function Carousel({ config }: { config: CarouselConfig }) {
   const [current, setCurrent] = useState(0);

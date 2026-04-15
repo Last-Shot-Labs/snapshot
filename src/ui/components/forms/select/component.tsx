@@ -116,7 +116,6 @@ export function SelectControl({
         disabled={disabled}
         onChange={(event) => onChangeValue?.(event.target.value)}
         aria-label={ariaLabel}
-        data-snapshot-structural-select=""
         data-snapshot-id={surfaceId}
         data-testid={testId}
         className={[className, controlSurface.className].filter(Boolean).join(" ") || undefined}

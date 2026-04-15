@@ -3,13 +3,10 @@
 import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { resolveOptionalPrimitiveValue } from "../resolve-value";
 import type { DividerConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 export function Divider({ config }: { config: DividerConfig }) {
   const manifest = useManifestRuntime();

@@ -4,16 +4,13 @@ import { useRef, useState } from "react";
 import { useSubscribe } from "../../../context/index";
 import { renderIcon } from "../../../icons/render";
 import { ComponentRenderer } from "../../../manifest/renderer";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
 import { FloatingMenuStyles, FloatingPanel } from "../../primitives/floating-menu";
 import { NavLink } from "../nav-link";
 import type { NavLinkConfig } from "../nav-link/types";
 import type { NavDropdownConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 function isNavLinkConfig(config: unknown): config is NavLinkConfig {
   return (

@@ -2,8 +2,11 @@ import { atom } from "jotai";
 import { useAtom } from "jotai/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { useActionExecutor } from "./executor";
+import { SurfaceStyles } from "../components/_base/surface-styles";
+import { resolveSurfacePresentation } from "../components/_base/style-surfaces";
+import { ButtonControl } from "../components/forms/button";
 import { useManifestRuntime } from "../manifest/runtime";
+import { useActionExecutor } from "./executor";
 import type { ActionConfig } from "./types";
 
 type ToastVariant = "success" | "error" | "warning" | "info";
@@ -205,86 +208,110 @@ function ToastCard({
     () => (toast.undo ? Math.max(0, Math.ceil(remainingMs / 1000)) : null),
     [remainingMs, toast.undo],
   );
-
-  return (
-    <div
-      style={{
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `toast-${toast.id}`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
+      style: {
         padding: "var(--sn-spacing-sm, 0.75rem) var(--sn-spacing-md, 1rem)",
         borderRadius: "var(--sn-radius-md, 0.5rem)",
         boxShadow: "var(--sn-shadow-md, 0 2px 8px rgba(0,0,0,0.15))",
-        display: "flex",
-        alignItems: "center",
-        gap: "var(--sn-spacing-sm, 0.5rem)",
-        ...variantStyles[toast.variant],
-        ...(toast.color
-          ? {
-              backgroundColor: toast.color,
-              color: "var(--sn-color-foreground, #ffffff)",
-            }
-          : null),
-      }}
-      role="status"
-      aria-live="polite"
-    >
-      {toast.icon ? <span aria-hidden="true">{toast.icon}</span> : null}
-      <span style={{ flex: 1 }}>{toast.message}</span>
-      {toast.action ? (
-        <button
-          onClick={toast.action.onClick}
-          type="button"
-          style={{
-            background: "transparent",
-            border: "var(--sn-border-default, 1px) solid currentColor",
-            color: "inherit",
-            cursor: "pointer",
-            padding:
-              "var(--sn-spacing-2xs, 0.25rem) var(--sn-spacing-xs, 0.5rem)",
-            borderRadius: "var(--sn-radius-sm, 0.25rem)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-          }}
-        >
-          {toast.action.label}
-        </button>
-      ) : null}
-      {toast.undo ? (
-        <button
-          type="button"
-          onClick={() => {
-            void execute(toast.undo!.action);
-            onDismiss(toast.id);
-          }}
-          style={{
-            background: "transparent",
-            border: "var(--sn-border-default, 1px) solid currentColor",
-            color: "inherit",
-            cursor: "pointer",
-            padding:
-              "var(--sn-spacing-2xs, 0.25rem) var(--sn-spacing-xs, 0.5rem)",
-            borderRadius: "var(--sn-radius-sm, 0.25rem)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-          }}
-        >
-          {toast.undo.label}{" "}
-          {undoCountdown !== null ? `(${undoCountdown})` : ""}
-        </button>
-      ) : null}
-      <button
-        type="button"
-        onClick={() => onDismiss(toast.id)}
+      },
+    },
+  });
+  const messageSurface = resolveSurfacePresentation({
+    surfaceId: `toast-${toast.id}-message`,
+    implementationBase: {
+      flex: 1,
+      minWidth: 0,
+    },
+  });
+
+  return (
+    <>
+      <div
+        className={rootSurface.className}
         style={{
-          background: "transparent",
-          border: "none",
-          color: "inherit",
-          cursor: "pointer",
-          padding: "var(--sn-spacing-2xs, 0.25rem)",
-          fontSize: "var(--sn-font-size-md, 1rem)",
-          lineHeight: "var(--sn-leading-none, 1)",
+          ...(rootSurface.style ?? {}),
+          ...variantStyles[toast.variant],
+          ...(toast.color
+            ? {
+                backgroundColor: toast.color,
+                color: "var(--sn-color-foreground, #ffffff)",
+              }
+            : null),
         }}
-        aria-label="Dismiss"
+        role="status"
+        aria-live="polite"
       >
-        ×
-      </button>
-    </div>
+        {toast.icon ? <span aria-hidden="true">{toast.icon}</span> : null}
+        <span
+          data-snapshot-id={`toast-${toast.id}-message`}
+          className={messageSurface.className}
+          style={messageSurface.style}
+        >
+          {toast.message}
+        </span>
+        {toast.action ? (
+          <ButtonControl
+            onClick={toast.action.onClick}
+            type="button"
+            variant="ghost"
+            size="sm"
+            style={{
+              background: "transparent",
+              border: "var(--sn-border-default, 1px) solid currentColor",
+              color: "inherit",
+            }}
+          >
+            {toast.action.label}
+          </ButtonControl>
+        ) : null}
+        {toast.undo ? (
+          <ButtonControl
+            type="button"
+            onClick={() => {
+              void execute(toast.undo!.action);
+              onDismiss(toast.id);
+            }}
+            variant="ghost"
+            size="sm"
+            style={{
+              background: "transparent",
+              border: "var(--sn-border-default, 1px) solid currentColor",
+              color: "inherit",
+            }}
+          >
+            {toast.undo.label}{" "}
+            {undoCountdown !== null ? `(${undoCountdown})` : ""}
+          </ButtonControl>
+        ) : null}
+        <ButtonControl
+          type="button"
+          onClick={() => onDismiss(toast.id)}
+          variant="ghost"
+          size="icon"
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "inherit",
+            width: "2rem",
+            minWidth: "2rem",
+            height: "2rem",
+            minHeight: "2rem",
+            padding: 0,
+            lineHeight: "var(--sn-leading-none, 1)",
+          }}
+          ariaLabel="Dismiss"
+        >
+          ×
+        </ButtonControl>
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={messageSurface.scopedCss} />
+    </>
   );
 }
 
@@ -293,35 +320,45 @@ export function ToastContainer(): ReactNode {
   const runtime = useManifestRuntime();
   const [queue, setQueue] = useAtom(toastQueueAtom);
   const position = runtime?.toast?.position ?? "bottom-right";
+  const containerSurface = resolveSurfacePresentation({
+    surfaceId: "snapshot-toasts",
+    implementationBase: {
+      position: "fixed",
+      zIndex: "var(--sn-z-index-toast, 9999)",
+      display: "flex",
+      flexDirection: "column",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
+      style: {
+        ...resolveToastContainerPositionStyle(position),
+        maxWidth: "24rem",
+      },
+    },
+  });
 
   if (queue.length === 0) {
     return null;
   }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        ...resolveToastContainerPositionStyle(position),
-        zIndex: "var(--sn-z-index-toast, 9999)" as unknown as number,
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--sn-spacing-sm, 0.5rem)",
-        maxWidth: "24rem",
-      }}
-      data-snapshot-toasts=""
-    >
-      {queue.map((toast) => (
-        <ToastCard
-          key={toast.id}
-          toast={toast}
-          onDismiss={(id) => {
-            setQueue((currentQueue) =>
-              currentQueue.filter((entry) => entry.id !== id),
-            );
-          }}
-        />
-      ))}
-    </div>
+    <>
+      <div
+        data-snapshot-toasts=""
+        className={containerSurface.className}
+        style={containerSurface.style}
+      >
+        {queue.map((toast) => (
+          <ToastCard
+            key={toast.id}
+            toast={toast}
+            onDismiss={(id) => {
+              setQueue((currentQueue) =>
+                currentQueue.filter((entry) => entry.id !== id),
+              );
+            }}
+          />
+        ))}
+      </div>
+      <SurfaceStyles css={containerSurface.scopedCss} />
+    </>
   );
 }

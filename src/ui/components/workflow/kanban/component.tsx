@@ -9,6 +9,7 @@ import React, {
 import { useComponentData } from "../../_base/use-component-data";
 import { useActionExecutor } from "../../../actions/executor";
 import { useSubscribe, usePublish } from "../../../context/hooks";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import {
   DndContext,
@@ -39,10 +40,6 @@ const priorityColorMap: Record<string, string> = {
   medium: "var(--sn-color-warning, #f59e0b)",
   low: "var(--sn-color-info, #3b82f6)",
 };
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 function asSurfaceConfig(
   value: unknown,

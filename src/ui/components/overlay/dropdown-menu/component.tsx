@@ -3,6 +3,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { renderIcon } from "../../../icons/render";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { ButtonControl } from "../../forms/button";
 import {
   FloatingMenuStyles,
@@ -13,10 +14,6 @@ import {
 } from "../../primitives/floating-menu";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { DropdownMenuConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
   const execute = useActionExecutor();

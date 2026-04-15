@@ -3,16 +3,13 @@
 import React from "react";
 import { useWizard } from "./hook";
 import { ButtonControl } from "../button";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { WizardConfig, WizardStepConfig } from "./types";
 import type { FieldConfig } from "../auto-form/types";
 
 const ANIMATION_DURATION_VAR = "var(--sn-duration-normal, 200ms)";
 const ANIMATION_EASE_VAR = "var(--sn-ease-default, ease)";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 function resolveFieldSurface(
   rootId: string,

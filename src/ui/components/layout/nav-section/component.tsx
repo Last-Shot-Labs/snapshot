@@ -3,12 +3,9 @@
 import { useState } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { ButtonControl } from "../../forms/button";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { NavSectionConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 export function NavSection({ config }: { config: NavSectionConfig }) {
   const [isCollapsed, setIsCollapsed] = useState(config.defaultCollapsed ?? false);

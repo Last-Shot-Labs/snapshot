@@ -4,13 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { usePublish } from "../../../context/index";
 import { useActionExecutor } from "../../../actions/executor";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { InputControl } from "../../forms/input";
 import type { NavSearchConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 export function NavSearch({ config }: { config: NavSearchConfig }) {
   const [value, setValue] = useState("");

@@ -2,15 +2,15 @@
 
 > **Status**
 >
-> | Phase | Title | Status | Track |
-> |---|---|---|---|
-> | 0 | Snapshot-Safe Bootstrap | Completed | Snapshot + Contract |
-> | 1 | Canonical Shared Contract Boundary | In progress | Contract |
-> | 2 | Snapshot Rebased On Shared Contract | In progress | Snapshot |
-> | 3 | Pocketshot Manifest Runtime Rebuilt On Shared Contract | In progress | Pocketshot Runtime |
-> | 4 | Native Universal Styling Runtime | Not started | Pocketshot UI |
-> | 5 | Pocketshot Component Library Rebased On Shared Contract | In progress | Pocketshot UI |
-> | 6 | CLI, Fixtures, And Contract Proofs | In progress | Tooling + Tests |
+> | Phase | Title                                                   | Status      | Track               |
+> | ----- | ------------------------------------------------------- | ----------- | ------------------- |
+> | 0     | Snapshot-Safe Bootstrap                                 | Completed   | Snapshot + Contract |
+> | 1     | Canonical Shared Contract Boundary                      | In progress | Contract            |
+> | 2     | Snapshot Rebased On Shared Contract                     | In progress | Snapshot            |
+> | 3     | Pocketshot Manifest Runtime Rebuilt On Shared Contract  | In progress | Pocketshot Runtime  |
+> | 4     | Native Universal Styling Runtime                        | Not started | Pocketshot UI       |
+> | 5     | Pocketshot Component Library Rebased On Shared Contract | In progress | Pocketshot UI       |
+> | 6     | CLI, Fixtures, And Contract Proofs                      | In progress | Tooling + Tests     |
 >
 > **Priority:** P0
 >
@@ -25,6 +25,11 @@
 > - Snapshot already imports/re-exports multiple shared contract surfaces while keeping its current runtime/compiler behavior intact.
 > - Pocketshot already consumes shared manifest section types, shared ref types/guards/schemas, and its component schema layer now uses the shared `fromRefSchema` instead of local copies.
 > - Pocketshot's `resolveFromRef()` now honors nested paths and shared transforms, which closes a real contract/runtime mismatch.
+> - Pocketshot's action runtime now executes the shared canonical action contract for navigation, resources, workflows, refresh, set-value, theme, toast, and modal semantics, while keeping native-only actions local.
+> - Pocketshot now has native manifest runtime scaffolding under `src/ui/manifest/` for app boot, runtime providers, navigation selection, resources, and component registry ownership instead of a single thin entrypoint.
+> - Pocketshot now has a local shared-workflow engine wired into `run-workflow` execution and a manifest resource runtime that uses the shared endpoint/resource contract.
+> - `../pocketshot/docs/component-classification.md` now exists as the Phase 5 baseline classification artifact covering the current Pocketshot component inventory.
+> - `../frontend-contract/fixtures/**` now exists with auth, data, navigation, overlays, state, and workflow fixtures validated by shared-contract tests and consumed by Pocketshot SDK tests for resource/workflow runtime coverage.
 > - Shared-package typecheck/test/build are passing. Pocketshot contract-level validation is currently done with targeted tests and import-smoke checks because the repo's broader RN dependency/type baseline is still incomplete in this workspace.
 
 ---
@@ -205,7 +210,7 @@ Audited in this repo:
 - [src/ui/manifest/resources.ts](../../src/ui/manifest/resources.ts), [src/ui/workflows/types.ts](../../src/ui/workflows/types.ts), and [src/ui/state/types.ts](../../src/ui/state/types.ts) already define stable cross-platform semantics.
 - [src/ui/tokens/](../../src/ui/tokens) already defines the canonical web token vocabulary and flavor model.
 - [src/ui/manifest/index.ts](../../src/ui/manifest/index.ts) exports a large public manifest/runtime surface from inside Snapshot.
-- [src/ui/components/_base/schema.ts](../../src/ui/components/_base/schema.ts) and [src/ui/components/_base/style-surfaces.ts](../../src/ui/components/_base/style-surfaces.ts) already define the universal style-prop and surface-resolution direction.
+- [src/ui/components/\_base/schema.ts](../../src/ui/components/_base/schema.ts) and [src/ui/components/\_base/style-surfaces.ts](../../src/ui/components/_base/style-surfaces.ts) already define the universal style-prop and surface-resolution direction.
 
 Current state of the styling cutover:
 
@@ -257,16 +262,16 @@ After this spec:
 
 ### Representative files
 
-| Path | Purpose |
-|---|---|
-| [src/ui/manifest/schema.ts](../../src/ui/manifest/schema.ts) | Snapshot manifest source of truth today |
-| [src/ui/manifest/compiler.ts](../../src/ui/manifest/compiler.ts) | Snapshot manifest compiler |
-| [src/ui/components/_base/schema.ts](../../src/ui/components/_base/schema.ts) | Snapshot universal style/schema foundation |
-| [src/ui/components/_base/style-surfaces.ts](../../src/ui/components/_base/style-surfaces.ts) | Snapshot surface merge/runtime model |
-| [../../../pocketshot/src/create-pocketshot.tsx](../../../pocketshot/src/create-pocketshot.tsx) | Pocketshot factory entrypoint |
-| [../../../pocketshot/src/ui/manifest/types.ts](../../../pocketshot/src/ui/manifest/types.ts) | Pocketshot shipped manifest shape today |
-| [../../../pocketshot/src/ui/components/registry.ts](../../../pocketshot/src/ui/components/registry.ts) | Pocketshot native component registry |
-| [../../../pocketshot/docs/spec-pocketshot-2.0.md](../../../pocketshot/docs/spec-pocketshot-2.0.md) | Intended native declarative direction |
+| Path                                                                                                   | Purpose                                    |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
+| [src/ui/manifest/schema.ts](../../src/ui/manifest/schema.ts)                                           | Snapshot manifest source of truth today    |
+| [src/ui/manifest/compiler.ts](../../src/ui/manifest/compiler.ts)                                       | Snapshot manifest compiler                 |
+| [src/ui/components/\_base/schema.ts](../../src/ui/components/_base/schema.ts)                          | Snapshot universal style/schema foundation |
+| [src/ui/components/\_base/style-surfaces.ts](../../src/ui/components/_base/style-surfaces.ts)          | Snapshot surface merge/runtime model       |
+| [../../../pocketshot/src/create-pocketshot.tsx](../../../pocketshot/src/create-pocketshot.tsx)         | Pocketshot factory entrypoint              |
+| [../../../pocketshot/src/ui/manifest/types.ts](../../../pocketshot/src/ui/manifest/types.ts)           | Pocketshot shipped manifest shape today    |
+| [../../../pocketshot/src/ui/components/registry.ts](../../../pocketshot/src/ui/components/registry.ts) | Pocketshot native component registry       |
+| [../../../pocketshot/docs/spec-pocketshot-2.0.md](../../../pocketshot/docs/spec-pocketshot-2.0.md)     | Intended native declarative direction      |
 
 ---
 
@@ -403,17 +408,17 @@ The shared package must own these entrypoints:
 
 ### Canonical ownership matrix
 
-| Domain | Shared contract package owns | Snapshot owns | Pocketshot owns |
-|---|---|---|---|
-| Manifest | schema, validation, compiler, presets, structural metadata | web boot/runtime binding | native boot/runtime binding |
-| Actions | action vocabulary, payload schemas, execution contracts | browser handlers and side effects | native handlers and side effects |
-| Resources | declarative model, dependency semantics, invalidation semantics | web transport/runtime integration | native transport/runtime integration |
-| Workflows | node types, graph semantics, execution contracts | browser-trigger adapters | native-trigger adapters |
-| State | `from` semantics, scopes, state descriptors | browser state providers | native state providers |
-| Policies | policy schema and evaluation contract | browser route/component enforcement | native route/component enforcement |
-| I18n | locale contract, translation refs, schema | browser locale detection/persistence | native locale detection/persistence |
-| Tokens | semantic token vocabulary, flavor model, mode semantics | CSS variable emission and DOM stylesheet behavior | React Native token resolution and style projection |
-| Components | canonical type names, schema metadata, slot catalog, runtime-state catalog | React DOM implementations | React Native implementations |
+| Domain     | Shared contract package owns                                               | Snapshot owns                                     | Pocketshot owns                                    |
+| ---------- | -------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------- |
+| Manifest   | schema, validation, compiler, presets, structural metadata                 | web boot/runtime binding                          | native boot/runtime binding                        |
+| Actions    | action vocabulary, payload schemas, execution contracts                    | browser handlers and side effects                 | native handlers and side effects                   |
+| Resources  | declarative model, dependency semantics, invalidation semantics            | web transport/runtime integration                 | native transport/runtime integration               |
+| Workflows  | node types, graph semantics, execution contracts                           | browser-trigger adapters                          | native-trigger adapters                            |
+| State      | `from` semantics, scopes, state descriptors                                | browser state providers                           | native state providers                             |
+| Policies   | policy schema and evaluation contract                                      | browser route/component enforcement               | native route/component enforcement                 |
+| I18n       | locale contract, translation refs, schema                                  | browser locale detection/persistence              | native locale detection/persistence                |
+| Tokens     | semantic token vocabulary, flavor model, mode semantics                    | CSS variable emission and DOM stylesheet behavior | React Native token resolution and style projection |
+| Components | canonical type names, schema metadata, slot catalog, runtime-state catalog | React DOM implementations                         | React Native implementations                       |
 
 ### Post-spec source-of-truth rules
 
@@ -462,21 +467,21 @@ Snapshot and Pocketshot may adapt these contracts to platform runtime behavior, 
 
 The first implementation pass should move or split files along this exact path map:
 
-| Snapshot source | Shared-contract destination | Notes |
-|---|---|---|
-| `src/ui/manifest/schema.ts` | `../frontend-contract/src/manifest/schema.ts` | shared manifest schema only |
-| `src/ui/manifest/compiler.ts` | `../frontend-contract/src/manifest/compiler.ts` | compiler, preset expansion, structural validation |
-| `src/ui/manifest/types.ts` | `../frontend-contract/src/manifest/types.ts` | manifest contract types |
-| `src/ui/manifest/resources.ts` | `../frontend-contract/src/resources/schema.ts` | move declarative resource model, keep runtime fetch orchestration local |
-| `src/ui/workflows/schema.ts` | `../frontend-contract/src/workflows/schema.ts` | shared node schema |
-| `src/ui/workflows/types.ts` | `../frontend-contract/src/workflows/types.ts` | shared workflow types |
-| `src/ui/workflows/engine.ts` | `../frontend-contract/src/workflows/engine.ts` | only the platform-neutral engine pieces |
-| `src/ui/state/types.ts` | `../frontend-contract/src/state/types.ts` | shared state descriptors and `from` semantics |
-| `src/ui/tokens/schema.ts` | `../frontend-contract/src/tokens/schema.ts` | token schema only |
-| `src/ui/tokens/types.ts` | `../frontend-contract/src/tokens/types.ts` | semantic token types |
-| `src/ui/tokens/flavors.ts` | `../frontend-contract/src/tokens/flavors.ts` | flavor inheritance and composition |
-| `src/ui/tokens/derive-dark.ts` | `../frontend-contract/src/tokens/derive-dark.ts` | mode derivation semantics |
-| `src/ui/components/_base/schema.ts` | `../frontend-contract/src/components/schema.ts` | only canonical metadata/schema helpers |
+| Snapshot source                     | Shared-contract destination                      | Notes                                                                   |
+| ----------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------- |
+| `src/ui/manifest/schema.ts`         | `../frontend-contract/src/manifest/schema.ts`    | shared manifest schema only                                             |
+| `src/ui/manifest/compiler.ts`       | `../frontend-contract/src/manifest/compiler.ts`  | compiler, preset expansion, structural validation                       |
+| `src/ui/manifest/types.ts`          | `../frontend-contract/src/manifest/types.ts`     | manifest contract types                                                 |
+| `src/ui/manifest/resources.ts`      | `../frontend-contract/src/resources/schema.ts`   | move declarative resource model, keep runtime fetch orchestration local |
+| `src/ui/workflows/schema.ts`        | `../frontend-contract/src/workflows/schema.ts`   | shared node schema                                                      |
+| `src/ui/workflows/types.ts`         | `../frontend-contract/src/workflows/types.ts`    | shared workflow types                                                   |
+| `src/ui/workflows/engine.ts`        | `../frontend-contract/src/workflows/engine.ts`   | only the platform-neutral engine pieces                                 |
+| `src/ui/state/types.ts`             | `../frontend-contract/src/state/types.ts`        | shared state descriptors and `from` semantics                           |
+| `src/ui/tokens/schema.ts`           | `../frontend-contract/src/tokens/schema.ts`      | token schema only                                                       |
+| `src/ui/tokens/types.ts`            | `../frontend-contract/src/tokens/types.ts`       | semantic token types                                                    |
+| `src/ui/tokens/flavors.ts`          | `../frontend-contract/src/tokens/flavors.ts`     | flavor inheritance and composition                                      |
+| `src/ui/tokens/derive-dark.ts`      | `../frontend-contract/src/tokens/derive-dark.ts` | mode derivation semantics                                               |
+| `src/ui/components/_base/schema.ts` | `../frontend-contract/src/components/schema.ts`  | only canonical metadata/schema helpers                                  |
 
 Anything that touches DOM, CSS emission, React rendering, browser events, or React Native style objects stays out of the shared contract package even if it currently lives beside shared semantics in Snapshot.
 
@@ -484,25 +489,25 @@ Anything that touches DOM, CSS emission, React rendering, browser events, or Rea
 
 The same Phase 1 pass must also classify the following Snapshot files explicitly as move, split, or stay-local:
 
-| Snapshot source | Shared-contract destination | Decision |
-|---|---|---|
-| `src/ui/actions/types.ts` | `../frontend-contract/src/actions/types.ts` | move |
-| `src/ui/actions/interpolate.ts` | `../frontend-contract/src/actions/interpolate.ts` | split if platform-neutral pieces exist |
-| `src/ui/actions/executor.ts` | `../frontend-contract/src/actions/executor.ts` | split contract from runtime handlers |
-| `src/ui/policies/types.ts` | `../frontend-contract/src/policies/types.ts` | move |
-| `src/ui/policies/evaluate.ts` | `../frontend-contract/src/policies/evaluate.ts` | move if platform-neutral |
-| `src/ui/i18n/schema.ts` | `../frontend-contract/src/i18n/schema.ts` | move |
-| `src/ui/i18n/resolve.ts` | `../frontend-contract/src/i18n/resolve.ts` | move if platform-neutral |
-| `src/ui/manifest/defaults/i18n-en.ts` | `../frontend-contract/src/i18n/defaults/en.ts` | move if used as shared default |
-| `src/ui/manifest/guards/authenticated.ts` | none | stay local to Snapshot runtime adapter |
-| `src/ui/manifest/guards/unauthenticated.ts` | none | stay local to Snapshot runtime adapter |
-| `src/ui/manifest/router.ts` | none | stay local to Snapshot |
-| `src/ui/manifest/runtime.tsx` | none | stay local to Snapshot |
-| `src/ui/manifest/component-registry.tsx` | none | stay local to Snapshot |
-| `src/ui/tokens/resolve.ts` | split | move semantic resolution, keep CSS/runtime resolution local |
-| `src/ui/tokens/editor.ts` | none | stay local to Snapshot unless pure schema helpers are extracted |
-| `src/ui/tokens/tailwind-bridge.ts` | none | stay local to Snapshot |
-| `src/ui/tokens/contrast-checker.ts` | optional `../frontend-contract/src/tokens/contrast.ts` | move only if platform-neutral and used cross-platform |
+| Snapshot source                             | Shared-contract destination                            | Decision                                                        |
+| ------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------- |
+| `src/ui/actions/types.ts`                   | `../frontend-contract/src/actions/types.ts`            | move                                                            |
+| `src/ui/actions/interpolate.ts`             | `../frontend-contract/src/actions/interpolate.ts`      | split if platform-neutral pieces exist                          |
+| `src/ui/actions/executor.ts`                | `../frontend-contract/src/actions/executor.ts`         | split contract from runtime handlers                            |
+| `src/ui/policies/types.ts`                  | `../frontend-contract/src/policies/types.ts`           | move                                                            |
+| `src/ui/policies/evaluate.ts`               | `../frontend-contract/src/policies/evaluate.ts`        | move if platform-neutral                                        |
+| `src/ui/i18n/schema.ts`                     | `../frontend-contract/src/i18n/schema.ts`              | move                                                            |
+| `src/ui/i18n/resolve.ts`                    | `../frontend-contract/src/i18n/resolve.ts`             | move if platform-neutral                                        |
+| `src/ui/manifest/defaults/i18n-en.ts`       | `../frontend-contract/src/i18n/defaults/en.ts`         | move if used as shared default                                  |
+| `src/ui/manifest/guards/authenticated.ts`   | none                                                   | stay local to Snapshot runtime adapter                          |
+| `src/ui/manifest/guards/unauthenticated.ts` | none                                                   | stay local to Snapshot runtime adapter                          |
+| `src/ui/manifest/router.ts`                 | none                                                   | stay local to Snapshot                                          |
+| `src/ui/manifest/runtime.tsx`               | none                                                   | stay local to Snapshot                                          |
+| `src/ui/manifest/component-registry.tsx`    | none                                                   | stay local to Snapshot                                          |
+| `src/ui/tokens/resolve.ts`                  | split                                                  | move semantic resolution, keep CSS/runtime resolution local     |
+| `src/ui/tokens/editor.ts`                   | none                                                   | stay local to Snapshot unless pure schema helpers are extracted |
+| `src/ui/tokens/tailwind-bridge.ts`          | none                                                   | stay local to Snapshot                                          |
+| `src/ui/tokens/contrast-checker.ts`         | optional `../frontend-contract/src/tokens/contrast.ts` | move only if platform-neutral and used cross-platform           |
 
 This table is not optional guidance. By the end of Phase 1, each listed file must have an explicit disposition.
 
@@ -607,16 +612,16 @@ The following patterns are forbidden anywhere in `../frontend-contract/src/**`:
 
 Phase 1 is only complete when each domain below has a real shared-contract home:
 
-| Domain | Required shared-contract files |
-|---|---|
-| Manifest | `src/manifest/schema.ts`, `src/manifest/compiler.ts`, `src/manifest/types.ts` |
-| Actions | `src/actions/types.ts` and any platform-neutral execution contract helpers |
-| Resources | `src/resources/schema.ts` and resource types/helpers |
-| Workflows | `src/workflows/schema.ts`, `src/workflows/types.ts`, `src/workflows/engine.ts` |
-| State | `src/state/types.ts` |
-| Policies | `src/policies/types.ts`, `src/policies/evaluate.ts` |
-| I18n | `src/i18n/schema.ts`, `src/i18n/resolve.ts` |
-| Tokens | `src/tokens/schema.ts`, `src/tokens/types.ts`, `src/tokens/flavors.ts` |
+| Domain     | Required shared-contract files                                                                               |
+| ---------- | ------------------------------------------------------------------------------------------------------------ |
+| Manifest   | `src/manifest/schema.ts`, `src/manifest/compiler.ts`, `src/manifest/types.ts`                                |
+| Actions    | `src/actions/types.ts` and any platform-neutral execution contract helpers                                   |
+| Resources  | `src/resources/schema.ts` and resource types/helpers                                                         |
+| Workflows  | `src/workflows/schema.ts`, `src/workflows/types.ts`, `src/workflows/engine.ts`                               |
+| State      | `src/state/types.ts`                                                                                         |
+| Policies   | `src/policies/types.ts`, `src/policies/evaluate.ts`                                                          |
+| I18n       | `src/i18n/schema.ts`, `src/i18n/resolve.ts`                                                                  |
+| Tokens     | `src/tokens/schema.ts`, `src/tokens/types.ts`, `src/tokens/flavors.ts`                                       |
 | Components | `src/components/schema.ts`, `src/components/slots.ts`, `src/components/states.ts`, `src/components/types.ts` |
 
 ### Required deliverables
@@ -744,18 +749,18 @@ with a native runtime shaped like:
 
 Each new Pocketshot manifest file must have a single clear job:
 
-| File | Responsibility |
-|---|---|
-| `schema.ts` | re-export shared manifest schema/types for native consumers |
-| `compiler.ts` | re-export or wrap shared compiler with native-safe defaults |
-| `component-registry.ts` | native component lookup keyed by canonical shared names |
-| `runtime.tsx` | app runtime providers, boot orchestration, lifecycle wiring |
-| `navigation.tsx` | Expo Router stack/tab/drawer mounting from manifest navigation config |
-| `resources.ts` | native resource orchestration and refresh/invalidation hooks |
-| `renderer.tsx` | native component tree renderer from compiled nodes |
-| `app.tsx` | public `ManifestApp` entrypoint |
-| `structural.tsx` | native structural wrappers/layout glue |
-| `index.ts` | public exports |
+| File                    | Responsibility                                                        |
+| ----------------------- | --------------------------------------------------------------------- |
+| `schema.ts`             | re-export shared manifest schema/types for native consumers           |
+| `compiler.ts`           | re-export or wrap shared compiler with native-safe defaults           |
+| `component-registry.ts` | native component lookup keyed by canonical shared names               |
+| `runtime.tsx`           | app runtime providers, boot orchestration, lifecycle wiring           |
+| `navigation.tsx`        | Expo Router stack/tab/drawer mounting from manifest navigation config |
+| `resources.ts`          | native resource orchestration and refresh/invalidation hooks          |
+| `renderer.tsx`          | native component tree renderer from compiled nodes                    |
+| `app.tsx`               | public `ManifestApp` entrypoint                                       |
+| `structural.tsx`        | native structural wrappers/layout glue                                |
+| `index.ts`              | public exports                                                        |
 
 ### Pocketshot deletions and replacements
 
@@ -829,11 +834,11 @@ Create under `../pocketshot/src/ui/components/_base/`:
 
 ### Native base-layer file responsibilities
 
-| File | Responsibility |
-|---|---|
-| `style-props.ts` | native-facing contract for universal style props |
-| `style-surfaces.ts` | slot/state/token resolution into RN style fragments |
-| `surface-state.ts` | canonical runtime-state mapping for press/focus/open/selected/etc |
+| File                   | Responsibility                                                               |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| `style-props.ts`       | native-facing contract for universal style props                             |
+| `style-surfaces.ts`    | slot/state/token resolution into RN style fragments                          |
+| `surface-state.ts`     | canonical runtime-state mapping for press/focus/open/selected/etc            |
 | `ComponentWrapper.tsx` | shared component shell that applies surfaces, visibility, data/action wiring |
 
 ### Native parity rule
@@ -1071,7 +1076,7 @@ Do not start the next phase until the current phase has produced its required de
 
 1. Read [docs/engineering-rules.md](../engineering-rules.md).
 2. Read [../../../pocketshot/docs/engineering-rules.md](../../../pocketshot/docs/engineering-rules.md).
-3. Read [src/ui/manifest/schema.ts](../../src/ui/manifest/schema.ts), [src/ui/manifest/compiler.ts](../../src/ui/manifest/compiler.ts), [src/ui/actions/types.ts](../../src/ui/actions/types.ts), [src/ui/policies/types.ts](../../src/ui/policies/types.ts), [src/ui/i18n/schema.ts](../../src/ui/i18n/schema.ts), [src/ui/components/_base/schema.ts](../../src/ui/components/_base/schema.ts), [../../../pocketshot/src/ui/manifest/ManifestApp.tsx](../../../pocketshot/src/ui/manifest/ManifestApp.tsx), [../../../pocketshot/src/ui/manifest/types.ts](../../../pocketshot/src/ui/manifest/types.ts), and [../../../pocketshot/src/ui/components/registry.ts](../../../pocketshot/src/ui/components/registry.ts).
+3. Read [src/ui/manifest/schema.ts](../../src/ui/manifest/schema.ts), [src/ui/manifest/compiler.ts](../../src/ui/manifest/compiler.ts), [src/ui/actions/types.ts](../../src/ui/actions/types.ts), [src/ui/policies/types.ts](../../src/ui/policies/types.ts), [src/ui/i18n/schema.ts](../../src/ui/i18n/schema.ts), [src/ui/components/\_base/schema.ts](../../src/ui/components/_base/schema.ts), [../../../pocketshot/src/ui/manifest/ManifestApp.tsx](../../../pocketshot/src/ui/manifest/ManifestApp.tsx), [../../../pocketshot/src/ui/manifest/types.ts](../../../pocketshot/src/ui/manifest/types.ts), and [../../../pocketshot/src/ui/components/registry.ts](../../../pocketshot/src/ui/components/registry.ts).
 4. Create `../frontend-contract` and wire `"@lastshotlabs/frontend-contract": "file:../frontend-contract"` into both repos.
 5. Build the shared-contract package surface first.
 6. Extract or split Snapshot contracts according to the extraction maps in this spec.

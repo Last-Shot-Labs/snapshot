@@ -5,16 +5,13 @@ import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { renderIcon } from "../../../icons/render";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import {
   resolveOptionalPrimitiveValue,
   resolvePrimitiveValue,
 } from "../resolve-value";
 import type { LinkConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 function isClientNavigableHref(to: string): boolean {
   return /^\/(?!\/)/.test(to);

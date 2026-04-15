@@ -3,12 +3,9 @@
 import type { CSSProperties } from "react";
 import { useEffect, useRef } from "react";
 import { usePrefetchRoute } from "../../../../ssr/prefetch";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { PrefetchLinkProps } from "./schema";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 /**
  * `<PrefetchLink>` — a prefetch primitive that renders a plain `<a>` anchor and

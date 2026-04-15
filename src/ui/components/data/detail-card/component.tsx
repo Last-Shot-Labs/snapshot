@@ -6,15 +6,12 @@ import type { ActionConfig } from "../../../actions/types";
 import { renderIcon } from "../../../icons/render";
 import { AutoErrorState } from "../../_base/auto-error-state";
 import { ComponentWrapper } from "../../_base/component-wrapper";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
 import { useDetailCard } from "./hook";
 import type { DetailCardConfig } from "./schema";
 import type { ResolvedField } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 function formatValue(field: ResolvedField): React.ReactNode {
   const { value, format } = field;

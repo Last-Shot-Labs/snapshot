@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSubscribe, usePublish } from "../../../context/index";
 import { useEvaluateExpression } from "../../../expressions/use-expression";
 import { ComponentRenderer } from "../../../manifest/renderer";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
 import type { CollapsibleConfig } from "./types";
@@ -15,9 +16,6 @@ const DURATION_MAP: Record<string, number> = {
   slow: 500,
 };
 
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 export function Collapsible({ config }: { config: CollapsibleConfig }) {
   const openExpr =

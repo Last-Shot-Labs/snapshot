@@ -7,6 +7,7 @@ import { resolveTemplate } from "../../../expressions/template";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { renderIcon } from "../../../icons/render";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
 import { resolveOptionalPrimitiveValue } from "../resolve-value";
@@ -20,10 +21,6 @@ const PROVIDER_ICON_MAP: Record<string, string> = {
   facebook: "globe",
   discord: "globe",
 };
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 function titleCase(value: string): string {
   return value

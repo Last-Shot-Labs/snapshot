@@ -14,6 +14,7 @@ export function InputControl({
   type = "text",
   value,
   placeholder,
+  autoComplete,
   disabled,
   readOnly,
   maxLength,
@@ -96,6 +97,7 @@ export function InputControl({
         type={type}
         value={value}
         placeholder={placeholder}
+        autoComplete={autoComplete}
         disabled={disabled}
         readOnly={readOnly}
         maxLength={maxLength}

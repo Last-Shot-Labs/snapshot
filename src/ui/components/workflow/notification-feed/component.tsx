@@ -4,6 +4,7 @@ import React, { useMemo, useCallback, type CSSProperties } from "react";
 import { useComponentData } from "../../_base/use-component-data";
 import { useActionExecutor } from "../../../actions/executor";
 import { useSubscribe } from "../../../context/hooks";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { formatRelativeTime } from "../../_base/utils";
 import type { NotificationFeedConfig } from "./types";
@@ -14,10 +15,6 @@ const typeColorMap: Record<string, string> = {
   warning: "var(--sn-color-warning, #f59e0b)",
   error: "var(--sn-color-destructive, #ef4444)",
 };
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 function asSurfaceConfig(
   value: unknown,

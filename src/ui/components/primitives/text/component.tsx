@@ -5,6 +5,7 @@ import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { useRouteRuntime } from "../../../manifest/runtime";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { resolvePrimitiveValue } from "../resolve-value";
 import type { TextConfig } from "./types";
@@ -30,10 +31,6 @@ const WEIGHT_MAP: Record<NonNullable<TextConfig["weight"]>, CSSProperties["fontW
   semibold: "var(--sn-font-weight-semibold, 600)",
   bold: "var(--sn-font-weight-bold, 700)",
 };
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 export function Text({ config }: { config: TextConfig }) {
   const manifest = useManifestRuntime();

@@ -6,12 +6,10 @@ import { useSubscribe, usePublish } from "../../../context/index";
 import { useActionExecutor } from "../../../actions/executor";
 import { renderIcon } from "../../../icons/render";
 import { ButtonControl } from "../button";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { ToggleGroupConfig } from "./types";
 
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 const SIZE_MAP: Record<
   string,

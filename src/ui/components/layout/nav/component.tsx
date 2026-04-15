@@ -9,6 +9,7 @@ import { ComponentRenderer } from "../../../manifest/renderer";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import type { ComponentConfig } from "../../../manifest/types";
 import { ComponentWrapper } from "../../_base/component-wrapper";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import {
   resolveSurfaceConfig,
   resolveSurfacePresentation,
@@ -22,10 +23,6 @@ import { NavUserMenu } from "../nav-user-menu";
 import { useNav } from "./hook";
 import type { NavConfig } from "./schema";
 import type { ResolvedNavItem } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 function resolveNavText(
   value: string | TRef | undefined,

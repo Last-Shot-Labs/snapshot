@@ -12,6 +12,7 @@ export interface InputControlProps {
   type?: InputConfig["inputType"];
   value: string;
   placeholder?: string;
+  autoComplete?: string;
   disabled?: boolean;
   readOnly?: boolean;
   maxLength?: number;

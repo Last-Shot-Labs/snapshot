@@ -6,12 +6,9 @@ import {
   ContextMenuPortal,
   type ContextMenuPortalItem,
 } from "../../_base/context-menu-portal";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { ContextMenuConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 /**
  * Render a right-click context menu backed by the shared context-menu portal runtime.

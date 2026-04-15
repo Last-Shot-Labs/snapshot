@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useActionExecutor } from "../../actions/executor";
 import type { ActionConfig } from "../../actions/types";
 import { renderIcon } from "../../icons/render";
-import { getButtonStyle } from "./button-styles";
+import { ButtonControl } from "../forms/button";
 
 export interface AutoEmptyStateConfig {
   icon?: string;
@@ -73,15 +73,15 @@ export function AutoEmptyState({
         </div>
       ) : null}
       {config.action ? (
-        <button
+        <ButtonControl
           type="button"
-          onClick={() => void execute(config.action!.action)}
-          style={getButtonStyle(
+          variant={
             config.action.variant === "primary"
               ? "default"
-              : config.action.variant ?? "outline",
-            "sm",
-          )}
+              : config.action.variant ?? "outline"
+          }
+          size="sm"
+          onClick={() => void execute(config.action!.action)}
         >
           {config.action.icon ? (
             <span style={{ display: "inline-flex", marginRight: "0.5rem" }}>
@@ -89,7 +89,7 @@ export function AutoEmptyState({
             </span>
           ) : null}
           {config.action.label}
-        </button>
+        </ButtonControl>
       ) : null}
     </div>
   );

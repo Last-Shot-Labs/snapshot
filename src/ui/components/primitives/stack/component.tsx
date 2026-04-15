@@ -1,6 +1,7 @@
 'use client';
 
 import { ComponentRenderer } from "../../../manifest/renderer";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { StackConfig } from "./types";
 
@@ -47,10 +48,6 @@ const PADDING_MAP: Record<string, string> = {
   lg: "var(--sn-spacing-lg, 1.5rem)",
   xl: "var(--sn-spacing-xl, 2rem)",
 };
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 function baseResponsiveValue<T>(value: T | { default: T } | undefined): T | undefined {
   if (

@@ -4,12 +4,9 @@ import { useCallback, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { ComponentWrapper } from "../../_base/component-wrapper";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { SplitPaneConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 export function SplitPane({ config }: { config: SplitPaneConfig }) {
   const direction = config.direction ?? "horizontal";

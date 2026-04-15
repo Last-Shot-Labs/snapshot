@@ -6,6 +6,7 @@ import { resolveRuntimeLocale, resolveTRef } from "../../../i18n/resolve";
 import { isTRef, type I18nConfig, type TRef } from "../../../i18n/schema";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { ButtonControl } from "../../forms/button";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import {
   FloatingMenuStyles,
@@ -14,10 +15,6 @@ import {
 } from "../../primitives/floating-menu";
 import { useActionExecutor } from "../../../actions/executor";
 import type { NavUserMenuConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 function resolveMenuText(
   value: string | TRef,

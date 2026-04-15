@@ -39,6 +39,7 @@ import type { AutoEmptyStateConfig } from "../../_base/auto-empty-state";
 import { AutoSkeleton } from "../../_base/auto-skeleton";
 import { useComponentData } from "../../_base/use-component-data";
 import { useLiveData } from "../../_base/use-live-data";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { ButtonControl } from "../../forms/button";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { ChartConfig } from "./types";
@@ -50,10 +51,6 @@ const DEFAULT_COLORS = [
   "var(--sn-chart-4, #f59e0b)",
   "var(--sn-chart-5, #ef4444)",
 ];
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 function getSeriesColor(color: string | undefined, index: number): string {
   return color ?? DEFAULT_COLORS[index % DEFAULT_COLORS.length]!;

@@ -93,19 +93,19 @@ Specs moved to [`docs/specs/completed/`](./specs/completed/).
 **Manifest-only completion (`manifest-only.md`) - Done 2026-04-10:**
 
 The drive to 100% manifest capability. 35 phases across 8 file-disjoint tracks, all on
-`main`. The acceptance test - *"can a user enable this feature by editing
-`snapshot.manifest.json` with no TypeScript?"* - now passes for every feature in the
+`main`. The acceptance test - _"can a user enable this feature by editing
+`snapshot.manifest.json` with no TypeScript?"_ - now passes for every feature in the
 spec.
 
-| Track | Shipped |
-|---|---|
-| **A** | Hardcoded behavior removed - auth path inference, layout fallback, `"custom"` magic, side-effect registration, hardcoded loading/error/404/offline UI - all gone. Boot-time `bootBuiltins()` replaces module side effects. |
-| **B** | `SnapshotConfig` collapsed to four fields (`apiUrl`, `env`, `bearerToken`, `manifest`). `{ "env": "..." }` resolver. `manifest.auth.{session,contract,on}`, `manifest.app.cache`, `manifest.realtime.{ws,sse}`. |
-| **C** | Declarative custom-action declarations. Manifest-declarable flavors with `extends` + shared dark-variant derivation. |
-| **D** | `policies` schema + resolver + route guard + component `visible` integration (and `guard.condition` deleted). `i18n` schema + `{ "t": "..." }` ref + locale detection + persistence. |
-| **E** | `clients` block with per-resource selection + `registerClient` factory. `subApps` block with sub-manifest mounting, theme/i18n/policy inheritance, child-wins client collision, client-only SSR fallback. |
-| **F** | SSR convention routes, nested layouts (replacing single `page.layout`), parallel route slots on built-in layouts, SSR middleware as workflows with `SSRMiddlewareContext`. |
-| **G** | WS/SSE event -> workflow mapping, per-resource invalidation rules, per-resource optimistic updates with snapshot-then-restore rollback, form submission lifecycle workflows. |
+| Track | Shipped                                                                                                                                                                                                                                       |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A** | Hardcoded behavior removed - auth path inference, layout fallback, `"custom"` magic, side-effect registration, hardcoded loading/error/404/offline UI - all gone. Boot-time `bootBuiltins()` replaces module side effects.                    |
+| **B** | `SnapshotConfig` collapsed to four fields (`apiUrl`, `env`, `bearerToken`, `manifest`). `{ "env": "..." }` resolver. `manifest.auth.{session,contract,on}`, `manifest.app.cache`, `manifest.realtime.{ws,sse}`.                               |
+| **C** | Declarative custom-action declarations. Manifest-declarable flavors with `extends` + shared dark-variant derivation.                                                                                                                          |
+| **D** | `policies` schema + resolver + route guard + component `visible` integration (and `guard.condition` deleted). `i18n` schema + `{ "t": "..." }` ref + locale detection + persistence.                                                          |
+| **E** | `clients` block with per-resource selection + `registerClient` factory. `subApps` block with sub-manifest mounting, theme/i18n/policy inheritance, child-wins client collision, client-only SSR fallback.                                     |
+| **F** | SSR convention routes, nested layouts (replacing single `page.layout`), parallel route slots on built-in layouts, SSR middleware as workflows with `SSRMiddlewareContext`.                                                                    |
+| **G** | WS/SSE event -> workflow mapping, per-resource invalidation rules, per-resource optimistic updates with snapshot-then-restore rollback, form submission lifecycle workflows.                                                                  |
 | **H** | `manifest.toast`, `manifest.analytics` + `track` action + `registerAnalyticsProvider`, `manifest.push`, `manifest.theme.editor.persist`, and full OAuth/MFA/WebAuthn config (with top-level `auth.providers` map and screen-level name refs). |
 
 Spec at [`docs/specs/completed/manifest-only.md`](./specs/completed/manifest-only.md).
@@ -117,6 +117,8 @@ Spec at [`docs/specs/completed/manifest-only.md`](./specs/completed/manifest-onl
 - Extract the cross-platform frontend contract into a dedicated shared package instead of letting it remain web-owned inside Snapshot.
 - Rebase Snapshot and Pocketshot as peer runtimes over that shared contract package.
 - Finish Pocketshot's declarative runtime against the same manifest, token, action, resource, workflow, state, policy, i18n, and component metadata contract.
+- Runtime execution is now materially underway: Pocketshot is wired to shared refs/manifest/tokens/actions/resources/workflows, has native manifest runtime scaffolding, a shared-workflow execution path, resource query invalidation helpers, and a checked-in component classification artifact.
+- Shared proof fixtures now exist in `../frontend-contract/fixtures/`, are covered by shared-contract tests, and are already being consumed by Pocketshot SDK tests for cross-runtime contract verification.
 - This is replacement work: both packages are pre-production and incorrect contracts should be replaced outright.
 
 **Documentation infrastructure (`documentation-infrastructure.md`) - Active 2026-04-13:**

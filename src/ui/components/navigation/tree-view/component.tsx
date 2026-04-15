@@ -6,12 +6,9 @@ import { useActionExecutor } from "../../../actions/executor";
 import { AutoErrorState } from "../../_base/auto-error-state";
 import { renderIcon } from "../../../icons/render";
 import { useComponentData } from "../../_base/use-component-data";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { TreeViewConfig, TreeItemInput } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 interface TreeNodeProps {
   rootId: string;

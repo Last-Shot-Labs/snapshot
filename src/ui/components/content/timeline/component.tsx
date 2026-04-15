@@ -5,15 +5,12 @@ import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { AutoErrorState } from "../../_base/auto-error-state";
 import { useComponentData } from "../../_base/use-component-data";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { Icon } from "../../../icons/icon";
 import type { ComponentConfig } from "../../../manifest/types";
 import type { TimelineConfig, TimelineItem } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 /**
  * Resolve timeline items from either static config or API data.

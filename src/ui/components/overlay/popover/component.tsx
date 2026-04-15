@@ -6,13 +6,10 @@ import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
 import { renderIcon } from "../../../icons/render";
 import { ButtonControl } from "../../forms/button";
+import { SurfaceStyles } from "../../_base/surface-styles";
 import { FloatingPanel } from "../../primitives/floating-menu";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { PopoverConfig } from "./types";
-
-function SurfaceStyles({ css }: { css?: string }) {
-  return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
-}
 
 /**
  * Floating panel component triggered by a button-like control.
