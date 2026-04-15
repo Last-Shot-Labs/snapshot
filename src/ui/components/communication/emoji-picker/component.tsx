@@ -7,6 +7,8 @@ import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
+import { ButtonControl } from "../../forms/button";
+import { InputControl } from "../../forms/input";
 import type { EmojiCategory, EmojiEntry, EmojiPickerConfig } from "./types";
 import emojiData from "./emoji-data.json";
 import type { CustomEmoji } from "./custom-emoji";
@@ -312,13 +314,13 @@ export function EmojiPicker({ config }: { config: EmojiPickerConfig }) {
             >
               <Icon name="search" size={14} />
             </span>
-            <input
-              data-testid="emoji-search"
-              data-snapshot-id={`${rootId}-searchInput`}
+            <InputControl
+              testId="emoji-search"
+              surfaceId={`${rootId}-searchInput`}
               type="text"
               placeholder="Search emoji..."
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChangeText={setSearch}
               className={searchInputSurface.className}
               style={searchInputSurface.style}
             />
@@ -372,22 +374,24 @@ export function EmojiPicker({ config }: { config: EmojiPickerConfig }) {
 
             return (
               <div key={categoryKey}>
-                <button
+                <ButtonControl
                   type="button"
-                  data-active={activeCategory === categoryKey ? "" : undefined}
-                  data-snapshot-id={`${rootId}-categoryTab-${categoryKey}`}
                   title={CATEGORY_LABELS[categoryKey] ?? categoryKey}
-                  aria-label={CATEGORY_LABELS[categoryKey] ?? categoryKey}
+                  ariaLabel={CATEGORY_LABELS[categoryKey] ?? categoryKey}
                   onClick={() =>
                     setActiveCategory(
                       activeCategory === categoryKey ? null : categoryKey,
                     )
                   }
+                  surfaceId={`${rootId}-categoryTab-${categoryKey}`}
                   className={categoryTabSurface.className}
                   style={categoryTabSurface.style}
+                  variant="ghost"
+                  size="icon"
+                  activeStates={activeCategory === categoryKey ? ["active"] : []}
                 >
                   <Icon name={CATEGORY_ICONS[categoryKey] ?? "hash"} size={14} />
-                </button>
+                </ButtonControl>
                 <SurfaceStyles css={categoryTabSurface.scopedCss} />
               </div>
             );
@@ -505,13 +509,16 @@ export function EmojiPicker({ config }: { config: EmojiPickerConfig }) {
 
                       return (
                         <div key={emoji.name}>
-                          <button
+                          <ButtonControl
                             type="button"
-                            data-snapshot-id={`${categoryId}-emoji-${emoji.name}`}
                             onClick={() => handleSelect(emoji)}
                             title={custom ? `:${custom.shortcode}:` : emoji.name}
+                            ariaLabel={custom ? `:${custom.shortcode}:` : emoji.name}
+                            surfaceId={`${categoryId}-emoji-${emoji.name}`}
                             className={emojiButtonSurface.className}
                             style={emojiButtonSurface.style}
+                            variant="ghost"
+                            size="icon"
                           >
                             {custom ? (
                               <img
@@ -524,7 +531,7 @@ export function EmojiPicker({ config }: { config: EmojiPickerConfig }) {
                             ) : (
                               emoji.native
                             )}
-                          </button>
+                          </ButtonControl>
                           <SurfaceStyles css={emojiButtonSurface.scopedCss} />
                           <SurfaceStyles css={customEmojiSurface.scopedCss} />
                         </div>

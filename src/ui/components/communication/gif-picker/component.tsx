@@ -7,6 +7,8 @@ import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
+import { ButtonControl } from "../../forms/button";
+import { InputControl } from "../../forms/input";
 import type { GifEntry, GifPickerConfig } from "./types";
 
 function toGifEntries(
@@ -278,13 +280,13 @@ export function GifPicker({ config }: { config: GifPickerConfig }) {
             >
               <Icon name="search" size={14} />
             </span>
-            <input
-              data-testid="gif-search"
-              data-snapshot-id={`${rootId}-searchInput`}
+            <InputControl
+              testId="gif-search"
+              surfaceId={`${rootId}-searchInput`}
               type="text"
               placeholder={config.placeholder ?? "Search GIFs..."}
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChangeText={setSearch}
               className={searchInputSurface.className}
               style={searchInputSurface.style}
             />
@@ -374,14 +376,16 @@ export function GifPicker({ config }: { config: GifPickerConfig }) {
 
                 return (
                   <div key={gif.id}>
-                    <button
+                    <ButtonControl
                       type="button"
-                      data-snapshot-id={`${rootId}-item-${gif.id}`}
                       onClick={() => handleSelect(gif)}
                       title={gif.title}
-                      aria-label={gif.title ?? "Select GIF"}
+                      ariaLabel={gif.title ?? "Select GIF"}
+                      surfaceId={`${rootId}-item-${gif.id}`}
                       className={itemSurface.className}
                       style={itemSurface.style}
+                      variant="ghost"
+                      size="sm"
                     >
                       <img
                         src={gif.preview ?? gif.url}
@@ -391,7 +395,7 @@ export function GifPicker({ config }: { config: GifPickerConfig }) {
                         className={imageSurface.className}
                         style={imageSurface.style}
                       />
-                    </button>
+                    </ButtonControl>
                     <SurfaceStyles css={itemSurface.scopedCss} />
                     <SurfaceStyles css={imageSurface.scopedCss} />
                   </div>

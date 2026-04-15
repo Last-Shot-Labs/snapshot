@@ -9,6 +9,8 @@ import { AutoErrorState } from "../../_base/auto-error-state";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
+import { ButtonControl } from "../../forms/button";
+import { InputControl } from "../../forms/input";
 import type { EntityPickerConfig } from "./types";
 
 interface ResolvedEntity {
@@ -173,15 +175,16 @@ function EntityPickerItem({
 
   return (
     <>
-      <button
+      <ButtonControl
         type="button"
-        key={entity.value}
-        data-testid="entity-picker-item"
-        data-selected={isSelected ? "true" : undefined}
-        data-snapshot-id={itemBaseId}
+        testId="entity-picker-item"
+        surfaceId={itemBaseId}
         onClick={() => onToggle(entity.value)}
         className={itemSurface.className}
         style={itemSurface.style}
+        variant="ghost"
+        size="sm"
+        activeStates={isSelected ? ["selected"] : []}
       >
         {isMultiple ? (
           <span
@@ -245,7 +248,7 @@ function EntityPickerItem({
             \u2713
           </span>
         ) : null}
-      </button>
+      </ButtonControl>
       <SurfaceStyles css={itemSurface.scopedCss} />
       <SurfaceStyles css={itemSelectionSurface.scopedCss} />
       <SurfaceStyles css={itemAvatarSurface.scopedCss} />
@@ -592,13 +595,18 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
           ...((config.style as CSSProperties | undefined) ?? {}),
         }}
       >
-        <button
+        <ButtonControl
           type="button"
-          data-testid="entity-picker-trigger"
-          data-snapshot-id={`${rootId}-trigger`}
+          testId="entity-picker-trigger"
+          surfaceId={`${rootId}-trigger`}
           onClick={() => setIsOpen((open) => !open)}
           className={triggerSurface.className}
           style={triggerSurface.style}
+          variant="ghost"
+          size="sm"
+          activeStates={isOpen ? ["open"] : []}
+          ariaExpanded={isOpen}
+          ariaHasPopup="listbox"
         >
           <span
             data-snapshot-id={`${rootId}-triggerLabel`}
@@ -615,7 +623,7 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
           >
             {isOpen ? "\u25B2" : "\u25BC"}
           </span>
-        </button>
+        </ButtonControl>
 
         {isOpen ? (
           <div
@@ -630,14 +638,14 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
                 className={searchContainerSurface.className}
                 style={searchContainerSurface.style}
               >
-                <input
-                  ref={searchInputRef}
-                  data-testid="entity-picker-search"
-                  data-snapshot-id={`${rootId}-searchInput`}
+                <InputControl
+                  inputRef={searchInputRef}
+                  testId="entity-picker-search"
+                  surfaceId={`${rootId}-searchInput`}
                   type="text"
                   placeholder="Search..."
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChangeText={setSearch}
                   className={searchInputSurface.className}
                   style={searchInputSurface.style}
                 />

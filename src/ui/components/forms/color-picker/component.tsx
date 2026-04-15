@@ -6,6 +6,8 @@ import { useActionExecutor } from "../../../actions/executor";
 import { usePublish, useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../button";
+import { InputControl } from "../input";
 import type { ColorPickerConfig } from "./types";
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -243,26 +245,26 @@ export function ColorPicker({ config }: { config: ColorPickerConfig }) {
           className={controlsSurface.className}
           style={controlsSurface.style}
         >
-          <input
+          <InputControl
             type="color"
             value={color}
-            onChange={(event) => {
-              setColor(event.target.value);
-              triggerChange(event.target.value, alpha);
+            onChangeText={(nextColor) => {
+              setColor(nextColor);
+              triggerChange(nextColor, alpha);
             }}
-            data-snapshot-id={`${rootId}-picker`}
+            surfaceId={`${rootId}-picker`}
             className={pickerSurface.className}
             style={pickerSurface.style}
           />
           {config.allowCustom ? (
-            <input
+            <InputControl
               type="text"
               value={color}
-              onChange={(event) => {
-                setColor(event.target.value);
-                triggerChange(event.target.value, alpha);
+              onChangeText={(nextColor) => {
+                setColor(nextColor);
+                triggerChange(nextColor, alpha);
               }}
-              data-snapshot-id={`${rootId}-input`}
+              surfaceId={`${rootId}-input`}
               className={inputSurface.className}
               style={inputSurface.style}
             />
@@ -282,18 +284,17 @@ export function ColorPicker({ config }: { config: ColorPickerConfig }) {
             >
               Alpha {Math.round(alpha * 100)}%
             </span>
-            <input
+            <InputControl
               type="range"
-              min={0}
-              max={100}
-              step={1}
-              value={Math.round(alpha * 100)}
-              onChange={(event) => {
-                const nextAlpha = Number(event.target.value) / 100;
+              min="0"
+              max="100"
+              value={String(Math.round(alpha * 100))}
+              onChangeText={(nextValue) => {
+                const nextAlpha = Number(nextValue) / 100;
                 setAlpha(nextAlpha);
                 triggerChange(color, nextAlpha);
               }}
-              data-snapshot-id={`${rootId}-alphaInput`}
+              surfaceId={`${rootId}-alphaInput`}
               className={alphaInputSurface.className}
               style={alphaInputSurface.style}
             />
@@ -325,16 +326,18 @@ export function ColorPicker({ config }: { config: ColorPickerConfig }) {
 
               return (
                 <span key={swatch}>
-                  <button
+                  <ButtonControl
                     type="button"
-                    aria-label={swatch}
+                    ariaLabel={swatch}
                     onClick={() => {
                       setColor(swatch);
                       triggerChange(swatch, alpha);
                     }}
-                    data-snapshot-id={`${rootId}-swatch-${index}`}
+                    surfaceId={`${rootId}-swatch-${index}`}
                     className={swatchSurface.className}
                     style={swatchSurface.style}
+                    variant="ghost"
+                    size="icon"
                   />
                   <SurfaceStyles css={swatchSurface.scopedCss} />
                 </span>

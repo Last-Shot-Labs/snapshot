@@ -11,6 +11,8 @@ import { usePublish, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
+import { InputControl } from "../../forms/input";
 import type { RichInputConfig } from "./types";
 
 interface ToolbarItem {
@@ -385,11 +387,11 @@ export function RichInput({ config }: { config: RichInputConfig }) {
             <span data-snapshot-id={`${rootId}-linkIcon`} className={linkIconSurface.className} style={linkIconSurface.style}>
               <Icon name="link" size={14} />
             </span>
-            <input
-              ref={linkInputRef}
+            <InputControl
+              inputRef={linkInputRef}
               type="url"
               value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
+              onChangeText={setLinkUrl}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && linkUrl.trim()) {
                   e.preventDefault();
@@ -405,13 +407,14 @@ export function RichInput({ config }: { config: RichInputConfig }) {
                 }
               }}
               placeholder="Paste URL and press Enter..."
-              data-snapshot-id={`${rootId}-linkInput`}
+              surfaceId={`${rootId}-linkInput`}
               className={linkInputSurface.className}
               style={linkInputSurface.style}
+              testId="rich-input-link-input"
             />
-            <button
+            <ButtonControl
               type="button"
-              aria-label="Close link input"
+              ariaLabel="Close link input"
               onClick={() => {
                 if (linkUrl.trim()) {
                   const url = linkUrl.trim().startsWith("http") ? linkUrl.trim() : `https://${linkUrl.trim()}`;
@@ -420,12 +423,14 @@ export function RichInput({ config }: { config: RichInputConfig }) {
                 setShowLinkInput(false);
                 setLinkUrl("");
               }}
-              data-snapshot-id={`${rootId}-linkCloseButton`}
+              surfaceId={`${rootId}-linkCloseButton`}
               className={linkCloseSurface.className}
               style={linkCloseSurface.style}
+              variant="ghost"
+              size="icon"
             >
               <Icon name="x" size={14} />
-            </button>
+            </ButtonControl>
           </div>
         ) : null}
 
@@ -480,20 +485,21 @@ export function RichInput({ config }: { config: RichInputConfig }) {
 
                 return (
                   <div key={item.name}>
-                    <button
+                    <ButtonControl
                       type="button"
-                      data-ri-btn
-                      data-active={active ? "" : undefined}
                       onClick={() => handleToolbarAction(item)}
                       title={item.label}
-                      aria-label={item.label}
+                      ariaLabel={item.label}
                       disabled={readonly}
-                      data-snapshot-id={`${rootId}-toolbarButton-${index}`}
+                      surfaceId={`${rootId}-toolbarButton-${index}`}
                       className={buttonSurface.className}
                       style={buttonSurface.style}
+                      variant="ghost"
+                      size="icon"
+                      activeStates={active ? ["active"] : []}
                     >
                       <Icon name={item.icon} size={16} />
-                    </button>
+                    </ButtonControl>
                     <SurfaceStyles css={buttonSurface.scopedCss} />
                   </div>
                 );
@@ -507,18 +513,20 @@ export function RichInput({ config }: { config: RichInputConfig }) {
                 </span>
               ) : null}
               {config.sendAction ? (
-                <button
+                <ButtonControl
                   type="button"
-                  data-testid="rich-input-send"
                   onClick={handleSend}
                   disabled={readonly || !charCount || isOverLimit}
-                  aria-label="Send message"
-                  data-snapshot-id={`${rootId}-sendButton`}
+                  ariaLabel="Send message"
+                  surfaceId={`${rootId}-sendButton`}
                   className={sendButtonSurface.className}
                   style={sendButtonSurface.style}
+                  variant="ghost"
+                  size="icon"
+                  testId="rich-input-send"
                 >
                   <Icon name="send" size={16} />
-                </button>
+                </ButtonControl>
               ) : null}
             </div>
           </div>

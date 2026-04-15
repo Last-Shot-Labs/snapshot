@@ -12,6 +12,7 @@ import {
   getInitials,
   getNestedField,
 } from "../../_base/utils";
+import { ButtonControl } from "../../forms/button";
 import { RichInput } from "../../content/rich-input/component";
 import type { RichInputConfig } from "../../content/rich-input/types";
 import { sanitizeMessageHtml } from "../message-thread/message-renderer";
@@ -320,16 +321,19 @@ function CommentItem({
               </span>
             ) : null}
             {config.deleteAction ? (
-              <button
+              <ButtonControl
                 type="button"
-                data-snapshot-id={`${itemId}-deleteButton`}
                 onClick={handleDelete}
+                surfaceId={`${itemId}-deleteButton`}
                 className={deleteButtonSurface.className}
                 style={deleteButtonSurface.style}
                 title="Delete comment"
+                ariaLabel="Delete comment"
+                variant="ghost"
+                size="icon"
               >
                 <Icon name="trash-2" size={12} />
-              </button>
+              </ButtonControl>
             ) : null}
           </div>
 

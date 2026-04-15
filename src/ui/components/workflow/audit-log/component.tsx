@@ -6,6 +6,8 @@ import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
 import { formatRelativeTime, getInitials } from "../../_base/utils";
+import { ButtonControl } from "../../forms/button";
+import { SelectControl } from "../../forms/select";
 import type { AuditLogConfig } from "./types";
 
 type AuditRecord = Record<string, unknown>;
@@ -416,13 +418,11 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
 
               return (
                 <div key={filter.field}>
-                  <select
+                  <SelectControl
                     value={activeFilters[filter.field] ?? ""}
-                    onChange={(event) =>
-                      handleFilterChange(filter.field, event.target.value)
-                    }
+                    onChangeValue={(value) => handleFilterChange(filter.field, value)}
                     aria-label={filter.label}
-                    data-snapshot-id={`${rootId}-filter-${filter.field}`}
+                    surfaceId={`${rootId}-filter-${filter.field}`}
                     className={filterSurface.className}
                     style={filterSurface.style}
                   >
@@ -432,7 +432,7 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
                         {option}
                       </option>
                     ))}
-                  </select>
+                  </SelectControl>
                   <SurfaceStyles css={filterSurface.scopedCss} />
                 </div>
               );
@@ -633,17 +633,18 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
                       ) : null}
                       {details ? (
                         <>
-                          <button
+                          <ButtonControl
                             type="button"
-                            data-audit-toggle
-                            aria-expanded={isExpanded}
+                            ariaExpanded={isExpanded}
                             onClick={() => toggleDetails(index)}
-                            data-snapshot-id={`${rootId}-entry-${entryId}-toggleButton`}
+                            surfaceId={`${rootId}-entry-${entryId}-toggleButton`}
                             className={toggleButtonSurface.className}
                             style={toggleButtonSurface.style}
+                            variant="ghost"
+                            size="sm"
                           >
                             {isExpanded ? "Hide details" : "Show details"}
-                          </button>
+                          </ButtonControl>
                           {isExpanded ? (
                             <DetailsSection
                               rootId={rootId}
@@ -675,16 +676,17 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
             className={loadMoreWrapperSurface.className}
             style={loadMoreWrapperSurface.style}
           >
-            <button
+            <ButtonControl
               type="button"
-              data-audit-load-more
               onClick={loadMore}
-              data-snapshot-id={`${rootId}-loadMoreButton`}
+              surfaceId={`${rootId}-loadMoreButton`}
               className={loadMoreButtonSurface.className}
               style={loadMoreButtonSurface.style}
+              variant="outline"
+              size="sm"
             >
               Load more
-            </button>
+            </ButtonControl>
           </div>
         ) : null}
       </div>

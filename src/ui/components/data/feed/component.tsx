@@ -15,6 +15,7 @@ import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
 import { useLiveData } from "../../_base/use-live-data";
+import { ButtonControl } from "../../forms/button";
 import { formatRelativeTime } from "./relative-time";
 import type { FeedConfig, FeedItem } from "./types";
 
@@ -521,20 +522,22 @@ function FeedItemRow({
 
               return (
                 <div key={`${itemAction.label}-${index}`}>
-                  <button
+                  <ButtonControl
                     type="button"
-                    aria-label={itemAction.label}
-                    data-snapshot-id={`${itemId}-action-${index}`}
+                    ariaLabel={itemAction.label}
+                    surfaceId={`${itemId}-action-${index}`}
                     onClick={(event) => {
                       event.stopPropagation();
                       void execute(itemAction.action, { item: item.raw });
                     }}
                     className={itemActionSurface.className}
                     style={itemActionSurface.style}
+                    variant="ghost"
+                    size="sm"
                   >
                     {itemAction.icon ? <Icon name={itemAction.icon} size={14} /> : null}
                     <span>{itemAction.label}</span>
-                  </button>
+                  </ButtonControl>
                   <SurfaceStyles css={itemActionSurface.scopedCss} />
                 </div>
               );
@@ -809,15 +812,17 @@ export function Feed({ config }: { config: FeedConfig }) {
             >
               New activity available
             </span>
-            <button
+            <ButtonControl
               type="button"
               onClick={refresh}
-              data-snapshot-id={`${rootId}-liveButton`}
+              surfaceId={`${rootId}-liveButton`}
               className={liveButtonSurface.className}
               style={liveButtonSurface.style}
+              variant="outline"
+              size="sm"
             >
               Refresh
-            </button>
+            </ButtonControl>
           </div>
         ) : null}
 
@@ -932,16 +937,17 @@ export function Feed({ config }: { config: FeedConfig }) {
             className={paginationSurface.className}
             style={paginationSurface.style}
           >
-            <button
+            <ButtonControl
               type="button"
-              data-feed-load-more=""
               onClick={loadMore}
-              data-snapshot-id={`${rootId}-loadMoreButton`}
+              surfaceId={`${rootId}-loadMoreButton`}
               className={loadMoreButtonSurface.className}
               style={loadMoreButtonSurface.style}
+              variant="ghost"
+              size="sm"
             >
               Load more
-            </button>
+            </ButtonControl>
           </div>
         ) : null}
       </div>

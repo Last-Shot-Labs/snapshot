@@ -9,6 +9,7 @@ import { usePublish, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/icon";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
 import { Markdown } from "../markdown/component";
 import { snEditorTheme, snSyntaxHighlight } from "./cm-theme";
 import { applyToolbarAction, DEFAULT_TOOLBAR, TOOLBAR_ITEMS } from "./toolbar";
@@ -245,18 +246,20 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
                     });
                     return (
                       <div key={item.name}>
-                        <button
+                        <ButtonControl
                           type="button"
                           onClick={() => handleToolbarAction(item)}
                           title={item.shortcut ? `${item.label} (${item.shortcut})` : item.label}
-                          aria-label={item.label}
+                          ariaLabel={item.label}
                           disabled={resolvedReadonly}
-                          data-snapshot-id={`${rootId}-toolbarButton-${index}`}
+                          surfaceId={`${rootId}-toolbarButton-${index}`}
                           className={buttonSurface.className}
                           style={buttonSurface.style}
+                          variant="ghost"
+                          size="icon"
                         >
                           <Icon name={item.icon} size={14} />
-                        </button>
+                        </ButtonControl>
                         <SurfaceStyles css={buttonSurface.scopedCss} />
                       </div>
                     );
@@ -290,17 +293,20 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
                 });
                 return (
                   <div key={mode}>
-                    <button
+                    <ButtonControl
                       type="button"
                       onClick={() => setCurrentMode(mode)}
-                      aria-label={`Switch to ${mode} mode`}
-                      aria-pressed={active}
-                      data-snapshot-id={`${rootId}-modeButton-${index}`}
+                      ariaLabel={`Switch to ${mode} mode`}
+                      ariaPressed={active}
+                      surfaceId={`${rootId}-modeButton-${index}`}
                       className={buttonSurface.className}
                       style={buttonSurface.style}
+                      variant="ghost"
+                      size="sm"
+                      activeStates={active ? ["active"] : []}
                     >
                       {mode === "split" ? <Icon name="split" size={12} /> : mode === "preview" ? <Icon name="eye" size={12} /> : <Icon name="edit" size={12} />}
-                    </button>
+                    </ButtonControl>
                     <SurfaceStyles css={buttonSurface.scopedCss} />
                   </div>
                 );
