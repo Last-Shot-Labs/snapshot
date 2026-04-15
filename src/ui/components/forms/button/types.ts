@@ -1,6 +1,9 @@
 import type {
   CSSProperties,
+  FocusEventHandler,
   KeyboardEventHandler,
+  MouseEventHandler,
+  PointerEventHandler,
   ReactNode,
   Ref,
 } from "react";
@@ -16,8 +19,12 @@ export interface ButtonControlProps {
   size?: ButtonConfig["size"];
   disabled?: boolean;
   fullWidth?: boolean;
-  onClick?: () => void;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
   onKeyDown?: KeyboardEventHandler<HTMLButtonElement>;
+  onFocus?: FocusEventHandler<HTMLButtonElement>;
+  onBlur?: FocusEventHandler<HTMLButtonElement>;
+  onPointerEnter?: PointerEventHandler<HTMLButtonElement>;
+  onPointerLeave?: PointerEventHandler<HTMLButtonElement>;
   className?: string;
   style?: CSSProperties;
   buttonRef?: Ref<HTMLButtonElement>;
@@ -27,6 +34,7 @@ export interface ButtonControlProps {
   testId?: string;
   ariaLabel?: string;
   ariaDescribedBy?: string;
+  ariaLive?: "off" | "polite" | "assertive";
   ariaPressed?: boolean;
   ariaChecked?: boolean;
   ariaCurrent?: "page" | "step" | "location" | "date" | "time" | true;
@@ -35,6 +43,7 @@ export interface ButtonControlProps {
   ariaHasPopup?: boolean | "menu" | "listbox" | "tree" | "grid" | "dialog";
   role?: string;
   tabIndex?: number;
+  title?: string;
   activeStates?: Array<
     | "hover"
     | "focus"

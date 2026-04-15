@@ -17,6 +17,7 @@ import java from "highlight.js/lib/languages/java";
 import { useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
 import "./hljs-theme.css";
 import type { CodeBlockConfig } from "./types";
 
@@ -291,16 +292,18 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
           </div>
 
           {showCopy && (
-            <button
+            <ButtonControl
               type="button"
-              data-snapshot-id={`${rootId}-copyButton`}
-              data-testid="code-block-copy"
               onClick={() => void handleCopy()}
+              testId="code-block-copy"
+              variant="ghost"
+              size="sm"
+              surfaceId={`${rootId}-copyButton`}
               className={copyButtonSurface.className}
               style={copyButtonSurface.style}
             >
               {copyLabel}
-            </button>
+            </ButtonControl>
           )}
         </div>
       )}

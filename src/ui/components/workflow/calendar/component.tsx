@@ -5,6 +5,7 @@ import { useActionExecutor } from "../../../actions/executor";
 import { useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
 import { useComponentData } from "../../_base/use-component-data";
 import type { CalendarConfig, ResolvedEvent } from "./types";
 
@@ -93,20 +94,23 @@ function EventPill({
     componentSurface: slots?.event,
   });
   const body = clickable ? (
-    <button
-      type="button"
-      data-calendar-event
-      data-snapshot-id={id}
-      title={event.title}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
-      }}
-      className={surface.className}
-      style={surface.style}
-    >
-      {event.title}
-    </button>
+    <div data-calendar-event data-snapshot-id={id} title={event.title}>
+      <ButtonControl
+        type="button"
+        variant="ghost"
+        size="sm"
+        surfaceId={id}
+        title={event.title}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}
+        className={surface.className}
+        style={surface.style}
+      >
+        {event.title}
+      </ButtonControl>
+    </div>
   ) : (
     <div data-calendar-event data-snapshot-id={id} title={event.title} className={surface.className} style={surface.style}>
       {event.title}
@@ -249,9 +253,19 @@ export function Calendar({ config }: { config: CalendarConfig }) {
     });
     return (
       <div key={id}>
-        <button type="button" onClick={onClick} data-testid={`calendar-nav-${id}`} aria-label={ariaLabel} data-snapshot-id={`${rootId}-nav-${id}`} className={surface.className} style={surface.style}>
+        <ButtonControl
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onClick}
+          testId={`calendar-nav-${id}`}
+          ariaLabel={ariaLabel}
+          surfaceId={`${rootId}-nav-${id}`}
+          className={surface.className}
+          style={surface.style}
+        >
           {text}
-        </button>
+        </ButtonControl>
         <SurfaceStyles css={surface.scopedCss} />
       </div>
     );

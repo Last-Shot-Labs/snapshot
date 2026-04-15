@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { renderIcon } from "../../icons/render";
+import { ButtonControl } from "../forms/button";
 
 export interface AutoErrorStateConfig {
   title?: string;
@@ -68,27 +69,14 @@ export function AutoErrorState({
         </div>
       ) : null}
       {showRetry ? (
-        <button
+        <ButtonControl
           type="button"
           onClick={onRetry}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "var(--sn-spacing-xs, 0.25rem)",
-            padding:
-              "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
-            borderRadius: "var(--sn-radius-md, 0.375rem)",
-            border:
-              "1px solid var(--sn-color-border, #e2e8f0)",
-            background: "var(--sn-color-card, #ffffff)",
-            color: "var(--sn-color-foreground, #111827)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            fontWeight: "var(--sn-font-weight-medium, 500)",
-            cursor: "pointer",
-          }}
+          variant="outline"
+          size="sm"
         >
           {retryLabel}
-        </button>
+        </ButtonControl>
       ) : null}
     </div>
   );

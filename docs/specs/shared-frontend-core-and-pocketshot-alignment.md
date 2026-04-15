@@ -8,7 +8,7 @@
 > | 1     | Canonical Shared Contract Boundary                      | In progress | Contract            |
 > | 2     | Snapshot Rebased On Shared Contract                     | In progress | Snapshot            |
 > | 3     | Pocketshot Manifest Runtime Rebuilt On Shared Contract  | In progress | Pocketshot Runtime  |
-> | 4     | Native Universal Styling Runtime                        | Not started | Pocketshot UI       |
+> | 4     | Native Universal Styling Runtime                        | In progress | Pocketshot UI       |
 > | 5     | Pocketshot Component Library Rebased On Shared Contract | In progress | Pocketshot UI       |
 > | 6     | CLI, Fixtures, And Contract Proofs                      | In progress | Tooling + Tests     |
 >
@@ -16,7 +16,7 @@
 >
 > **Product bar:** Snapshot and Pocketshot are peer runtimes over one canonical frontend contract. Neither package is allowed to own cross-platform concepts that belong in the shared contract package.
 
-> **Execution Snapshot - 2026-04-14**
+> **Execution Snapshot - 2026-04-15**
 >
 > The work is no longer theoretical:
 >
@@ -28,9 +28,12 @@
 > - Pocketshot's action runtime now executes the shared canonical action contract for navigation, resources, workflows, refresh, set-value, theme, toast, and modal semantics, while keeping native-only actions local.
 > - Pocketshot now has native manifest runtime scaffolding under `src/ui/manifest/` for app boot, runtime providers, navigation selection, resources, and component registry ownership instead of a single thin entrypoint.
 > - Pocketshot now has a local shared-workflow engine wired into `run-workflow` execution and a manifest resource runtime that uses the shared endpoint/resource contract.
+> - The shared package now owns a platform-neutral component contract surface for canonical states, style props, slot schemas, and shared base component metadata.
+> - Pocketshot now has a native universal styling base layer under `src/ui/components/_base/` that resolves shared style props, canonical surface states, slot overlays, and wrapper visibility semantics.
+> - Pocketshot's runtime now honors shared expression-backed values for `visible` and `visibleWhen`, and overlay wrappers publish canonical `open` state styling instead of bypassing the shared surface contract.
 > - `../pocketshot/docs/component-classification.md` now exists as the Phase 5 baseline classification artifact covering the current Pocketshot component inventory.
 > - `../frontend-contract/fixtures/**` now exists with auth, data, navigation, overlays, state, and workflow fixtures validated by shared-contract tests and consumed by Pocketshot SDK tests for resource/workflow runtime coverage.
-> - Shared-package typecheck/test/build are passing. Pocketshot contract-level validation is currently done with targeted tests and import-smoke checks because the repo's broader RN dependency/type baseline is still incomplete in this workspace.
+> - Shared-package typecheck/test/build are passing. Pocketshot contract-level validation is currently done with targeted tests and import-smoke checks because the repo's broader RN dependency/type baseline is still incomplete in this workspace, and the native styling/runtime test suite now includes direct coverage for style-prop mapping, surface merge precedence, and expression evaluation.
 
 ---
 

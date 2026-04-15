@@ -7,6 +7,8 @@ import { usePublish, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../button";
+import { InputControl } from "../input";
 import type { QuickAddConfig } from "./types";
 
 export function QuickAdd({ config }: { config: QuickAddConfig }) {
@@ -159,12 +161,12 @@ export function QuickAdd({ config }: { config: QuickAddConfig }) {
           <Icon name={icon} size={18} />
         </span>
 
-        <input
-          data-testid="quick-add-input"
-          data-snapshot-id={`${rootId}-input`}
+        <InputControl
+          testId="quick-add-input"
+          surfaceId={`${rootId}-input`}
           type="text"
           value={value}
-          onChange={(event) => setValue(event.target.value)}
+          onChangeText={setValue}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className={inputSurface.className}
@@ -172,17 +174,19 @@ export function QuickAdd({ config }: { config: QuickAddConfig }) {
         />
 
         {showButton ? (
-          <button
+          <ButtonControl
             type="button"
-            data-testid="quick-add-button"
-            data-snapshot-id={`${rootId}-button`}
+            testId="quick-add-button"
+            surfaceId={`${rootId}-button`}
             onClick={handleSubmit}
             disabled={!canSubmit}
+            variant="ghost"
+            size="sm"
             className={buttonSurface.className}
             style={buttonSurface.style}
           >
             {buttonText}
-          </button>
+          </ButtonControl>
         ) : null}
       </div>
       <SurfaceStyles css={rootSurface.scopedCss} />

@@ -6,6 +6,8 @@ import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../button";
+import { InputControl } from "../input";
 import type { InlineEditConfig } from "./types";
 
 /**
@@ -202,28 +204,30 @@ export function InlineEdit({ config }: { config: InlineEditConfig }) {
         style={rootSurface.style}
       >
         {editing ? (
-          <input
-            ref={inputRef}
+          <InputControl
+            inputRef={inputRef}
+            inputId={`${rootId}-input`}
             type={inputType}
             value={editValue}
-            onChange={(event) => setEditValue(event.target.value)}
+            onChangeText={setEditValue}
             onKeyDown={handleKeyDown}
             onBlur={save}
             data-testid="inline-edit-input"
-            data-snapshot-id={`${rootId}-input`}
             className={inputSurface.className}
             style={inputSurface.style}
           />
         ) : (
-          <button
+          <ButtonControl
             type="button"
             onClick={startEditing}
             onPointerEnter={() => setDisplayHovered(true)}
             onPointerLeave={() => setDisplayHovered(false)}
             onFocus={() => setDisplayFocused(true)}
             onBlur={() => setDisplayFocused(false)}
-            data-testid="inline-edit-display"
-            data-snapshot-id={`${rootId}-display`}
+            testId="inline-edit-display"
+            surfaceId={`${rootId}-display`}
+            variant="ghost"
+            size="sm"
             className={displaySurface.className}
             style={displaySurface.style}
           >
@@ -241,7 +245,7 @@ export function InlineEdit({ config }: { config: InlineEditConfig }) {
             >
               <Icon name="pencil" size={12} />
             </span>
-          </button>
+          </ButtonControl>
         )}
       </div>
       <SurfaceStyles css={rootSurface.scopedCss} />

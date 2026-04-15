@@ -15,6 +15,7 @@ export function InputControl({
   value,
   placeholder,
   autoComplete,
+  autoFocus,
   disabled,
   readOnly,
   maxLength,
@@ -25,6 +26,9 @@ export function InputControl({
   ariaLabel,
   onChangeText,
   onBlur,
+  onFocus,
+  onClick,
+  onKeyDown,
   className,
   style,
   surfaceId,
@@ -98,6 +102,7 @@ export function InputControl({
         value={value}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        autoFocus={autoFocus}
         disabled={disabled}
         readOnly={readOnly}
         maxLength={maxLength}
@@ -115,6 +120,9 @@ export function InputControl({
         }}
         onChange={(event) => onChangeText?.(event.target.value)}
         onBlur={onBlur}
+        onFocus={onFocus}
+        onClick={onClick}
+        onKeyDown={onKeyDown}
       />
       <SurfaceStyles css={controlSurface.scopedCss} />
     </>

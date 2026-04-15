@@ -8,6 +8,8 @@ import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
+import { ButtonControl } from "../button";
+import { InputControl } from "../input";
 import type { MultiSelectConfig, MultiSelectOption } from "./types";
 
 function joinClassNames(
@@ -93,17 +95,18 @@ function SelectedPill({
         >
           {item.label}
         </span>
-        <button
+        <ButtonControl
           type="button"
-          role="button"
-          aria-label={`Remove ${item.label}`}
-          data-snapshot-id={`${pillId}-remove`}
+          ariaLabel={`Remove ${item.label}`}
+          surfaceId={`${pillId}-remove`}
           onClick={(event) => onRemove(item.value, event)}
+          variant="ghost"
+          size="icon"
           className={pillRemoveSurface.className}
           style={pillRemoveSurface.style}
         >
           \u00d7
-        </button>
+        </ButtonControl>
       </span>
       <SurfaceStyles css={pillSurface.scopedCss} />
       <SurfaceStyles css={pillLabelSurface.scopedCss} />
@@ -656,14 +659,14 @@ export function MultiSelect({ config }: { config: MultiSelectConfig }) {
                 className={searchContainerSurface.className}
                 style={searchContainerSurface.style}
               >
-                <input
+                <InputControl
                   type="text"
                   placeholder="Search..."
                   value={search}
                   autoFocus
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChangeText={setSearch}
                   onClick={(event) => event.stopPropagation()}
-                  data-snapshot-id={`${rootId}-searchInput`}
+                  surfaceId={`${rootId}-searchInput`}
                   className={searchInputSurface.className}
                   style={searchInputSurface.style}
                 />
@@ -688,18 +691,20 @@ export function MultiSelect({ config }: { config: MultiSelectConfig }) {
                 style={errorSurface.style}
               >
                 <div>Failed to load options</div>
-                <button
+                <ButtonControl
                   type="button"
-                  data-snapshot-id={`${rootId}-retryButton`}
+                  surfaceId={`${rootId}-retryButton`}
                   onClick={(event) => {
                     event.stopPropagation();
                     dataRefetch();
                   }}
+                  variant="ghost"
+                  size="sm"
                   className={retryButtonSurface.className}
                   style={retryButtonSurface.style}
                 >
                   Retry
-                </button>
+                </ButtonControl>
               </div>
             ) : null}
 

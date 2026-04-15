@@ -6,6 +6,7 @@ import { useActionExecutor } from "../../../actions/executor";
 import { useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
 import type { VoteConfig } from "./types";
 
 export function Vote({ config }: { config: VoteConfig }) {
@@ -92,21 +93,23 @@ export function Vote({ config }: { config: VoteConfig }) {
         ...((config.style as CSSProperties | undefined) ?? {}),
       }}
     >
-      <button
+      <ButtonControl
         type="button"
-        data-snapshot-id={`${rootId}-upvote`}
-        className={upvoteSurface.className}
         onClick={() => {
           setVoted(voted === "up" ? null : "up");
           if (config.upAction) {
             void execute(config.upAction);
           }
         }}
-        aria-label="Upvote"
+        ariaLabel="Upvote"
+        variant="ghost"
+        size="icon"
+        surfaceId={`${rootId}-upvote`}
+        className={upvoteSurface.className}
         style={upvoteSurface.style}
       >
         &#x25B2;
-      </button>
+      </ButtonControl>
       <span
         data-snapshot-id={`${rootId}-value`}
         className={valueSurface.className}
@@ -114,21 +117,23 @@ export function Vote({ config }: { config: VoteConfig }) {
       >
         {displayValue}
       </span>
-      <button
+      <ButtonControl
         type="button"
-        data-snapshot-id={`${rootId}-downvote`}
-        className={downvoteSurface.className}
         onClick={() => {
           setVoted(voted === "down" ? null : "down");
           if (config.downAction) {
             void execute(config.downAction);
           }
         }}
-        aria-label="Downvote"
+        ariaLabel="Downvote"
+        variant="ghost"
+        size="icon"
+        surfaceId={`${rootId}-downvote`}
+        className={downvoteSurface.className}
         style={downvoteSurface.style}
       >
         &#x25BC;
-      </button>
+      </ButtonControl>
       <SurfaceStyles css={rootSurface.scopedCss} />
       <SurfaceStyles css={upvoteSurface.scopedCss} />
       <SurfaceStyles css={valueSurface.scopedCss} />

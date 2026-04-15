@@ -1,4 +1,10 @@
-import type { CSSProperties, Ref } from "react";
+import type {
+  CSSProperties,
+  FocusEventHandler,
+  KeyboardEventHandler,
+  MouseEventHandler,
+  Ref,
+} from "react";
 import type { z } from "zod";
 import type { RuntimeSurfaceState } from "../../_base/style-surfaces";
 import type { inputConfigSchema } from "./schema";
@@ -13,6 +19,7 @@ export interface InputControlProps {
   value: string;
   placeholder?: string;
   autoComplete?: string;
+  autoFocus?: boolean;
   disabled?: boolean;
   readOnly?: boolean;
   maxLength?: number;
@@ -23,6 +30,9 @@ export interface InputControlProps {
   ariaLabel?: string;
   onChangeText?: (value: string) => void;
   onBlur?: () => void;
+  onFocus?: FocusEventHandler<HTMLInputElement>;
+  onClick?: MouseEventHandler<HTMLInputElement>;
+  onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
   className?: string;
   style?: CSSProperties;
   surfaceId?: string;

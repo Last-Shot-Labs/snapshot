@@ -306,7 +306,7 @@ function ToastCard({
           }}
           ariaLabel="Dismiss"
         >
-          ×
+          x
         </ButtonControl>
       </div>
       <SurfaceStyles css={rootSurface.scopedCss} />

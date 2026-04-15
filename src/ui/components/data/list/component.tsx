@@ -16,6 +16,7 @@ import { useLiveData } from "../../_base/use-live-data";
 import { useReorderable } from "../../_base/use-reorderable";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
+import { ButtonControl } from "../../forms/button";
 import {
   SortableContext,
   useDroppable,
@@ -648,9 +649,9 @@ export function ListComponent({ config }: { config: ListConfig }) {
           }}
         >
           <span>New items available</span>
-          <button type="button" onClick={refresh}>
+          <ButtonControl type="button" onClick={refresh} variant="outline" size="sm">
             Refresh
-          </button>
+          </ButtonControl>
         </div>
       ) : null}
       {/* Loading state */}

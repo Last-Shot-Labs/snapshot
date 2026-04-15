@@ -7,6 +7,7 @@ import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
 import type { NotificationBellConfig } from "./types";
 
 /** Icon sizes per size variant (px). */
@@ -154,17 +155,19 @@ export function NotificationBell({
         ...((config.style as CSSProperties | undefined) ?? {}),
       }}
     >
-      <button
-        data-snapshot-id={`${rootId}-button`}
-        data-testid="notification-bell"
-        className={buttonSurface.className}
+      <ButtonControl
         onClick={handleClick}
-        aria-label={
+        testId="notification-bell"
+        ariaLabel={
           showBadge
             ? `Notifications (${resolvedCount} unread)`
             : "Notifications"
         }
-        aria-live={config.ariaLive}
+        ariaLive={config.ariaLive}
+        variant="ghost"
+        size="icon"
+        surfaceId={`${rootId}-button`}
+        className={buttonSurface.className}
         style={{
           ...(buttonSurface.style ?? {}),
         }}
@@ -181,7 +184,7 @@ export function NotificationBell({
             {displayCount}
           </span>
         )}
-      </button>
+      </ButtonControl>
       <SurfaceStyles css={rootSurface.scopedCss} />
       <SurfaceStyles css={buttonSurface.scopedCss} />
       <SurfaceStyles css={badgeSurface.scopedCss} />

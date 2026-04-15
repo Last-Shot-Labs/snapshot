@@ -8,6 +8,7 @@ import { renderIcon } from "../../../icons/render";
 import { useComponentData } from "../../_base/use-component-data";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
 import type { TreeViewConfig, TreeItemInput } from "./types";
 
 interface TreeNodeProps {
@@ -201,19 +202,20 @@ function TreeNode({
       className={itemSurface.className}
       style={itemSurface.style}
     >
-      <button
+      <ButtonControl
         type="button"
-        data-testid="tree-node-row"
-        data-selected={isSelected ? "" : undefined}
-        data-snapshot-id={`${rootId}-row-${pathKey}`}
-        className={rowSurface.className}
-        style={rowSurface.style}
+        disabled={isDisabled}
+        testId="tree-node-row"
         onClick={handleClick}
         role="treeitem"
         tabIndex={isDisabled ? -1 : isSelected ? 0 : -1}
-        aria-expanded={hasChildren ? isExpanded : undefined}
-        aria-selected={selectable ? isSelected : undefined}
-        aria-disabled={isDisabled || undefined}
+        ariaExpanded={hasChildren ? isExpanded : undefined}
+        ariaSelected={selectable ? isSelected : undefined}
+        variant="ghost"
+        size="sm"
+        surfaceId={`${rootId}-row-${pathKey}`}
+        className={rowSurface.className}
+        style={rowSurface.style}
       >
         {showConnectors && depth > 0 ? (
           <span
@@ -271,7 +273,7 @@ function TreeNode({
             {item.badge}
           </span>
         ) : null}
-      </button>
+      </ButtonControl>
 
       {hasChildren && isExpanded ? (
         <div

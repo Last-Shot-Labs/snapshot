@@ -1,6 +1,6 @@
 # Roadmap
 
-> **Last updated:** 2026-04-14 - shared frontend contract execution status updated
+> **Last updated:** 2026-04-15 - shared frontend contract execution status updated
 >
 > Modeled on [`bunshot/docs/roadmap.md`](../../bunshot/docs/roadmap.md). Specs progress
 > from `docs/specs/<name>.md` (active) -> `docs/specs/completed/<name>.md` (done) and
@@ -118,6 +118,7 @@ Spec at [`docs/specs/completed/manifest-only.md`](./specs/completed/manifest-onl
 - Rebase Snapshot and Pocketshot as peer runtimes over that shared contract package.
 - Finish Pocketshot's declarative runtime against the same manifest, token, action, resource, workflow, state, policy, i18n, and component metadata contract.
 - Runtime execution is now materially underway: Pocketshot is wired to shared refs/manifest/tokens/actions/resources/workflows, has native manifest runtime scaffolding, a shared-workflow execution path, resource query invalidation helpers, and a checked-in component classification artifact.
+- Phase 4 is now in flight too: the shared package owns a platform-neutral component contract surface, and Pocketshot now has a native base styling/runtime layer for canonical style props, surface states, expression-backed visibility, and overlay `open` state handling.
 - Shared proof fixtures now exist in `../frontend-contract/fixtures/`, are covered by shared-contract tests, and are already being consumed by Pocketshot SDK tests for cross-runtime contract verification.
 - This is replacement work: both packages are pre-production and incorrect contracts should be replaced outright.
 

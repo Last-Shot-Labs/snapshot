@@ -18,6 +18,10 @@ export function ButtonControl({
   fullWidth,
   onClick,
   onKeyDown,
+  onFocus,
+  onBlur,
+  onPointerEnter,
+  onPointerLeave,
   className,
   style,
   buttonRef,
@@ -27,6 +31,7 @@ export function ButtonControl({
   testId,
   ariaLabel,
   ariaDescribedBy,
+  ariaLive,
   ariaPressed,
   ariaChecked,
   ariaCurrent,
@@ -35,6 +40,7 @@ export function ButtonControl({
   ariaHasPopup,
   role,
   tabIndex,
+  title,
   activeStates,
 }: ButtonControlProps) {
   const minHeightBySize: Record<string, string> = {
@@ -74,6 +80,10 @@ export function ButtonControl({
         disabled={disabled}
         onClick={onClick}
         onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
         data-sn-button=""
         data-variant={variant}
         data-snapshot-id={surfaceId}
@@ -85,6 +95,7 @@ export function ButtonControl({
         data-disabled={resolvedStates.has("disabled") ? "true" : undefined}
         aria-label={ariaLabel}
         aria-describedby={ariaDescribedBy}
+        aria-live={ariaLive}
         aria-pressed={ariaPressed}
         aria-checked={ariaChecked}
         aria-current={ariaCurrent}
@@ -94,6 +105,7 @@ export function ButtonControl({
         aria-disabled={disabled || undefined}
         role={role}
         tabIndex={tabIndex}
+        title={title}
         className={[className, rootSurface.className].filter(Boolean).join(" ") || undefined}
         style={{
           ...(rootSurface.style ?? {}),

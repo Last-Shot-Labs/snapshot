@@ -6,6 +6,7 @@ import { useActionExecutor } from "../../../actions/executor";
 import { useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
 import { formatRelativeTime } from "../../_base/utils";
 import type { NotificationFeedConfig } from "./types";
 
@@ -350,15 +351,16 @@ export function NotificationFeed({
         </div>
 
         {showMarkAllRead && unreadCount > 0 && config.markReadAction && (
-          <button
-            data-notification-mark-all
-            data-snapshot-id={`${rootId}-mark-all`}
+          <ButtonControl
+            surfaceId={`${rootId}-mark-all`}
             className={markAllButtonSurface.className}
             onClick={handleMarkAllRead}
+            variant="ghost"
+            size="sm"
             style={markAllButtonSurface.style}
           >
             Mark all read
-          </button>
+          </ButtonControl>
         )}
       </div>
 
