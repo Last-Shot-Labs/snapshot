@@ -139,6 +139,25 @@ describe("ModalComponent", () => {
     expect(store.get(modalStackAtom)).toEqual([]);
   });
 
+  it("uses shared button controls for close and footer actions", () => {
+    store.set(modalStackAtom, ["test-modal"]);
+    const config: ModalConfig = {
+      ...baseConfig,
+      footer: {
+        actions: [{ label: "Save", dismiss: true }],
+      },
+    };
+
+    render(createElement(ModalComponent, { config }), {
+      wrapper: createWrapper(store),
+    });
+
+    expect(screen.getByTestId("modal-close").getAttribute("data-sn-button")).not.toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Save" }).getAttribute("data-sn-button"),
+    ).not.toBeNull();
+  });
+
   it("renders without title when none provided", () => {
     store.set(modalStackAtom, ["no-title-modal"]);
     const config: ModalConfig = {

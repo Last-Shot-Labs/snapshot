@@ -45,7 +45,7 @@ export interface FloatingPanelProps {
   open: boolean;
   onClose: () => void;
   containerRef: RefObject<HTMLElement | null>;
-  side?: "top" | "bottom";
+  side?: "top" | "bottom" | "left" | "right";
   align?: "start" | "center" | "end";
   animate?: boolean;
   minWidth?: string;
@@ -166,8 +166,14 @@ export function FloatingPanel({
     return null;
   }
 
-  const alignStyle: CSSProperties =
-    align === "end"
+  const alignsVertically = side === "left" || side === "right";
+  const alignStyle: CSSProperties = alignsVertically
+    ? align === "end"
+      ? { bottom: 0 }
+      : align === "center"
+        ? { top: "50%" }
+        : { top: 0 }
+    : align === "end"
       ? { right: 0 }
       : align === "center"
         ? { left: "50%" }
@@ -176,18 +182,37 @@ export function FloatingPanel({
   const sideStyle: CSSProperties =
     side === "top"
       ? { bottom: "100%", marginBottom: "var(--sn-spacing-xs, 0.25rem)" }
-      : { top: "100%", marginTop: "var(--sn-spacing-xs, 0.25rem)" };
+      : side === "left"
+        ? { right: "100%", marginRight: "var(--sn-spacing-xs, 0.25rem)" }
+        : side === "right"
+          ? { left: "100%", marginLeft: "var(--sn-spacing-xs, 0.25rem)" }
+          : { top: "100%", marginTop: "var(--sn-spacing-xs, 0.25rem)" };
 
-  const centerTranslate = align === "center" ? "translateX(-50%) " : "";
+  const centerTranslate =
+    align === "center"
+      ? alignsVertically
+        ? "translateY(-50%) "
+        : "translateX(-50%) "
+      : "";
+  const transformOrigin =
+    side === "top"
+      ? "bottom"
+      : side === "left"
+        ? "right"
+        : side === "right"
+          ? "left"
+          : "top";
   const animationStyle: CSSProperties = enableAnimation
     ? {
         opacity: animating ? 1 : 0,
         transform: `${centerTranslate}${animating ? "scale(1)" : "scale(0.95)"}`,
-        transformOrigin: side === "top" ? "bottom" : "top",
+        transformOrigin,
         transition: `opacity var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease), transform var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease)`,
       }
     : align === "center"
-      ? { transform: "translateX(-50%)" }
+      ? {
+          transform: alignsVertically ? "translateY(-50%)" : "translateX(-50%)",
+        }
       : {};
 
   const panelSurface = resolveSlotSurface({

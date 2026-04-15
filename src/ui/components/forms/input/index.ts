@@ -1,3 +1,3 @@
 export { inputConfigSchema } from "./schema";
-export { Input } from "./component";
-export type { InputConfig } from "./types";
+export { Input, InputControl } from "./component";
+export type { InputConfig, InputControlProps } from "./types";

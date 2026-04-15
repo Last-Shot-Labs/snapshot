@@ -5,6 +5,19 @@ import {
   baseComponentConfigSchema,
   fromRefSchema,
 } from "../../../manifest/schema";
+import { slotsSchema } from "../../_base/schema";
+
+export const modalSlotNames = [
+  "root",
+  "overlay",
+  "panel",
+  "header",
+  "title",
+  "closeButton",
+  "body",
+  "footer",
+  "footerAction",
+] as const;
 
 /**
  * Zod schema for modal component config.
@@ -59,6 +72,7 @@ export const modalConfigSchema = baseComponentConfigSchema.extend({
       align: z.enum(["left", "center", "right"]).optional(),
     })
     .optional(),
+  slots: slotsSchema(modalSlotNames).optional(),
 });
 
 /** Inferred type for modal config. */

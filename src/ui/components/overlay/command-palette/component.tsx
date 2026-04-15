@@ -17,6 +17,7 @@ import {
 import { Icon } from "../../../icons/index";
 import { useComponentData } from "../../_base/use-component-data";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { InputControl } from "../../forms/input";
 import {
   buildRequestUrl,
   resolveEndpointTarget,
@@ -565,16 +566,16 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
             size={16}
             color="var(--sn-color-muted-foreground, #6b7280)"
           />
-          <input
-            ref={inputRef}
-            data-snapshot-id={`${rootId}-search-input`}
+          <InputControl
+            inputRef={inputRef}
+            surfaceId={`${rootId}-search-input`}
             className={searchInputSurface.className}
             style={searchInputSurface.style}
             type="text"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChangeText={setQuery}
             placeholder={placeholder}
-            aria-label={placeholder}
+            ariaLabel={placeholder}
           />
           <kbd
             style={{

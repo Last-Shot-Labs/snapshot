@@ -86,4 +86,16 @@ describe("drawerConfigSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts drawer slot surfaces", () => {
+    const result = drawerConfigSchema.safeParse({
+      ...baseConfig,
+      slots: {
+        panel: { className: "drawer-panel-slot" },
+        closeButton: { className: "drawer-close-slot" },
+        footerAction: { className: "drawer-footer-action-slot" },
+      },
+    });
+    expect(result.success).toBe(true);
+  });
 });

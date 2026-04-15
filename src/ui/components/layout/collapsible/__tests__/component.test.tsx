@@ -35,4 +35,20 @@ describe("Collapsible", () => {
 
     expect(container.querySelector('[data-collapsible-content][data-open="true"]')).toBeTruthy();
   });
+
+  it("uses the shared button control for its trigger", () => {
+    render(
+      <Collapsible
+        config={{
+          type: "collapsible",
+          trigger: { type: "markdown", id: "trigger-copy", content: "Toggle" } as never,
+          children: [{ type: "markdown", id: "body-copy", content: "Body" } as never],
+        }}
+      />,
+    );
+
+    expect(
+      screen.getAllByRole("button")[0]?.getAttribute("data-sn-button"),
+    ).not.toBeNull();
+  });
 });

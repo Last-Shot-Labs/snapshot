@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { extendComponentSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
 import { actionSchema } from "../../../actions/types";
 
@@ -15,4 +15,5 @@ export const iconButtonConfigSchema = extendComponentSchema({
   action: actionSchema.optional(),
   disabled: z.union([z.boolean(), fromRefSchema]).optional(),
   tooltip: z.string().optional(),
+  slots: slotsSchema(["root", "icon"]).optional(),
 }).strict();

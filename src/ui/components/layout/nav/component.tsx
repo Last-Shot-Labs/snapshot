@@ -1,25 +1,27 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSubscribe } from "../../../context";
-import { ComponentWrapper } from "../../_base/component-wrapper";
-import { resolveSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
-import { ButtonControl } from "../../forms/button";
-import {
-  FloatingMenuStyles,
-  FloatingPanel,
-  MenuItem,
-} from "../../primitives/floating-menu";
-import { useActionExecutor } from "../../../actions/executor";
 import { renderIcon } from "../../../icons/render";
 import { resolveRuntimeLocale, resolveTRef } from "../../../i18n/resolve";
 import { isTRef, type I18nConfig, type TRef } from "../../../i18n/schema";
-import { useManifestRuntime } from "../../../manifest/runtime";
 import { ComponentRenderer } from "../../../manifest/renderer";
+import { useManifestRuntime } from "../../../manifest/runtime";
 import type { ComponentConfig } from "../../../manifest/types";
+import { ComponentWrapper } from "../../_base/component-wrapper";
+import {
+  resolveSurfaceConfig,
+  resolveSurfacePresentation,
+} from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
+import { FloatingMenuStyles } from "../../primitives/floating-menu";
+import { NavDropdown } from "../nav-dropdown";
+import { NavLink } from "../nav-link";
+import { NavLogo } from "../nav-logo";
+import { NavUserMenu } from "../nav-user-menu";
 import { useNav } from "./hook";
 import type { NavConfig } from "./schema";
-import type { AuthUser, ResolvedNavItem } from "./types";
+import type { ResolvedNavItem } from "./types";
 
 function SurfaceStyles({ css }: { css?: string }) {
   return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
@@ -45,52 +47,58 @@ function resolveNavText(
   return "";
 }
 
-function AvatarSurface({
-  user,
-  surfaceId,
-  slot,
-}: {
-  user: AuthUser;
-  surfaceId: string;
-  slot?: Record<string, unknown>;
-}) {
-  const avatarSurface = resolveSurfacePresentation({
-    surfaceId,
-    implementationBase: {
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: "2rem",
-      height: "2rem",
-      borderRadius: "var(--sn-radius-full, 9999px)",
-      overflow: "hidden",
-      flexShrink: 0,
-      background: "var(--sn-color-muted)",
-      color: "var(--sn-color-muted-foreground)",
-    },
-    componentSurface: slot,
-  });
+function resolvePositiveBadge(item: ResolvedNavItem): number | undefined {
+  return item.resolvedBadge !== null && item.resolvedBadge > 0
+    ? item.resolvedBadge
+    : undefined;
+}
 
-  return (
-    <>
-      <span
-        data-snapshot-id={surfaceId}
-        className={avatarSurface.className}
-        style={avatarSurface.style}
-      >
-        {user.avatar ? (
-          <img
-            src={user.avatar}
-            alt={user.name ?? "User"}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        ) : (
-          (user.name?.charAt(0)?.toUpperCase() ?? "U")
-        )}
-      </span>
-      <SurfaceStyles css={avatarSurface.scopedCss} />
-    </>
-  );
+function buildGroupedNavLinkConfig(
+  item: ResolvedNavItem,
+  id: string,
+  slots: NavConfig["slots"],
+) {
+  return {
+    type: "nav-link" as const,
+    id,
+    label: item.label,
+    path: item.path ?? "/",
+    icon: item.icon,
+    badge: resolvePositiveBadge(item),
+    disabled: item.isDisabled,
+    active: item.isActive,
+    matchChildren: true,
+    slots: {
+      root: slots?.item ?? item.slots?.item,
+      label: slots?.itemLabel ?? item.slots?.itemLabel,
+      icon: slots?.itemIcon ?? item.slots?.itemIcon,
+      badge: slots?.itemBadge ?? item.slots?.itemBadge,
+    },
+  };
+}
+
+function buildGroupedDropdownLinkConfig(
+  item: ResolvedNavItem,
+  id: string,
+  slots: NavConfig["slots"],
+) {
+  return {
+    type: "nav-link" as const,
+    id,
+    label: item.label,
+    path: item.path ?? "/",
+    icon: item.icon,
+    badge: resolvePositiveBadge(item),
+    disabled: item.isDisabled,
+    active: item.isActive,
+    matchChildren: true,
+    slots: {
+      root: slots?.dropdownItem ?? item.slots?.dropdownItem,
+      label: slots?.dropdownItemLabel ?? item.slots?.dropdownItemLabel,
+      icon: slots?.dropdownItemIcon ?? item.slots?.dropdownItemIcon,
+      badge: slots?.dropdownItemBadge ?? item.slots?.dropdownItemBadge,
+    },
+  };
 }
 
 function NavEntry({
@@ -110,8 +118,6 @@ function NavEntry({
   locale: string | undefined;
   i18n: I18nConfig | undefined;
 }) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const containerRef = useRef<HTMLLIElement>(null);
   const hasChildren = Boolean(item.children?.length);
   const itemId = item.path ? `${rootId}-${item.path}` : rootId;
   const label = resolveNavText(item.label, locale, i18n);
@@ -161,19 +167,64 @@ function NavEntry({
     return null;
   }
 
+  if (!hasChildren && item.path) {
+    return (
+      <li style={isTopNav ? { position: "relative" } : undefined}>
+        <NavLink
+          config={buildGroupedNavLinkConfig(item, itemId, slots)}
+          onNavigate={onNavigate}
+        />
+      </li>
+    );
+  }
+
+  if (isTopNav && hasChildren) {
+    return (
+      <li style={{ position: "relative" }}>
+        <NavDropdown
+          config={{
+            type: "nav-dropdown",
+            id: itemId,
+            label,
+            icon: item.icon,
+            current: item.isActive,
+            disabled: item.isDisabled,
+            align: "start",
+            trigger: "click",
+            slots: {
+              trigger: slots?.item ?? item.slots?.item,
+              triggerLabel: slots?.itemLabel ?? item.slots?.itemLabel,
+              triggerIcon: slots?.itemIcon ?? item.slots?.itemIcon,
+              panel: slots?.dropdown,
+              item: slots?.dropdownItem,
+              itemLabel: slots?.dropdownItemLabel,
+              itemIcon: slots?.dropdownItemIcon,
+            },
+            items:
+              item.children
+                ?.filter((child) => child.isVisible)
+                .map((child, index) =>
+                  buildGroupedDropdownLinkConfig(
+                    child,
+                    `${itemId}-dropdown-item-${index}`,
+                    slots,
+                  ),
+                ) ?? [],
+          }}
+          onNavigate={onNavigate}
+        />
+      </li>
+    );
+  }
+
   return (
-    <li ref={containerRef} style={isTopNav ? { position: "relative" } : undefined}>
+    <li style={isTopNav ? { position: "relative" } : undefined}>
       <ButtonControl
         variant="ghost"
         disabled={item.isDisabled}
         ariaCurrent={item.isActive && item.path ? "page" : undefined}
         onClick={() => {
           if (item.isDisabled) {
-            return;
-          }
-
-          if (isTopNav && hasChildren) {
-            setDropdownOpen((value) => !value);
             return;
           }
 
@@ -184,10 +235,7 @@ function NavEntry({
         surfaceId={`${itemId}-button`}
         surfaceConfig={buttonSlot}
         itemSurfaceConfig={item.slots?.item}
-        activeStates={[
-          ...(item.isActive ? (["current"] as const) : []),
-          ...(dropdownOpen ? (["open"] as const) : []),
-        ]}
+        activeStates={item.isActive ? ["current"] : []}
       >
         {item.icon ? (
           <span
@@ -205,7 +253,7 @@ function NavEntry({
         >
           {label}
         </span>
-        {item.resolvedBadge !== null && item.resolvedBadge > 0 ? (
+        {resolvePositiveBadge(item) ? (
           <span
             data-snapshot-id={`${itemId}-badge`}
             className={badgeSurface.className}
@@ -214,7 +262,7 @@ function NavEntry({
             {item.resolvedBadge}
           </span>
         ) : null}
-        {hasChildren ? <span aria-hidden="true">▾</span> : null}
+        {hasChildren ? <span aria-hidden="true">v</span> : null}
       </ButtonControl>
       <SurfaceStyles css={labelSurface.scopedCss} />
       <SurfaceStyles css={iconSurface.scopedCss} />
@@ -236,118 +284,7 @@ function NavEntry({
           ))}
         </ul>
       ) : null}
-
-      {isTopNav && hasChildren ? (
-        <FloatingPanel
-          open={dropdownOpen}
-          onClose={() => setDropdownOpen(false)}
-          containerRef={containerRef}
-          side="bottom"
-          align="start"
-          surfaceId={`${itemId}-dropdown`}
-          slot={slots?.dropdown}
-        >
-          {item.children?.filter((child) => child.isVisible).map((child, index) => (
-            <MenuItem
-              key={child.path ?? `${itemId}-dropdown-${index}`}
-              label={resolveNavText(child.label, locale, i18n)}
-              icon={child.icon}
-              onClick={() => {
-                setDropdownOpen(false);
-                if (child.path) {
-                  onNavigate?.(child.path);
-                }
-              }}
-              disabled={child.isDisabled}
-              current={child.isActive}
-              surfaceId={`${itemId}-dropdown-item-${index}`}
-              slot={slots?.dropdownItem ?? child.slots?.dropdownItem}
-              labelSlot={slots?.dropdownItemLabel ?? child.slots?.dropdownItemLabel}
-              iconSlot={slots?.dropdownItemIcon ?? child.slots?.dropdownItemIcon}
-            />
-          ))}
-        </FloatingPanel>
-      ) : null}
     </li>
-  );
-}
-
-function UserMenu({
-  rootId,
-  config,
-  user,
-  slots,
-  isTopNav,
-  locale,
-  i18n,
-}: {
-  rootId: string;
-  config: Extract<NavConfig["userMenu"], Record<string, unknown>>;
-  user: AuthUser;
-  slots: NavConfig["slots"];
-  isTopNav: boolean;
-  locale: string | undefined;
-  i18n: I18nConfig | undefined;
-}) {
-  const execute = useActionExecutor();
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const showAvatar = config.showAvatar !== false;
-  const showEmail = config.showEmail ?? false;
-  const menuItems = config.items ?? [];
-
-  return (
-    <div
-      ref={containerRef}
-      style={isTopNav ? { marginLeft: "auto", position: "relative" } : { position: "relative" }}
-    >
-      <ButtonControl
-        variant="ghost"
-        onClick={() => setOpen((value) => !value)}
-        surfaceId={`${rootId}-trigger`}
-        surfaceConfig={slots?.userMenuTrigger}
-        activeStates={open ? ["open"] : []}
-      >
-        {showAvatar ? (
-          <AvatarSurface
-            user={user}
-            surfaceId={`${rootId}-avatar`}
-            slot={slots?.userAvatar}
-          />
-        ) : null}
-        {!isTopNav && user.name ? <span>{user.name}</span> : null}
-      </ButtonControl>
-      <FloatingPanel
-        open={open}
-        onClose={() => setOpen(false)}
-        containerRef={containerRef}
-        side="bottom"
-        align="end"
-        surfaceId={`${rootId}-panel`}
-        slot={slots?.userMenu}
-      >
-        {showEmail && user.email ? (
-          <div style={{ padding: "0.5rem 0.75rem", fontSize: "0.75rem" }}>
-            {user.email}
-          </div>
-        ) : null}
-        {menuItems.map((item, index) => (
-          <MenuItem
-            key={`${rootId}-item-${index}`}
-            label={resolveNavText(item.label, locale, i18n)}
-            icon={item.icon}
-            onClick={() => {
-              setOpen(false);
-              void execute(item.action);
-            }}
-            surfaceId={`${rootId}-item-${index}`}
-            slot={slots?.userMenuItem ?? item.slots?.item}
-            labelSlot={item.slots?.itemLabel}
-            iconSlot={item.slots?.itemIcon}
-          />
-        ))}
-      </FloatingPanel>
-    </div>
   );
 }
 
@@ -384,11 +321,6 @@ export function Nav({
           path: manifest.app.home ?? "/",
         }
       : undefined);
-  const effectiveLogoText = resolveNavText(
-    effectiveLogo?.text,
-    activeLocale,
-    manifest?.raw.i18n,
-  );
 
   useEffect(() => {
     if (pathname) {
@@ -409,34 +341,6 @@ export function Nav({
       componentSurface: config,
       itemSurface: config.slots?.root,
     }).resolvedConfigForWrapper ?? config;
-  const brandSurface = resolveSurfacePresentation({
-    surfaceId: `${config.id ?? "nav"}-brand`,
-    implementationBase: {
-      display: "flex",
-      alignItems: "center",
-      gap: "0.5rem",
-      cursor: effectiveLogo?.path ? "pointer" : undefined,
-    },
-    componentSurface: config.slots?.brand,
-  });
-  const brandIconSurface = resolveSurfacePresentation({
-    surfaceId: `${config.id ?? "nav"}-brand-icon`,
-    implementationBase: {
-      display: "inline-flex",
-      alignItems: "center",
-      flexShrink: 0,
-    },
-    componentSurface: config.slots?.brandIcon,
-  });
-  const brandLabelSurface = resolveSurfacePresentation({
-    surfaceId: `${config.id ?? "nav"}-brand-label`,
-    implementationBase: {
-      display: "inline-flex",
-      alignItems: "center",
-      fontWeight: 600,
-    },
-    componentSurface: config.slots?.brandLabel,
-  });
   const listSurface = resolveSurfacePresentation({
     surfaceId: `${config.id ?? "nav"}-list`,
     implementationBase: {
@@ -455,7 +359,10 @@ export function Nav({
       <ComponentWrapper type="nav" config={rootConfig}>
         <nav aria-label="Main navigation">
           {templateItems.map((child, index) => (
-            <ComponentRenderer key={child.id ?? `nav-template-${index}`} config={child} />
+            <ComponentRenderer
+              key={child.id ?? `nav-template-${index}`}
+              config={child}
+            />
           ))}
         </nav>
       </ComponentWrapper>
@@ -464,42 +371,40 @@ export function Nav({
 
   return (
     <ComponentWrapper type="nav" config={rootConfig}>
-      <nav aria-label="Main navigation" data-variant={variant} data-collapsed={isCollapsed ? "true" : undefined}>
+      <nav
+        aria-label="Main navigation"
+        data-variant={variant}
+        data-collapsed={isCollapsed ? "true" : undefined}
+      >
         {effectiveLogo ? (
-          <div
-            data-snapshot-id={`${config.id ?? "nav"}-brand`}
-            className={brandSurface.className}
-            style={brandSurface.style}
-            onClick={() => {
-              if (effectiveLogo.path) {
-                onNavigate?.(effectiveLogo.path);
-              }
+          <NavLogo
+            config={{
+              type: "nav-logo",
+              id: `${config.id ?? "nav"}-brand`,
+              src: effectiveLogo.src,
+              text: resolveNavText(
+                effectiveLogo.text,
+                activeLocale,
+                manifest?.raw.i18n,
+              ),
+              path: effectiveLogo.path,
+              slots: {
+                root: config.slots?.brand,
+                icon: config.slots?.brandIcon,
+                label: config.slots?.brandLabel,
+              },
             }}
-          >
-            {effectiveLogo.src ? (
-              <img
-                src={effectiveLogo.src}
-                alt={effectiveLogoText || "Logo"}
-                data-snapshot-id={`${config.id ?? "nav"}-brand-icon`}
-                className={brandIconSurface.className}
-                style={brandIconSurface.style}
-              />
-            ) : null}
-            {effectiveLogoText ? (
-              <span
-                data-snapshot-id={`${config.id ?? "nav"}-brand-label`}
-                className={brandLabelSurface.className}
-                style={brandLabelSurface.style}
-              >
-                {effectiveLogoText}
-              </span>
-            ) : null}
-          </div>
+            onNavigate={onNavigate}
+          />
         ) : null}
 
         {config.collapsible !== false && !isTopNav ? (
-          <ButtonControl variant="ghost" onClick={toggle} surfaceId={`${config.id ?? "nav"}-toggle`}>
-            {isCollapsed ? "☰" : "✕"}
+          <ButtonControl
+            variant="ghost"
+            onClick={toggle}
+            surfaceId={`${config.id ?? "nav"}-toggle`}
+          >
+            {isCollapsed ? "Menu" : "Close"}
           </ButtonControl>
         ) : null}
 
@@ -523,23 +428,37 @@ export function Nav({
         </ul>
 
         {user && config.userMenu !== false ? (
-          <UserMenu
-            rootId={`${config.id ?? "nav"}-user-menu`}
-            config={
-              typeof config.userMenu === "object" ? config.userMenu : {}
-            }
-            user={user}
-            slots={config.slots}
-            isTopNav={isTopNav}
-            locale={activeLocale}
-            i18n={manifest?.raw.i18n}
-          />
+          <div style={isTopNav ? { marginLeft: "auto" } : undefined}>
+            <NavUserMenu
+              config={{
+                type: "nav-user-menu",
+                id: `${config.id ?? "nav"}-user-menu`,
+                mode: isTopNav ? "compact" : "full",
+                showAvatar:
+                  typeof config.userMenu === "object"
+                    ? config.userMenu.showAvatar
+                    : undefined,
+                showEmail:
+                  typeof config.userMenu === "object"
+                    ? config.userMenu.showEmail
+                    : undefined,
+                showName: !isTopNav,
+                items:
+                  typeof config.userMenu === "object"
+                    ? config.userMenu.items
+                    : undefined,
+                slots: {
+                  trigger: config.slots?.userMenuTrigger,
+                  avatar: config.slots?.userAvatar,
+                  panel: config.slots?.userMenu,
+                  item: config.slots?.userMenuItem,
+                },
+              }}
+            />
+          </div>
         ) : null}
 
         <FloatingMenuStyles />
-        <SurfaceStyles css={brandSurface.scopedCss} />
-        <SurfaceStyles css={brandIconSurface.scopedCss} />
-        <SurfaceStyles css={brandLabelSurface.scopedCss} />
         <SurfaceStyles css={listSurface.scopedCss} />
       </nav>
     </ComponentWrapper>

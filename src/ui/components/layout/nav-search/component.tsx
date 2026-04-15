@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import { usePublish } from "../../../context/index";
 import { useActionExecutor } from "../../../actions/executor";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { InputControl } from "../../forms/input";
 import type { NavSearchConfig } from "./types";
 
 function SurfaceStyles({ css }: { css?: string }) {
@@ -102,16 +103,16 @@ export function NavSearch({ config }: { config: NavSearchConfig }) {
       className={rootSurface.className}
       style={rootSurface.style}
     >
-      <input
-        ref={inputRef}
+      <InputControl
+        inputRef={inputRef}
         type="search"
         placeholder={config.placeholder ?? "Search..."}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
-        data-snapshot-id={`${rootId}-input`}
+        onChangeText={setValue}
+        surfaceId={`${rootId}-input`}
         className={inputSurface.className}
         style={inputSurface.style as CSSProperties | undefined}
-        aria-label={config.placeholder ?? "Search"}
+        ariaLabel={config.placeholder ?? "Search"}
       />
       {config.shortcut && (
         <kbd

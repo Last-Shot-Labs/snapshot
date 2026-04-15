@@ -1,1 +1,19 @@
-export { selectConfigSchema } from "../../../manifest/schema";
+import { z } from "zod";
+import { dataSourceSchema } from "../../../manifest/resources";
+import { fromRefSchema } from "../../_base/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+
+const selectOptionSchema = z.object({
+  label: z.union([z.string(), fromRefSchema]),
+  value: z.string(),
+});
+
+export const selectConfigSchema = extendComponentSchema({
+  type: z.literal("select"),
+  options: z.union([z.array(selectOptionSchema), dataSourceSchema]),
+  valueField: z.string().optional(),
+  labelField: z.string().optional(),
+  default: z.union([z.string(), fromRefSchema]).optional(),
+  placeholder: z.union([z.string(), fromRefSchema]).optional(),
+  slots: slotsSchema(["root", "control"]).optional(),
+}).strict();

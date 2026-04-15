@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { componentConfigSchema } from "../../../manifest/schema";
-import { extendComponentSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 
 function responsiveValueSchema<T extends z.ZodTypeAny>(valueSchema: T) {
   return z.union([
@@ -29,4 +29,5 @@ export const columnConfigSchema = extendComponentSchema({
   align: z.enum(["start", "center", "end", "stretch"]).optional(),
   overflow: z.enum(["auto", "hidden", "scroll", "visible"]).optional(),
   maxHeight: z.string().optional(),
+  slots: slotsSchema(["root", "item"]).optional(),
 }).strict();

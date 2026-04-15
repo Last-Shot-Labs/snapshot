@@ -5,6 +5,19 @@ import {
   baseComponentConfigSchema,
   fromRefSchema,
 } from "../../../manifest/schema";
+import { slotsSchema } from "../../_base/schema";
+
+export const drawerSlotNames = [
+  "root",
+  "overlay",
+  "panel",
+  "header",
+  "title",
+  "closeButton",
+  "body",
+  "footer",
+  "footerAction",
+] as const;
 
 /**
  * Zod schema for drawer component config.
@@ -61,6 +74,7 @@ export const drawerConfigSchema = baseComponentConfigSchema.extend({
       align: z.enum(["left", "center", "right"]).optional(),
     })
     .optional(),
+  slots: slotsSchema(drawerSlotNames).optional(),
 });
 
 /** Inferred type for drawer config. */

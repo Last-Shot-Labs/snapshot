@@ -2,9 +2,16 @@
 
 import { useSubscribe } from "../../../context/index";
 import { Link } from "../../primitives/link";
+import type { LinkConfig } from "../../primitives/link/types";
 import type { NavLinkConfig } from "./types";
 
-export function NavLink({ config }: { config: NavLinkConfig }) {
+export function NavLink({
+  config,
+  onNavigate,
+}: {
+  config: NavLinkConfig;
+  onNavigate?: (path: string) => void;
+}) {
   const resolvedDisabled = useSubscribe(
     typeof config.disabled === "object" &&
       config.disabled !== null &&
@@ -48,6 +55,8 @@ export function NavLink({ config }: { config: NavLinkConfig }) {
     }
   }
 
+  const linkSlots = config.slots as LinkConfig["slots"];
+
   return (
     <div data-snapshot-component="nav-link">
       <Link
@@ -61,9 +70,10 @@ export function NavLink({ config }: { config: NavLinkConfig }) {
           variant: "navigation",
           disabled: isDisabled,
           current: isActive,
-          matchChildren: config.matchChildren,
-          slots: config.slots,
+          matchChildren: config.matchChildren ?? true,
+          slots: linkSlots,
         }}
+        onNavigate={onNavigate}
       />
     </div>
   );

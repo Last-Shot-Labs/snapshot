@@ -65,7 +65,13 @@ function getVariantStyle(
   };
 }
 
-export function Link({ config }: { config: LinkConfig }) {
+export function Link({
+  config,
+  onNavigate,
+}: {
+  config: LinkConfig;
+  onNavigate?: (to: string) => void;
+}) {
   const routeRuntime = useRouteRuntime();
   const manifest = useManifestRuntime();
   const localeState = useSubscribe({ from: "global.locale" });
@@ -222,6 +228,8 @@ export function Link({ config }: { config: LinkConfig }) {
       <a
         data-snapshot-component="link"
         data-snapshot-id={`${rootId}-root`}
+        data-current={isCurrent ? "true" : undefined}
+        data-disabled={isDisabled ? "true" : undefined}
         href={to}
         target={config.external ? "_blank" : undefined}
         rel={config.external ? "noreferrer noopener" : undefined}
@@ -235,8 +243,6 @@ export function Link({ config }: { config: LinkConfig }) {
           }
 
           if (
-            config.external ||
-            !routeRuntime?.navigate ||
             event.defaultPrevented ||
             event.button !== 0 ||
             event.metaKey ||
@@ -247,12 +253,19 @@ export function Link({ config }: { config: LinkConfig }) {
             return;
           }
 
-          if (!isClientNavigableHref(to)) {
+          if (!isClientNavigableHref(to) || config.external) {
             return;
           }
 
           event.preventDefault();
-          routeRuntime.navigate(to);
+          if (onNavigate) {
+            onNavigate(to);
+            return;
+          }
+
+          if (routeRuntime?.navigate) {
+            routeRuntime.navigate(to);
+          }
         }}
         className={rootSurface.className}
         style={rootSurface.style}

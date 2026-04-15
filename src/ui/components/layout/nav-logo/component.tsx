@@ -10,7 +10,13 @@ function SurfaceStyles({ css }: { css?: string }) {
   return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
-export function NavLogo({ config }: { config: NavLogoConfig }) {
+export function NavLogo({
+  config,
+  onNavigate,
+}: {
+  config: NavLogoConfig;
+  onNavigate?: (path: string) => void;
+}) {
   const manifest = useManifestRuntime();
   const execute = useActionExecutor();
 
@@ -21,6 +27,10 @@ export function NavLogo({ config }: { config: NavLogoConfig }) {
 
   const handleClick = () => {
     if (path) {
+      if (onNavigate) {
+        onNavigate(path);
+        return;
+      }
       void execute({ type: "navigate", to: path } as Parameters<
         typeof execute
       >[0]);

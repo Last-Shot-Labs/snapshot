@@ -30,6 +30,8 @@ export function ButtonControl({
   testId,
   ariaLabel,
   ariaDescribedBy,
+  ariaPressed,
+  ariaChecked,
   ariaCurrent,
   ariaSelected,
   ariaExpanded,
@@ -86,6 +88,8 @@ export function ButtonControl({
         data-disabled={resolvedStates.has("disabled") ? "true" : undefined}
         aria-label={ariaLabel}
         aria-describedby={ariaDescribedBy}
+        aria-pressed={ariaPressed}
+        aria-checked={ariaChecked}
         aria-current={ariaCurrent}
         aria-selected={ariaSelected}
         aria-expanded={ariaExpanded}

@@ -18,6 +18,7 @@ export const navSlotNames = [
   "dropdownItem",
   "dropdownItemLabel",
   "dropdownItemIcon",
+  "dropdownItemBadge",
   "userMenu",
   "userMenuTrigger",
   "userMenuItem",
@@ -32,6 +33,7 @@ const navItemSlotNames = [
   "dropdownItem",
   "dropdownItemLabel",
   "dropdownItemIcon",
+  "dropdownItemBadge",
 ] as const;
 
 const navTextSchema = z.union([z.string(), tRefSchema]);

@@ -20,6 +20,8 @@ export const navDropdownConfigSchema = extendComponentSchema({
   label: z.string(),
   icon: z.string().optional(),
   trigger: z.enum(["click", "hover"]).optional(),
+  current: z.boolean().optional(),
+  disabled: z.boolean().optional(),
   align: z.enum(["start", "center", "end"]).optional(),
   width: z.string().optional(),
   items: z.array(componentConfigSchema),

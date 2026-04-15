@@ -1,52 +1,19 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import { useSubscribe } from "../../../context/index";
 import { useActionExecutor } from "../../../actions/executor";
 import { renderIcon } from "../../../icons/render";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../button";
 import type { IconButtonConfig } from "./types";
 
-const SIZE_MAP: Record<string, string> = {
-  xs: "1.5rem",
-  sm: "2rem",
-  md: "2.5rem",
-  lg: "3rem",
-};
-
-const ICON_SIZE_MAP: Record<string, number> = {
-  xs: 12,
-  sm: 14,
-  md: 16,
-  lg: 20,
-};
-
-const VARIANT_STYLES: Record<string, CSSProperties> = {
-  default: {
-    background: "var(--sn-color-primary)",
-    color: "var(--sn-color-primary-foreground)",
-    border: "none",
-  },
-  secondary: {
-    background: "var(--sn-color-secondary)",
-    color: "var(--sn-color-secondary-foreground)",
-    border: "none",
-  },
-  outline: {
-    background: "transparent",
-    color: "inherit",
-    border: "1px solid var(--sn-color-border)",
-  },
-  ghost: {
-    background: "transparent",
-    color: "inherit",
-    border: "none",
-  },
-  destructive: {
-    background: "var(--sn-color-destructive)",
-    color: "var(--sn-color-destructive-foreground)",
-    border: "none",
-  },
-};
+const SIZE_MAP = {
+  xs: { size: "sm" as const, dim: "1.5rem", iconSize: 12 },
+  sm: { size: "sm" as const, dim: "2rem", iconSize: 14 },
+  md: { size: "md" as const, dim: "2.5rem", iconSize: 16 },
+  lg: { size: "lg" as const, dim: "3rem", iconSize: 20 },
+} as const;
 
 export function IconButton({ config }: { config: IconButtonConfig }) {
   const execute = useActionExecutor();
@@ -62,44 +29,59 @@ export function IconButton({ config }: { config: IconButtonConfig }) {
         ? resolvedDisabled
         : false;
 
-  const size = config.size ?? "md";
+  const size = SIZE_MAP[config.size ?? "md"];
   const variant = config.variant ?? "ghost";
-  const shape = config.shape ?? "circle";
-  const dim = SIZE_MAP[size] ?? SIZE_MAP.md;
-  const iconSize = ICON_SIZE_MAP[size] ?? ICON_SIZE_MAP.md;
-
-  const style: CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: dim,
-    height: dim,
-    borderRadius:
-      shape === "circle"
-        ? "var(--sn-radius-full, 9999px)"
-        : "var(--sn-radius-md, 0.375rem)",
-    cursor: isDisabled ? "not-allowed" : "pointer",
-    opacity: isDisabled ? 0.5 : 1,
-    fontFamily: "inherit",
-    transition:
-      "background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-    ...(VARIANT_STYLES[variant] ?? VARIANT_STYLES.ghost),
-  };
+  const states = isDisabled ? (["disabled"] as const) : [];
+  const rootId = config.id ?? config.ariaLabel;
+  const iconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-icon`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    componentSurface: config.slots?.icon,
+    activeStates: [...states],
+  });
 
   return (
-    <button
-      type="button"
-      aria-label={config.ariaLabel}
-      title={config.tooltip ?? config.ariaLabel}
-      disabled={isDisabled}
-      onClick={() => {
-        if (config.action) {
-          void execute(config.action as Parameters<typeof execute>[0]);
-        }
-      }}
-      style={style}
-    >
-      {renderIcon(config.icon, iconSize)}
-    </button>
+    <div data-snapshot-component="icon-button">
+      <ButtonControl
+        type="button"
+        variant={variant}
+        size={size.size}
+        disabled={isDisabled}
+        onClick={() => {
+          if (config.action) {
+            void execute(config.action as Parameters<typeof execute>[0]);
+          }
+        }}
+        surfaceId={rootId}
+        surfaceConfig={config.slots?.root}
+        activeStates={[...states]}
+        ariaLabel={config.ariaLabel}
+        style={{
+          width: size.dim,
+          minWidth: size.dim,
+          height: size.dim,
+          minHeight: size.dim,
+          padding: 0,
+          borderRadius:
+            config.shape === "square"
+              ? "var(--sn-radius-md, 0.375rem)"
+              : "var(--sn-radius-full, 9999px)",
+        }}
+      >
+        <span
+          title={config.tooltip ?? config.ariaLabel}
+          data-snapshot-id={`${rootId}-icon`}
+          className={iconSurface.className}
+          style={iconSurface.style}
+        >
+          {renderIcon(config.icon, size.iconSize)}
+        </span>
+      </ButtonControl>
+      <SurfaceStyles css={iconSurface.scopedCss} />
+    </div>
   );
 }

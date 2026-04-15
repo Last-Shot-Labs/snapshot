@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { componentConfigSchema } from "../../../manifest/schema";
-import { extendComponentSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 
 export const boxConfigSchema = extendComponentSchema({
   type: z.literal("box"),
@@ -18,4 +18,5 @@ export const boxConfigSchema = extendComponentSchema({
     ])
     .optional(),
   children: z.array(componentConfigSchema).optional(),
+  slots: slotsSchema(["root", "item"]).optional(),
 }).strict();

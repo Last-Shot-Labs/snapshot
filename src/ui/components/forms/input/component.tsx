@@ -1,38 +1,129 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
-import type { InputConfig } from "./types";
+import { ComponentWrapper } from "../../_base/component-wrapper";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import type { InputConfig, InputControlProps } from "./types";
 
-/**
- * Config-driven Input component — a standalone text input field with label,
- * placeholder, validation, optional icon, and helper/error text.
- *
- * Publishes `{ value: string }` to the page context when an `id` is set.
- * Supports debounced `changeAction` execution on value change.
- *
- * @param props - Component props containing the input config
- *
- * @example
- * ```json
- * {
- *   "type": "input",
- *   "id": "search-field",
- *   "label": "Search",
- *   "inputType": "search",
- *   "placeholder": "Type to search...",
- *   "icon": "search",
- *   "changeAction": { "type": "set-value", "target": "results-table", "field": "filter" }
- * }
- * ```
- */
+export function InputControl({
+  inputRef,
+  inputId,
+  type = "text",
+  value,
+  placeholder,
+  disabled,
+  readOnly,
+  maxLength,
+  pattern,
+  required,
+  ariaInvalid,
+  ariaDescribedBy,
+  ariaLabel,
+  onChangeText,
+  onBlur,
+  className,
+  style,
+  surfaceId,
+  surfaceConfig,
+  itemSurfaceConfig,
+  activeStates,
+  testId,
+}: InputControlProps) {
+  const resolvedStates = new Set([
+    ...(activeStates ?? []),
+    ...(disabled ? (["disabled"] as const) : []),
+    ...(ariaInvalid ? (["invalid"] as const) : []),
+  ]);
+  const controlSurface = resolveSurfacePresentation({
+    surfaceId,
+    implementationBase: {
+      width: "100%",
+      style: {
+        appearance: "none",
+        boxSizing: "border-box",
+        padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        lineHeight: "var(--sn-leading-normal, 1.5)",
+        color: "var(--sn-color-foreground, #111827)",
+        backgroundColor: "var(--sn-color-background, #ffffff)",
+        border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
+        borderRadius: "var(--sn-radius-md, 0.375rem)",
+        outline: "none",
+        transition:
+          "border-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out), box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)",
+      },
+      states: {
+        focus: {
+          style: {
+            borderColor: "var(--sn-color-primary, #2563eb)",
+            boxShadow:
+              "0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent)",
+          },
+        },
+        invalid: {
+          style: {
+            borderColor: "var(--sn-color-destructive, #ef4444)",
+          },
+          states: {
+            focus: {
+              style: {
+                borderColor: "var(--sn-color-destructive, #ef4444)",
+                boxShadow:
+                  "0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-destructive, #ef4444) 25%, transparent)",
+              },
+            },
+          },
+        },
+        disabled: {
+          opacity: 0.5,
+          cursor: "not-allowed",
+        },
+      },
+    },
+    componentSurface: surfaceConfig,
+    itemSurface: itemSurfaceConfig,
+    activeStates: Array.from(resolvedStates),
+  });
+
+  return (
+    <>
+      <input
+        ref={inputRef}
+        id={inputId}
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        disabled={disabled}
+        readOnly={readOnly}
+        maxLength={maxLength}
+        pattern={pattern}
+        required={required}
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
+        aria-label={ariaLabel}
+        data-testid={testId}
+        data-snapshot-id={surfaceId}
+        className={[className, controlSurface.className].filter(Boolean).join(" ") || undefined}
+        style={{
+          ...(controlSurface.style ?? {}),
+          ...(style ?? {}),
+        }}
+        onChange={(event) => onChangeText?.(event.target.value)}
+        onBlur={onBlur}
+      />
+      <SurfaceStyles css={controlSurface.scopedCss} />
+    </>
+  );
+}
+
 export function Input({ config }: { config: InputConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
 
-  // Resolve from-refs
   const visible = useSubscribe(config.visible ?? true);
   const resolvedValue = useSubscribe(config.value) as string | undefined;
   const resolvedDisabled = useSubscribe(config.disabled ?? false) as boolean;
@@ -42,65 +133,61 @@ export function Input({ config }: { config: InputConfig }) {
     | undefined;
 
   const inputType = config.inputType ?? "text";
-
   const [value, setValue] = useState(resolvedValue ?? "");
   const [validationError, setValidationError] = useState<string | undefined>();
   const [touched, setTouched] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Sync external value changes
   useEffect(() => {
     if (resolvedValue !== undefined) {
       setValue(resolvedValue);
     }
   }, [resolvedValue]);
 
-  // Publish value changes
   useEffect(() => {
-    if (publish) {
-      publish({ value });
-    }
+    publish?.({ value });
   }, [publish, value]);
 
   const validate = useCallback(
-    (val: string): string | undefined => {
-      if (config.required && !val.trim()) {
+    (nextValue: string): string | undefined => {
+      if (config.required && !nextValue.trim()) {
         return "This field is required";
       }
-      if (config.maxLength && val.length > config.maxLength) {
+      if (config.maxLength && nextValue.length > config.maxLength) {
         return `Maximum ${config.maxLength} characters`;
       }
       if (config.pattern) {
         try {
-          const re = new RegExp(config.pattern);
-          if (!re.test(val)) {
+          const matcher = new RegExp(config.pattern);
+          if (!matcher.test(nextValue)) {
             return "Invalid format";
           }
         } catch {
-          // Invalid regex in config — skip validation
+          return undefined;
         }
       }
       return undefined;
     },
-    [config.required, config.maxLength, config.pattern],
+    [config.maxLength, config.pattern, config.required],
   );
 
   const handleChange = useCallback(
-    (newValue: string) => {
-      setValue(newValue);
+    (nextValue: string) => {
+      setValue(nextValue);
       if (touched) {
-        setValidationError(validate(newValue));
+        setValidationError(validate(nextValue));
       }
 
-      // Debounced action execution
       if (config.changeAction) {
-        if (debounceRef.current) clearTimeout(debounceRef.current);
+        if (debounceRef.current) {
+          clearTimeout(debounceRef.current);
+        }
         debounceRef.current = setTimeout(() => {
-          void execute(config.changeAction!, { value: newValue });
+          void execute(config.changeAction!, { value: nextValue });
         }, 300);
       }
     },
-    [touched, validate, config.changeAction, execute],
+    [config.changeAction, execute, touched, validate],
   );
 
   const handleBlur = useCallback(() => {
@@ -108,158 +195,166 @@ export function Input({ config }: { config: InputConfig }) {
     setValidationError(validate(value));
   }, [validate, value]);
 
+  if (visible === false) {
+    return null;
+  }
+
+  const rootId = config.id ?? "input";
+  const fieldId = config.id ? `sn-input-${config.id}` : undefined;
   const errorMessage =
     resolvedErrorText ?? (touched ? validationError : undefined);
-  const hasError = !!errorMessage;
-  const fieldId = config.id ? `sn-input-${config.id}` : undefined;
+  const helperId = fieldId
+    ? errorMessage
+      ? `${fieldId}-error`
+      : config.helperText
+        ? `${fieldId}-helper`
+        : undefined
+    : undefined;
+  const resolvedStates = [
+    ...(errorMessage ? (["invalid"] as const) : []),
+    ...(resolvedDisabled ? (["disabled"] as const) : []),
+  ];
 
-  if (visible === false) return null;
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "var(--sn-spacing-2xs, 0.125rem)",
+      color: "var(--sn-color-foreground, #111827)",
+      fontSize: "sm",
+      fontWeight: "medium",
+    },
+    componentSurface: config.slots?.label,
+  });
+  const requiredIndicatorSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-required-indicator`,
+    implementationBase: {
+      color: "var(--sn-color-destructive, #ef4444)",
+    },
+    componentSurface: config.slots?.requiredIndicator,
+  });
+  const fieldSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-field`,
+    implementationBase: {
+      position: "relative",
+      display: "flex",
+      alignItems: "center",
+      width: "100%",
+    },
+    componentSurface: config.slots?.field,
+    activeStates: resolvedStates,
+  });
+  const iconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-icon`,
+    implementationBase: {
+      position: "absolute",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      inset: "0 auto 0 var(--sn-spacing-sm, 0.5rem)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        pointerEvents: "none",
+      },
+    },
+    componentSurface: config.slots?.icon,
+    activeStates: resolvedStates,
+  });
+  const helperSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-helper`,
+    implementationBase: {
+      color: errorMessage
+        ? "var(--sn-color-destructive, #ef4444)"
+        : "var(--sn-color-muted-foreground, #6b7280)",
+      fontSize: "xs",
+    },
+    componentSurface: config.slots?.helper,
+    activeStates: resolvedStates,
+  });
 
   return (
-    <div
-      data-snapshot-component="input"
-      data-testid="input"
-      className={config.className}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--sn-spacing-xs, 0.25rem)",
-        ...config.style,
-      }}
-    >
-      {config.label && (
-        <label
-          htmlFor={fieldId}
-          style={{
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            fontWeight:
-              "var(--sn-font-weight-medium, 500)" as unknown as number,
-            color: "var(--sn-color-foreground, #111827)",
-          }}
-        >
-          {config.label}
-          {config.required && (
-            <span
-              style={{
-                color: "var(--sn-color-destructive, #ef4444)",
-                marginLeft: "var(--sn-spacing-2xs, 0.125rem)",
-              }}
-            >
-              *
-            </span>
-          )}
-        </label>
-      )}
-
-      <div
-        style={{
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        {config.icon && (
-          <div
-            style={{
-              position: "absolute",
-              left: "var(--sn-spacing-sm, 0.5rem)",
-              display: "flex",
-              alignItems: "center",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-              pointerEvents: "none",
-            }}
+    <ComponentWrapper type="input" id={config.id} config={config}>
+      <div data-testid="input">
+        {config.label ? (
+          <label
+            htmlFor={fieldId}
+            data-snapshot-id={`${rootId}-label`}
+            className={labelSurface.className}
+            style={labelSurface.style}
           >
-            <Icon name={config.icon} size={16} />
-          </div>
-        )}
-        <input
-          id={fieldId}
-          type={inputType}
-          value={value}
-          placeholder={config.placeholder}
-          disabled={resolvedDisabled}
-          readOnly={resolvedReadonly}
-          maxLength={config.maxLength}
-          pattern={config.pattern}
-          required={config.required}
-          aria-invalid={hasError}
-          aria-describedby={
-            hasError && fieldId
-              ? `${fieldId}-error`
-              : config.helperText && fieldId
-                ? `${fieldId}-helper`
-                : undefined
-          }
-          onChange={(e) => handleChange(e.target.value)}
-          onBlur={handleBlur}
-          style={{
-            width: "100%",
-            padding: `var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)`,
-            paddingLeft: config.icon
-              ? "var(--sn-spacing-2xl, 2.25rem)"
-              : "var(--sn-spacing-md, 0.75rem)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            lineHeight: "var(--sn-leading-normal, 1.5)",
-            color: "var(--sn-color-foreground, #111827)",
-            backgroundColor: "var(--sn-color-background, #ffffff)",
-            border: `var(--sn-border-default, 1px) solid ${
-              hasError
-                ? "var(--sn-color-destructive, #ef4444)"
-                : "var(--sn-color-border, #d1d5db)"
-            }`,
-            borderRadius: "var(--sn-radius-md, 0.375rem)",
-            outline: "none",
-            transition:
-              "border-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out), box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)",
-            opacity: resolvedDisabled
-              ? "var(--sn-opacity-disabled, 0.5)"
-              : undefined,
-            cursor: resolvedDisabled ? "not-allowed" : undefined,
-            boxSizing: "border-box",
-          }}
-        />
-      </div>
+            {config.label}
+            {config.required ? (
+              <span
+                data-snapshot-id={`${rootId}-required-indicator`}
+                className={requiredIndicatorSurface.className}
+                style={requiredIndicatorSurface.style}
+              >
+                *
+              </span>
+            ) : null}
+          </label>
+        ) : null}
 
-      {(config.helperText || errorMessage) && (
-        <span
-          id={
-            errorMessage && fieldId
-              ? `${fieldId}-error`
-              : config.helperText && fieldId
-                ? `${fieldId}-helper`
-                : undefined
-          }
-          role={errorMessage ? "alert" : undefined}
-          style={{
-            fontSize: "var(--sn-font-size-xs, 0.75rem)",
-            color: errorMessage
-              ? "var(--sn-color-destructive, #ef4444)"
-              : "var(--sn-color-muted-foreground, #6b7280)",
-          }}
+        <div
+          data-snapshot-id={`${rootId}-field`}
+          className={fieldSurface.className}
+          style={fieldSurface.style}
         >
-          {errorMessage ?? config.helperText}
-        </span>
-      )}
-      <style>{`
-        [data-snapshot-component="input"] input:focus {
-          outline: none;
-          border-color: var(--sn-color-primary, #2563eb);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
-        }
-        [data-snapshot-component="input"] input:focus-visible {
-          outline: none;
-          border-color: var(--sn-color-primary, #2563eb);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
-        }
-        [data-snapshot-component="input"] input[aria-invalid="true"]:focus {
-          border-color: var(--sn-color-destructive, #ef4444);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-destructive, #ef4444) 25%, transparent);
-        }
-        [data-snapshot-component="input"] input[aria-invalid="true"]:focus-visible {
-          border-color: var(--sn-color-destructive, #ef4444);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-destructive, #ef4444) 25%, transparent);
-        }
-      `}</style>
-    </div>
+          {config.icon ? (
+            <span
+              data-snapshot-id={`${rootId}-icon`}
+              className={iconSurface.className}
+              style={iconSurface.style}
+            >
+              <Icon name={config.icon} size={16} />
+            </span>
+          ) : null}
+          <InputControl
+            inputId={fieldId}
+            type={inputType}
+            value={value}
+            placeholder={config.placeholder}
+            disabled={resolvedDisabled}
+            readOnly={resolvedReadonly}
+            maxLength={config.maxLength}
+            pattern={config.pattern}
+            required={config.required}
+            ariaInvalid={Boolean(errorMessage)}
+            ariaDescribedBy={helperId}
+            ariaLabel={config.label ?? config.placeholder}
+            onChangeText={handleChange}
+            onBlur={handleBlur}
+            surfaceId={`${rootId}-control`}
+            surfaceConfig={config.slots?.control}
+            activeStates={resolvedStates}
+            style={
+              config.icon
+                ? { paddingLeft: "var(--sn-spacing-2xl, 2.25rem)" }
+                : undefined
+            }
+            testId="input-control"
+          />
+        </div>
+
+        {config.helperText || errorMessage ? (
+          <span
+            id={helperId}
+            role={errorMessage ? "alert" : undefined}
+            data-snapshot-id={`${rootId}-helper`}
+            className={helperSurface.className}
+            style={helperSurface.style}
+          >
+            {errorMessage ?? config.helperText}
+          </span>
+        ) : null}
+
+        <SurfaceStyles css={labelSurface.scopedCss} />
+        <SurfaceStyles css={requiredIndicatorSurface.scopedCss} />
+        <SurfaceStyles css={fieldSurface.scopedCss} />
+        <SurfaceStyles css={iconSurface.scopedCss} />
+        <SurfaceStyles css={helperSurface.scopedCss} />
+      </div>
+    </ComponentWrapper>
   );
 }

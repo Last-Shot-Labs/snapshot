@@ -1,10 +1,12 @@
 'use client';
 
-import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { usePublish, useSubscribe } from "../../../context/hooks";
 import { useComponentData } from "../../_base/use-component-data";
-import type { SelectConfig } from "./types";
+import { ComponentWrapper } from "../../_base/component-wrapper";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import type { SelectConfig, SelectControlProps } from "./types";
 
 type SelectOption = {
   label: string;
@@ -48,14 +50,94 @@ function toOptions(
   }));
 }
 
-/**
- * Manifest-driven select input with support for static options and resource-backed
- * option lists.
- */
+export function SelectControl({
+  selectRef,
+  selectId,
+  value,
+  disabled,
+  ariaLabel,
+  onChangeValue,
+  className,
+  style,
+  surfaceId,
+  surfaceConfig,
+  itemSurfaceConfig,
+  activeStates,
+  testId,
+  children,
+}: SelectControlProps) {
+  const resolvedStates = new Set([
+    ...(activeStates ?? []),
+    ...(disabled ? (["disabled"] as const) : []),
+  ]);
+  const controlSurface = resolveSurfacePresentation({
+    surfaceId,
+    implementationBase: {
+      width: "100%",
+      style: {
+        appearance: "none",
+        boxSizing: "border-box",
+        padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        lineHeight: "var(--sn-leading-normal, 1.5)",
+        color: "var(--sn-color-foreground, #111827)",
+        backgroundColor: "var(--sn-color-background, #ffffff)",
+        border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
+        borderRadius: "var(--sn-radius-md, 0.375rem)",
+        outline: "none",
+        fontFamily: "inherit",
+        transition:
+          "border-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out), box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)",
+      },
+      states: {
+        focus: {
+          style: {
+            borderColor: "var(--sn-color-primary, #2563eb)",
+            boxShadow:
+              "0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent)",
+          },
+        },
+        disabled: {
+          opacity: 0.5,
+          cursor: "not-allowed",
+        },
+      },
+    },
+    componentSurface: surfaceConfig,
+    itemSurface: itemSurfaceConfig,
+    activeStates: Array.from(resolvedStates),
+  });
+
+  return (
+    <>
+      <select
+        ref={selectRef}
+        id={selectId}
+        value={value}
+        disabled={disabled}
+        onChange={(event) => onChangeValue?.(event.target.value)}
+        aria-label={ariaLabel}
+        data-snapshot-structural-select=""
+        data-snapshot-id={surfaceId}
+        data-testid={testId}
+        className={[className, controlSurface.className].filter(Boolean).join(" ") || undefined}
+        style={{
+          ...(controlSurface.style ?? {}),
+          ...(style ?? {}),
+        }}
+      >
+        {children}
+      </select>
+      <SurfaceStyles css={controlSurface.scopedCss} />
+    </>
+  );
+}
+
 export function Select({ config }: { config: SelectConfig }) {
   const publish = config.id ? usePublish(config.id) : null;
   const resolvedDefault = useSubscribe(config.default ?? "");
   const resolvedPlaceholder = useSubscribe(config.placeholder ?? "");
+  const visible = useSubscribe(config.visible ?? true);
 
   const dataResult = useComponentData(
     !Array.isArray(config.options) && config.options ? config.options : "",
@@ -64,7 +146,8 @@ export function Select({ config }: { config: SelectConfig }) {
   const options = useMemo(() => {
     if (Array.isArray(config.options)) {
       return config.options.map((option) => ({
-        label: String(option.label),
+        label:
+          typeof option.label === "string" ? option.label : String(option.label),
         value: option.value,
       }));
     }
@@ -80,7 +163,6 @@ export function Select({ config }: { config: SelectConfig }) {
     typeof resolvedPlaceholder === "string"
       ? resolvedPlaceholder
       : String(resolvedPlaceholder ?? "");
-
   const [value, setValue] = useState(defaultValue);
 
   useEffect(() => {
@@ -88,54 +170,59 @@ export function Select({ config }: { config: SelectConfig }) {
   }, [defaultValue]);
 
   useEffect(() => {
-    if (publish) {
-      publish(value);
-    }
+    publish?.(value);
   }, [publish, value]);
+
+  if (visible === false) {
+    return null;
+  }
 
   const isLoading =
     !Array.isArray(config.options) &&
     Boolean(config.options) &&
     dataResult.isLoading &&
     options.length === 0;
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: config.id,
+    implementationBase: {
+      width: "100%",
+    },
+    componentSurface: config.slots?.root,
+  });
 
   return (
-    <select
-      id={config.id}
-      value={value}
-      onChange={(event) => setValue(event.target.value)}
-      aria-label={placeholder || config.id || "Select"}
-      data-snapshot-structural-select=""
-      className={config.className}
-      style={{
-        padding: "var(--sn-spacing-xs, 0.5rem)",
-        borderRadius: "var(--sn-radius-md, 0.375rem)",
-        border:
-          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-        backgroundColor: "var(--sn-color-background, #fff)",
-        color: "var(--sn-color-foreground, #111827)",
-        fontSize: "var(--sn-font-size-md, 1rem)",
-        fontFamily: "var(--sn-font-sans, inherit)",
-        lineHeight: "var(--sn-leading-normal, 1.5)",
-        width: "100%",
-        ...(config.style as CSSProperties | undefined),
-      }}
-    >
-      {placeholder ? (
-        <option value="" disabled>
-          {placeholder}
-        </option>
-      ) : null}
-      {isLoading ? (
-        <option value="" disabled>
-          Loading...
-        </option>
-      ) : null}
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+    <ComponentWrapper type="select" id={config.id} config={config}>
+      <div
+        data-snapshot-id={config.id}
+        className={rootSurface.className}
+        style={rootSurface.style}
+      >
+        <SelectControl
+          selectId={config.id}
+          value={value}
+          ariaLabel={placeholder || config.id || "Select"}
+          onChangeValue={setValue}
+          surfaceId={`${config.id ?? "select"}-control`}
+          surfaceConfig={config.slots?.control}
+        >
+          {placeholder ? (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          ) : null}
+          {isLoading ? (
+            <option value="" disabled>
+              Loading...
+            </option>
+          ) : null}
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </SelectControl>
+        <SurfaceStyles css={rootSurface.scopedCss} />
+      </div>
+    </ComponentWrapper>
   );
 }

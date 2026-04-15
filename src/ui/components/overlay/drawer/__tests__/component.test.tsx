@@ -138,6 +138,25 @@ describe("DrawerComponent", () => {
     expect(store.get(modalStackAtom)).toEqual([]);
   });
 
+  it("uses shared button controls for close and footer actions", () => {
+    store.set(modalStackAtom, ["test-drawer"]);
+    const config: DrawerConfig = {
+      ...baseConfig,
+      footer: {
+        actions: [{ label: "Save", dismiss: true }],
+      },
+    };
+
+    render(createElement(DrawerComponent, { config }), {
+      wrapper: createWrapper(store),
+    });
+
+    expect(screen.getByTestId("drawer-close").getAttribute("data-sn-button")).not.toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Save" }).getAttribute("data-sn-button"),
+    ).not.toBeNull();
+  });
+
   it("has correct ARIA attributes", () => {
     store.set(modalStackAtom, ["test-drawer"]);
     const { container } = render(

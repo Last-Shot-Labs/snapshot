@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
 
 /**
@@ -21,8 +22,7 @@ import { fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const inputConfigSchema = z
-  .object({
+export const inputConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("input"),
     /** Label text displayed above the input. */
@@ -53,14 +53,14 @@ export const inputConfigSchema = z
     icon: z.string().optional(),
     /** Action to execute on value change (debounced). */
     changeAction: actionSchema.optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-    /** Inline styles. */
-    style: z.record(z.string()).optional(),
+    slots: slotsSchema([
+      "root",
+      "label",
+      "requiredIndicator",
+      "field",
+      "icon",
+      "control",
+      "helper",
+    ]).optional(),
   })
   .strict();

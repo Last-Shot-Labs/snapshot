@@ -1,19 +1,36 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ComponentRenderer } from "../../../manifest/renderer";
 import { useSubscribe } from "../../../context/index";
 import { renderIcon } from "../../../icons/render";
-import { ButtonControl } from "../../forms/button";
+import { ComponentRenderer } from "../../../manifest/renderer";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../../forms/button";
 import { FloatingMenuStyles, FloatingPanel } from "../../primitives/floating-menu";
+import { NavLink } from "../nav-link";
+import type { NavLinkConfig } from "../nav-link/types";
 import type { NavDropdownConfig } from "./types";
 
 function SurfaceStyles({ css }: { css?: string }) {
   return css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }
 
-export function NavDropdown({ config }: { config: NavDropdownConfig }) {
+function isNavLinkConfig(config: unknown): config is NavLinkConfig {
+  return (
+    typeof config === "object" &&
+    config !== null &&
+    "type" in config &&
+    (config as { type?: string }).type === "nav-link"
+  );
+}
+
+export function NavDropdown({
+  config,
+  onNavigate,
+}: {
+  config: NavDropdownConfig;
+  onNavigate?: (path: string) => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerMode = config.trigger ?? "click";
@@ -48,6 +65,7 @@ export function NavDropdown({ config }: { config: NavDropdownConfig }) {
     implementationBase: {
       display: "inline-flex",
       alignItems: "center",
+      whiteSpace: "nowrap",
     },
     componentSurface: config.slots?.triggerLabel,
   });
@@ -74,10 +92,14 @@ export function NavDropdown({ config }: { config: NavDropdownConfig }) {
       <FloatingMenuStyles />
       <ButtonControl
         variant="ghost"
+        disabled={config.disabled}
         onClick={() => setIsOpen((value) => !value)}
         surfaceId={`${rootId}-trigger`}
         surfaceConfig={config.slots?.trigger}
-        activeStates={isOpen ? ["open"] : []}
+        activeStates={[
+          ...(isOpen ? (["open"] as const) : []),
+          ...(config.current ? (["current"] as const) : []),
+        ]}
       >
         {config.icon ? (
           <span
@@ -126,7 +148,11 @@ export function NavDropdown({ config }: { config: NavDropdownConfig }) {
               className={itemSurface.className}
               style={itemSurface.style}
             >
-              <ComponentRenderer config={item} />
+              {isNavLinkConfig(item) ? (
+                <NavLink config={item} onNavigate={onNavigate} />
+              ) : (
+                <ComponentRenderer config={item} />
+              )}
               <SurfaceStyles css={itemSurface.scopedCss} />
             </div>
           );

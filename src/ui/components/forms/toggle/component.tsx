@@ -1,152 +1,139 @@
 'use client';
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { ButtonControl } from "../button";
 import type { ToggleConfig } from "./types";
 
-/** Padding and icon size dimensions for each size variant. */
 const SIZE_MAP = {
   sm: {
-    padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+    size: "sm" as const,
     iconSize: 14,
-    fontSize: "var(--sn-font-size-xs, 0.75rem)",
   },
   md: {
-    padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+    size: "md" as const,
     iconSize: 16,
-    fontSize: "var(--sn-font-size-sm, 0.875rem)",
   },
   lg: {
-    padding: "var(--sn-spacing-md, 0.75rem) var(--sn-spacing-lg, 1rem)",
+    size: "lg" as const,
     iconSize: 20,
-    fontSize: "var(--sn-font-size-md, 1rem)",
   },
 } as const;
 
-/**
- * Config-driven Toggle component — a pressed/unpressed toggle button.
- *
- * When pressed, displays with primary background and foreground colors.
- * When unpressed, uses transparent background. Publishes `{ pressed: boolean }`
- * to the page context when an `id` is set.
- *
- * @param props - Component props containing the toggle config
- *
- * @example
- * ```json
- * {
- *   "type": "toggle",
- *   "id": "italic-toggle",
- *   "icon": "italic",
- *   "variant": "outline",
- *   "size": "sm",
- *   "changeAction": { "type": "set-value", "target": "editor", "field": "italic" }
- * }
- * ```
- */
 export function Toggle({ config }: { config: ToggleConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
 
-  // Resolve from-refs
   const visible = useSubscribe(config.visible ?? true);
   const resolvedPressed = useSubscribe(config.pressed ?? false) as boolean;
   const resolvedDisabled = useSubscribe(config.disabled ?? false) as boolean;
 
-  const variant = config.variant ?? "default";
-  const size = config.size ?? "md";
-  const dims = SIZE_MAP[size];
-
   const [pressed, setPressed] = useState(resolvedPressed);
 
-  // Sync external pressed state changes
   useEffect(() => {
     setPressed(resolvedPressed);
   }, [resolvedPressed]);
 
-  // Publish pressed state
   useEffect(() => {
-    if (publish) {
-      publish({ pressed });
-    }
-  }, [publish, pressed]);
+    publish?.({ pressed });
+  }, [pressed, publish]);
 
   const handleToggle = useCallback(() => {
-    if (resolvedDisabled) return;
-    const newPressed = !pressed;
-    setPressed(newPressed);
-    if (config.changeAction) {
-      void execute(config.changeAction, { pressed: newPressed });
+    if (resolvedDisabled) {
+      return;
     }
-  }, [pressed, resolvedDisabled, config.changeAction, execute]);
 
-  if (visible === false) return null;
+    const nextPressed = !pressed;
+    setPressed(nextPressed);
+    if (config.changeAction) {
+      void execute(config.changeAction, { pressed: nextPressed });
+    }
+  }, [config.changeAction, execute, pressed, resolvedDisabled]);
 
-  const isOutline = variant === "outline";
+  if (visible === false) {
+    return null;
+  }
+
+  const size = SIZE_MAP[config.size ?? "md"];
+  const states = [
+    ...(pressed ? (["selected"] as const) : []),
+    ...(resolvedDisabled ? (["disabled"] as const) : []),
+  ];
+  const variant = config.variant === "outline" ? "outline" : "secondary";
+  const rootId = config.id ?? "toggle";
+
+  const iconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-icon`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      style: {
+        flexShrink: 0,
+      },
+    },
+    componentSurface: config.slots?.icon,
+    activeStates: states,
+  });
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    componentSurface: config.slots?.label,
+    activeStates: states,
+  });
 
   return (
-    <>
-      <style>{`
-      [data-snapshot-component="toggle"]:focus { outline: none; }
-      [data-snapshot-component="toggle"]:hover:not(:disabled) {
-        filter: brightness(0.95);
-      }
-      [data-snapshot-component="toggle"]:focus-visible {
-        outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-        outline-offset: var(--sn-ring-offset, 2px);
-      }
-    `}</style>
-      <button
-        data-snapshot-component="toggle"
-        data-testid="toggle"
+    <div data-snapshot-component="toggle">
+      <ButtonControl
         type="button"
-        className={config.className}
-        aria-pressed={pressed}
-        aria-disabled={resolvedDisabled}
+        variant={variant}
+        size={size.size}
         disabled={resolvedDisabled}
         onClick={handleToggle}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap:
-            config.label && config.icon
-              ? "var(--sn-spacing-xs, 0.25rem)"
-              : undefined,
-          padding: dims.padding,
-          fontSize: dims.fontSize,
-          fontWeight: "var(--sn-font-weight-medium, 500)" as unknown as number,
-          lineHeight: "var(--sn-leading-none, 1)",
-          borderRadius: "var(--sn-radius-md, 0.375rem)",
-          border: isOutline
-            ? `var(--sn-border-default, 1px) solid ${
-                pressed
-                  ? "var(--sn-color-primary, #2563eb)"
-                  : "var(--sn-color-border, #d1d5db)"
-              }`
-            : "var(--sn-border-default, 1px) solid transparent",
-          backgroundColor: pressed
-            ? "var(--sn-color-primary, #2563eb)"
-            : isOutline
-              ? "transparent"
-              : "var(--sn-color-secondary, #f3f4f6)",
-          color: pressed
-            ? "var(--sn-color-primary-foreground, #ffffff)"
-            : "var(--sn-color-foreground, #111827)",
-          cursor: resolvedDisabled ? "not-allowed" : "pointer",
-          opacity: resolvedDisabled
-            ? "var(--sn-opacity-disabled, 0.5)"
-            : undefined,
-          transition: `background-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out), color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out), border-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)`,
-          userSelect: "none",
-          ...((config.style as React.CSSProperties) ?? {}),
-        }}
+        surfaceId={rootId}
+        surfaceConfig={config.slots?.root}
+        activeStates={states}
+        ariaPressed={pressed}
+        style={
+          pressed
+            ? {
+                backgroundColor: "var(--sn-color-primary, #2563eb)",
+                borderColor: "var(--sn-color-primary, #2563eb)",
+                color: "var(--sn-color-primary-foreground, #ffffff)",
+              }
+            : undefined
+        }
+        testId="toggle"
       >
-        {config.icon && <Icon name={config.icon} size={dims.iconSize} />}
-        {config.label && <span>{config.label}</span>}
-      </button>
-    </>
+        {config.icon ? (
+          <span
+            data-snapshot-id={`${rootId}-icon`}
+            className={iconSurface.className}
+            style={iconSurface.style}
+          >
+            <Icon name={config.icon} size={size.iconSize} />
+          </span>
+        ) : null}
+        {config.label ? (
+          <span
+            data-snapshot-id={`${rootId}-label`}
+            className={labelSurface.className}
+            style={labelSurface.style}
+          >
+            {config.label}
+          </span>
+        ) : null}
+      </ButtonControl>
+      <SurfaceStyles css={iconSurface.scopedCss} />
+      <SurfaceStyles css={labelSurface.scopedCss} />
+    </div>
   );
 }

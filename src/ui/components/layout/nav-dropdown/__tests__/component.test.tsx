@@ -113,4 +113,31 @@ describe("NavDropdown", () => {
     vi.runAllTimers();
     expect(screen.getByTestId("nav-dropdown-item-item-a")).toBeTruthy();
   });
+
+  it("forwards onNavigate to nav-link items", () => {
+    const onNavigate = vi.fn();
+
+    renderWithContext(
+      <NavDropdown
+        config={{
+          type: "nav-dropdown",
+          label: "Products",
+          items: [
+            {
+              type: "nav-link",
+              id: "item-a",
+              label: "Pricing",
+              path: "/pricing",
+            } as never,
+          ],
+        }}
+        onNavigate={onNavigate}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Products" }));
+    fireEvent.click(screen.getByRole("link", { name: "Pricing" }));
+
+    expect(onNavigate).toHaveBeenCalledWith("/pricing");
+  });
 });

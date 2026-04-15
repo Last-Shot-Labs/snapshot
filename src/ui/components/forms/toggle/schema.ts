@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
 
 /**
@@ -20,8 +21,7 @@ import { fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const toggleConfigSchema = z
-  .object({
+export const toggleConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("toggle"),
     /** Button text label. */
@@ -38,14 +38,6 @@ export const toggleConfigSchema = z
     disabled: z.union([z.boolean(), fromRefSchema]).optional(),
     /** Action to execute on toggle. */
     changeAction: actionSchema.optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    slots: slotsSchema(["root", "icon", "label"]).optional(),
   })
   .strict();

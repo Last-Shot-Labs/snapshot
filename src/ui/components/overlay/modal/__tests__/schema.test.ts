@@ -119,4 +119,16 @@ describe("modalConfigSchema", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("accepts modal slot surfaces", () => {
+    const result = modalConfigSchema.safeParse({
+      ...baseConfig,
+      slots: {
+        panel: { className: "modal-panel-slot" },
+        closeButton: { className: "modal-close-slot" },
+        footerAction: { className: "modal-footer-action-slot" },
+      },
+    });
+    expect(result.success).toBe(true);
+  });
 });

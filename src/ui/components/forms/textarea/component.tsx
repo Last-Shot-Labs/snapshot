@@ -1,36 +1,129 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
-import type { TextareaConfig } from "./types";
+import { ComponentWrapper } from "../../_base/component-wrapper";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import type { TextareaConfig, TextareaControlProps } from "./types";
 
-/**
- * Config-driven Textarea component — a multi-line text input with label,
- * character count, validation, and configurable resize.
- *
- * Publishes `{ value: string }` to the page context when an `id` is set.
- * Shows a character count indicator when `maxLength` is configured.
- *
- * @param props - Component props containing the textarea config
- *
- * @example
- * ```json
- * {
- *   "type": "textarea",
- *   "id": "notes",
- *   "label": "Notes",
- *   "rows": 5,
- *   "maxLength": 500,
- *   "placeholder": "Add your notes..."
- * }
- * ```
- */
+export function TextareaControl({
+  textareaRef,
+  textareaId,
+  value,
+  rows = 3,
+  placeholder,
+  disabled,
+  readOnly,
+  maxLength,
+  required,
+  resize = "vertical",
+  ariaInvalid,
+  ariaDescribedBy,
+  ariaLabel,
+  onChangeText,
+  onBlur,
+  className,
+  style,
+  surfaceId,
+  surfaceConfig,
+  itemSurfaceConfig,
+  activeStates,
+  testId,
+}: TextareaControlProps) {
+  const resolvedStates = new Set([
+    ...(activeStates ?? []),
+    ...(disabled ? (["disabled"] as const) : []),
+    ...(ariaInvalid ? (["invalid"] as const) : []),
+  ]);
+  const controlSurface = resolveSurfacePresentation({
+    surfaceId,
+    implementationBase: {
+      width: "100%",
+      style: {
+        appearance: "none",
+        boxSizing: "border-box",
+        padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        lineHeight: "var(--sn-leading-normal, 1.5)",
+        color: "var(--sn-color-foreground, #111827)",
+        backgroundColor: "var(--sn-color-background, #ffffff)",
+        border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
+        borderRadius: "var(--sn-radius-md, 0.375rem)",
+        outline: "none",
+        resize,
+        fontFamily: "inherit",
+        transition:
+          "border-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out), box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)",
+      },
+      states: {
+        focus: {
+          style: {
+            borderColor: "var(--sn-color-primary, #2563eb)",
+            boxShadow:
+              "0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent)",
+          },
+        },
+        invalid: {
+          style: {
+            borderColor: "var(--sn-color-destructive, #ef4444)",
+          },
+          states: {
+            focus: {
+              style: {
+                borderColor: "var(--sn-color-destructive, #ef4444)",
+                boxShadow:
+                  "0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-destructive, #ef4444) 25%, transparent)",
+              },
+            },
+          },
+        },
+        disabled: {
+          opacity: 0.5,
+          cursor: "not-allowed",
+        },
+      },
+    },
+    componentSurface: surfaceConfig,
+    itemSurface: itemSurfaceConfig,
+    activeStates: Array.from(resolvedStates),
+  });
+
+  return (
+    <>
+      <textarea
+        ref={textareaRef}
+        id={textareaId}
+        value={value}
+        rows={rows}
+        placeholder={placeholder}
+        disabled={disabled}
+        readOnly={readOnly}
+        maxLength={maxLength}
+        required={required}
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
+        aria-label={ariaLabel}
+        data-testid={testId}
+        data-snapshot-id={surfaceId}
+        className={[className, controlSurface.className].filter(Boolean).join(" ") || undefined}
+        style={{
+          ...(controlSurface.style ?? {}),
+          ...(style ?? {}),
+        }}
+        onChange={(event) => onChangeText?.(event.target.value)}
+        onBlur={onBlur}
+      />
+      <SurfaceStyles css={controlSurface.scopedCss} />
+    </>
+  );
+}
+
 export function Textarea({ config }: { config: TextareaConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
 
-  // Resolve from-refs
   const visible = useSubscribe(config.visible ?? true);
   const resolvedValue = useSubscribe(config.value) as string | undefined;
   const resolvedDisabled = useSubscribe(config.disabled ?? false) as boolean;
@@ -39,61 +132,55 @@ export function Textarea({ config }: { config: TextareaConfig }) {
     | string
     | undefined;
 
-  const rows = config.rows ?? 3;
-  const resize = config.resize ?? "vertical";
-
   const [value, setValue] = useState(resolvedValue ?? "");
   const [validationError, setValidationError] = useState<string | undefined>();
   const [touched, setTouched] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Sync external value changes
   useEffect(() => {
     if (resolvedValue !== undefined) {
       setValue(resolvedValue);
     }
   }, [resolvedValue]);
 
-  // Publish value changes
   useEffect(() => {
-    if (publish) {
-      publish({ value });
-    }
+    publish?.({ value });
   }, [publish, value]);
 
   const validate = useCallback(
-    (val: string): string | undefined => {
-      if (config.required && !val.trim()) {
+    (nextValue: string): string | undefined => {
+      if (config.required && !nextValue.trim()) {
         return "This field is required";
       }
-      if (config.maxLength && val.length > config.maxLength) {
+      if (config.maxLength && nextValue.length > config.maxLength) {
         return `Maximum ${config.maxLength} characters`;
       }
       return undefined;
     },
-    [config.required, config.maxLength],
+    [config.maxLength, config.required],
   );
 
   const handleChange = useCallback(
-    (newValue: string) => {
-      // Enforce maxLength if set
-      if (config.maxLength && newValue.length > config.maxLength) {
+    (nextValue: string) => {
+      if (config.maxLength && nextValue.length > config.maxLength) {
         return;
       }
-      setValue(newValue);
+
+      setValue(nextValue);
       if (touched) {
-        setValidationError(validate(newValue));
+        setValidationError(validate(nextValue));
       }
 
-      // Debounced action execution
       if (config.changeAction) {
-        if (debounceRef.current) clearTimeout(debounceRef.current);
+        if (debounceRef.current) {
+          clearTimeout(debounceRef.current);
+        }
         debounceRef.current = setTimeout(() => {
-          void execute(config.changeAction!, { value: newValue });
+          void execute(config.changeAction!, { value: nextValue });
         }, 300);
       }
     },
-    [touched, validate, config.changeAction, config.maxLength, execute],
+    [config.changeAction, config.maxLength, execute, touched, validate],
   );
 
   const handleBlur = useCallback(() => {
@@ -101,157 +188,166 @@ export function Textarea({ config }: { config: TextareaConfig }) {
     setValidationError(validate(value));
   }, [validate, value]);
 
+  if (visible === false) {
+    return null;
+  }
+
+  const rootId = config.id ?? "textarea";
+  const fieldId = config.id ? `sn-textarea-${config.id}` : undefined;
   const errorMessage =
     resolvedErrorText ?? (touched ? validationError : undefined);
-  const hasError = !!errorMessage;
-  const fieldId = config.id ? `sn-textarea-${config.id}` : undefined;
+  const helperId = fieldId
+    ? errorMessage
+      ? `${fieldId}-error`
+      : config.helperText
+        ? `${fieldId}-helper`
+        : undefined
+    : undefined;
+  const resolvedStates = [
+    ...(errorMessage ? (["invalid"] as const) : []),
+    ...(resolvedDisabled ? (["disabled"] as const) : []),
+  ];
 
-  if (visible === false) return null;
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "var(--sn-spacing-2xs, 0.125rem)",
+      color: "var(--sn-color-foreground, #111827)",
+      fontSize: "sm",
+      fontWeight: "medium",
+    },
+    componentSurface: config.slots?.label,
+  });
+  const requiredIndicatorSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-required-indicator`,
+    implementationBase: {
+      color: "var(--sn-color-destructive, #ef4444)",
+    },
+    componentSurface: config.slots?.requiredIndicator,
+  });
+  const helperSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-helper`,
+    implementationBase: {
+      color: errorMessage
+        ? "var(--sn-color-destructive, #ef4444)"
+        : "var(--sn-color-muted-foreground, #6b7280)",
+      fontSize: "xs",
+    },
+    componentSurface: config.slots?.helper,
+    activeStates: resolvedStates,
+  });
+  const metaSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-meta`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "between",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
+    },
+    componentSurface: config.slots?.meta,
+    activeStates: resolvedStates,
+  });
+  const counterSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-counter`,
+    implementationBase: {
+      color:
+        config.maxLength !== undefined && value.length >= config.maxLength
+          ? "var(--sn-color-destructive, #ef4444)"
+          : "var(--sn-color-muted-foreground, #6b7280)",
+      fontSize: "xs",
+      style: {
+        marginLeft: "auto",
+      },
+    },
+    componentSurface: config.slots?.counter,
+    activeStates: [
+      ...resolvedStates,
+      ...(config.maxLength !== undefined && value.length >= config.maxLength
+        ? (["invalid"] as const)
+        : []),
+    ],
+  });
 
   return (
-    <div
-      data-snapshot-component="textarea"
-      data-testid="textarea"
-      className={config.className}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--sn-spacing-xs, 0.25rem)",
-        ...config.style,
-      }}
-    >
-      {config.label && (
-        <label
-          htmlFor={fieldId}
-          style={{
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            fontWeight:
-              "var(--sn-font-weight-medium, 500)" as unknown as number,
-            color: "var(--sn-color-foreground, #111827)",
-          }}
-        >
-          {config.label}
-          {config.required && (
-            <span
-              style={{
-                color: "var(--sn-color-destructive, #ef4444)",
-                marginLeft: "var(--sn-spacing-2xs, 0.125rem)",
-              }}
-            >
-              *
-            </span>
-          )}
-        </label>
-      )}
-
-      <textarea
-        id={fieldId}
-        value={value}
-        rows={rows}
-        placeholder={config.placeholder}
-        disabled={resolvedDisabled}
-        readOnly={resolvedReadonly}
-        maxLength={config.maxLength}
-        required={config.required}
-        aria-invalid={hasError}
-        aria-describedby={
-          hasError && fieldId
-            ? `${fieldId}-error`
-            : config.helperText && fieldId
-              ? `${fieldId}-helper`
-              : undefined
-        }
-        onChange={(e) => handleChange(e.target.value)}
-        onBlur={handleBlur}
-        style={{
-          width: "100%",
-          padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
-          fontSize: "var(--sn-font-size-sm, 0.875rem)",
-          lineHeight: "var(--sn-leading-normal, 1.5)",
-          color: "var(--sn-color-foreground, #111827)",
-          backgroundColor: "var(--sn-color-background, #ffffff)",
-          border: `var(--sn-border-default, 1px) solid ${
-            hasError
-              ? "var(--sn-color-destructive, #ef4444)"
-              : "var(--sn-color-border, #d1d5db)"
-          }`,
-          borderRadius: "var(--sn-radius-md, 0.375rem)",
-          outline: "none",
-          resize,
-          fontFamily: "inherit",
-          transition:
-            "border-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out), box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)",
-          opacity: resolvedDisabled
-            ? "var(--sn-opacity-disabled, 0.5)"
-            : undefined,
-          cursor: resolvedDisabled ? "not-allowed" : undefined,
-          boxSizing: "border-box",
-        }}
-      />
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        {(config.helperText || errorMessage) && (
-          <span
-            id={
-              errorMessage && fieldId
-                ? `${fieldId}-error`
-                : config.helperText && fieldId
-                  ? `${fieldId}-helper`
-                  : undefined
-            }
-            role={errorMessage ? "alert" : undefined}
-            style={{
-              fontSize: "var(--sn-font-size-xs, 0.75rem)",
-              color: errorMessage
-                ? "var(--sn-color-destructive, #ef4444)"
-                : "var(--sn-color-muted-foreground, #6b7280)",
-            }}
+    <ComponentWrapper type="textarea" id={config.id} config={config}>
+      <div data-testid="textarea">
+        {config.label ? (
+          <label
+            htmlFor={fieldId}
+            data-snapshot-id={`${rootId}-label`}
+            className={labelSurface.className}
+            style={labelSurface.style}
           >
-            {errorMessage ?? config.helperText}
-          </span>
-        )}
+            {config.label}
+            {config.required ? (
+              <span
+                data-snapshot-id={`${rootId}-required-indicator`}
+                className={requiredIndicatorSurface.className}
+                style={requiredIndicatorSurface.style}
+              >
+                *
+              </span>
+            ) : null}
+          </label>
+        ) : null}
 
-        {config.maxLength !== undefined && (
-          <span
-            style={{
-              fontSize: "var(--sn-font-size-xs, 0.75rem)",
-              color:
-                value.length >= config.maxLength
-                  ? "var(--sn-color-destructive, #ef4444)"
-                  : "var(--sn-color-muted-foreground, #6b7280)",
-              marginLeft: "auto",
-            }}
+        <TextareaControl
+          textareaId={fieldId}
+          value={value}
+          rows={config.rows ?? 3}
+          placeholder={config.placeholder}
+          disabled={resolvedDisabled}
+          readOnly={resolvedReadonly}
+          maxLength={config.maxLength}
+          required={config.required}
+          resize={config.resize ?? "vertical"}
+          ariaInvalid={Boolean(errorMessage)}
+          ariaDescribedBy={helperId}
+          ariaLabel={config.label ?? config.placeholder}
+          onChangeText={handleChange}
+          onBlur={handleBlur}
+          surfaceId={`${rootId}-control`}
+          surfaceConfig={config.slots?.control}
+          activeStates={resolvedStates}
+        />
+
+        {(config.helperText || errorMessage || config.maxLength !== undefined) ? (
+          <div
+            data-snapshot-id={`${rootId}-meta`}
+            className={metaSurface.className}
+            style={metaSurface.style}
           >
-            {value.length}/{config.maxLength}
-          </span>
-        )}
+            {config.helperText || errorMessage ? (
+              <span
+                id={helperId}
+                role={errorMessage ? "alert" : undefined}
+                data-snapshot-id={`${rootId}-helper`}
+                className={helperSurface.className}
+                style={helperSurface.style}
+              >
+                {errorMessage ?? config.helperText}
+              </span>
+            ) : null}
+            {config.maxLength !== undefined ? (
+              <span
+                data-snapshot-id={`${rootId}-counter`}
+                className={counterSurface.className}
+                style={counterSurface.style}
+              >
+                {value.length}/{config.maxLength}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
+        <SurfaceStyles css={labelSurface.scopedCss} />
+        <SurfaceStyles css={requiredIndicatorSurface.scopedCss} />
+        <SurfaceStyles css={helperSurface.scopedCss} />
+        <SurfaceStyles css={metaSurface.scopedCss} />
+        <SurfaceStyles css={counterSurface.scopedCss} />
       </div>
-      <style>{`
-        [data-snapshot-component="textarea"] textarea:focus {
-          outline: none;
-          border-color: var(--sn-color-primary, #2563eb);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
-        }
-        [data-snapshot-component="textarea"] textarea:focus-visible {
-          outline: none;
-          border-color: var(--sn-color-primary, #2563eb);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
-        }
-        [data-snapshot-component="textarea"] textarea[aria-invalid="true"]:focus {
-          border-color: var(--sn-color-destructive, #ef4444);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-destructive, #ef4444) 25%, transparent);
-        }
-        [data-snapshot-component="textarea"] textarea[aria-invalid="true"]:focus-visible {
-          border-color: var(--sn-color-destructive, #ef4444);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-destructive, #ef4444) 25%, transparent);
-        }
-      `}</style>
-    </div>
+    </ComponentWrapper>
   );
 }

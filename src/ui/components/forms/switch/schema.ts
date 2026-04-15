@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
 
 /**
@@ -19,8 +20,7 @@ import { fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const switchConfigSchema = z
-  .object({
+export const switchConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("switch"),
     /** Label text. Can be a FromRef. */
@@ -37,14 +37,12 @@ export const switchConfigSchema = z
     size: z.enum(["sm", "md", "lg"]).optional(),
     /** Action to execute on toggle. */
     action: actionSchema.optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    slots: slotsSchema([
+      "root",
+      "track",
+      "thumb",
+      "label",
+      "description",
+    ]).optional(),
   })
   .strict();

@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { componentConfigSchema } from "../../../manifest/schema";
-import { extendComponentSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
+
+export const collapsibleSlotNames = ["root", "trigger", "content"] as const;
 
 export const collapsibleConfigSchema = extendComponentSchema({
   type: z.literal("collapsible"),
@@ -17,4 +19,5 @@ export const collapsibleConfigSchema = extendComponentSchema({
   children: z.array(componentConfigSchema),
   duration: z.enum(["instant", "fast", "normal", "slow"]).optional(),
   publishTo: z.string().optional(),
+  slots: slotsSchema(collapsibleSlotNames).optional(),
 }).strict();

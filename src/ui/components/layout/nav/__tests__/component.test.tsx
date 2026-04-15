@@ -292,9 +292,9 @@ describe("Nav component", () => {
         <Nav config={config} pathname="/" onNavigate={onNavigate} />,
         { flags: { reportsDisabled: true } },
       );
-      const button = getByRole("button", { name: "Reports" });
-      expect(button.getAttribute("aria-disabled")).toBe("true");
-      fireEvent.click(button);
+      const link = getByRole("link", { name: "Reports" });
+      expect(link.getAttribute("aria-disabled")).toBe("true");
+      fireEvent.click(link);
       expect(onNavigate).not.toHaveBeenCalled();
     });
   });
@@ -482,6 +482,76 @@ describe("Nav component", () => {
       expect(getByText("Profile")).not.toBeNull();
       expect(getByText("Security")).not.toBeNull();
     });
+
+    it("uses the shared nav-dropdown wrapper for top-nav grouped children", () => {
+      const config: NavConfig = {
+        type: "nav",
+        items: [
+          {
+            label: "Settings",
+            children: [
+              { label: "Profile", path: "/settings/profile" },
+              { label: "Security", path: "/settings/security" },
+            ],
+          },
+        ],
+      };
+      const { container, getByRole } = renderWithContext(
+        <Nav config={config} pathname="/settings/profile" variant="top-nav" />,
+      );
+
+      const dropdown = container.querySelector('[data-snapshot-component="nav-dropdown"]');
+      expect(dropdown).not.toBeNull();
+
+      const trigger = getByRole("button", { name: "Settings" });
+      expect(trigger.getAttribute("data-current")).toBe("true");
+      fireEvent.click(trigger);
+
+      const panel = container.querySelector('[data-snapshot-id="nav-item-0-panel"]');
+      expect(panel?.getAttribute("style")).toContain("var(--sn-color-popover");
+      expect(getByRole("link", { name: "Profile" })).not.toBeNull();
+    });
+
+    it("uses grouped dropdown links for navigation callbacks", () => {
+      const onNavigate = vi.fn();
+      const config: NavConfig = {
+        type: "nav",
+        items: [
+          {
+            label: "Settings",
+            children: [{ label: "Profile", path: "/settings/profile" }],
+          },
+        ],
+      };
+      const { getByRole } = renderWithContext(
+        <Nav
+          config={config}
+          pathname="/"
+          variant="top-nav"
+          onNavigate={onNavigate}
+        />,
+      );
+
+      fireEvent.click(getByRole("button", { name: "Settings" }));
+      fireEvent.click(getByRole("link", { name: "Profile" }));
+
+      expect(onNavigate).toHaveBeenCalledWith("/settings/profile");
+    });
+  });
+
+  it("uses shared nav-logo and nav-user-menu wrappers in the grouped path", () => {
+    const config: NavConfig = {
+      ...baseConfig,
+      logo: { text: "MyApp", path: "/" },
+      userMenu: true,
+    };
+    const { container } = renderWithContext(
+      <Nav config={config} pathname="/" variant="top-nav" />,
+      { user: { name: "Alice" } },
+    );
+
+    expect(container.querySelector('[data-snapshot-component="nav-logo"]')).not.toBeNull();
+    expect(container.querySelector('[data-snapshot-component="nav-user-menu"]')).not.toBeNull();
   });
 
   it("sets data-snapshot-component=nav", () => {

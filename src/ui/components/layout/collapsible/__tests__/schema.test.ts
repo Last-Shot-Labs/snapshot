@@ -16,4 +16,20 @@ describe("collapsibleConfigSchema", () => {
 
     expect(result.success).toBe(true);
   });
+
+  it("accepts collapsible slot surfaces", () => {
+    bootBuiltins();
+
+    const result = collapsibleConfigSchema.safeParse({
+      type: "collapsible",
+      trigger: { type: "markdown", content: "Toggle" },
+      children: [{ type: "markdown", content: "Body" }],
+      slots: {
+        trigger: { className: "collapsible-trigger-slot" },
+        content: { className: "collapsible-content-slot" },
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
 });

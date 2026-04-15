@@ -27,11 +27,13 @@ export interface ButtonControlProps {
   testId?: string;
   ariaLabel?: string;
   ariaDescribedBy?: string;
+  ariaPressed?: boolean;
+  ariaChecked?: boolean;
   ariaCurrent?: "page" | "step" | "location" | "date" | "time" | true;
   ariaSelected?: boolean;
   ariaExpanded?: boolean;
   ariaHasPopup?: boolean | "menu" | "listbox" | "tree" | "grid" | "dialog";
-  role?: "button" | "tab";
+  role?: string;
   tabIndex?: number;
   activeStates?: Array<
     | "hover"
