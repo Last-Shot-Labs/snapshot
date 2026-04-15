@@ -2,7 +2,7 @@ import type { z } from "zod";
 import type { calendarConfigSchema, calendarEventSchema } from "./schema";
 
 /** Inferred config type from the Calendar Zod schema. */
-export type CalendarConfig = z.infer<typeof calendarConfigSchema>;
+export type CalendarConfig = z.input<typeof calendarConfigSchema>;
 
 /** Inferred static event type. */
 export type CalendarEventConfig = z.infer<typeof calendarEventSchema>;

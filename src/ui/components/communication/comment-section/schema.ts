@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
-import { dataSourceSchema, fromRefSchema } from "../../_base/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import { dataSourceSchema } from "../../_base/types";
 
 /**
  * Zod config schema for the CommentSection component.
@@ -22,8 +23,7 @@ import { dataSourceSchema, fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const commentSectionConfigSchema = z
-  .object({
+export const commentSectionConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("comment-section"),
     /** API endpoint for comments data. */
@@ -48,14 +48,30 @@ export const commentSectionConfigSchema = z
     sortOrder: z.enum(["newest", "oldest"]).optional(),
     /** Empty state message. Default: "No comments yet". */
     emptyMessage: z.string().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    slots: slotsSchema([
+      "root",
+      "header",
+      "headerIcon",
+      "headerTitle",
+      "headerCount",
+      "list",
+      "loadingItem",
+      "loadingAvatar",
+      "loadingTitle",
+      "loadingBody",
+      "errorState",
+      "emptyState",
+      "commentWrapper",
+      "commentItem",
+      "avatarImage",
+      "avatarFallback",
+      "contentColumn",
+      "commentHeader",
+      "authorName",
+      "timestamp",
+      "deleteButton",
+      "body",
+      "inputArea",
+    ]).optional(),
   })
   .strict();

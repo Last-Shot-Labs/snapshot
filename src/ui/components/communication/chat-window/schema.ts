@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { dataSourceSchema, fromRefSchema } from "../../_base/types";
 
 /**
@@ -23,8 +24,7 @@ import { dataSourceSchema, fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const chatWindowConfigSchema = z
-  .object({
+export const chatWindowConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("chat-window"),
     /** API endpoint for message data. */
@@ -57,14 +57,16 @@ export const chatWindowConfigSchema = z
     showReactions: z.boolean().optional(),
     /** Total height of the chat window. Default: "500px". */
     height: z.string().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    slots: slotsSchema([
+      "root",
+      "header",
+      "headerIcon",
+      "titleGroup",
+      "title",
+      "subtitle",
+      "threadArea",
+      "typingArea",
+      "inputArea",
+    ]).optional(),
   })
   .strict();

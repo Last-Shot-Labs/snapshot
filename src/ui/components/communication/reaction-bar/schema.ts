@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { dataSourceSchema, fromRefSchema } from "../../_base/types";
 
 /**
@@ -19,8 +20,7 @@ import { dataSourceSchema, fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const reactionBarConfigSchema = z
-  .object({
+export const reactionBarConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("reaction-bar"),
     /** Static reactions array. */
@@ -44,14 +44,13 @@ export const reactionBarConfigSchema = z
     removeAction: actionSchema.optional(),
     /** Show the "+" button to add reactions. Default: true. */
     showAddButton: z.boolean().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-  })
-  .strict();
+    slots: slotsSchema([
+      "root",
+      "reaction",
+      "emoji",
+      "count",
+      "addWrapper",
+      "addButton",
+      "picker",
+    ]).optional(),
+  }).strict();

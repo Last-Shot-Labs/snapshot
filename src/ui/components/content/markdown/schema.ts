@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
 
 /**
@@ -14,22 +15,35 @@ import { fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const markdownConfigSchema = z
-  .object({
+export const markdownConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("markdown"),
     /** Markdown content string. Supports FromRef for dynamic content. */
     content: z.union([z.string(), fromRefSchema]),
     /** Max height before scrolling. Example: "400px". */
     maxHeight: z.string().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-    /** Inline styles. */
-    style: z.record(z.string()).optional(),
-  })
-  .strict();
+    slots: slotsSchema([
+      "root",
+      "heading1",
+      "heading2",
+      "heading3",
+      "heading4",
+      "heading5",
+      "heading6",
+      "paragraph",
+      "link",
+      "unorderedList",
+      "orderedList",
+      "listItem",
+      "blockquote",
+      "pre",
+      "inlineCode",
+      "blockCode",
+      "table",
+      "tableHead",
+      "tableHeader",
+      "tableCell",
+      "rule",
+      "image",
+    ]).optional(),
+  }).strict();

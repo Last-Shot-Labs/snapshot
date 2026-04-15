@@ -6,6 +6,7 @@ import {
   errorStateConfigSchema,
   liveConfigSchema,
 } from "../../../manifest/schema";
+import { slotsSchema } from "../../_base/schema";
 import { dataSourceSchema, fromRefSchema, pollConfigSchema } from "../../_base/types";
 
 /** Schema for the trend indicator configuration. */
@@ -82,5 +83,16 @@ export const statCardConfigSchema = baseComponentConfigSchema
     live: liveConfigSchema.optional(),
     /** Live region politeness for dynamic metric updates. */
     ariaLive: z.enum(["off", "polite", "assertive"]).default("polite"),
+    slots: slotsSchema([
+      "root",
+      "loading",
+      "error",
+      "label",
+      "valueRow",
+      "value",
+      "icon",
+      "trend",
+      "empty",
+    ]).optional(),
   })
   .strict();

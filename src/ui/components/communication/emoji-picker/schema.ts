@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
-import { dataSourceSchema, fromRefSchema } from "../../_base/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import { dataSourceSchema } from "../../_base/types";
 
 /**
  * Zod config schema for the EmojiPicker component.
@@ -17,8 +18,7 @@ import { dataSourceSchema, fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const emojiPickerConfigSchema = z
-  .object({
+export const emojiPickerConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("emoji-picker"),
     /** Which emoji categories to show. Default: all. */
@@ -62,14 +62,21 @@ export const emojiPickerConfigSchema = z
     emojiUrlPrefix: z.string().optional(),
     /** Action dispatched when an emoji is selected. */
     selectAction: actionSchema.optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    slots: slotsSchema([
+      "root",
+      "searchSection",
+      "searchShell",
+      "searchIcon",
+      "searchInput",
+      "categoryTabs",
+      "categoryTab",
+      "gridScroll",
+      "categorySection",
+      "categoryLabel",
+      "emojiGrid",
+      "emojiButton",
+      "customEmoji",
+      "emptyState",
+    ]).optional(),
   })
   .strict();

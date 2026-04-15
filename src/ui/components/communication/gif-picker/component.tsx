@@ -1,30 +1,48 @@
 'use client';
 
-import {
-  useState,
-  useMemo,
-  useCallback,
-  useEffect,
-} from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useActionExecutor } from "../../../actions/executor";
+import { usePublish, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
-import type { GifPickerConfig, GifEntry } from "./types";
+import type { GifEntry, GifPickerConfig } from "./types";
 
-/**
- * GifPicker — searchable GIF grid with support for API-powered search
- * or static GIF data. Displays a masonry-style grid of GIF previews.
- *
- * @param props - Component props containing the GIF picker configuration
- */
+function toGifEntries(
+  payload: unknown,
+  urlField: string,
+  previewField: string,
+  titleField: string,
+): GifEntry[] {
+  const recordData =
+    payload && typeof payload === "object" && !Array.isArray(payload)
+      ? (payload as Record<string, unknown>)
+      : undefined;
+  const items = Array.isArray(payload)
+    ? (payload as Record<string, unknown>[])
+    : ((recordData?.results ??
+        recordData?.data ??
+        recordData?.gifs ??
+        []) as Record<string, unknown>[]);
+
+  return items.map((item, index) => ({
+    id: String(item.id ?? index),
+    url: String(item[urlField] ?? ""),
+    preview: String(item[previewField] ?? item[urlField] ?? ""),
+    width: item.width as number | undefined,
+    height: item.height as number | undefined,
+    title: String(item[titleField] ?? ""),
+  }));
+}
+
 export function GifPicker({ config }: { config: GifPickerConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
-
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const rootId = config.id ?? "gif-picker";
 
   const columns = config.columns ?? 2;
   const maxHeight = config.maxHeight ?? "300px";
@@ -32,16 +50,18 @@ export function GifPicker({ config }: { config: GifPickerConfig }) {
   const previewField = config.previewField ?? "preview";
   const titleField = config.titleField ?? "title";
 
-  // Static GIFs (for demos)
   const staticGifs = useMemo(() => {
-    if (!config.gifs) return [];
-    return config.gifs.map((g) => ({
-      id: g.id,
-      url: g.url,
-      preview: g.preview ?? g.url,
-      width: g.width,
-      height: g.height,
-      title: g.title,
+    if (!config.gifs) {
+      return [];
+    }
+
+    return config.gifs.map((gif) => ({
+      id: gif.id,
+      url: gif.url,
+      preview: gif.preview ?? gif.url,
+      width: gif.width,
+      height: gif.height,
+      title: gif.title,
     }));
   }, [config.gifs]);
 
@@ -65,34 +85,16 @@ export function GifPicker({ config }: { config: GifPickerConfig }) {
       ? { q: debouncedSearch }
       : undefined,
   );
-  const results = useMemo(() => {
-    const payload = remoteResults.data as unknown;
-    const recordData =
-      payload && typeof payload === "object" && !Array.isArray(payload)
-        ? (payload as Record<string, unknown>)
-        : undefined;
-    const items = Array.isArray(payload)
-      ? (payload as Record<string, unknown>[])
-      : ((recordData?.results ??
-          recordData?.data ??
-          recordData?.gifs ??
-          []) as Record<string, unknown>[]);
-
-    return items.map((item, index) => ({
-      id: String(item.id ?? index),
-      url: String(item[urlField] ?? ""),
-      preview: String(item[previewField] ?? item[urlField] ?? ""),
-      width: item.width as number | undefined,
-      height: item.height as number | undefined,
-      title: String(item[titleField] ?? ""),
-    }));
-  }, [previewField, remoteResults.data, titleField, urlField]);
+  const results = useMemo(
+    () =>
+      toGifEntries(remoteResults.data, urlField, previewField, titleField),
+    [previewField, remoteResults.data, titleField, urlField],
+  );
 
   const handleSelect = useCallback(
     (gif: GifEntry) => {
-      if (publish) {
-        publish({ url: gif.url, title: gif.title, id: gif.id });
-      }
+      publish?.({ url: gif.url, title: gif.title, id: gif.id });
+
       if (config.selectAction) {
         void execute(config.selectAction, {
           url: gif.url,
@@ -101,190 +103,325 @@ export function GifPicker({ config }: { config: GifPickerConfig }) {
         });
       }
     },
-    [publish, config.selectAction, execute],
+    [config.selectAction, execute, publish],
   );
 
-  if (visible === false) return null;
+  if (visible === false) {
+    return null;
+  }
 
   const displayGifs = staticGifs.length > 0 ? staticGifs : results;
   const loading = staticGifs.length === 0 && remoteResults.isLoading;
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {
+      width: "100%",
+      maxWidth: "400px",
+      overflow: "hidden",
+      borderRadius: "md",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      bg: "var(--sn-color-card, #ffffff)",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const searchSectionSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-searchSection`,
+    implementationBase: {
+      padding: "xs",
+      style: {
+        borderBottom:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      },
+    },
+    componentSurface: config.slots?.searchSection,
+  });
+  const searchShellSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-searchShell`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "xs",
+      paddingY: "xs",
+      paddingX: "sm",
+      borderRadius: "sm",
+      bg: "var(--sn-color-secondary, #f3f4f6)",
+    },
+    componentSurface: config.slots?.searchShell,
+  });
+  const searchIconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-searchIcon`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        flexShrink: 0,
+      },
+    },
+    componentSurface: config.slots?.searchIcon,
+  });
+  const searchInputSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-searchInput`,
+    implementationBase: {
+      width: "100%",
+      fontSize: "sm",
+      color: "var(--sn-color-foreground, #111827)",
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+      style: {
+        border: "none",
+        outline: "none",
+        background: "transparent",
+        padding: 0,
+        minWidth: 0,
+        fontFamily: "inherit",
+      },
+    },
+    componentSurface: config.slots?.searchInput,
+  });
+  const contentSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-content`,
+    implementationBase: {
+      overflow: "auto",
+      padding: "xs",
+      style: {
+        maxHeight,
+      },
+    },
+    componentSurface: config.slots?.content,
+  });
+  const loadingStateSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-loadingState`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "xs",
+      padding: "lg",
+      textAlign: "center",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+    },
+    componentSurface: config.slots?.loadingState,
+  });
+  const loadingIconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-loadingIcon`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        display: "inline-flex",
+        flexShrink: 0,
+      },
+    },
+    componentSurface: config.slots?.loadingIcon,
+  });
+  const emptyStateSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-emptyState`,
+    implementationBase: {
+      padding: "lg",
+      textAlign: "center",
+      fontSize: "sm",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+    },
+    componentSurface: config.slots?.emptyState,
+  });
+  const gridSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-grid`,
+    implementationBase: {
+      display: "grid",
+      gap: "sm",
+      style: {
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
+      },
+    },
+    componentSurface: config.slots?.grid,
+  });
+  const attributionSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-attribution`,
+    implementationBase: {
+      paddingY: "xs",
+      paddingX: "sm",
+      textAlign: "center",
+      fontSize: "xs",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        borderTop:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      },
+    },
+    componentSurface: config.slots?.attribution,
+  });
 
   return (
-    <div
-      data-snapshot-component="gif-picker"
-      data-testid="gif-picker"
-      className={config.className}
-      style={{
-        border:
-          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-        borderRadius: "var(--sn-radius-md, 0.5rem)",
-        backgroundColor: "var(--sn-color-card, #ffffff)",
-        overflow: "hidden",
-        width: "100%",
-        maxWidth: "400px",
-        ...(config.style as React.CSSProperties),
-      }}
-    >
-      {/* Hover/transition styles */}
-      <style>{`
-[data-snapshot-component="gif-picker"] button:hover img {
-  transform: scale(1.03);
-}
-[data-snapshot-component="gif-picker"] button img {
-  transition: transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease);
-}
-[data-snapshot-component="gif-picker"] button:hover {
-  box-shadow: var(--sn-shadow-sm, 0 1px 2px rgba(0,0,0,0.1));
-}
-@keyframes sn-gif-spinner {
-  to { transform: rotate(360deg); }
-}
-[data-snapshot-component="gif-picker"] [data-testid="gif-search"]:focus {
-  outline: none;
-}
-`}</style>
-      {/* Search */}
+    <>
       <div
-        style={{
-          padding: "var(--sn-spacing-xs, 0.25rem)",
-          borderBottom:
-            "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-        }}
+        data-snapshot-component="gif-picker"
+        data-testid="gif-picker"
+        data-snapshot-id={rootId}
+        className={rootSurface.className}
+        style={rootSurface.style}
       >
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "var(--sn-spacing-xs, 0.25rem)",
-            padding:
-              "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-            backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
-            borderRadius: "var(--sn-radius-sm, 0.25rem)",
-          }}
+          data-snapshot-id={`${rootId}-searchSection`}
+          className={searchSectionSurface.className}
+          style={searchSectionSurface.style}
         >
-          <Icon name="search" size={14} />
-          <input
-            data-testid="gif-search"
-            type="text"
-            placeholder={config.placeholder ?? "Search GIFs..."}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              border: "none",
-              outline: "none",
-              background: "transparent",
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              color: "var(--sn-color-foreground, #111827)",
-              width: "100%",
-              padding: 0,
-            }}
-          />
-        </div>
-      </div>
-
-      {/* GIF grid */}
-      <div
-        style={{
-          maxHeight,
-          overflowY: "auto",
-          padding: "var(--sn-spacing-xs, 0.25rem)",
-        }}
-      >
-        {loading && (
           <div
-            style={{
-              padding: "var(--sn-spacing-lg, 1.5rem)",
-              textAlign: "center",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            data-snapshot-id={`${rootId}-searchShell`}
+            className={searchShellSurface.className}
+            style={searchShellSurface.style}
           >
             <span
-              style={{
-                animation: "sn-gif-spinner 1s linear infinite",
-                display: "inline-flex",
-              }}
+              aria-hidden="true"
+              data-snapshot-id={`${rootId}-searchIcon`}
+              className={searchIconSurface.className}
+              style={searchIconSurface.style}
             >
-              <Icon name="loader" size={20} />
+              <Icon name="search" size={14} />
             </span>
+            <input
+              data-testid="gif-search"
+              data-snapshot-id={`${rootId}-searchInput`}
+              type="text"
+              placeholder={config.placeholder ?? "Search GIFs..."}
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className={searchInputSurface.className}
+              style={searchInputSurface.style}
+            />
           </div>
-        )}
-
-        {!loading && displayGifs.length === 0 && (
-          <div
-            style={{
-              padding: "var(--sn-spacing-lg, 1.5rem)",
-              textAlign: "center",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            }}
-          >
-            {search ? "No GIFs found" : "Search for GIFs"}
-          </div>
-        )}
-
-        {!loading && displayGifs.length > 0 && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${columns}, 1fr)`,
-              gap: "var(--sn-spacing-sm, 0.5rem)",
-            }}
-          >
-            {displayGifs.map((gif) => (
-              <button
-                type="button"
-                key={gif.id}
-                onClick={() => handleSelect(gif)}
-                title={gif.title}
-                aria-label={gif.title ?? "Select GIF"}
-                style={{
-                  display: "block",
-                  padding: 0,
-                  border: "none",
-                  borderRadius: "var(--sn-radius-sm, 0.25rem)",
-                  overflow: "hidden",
-                  cursor: "pointer",
-                  backgroundColor: "var(--sn-color-muted, #f3f4f6)",
-                  lineHeight: 0,
-                }}
-              >
-                <img
-                  src={gif.preview ?? gif.url}
-                  alt={gif.title ?? "GIF"}
-                  loading="lazy"
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    display: "block",
-                    minHeight: "60px",
-                    objectFit: "cover",
-                  }}
-                />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Attribution */}
-      {config.attribution && (
-        <div
-          style={{
-            padding:
-              "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-            borderTop:
-              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-            fontSize: "var(--sn-font-size-xs, 0.75rem)",
-            color: "var(--sn-color-muted-foreground, #6b7280)",
-            textAlign: "center",
-          }}
-        >
-          {config.attribution}
         </div>
-      )}
-    </div>
+
+        <div
+          data-snapshot-id={`${rootId}-content`}
+          className={contentSurface.className}
+          style={contentSurface.style}
+        >
+          {loading ? (
+            <div
+              data-snapshot-id={`${rootId}-loadingState`}
+              className={loadingStateSurface.className}
+              style={loadingStateSurface.style}
+            >
+              <span
+                aria-hidden="true"
+                data-snapshot-id={`${rootId}-loadingIcon`}
+                className={loadingIconSurface.className}
+                style={loadingIconSurface.style}
+              >
+                <Icon name="loader" size={20} />
+              </span>
+              <span>Loading GIFs</span>
+            </div>
+          ) : null}
+
+          {!loading && displayGifs.length === 0 ? (
+            <div
+              data-snapshot-id={`${rootId}-emptyState`}
+              className={emptyStateSurface.className}
+              style={emptyStateSurface.style}
+            >
+              {search ? "No GIFs found" : "Search for GIFs"}
+            </div>
+          ) : null}
+
+          {!loading && displayGifs.length > 0 ? (
+            <div
+              data-snapshot-id={`${rootId}-grid`}
+              className={gridSurface.className}
+              style={gridSurface.style}
+            >
+              {displayGifs.map((gif) => {
+                const itemSurface = resolveSurfacePresentation({
+                  surfaceId: `${rootId}-item-${gif.id}`,
+                  implementationBase: {
+                    display: "block",
+                    overflow: "hidden",
+                    borderRadius: "sm",
+                    cursor: "pointer",
+                    bg: "var(--sn-color-muted, #f3f4f6)",
+                    hover: {
+                      shadow: "sm",
+                    },
+                    focus: {
+                      ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+                    },
+                    style: {
+                      padding: 0,
+                      border: "none",
+                      lineHeight: 0,
+                    },
+                  },
+                  componentSurface: config.slots?.item,
+                });
+                const imageSurface = resolveSurfacePresentation({
+                  surfaceId: `${rootId}-item-${gif.id}-image`,
+                  implementationBase: {
+                    style: {
+                      width: "100%",
+                      height: "auto",
+                      display: "block",
+                      minHeight: "60px",
+                      objectFit: "cover",
+                      transition:
+                        "transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+                    },
+                    hover: {
+                      scale: 1.03,
+                    },
+                  },
+                  componentSurface: config.slots?.image,
+                });
+
+                return (
+                  <div key={gif.id}>
+                    <button
+                      type="button"
+                      data-snapshot-id={`${rootId}-item-${gif.id}`}
+                      onClick={() => handleSelect(gif)}
+                      title={gif.title}
+                      aria-label={gif.title ?? "Select GIF"}
+                      className={itemSurface.className}
+                      style={itemSurface.style}
+                    >
+                      <img
+                        src={gif.preview ?? gif.url}
+                        alt={gif.title ?? "GIF"}
+                        loading="lazy"
+                        data-snapshot-id={`${rootId}-item-${gif.id}-image`}
+                        className={imageSurface.className}
+                        style={imageSurface.style}
+                      />
+                    </button>
+                    <SurfaceStyles css={itemSurface.scopedCss} />
+                    <SurfaceStyles css={imageSurface.scopedCss} />
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+
+        {config.attribution ? (
+          <div
+            data-snapshot-id={`${rootId}-attribution`}
+            className={attributionSurface.className}
+            style={attributionSurface.style}
+          >
+            {config.attribution}
+          </div>
+        ) : null}
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={searchSectionSurface.scopedCss} />
+      <SurfaceStyles css={searchShellSurface.scopedCss} />
+      <SurfaceStyles css={searchIconSurface.scopedCss} />
+      <SurfaceStyles css={searchInputSurface.scopedCss} />
+      <SurfaceStyles css={contentSurface.scopedCss} />
+      <SurfaceStyles css={loadingStateSurface.scopedCss} />
+      <SurfaceStyles css={loadingIconSurface.scopedCss} />
+      <SurfaceStyles css={emptyStateSurface.scopedCss} />
+      <SurfaceStyles css={gridSurface.scopedCss} />
+      <SurfaceStyles css={attributionSurface.scopedCss} />
+    </>
   );
 }

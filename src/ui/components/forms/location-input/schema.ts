@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
 import { endpointTargetSchema } from "../../../manifest/resources";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
 
 /**
@@ -38,8 +39,7 @@ import { fromRefSchema } from "../../_base/types";
  * ]
  * ```
  */
-export const locationInputConfigSchema = z
-  .object({
+export const locationInputConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("location-input"),
     /** Label text above the input. */
@@ -77,14 +77,21 @@ export const locationInputConfigSchema = z
     helperText: z.string().optional(),
     /** Error text. Can be a FromRef. */
     errorText: z.union([z.string(), fromRefSchema]).optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-  })
-  .strict();
+    slots: slotsSchema([
+      "root",
+      "label",
+      "required",
+      "field",
+      "leadingIcon",
+      "input",
+      "loadingIcon",
+      "results",
+      "result",
+      "resultIcon",
+      "resultContent",
+      "resultName",
+      "resultAddress",
+      "mapLink",
+      "helper",
+    ]).optional(),
+  }).strict();

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
+import type { CSSProperties } from "react";
 import hljs from "highlight.js/lib/core";
 import typescript from "highlight.js/lib/languages/typescript";
 import javascript from "highlight.js/lib/languages/javascript";
@@ -14,6 +15,8 @@ import go from "highlight.js/lib/languages/go";
 import rust from "highlight.js/lib/languages/rust";
 import java from "highlight.js/lib/languages/java";
 import { useSubscribe } from "../../../context/hooks";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import "./hljs-theme.css";
 import type { CodeBlockConfig } from "./types";
 
@@ -58,6 +61,7 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const resolvedCode = useSubscribe(config.code);
   const codeText = typeof resolvedCode === "string" ? resolvedCode : "";
+  const rootId = config.id ?? "code-block";
 
   const highlightEnabled = config.highlight !== false;
 
@@ -81,7 +85,7 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
   const wrap = config.wrap ?? false;
   const lines = codeText.split("\n");
 
-  const handleCopy = useCallback(async () => {
+  async function handleCopy() {
     try {
       await navigator.clipboard.writeText(codeText);
       setCopied(true);
@@ -89,70 +93,197 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
     } catch {
       // Fallback: silent fail
     }
-  }, [codeText]);
+  }
 
   const hasTitleBar = config.title || config.language || showCopy;
+  const copyLabel = copied ? "Copied!" : "Copy";
+
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {
+      borderRadius: "md",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      bg: "var(--sn-color-card, #ffffff)",
+      overflow: "hidden",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const titleBarSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-titleBar`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "between",
+      paddingY: "xs",
+      paddingX: "md",
+      bg: "var(--sn-color-secondary, #f1f5f9)",
+      border: "0",
+      style: {
+        borderBottom:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+        gap: "var(--sn-spacing-sm, 0.5rem)",
+      },
+    },
+    componentSurface: config.slots?.titleBar,
+  });
+  const titleMetaSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-titleMeta`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "sm",
+      style: {
+        minWidth: 0,
+      },
+    },
+    componentSurface: config.slots?.titleMeta,
+  });
+  const titleSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-title`,
+    implementationBase: {
+      fontSize: "xs",
+      fontWeight: "semibold",
+      color: "var(--sn-color-foreground, #111827)",
+      style: {
+        fontFamily: "var(--sn-font-mono, monospace)",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      },
+    },
+    componentSurface: config.slots?.title,
+  });
+  const languageSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-language`,
+    implementationBase: {
+      fontSize: "xs",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        whiteSpace: "nowrap",
+      },
+    },
+    componentSurface: config.slots?.language,
+  });
+  const copyButtonSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-copyButton`,
+    implementationBase: {
+      fontSize: "xs",
+      paddingY: "xs",
+      paddingX: "sm",
+      borderRadius: "sm",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      bg: "var(--sn-color-card, #ffffff)",
+      color: "var(--sn-color-foreground, #111827)",
+      cursor: "pointer",
+      transition: "colors",
+      hover: {
+        bg: "var(--sn-color-accent, var(--sn-color-muted, #f3f4f6))",
+      },
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+      style: {
+        whiteSpace: "nowrap",
+        flexShrink: 0,
+      },
+    },
+    componentSurface: config.slots?.copyButton,
+  });
+  const bodySurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-body`,
+    implementationBase: {
+      overflow: "auto",
+      style: {
+        maxHeight: config.maxHeight,
+      },
+    },
+    componentSurface: config.slots?.body,
+  });
+  const preSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-pre`,
+    implementationBase: {
+      display: "flex",
+      style: {
+        margin: 0,
+        padding: "var(--sn-spacing-md, 1rem)",
+        fontFamily: "var(--sn-font-mono, monospace)",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        lineHeight: "var(--sn-leading-relaxed, 1.625)",
+      },
+    },
+    componentSurface: config.slots?.pre,
+  });
+  const lineNumbersSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-lineNumbers`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        borderRight:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+        paddingRight: "var(--sn-spacing-sm, 0.5rem)",
+        marginRight: "var(--sn-spacing-md, 1rem)",
+        textAlign: "right",
+        userSelect: "none",
+        flexShrink: 0,
+      },
+    },
+    componentSurface: config.slots?.lineNumbers,
+  });
+  const codeSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-code`,
+    implementationBase: {
+      color: "var(--sn-color-foreground, #111827)",
+      style: {
+        flex: 1,
+        whiteSpace: wrap ? "pre-wrap" : "pre",
+        wordBreak: wrap ? "break-all" : undefined,
+      },
+    },
+    componentSurface: config.slots?.code,
+  });
 
   return (
-    <div
-      data-snapshot-component="code-block"
-      data-testid="code-block"
-      className={config.className}
-      style={{
-        borderRadius: "var(--sn-radius-md, 0.5rem)",
-        border:
-          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-        backgroundColor: "var(--sn-color-card, #ffffff)",
-        overflow: "hidden",
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
-    >
+    <>
+      <div
+        data-snapshot-component="code-block"
+        data-snapshot-id={rootId}
+        data-testid="code-block"
+        className={[config.className, rootSurface.className].filter(Boolean).join(" ") || undefined}
+        style={{
+          ...(rootSurface.style ?? {}),
+          ...((config.style as CSSProperties | undefined) ?? {}),
+        }}
+      >
       {/* Title bar */}
       {hasTitleBar && (
         <div
+          data-snapshot-id={`${rootId}-titleBar`}
           data-testid="code-block-titlebar"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-md, 1rem)",
-            backgroundColor: "var(--sn-color-secondary, #f1f5f9)",
-            borderBottom:
-              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-            gap: "var(--sn-spacing-sm, 0.5rem)",
-          }}
+          className={titleBarSurface.className}
+          style={titleBarSurface.style}
         >
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "var(--sn-spacing-sm, 0.5rem)",
-              minWidth: 0,
-            }}
+            data-snapshot-id={`${rootId}-titleMeta`}
+            className={titleMetaSurface.className}
+            style={titleMetaSurface.style}
           >
             {config.title && (
               <span
+                data-snapshot-id={`${rootId}-title`}
                 data-testid="code-block-title"
-                style={{
-                  fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                  fontWeight: "var(--sn-font-weight-semibold, 600)",
-                  color: "var(--sn-color-foreground, #111827)",
-                  fontFamily: "var(--sn-font-mono, monospace)",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
+                className={titleSurface.className}
+                style={titleSurface.style}
               >
                 {config.title}
               </span>
             )}
             {config.language && (
               <span
+                data-snapshot-id={`${rootId}-language`}
                 data-testid="code-block-language"
-                style={{
-                  fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                  color: "var(--sn-color-muted-foreground, #6b7280)",
-                }}
+                className={languageSurface.className}
+                style={languageSurface.style}
               >
                 {config.language}
               </span>
@@ -162,88 +293,37 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
           {showCopy && (
             <button
               type="button"
+              data-snapshot-id={`${rootId}-copyButton`}
               data-testid="code-block-copy"
               onClick={() => void handleCopy()}
-              style={{
-                fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                padding:
-                  "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-                borderRadius: "var(--sn-radius-sm, 0.25rem)",
-                border:
-                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-                backgroundColor: "var(--sn-color-card, #ffffff)",
-                color: "var(--sn-color-foreground, #111827)",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-              }}
+              className={copyButtonSurface.className}
+              style={copyButtonSurface.style}
             >
-              {copied ? "Copied!" : "Copy"}
+              {copyLabel}
             </button>
           )}
         </div>
       )}
 
-      {/* Copy button positioned top-right when no title bar */}
-      {showCopy && !hasTitleBar && (
-        <div style={{ position: "relative" }}>
-          <button
-            type="button"
-            data-testid="code-block-copy"
-            onClick={() => void handleCopy()}
-            style={{
-              position: "absolute",
-              top: "var(--sn-spacing-xs, 0.25rem)",
-              right: "var(--sn-spacing-xs, 0.25rem)",
-              fontSize: "var(--sn-font-size-xs, 0.75rem)",
-              padding:
-                "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-              borderRadius: "var(--sn-radius-sm, 0.25rem)",
-              border:
-                "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-              backgroundColor: "var(--sn-color-card, #ffffff)",
-              color: "var(--sn-color-foreground, #111827)",
-              cursor: "pointer",
-              zIndex: 1,
-            }}
-          >
-            {copied ? "Copied!" : "Copy"}
-          </button>
-        </div>
-      )}
-
       {/* Code area */}
       <div
-        style={{
-          overflow: "auto",
-          maxHeight: config.maxHeight,
-        }}
+        data-snapshot-id={`${rootId}-body`}
+        className={bodySurface.className}
+        style={bodySurface.style}
       >
         <pre
-          style={{
-            margin: 0,
-            padding: "var(--sn-spacing-md, 1rem)",
-            fontFamily: "var(--sn-font-mono, monospace)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            lineHeight: "var(--sn-leading-relaxed, 1.625)",
-            display: "flex",
-          }}
+          data-snapshot-id={`${rootId}-pre`}
+          className={preSurface.className}
+          style={preSurface.style}
         >
           {/* Line numbers */}
           {showLineNumbers && (
             <div
+              data-snapshot-id={`${rootId}-lineNumbers`}
               data-testid="code-block-line-numbers"
               aria-hidden="true"
-              style={{
-                color: "var(--sn-color-muted-foreground, #6b7280)",
-                borderRight:
-                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-                paddingRight: "var(--sn-spacing-sm, 0.5rem)",
-                marginRight: "var(--sn-spacing-md, 1rem)",
-                textAlign: "right",
-                userSelect: "none",
-                flexShrink: 0,
-              }}
+              className={lineNumbersSurface.className}
+              style={lineNumbersSurface.style}
             >
               {lines.map((_, i) => (
                 <div key={i}>{i + 1}</div>
@@ -254,42 +334,35 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
           {/* Code content */}
           {highlightedHtml ? (
             <code
+              data-snapshot-id={`${rootId}-code`}
               data-testid="code-block-code"
-              style={{
-                flex: 1,
-                whiteSpace: wrap ? "pre-wrap" : "pre",
-                wordBreak: wrap ? "break-all" : undefined,
-                color: "var(--sn-color-foreground, #111827)",
-              }}
+              className={codeSurface.className}
+              style={codeSurface.style}
               dangerouslySetInnerHTML={{ __html: highlightedHtml }}
             />
           ) : (
             <code
+              data-snapshot-id={`${rootId}-code`}
               data-testid="code-block-code"
-              style={{
-                flex: 1,
-                whiteSpace: wrap ? "pre-wrap" : "pre",
-                wordBreak: wrap ? "break-all" : undefined,
-                color: "var(--sn-color-foreground, #111827)",
-              }}
+              className={codeSurface.className}
+              style={codeSurface.style}
             >
               {codeText}
             </code>
           )}
         </pre>
       </div>
-      <style>{`
-        [data-snapshot-component="code-block"] button:hover {
-          background: var(--sn-color-accent, var(--sn-color-muted));
-        }
-        [data-snapshot-component="code-block"] button:focus {
-          outline: none;
-        }
-        [data-snapshot-component="code-block"] button:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-      `}</style>
-    </div>
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={titleBarSurface.scopedCss} />
+      <SurfaceStyles css={titleMetaSurface.scopedCss} />
+      <SurfaceStyles css={titleSurface.scopedCss} />
+      <SurfaceStyles css={languageSurface.scopedCss} />
+      <SurfaceStyles css={copyButtonSurface.scopedCss} />
+      <SurfaceStyles css={bodySurface.scopedCss} />
+      <SurfaceStyles css={preSurface.scopedCss} />
+      <SurfaceStyles css={lineNumbersSurface.scopedCss} />
+      <SurfaceStyles css={codeSurface.scopedCss} />
+    </>
   );
 }

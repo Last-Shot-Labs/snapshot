@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
 import { endpointTargetSchema } from "../../../manifest/resources";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 
 /**
  * Zod config schema for the FileUploader component.
@@ -21,8 +22,7 @@ import { endpointTargetSchema } from "../../../manifest/resources";
  * }
  * ```
  */
-export const fileUploaderConfigSchema = z
-  .object({
+export const fileUploaderConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("file-uploader"),
     /** File type filter for the native file picker (e.g., "image/*,.pdf"). */
@@ -41,12 +41,23 @@ export const fileUploaderConfigSchema = z
     uploadEndpoint: endpointTargetSchema.optional(),
     /** Action dispatched after a successful upload. */
     onUpload: actionSchema.optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-  })
-  .strict();
+    slots: slotsSchema([
+      "root",
+      "trigger",
+      "triggerIcon",
+      "selectedText",
+      "dropzone",
+      "dropzoneIcon",
+      "dropzoneLabel",
+      "dropzoneDescription",
+      "list",
+      "item",
+      "status",
+      "fileInfo",
+      "fileName",
+      "error",
+      "size",
+      "remove",
+      "progress",
+    ]).optional(),
+  }).strict();

@@ -1,37 +1,33 @@
 'use client';
 
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import { useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
-import { MessageThread } from "../message-thread/component";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { RichInput } from "../../content/rich-input/component";
-import { TypingIndicator } from "../typing-indicator/component";
-import type { ChatWindowConfig } from "./types";
-import type { MessageThreadConfig } from "../message-thread/types";
 import type { RichInputConfig } from "../../content/rich-input/types";
+import { MessageThread } from "../message-thread/component";
+import type { MessageThreadConfig } from "../message-thread/types";
+import { TypingIndicator } from "../typing-indicator/component";
 import type { TypingIndicatorConfig } from "../typing-indicator/types";
+import type { ChatWindowConfig } from "./types";
 
-/**
- * ChatWindow — full chat interface composing a message thread,
- * rich input, and typing indicator. Provides a Discord/Slack-style
- * chat experience in a single config-driven component.
- *
- * @param props - Component props containing the chat window configuration
- */
 export function ChatWindow({ config }: { config: ChatWindowConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const title = useSubscribe(config.title ?? "") as string;
   const subtitle = useSubscribe(config.subtitle ?? "") as string;
-  const publish = usePublish(config.id);
+  const rootId = config.id ?? "chat-window";
 
-  if (visible === false) return null;
+  if (visible === false) {
+    return null;
+  }
 
   const showHeader = config.showHeader ?? true;
   const showTypingIndicator = config.showTypingIndicator ?? true;
   const height = config.height ?? "clamp(300px, 70vh, 500px)";
 
-  // Build MessageThread config
   const threadConfig: MessageThreadConfig = {
-    type: "message-thread" as const,
+    type: "message-thread",
     data: config.data,
     contentField: config.contentField,
     authorNameField: config.authorNameField,
@@ -42,9 +38,8 @@ export function ChatWindow({ config }: { config: ChatWindowConfig }) {
     groupByDate: true,
   };
 
-  // Build RichInput config
   const inputConfig: RichInputConfig = {
-    type: "rich-input" as const,
+    type: "rich-input",
     placeholder: config.inputPlaceholder ?? "Type a message...",
     sendOnEnter: true,
     sendAction: config.sendAction,
@@ -62,114 +57,211 @@ export function ChatWindow({ config }: { config: ChatWindowConfig }) {
     ],
   };
 
-  // Build TypingIndicator config (starts empty)
   const typingConfig: TypingIndicatorConfig = {
-    type: "typing-indicator" as const,
+    type: "typing-indicator",
     users: [],
   };
 
-  return (
-    <div
-      data-snapshot-component="chat-window"
-      data-testid="chat-window"
-      aria-label="Chat"
-      className={config.className}
-      style={{
-        display: "flex",
-        flexDirection: "column",
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden",
+      borderRadius: "md",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      bg: "var(--sn-color-card, #ffffff)",
+      style: {
         height,
-        border:
+      },
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const headerSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-header`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "sm",
+      paddingY: "sm",
+      paddingX: "md",
+      bg: "var(--sn-color-card, #ffffff)",
+      style: {
+        flexShrink: 0,
+        borderBottom:
           "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-        borderRadius: "var(--sn-radius-md, 0.5rem)",
-        backgroundColor: "var(--sn-color-card, #ffffff)",
+      },
+    },
+    componentSurface: config.slots?.header,
+  });
+  const headerIconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-headerIcon`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+    },
+    componentSurface: config.slots?.headerIcon,
+  });
+  const titleGroupSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-titleGroup`,
+    implementationBase: {
+      flex: "1",
+      style: {
+        minWidth: 0,
+      },
+    },
+    componentSurface: config.slots?.titleGroup,
+  });
+  const titleSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-title`,
+    implementationBase: {
+      fontSize: "base",
+      fontWeight: "semibold",
+      color: "var(--sn-color-foreground, #111827)",
+      style: {
         overflow: "hidden",
-        ...(config.style as React.CSSProperties),
-      }}
-    >
-      {/* Header */}
-      {showHeader && (
-        <div
-          data-testid="chat-header"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "var(--sn-spacing-sm, 0.5rem)",
-            padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
-            borderBottom:
-              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-            backgroundColor: "var(--sn-color-card, #ffffff)",
-            flexShrink: 0,
-          }}
-        >
-          <Icon name="hash" size={18} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            {title && (
-              <div
-                style={{
-                  fontSize: "var(--sn-font-size-md, 1rem)",
-                  fontWeight:
-                    "var(--sn-font-weight-semibold, 600)" as React.CSSProperties["fontWeight"],
-                  color: "var(--sn-color-foreground, #111827)",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {title}
-              </div>
-            )}
-            {subtitle && (
-              <div
-                style={{
-                  fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                  color: "var(--sn-color-muted-foreground, #6b7280)",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {subtitle}
-              </div>
-            )}
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      },
+    },
+    componentSurface: config.slots?.title,
+  });
+  const subtitleSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-subtitle`,
+    implementationBase: {
+      fontSize: "xs",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      },
+    },
+    componentSurface: config.slots?.subtitle,
+  });
+  const threadAreaSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-threadArea`,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      flex: "1",
+      style: {
+        minHeight: 0,
+      },
+    },
+    componentSurface: config.slots?.threadArea,
+  });
+  const typingAreaSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-typingArea`,
+    implementationBase: {
+      style: {
+        flexShrink: 0,
+        minHeight: "1.5rem",
+      },
+    },
+    componentSurface: config.slots?.typingArea,
+  });
+  const inputAreaSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-inputArea`,
+    implementationBase: {
+      paddingY: "sm",
+      paddingX: "md",
+      style: {
+        flexShrink: 0,
+        borderTop:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      },
+    },
+    componentSurface: config.slots?.inputArea,
+  });
+
+  return (
+    <>
+      <div
+        data-snapshot-component="chat-window"
+        data-testid="chat-window"
+        aria-label="Chat"
+        data-snapshot-id={rootId}
+        className={rootSurface.className}
+        style={rootSurface.style}
+      >
+        {showHeader ? (
+          <div
+            data-testid="chat-header"
+            data-snapshot-id={`${rootId}-header`}
+            className={headerSurface.className}
+            style={headerSurface.style}
+          >
+            <span
+              aria-hidden="true"
+              data-snapshot-id={`${rootId}-headerIcon`}
+              className={headerIconSurface.className}
+              style={headerIconSurface.style}
+            >
+              <Icon name="hash" size={18} />
+            </span>
+            <div
+              data-snapshot-id={`${rootId}-titleGroup`}
+              className={titleGroupSurface.className}
+              style={titleGroupSurface.style}
+            >
+              {title ? (
+                <div
+                  data-snapshot-id={`${rootId}-title`}
+                  className={titleSurface.className}
+                  style={titleSurface.style}
+                >
+                  {title}
+                </div>
+              ) : null}
+              {subtitle ? (
+                <div
+                  data-snapshot-id={`${rootId}-subtitle`}
+                  className={subtitleSurface.className}
+                  style={subtitleSurface.style}
+                >
+                  {subtitle}
+                </div>
+              ) : null}
+            </div>
           </div>
+        ) : null}
+
+        <div
+          data-snapshot-id={`${rootId}-threadArea`}
+          className={threadAreaSurface.className}
+          style={threadAreaSurface.style}
+        >
+          <MessageThread config={{ ...threadConfig, maxHeight: undefined }} />
         </div>
-      )}
 
-      {/* Message thread */}
-      <div
-        style={{
-          flex: 1,
-          minHeight: 0,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <MessageThread
-          config={{
-            ...threadConfig,
-            maxHeight: undefined, // Let flex handle sizing
-          }}
-        />
-      </div>
+        {showTypingIndicator ? (
+          <div
+            data-snapshot-id={`${rootId}-typingArea`}
+            className={typingAreaSurface.className}
+            style={typingAreaSurface.style}
+          >
+            <TypingIndicator config={typingConfig} />
+          </div>
+        ) : null}
 
-      {/* Typing indicator */}
-      {showTypingIndicator && (
-        <div style={{ flexShrink: 0, minHeight: "1.5rem" }}>
-          <TypingIndicator config={typingConfig} />
+        <div
+          data-snapshot-id={`${rootId}-inputArea`}
+          className={inputAreaSurface.className}
+          style={inputAreaSurface.style}
+        >
+          <RichInput config={inputConfig} />
         </div>
-      )}
-
-      {/* Input area */}
-      <div
-        style={{
-          flexShrink: 0,
-          borderTop:
-            "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-          padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
-        }}
-      >
-        <RichInput config={inputConfig} />
       </div>
-    </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={headerSurface.scopedCss} />
+      <SurfaceStyles css={headerIconSurface.scopedCss} />
+      <SurfaceStyles css={titleGroupSurface.scopedCss} />
+      <SurfaceStyles css={titleSurface.scopedCss} />
+      <SurfaceStyles css={subtitleSurface.scopedCss} />
+      <SurfaceStyles css={threadAreaSurface.scopedCss} />
+      <SurfaceStyles css={typingAreaSurface.scopedCss} />
+      <SurfaceStyles css={inputAreaSurface.scopedCss} />
+    </>
   );
 }

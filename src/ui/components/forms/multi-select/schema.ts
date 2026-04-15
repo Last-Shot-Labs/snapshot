@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { dataSourceSchema, fromRefSchema } from "../../_base/types";
 
 /** Schema for a single option in the multi-select dropdown. */
@@ -37,8 +38,7 @@ const optionSchema = z.object({
  * }
  * ```
  */
-export const multiSelectConfigSchema = z
-  .object({
+export const multiSelectConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("multi-select"),
     /** Label text displayed above the select. */
@@ -63,14 +63,25 @@ export const multiSelectConfigSchema = z
     disabled: z.union([z.boolean(), fromRefSchema]).optional(),
     /** Action to execute when the selection changes. */
     changeAction: actionSchema.optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-    /** Inline styles. */
-    style: z.record(z.string()).optional(),
-  })
-  .strict();
+    slots: slotsSchema([
+      "root",
+      "label",
+      "trigger",
+      "placeholder",
+      "pill",
+      "pillLabel",
+      "pillRemove",
+      "chevron",
+      "dropdown",
+      "searchContainer",
+      "searchInput",
+      "loading",
+      "error",
+      "retryButton",
+      "empty",
+      "option",
+      "optionIndicator",
+      "optionIcon",
+      "optionLabel",
+    ]).optional(),
+  }).strict();

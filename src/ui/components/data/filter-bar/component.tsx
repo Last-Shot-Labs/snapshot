@@ -1,48 +1,47 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { usePublish, useSubscribe } from "../../../context/hooks";
+import type { CSSProperties, ChangeEvent } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
+import { usePublish, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { FilterBarConfig } from "./types";
 
-/** Internal state for active filter selections. */
 type FilterState = Record<string, string | string[]>;
 
-/**
- * FilterBar component — search input + filter dropdowns + active filter pills.
- *
- * Publishes `{ search, filters }` to the page context so other components
- * (e.g., data tables) can subscribe and react to filter changes.
- *
- * @param props.config - The filter bar config from the manifest
- */
+type ActivePill = {
+  key: string;
+  value: string;
+  displayLabel: string;
+};
+
 export function FilterBar({ config }: { config: FilterBarConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const visible = useSubscribe(config.visible ?? true);
-
   const showSearch = config.showSearch !== false;
   const filters = config.filters ?? [];
-
   const [search, setSearch] = useState("");
   const [filterState, setFilterState] = useState<FilterState>({});
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const rootId = config.id ?? "filter-bar";
 
-  // Publish state changes
   useEffect(() => {
     publish?.({ search, filters: filterState });
   }, [search, filterState, publish]);
 
-  // Close dropdown on click outside
   useEffect(() => {
-    if (!openDropdown) return;
+    if (!openDropdown) {
+      return undefined;
+    }
 
-    const handleClick = (e: MouseEvent) => {
+    const handleClick = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
+        !dropdownRef.current.contains(event.target as Node)
       ) {
         setOpenDropdown(null);
       }
@@ -52,230 +51,350 @@ export function FilterBar({ config }: { config: FilterBarConfig }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [openDropdown]);
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = e.target.value;
-      setSearch(val);
+  useEffect(() => {
+    if (!openDropdown) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [openDropdown]);
+
+  const dispatchChange = useCallback(
+    (nextSearch: string, nextFilters: FilterState) => {
       if (config.changeAction) {
         void execute(config.changeAction, {
-          search: val,
-          filters: filterState,
+          search: nextSearch,
+          filters: nextFilters,
         });
       }
     },
-    [config.changeAction, execute, filterState],
+    [config.changeAction, execute],
+  );
+
+  const handleSearchChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setSearch(value);
+      dispatchChange(value, filterState);
+    },
+    [dispatchChange, filterState],
   );
 
   const handleOptionSelect = useCallback(
     (key: string, value: string, multiple: boolean) => {
-      setFilterState((prev) => {
-        const newState = { ...prev };
+      setFilterState((previous) => {
+        const nextState: FilterState = { ...previous };
 
         if (multiple) {
-          const current = Array.isArray(prev[key])
-            ? [...(prev[key] as string[])]
+          const current = Array.isArray(previous[key])
+            ? [...(previous[key] as string[])]
             : [];
-          const idx = current.indexOf(value);
-          if (idx >= 0) {
-            current.splice(idx, 1);
+          const index = current.indexOf(value);
+
+          if (index >= 0) {
+            current.splice(index, 1);
             if (current.length === 0) {
-              delete newState[key];
+              delete nextState[key];
             } else {
-              newState[key] = current;
+              nextState[key] = current;
             }
           } else {
-            newState[key] = [...current, value];
+            nextState[key] = [...current, value];
           }
         } else {
-          if (prev[key] === value) {
-            delete newState[key];
+          if (previous[key] === value) {
+            delete nextState[key];
           } else {
-            newState[key] = value;
+            nextState[key] = value;
           }
           setOpenDropdown(null);
         }
 
-        if (config.changeAction) {
-          void execute(config.changeAction, {
-            search,
-            filters: newState,
-          });
-        }
-
-        return newState;
+        dispatchChange(search, nextState);
+        return nextState;
       });
     },
-    [config.changeAction, execute, search],
+    [dispatchChange, search],
   );
 
   const removeFilter = useCallback(
     (key: string, value?: string) => {
-      setFilterState((prev) => {
-        const newState = { ...prev };
+      setFilterState((previous) => {
+        const nextState: FilterState = { ...previous };
 
-        if (value && Array.isArray(prev[key])) {
-          const arr = (prev[key] as string[]).filter((v) => v !== value);
-          if (arr.length === 0) {
-            delete newState[key];
+        if (value && Array.isArray(previous[key])) {
+          const nextValues = (previous[key] as string[]).filter(
+            (candidate) => candidate !== value,
+          );
+
+          if (nextValues.length === 0) {
+            delete nextState[key];
           } else {
-            newState[key] = arr;
+            nextState[key] = nextValues;
           }
         } else {
-          delete newState[key];
+          delete nextState[key];
         }
 
-        if (config.changeAction) {
-          void execute(config.changeAction, {
-            search,
-            filters: newState,
-          });
-        }
-
-        return newState;
+        dispatchChange(search, nextState);
+        return nextState;
       });
     },
-    [config.changeAction, execute, search],
+    [dispatchChange, search],
   );
 
   const clearAll = useCallback(() => {
     setSearch("");
     setFilterState({});
-    if (config.changeAction) {
-      void execute(config.changeAction, { search: "", filters: {} });
+    dispatchChange("", {});
+  }, [dispatchChange]);
+
+  const isSelected = useCallback(
+    (key: string, value: string) => {
+      const current = filterState[key];
+      if (!current) {
+        return false;
+      }
+      return Array.isArray(current) ? current.includes(value) : current === value;
+    },
+    [filterState],
+  );
+
+  const activePills = useMemo<ActivePill[]>(() => {
+    const pills: ActivePill[] = [];
+
+    for (const filter of filters) {
+      const selected = filterState[filter.key];
+      if (!selected) {
+        continue;
+      }
+
+      const values = Array.isArray(selected) ? selected : [selected];
+      for (const value of values) {
+        const option = filter.options.find((candidate) => candidate.value === value);
+        pills.push({
+          key: filter.key,
+          value,
+          displayLabel: option
+            ? `${filter.label}: ${option.label}`
+            : `${filter.label}: ${value}`,
+        });
+      }
     }
-  }, [config.changeAction, execute]);
 
-  const hasActiveFilters =
-    search.length > 0 || Object.keys(filterState).length > 0;
+    return pills;
+  }, [filterState, filters]);
 
-  // Build active pill list
-  const activePills: Array<{
-    key: string;
-    label: string;
-    value: string;
-    displayLabel: string;
-  }> = [];
+  const hasActiveFilters = search.length > 0 || activePills.length > 0;
 
-  for (const f of filters) {
-    const val = filterState[f.key];
-    if (!val) continue;
-
-    const values = Array.isArray(val) ? val : [val];
-    for (const v of values) {
-      const opt = f.options.find((o) => o.value === v);
-      activePills.push({
-        key: f.key,
-        label: f.label,
-        value: v,
-        displayLabel: opt ? `${f.label}: ${opt.label}` : `${f.label}: ${v}`,
-      });
-    }
+  if (visible === false) {
+    return null;
   }
 
-  // Helper to check if an option is selected
-  const isSelected = (key: string, value: string): boolean => {
-    const current = filterState[key];
-    if (!current) return false;
-    if (Array.isArray(current)) return current.includes(value);
-    return current === value;
-  };
-
-  // Close dropdown on Escape key
-  useEffect(() => {
-    if (!openDropdown) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpenDropdown(null);
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [openDropdown]);
-
-  // Visibility check
-  if (visible === false) return null;
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const toolbarSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-toolbar`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
+      flexWrap: "wrap",
+    },
+    componentSurface: config.slots?.toolbar,
+  });
+  const searchSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-search`,
+    implementationBase: {
+      position: "relative",
+      style: {
+        flex: "1 1 200px",
+        minWidth: "140px",
+        maxWidth: "min(320px, 100%)",
+      },
+    },
+    componentSurface: config.slots?.search,
+  });
+  const searchIconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-search-icon`,
+    implementationBase: {
+      position: "absolute",
+      display: "flex",
+      style: {
+        left: "var(--sn-spacing-sm, 0.5rem)",
+        top: "50%",
+        transform: "translateY(-50%)",
+        color: "var(--sn-color-muted-foreground, #6b7280)",
+        pointerEvents: "none",
+      },
+    },
+    componentSurface: config.slots?.searchIcon,
+  });
+  const filterButtonSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-filter-button`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--sn-spacing-2xs, 0.125rem)",
+      cursor: "pointer",
+      hover: {
+        opacity: 0.85,
+      },
+      focus: {
+        ring: true,
+      },
+      style: {
+        padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        borderRadius: "var(--sn-radius-md, 0.375rem)",
+        whiteSpace: "nowrap",
+      },
+      states: {
+        active: {
+          style: {
+            border: "1px solid var(--sn-color-primary, #2563eb)",
+            backgroundColor: "var(--sn-color-primary, #2563eb)",
+            color: "var(--sn-color-primary-foreground, #fff)",
+          },
+        },
+      },
+    },
+    componentSurface: config.slots?.filterButton,
+  });
+  const dropdownSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-dropdown`,
+    implementationBase: {
+      position: "absolute",
+      style: {
+        top: "calc(100% + 4px)",
+        left: 0,
+        zIndex: "var(--sn-z-index-dropdown, 30)",
+        minWidth: "150px",
+        backgroundColor: "var(--sn-color-popover, #fff)",
+        border:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+        borderRadius: "var(--sn-radius-md, 0.375rem)",
+        boxShadow: "var(--sn-shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1))",
+        padding: "var(--sn-spacing-2xs, 0.125rem) 0",
+        overflow: "hidden",
+      },
+    },
+    componentSurface: config.slots?.dropdown,
+  });
+  const optionSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-option`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
+      cursor: "pointer",
+      hover: {
+        bg: "var(--sn-color-accent, #f3f4f6)",
+      },
+      focus: {
+        ring: true,
+        bg: "var(--sn-color-accent, #f3f4f6)",
+      },
+      style: {
+        width: "100%",
+        padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+        border: "none",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        color: "var(--sn-color-popover-foreground, #111)",
+        textAlign: "left",
+        whiteSpace: "nowrap",
+      },
+      states: {
+        active: {
+          style: {
+            background: "var(--sn-color-accent, #f3f4f6)",
+          },
+        },
+      },
+    },
+    componentSurface: config.slots?.option,
+  });
+  const pillSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-pill`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "var(--sn-spacing-2xs, 0.125rem)",
+      style: {
+        padding: "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-sm, 0.5rem)",
+        fontSize: "var(--sn-font-size-xs, 0.75rem)",
+        backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
+        color: "var(--sn-color-secondary-foreground, #111)",
+        borderRadius: "var(--sn-radius-full, 9999px)",
+      },
+    },
+    componentSurface: config.slots?.pill,
+  });
+  const clearButtonSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-clear`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--sn-spacing-2xs, 0.125rem)",
+      cursor: "pointer",
+      hover: {
+        color: "var(--sn-color-foreground, #111)",
+      },
+      focus: {
+        ring: true,
+      },
+      style: {
+        padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        border: "none",
+        background: "none",
+        color: "var(--sn-color-muted-foreground, #6b7280)",
+        whiteSpace: "nowrap",
+      },
+    },
+    componentSurface: config.slots?.clearButton,
+  });
 
   return (
     <div
       data-snapshot-component="filter-bar"
-      className={config.className}
+      data-snapshot-id={rootId}
+      className={[config.className, rootSurface.className].filter(Boolean).join(" ") || undefined}
       style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--sn-spacing-sm, 0.5rem)",
-        ...(config.style as React.CSSProperties),
+        ...(rootSurface.style ?? {}),
+        ...((config.style as CSSProperties | undefined) ?? {}),
       }}
     >
-      {/* Hover/focus styles */}
-      <style>{`
-[data-snapshot-component="filter-bar"] [data-testid^="filter-button-"]:hover {
-  opacity: var(--sn-opacity-hover, 0.85);
-}
-[data-snapshot-component="filter-bar"] [data-testid^="filter-button-"]:focus {
-  outline: none;
-}
-[data-snapshot-component="filter-bar"] [data-testid^="filter-button-"]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-[data-snapshot-component="filter-bar"] [role="option"]:focus {
-  outline: none;
-}
-[data-snapshot-component="filter-bar"] [role="option"]:hover {
-  background-color: var(--sn-color-accent, #f3f4f6);
-}
-[data-snapshot-component="filter-bar"] [role="option"]:focus-visible {
-  background-color: var(--sn-color-accent, #f3f4f6);
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-[data-snapshot-component="filter-bar"] [data-testid="filter-bar-search"]:focus {
-  outline: none;
-}
-[data-snapshot-component="filter-bar"] [data-testid="filter-bar-search"]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-[data-snapshot-component="filter-bar"] [data-testid="filter-bar-clear"]:hover {
-  color: var(--sn-color-foreground, #111);
-}
-[data-snapshot-component="filter-bar"] [data-testid="filter-bar-clear"]:focus {
-  outline: none;
-}
-[data-snapshot-component="filter-bar"] [data-testid="filter-bar-clear"]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-`}</style>
-      {/* Top row: search + filter buttons */}
       <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "var(--sn-spacing-sm, 0.5rem)",
-          flexWrap: "wrap",
-        }}
+        data-snapshot-id={`${rootId}-toolbar`}
+        className={toolbarSurface.className}
+        style={toolbarSurface.style}
       >
-        {/* Search input */}
-        {showSearch && (
+        {showSearch ? (
           <div
-            style={{
-              position: "relative",
-              flex: "1 1 200px",
-              minWidth: "140px",
-              maxWidth: "min(320px, 100%)",
-            }}
+            data-snapshot-id={`${rootId}-search`}
+            className={searchSurface.className}
+            style={searchSurface.style}
           >
             <div
-              style={{
-                position: "absolute",
-                left: "var(--sn-spacing-sm, 0.5rem)",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "var(--sn-color-muted-foreground, #6b7280)",
-                pointerEvents: "none",
-                display: "flex",
-              }}
+              data-snapshot-id={`${rootId}-search-icon`}
+              className={searchIconSurface.className}
+              style={searchIconSurface.style}
             >
               <Icon name="search" size={14} />
             </div>
@@ -297,106 +416,77 @@ export function FilterBar({ config }: { config: FilterBarConfig }) {
                 borderRadius: "var(--sn-radius-md, 0.375rem)",
                 backgroundColor: "var(--sn-color-input, #fff)",
                 color: "var(--sn-color-foreground, #111)",
-                outline: "none",
               }}
             />
           </div>
-        )}
+        ) : null}
 
-        {/* Filter dropdown buttons */}
         {filters.map((filter) => {
-          const isActive = openDropdown === filter.key;
+          const isOpen = openDropdown === filter.key;
           const hasValue = filter.key in filterState;
 
           return (
             <div
               key={filter.key}
-              ref={isActive ? dropdownRef : undefined}
+              ref={isOpen ? dropdownRef : undefined}
               style={{ position: "relative" }}
             >
               <button
                 type="button"
-                onClick={() => setOpenDropdown(isActive ? null : filter.key)}
                 data-testid={`filter-button-${filter.key}`}
+                className={filterButtonSurface.className}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--sn-spacing-2xs, 0.125rem)",
-                  padding:
-                    "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-                  fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                  border: `1px solid ${hasValue ? "var(--sn-color-primary, #2563eb)" : "var(--sn-color-border, #e5e7eb)"}`,
-                  borderRadius: "var(--sn-radius-md, 0.375rem)",
+                  ...(filterButtonSurface.style ?? {}),
+                  border: hasValue
+                    ? "1px solid var(--sn-color-primary, #2563eb)"
+                    : "1px solid var(--sn-color-border, #e5e7eb)",
                   backgroundColor: hasValue
                     ? "var(--sn-color-primary, #2563eb)"
                     : "var(--sn-color-card, #fff)",
                   color: hasValue
                     ? "var(--sn-color-primary-foreground, #fff)"
                     : "var(--sn-color-foreground, #111)",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
                 }}
+                onClick={() => setOpenDropdown(isOpen ? null : filter.key)}
               >
                 <span>{filter.label}</span>
                 <Icon name="chevron-down" size={12} color="currentColor" />
               </button>
 
-              {/* Dropdown options */}
-              {isActive && (
+              {isOpen ? (
                 <div
                   role="listbox"
                   data-testid={`filter-dropdown-${filter.key}`}
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 4px)",
-                    left: 0,
-                    zIndex: "var(--sn-z-index-dropdown, 30)",
-                    minWidth: "150px",
-                    backgroundColor: "var(--sn-color-popover, #fff)",
-                    border:
-                      "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-                    borderRadius: "var(--sn-radius-md, 0.375rem)",
-                    boxShadow:
-                      "var(--sn-shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1))",
-                    padding: "var(--sn-spacing-2xs, 0.125rem) 0",
-                    overflow: "hidden",
-                  }}
+                  data-snapshot-id={`${rootId}-dropdown`}
+                  className={dropdownSurface.className}
+                  style={dropdownSurface.style}
                 >
-                  {filter.options.map((opt) => {
-                    const selected = isSelected(filter.key, opt.value);
+                  {filter.options.map((option) => {
+                    const selected = isSelected(filter.key, option.value);
 
                     return (
                       <button
-                        key={opt.value}
+                        key={option.value}
                         type="button"
                         role="option"
                         aria-selected={selected}
-                        onClick={() =>
-                          handleOptionSelect(
-                            filter.key,
-                            opt.value,
-                            filter.multiple === true,
-                          )
-                        }
+                        data-snapshot-id={`${rootId}-option`}
+                        className={optionSurface.className}
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "var(--sn-spacing-sm, 0.5rem)",
-                          width: "100%",
-                          padding:
-                            "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-                          border: "none",
+                          ...(optionSurface.style ?? {}),
                           background: selected
                             ? "var(--sn-color-accent, #f3f4f6)"
                             : "none",
-                        cursor: "pointer",
-                        fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                        color: "var(--sn-color-popover-foreground, #111)",
-                        textAlign: "left",
-                        whiteSpace: "nowrap",
-                      }}
+                        }}
+                        onClick={() =>
+                          handleOptionSelect(
+                            filter.key,
+                            option.value,
+                            filter.multiple === true,
+                          )
+                        }
                       >
-                        {filter.multiple && (
+                        {filter.multiple ? (
                           <span
                             style={{
                               display: "inline-flex",
@@ -412,53 +502,41 @@ export function FilterBar({ config }: { config: FilterBarConfig }) {
                               flexShrink: 0,
                             }}
                           >
-                            {selected && (
+                            {selected ? (
                               <Icon
                                 name="check"
                                 size={10}
                                 color="var(--sn-color-primary-foreground, #fff)"
                               />
-                            )}
+                            ) : null}
                           </span>
-                        )}
-                        <span>{opt.label}</span>
+                        ) : null}
+                        <span>{option.label}</span>
                       </button>
                     );
                   })}
                 </div>
-              )}
+              ) : null}
             </div>
           );
         })}
 
-        {/* Clear all button */}
-        {hasActiveFilters && (
+        {hasActiveFilters ? (
           <button
             type="button"
-            onClick={clearAll}
             data-testid="filter-bar-clear"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "var(--sn-spacing-2xs, 0.125rem)",
-              padding:
-                "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              border: "none",
-              background: "none",
-              cursor: "pointer",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-              whiteSpace: "nowrap",
-            }}
+            data-snapshot-id={`${rootId}-clear`}
+            className={clearButtonSurface.className}
+            style={clearButtonSurface.style}
+            onClick={clearAll}
           >
             <Icon name="x" size={12} />
             <span>Clear all</span>
           </button>
-        )}
+        ) : null}
       </div>
 
-      {/* Active filter pills */}
-      {activePills.length > 0 && (
+      {activePills.length > 0 ? (
         <div
           data-testid="filter-bar-pills"
           style={{
@@ -470,23 +548,15 @@ export function FilterBar({ config }: { config: FilterBarConfig }) {
           {activePills.map((pill) => (
             <span
               key={`${pill.key}-${pill.value}`}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "var(--sn-spacing-2xs, 0.125rem)",
-                padding:
-                  "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-sm, 0.5rem)",
-                fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
-                color: "var(--sn-color-secondary-foreground, #111)",
-                borderRadius: "var(--sn-radius-full, 9999px)",
-              }}
+              data-snapshot-id={`${rootId}-pill`}
+              className={pillSurface.className}
+              style={pillSurface.style}
             >
               <span>{pill.displayLabel}</span>
               <button
                 type="button"
-                onClick={() => removeFilter(pill.key, pill.value)}
                 aria-label={`Remove filter ${pill.displayLabel}`}
+                onClick={() => removeFilter(pill.key, pill.value)}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -494,7 +564,7 @@ export function FilterBar({ config }: { config: FilterBarConfig }) {
                   border: "none",
                   background: "none",
                   cursor: "pointer",
-                  padding: "0",
+                  padding: 0,
                   color: "var(--sn-color-muted-foreground, #6b7280)",
                   lineHeight: "var(--sn-leading-none, 1)",
                 }}
@@ -504,7 +574,17 @@ export function FilterBar({ config }: { config: FilterBarConfig }) {
             </span>
           ))}
         </div>
-      )}
+      ) : null}
+
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={toolbarSurface.scopedCss} />
+      <SurfaceStyles css={searchSurface.scopedCss} />
+      <SurfaceStyles css={searchIconSurface.scopedCss} />
+      <SurfaceStyles css={filterButtonSurface.scopedCss} />
+      <SurfaceStyles css={dropdownSurface.scopedCss} />
+      <SurfaceStyles css={optionSurface.scopedCss} />
+      <SurfaceStyles css={pillSurface.scopedCss} />
+      <SurfaceStyles css={clearButtonSurface.scopedCss} />
     </div>
   );
 }

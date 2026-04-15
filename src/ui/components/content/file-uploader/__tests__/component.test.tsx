@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { cleanup, render, screen, fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { AtomRegistryImpl } from "../../../../context/registry";
 import {
@@ -55,10 +55,12 @@ const baseConfig: FileUploaderConfig = {
 describe("FileUploader", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    cleanup();
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    cleanup();
   });
 
   it("renders with data-snapshot-component attribute", () => {

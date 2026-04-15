@@ -3,8 +3,19 @@ import { actionSchema } from "../../../actions/types";
 import { fromRefSchema } from "../../_base/types";
 import { workflowDefinitionSchema } from "../../../workflows/schema";
 import { extendComponentSchema } from "../../_base/schema";
-import { modalSlotNames } from "../modal/schema";
 import { slotsSchema } from "../../_base/schema";
+
+const confirmDialogSlotNames = [
+  "root",
+  "overlay",
+  "panel",
+  "header",
+  "title",
+  "closeButton",
+  "body",
+  "footer",
+  "footerAction",
+] as const;
 
 const footerVariantSchema = z.enum([
   "default",
@@ -35,5 +46,5 @@ export const confirmDialogConfigSchema = extendComponentSchema({
     trapFocus: z.boolean().default(true),
     initialFocus: z.string().optional(),
     returnFocus: z.boolean().default(true),
-    slots: slotsSchema(modalSlotNames).optional(),
+    slots: slotsSchema(confirmDialogSlotNames).optional(),
   }).strict();

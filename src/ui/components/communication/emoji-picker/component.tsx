@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useMemo, useCallback } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
+import { usePublish, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { useComponentData } from "../../_base/use-component-data";
+import type { EmojiCategory, EmojiEntry, EmojiPickerConfig } from "./types";
 import emojiData from "./emoji-data.json";
-import type { EmojiPickerConfig } from "./types";
-import type { EmojiEntry, EmojiCategory } from "./types";
-
 import type { CustomEmoji } from "./custom-emoji";
-import { CUSTOM_EMOJI_CSS } from "./custom-emoji";
+import { resolveEmojiRecords } from "./custom-emoji";
 
-/** Category → display label mapping. */
 const CATEGORY_LABELS: Record<string, string> = {
   smileys: "Smileys & Emotion",
   people: "People & Body",
@@ -25,7 +25,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   custom: "sparkles",
 };
 
-/** Category → icon name mapping. */
 const CATEGORY_ICONS: Record<string, string> = {
   smileys: "smile",
   people: "users",
@@ -39,75 +38,123 @@ const CATEGORY_ICONS: Record<string, string> = {
   custom: "sparkles",
 };
 
-/**
- * EmojiPicker — searchable grid of emojis organized by category.
- * Publishes `{ emoji, name }` when an emoji is selected.
- *
- * @param props - Component props containing the emoji picker configuration
- */
+function toRecordArray(payload: unknown): Record<string, unknown>[] {
+  if (Array.isArray(payload)) {
+    return payload as Record<string, unknown>[];
+  }
+
+  if (!payload || typeof payload !== "object") {
+    return [];
+  }
+
+  const recordData = payload as Record<string, unknown>;
+  const candidates = [
+    recordData.results,
+    recordData.data,
+    recordData.items,
+    recordData.emojis,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      return candidate as Record<string, unknown>[];
+    }
+  }
+
+  return [];
+}
+
 export function EmojiPicker({ config }: { config: EmojiPickerConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
-
+  const customEmojiResult = useComponentData(config.customEmojiData ?? "");
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const rootId = config.id ?? "emoji-picker";
 
   const perRow = config.perRow ?? 8;
   const maxHeight = config.maxHeight ?? "300px";
 
-  // Build custom emoji category
-  const customEmojis = config.customEmojis as CustomEmoji[] | undefined;
+  const remoteCustomEmojis = useMemo(
+    () =>
+      resolveEmojiRecords(
+        toRecordArray(customEmojiResult.data),
+        config.emojiUrlField,
+        config.emojiUrlPrefix,
+      ),
+    [config.emojiUrlField, config.emojiUrlPrefix, customEmojiResult.data],
+  );
+
+  const customEmojis = useMemo(() => {
+    const entries = [...remoteCustomEmojis, ...(config.customEmojis ?? [])];
+    const seen = new Set<string>();
+
+    return entries.filter((emoji) => {
+      const key = emoji.shortcode || emoji.id;
+      if (!key || seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  }, [config.customEmojis, remoteCustomEmojis]);
+
   const customCategory: EmojiCategory | null = useMemo(() => {
-    if (!customEmojis || customEmojis.length === 0) return null;
+    if (customEmojis.length === 0) {
+      return null;
+    }
+
     return {
       category: "custom",
-      emojis: customEmojis.map((ce) => ({
-        native: "", // Custom emojis don't have native chars
-        name: ce.name,
-        keywords: [ce.shortcode, ce.name.toLowerCase()],
-        // Store custom data for rendering
-        _custom: ce,
+      emojis: customEmojis.map((customEmoji) => ({
+        native: "",
+        name: customEmoji.name,
+        keywords: [customEmoji.shortcode, customEmoji.name.toLowerCase()],
+        _custom: customEmoji,
       })),
     };
   }, [customEmojis]);
 
-  // Filter categories based on config + merge custom
   const categories = useMemo(() => {
     const allCategories = emojiData as EmojiCategory[];
     let result: EmojiCategory[];
+
     if (config.categories) {
       const allowed = new Set<string>(config.categories);
-      result = allCategories.filter((c) => allowed.has(c.category));
+      result = allCategories.filter((category) => allowed.has(category.category));
     } else {
       result = [...allCategories];
     }
-    // Add custom category at the front if present
+
     if (customCategory) {
       result = [customCategory, ...result];
     }
+
     return result;
   }, [config.categories, customCategory]);
 
-  // Filter by search
   const filteredCategories = useMemo(() => {
-    if (!search.trim()) return categories;
+    if (!search.trim()) {
+      return categories;
+    }
+
     const query = search.toLowerCase();
     return categories
-      .map((cat) => ({
-        ...cat,
-        emojis: cat.emojis.filter(
-          (e) =>
-            e.name.toLowerCase().includes(query) ||
-            e.keywords.some((k) => k.includes(query)),
+      .map((category) => ({
+        ...category,
+        emojis: category.emojis.filter(
+          (emoji) =>
+            emoji.name.toLowerCase().includes(query) ||
+            emoji.keywords.some((keyword) => keyword.includes(query)),
         ),
       }))
-      .filter((cat) => cat.emojis.length > 0);
+      .filter((category) => category.emojis.length > 0);
   }, [categories, search]);
 
   const handleSelect = useCallback(
     (emoji: EmojiEntry) => {
-      const custom = (emoji as unknown as Record<string, unknown>)._custom as
+      const custom = ((emoji as unknown) as Record<string, unknown>)._custom as
         | CustomEmoji
         | undefined;
       const payload = custom
@@ -120,249 +167,396 @@ export function EmojiPicker({ config }: { config: EmojiPickerConfig }) {
           }
         : { emoji: emoji.native, name: emoji.name, isCustom: false };
 
-      if (publish) {
-        publish(payload);
-      }
+      publish?.(payload);
+
       if (config.selectAction) {
         void execute(config.selectAction, payload);
       }
     },
-    [publish, config.selectAction, execute],
+    [config.selectAction, execute, publish],
   );
 
-  if (visible === false) return null;
+  if (visible === false) {
+    return null;
+  }
 
-  const categoryKeys = categories.map((c) => c.category);
+  const categoryKeys = categories.map((category) => category.category);
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {
+      width: "100%",
+      maxWidth: `${perRow * 2.25 + 1.5}rem`,
+      overflow: "hidden",
+      borderRadius: "md",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      bg: "var(--sn-color-card, #ffffff)",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const searchSectionSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-searchSection`,
+    implementationBase: {
+      padding: "xs",
+      style: {
+        borderBottom:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      },
+    },
+    componentSurface: config.slots?.searchSection,
+  });
+  const searchShellSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-searchShell`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "xs",
+      paddingY: "xs",
+      paddingX: "sm",
+      borderRadius: "sm",
+      bg: "var(--sn-color-secondary, #f3f4f6)",
+    },
+    componentSurface: config.slots?.searchShell,
+  });
+  const searchIconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-searchIcon`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        flexShrink: 0,
+      },
+    },
+    componentSurface: config.slots?.searchIcon,
+  });
+  const searchInputSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-searchInput`,
+    implementationBase: {
+      width: "100%",
+      fontSize: "sm",
+      color: "var(--sn-color-foreground, #111827)",
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+      style: {
+        border: "none",
+        outline: "none",
+        background: "transparent",
+        padding: 0,
+        minWidth: 0,
+        fontFamily: "inherit",
+      },
+    },
+    componentSurface: config.slots?.searchInput,
+  });
+  const categoryTabsSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-categoryTabs`,
+    implementationBase: {
+      display: "flex",
+      gap: "2xs",
+      overflow: "auto",
+      paddingY: "2xs",
+      paddingX: "xs",
+      style: {
+        borderBottom:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      },
+    },
+    componentSurface: config.slots?.categoryTabs,
+  });
+  const gridScrollSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-gridScroll`,
+    implementationBase: {
+      overflow: "auto",
+      padding: "xs",
+      style: {
+        maxHeight,
+      },
+    },
+    componentSurface: config.slots?.gridScroll,
+  });
+  const emptyStateSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-emptyState`,
+    implementationBase: {
+      padding: "md",
+      textAlign: "center",
+      fontSize: "sm",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+    },
+    componentSurface: config.slots?.emptyState,
+  });
 
   return (
-    <div
-      data-snapshot-component="emoji-picker"
-      data-testid="emoji-picker"
-      className={config.className}
-      style={{
-        border:
-          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-        borderRadius: "var(--sn-radius-md, 0.5rem)",
-        backgroundColor: "var(--sn-color-card, #ffffff)",
-        overflow: "hidden",
-        width: "100%",
-        maxWidth: `${perRow * 2.25 + 1.5}rem`,
-        ...(config.style as React.CSSProperties),
-      }}
-    >
-      {/* Hover/transition/focus styles */}
-      <style>{`
-[data-snapshot-component="emoji-picker"] [data-emoji-btn]:hover {
-  background-color: var(--sn-color-accent, #f3f4f6);
-  transform: scale(1.15);
-}
-[data-snapshot-component="emoji-picker"] [data-emoji-btn]:focus {
-  outline: none;
-}
-[data-snapshot-component="emoji-picker"] [data-emoji-btn]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-[data-snapshot-component="emoji-picker"] [data-cat-tab]:hover {
-  background-color: var(--sn-color-accent, #f3f4f6);
-}
-[data-snapshot-component="emoji-picker"] [data-cat-tab][data-active]:hover {
-  background-color: color-mix(in oklch, var(--sn-color-primary, #2563eb) 85%, black);
-}
-[data-snapshot-component="emoji-picker"] [data-cat-tab]:focus {
-  outline: none;
-}
-[data-snapshot-component="emoji-picker"] [data-cat-tab]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-[data-snapshot-component="emoji-picker"] [data-testid="emoji-search"]:focus {
-  outline: none;
-}
-[data-snapshot-component="emoji-picker"] [data-testid="emoji-search"]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-`}</style>
-      {/* Custom emoji CSS */}
-      {customCategory && <style>{CUSTOM_EMOJI_CSS}</style>}
-      {/* Search */}
+    <>
       <div
-        style={{
-          padding: "var(--sn-spacing-xs, 0.25rem)",
-          borderBottom:
-            "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-        }}
+        data-snapshot-component="emoji-picker"
+        data-testid="emoji-picker"
+        data-snapshot-id={rootId}
+        className={rootSurface.className}
+        style={rootSurface.style}
       >
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "var(--sn-spacing-xs, 0.25rem)",
-            padding:
-              "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-            backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
-            borderRadius: "var(--sn-radius-sm, 0.25rem)",
-          }}
+          data-snapshot-id={`${rootId}-searchSection`}
+          className={searchSectionSurface.className}
+          style={searchSectionSurface.style}
         >
-          <Icon name="search" size={14} />
-          <input
-            data-testid="emoji-search"
-            type="text"
-            placeholder="Search emoji..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              border: "none",
-              outline: "none",
-              background: "transparent",
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              color: "var(--sn-color-foreground, #111827)",
-              width: "100%",
-              padding: 0,
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Category tabs */}
-      <div
-        style={{
-          display: "flex",
-          borderBottom:
-            "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-          padding: "var(--sn-spacing-2xs, 2px) var(--sn-spacing-xs, 0.25rem)",
-          gap: "var(--sn-border-thin, 1px)",
-          overflowX: "auto",
-        }}
-      >
-        {categoryKeys.map((cat) => (
-          <button
-            key={cat}
-            data-cat-tab
-            data-active={activeCategory === cat ? "" : undefined}
-            title={CATEGORY_LABELS[cat] ?? cat}
-            aria-label={CATEGORY_LABELS[cat] ?? cat}
-            onClick={() =>
-              setActiveCategory(activeCategory === cat ? null : cat)
-            }
-            style={{
-              flex: "0 0 auto",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "2rem",
-              height: "2rem",
-              padding: 0,
-              border: "none",
-              borderRadius: "var(--sn-radius-sm, 0.25rem)",
-              backgroundColor:
-                activeCategory === cat
-                  ? "var(--sn-color-primary, #2563eb)"
-                  : "transparent",
-              color:
-                activeCategory === cat
-                  ? "var(--sn-color-primary-foreground, #ffffff)"
-                  : "var(--sn-color-muted-foreground, #6b7280)",
-              cursor: "pointer",
-              transition:
-                "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-            }}
+          <div
+            data-snapshot-id={`${rootId}-searchShell`}
+            className={searchShellSurface.className}
+            style={searchShellSurface.style}
           >
-            <Icon name={CATEGORY_ICONS[cat] ?? "hash"} size={14} />
-          </button>
-        ))}
-      </div>
+            <span
+              aria-hidden="true"
+              data-snapshot-id={`${rootId}-searchIcon`}
+              className={searchIconSurface.className}
+              style={searchIconSurface.style}
+            >
+              <Icon name="search" size={14} />
+            </span>
+            <input
+              data-testid="emoji-search"
+              data-snapshot-id={`${rootId}-searchInput`}
+              type="text"
+              placeholder="Search emoji..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className={searchInputSurface.className}
+              style={searchInputSurface.style}
+            />
+          </div>
+        </div>
 
-      {/* Emoji grid */}
-      <div
-        style={{
-          maxHeight,
-          overflowY: "auto",
-          padding: "var(--sn-spacing-xs, 0.25rem)",
-        }}
-      >
-        {filteredCategories
-          .filter((cat) => !activeCategory || cat.category === activeCategory)
-          .map((cat) => (
-            <div key={cat.category}>
-              <div
-                style={{
-                  fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                  color: "var(--sn-color-muted-foreground, #6b7280)",
-                  fontWeight:
-                    "var(--sn-font-weight-semibold, 600)" as React.CSSProperties["fontWeight"],
-                  padding:
-                    "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-xs, 0.25rem)",
-                  textTransform: "capitalize",
-                }}
-              >
-                {CATEGORY_LABELS[cat.category] ?? cat.category}
+        <div
+          data-snapshot-id={`${rootId}-categoryTabs`}
+          className={categoryTabsSurface.className}
+          style={categoryTabsSurface.style}
+        >
+          {categoryKeys.map((categoryKey) => {
+            const categoryTabSurface = resolveSurfacePresentation({
+              surfaceId: `${rootId}-categoryTab-${categoryKey}`,
+              implementationBase: {
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--sn-color-muted-foreground, #6b7280)",
+                borderRadius: "sm",
+                cursor: "pointer",
+                hover: {
+                  bg: "var(--sn-color-accent, #f3f4f6)",
+                },
+                focus: {
+                  ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+                },
+                states: {
+                  active: {
+                    bg: "var(--sn-color-primary, #2563eb)",
+                    color: "var(--sn-color-primary-foreground, #ffffff)",
+                    hover: {
+                      bg: "color-mix(in oklch, var(--sn-color-primary, #2563eb) 85%, black)",
+                    },
+                  },
+                },
+                style: {
+                  flex: "0 0 auto",
+                  width: "2rem",
+                  height: "2rem",
+                  padding: 0,
+                  border: "none",
+                  background: "transparent",
+                  transition:
+                    "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+                },
+              },
+              componentSurface: config.slots?.categoryTab,
+              activeStates: activeCategory === categoryKey ? ["active"] : [],
+            });
+
+            return (
+              <div key={categoryKey}>
+                <button
+                  type="button"
+                  data-active={activeCategory === categoryKey ? "" : undefined}
+                  data-snapshot-id={`${rootId}-categoryTab-${categoryKey}`}
+                  title={CATEGORY_LABELS[categoryKey] ?? categoryKey}
+                  aria-label={CATEGORY_LABELS[categoryKey] ?? categoryKey}
+                  onClick={() =>
+                    setActiveCategory(
+                      activeCategory === categoryKey ? null : categoryKey,
+                    )
+                  }
+                  className={categoryTabSurface.className}
+                  style={categoryTabSurface.style}
+                >
+                  <Icon name={CATEGORY_ICONS[categoryKey] ?? "hash"} size={14} />
+                </button>
+                <SurfaceStyles css={categoryTabSurface.scopedCss} />
               </div>
-              <div
-                style={{
+            );
+          })}
+        </div>
+
+        <div
+          data-snapshot-id={`${rootId}-gridScroll`}
+          className={gridScrollSurface.className}
+          style={gridScrollSurface.style}
+        >
+          {filteredCategories
+            .filter(
+              (category) =>
+                !activeCategory || category.category === activeCategory,
+            )
+            .map((category) => {
+              const categoryId = `${rootId}-category-${category.category}`;
+              const categorySectionSurface = resolveSurfacePresentation({
+                surfaceId: categoryId,
+                implementationBase: {
+                  style: {
+                    marginBottom: "var(--sn-spacing-xs, 0.25rem)",
+                  },
+                },
+                componentSurface: config.slots?.categorySection,
+              });
+              const categoryLabelSurface = resolveSurfacePresentation({
+                surfaceId: `${categoryId}-label`,
+                implementationBase: {
+                  paddingY: "xs",
+                  paddingX: "xs",
+                  fontSize: "xs",
+                  fontWeight: "semibold",
+                  color: "var(--sn-color-muted-foreground, #6b7280)",
+                  style: {
+                    textTransform: "capitalize",
+                  },
+                },
+                componentSurface: config.slots?.categoryLabel,
+              });
+              const emojiGridSurface = resolveSurfacePresentation({
+                surfaceId: `${categoryId}-grid`,
+                implementationBase: {
                   display: "grid",
-                  gridTemplateColumns: `repeat(${perRow}, 1fr)`,
-                  gap: "var(--sn-spacing-2xs, 2px)",
-                }}
-              >
-                {cat.emojis.map((emoji) => {
-                  const custom = (emoji as unknown as Record<string, unknown>)
-                    ._custom as CustomEmoji | undefined;
-                  return (
-                    <button
-                      key={emoji.name}
-                      data-emoji-btn
-                      onClick={() => handleSelect(emoji)}
-                      title={custom ? `:${custom.shortcode}:` : emoji.name}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "2rem",
-                        height: "2rem",
-                        padding: 0,
-                        border: "none",
-                        borderRadius: "var(--sn-radius-sm, 0.25rem)",
-                        backgroundColor: "transparent",
-                        cursor: "pointer",
-                        fontSize: "var(--sn-font-size-lg, 1.25rem)",
-                        transition:
-                          "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-                      }}
-                    >
-                      {custom ? (
-                        <img
-                          src={custom.url}
-                          alt={`:${custom.shortcode}:`}
-                          style={{
+                  gap: "2xs",
+                  style: {
+                    gridTemplateColumns: `repeat(${perRow}, 1fr)`,
+                  },
+                },
+                componentSurface: config.slots?.emojiGrid,
+              });
+
+              return (
+                <div
+                  key={category.category}
+                  data-snapshot-id={categoryId}
+                  className={categorySectionSurface.className}
+                  style={categorySectionSurface.style}
+                >
+                  <div
+                    data-snapshot-id={`${categoryId}-label`}
+                    className={categoryLabelSurface.className}
+                    style={categoryLabelSurface.style}
+                  >
+                    {CATEGORY_LABELS[category.category] ?? category.category}
+                  </div>
+                  <div
+                    data-snapshot-id={`${categoryId}-grid`}
+                    className={emojiGridSurface.className}
+                    style={emojiGridSurface.style}
+                  >
+                    {category.emojis.map((emoji) => {
+                      const custom = ((emoji as unknown) as Record<string, unknown>)
+                        ._custom as CustomEmoji | undefined;
+                      const emojiButtonSurface = resolveSurfacePresentation({
+                        surfaceId: `${categoryId}-emoji-${emoji.name}`,
+                        implementationBase: {
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: "sm",
+                          cursor: "pointer",
+                          fontSize: "lg",
+                          hover: {
+                            bg: "var(--sn-color-accent, #f3f4f6)",
+                            scale: 1.15,
+                          },
+                          focus: {
+                            ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+                          },
+                          style: {
+                            width: "2rem",
+                            height: "2rem",
+                            padding: 0,
+                            border: "none",
+                            background: "transparent",
+                            transition:
+                              "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+                          },
+                        },
+                        componentSurface: config.slots?.emojiButton,
+                      });
+                      const customEmojiSurface = resolveSurfacePresentation({
+                        surfaceId: `${categoryId}-emoji-${emoji.name}-custom`,
+                        implementationBase: {
+                          style: {
                             width: "1.375rem",
                             height: "1.375rem",
                             objectFit: "contain",
-                          }}
-                        />
-                      ) : (
-                        emoji.native
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+                          },
+                        },
+                        componentSurface: config.slots?.customEmoji,
+                      });
+
+                      return (
+                        <div key={emoji.name}>
+                          <button
+                            type="button"
+                            data-snapshot-id={`${categoryId}-emoji-${emoji.name}`}
+                            onClick={() => handleSelect(emoji)}
+                            title={custom ? `:${custom.shortcode}:` : emoji.name}
+                            className={emojiButtonSurface.className}
+                            style={emojiButtonSurface.style}
+                          >
+                            {custom ? (
+                              <img
+                                src={custom.url}
+                                alt={`:${custom.shortcode}:`}
+                                data-snapshot-id={`${categoryId}-emoji-${emoji.name}-custom`}
+                                className={customEmojiSurface.className}
+                                style={customEmojiSurface.style}
+                              />
+                            ) : (
+                              emoji.native
+                            )}
+                          </button>
+                          <SurfaceStyles css={emojiButtonSurface.scopedCss} />
+                          <SurfaceStyles css={customEmojiSurface.scopedCss} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <SurfaceStyles css={categorySectionSurface.scopedCss} />
+                  <SurfaceStyles css={categoryLabelSurface.scopedCss} />
+                  <SurfaceStyles css={emojiGridSurface.scopedCss} />
+                </div>
+              );
+            })}
+
+          {filteredCategories.length === 0 ? (
+            <div
+              data-snapshot-id={`${rootId}-emptyState`}
+              className={emptyStateSurface.className}
+              style={emptyStateSurface.style}
+            >
+              No emojis found
             </div>
-          ))}
-        {filteredCategories.length === 0 && (
-          <div
-            style={{
-              padding: "var(--sn-spacing-md, 1rem)",
-              textAlign: "center",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            }}
-          >
-            No emojis found
-          </div>
-        )}
+          ) : null}
+        </div>
       </div>
-    </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={searchSectionSurface.scopedCss} />
+      <SurfaceStyles css={searchShellSurface.scopedCss} />
+      <SurfaceStyles css={searchIconSurface.scopedCss} />
+      <SurfaceStyles css={searchInputSurface.scopedCss} />
+      <SurfaceStyles css={categoryTabsSurface.scopedCss} />
+      <SurfaceStyles css={gridScrollSurface.scopedCss} />
+      <SurfaceStyles css={emptyStateSurface.scopedCss} />
+    </>
   );
 }

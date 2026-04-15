@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import type { CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
+import { usePublish, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
 import type { LocationInputConfig } from "./types";
 
-/** Shape of a resolved location. */
 interface LocationResult {
   name: string;
   address?: string;
@@ -15,22 +17,155 @@ interface LocationResult {
   lng: number;
 }
 
-/**
- * LocationInput — geocode autocomplete input.
- *
- * Searches a backend endpoint as the user types, displays matching
- * locations in a dropdown, and publishes `{ name, lat, lng, address }`
- * on selection. Optionally shows a Google Maps link after selection.
- *
- * @param props - Component props containing the location input configuration
- */
+function joinClassNames(
+  ...values: Array<string | undefined | null | false>
+): string | undefined {
+  const className = values.filter(Boolean).join(" ");
+  return className || undefined;
+}
+
+function LocationResultRow({
+  config,
+  location,
+  index,
+  rootId,
+  onSelect,
+  hasBorder,
+}: {
+  config: LocationInputConfig;
+  location: LocationResult;
+  index: number;
+  rootId: string;
+  onSelect: (location: LocationResult) => void;
+  hasBorder: boolean;
+}) {
+  const resultId = `${rootId}-result-${index}`;
+  const resultSurface = resolveSurfacePresentation({
+    surfaceId: resultId,
+    implementationBase: {
+      display: "flex",
+      alignItems: "start",
+      gap: "sm",
+      width: "100%",
+      cursor: "pointer",
+      transition: "colors",
+      style: {
+        padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
+        border: "none",
+        borderBottom: hasBorder
+          ? "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)"
+          : undefined,
+        backgroundColor: "transparent",
+        textAlign: "left",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        color: "var(--sn-color-foreground, #111827)",
+      },
+      hover: {
+        bg: "var(--sn-color-accent, var(--sn-color-muted, #f3f4f6))",
+      },
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+    },
+    componentSurface: config.slots?.result,
+  });
+  const resultIconSurface = resolveSurfacePresentation({
+    surfaceId: `${resultId}-icon`,
+    implementationBase: {},
+    componentSurface: config.slots?.resultIcon,
+  });
+  const resultContentSurface = resolveSurfacePresentation({
+    surfaceId: `${resultId}-content`,
+    implementationBase: {
+      style: {
+        minWidth: 0,
+      },
+    },
+    componentSurface: config.slots?.resultContent,
+  });
+  const resultNameSurface = resolveSurfacePresentation({
+    surfaceId: `${resultId}-name`,
+    implementationBase: {
+      fontWeight: "medium",
+      style: {
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      },
+    },
+    componentSurface: config.slots?.resultName,
+  });
+  const resultAddressSurface = resolveSurfacePresentation({
+    surfaceId: `${resultId}-address`,
+    implementationBase: {
+      fontSize: "xs",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      },
+    },
+    componentSurface: config.slots?.resultAddress,
+  });
+
+  return (
+    <>
+      <button
+        type="button"
+        data-testid="location-result"
+        data-snapshot-id={resultId}
+        className={resultSurface.className}
+        style={resultSurface.style}
+        onClick={() => onSelect(location)}
+      >
+        <span
+          data-snapshot-id={`${resultId}-icon`}
+          className={resultIconSurface.className}
+          style={resultIconSurface.style}
+        >
+          <Icon name="map-pin" size={14} />
+        </span>
+        <div
+          data-snapshot-id={`${resultId}-content`}
+          className={resultContentSurface.className}
+          style={resultContentSurface.style}
+        >
+          <div
+            data-snapshot-id={`${resultId}-name`}
+            className={resultNameSurface.className}
+            style={resultNameSurface.style}
+          >
+            {location.name}
+          </div>
+          {location.address ? (
+            <div
+              data-snapshot-id={`${resultId}-address`}
+              className={resultAddressSurface.className}
+              style={resultAddressSurface.style}
+            >
+              {location.address}
+            </div>
+          ) : null}
+        </div>
+      </button>
+      <SurfaceStyles css={resultSurface.scopedCss} />
+      <SurfaceStyles css={resultIconSurface.scopedCss} />
+      <SurfaceStyles css={resultContentSurface.scopedCss} />
+      <SurfaceStyles css={resultNameSurface.scopedCss} />
+      <SurfaceStyles css={resultAddressSurface.scopedCss} />
+    </>
+  );
+}
+
 export function LocationInput({ config }: { config: LocationInputConfig }) {
   const visible = useSubscribe(config.visible ?? true);
-  const disabled = useSubscribe(config.disabled ?? false) as boolean;
+  const disabled = Boolean(useSubscribe(config.disabled ?? false));
   const errorText = useSubscribe(config.errorText ?? "") as string;
   const initialValue = useSubscribe(config.value ?? "") as string;
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
+  const rootId = config.id ?? "location-input";
 
   const [query, setQuery] = useState(initialValue || "");
   const [results, setResults] = useState<LocationResult[]>([]);
@@ -48,12 +183,11 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
   const minChars = config.minChars ?? 2;
   const showMapLink = config.showMapLink ?? true;
 
-  // Sync initial value
   useEffect(() => {
     if (initialValue && !selected) {
       setQuery(initialValue);
     }
-  }, [initialValue]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [initialValue, selected]);
 
   useEffect(() => {
     if (debounceRef.current) {
@@ -73,7 +207,7 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
 
   const shouldSearch = debouncedQuery.length >= minChars;
   const searchResults = useComponentData(
-    shouldSearch ? (config.searchEndpoint ?? "") : "",
+    shouldSearch ? config.searchEndpoint : "",
     shouldSearch ? { q: debouncedQuery } : undefined,
   );
 
@@ -114,13 +248,10 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
     shouldSearch,
   ]);
 
-  const handleInputChange = useCallback(
-    (value: string) => {
-      setQuery(value);
-      setSelected(null);
-    },
-    [],
-  );
+  const handleInputChange = useCallback((value: string) => {
+    setQuery(value);
+    setSelected(null);
+  }, []);
 
   const handleSelect = useCallback(
     (location: LocationResult) => {
@@ -142,24 +273,23 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
         void execute(config.changeAction, payload);
       }
     },
-    [publish, config.changeAction, execute],
+    [config.changeAction, execute, publish],
   );
 
-  // Close dropdown on click outside
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
+    function handleClick(event: MouseEvent) {
       if (
         containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
+        !containerRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
-    };
+    }
+
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
@@ -168,243 +298,281 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
     };
   }, []);
 
-  if (visible === false) return null;
+  if (visible === false) {
+    return null;
+  }
 
-  const hasError = !!errorText;
+  const hasError = Boolean(errorText);
   const mapsUrl = selected
     ? `https://www.google.com/maps/search/?api=1&query=${selected.lat},${selected.lng}`
     : null;
 
-  return (
-    <div
-      ref={containerRef}
-      data-snapshot-component="location-input"
-      data-testid="location-input"
-      className={config.className}
-      style={{
-        position: "relative",
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
-    >
-      {/* Label */}
-      {config.label && (
-        <label
-          style={{
-            display: "block",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            fontWeight:
-              "var(--sn-font-weight-medium, 500)" as React.CSSProperties["fontWeight"],
-            color: "var(--sn-color-foreground, #111827)",
-            marginBottom: "var(--sn-spacing-xs, 0.25rem)",
-          }}
-        >
-          {config.label}
-          {config.required && (
-            <span
-              style={{
-                color: "var(--sn-color-destructive, #ef4444)",
-                marginLeft: "var(--sn-spacing-2xs, 0.125rem)",
-              }}
-            >
-              *
-            </span>
-          )}
-        </label>
-      )}
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {
+      position: "relative",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label`,
+    implementationBase: {
+      display: "block",
+      fontSize: "sm",
+      fontWeight: "medium",
+      color: "var(--sn-color-foreground, #111827)",
+      style: {
+        marginBottom: "var(--sn-spacing-xs, 0.25rem)",
+      },
+    },
+    componentSurface: config.slots?.label,
+  });
+  const requiredSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-required`,
+    implementationBase: {
+      color: "var(--sn-color-destructive, #ef4444)",
+      style: {
+        marginLeft: "var(--sn-spacing-2xs, 0.125rem)",
+      },
+    },
+    componentSurface: config.slots?.required,
+  });
+  const fieldSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-field`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      border: `var(--sn-border-default, 1px) solid ${
+        hasError
+          ? "var(--sn-color-destructive, #ef4444)"
+          : "var(--sn-color-border, #e5e7eb)"
+      }`,
+      borderRadius: "md",
+      bg: disabled
+        ? "var(--sn-color-secondary, #f3f4f6)"
+        : "var(--sn-color-card, #ffffff)",
+      overflow: "hidden",
+    },
+    componentSurface: config.slots?.field,
+  });
+  const leadingIconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-leadingIcon`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        padding: "0 var(--sn-spacing-sm, 0.5rem)",
+      },
+    },
+    componentSurface: config.slots?.leadingIcon,
+  });
+  const inputSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-input`,
+    implementationBase: {
+      flex: "1",
+      width: "100%",
+      fontSize: "sm",
+      color: "var(--sn-color-foreground, #111827)",
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+      style: {
+        border: "none",
+        outline: "none",
+        padding:
+          "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-sm, 0.5rem) 0",
+        backgroundColor: "transparent",
+      },
+    },
+    componentSurface: config.slots?.input,
+  });
+  const loadingIconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-loadingIcon`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        padding: "0 var(--sn-spacing-sm, 0.5rem)",
+      },
+    },
+    componentSurface: config.slots?.loadingIcon,
+  });
+  const resultsSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-results`,
+    implementationBase: {
+      position: "absolute",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      borderRadius: "md",
+      bg: "var(--sn-color-card, #ffffff)",
+      shadow: "lg",
+      overflow: "auto",
+      zIndex: "dropdown",
+      style: {
+        top: "100%",
+        left: 0,
+        right: 0,
+        marginTop: "var(--sn-spacing-xs, 0.25rem)",
+        maxHeight: "200px",
+      },
+    },
+    componentSurface: config.slots?.results,
+  });
+  const mapLinkSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-mapLink`,
+    implementationBase: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "xs",
+      fontSize: "xs",
+      color: "var(--sn-color-info, #3b82f6)",
+      style: {
+        marginTop: "var(--sn-spacing-xs, 0.25rem)",
+        textDecoration: "none",
+      },
+    },
+    componentSurface: config.slots?.mapLink,
+  });
+  const helperSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-helper`,
+    implementationBase: {
+      fontSize: "xs",
+      color: hasError
+        ? "var(--sn-color-destructive, #ef4444)"
+        : "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        marginTop: "var(--sn-spacing-xs, 0.25rem)",
+      },
+    },
+    componentSurface: config.slots?.helper,
+  });
 
-      {/* Input with icon */}
+  return (
+    <>
       <div
+        ref={containerRef}
+        data-snapshot-component="location-input"
+        data-snapshot-id={rootId}
+        data-testid="location-input"
+        className={joinClassNames(config.className, rootSurface.className)}
         style={{
-          display: "flex",
-          alignItems: "center",
-          border: `var(--sn-border-default, 1px) solid ${hasError ? "var(--sn-color-destructive, #ef4444)" : "var(--sn-color-border, #e5e7eb)"}`,
-          borderRadius: "var(--sn-radius-md, 0.375rem)",
-          backgroundColor: disabled
-            ? "var(--sn-color-secondary, #f3f4f6)"
-            : "var(--sn-color-card, #ffffff)",
-          overflow: "hidden",
-          transition:
-            "border-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+          ...(rootSurface.style ?? {}),
+          ...((config.style as CSSProperties | undefined) ?? {}),
         }}
       >
-        <span
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "0 var(--sn-spacing-sm, 0.5rem)",
-            color: "var(--sn-color-muted-foreground, #6b7280)",
-          }}
-        >
-          <Icon name="map-pin" size={16} />
-        </span>
-        <input
-          data-testid="location-search"
-          type="text"
-          value={query}
-          onChange={(e) => handleInputChange(e.target.value)}
-          onFocus={() => {
-            if (results.length > 0) setIsOpen(true);
-          }}
-          placeholder={config.placeholder ?? "Search for a location..."}
-          disabled={disabled}
-          style={{
-            flex: 1,
-            border: "none",
-            outline: "none",
-            padding:
-              "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-sm, 0.5rem) 0",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            color: "var(--sn-color-foreground, #111827)",
-            backgroundColor: "transparent",
-            width: "100%",
-          }}
-        />
-        {searchResults.isLoading && shouldSearch && (
-          <span
-            style={{
-              padding: "0 var(--sn-spacing-sm, 0.5rem)",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-            }}
+        {config.label ? (
+          <label
+            data-snapshot-id={`${rootId}-label`}
+            className={labelSurface.className}
+            style={labelSurface.style}
           >
-            <Icon name="loader" size={16} />
+            {config.label}
+            {config.required ? (
+              <span
+                data-snapshot-id={`${rootId}-required`}
+                className={requiredSurface.className}
+                style={requiredSurface.style}
+              >
+                *
+              </span>
+            ) : null}
+          </label>
+        ) : null}
+
+        <div
+          data-snapshot-id={`${rootId}-field`}
+          className={fieldSurface.className}
+          style={fieldSurface.style}
+        >
+          <span
+            data-snapshot-id={`${rootId}-leadingIcon`}
+            className={leadingIconSurface.className}
+            style={leadingIconSurface.style}
+          >
+            <Icon name="map-pin" size={16} />
           </span>
-        )}
-      </div>
-
-      {/* Dropdown results */}
-      {isOpen && results.length > 0 && (
-        <div
-          data-testid="location-results"
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            right: 0,
-            marginTop: "var(--sn-spacing-xs, 0.25rem)",
-            border:
-              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-            borderRadius: "var(--sn-radius-md, 0.375rem)",
-            backgroundColor: "var(--sn-color-card, #ffffff)",
-            boxShadow: "var(--sn-shadow-lg, 0 10px 15px -3px rgba(0,0,0,0.1))",
-            zIndex: "var(--sn-z-index-dropdown, 40)" as unknown as number,
-            maxHeight: "200px",
-            overflowY: "auto",
-          }}
-        >
-          {results.map((loc, i) => (
-            <button
-              type="button"
-              key={`${loc.name}-${loc.lat}-${loc.lng}-${i}`}
-              data-testid="location-result"
-              onClick={() => handleSelect(loc)}
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "var(--sn-spacing-sm, 0.5rem)",
-                width: "100%",
-                padding:
-                  "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
-                border: "none",
-                borderBottom:
-                  i < results.length - 1
-                    ? "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)"
-                    : undefined,
-                backgroundColor: "transparent",
-                cursor: "pointer",
-                textAlign: "left",
-                fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                color: "var(--sn-color-foreground, #111827)",
-              }}
+          <input
+            data-testid="location-search"
+            type="text"
+            value={query}
+            disabled={disabled}
+            placeholder={config.placeholder ?? "Search for a location..."}
+            onChange={(event) => handleInputChange(event.target.value)}
+            onFocus={() => {
+              if (results.length > 0) {
+                setIsOpen(true);
+              }
+            }}
+            data-snapshot-id={`${rootId}-input`}
+            className={inputSurface.className}
+            style={inputSurface.style}
+          />
+          {searchResults.isLoading && shouldSearch ? (
+            <span
+              data-snapshot-id={`${rootId}-loadingIcon`}
+              className={loadingIconSurface.className}
+              style={loadingIconSurface.style}
             >
-              <Icon name="map-pin" size={14} />
-              <div style={{ minWidth: 0 }}>
-                <div
-                  style={{
-                    fontWeight:
-                      "var(--sn-font-weight-medium, 500)" as React.CSSProperties["fontWeight"],
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {loc.name}
-                </div>
-                {loc.address && (
-                  <div
-                    style={{
-                      fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                      color: "var(--sn-color-muted-foreground, #6b7280)",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {loc.address}
-                  </div>
-                )}
-              </div>
-            </button>
-          ))}
+              <Icon name="loader" size={16} />
+            </span>
+          ) : null}
         </div>
-      )}
 
-      {/* Map link after selection */}
-      {showMapLink && selected && mapsUrl && (
-        <a
-          href={mapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "var(--sn-spacing-xs, 0.25rem)",
-            marginTop: "var(--sn-spacing-xs, 0.25rem)",
-            fontSize: "var(--sn-font-size-xs, 0.75rem)",
-            color: "var(--sn-color-info, #3b82f6)",
-            textDecoration: "none",
-          }}
-        >
-          <Icon name="external-link" size={12} />
-          Open in Google Maps
-        </a>
-      )}
+        {isOpen && results.length > 0 ? (
+          <div
+            data-testid="location-results"
+            data-snapshot-id={`${rootId}-results`}
+            className={resultsSurface.className}
+            style={resultsSurface.style}
+          >
+            {results.map((location, index) => (
+              <LocationResultRow
+                key={`${location.name}-${location.lat}-${location.lng}-${index}`}
+                config={config}
+                location={location}
+                index={index}
+                rootId={rootId}
+                onSelect={handleSelect}
+                hasBorder={index < results.length - 1}
+              />
+            ))}
+          </div>
+        ) : null}
 
-      {/* Helper / Error text */}
-      {(config.helperText || hasError) && (
-        <div
-          style={{
-            marginTop: "var(--sn-spacing-xs, 0.25rem)",
-            fontSize: "var(--sn-font-size-xs, 0.75rem)",
-            color: hasError
-              ? "var(--sn-color-destructive, #ef4444)"
-              : "var(--sn-color-muted-foreground, #6b7280)",
-          }}
-        >
-          {hasError ? errorText : config.helperText}
-        </div>
-      )}
-      <style>{`
-        [data-snapshot-component="location-input"] input:focus {
-          outline: none;
-          border-color: var(--sn-color-primary, #2563eb);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
-        }
-        [data-snapshot-component="location-input"] input:focus-visible {
-          outline: none;
-          border-color: var(--sn-color-primary, #2563eb);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
-        }
-        [data-snapshot-component="location-input"] button:hover {
-          background: var(--sn-color-accent, var(--sn-color-muted));
-        }
-        [data-snapshot-component="location-input"] button:focus {
-          outline: none;
-        }
-        [data-snapshot-component="location-input"] button:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-      `}</style>
-    </div>
+        {showMapLink && selected && mapsUrl ? (
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-snapshot-id={`${rootId}-mapLink`}
+            className={mapLinkSurface.className}
+            style={mapLinkSurface.style}
+          >
+            <Icon name="external-link" size={12} />
+            Open in Google Maps
+          </a>
+        ) : null}
+
+        {config.helperText || hasError ? (
+          <div
+            data-snapshot-id={`${rootId}-helper`}
+            className={helperSurface.className}
+            style={helperSurface.style}
+          >
+            {hasError ? errorText : config.helperText}
+          </div>
+        ) : null}
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={requiredSurface.scopedCss} />
+      <SurfaceStyles css={fieldSurface.scopedCss} />
+      <SurfaceStyles css={leadingIconSurface.scopedCss} />
+      <SurfaceStyles css={inputSurface.scopedCss} />
+      <SurfaceStyles css={loadingIconSurface.scopedCss} />
+      <SurfaceStyles css={resultsSurface.scopedCss} />
+      <SurfaceStyles css={mapLinkSurface.scopedCss} />
+      <SurfaceStyles css={helperSurface.scopedCss} />
+    </>
   );
 }

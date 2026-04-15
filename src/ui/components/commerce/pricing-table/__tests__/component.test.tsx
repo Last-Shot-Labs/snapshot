@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { AtomRegistryImpl } from "../../../../context/registry";
 import {
@@ -56,6 +56,7 @@ const baseConfig: PricingTableConfig = {
 describe("PricingTable", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    cleanup();
   });
 
   it("renders with data-snapshot-component attribute", () => {

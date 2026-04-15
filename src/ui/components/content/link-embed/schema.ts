@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
 
 /**
@@ -31,8 +32,7 @@ import { fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const linkEmbedConfigSchema = z
-  .object({
+export const linkEmbedConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("link-embed"),
     /** The URL to embed. Can be a FromRef. */
@@ -68,14 +68,15 @@ export const linkEmbedConfigSchema = z
     allowIframe: z.boolean().optional(),
     /** Aspect ratio for video embeds. Default: "16/9". */
     aspectRatio: z.string().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-  })
-  .strict();
+    slots: slotsSchema([
+      "root",
+      "media",
+      "card",
+      "thumbnail",
+      "content",
+      "siteMeta",
+      "title",
+      "description",
+      "url",
+    ]).optional(),
+  }).strict();

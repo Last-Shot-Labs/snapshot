@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { baseComponentConfigSchema, dataSourceSchema } from "../../_base/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import { dataSourceSchema } from "../../_base/types";
 
 /**
  * Schema for a filter dropdown configuration.
@@ -34,8 +35,7 @@ export const auditLogFilterSchema = z
  * }
  * ```
  */
-export const auditLogConfigSchema = baseComponentConfigSchema
-  .extend({
+export const auditLogConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("audit-log"),
     /** API endpoint returning log entries. Supports FromRef. */
@@ -59,5 +59,31 @@ export const auditLogConfigSchema = baseComponentConfigSchema
       .optional(),
     /** Filter dropdown configurations. */
     filters: z.array(auditLogFilterSchema).optional(),
-  })
-  .strict();
+    slots: slotsSchema([
+      "root",
+      "filters",
+      "filterSelect",
+      "loadingItem",
+      "loadingAvatar",
+      "loadingTitle",
+      "loadingBody",
+      "errorState",
+      "emptyState",
+      "entries",
+      "entry",
+      "avatar",
+      "content",
+      "actionText",
+      "userName",
+      "timestamp",
+      "toggleButton",
+      "details",
+      "detailsRow",
+      "detailsKey",
+      "detailsValue",
+      "changesOld",
+      "changesNew",
+      "loadMoreWrapper",
+      "loadMoreButton",
+    ]).optional(),
+  }).strict();

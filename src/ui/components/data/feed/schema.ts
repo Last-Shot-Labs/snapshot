@@ -5,7 +5,8 @@ import {
   liveConfigSchema,
   loadingConfigSchema,
 } from "../../../manifest/schema";
-import { dataSourceSchema, fromRefSchema } from "../../_base/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import { dataSourceSchema } from "../../_base/types";
 
 /**
  * Zod schema for the Feed component configuration.
@@ -30,12 +31,9 @@ import { dataSourceSchema, fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const feedSchema = z
-  .object({
+export const feedSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("feed"),
-    /** Optional component id for publishing selected item to the page context. */
-    id: z.string().optional(),
     /** Data source: endpoint string (e.g. "GET /api/events") or a FromRef. */
     data: dataSourceSchema,
     /** Field in each item used as the React key. Defaults to "id". */
@@ -86,11 +84,29 @@ export const feedSchema = z
     empty: emptyStateConfigSchema.optional(),
     /** Live refresh configuration driven by realtime events. */
     live: liveConfigSchema.optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    slots: slotsSchema([
+      "root",
+      "liveBanner",
+      "liveText",
+      "liveButton",
+      "loadingState",
+      "errorState",
+      "emptyState",
+      "list",
+      "groupLabel",
+      "item",
+      "avatarImage",
+      "avatarFallback",
+      "content",
+      "headerRow",
+      "title",
+      "badge",
+      "description",
+      "timestamp",
+      "actions",
+      "itemAction",
+      "pagination",
+      "loadMoreButton",
+    ]).optional(),
   })
   .strict();

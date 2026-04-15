@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { usePublish, useSubscribe } from "../../../context/hooks";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { ColorPickerConfig } from "./types";
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -76,13 +79,11 @@ function formatColorValue(
   return `hsla(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%, ${alpha.toFixed(2)})`;
 }
 
-/**
- * Render a manifest-driven color picker input.
- */
 export function ColorPicker({ config }: { config: ColorPickerConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const visible = useSubscribe(config.visible ?? true);
+  const rootId = config.id ?? "color-picker";
   const [color, setColor] = useState(config.defaultValue ?? "#2563eb");
   const [alpha, setAlpha] = useState(1);
   const displayValue = useMemo(
@@ -113,144 +114,253 @@ export function ColorPicker({ config }: { config: ColorPickerConfig }) {
     }
   };
 
-  return (
-    <div
-      data-snapshot-component="color-picker"
-      className={config.className}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--sn-spacing-sm, 0.5rem)",
-        ...(config.style as React.CSSProperties),
-      }}
-    >
-      {config.label ? (
-        <label
-          style={{
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            fontWeight: "var(--sn-font-weight-medium, 500)",
-            color: "var(--sn-color-foreground, #111827)",
-          }}
-        >
-          {config.label}
-        </label>
-      ) : null}
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "sm",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label`,
+    implementationBase: {
+      fontSize: "sm",
+      fontWeight: "medium",
+      color: "var(--sn-color-foreground, #111827)",
+    },
+    componentSurface: config.slots?.label,
+  });
+  const controlsSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-controls`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "sm",
+    },
+    componentSurface: config.slots?.controls,
+  });
+  const pickerSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-picker`,
+    implementationBase: {
+      cursor: "pointer",
+      style: {
+        width: "3rem",
+        height: "3rem",
+        border: "none",
+        background: "transparent",
+        padding: 0,
+      },
+    },
+    componentSurface: config.slots?.picker,
+  });
+  const inputSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-input`,
+    implementationBase: {
+      flex: "1",
+      fontSize: "sm",
+      paddingY: "sm",
+      paddingX: "md",
+      borderRadius: "md",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
+      bg: "var(--sn-color-background, #ffffff)",
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+      style: {
+        boxSizing: "border-box",
+      },
+    },
+    componentSurface: config.slots?.input,
+  });
+  const alphaSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-alpha`,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "xs",
+    },
+    componentSurface: config.slots?.alpha,
+  });
+  const alphaLabelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-alphaLabel`,
+    implementationBase: {
+      fontSize: "xs",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+    },
+    componentSurface: config.slots?.alphaLabel,
+  });
+  const alphaInputSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-alphaInput`,
+    implementationBase: {},
+    componentSurface: config.slots?.alphaInput,
+  });
+  const swatchesSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-swatches`,
+    implementationBase: {
+      display: "grid",
+      gap: "xs",
+      style: {
+        gridTemplateColumns: "repeat(auto-fit, minmax(2rem, 1fr))",
+      },
+    },
+    componentSurface: config.slots?.swatches,
+  });
+  const valueSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-value`,
+    implementationBase: {
+      fontSize: "xs",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+    },
+    componentSurface: config.slots?.value,
+  });
 
+  return (
+    <>
       <div
+        data-snapshot-component="color-picker"
+        data-snapshot-id={rootId}
+        className={[config.className, rootSurface.className].filter(Boolean).join(" ") || undefined}
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "var(--sn-spacing-sm, 0.5rem)",
+          ...(rootSurface.style ?? {}),
+          ...((config.style as CSSProperties | undefined) ?? {}),
         }}
       >
-        <input
-          type="color"
-          value={color}
-          onChange={(event) => {
-            setColor(event.target.value);
-            triggerChange(event.target.value, alpha);
-          }}
-          style={{
-            width: "3rem",
-            height: "3rem",
-            border: "none",
-            background: "transparent",
-            padding: 0,
-            cursor: "pointer",
-          }}
-        />
-        {config.allowCustom ? (
+        {config.label ? (
+          <label
+            data-snapshot-id={`${rootId}-label`}
+            className={labelSurface.className}
+            style={labelSurface.style}
+          >
+            {config.label}
+          </label>
+        ) : null}
+
+        <div
+          data-snapshot-id={`${rootId}-controls`}
+          className={controlsSurface.className}
+          style={controlsSurface.style}
+        >
           <input
-            type="text"
+            type="color"
             value={color}
             onChange={(event) => {
               setColor(event.target.value);
               triggerChange(event.target.value, alpha);
             }}
-            style={{
-              flex: 1,
-              padding:
-                "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
-              borderRadius: "var(--sn-radius-md, 0.375rem)",
-              border:
-                "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              boxSizing: "border-box",
-            }}
+            data-snapshot-id={`${rootId}-picker`}
+            className={pickerSurface.className}
+            style={pickerSurface.style}
           />
-        ) : null}
-      </div>
-
-      {config.showAlpha ? (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--sn-spacing-xs, 0.25rem)",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "var(--sn-font-size-xs, 0.75rem)",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-            }}
-          >
-            Alpha {Math.round(alpha * 100)}%
-          </span>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={1}
-            value={Math.round(alpha * 100)}
-            onChange={(event) => {
-              const nextAlpha = Number(event.target.value) / 100;
-              setAlpha(nextAlpha);
-              triggerChange(color, nextAlpha);
-            }}
-          />
-        </div>
-      ) : null}
-
-      {config.swatches && config.swatches.length > 0 ? (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(2rem, 1fr))",
-            gap: "var(--sn-spacing-xs, 0.25rem)",
-          }}
-        >
-          {config.swatches.map((swatch) => (
-            <button
-              key={swatch}
-              type="button"
-              onClick={() => {
-                setColor(swatch);
-                triggerChange(swatch, alpha);
+          {config.allowCustom ? (
+            <input
+              type="text"
+              value={color}
+              onChange={(event) => {
+                setColor(event.target.value);
+                triggerChange(event.target.value, alpha);
               }}
-              aria-label={swatch}
-              style={{
-                width: "2rem",
-                height: "2rem",
-                borderRadius: "var(--sn-radius-sm, 0.25rem)",
-                border:
-                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
-                backgroundColor: swatch,
-                cursor: "pointer",
-              }}
+              data-snapshot-id={`${rootId}-input`}
+              className={inputSurface.className}
+              style={inputSurface.style}
             />
-          ))}
+          ) : null}
         </div>
-      ) : null}
 
-      <span
-        style={{
-          fontSize: "var(--sn-font-size-xs, 0.75rem)",
-          color: "var(--sn-color-muted-foreground, #6b7280)",
-        }}
-      >
-        {displayValue}
-      </span>
-    </div>
+        {config.showAlpha ? (
+          <div
+            data-snapshot-id={`${rootId}-alpha`}
+            className={alphaSurface.className}
+            style={alphaSurface.style}
+          >
+            <span
+              data-snapshot-id={`${rootId}-alphaLabel`}
+              className={alphaLabelSurface.className}
+              style={alphaLabelSurface.style}
+            >
+              Alpha {Math.round(alpha * 100)}%
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={Math.round(alpha * 100)}
+              onChange={(event) => {
+                const nextAlpha = Number(event.target.value) / 100;
+                setAlpha(nextAlpha);
+                triggerChange(color, nextAlpha);
+              }}
+              data-snapshot-id={`${rootId}-alphaInput`}
+              className={alphaInputSurface.className}
+              style={alphaInputSurface.style}
+            />
+          </div>
+        ) : null}
+
+        {config.swatches && config.swatches.length > 0 ? (
+          <div
+            data-snapshot-id={`${rootId}-swatches`}
+            className={swatchesSurface.className}
+            style={swatchesSurface.style}
+          >
+            {config.swatches.map((swatch, index) => {
+              const swatchSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-swatch-${index}`,
+                implementationBase: {
+                  cursor: "pointer",
+                  borderRadius: "sm",
+                  border:
+                    "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
+                  style: {
+                    width: "2rem",
+                    height: "2rem",
+                    backgroundColor: swatch,
+                  },
+                },
+                componentSurface: config.slots?.swatch,
+              });
+
+              return (
+                <span key={swatch}>
+                  <button
+                    type="button"
+                    aria-label={swatch}
+                    onClick={() => {
+                      setColor(swatch);
+                      triggerChange(swatch, alpha);
+                    }}
+                    data-snapshot-id={`${rootId}-swatch-${index}`}
+                    className={swatchSurface.className}
+                    style={swatchSurface.style}
+                  />
+                  <SurfaceStyles css={swatchSurface.scopedCss} />
+                </span>
+              );
+            })}
+          </div>
+        ) : null}
+
+        <span
+          data-snapshot-id={`${rootId}-value`}
+          className={valueSurface.className}
+          style={valueSurface.style}
+        >
+          {displayValue}
+        </span>
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={controlsSurface.scopedCss} />
+      <SurfaceStyles css={pickerSurface.scopedCss} />
+      <SurfaceStyles css={inputSurface.scopedCss} />
+      <SurfaceStyles css={alphaSurface.scopedCss} />
+      <SurfaceStyles css={alphaLabelSurface.scopedCss} />
+      <SurfaceStyles css={alphaInputSurface.scopedCss} />
+      <SurfaceStyles css={swatchesSurface.scopedCss} />
+      <SurfaceStyles css={valueSurface.scopedCss} />
+    </>
   );
 }

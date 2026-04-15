@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
 import { endpointTargetSchema } from "../../../manifest/resources";
-import { fromRefSchema } from "../../_base/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 
 /**
  * Zod config schema for the GifPicker component.
@@ -42,8 +42,7 @@ import { fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const gifPickerConfigSchema = z
-  .object({
+export const gifPickerConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("gif-picker"),
     /** Backend endpoint for GIF search. Query appended as `?q={search}`. */
@@ -79,14 +78,20 @@ export const gifPickerConfigSchema = z
     placeholder: z.string().optional(),
     /** Attribution text (e.g., "Powered by Giphy"). */
     attribution: z.string().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    slots: slotsSchema([
+      "root",
+      "searchSection",
+      "searchShell",
+      "searchIcon",
+      "searchInput",
+      "content",
+      "loadingState",
+      "loadingIcon",
+      "emptyState",
+      "grid",
+      "item",
+      "image",
+      "attribution",
+    ]).optional(),
   })
   .strict();

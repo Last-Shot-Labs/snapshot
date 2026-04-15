@@ -1,8 +1,13 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { render } from "@testing-library/react";
+import { afterEach } from "vitest";
+import { cleanup, render } from "@testing-library/react";
 import { Layout } from "../component";
 import type { LayoutConfig } from "../schema";
+
+afterEach(() => {
+  cleanup();
+});
 
 describe("Layout component", () => {
   const sidebarConfig: LayoutConfig = { type: "layout", variant: "sidebar" };

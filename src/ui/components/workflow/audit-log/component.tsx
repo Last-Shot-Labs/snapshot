@@ -1,167 +1,266 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from "react";
-import { useComponentData } from "../../_base/use-component-data";
+import { useState, useMemo, useCallback } from "react";
 import { useSubscribe } from "../../../context/hooks";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { useComponentData } from "../../_base/use-component-data";
 import { formatRelativeTime, getInitials } from "../../_base/utils";
 import type { AuditLogConfig } from "./types";
 
-// ── Skeleton ───────────────────────────────────────────────────────────────
+type AuditRecord = Record<string, unknown>;
 
-function SkeletonEntry() {
+function SkeletonEntry({
+  rootId,
+  index,
+  slots,
+}: {
+  rootId: string;
+  index: number;
+  slots: AuditLogConfig["slots"];
+}) {
+  const itemId = `${rootId}-loading-${index}`;
+  const itemSurface = resolveSurfacePresentation({
+    surfaceId: itemId,
+    implementationBase: {
+      display: "flex",
+      gap: "sm",
+      paddingY: "md",
+    },
+    componentSurface: slots?.loadingItem,
+  });
+  const avatarSurface = resolveSurfacePresentation({
+    surfaceId: `${itemId}-avatar`,
+    implementationBase: {
+      bg: "var(--sn-color-muted, #e5e7eb)",
+      opacity: 0.5,
+      style: {
+        width: "32px",
+        height: "32px",
+        borderRadius: "var(--sn-radius-full, 9999px)",
+        flexShrink: 0,
+      },
+    },
+    componentSurface: slots?.loadingAvatar,
+  });
+  const titleSurface = resolveSurfacePresentation({
+    surfaceId: `${itemId}-title`,
+    implementationBase: {
+      bg: "var(--sn-color-muted, #e5e7eb)",
+      opacity: 0.5,
+      borderRadius: "xs",
+      style: {
+        height: "1em",
+        width: "60%",
+        marginBottom: "var(--sn-spacing-xs, 4px)",
+      },
+    },
+    componentSurface: slots?.loadingTitle,
+  });
+  const bodySurface = resolveSurfacePresentation({
+    surfaceId: `${itemId}-body`,
+    implementationBase: {
+      bg: "var(--sn-color-muted, #e5e7eb)",
+      opacity: 0.3,
+      borderRadius: "xs",
+      style: {
+        height: "0.75em",
+        width: "30%",
+      },
+    },
+    componentSurface: slots?.loadingBody,
+  });
+
   return (
-    <div
-      data-audit-skeleton
-      style={{
-        display: "flex",
-        gap: "var(--sn-spacing-sm, 8px)",
-        padding: "var(--sn-spacing-md, 12px) 0",
-      }}
-    >
+    <>
       <div
-        style={{
-          width: "32px",
-          height: "32px",
-          borderRadius: "var(--sn-radius-full, 9999px)",
-          backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-          opacity: "var(--sn-opacity-muted, 0.5)",
-          flexShrink: 0,
-        }}
-      />
-      <div style={{ flex: 1 }}>
+        data-snapshot-id={itemId}
+        className={itemSurface.className}
+        style={itemSurface.style}
+      >
         <div
-          style={{
-            height: "1em",
-            width: "60%",
-            borderRadius: "var(--sn-radius-xs, 2px)",
-            backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-            opacity: "var(--sn-opacity-muted, 0.5)",
-            marginBottom: "var(--sn-spacing-xs, 4px)",
-          }}
+          data-snapshot-id={`${itemId}-avatar`}
+          className={avatarSurface.className}
+          style={avatarSurface.style}
         />
-        <div
-          style={{
-            height: "0.75em",
-            width: "30%",
-            borderRadius: "var(--sn-radius-xs, 2px)",
-            backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-            opacity: "var(--sn-opacity-disabled, 0.3)",
-          }}
-        />
+        <div style={{ flex: 1 }}>
+          <div
+            data-snapshot-id={`${itemId}-title`}
+            className={titleSurface.className}
+            style={titleSurface.style}
+          />
+          <div
+            data-snapshot-id={`${itemId}-body`}
+            className={bodySurface.className}
+            style={bodySurface.style}
+          />
+        </div>
       </div>
-    </div>
+      <SurfaceStyles css={itemSurface.scopedCss} />
+      <SurfaceStyles css={avatarSurface.scopedCss} />
+      <SurfaceStyles css={titleSurface.scopedCss} />
+      <SurfaceStyles css={bodySurface.scopedCss} />
+    </>
   );
 }
 
-// ── Details renderer ───────────────────────────────────────────────────────
+function DetailsSection({
+  rootId,
+  entryId,
+  details,
+  slots,
+}: {
+  rootId: string;
+  entryId: string;
+  details: Record<string, unknown>;
+  slots: AuditLogConfig["slots"];
+}) {
+  const detailsSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-entry-${entryId}-details`,
+    implementationBase: {
+      padding: "sm",
+      borderRadius: "sm",
+      bg: "var(--sn-color-muted, #f1f5f9)",
+      fontSize: "xs",
+      style: {
+        marginTop: "var(--sn-spacing-xs, 4px)",
+      },
+    },
+    componentSurface: slots?.details,
+  });
+  const rowSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-entry-${entryId}-detailsRow`,
+    implementationBase: {
+      style: {
+        marginBottom: "var(--sn-spacing-2xs, 2px)",
+      },
+    },
+    componentSurface: slots?.detailsRow,
+  });
+  const keySurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-entry-${entryId}-detailsKey`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground, #64748b)",
+    },
+    componentSurface: slots?.detailsKey,
+  });
+  const valueSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-entry-${entryId}-detailsValue`,
+    implementationBase: {
+      color: "var(--sn-color-foreground, #0f172a)",
+    },
+    componentSurface: slots?.detailsValue,
+  });
+  const changesOldSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-entry-${entryId}-changesOld`,
+    implementationBase: {
+      color: "var(--sn-color-destructive, #ef4444)",
+    },
+    componentSurface: slots?.changesOld,
+  });
+  const changesNewSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-entry-${entryId}-changesNew`,
+    implementationBase: {
+      color: "var(--sn-color-success, #22c55e)",
+    },
+    componentSurface: slots?.changesNew,
+  });
 
-function DetailsSection({ details }: { details: Record<string, unknown> }) {
   const entries = Object.entries(details);
-  if (entries.length === 0) return null;
-
-  // Check if it's a before/after changes format
-  const record = details;
-  const hasOldNew = "old" in record && "new" in record;
-
-  if (hasOldNew) {
-    return (
-      <div
-        data-audit-changes
-        style={{
-          fontSize: "var(--sn-font-size-xs, 0.75rem)",
-          padding: "var(--sn-spacing-sm, 8px)",
-          backgroundColor: "var(--sn-color-muted, #f1f5f9)",
-          borderRadius: "var(--sn-radius-sm, 4px)",
-          marginTop: "var(--sn-spacing-xs, 4px)",
-        }}
-      >
-        <div style={{ color: "var(--sn-color-destructive, #ef4444)" }}>
-          - {JSON.stringify(record["old"])}
-        </div>
-        <div style={{ color: "var(--sn-color-success, #22c55e)" }}>
-          + {JSON.stringify(record["new"])}
-        </div>
-      </div>
-    );
+  if (entries.length === 0) {
+    return null;
   }
 
+  const hasOldNew = "old" in details && "new" in details;
+
   return (
-    <div
-      data-audit-details
-      style={{
-        fontSize: "var(--sn-font-size-xs, 0.75rem)",
-        padding: "var(--sn-spacing-sm, 8px)",
-        backgroundColor: "var(--sn-color-muted, #f1f5f9)",
-        borderRadius: "var(--sn-radius-sm, 4px)",
-        marginTop: "var(--sn-spacing-xs, 4px)",
-      }}
-    >
-      {entries.map(([key, value]) => (
-        <div key={key} style={{ marginBottom: "var(--sn-spacing-2xs, 2px)" }}>
-          <span
-            style={{
-              color: "var(--sn-color-muted-foreground, #64748b)",
-            }}
-          >
-            {key}:
-          </span>{" "}
-          <span style={{ color: "var(--sn-color-foreground, #0f172a)" }}>
-            {typeof value === "object" ? JSON.stringify(value) : String(value)}
-          </span>
-        </div>
-      ))}
-    </div>
+    <>
+      <div
+        data-snapshot-id={`${rootId}-entry-${entryId}-details`}
+        className={detailsSurface.className}
+        style={detailsSurface.style}
+      >
+        {hasOldNew ? (
+          <>
+            <div
+              data-snapshot-id={`${rootId}-entry-${entryId}-changesOld`}
+              className={changesOldSurface.className}
+              style={changesOldSurface.style}
+            >
+              - {JSON.stringify(details.old)}
+            </div>
+            <div
+              data-snapshot-id={`${rootId}-entry-${entryId}-changesNew`}
+              className={changesNewSurface.className}
+              style={changesNewSurface.style}
+            >
+              + {JSON.stringify(details.new)}
+            </div>
+          </>
+        ) : (
+          entries.map(([key, value]) => (
+            <div
+              key={key}
+              data-snapshot-id={`${rootId}-entry-${entryId}-detailsRow`}
+              className={rowSurface.className}
+              style={rowSurface.style}
+            >
+              <span
+                data-snapshot-id={`${rootId}-entry-${entryId}-detailsKey`}
+                className={keySurface.className}
+                style={keySurface.style}
+              >
+                {key}:
+              </span>{" "}
+              <span
+                data-snapshot-id={`${rootId}-entry-${entryId}-detailsValue`}
+                className={valueSurface.className}
+                style={valueSurface.style}
+              >
+                {typeof value === "object" ? JSON.stringify(value) : String(value)}
+              </span>
+            </div>
+          ))
+        )}
+      </div>
+      <SurfaceStyles css={detailsSurface.scopedCss} />
+      <SurfaceStyles css={rowSurface.scopedCss} />
+      <SurfaceStyles css={keySurface.scopedCss} />
+      <SurfaceStyles css={valueSurface.scopedCss} />
+      <SurfaceStyles css={changesOldSurface.scopedCss} />
+      <SurfaceStyles css={changesNewSurface.scopedCss} />
+    </>
   );
 }
 
-// ── Main component ─────────────────────────────────────────────────────────
-
-/**
- * Config-driven AuditLog component.
- *
- * Renders a vertical list of log entries with user avatars, relative
- * timestamps, collapsible details, filter dropdowns, and pagination.
- *
- * @param props - Component props containing the AuditLog configuration
- */
 export function AuditLog({ config }: { config: AuditLogConfig }) {
   const { data, isLoading, error } = useComponentData(config.data, undefined);
   const visible = useSubscribe(config.visible ?? true);
+  const rootId = config.id ?? "audit-log";
 
   const userField = config.userField ?? "user";
   const actionField = config.actionField ?? "action";
   const timestampField = config.timestampField ?? "timestamp";
 
-  // Filter state
-  const [activeFilters, setActiveFilters] = useState<Record<string, string>>(
-    {},
-  );
-
-  // Expanded details state
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
-  // Pagination state
   const pageSize = useMemo(() => {
     if (config.pagination === false) return Infinity;
-    if (typeof config.pagination === "object")
-      return config.pagination.pageSize;
+    if (typeof config.pagination === "object") return config.pagination.pageSize;
     return 20;
   }, [config.pagination]);
-
   const [visibleCount, setVisibleCount] = useState(pageSize);
 
-  // Extract items
-  const allItems: Record<string, unknown>[] = useMemo(() => {
+  const allItems: AuditRecord[] = useMemo(() => {
     if (!data) return [];
-    if (Array.isArray(data)) return data as Record<string, unknown>[];
+    if (Array.isArray(data)) return data as AuditRecord[];
     for (const key of ["data", "items", "results", "entries", "logs"]) {
-      if (Array.isArray(data[key]))
-        return data[key] as Record<string, unknown>[];
+      if (Array.isArray(data[key])) return data[key] as AuditRecord[];
     }
     return [];
   }, [data]);
 
-  // Filter items
   const filteredItems = useMemo(() => {
     let items = allItems;
     for (const [field, value] of Object.entries(activeFilters)) {
@@ -170,9 +269,8 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
       }
     }
     return items;
-  }, [allItems, activeFilters]);
+  }, [activeFilters, allItems]);
 
-  // Paginated items
   const visibleItems = useMemo(
     () => filteredItems.slice(0, visibleCount),
     [filteredItems, visibleCount],
@@ -180,13 +278,13 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
 
   const hasMore = visibleCount < filteredItems.length;
 
-  const toggleDetails = useCallback((idx: number) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(idx)) {
-        next.delete(idx);
+  const toggleDetails = useCallback((index: number) => {
+    setExpandedIds((previous) => {
+      const next = new Set(previous);
+      if (next.has(index)) {
+        next.delete(index);
       } else {
-        next.add(idx);
+        next.add(index);
       }
       return next;
     });
@@ -194,270 +292,409 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
 
   const handleFilterChange = useCallback(
     (field: string, value: string) => {
-      setActiveFilters((prev) => ({ ...prev, [field]: value }));
+      setActiveFilters((previous) => ({ ...previous, [field]: value }));
       setVisibleCount(pageSize);
     },
     [pageSize],
   );
 
   const loadMore = useCallback(() => {
-    setVisibleCount((c) => c + pageSize);
+    setVisibleCount((count) => count + pageSize);
   }, [pageSize]);
 
-  if (visible === false) return null;
+  if (visible === false) {
+    return null;
+  }
+
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {},
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const filtersSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-filters`,
+    implementationBase: {
+      display: "flex",
+      gap: "sm",
+      flexWrap: "wrap",
+      style: {
+        marginBottom: "var(--sn-spacing-md, 12px)",
+      },
+    },
+    componentSurface: config.slots?.filters,
+  });
+  const errorStateSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-errorState`,
+    implementationBase: {
+      padding: "md",
+      textAlign: "center",
+      fontSize: "sm",
+      color: "var(--sn-color-destructive, #ef4444)",
+    },
+    componentSurface: config.slots?.errorState,
+  });
+  const emptyStateSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-emptyState`,
+    implementationBase: {
+      padding: "lg",
+      textAlign: "center",
+      fontSize: "sm",
+      color: "var(--sn-color-muted-foreground, #94a3b8)",
+    },
+    componentSurface: config.slots?.emptyState,
+  });
+  const entriesSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-entries`,
+    implementationBase: {},
+    componentSurface: config.slots?.entries,
+  });
+  const loadMoreWrapperSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-loadMoreWrapper`,
+    implementationBase: {
+      padding: "md",
+      textAlign: "center",
+    },
+    componentSurface: config.slots?.loadMoreWrapper,
+  });
+  const loadMoreButtonSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-loadMoreButton`,
+    implementationBase: {
+      paddingY: "sm",
+      paddingX: "lg",
+      borderRadius: "md",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
+      bg: "var(--sn-color-card, #fff)",
+      color: "var(--sn-color-foreground, #0f172a)",
+      cursor: "pointer",
+      fontSize: "sm",
+      hover: {
+        bg: "var(--sn-color-accent, var(--sn-color-muted))",
+      },
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+    },
+    componentSurface: config.slots?.loadMoreButton,
+  });
 
   return (
-    <div
-      data-snapshot-component="audit-log"
-      className={config.className}
-      style={{
-        ...((config.style as React.CSSProperties) ?? {}),
-      }}
-    >
-      {/* Filter bar */}
-      {config.filters && config.filters.length > 0 && (
-        <div
-          data-audit-filters
-          style={{
-            display: "flex",
-            gap: "var(--sn-spacing-sm, 8px)",
-            marginBottom: "var(--sn-spacing-md, 12px)",
-            flexWrap: "wrap",
-          }}
-        >
-          {config.filters.map((filter) => (
-            <select
-              key={filter.field}
-              value={activeFilters[filter.field] ?? ""}
-              onChange={(e) => handleFilterChange(filter.field, e.target.value)}
-              aria-label={filter.label}
-              style={{
-                padding: "var(--sn-spacing-xs, 4px) var(--sn-spacing-sm, 8px)",
-                borderRadius: "var(--sn-radius-sm, 4px)",
-                border:
-                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
-                backgroundColor: "var(--sn-color-card, #fff)",
-                fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                color: "var(--sn-color-foreground, #0f172a)",
-              }}
-            >
-              <option value="">{filter.label}</option>
-              {filter.options.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-          ))}
-        </div>
-      )}
+    <>
+      <div
+        data-snapshot-component="audit-log"
+        data-snapshot-id={rootId}
+        className={rootSurface.className}
+        style={rootSurface.style}
+      >
+        {config.filters && config.filters.length > 0 ? (
+          <div
+            data-audit-filters
+            data-snapshot-id={`${rootId}-filters`}
+            className={filtersSurface.className}
+            style={filtersSurface.style}
+          >
+            {config.filters.map((filter) => {
+              const filterSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-filter-${filter.field}`,
+                implementationBase: {
+                  borderRadius: "sm",
+                  border:
+                    "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
+                  bg: "var(--sn-color-card, #fff)",
+                  color: "var(--sn-color-foreground, #0f172a)",
+                  fontSize: "sm",
+                  focus: {
+                    ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+                  },
+                  style: {
+                    padding:
+                      "var(--sn-spacing-xs, 4px) var(--sn-spacing-sm, 8px)",
+                  },
+                },
+                componentSurface: config.slots?.filterSelect,
+              });
 
-      {/* Loading state */}
-      {isLoading && (
-        <div>
-          <SkeletonEntry />
-          <SkeletonEntry />
-          <SkeletonEntry />
-        </div>
-      )}
+              return (
+                <div key={filter.field}>
+                  <select
+                    value={activeFilters[filter.field] ?? ""}
+                    onChange={(event) =>
+                      handleFilterChange(filter.field, event.target.value)
+                    }
+                    aria-label={filter.label}
+                    data-snapshot-id={`${rootId}-filter-${filter.field}`}
+                    className={filterSurface.className}
+                    style={filterSurface.style}
+                  >
+                    <option value="">{filter.label}</option>
+                    {filter.options.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <SurfaceStyles css={filterSurface.scopedCss} />
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
 
-      {/* Error state */}
-      {error && (
-        <div
-          data-audit-error
-          role="alert"
-          style={{
-            padding: "var(--sn-spacing-md, 12px)",
-            color: "var(--sn-color-destructive, #ef4444)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            textAlign: "center",
-          }}
-        >
-          Error: {error.message}
-        </div>
-      )}
+        {isLoading ? (
+          <div>
+            <SkeletonEntry rootId={rootId} index={0} slots={config.slots} />
+            <SkeletonEntry rootId={rootId} index={1} slots={config.slots} />
+            <SkeletonEntry rootId={rootId} index={2} slots={config.slots} />
+          </div>
+        ) : null}
 
-      {/* Empty state */}
-      {!isLoading && !error && filteredItems.length === 0 && (
-        <div
-          data-audit-empty
-          style={{
-            padding: "var(--sn-spacing-lg, 16px)",
-            color: "var(--sn-color-muted-foreground, #94a3b8)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            textAlign: "center",
-          }}
-        >
-          No log entries
-        </div>
-      )}
+        {error ? (
+          <div
+            data-audit-error
+            role="alert"
+            data-snapshot-id={`${rootId}-errorState`}
+            className={errorStateSurface.className}
+            style={errorStateSurface.style}
+          >
+            Error: {error.message}
+          </div>
+        ) : null}
 
-      {/* Entries */}
-      {!isLoading && !error && (
-        <div data-audit-entries>
-          {visibleItems.map((item, idx) => {
-            const user = String(item[userField] ?? "");
-            const action = String(item[actionField] ?? "");
-            const rawTimestamp = item[timestampField];
-            const timestamp = rawTimestamp
-              ? new Date(String(rawTimestamp))
-              : null;
-            const details: Record<string, unknown> | undefined =
-              config.detailsField &&
-              item[config.detailsField] != null &&
-              typeof item[config.detailsField] === "object"
-                ? (item[config.detailsField] as Record<string, unknown>)
-                : undefined;
-            const isExpanded = expandedIds.has(idx);
+        {!isLoading && !error && filteredItems.length === 0 ? (
+          <div
+            data-audit-empty
+            data-snapshot-id={`${rootId}-emptyState`}
+            className={emptyStateSurface.className}
+            style={emptyStateSurface.style}
+          >
+            No log entries
+          </div>
+        ) : null}
 
-            return (
-              <div
-                key={idx}
-                data-audit-entry
-                style={{
+        {!isLoading && !error ? (
+          <div
+            data-audit-entries
+            data-snapshot-id={`${rootId}-entries`}
+            className={entriesSurface.className}
+            style={entriesSurface.style}
+          >
+            {visibleItems.map((item, index) => {
+              const user = String(item[userField] ?? "");
+              const action = String(item[actionField] ?? "");
+              const rawTimestamp = item[timestampField];
+              const timestamp = rawTimestamp
+                ? new Date(String(rawTimestamp))
+                : null;
+              const details =
+                config.detailsField &&
+                item[config.detailsField] != null &&
+                typeof item[config.detailsField] === "object"
+                  ? (item[config.detailsField] as AuditRecord)
+                  : undefined;
+              const isExpanded = expandedIds.has(index);
+              const entryId = String(index);
+
+              const entrySurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-entry-${entryId}`,
+                implementationBase: {
                   display: "flex",
-                  gap: "var(--sn-spacing-sm, 8px)",
-                  padding: "var(--sn-spacing-md, 12px) 0",
-                  borderBottom:
-                    "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)",
-                  transition:
-                    "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-                }}
-              >
-                {/* Avatar */}
-                <div
-                  data-audit-avatar
-                  style={{
+                  gap: "sm",
+                  paddingY: "md",
+                  style: {
+                    borderBottom:
+                      "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)",
+                    transition:
+                      "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+                  },
+                },
+                componentSurface: config.slots?.entry,
+              });
+              const avatarSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-entry-${entryId}-avatar`,
+                implementationBase: {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "xs",
+                  fontWeight: "semibold",
+                  color: "var(--sn-color-primary-foreground, #fff)",
+                  bg: "var(--sn-color-primary, #2563eb)",
+                  style: {
                     width: "32px",
                     height: "32px",
                     borderRadius: "var(--sn-radius-full, 9999px)",
-                    backgroundColor: "var(--sn-color-primary, #2563eb)",
-                    color: "var(--sn-color-primary-foreground, #fff)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                    fontWeight:
-                      "var(--sn-font-weight-semibold, 600)" as React.CSSProperties["fontWeight"],
                     flexShrink: 0,
-                  }}
-                >
-                  {getInitials(user || "?")}
-                </div>
+                  },
+                },
+                componentSurface: config.slots?.avatar,
+              });
+              const contentSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-entry-${entryId}-content`,
+                implementationBase: {
+                  flex: "1",
+                  style: {
+                    minWidth: 0,
+                  },
+                },
+                componentSurface: config.slots?.content,
+              });
+              const actionTextSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-entry-${entryId}-actionText`,
+                implementationBase: {
+                  fontSize: "sm",
+                  color: "var(--sn-color-foreground, #0f172a)",
+                },
+                componentSurface: config.slots?.actionText,
+              });
+              const userNameSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-entry-${entryId}-userName`,
+                implementationBase: {
+                  fontWeight: "semibold",
+                },
+                componentSurface: config.slots?.userName,
+              });
+              const timestampSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-entry-${entryId}-timestamp`,
+                implementationBase: {
+                  fontSize: "xs",
+                  color: "var(--sn-color-muted-foreground, #64748b)",
+                  style: {
+                    marginTop: "var(--sn-spacing-2xs, 2px)",
+                  },
+                },
+                componentSurface: config.slots?.timestamp,
+              });
+              const toggleButtonSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-entry-${entryId}-toggleButton`,
+                implementationBase: {
+                  color: "var(--sn-color-primary, #2563eb)",
+                  cursor: "pointer",
+                  fontSize: "xs",
+                  hover: {
+                    bg: "var(--sn-color-accent, var(--sn-color-muted))",
+                  },
+                  focus: {
+                    ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+                  },
+                  style: {
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    marginTop: "var(--sn-spacing-xs, 4px)",
+                  },
+                },
+                componentSurface: config.slots?.toggleButton,
+              });
 
-                {/* Content */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {/* Action text */}
+              return (
+                <div key={index}>
                   <div
-                    style={{
-                      fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                      color: "var(--sn-color-foreground, #0f172a)",
-                    }}
+                    data-audit-entry
+                    data-snapshot-id={`${rootId}-entry-${entryId}`}
+                    className={entrySurface.className}
+                    style={entrySurface.style}
                   >
-                    <span
-                      style={{
-                        fontWeight:
-                          "var(--sn-font-weight-semibold, 600)" as React.CSSProperties["fontWeight"],
-                      }}
-                    >
-                      {user}
-                    </span>{" "}
-                    {action}
-                  </div>
-
-                  {/* Timestamp */}
-                  {timestamp && (
                     <div
-                      style={{
-                        fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                        color: "var(--sn-color-muted-foreground, #64748b)",
-                        marginTop: "var(--sn-spacing-2xs, 2px)",
-                      }}
-                      title={timestamp.toLocaleString()}
+                      data-audit-avatar
+                      data-snapshot-id={`${rootId}-entry-${entryId}-avatar`}
+                      className={avatarSurface.className}
+                      style={avatarSurface.style}
                     >
-                      {formatRelativeTime(timestamp, { includeTime: true })}
+                      {getInitials(user || "?")}
                     </div>
-                  )}
-
-                  {/* Expandable details */}
-                  {details && (
-                    <>
-                      <button
-                        data-audit-toggle
-                        aria-expanded={isExpanded}
-                        onClick={() => toggleDetails(idx)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          padding: 0,
-                          cursor: "pointer",
-                          fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                          color: "var(--sn-color-primary, #2563eb)",
-                          marginTop: "var(--sn-spacing-xs, 4px)",
-                        }}
+                    <div
+                      data-snapshot-id={`${rootId}-entry-${entryId}-content`}
+                      className={contentSurface.className}
+                      style={contentSurface.style}
+                    >
+                      <div
+                        data-snapshot-id={`${rootId}-entry-${entryId}-actionText`}
+                        className={actionTextSurface.className}
+                        style={actionTextSurface.style}
                       >
-                        {isExpanded ? "Hide details" : "Show details"}
-                      </button>
-
-                      {isExpanded && <DetailsSection details={details} />}
-                    </>
-                  )}
+                        <span
+                          data-snapshot-id={`${rootId}-entry-${entryId}-userName`}
+                          className={userNameSurface.className}
+                          style={userNameSurface.style}
+                        >
+                          {user}
+                        </span>{" "}
+                        {action}
+                      </div>
+                      {timestamp ? (
+                        <div
+                          data-snapshot-id={`${rootId}-entry-${entryId}-timestamp`}
+                          className={timestampSurface.className}
+                          style={timestampSurface.style}
+                          title={timestamp.toLocaleString()}
+                        >
+                          {formatRelativeTime(timestamp, { includeTime: true })}
+                        </div>
+                      ) : null}
+                      {details ? (
+                        <>
+                          <button
+                            type="button"
+                            data-audit-toggle
+                            aria-expanded={isExpanded}
+                            onClick={() => toggleDetails(index)}
+                            data-snapshot-id={`${rootId}-entry-${entryId}-toggleButton`}
+                            className={toggleButtonSurface.className}
+                            style={toggleButtonSurface.style}
+                          >
+                            {isExpanded ? "Hide details" : "Show details"}
+                          </button>
+                          {isExpanded ? (
+                            <DetailsSection
+                              rootId={rootId}
+                              entryId={entryId}
+                              details={details}
+                              slots={config.slots}
+                            />
+                          ) : null}
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                  <SurfaceStyles css={entrySurface.scopedCss} />
+                  <SurfaceStyles css={avatarSurface.scopedCss} />
+                  <SurfaceStyles css={contentSurface.scopedCss} />
+                  <SurfaceStyles css={actionTextSurface.scopedCss} />
+                  <SurfaceStyles css={userNameSurface.scopedCss} />
+                  <SurfaceStyles css={timestampSurface.scopedCss} />
+                  <SurfaceStyles css={toggleButtonSurface.scopedCss} />
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        ) : null}
 
-      {/* Load more */}
-      {hasMore && config.pagination !== false && (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "var(--sn-spacing-md, 12px)",
-          }}
-        >
-          <button
-            data-audit-load-more
-            onClick={loadMore}
-            style={{
-              padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-lg, 16px)",
-              borderRadius: "var(--sn-radius-md, 6px)",
-              border:
-                "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
-              backgroundColor: "var(--sn-color-card, #fff)",
-              cursor: "pointer",
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              color: "var(--sn-color-foreground, #0f172a)",
-            }}
+        {hasMore && config.pagination !== false ? (
+          <div
+            data-snapshot-id={`${rootId}-loadMoreWrapper`}
+            className={loadMoreWrapperSurface.className}
+            style={loadMoreWrapperSurface.style}
           >
-            Load more
-          </button>
-        </div>
-      )}
-
-      <style>{`
-        [data-snapshot-component="audit-log"] select:focus {
-          outline: none;
-          border-color: var(--sn-color-primary, #2563eb);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
-        }
-        [data-snapshot-component="audit-log"] select:focus-visible {
-          outline: none;
-          border-color: var(--sn-color-primary, #2563eb);
-          box-shadow: 0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent);
-        }
-        [data-snapshot-component="audit-log"] button:hover {
-          background: var(--sn-color-accent, var(--sn-color-muted));
-        }
-        [data-snapshot-component="audit-log"] button:focus {
-          outline: none;
-        }
-        [data-snapshot-component="audit-log"] button:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-      `}</style>
-    </div>
+            <button
+              type="button"
+              data-audit-load-more
+              onClick={loadMore}
+              data-snapshot-id={`${rootId}-loadMoreButton`}
+              className={loadMoreButtonSurface.className}
+              style={loadMoreButtonSurface.style}
+            >
+              Load more
+            </button>
+          </div>
+        ) : null}
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={filtersSurface.scopedCss} />
+      <SurfaceStyles css={errorStateSurface.scopedCss} />
+      <SurfaceStyles css={emptyStateSurface.scopedCss} />
+      <SurfaceStyles css={entriesSurface.scopedCss} />
+      <SurfaceStyles css={loadMoreWrapperSurface.scopedCss} />
+      <SurfaceStyles css={loadMoreButtonSurface.scopedCss} />
+    </>
   );
 }

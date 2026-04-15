@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { fromRefSchema } from "../../_base/types";
+import { actionSchema } from "../../../actions/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 
 /**
  * Zod config schema for the QuickAdd component.
@@ -17,8 +18,7 @@ import { fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const quickAddConfigSchema = z
-  .object({
+export const quickAddConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("quick-add"),
     /** Input placeholder text. Default: "Add new item...". */
@@ -26,7 +26,7 @@ export const quickAddConfigSchema = z
     /** Left icon name. Default: "plus". */
     icon: z.string().optional(),
     /** Action dispatched on submit with `{ value: string }` payload. */
-    submitAction: z.lazy(() => z.record(z.unknown()).pipe(z.any())).optional(),
+    submitAction: z.union([actionSchema, z.array(actionSchema)]).optional(),
     /** Whether Enter key submits. Default: true. */
     submitOnEnter: z.boolean().optional(),
     /** Whether to show the submit button. Default: true. */
@@ -35,14 +35,5 @@ export const quickAddConfigSchema = z
     buttonText: z.string().optional(),
     /** Whether to clear input after submit. Default: true. */
     clearOnSubmit: z.boolean().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-    /** Inline styles. */
-    style: z.record(z.string()).optional(),
-  })
-  .strict();
+    slots: slotsSchema(["root", "icon", "input", "button"]).optional(),
+  }).strict();

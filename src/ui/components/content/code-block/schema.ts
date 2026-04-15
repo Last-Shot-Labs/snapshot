@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { fromRefSchema } from "../../../manifest/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import { fromRefSchema } from "../../_base/types";
 
 /**
  * Zod config schema for the CodeBlock component.
@@ -18,8 +19,7 @@ import { fromRefSchema } from "../../../manifest/schema";
  * }
  * ```
  */
-export const codeBlockConfigSchema = z
-  .object({
+export const codeBlockConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("code-block"),
     /** The code content to display. Supports FromRef. */
@@ -38,14 +38,16 @@ export const codeBlockConfigSchema = z
     title: z.string().optional(),
     /** Wrap long lines instead of horizontal scroll. Default: false. */
     wrap: z.boolean().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-  })
-  .strict();
+    slots: slotsSchema([
+      "root",
+      "titleBar",
+      "titleMeta",
+      "title",
+      "language",
+      "copyButton",
+      "body",
+      "pre",
+      "lineNumbers",
+      "code",
+    ]).optional(),
+  }).strict();

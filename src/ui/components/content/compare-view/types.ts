@@ -2,7 +2,7 @@ import type { z } from "zod";
 import type { compareViewConfigSchema } from "./schema";
 
 /** Inferred config type from the CompareView Zod schema. */
-export type CompareViewConfig = z.infer<typeof compareViewConfigSchema>;
+export type CompareViewConfig = z.input<typeof compareViewConfigSchema>;
 
 /** A single line in the diff output. */
 export interface DiffLine {

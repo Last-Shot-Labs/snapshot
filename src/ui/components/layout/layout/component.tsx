@@ -3,6 +3,8 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { LayoutProps, LayoutSlots } from "./types";
 import { resolveLayout } from "../../../layouts/registry";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 
 function readSlot(
   slots: LayoutSlots | undefined,
@@ -10,6 +12,22 @@ function readSlot(
   fallback?: ReactNode,
 ): ReactNode {
   return slots?.[name] ?? fallback ?? null;
+}
+
+function resolveLayoutRootSurface(params: {
+  surfaceId: string;
+  className?: string;
+  style?: CSSProperties;
+  implementationBase: Record<string, unknown>;
+}) {
+  return resolveSurfacePresentation({
+    surfaceId: params.surfaceId,
+    implementationBase: params.implementationBase,
+    componentSurface: {
+      className: params.className,
+      style: params.style,
+    },
+  });
 }
 
 /**
@@ -35,81 +53,89 @@ function SidebarLayout({
   const sidebar = readSlot(slots, "sidebar", nav);
   const main = readSlot(slots, "main", children);
   const footer = readSlot(slots, "footer");
-
-  return (
-    <div
-      data-snapshot-component="layout"
-      data-layout-variant="sidebar"
-      className={className}
-      style={{
-        display: "flex",
-        minHeight: "100vh",
+  const rootSurface = resolveLayoutRootSurface({
+    surfaceId: "layout-sidebar",
+    className,
+    style,
+    implementationBase: {
+      display: "flex",
+      minHeight: "100vh",
+      style: {
         background: "var(--sn-color-background)",
         color: "var(--sn-color-foreground)",
-        ...style,
-      }}
-    >
-      {header ? (
-        <header
-          data-layout-header=""
-          style={{
-            borderBottom:
-              "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
-            padding: "var(--sn-spacing-md, 1rem)",
-          }}
-        >
-          {header}
-        </header>
-      ) : null}
-      <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
-        {sidebar ? (
-          <aside
-            aria-label="Sidebar navigation"
-            data-layout-sidebar=""
+      },
+    },
+  });
+
+  return (
+    <>
+      <div
+        data-snapshot-component="layout"
+        data-layout-variant="sidebar"
+        className={rootSurface.className}
+        style={rootSurface.style}
+      >
+        {header ? (
+          <header
+            data-layout-header=""
             style={{
-              width: "var(--sn-sidebar-width, 16rem)",
-              flexShrink: 0,
-              background: "var(--sn-color-sidebar, var(--sn-color-card))",
-              color:
-                "var(--sn-color-sidebar-foreground, var(--sn-color-card-foreground))",
-              borderRight:
+              borderBottom:
                 "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
-              display: "flex",
-              flexDirection: "column",
+              padding: "var(--sn-spacing-md, 1rem)",
+            }}
+          >
+            {header}
+          </header>
+        ) : null}
+        <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+          {sidebar ? (
+            <aside
+              aria-label="Sidebar navigation"
+              data-layout-sidebar=""
+              style={{
+                width: "var(--sn-sidebar-width, 16rem)",
+                flexShrink: 0,
+                background: "var(--sn-color-sidebar, var(--sn-color-card))",
+                color:
+                  "var(--sn-color-sidebar-foreground, var(--sn-color-card-foreground))",
+                borderRight:
+                  "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "auto",
+              }}
+            >
+              {sidebar}
+            </aside>
+          ) : null}
+          <main
+            id="main-content"
+            aria-label="Main content"
+            data-layout-content=""
+            tabIndex={-1}
+            style={{
+              flex: 1,
+              minWidth: 0,
+              padding: "var(--sn-spacing-lg, 1.5rem)",
               overflow: "auto",
             }}
           >
-            {sidebar}
-          </aside>
+            {main}
+          </main>
+        </div>
+        {footer ? (
+          <footer
+            data-layout-footer=""
+            style={{
+              borderTop:
+                "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
+              padding: "var(--sn-spacing-md, 1rem)",
+            }}
+          >
+            {footer}
+          </footer>
         ) : null}
-        <main
-          id="main-content"
-          aria-label="Main content"
-          data-layout-content=""
-          tabIndex={-1}
-          style={{
-            flex: 1,
-            minWidth: 0,
-            padding: "var(--sn-spacing-lg, 1.5rem)",
-            overflow: "auto",
-          }}
-        >
-          {main}
-        </main>
-      </div>
-      {footer ? (
-        <footer
-          data-layout-footer=""
-          style={{
-            borderTop:
-              "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
-            padding: "var(--sn-spacing-md, 1rem)",
-          }}
-        >
-          {footer}
-        </footer>
-      ) : null}
-      <style>{`
+        <style>{`
         @media (max-width: 768px) {
           [data-layout-variant="sidebar"] [data-layout-sidebar] {
             position: fixed;
@@ -124,8 +150,10 @@ function SidebarLayout({
             transform: translateX(0);
           }
         }
-      `}</style>
-    </div>
+        `}</style>
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+    </>
   );
 }
 
@@ -149,20 +177,27 @@ function TopNavLayout({
   const sidebar = readSlot(slots, "sidebar");
   const main = readSlot(slots, "main", children);
   const footer = readSlot(slots, "footer");
+  const rootSurface = resolveLayoutRootSurface({
+    surfaceId: "layout-top-nav",
+    className,
+    style,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      minHeight: "100vh",
+      style: {
+        background: "var(--sn-color-background)",
+        color: "var(--sn-color-foreground)",
+      },
+    },
+  });
 
   return (
     <div
       data-snapshot-component="layout"
       data-layout-variant="top-nav"
-      className={className}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        background: "var(--sn-color-background)",
-        color: "var(--sn-color-foreground)",
-        ...style,
-      }}
+      className={rootSurface.className}
+      style={rootSurface.style}
     >
       {header ? (
         <header
@@ -220,6 +255,7 @@ function TopNavLayout({
           {footer}
         </footer>
       ) : null}
+      <SurfaceStyles css={rootSurface.scopedCss} />
     </div>
   );
 }
@@ -242,20 +278,27 @@ function StackedLayout({
   const sidebar = readSlot(slots, "sidebar");
   const main = readSlot(slots, "main", children);
   const footer = readSlot(slots, "footer");
+  const rootSurface = resolveLayoutRootSurface({
+    surfaceId: "layout-stacked",
+    className,
+    style,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      minHeight: "100vh",
+      style: {
+        background: "var(--sn-color-background)",
+        color: "var(--sn-color-foreground)",
+      },
+    },
+  });
 
   return (
     <div
       data-snapshot-component="layout"
       data-layout-variant="stacked"
-      className={className}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        background: "var(--sn-color-background)",
-        color: "var(--sn-color-foreground)",
-        ...style,
-      }}
+      className={rootSurface.className}
+      style={rootSurface.style}
     >
       {header ? (
         <header
@@ -294,6 +337,7 @@ function StackedLayout({
           {footer}
         </footer>
       ) : null}
+      <SurfaceStyles css={rootSurface.scopedCss} />
     </div>
   );
 }
@@ -313,22 +357,29 @@ function MinimalLayout({
   className?: string;
 }) {
   const main = readSlot(slots, "main", children);
+  const rootSurface = resolveLayoutRootSurface({
+    surfaceId: "layout-minimal",
+    className,
+    style,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "100vh",
+      style: {
+        background: "var(--sn-color-background)",
+        color: "var(--sn-color-foreground)",
+        padding: "var(--sn-spacing-md, 1rem)",
+      },
+    },
+  });
 
   return (
     <div
       data-snapshot-component="layout"
       data-layout-variant="minimal"
-      className={className}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        background: "var(--sn-color-background)",
-        color: "var(--sn-color-foreground)",
-        padding: "var(--sn-spacing-md, 1rem)",
-        ...style,
-      }}
+      className={rootSurface.className}
+      style={rootSurface.style}
     >
       <main
         id="main-content"
@@ -339,9 +390,10 @@ function MinimalLayout({
           width: "100%",
           maxWidth: "var(--sn-container-md, 32rem)",
         }}
-      >
-        {main}
-      </main>
+        >
+          {main}
+        </main>
+      <SurfaceStyles css={rootSurface.scopedCss} />
     </div>
   );
 }
@@ -360,17 +412,25 @@ function FullWidthLayout({
   style?: CSSProperties;
   className?: string;
 }) {
+  const rootSurface = resolveLayoutRootSurface({
+    surfaceId: "layout-full-width",
+    className,
+    style,
+    implementationBase: {
+      minHeight: "100vh",
+      style: {
+        background: "var(--sn-color-background)",
+        color: "var(--sn-color-foreground)",
+      },
+    },
+  });
+
   return (
     <div
       data-snapshot-component="layout"
       data-layout-variant="full-width"
-      className={className}
-      style={{
-        minHeight: "100vh",
-        background: "var(--sn-color-background)",
-        color: "var(--sn-color-foreground)",
-        ...style,
-      }}
+      className={rootSurface.className}
+      style={rootSurface.style}
     >
       <main
         id="main-content"
@@ -380,6 +440,7 @@ function FullWidthLayout({
       >
         {children}
       </main>
+      <SurfaceStyles css={rootSurface.scopedCss} />
     </div>
   );
 }

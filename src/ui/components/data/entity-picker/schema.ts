@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
 import { errorStateConfigSchema } from "../../../manifest/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { dataSourceSchema, fromRefSchema } from "../../_base/types";
 
 /**
@@ -24,8 +25,7 @@ import { dataSourceSchema, fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const entityPickerConfigSchema = z
-  .object({
+export const entityPickerConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("entity-picker"),
     /** Trigger button label. Default: "Select...". */
@@ -54,14 +54,25 @@ export const entityPickerConfigSchema = z
     maxHeight: z.string().optional(),
     /** Error state config. */
     error: errorStateConfigSchema.optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-  })
-  .strict();
+    slots: slotsSchema([
+      "root",
+      "trigger",
+      "triggerLabel",
+      "triggerIcon",
+      "dropdown",
+      "searchContainer",
+      "searchInput",
+      "list",
+      "loading",
+      "error",
+      "empty",
+      "item",
+      "itemSelection",
+      "itemAvatar",
+      "itemIcon",
+      "itemContent",
+      "itemLabel",
+      "itemDescription",
+      "itemCheck",
+    ]).optional(),
+  }).strict();

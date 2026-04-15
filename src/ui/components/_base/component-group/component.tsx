@@ -2,6 +2,8 @@
 
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { ComponentRenderer } from "../../../manifest/renderer";
+import { SurfaceStyles } from "../surface-styles";
+import { resolveSurfacePresentation } from "../style-surfaces";
 import type { ComponentGroupConfig } from "./types";
 import type { ComponentConfig } from "../../../manifest/types";
 
@@ -13,6 +15,7 @@ import type { ComponentConfig } from "../../../manifest/types";
  */
 export function ComponentGroup({ config }: { config: ComponentGroupConfig }) {
   const manifest = useManifestRuntime();
+  const rootId = config.id ?? "component-group";
 
   const groupDefs = (manifest?.raw as Record<string, unknown> | undefined)?.[
     "componentGroups"
@@ -33,27 +36,41 @@ export function ComponentGroup({ config }: { config: ComponentGroupConfig }) {
   }
 
   const overrides = config.overrides;
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {},
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
 
   return (
     <>
-      {groupDef.components.map((componentConfig, index) => {
-        let resolved = componentConfig;
+      <div
+        data-snapshot-component="component-group"
+        data-snapshot-id={rootId}
+        className={[config.className, rootSurface.className].filter(Boolean).join(" ") || undefined}
+        style={rootSurface.style}
+      >
+        {groupDef.components.map((componentConfig, index) => {
+          let resolved = componentConfig;
 
-        // Apply overrides by component id
-        if (overrides && typeof componentConfig["id"] === "string") {
-          const idOverride = overrides[componentConfig["id"]];
-          if (idOverride) {
-            resolved = { ...componentConfig, ...idOverride };
+          // Apply overrides by component id
+          if (overrides && typeof componentConfig["id"] === "string") {
+            const idOverride = overrides[componentConfig["id"]];
+            if (idOverride) {
+              resolved = { ...componentConfig, ...idOverride };
+            }
           }
-        }
 
-        return (
-          <ComponentRenderer
-            key={(resolved["id"] as string) ?? index}
-            config={resolved as ComponentConfig}
-          />
-        );
-      })}
+          return (
+            <ComponentRenderer
+              key={(resolved["id"] as string) ?? index}
+              config={resolved as ComponentConfig}
+            />
+          );
+        })}
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
     </>
   );
 }

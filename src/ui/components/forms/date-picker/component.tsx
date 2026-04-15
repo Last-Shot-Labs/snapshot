@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { usePublish, useSubscribe } from "../../../context/hooks";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { DatePickerConfig } from "./types";
 
 function toOutputValue(
@@ -72,13 +75,11 @@ function formatDisplayValue(value: string, format?: string): string {
   return new Intl.DateTimeFormat().format(date);
 }
 
-/**
- * Render a manifest-driven date picker input.
- */
 export function DatePicker({ config }: { config: DatePickerConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const visible = useSubscribe(config.visible ?? true);
+  const rootId = config.id ?? "date-picker";
   const [singleValue, setSingleValue] = useState("");
   const [rangeValue, setRangeValue] = useState({ start: "", end: "" });
   const [multipleValue, setMultipleValue] = useState<string[]>([]);
@@ -107,9 +108,7 @@ export function DatePicker({ config }: { config: DatePickerConfig }) {
       publish(toOutputValue(multipleValue, config.valueFormat));
       return;
     }
-    publish(
-      singleValue ? toOutputValue(singleValue, config.valueFormat) : null,
-    );
+    publish(singleValue ? toOutputValue(singleValue, config.valueFormat) : null);
   }, [
     config.mode,
     config.valueFormat,
@@ -129,253 +128,394 @@ export function DatePicker({ config }: { config: DatePickerConfig }) {
     }
   };
 
-  const inputStyle: React.CSSProperties = {
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "sm",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label`,
+    implementationBase: {
+      fontSize: "sm",
+      fontWeight: "medium",
+      color: "var(--sn-color-foreground, #111827)",
+    },
+    componentSurface: config.slots?.label,
+  });
+  const presetsSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-presets`,
+    implementationBase: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "xs",
+    },
+    componentSurface: config.slots?.presets,
+  });
+  const presetButtonSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-presetButton`,
+    implementationBase: {
+      border: "var(--sn-border-thin, 1px) solid var(--sn-color-border, #d1d5db)",
+      bg: "var(--sn-color-card, #ffffff)",
+      borderRadius: "sm",
+      paddingY: "xs",
+      paddingX: "sm",
+      cursor: "pointer",
+      hover: {
+        bg: "var(--sn-color-accent, var(--sn-color-muted, #f3f4f6))",
+      },
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+    },
+    componentSurface: config.slots?.presetButton,
+  });
+  const inputBase = {
     width: "100%",
-    padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
-    borderRadius: "var(--sn-radius-md, 0.375rem)",
-    border:
-      "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
-    fontSize: "var(--sn-font-size-sm, 0.875rem)",
-    backgroundColor: "var(--sn-color-background, #ffffff)",
-    color: "var(--sn-color-foreground, #111827)",
-    boxSizing: "border-box",
-  };
+    paddingY: "sm",
+    paddingX: "md",
+    borderRadius: "md",
+    border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
+    bg: "var(--sn-color-background, #ffffff)",
+    fontSize: "sm",
+    focus: {
+      ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+    },
+    style: {
+      boxSizing: "border-box",
+    },
+  } as const;
+  const singleInputSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-singleInput`,
+    implementationBase: inputBase,
+    componentSurface: config.slots?.singleInput,
+  });
+  const rangeSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-range`,
+    implementationBase: {
+      display: "grid",
+      gap: "sm",
+      style: {
+        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+      },
+    },
+    componentSurface: config.slots?.range,
+  });
+  const rangeStartSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-rangeStart`,
+    implementationBase: inputBase,
+    componentSurface: config.slots?.rangeStart,
+  });
+  const rangeEndSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-rangeEnd`,
+    implementationBase: inputBase,
+    componentSurface: config.slots?.rangeEnd,
+  });
+  const multipleSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-multiple`,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "sm",
+    },
+    componentSurface: config.slots?.multiple,
+  });
+  const multipleEntrySurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-multipleEntry`,
+    implementationBase: {
+      display: "flex",
+      gap: "sm",
+    },
+    componentSurface: config.slots?.multipleEntry,
+  });
+  const multipleInputSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-multipleInput`,
+    implementationBase: inputBase,
+    componentSurface: config.slots?.multipleInput,
+  });
+  const multipleAddButtonSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-multipleAddButton`,
+    implementationBase: {
+      border: "var(--sn-border-thin, 1px) solid var(--sn-color-border, #d1d5db)",
+      bg: "var(--sn-color-card, #ffffff)",
+      borderRadius: "sm",
+      paddingY: "sm",
+      paddingX: "md",
+      cursor: "pointer",
+      hover: {
+        bg: "var(--sn-color-accent, var(--sn-color-muted, #f3f4f6))",
+      },
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+    },
+    componentSurface: config.slots?.multipleAddButton,
+  });
+  const multipleValuesSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-multipleValues`,
+    implementationBase: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "xs",
+    },
+    componentSurface: config.slots?.multipleValues,
+  });
+  const multipleValueSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-multipleValue`,
+    implementationBase: {
+      border: "var(--sn-border-thin, 1px) solid var(--sn-color-border, #d1d5db)",
+      bg: "var(--sn-color-secondary, #f3f4f6)",
+      borderRadius: "full",
+      paddingY: "xs",
+      paddingX: "sm",
+      cursor: "pointer",
+      hover: {
+        bg: "var(--sn-color-accent, var(--sn-color-muted, #e5e7eb))",
+      },
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+    },
+    componentSurface: config.slots?.multipleValue,
+  });
+  const summarySurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-summary`,
+    implementationBase: {
+      fontSize: "xs",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+    },
+    componentSurface: config.slots?.summary,
+  });
 
   return (
-    <div
-      data-snapshot-component="date-picker"
-      className={config.className}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--sn-spacing-sm, 0.5rem)",
-        ...(config.style as React.CSSProperties),
-      }}
-    >
-      {config.label ? (
-        <label
-          style={{
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            fontWeight: "var(--sn-font-weight-medium, 500)",
-            color: "var(--sn-color-foreground, #111827)",
-          }}
-        >
-          {config.label}
-        </label>
-      ) : null}
-
-      {config.presets && config.presets.length > 0 ? (
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "var(--sn-spacing-xs, 0.25rem)",
-          }}
-        >
-          {config.presets.map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              onClick={() => {
-                if (config.mode === "range") {
-                  const nextValue = { start: preset.start, end: preset.end };
-                  setRangeValue(nextValue);
-                  triggerChange(toOutputValue(nextValue, config.valueFormat));
-                  return;
-                }
-                if (config.mode === "multiple") {
-                  const nextValue = [preset.start, preset.end].filter(Boolean);
-                  setMultipleValue(nextValue);
-                  triggerChange(toOutputValue(nextValue, config.valueFormat));
-                  return;
-                }
-                setSingleValue(preset.start);
-                triggerChange(toOutputValue(preset.start, config.valueFormat));
-              }}
-              style={{
-                border:
-                  "var(--sn-border-thin, 1px) solid var(--sn-color-border, #d1d5db)",
-                backgroundColor: "var(--sn-color-card, #ffffff)",
-                borderRadius: "var(--sn-radius-sm, 0.25rem)",
-                padding:
-                  "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-                cursor: "pointer",
-              }}
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      {config.mode === "single" ? (
-        <input
-          type="date"
-          value={singleValue}
-          min={config.min}
-          max={config.max}
-          placeholder={config.placeholder}
-          onChange={(event) => {
-            const nextValue = event.target.value;
-            if (isDisabledDate(nextValue, config.disabledDates)) {
-              return;
-            }
-            setSingleValue(nextValue);
-            triggerChange(toOutputValue(nextValue, config.valueFormat));
-          }}
-          style={inputStyle}
-        />
-      ) : null}
-
-      {config.mode === "range" ? (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            gap: "var(--sn-spacing-sm, 0.5rem)",
-          }}
-        >
-          <input
-            type="date"
-            value={rangeValue.start}
-            min={config.min}
-            max={config.max}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              if (isDisabledDate(nextValue, config.disabledDates)) {
-                return;
-              }
-              const updated = { ...rangeValue, start: nextValue };
-              setRangeValue(updated);
-              triggerChange(toOutputValue(updated, config.valueFormat));
-            }}
-            style={inputStyle}
-          />
-          <input
-            type="date"
-            value={rangeValue.end}
-            min={rangeValue.start || config.min}
-            max={config.max}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              if (isDisabledDate(nextValue, config.disabledDates)) {
-                return;
-              }
-              const updated = { ...rangeValue, end: nextValue };
-              setRangeValue(updated);
-              triggerChange(toOutputValue(updated, config.valueFormat));
-            }}
-            style={inputStyle}
-          />
-        </div>
-      ) : null}
-
-      {config.mode === "multiple" ? (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--sn-spacing-sm, 0.5rem)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--sn-spacing-sm, 0.5rem)",
-            }}
+    <>
+      <div
+        data-snapshot-component="date-picker"
+        data-snapshot-id={rootId}
+        className={[config.className, rootSurface.className].filter(Boolean).join(" ") || undefined}
+        style={{
+          ...(rootSurface.style ?? {}),
+          ...((config.style as CSSProperties | undefined) ?? {}),
+        }}
+      >
+        {config.label ? (
+          <label
+            data-snapshot-id={`${rootId}-label`}
+            className={labelSurface.className}
+            style={labelSurface.style}
           >
-            <input
-              type="date"
-              value={multipleInput}
-              min={config.min}
-              max={config.max}
-              onChange={(event) => setMultipleInput(event.target.value)}
-              style={inputStyle}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                if (
-                  multipleInput.length === 0 ||
-                  isDisabledDate(multipleInput, config.disabledDates)
-                ) {
-                  return;
-                }
-                const nextValue = [...multipleValue, multipleInput]
-                  .filter(
-                    (value, index, array) => array.indexOf(value) === index,
-                  )
-                  .sort();
-                setMultipleValue(nextValue);
-                setMultipleInput("");
-                triggerChange(toOutputValue(nextValue, config.valueFormat));
-              }}
-              style={{
-                border:
-                  "var(--sn-border-thin, 1px) solid var(--sn-color-border, #d1d5db)",
-                backgroundColor: "var(--sn-color-card, #ffffff)",
-                borderRadius: "var(--sn-radius-sm, 0.25rem)",
-                padding:
-                  "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
-                cursor: "pointer",
-              }}
-            >
-              Add
-            </button>
-          </div>
+            {config.label}
+          </label>
+        ) : null}
+
+        {config.presets && config.presets.length > 0 ? (
           <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "var(--sn-spacing-xs, 0.25rem)",
-            }}
+            data-snapshot-id={`${rootId}-presets`}
+            className={presetsSurface.className}
+            style={presetsSurface.style}
           >
-            {multipleValue.map((value) => (
+            {config.presets.map((preset, index) => (
               <button
-                key={value}
+                key={preset.label}
                 type="button"
+                data-snapshot-id={`${rootId}-presetButton-${index}`}
+                className={presetButtonSurface.className}
+                style={presetButtonSurface.style}
                 onClick={() => {
-                  const nextValue = multipleValue.filter(
-                    (entry) => entry !== value,
-                  );
-                  setMultipleValue(nextValue);
-                  triggerChange(toOutputValue(nextValue, config.valueFormat));
-                }}
-                style={{
-                  border:
-                    "var(--sn-border-thin, 1px) solid var(--sn-color-border, #d1d5db)",
-                  backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
-                  borderRadius: "var(--sn-radius-full, 9999px)",
-                  padding:
-                    "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-                  cursor: "pointer",
+                  if (config.mode === "range") {
+                    const nextValue = { start: preset.start, end: preset.end };
+                    setRangeValue(nextValue);
+                    triggerChange(toOutputValue(nextValue, config.valueFormat));
+                    return;
+                  }
+                  if (config.mode === "multiple") {
+                    const nextValue = [preset.start, preset.end].filter(Boolean);
+                    setMultipleValue(nextValue);
+                    triggerChange(toOutputValue(nextValue, config.valueFormat));
+                    return;
+                  }
+                  setSingleValue(preset.start);
+                  triggerChange(toOutputValue(preset.start, config.valueFormat));
                 }}
               >
-                {formatDisplayValue(value, config.format)} ×
+                {preset.label}
               </button>
             ))}
           </div>
-        </div>
-      ) : null}
+        ) : null}
 
-      <div
-        style={{
-          fontSize: "var(--sn-font-size-xs, 0.75rem)",
-          color: "var(--sn-color-muted-foreground, #6b7280)",
-        }}
-      >
-        {config.mode === "single"
-          ? formatDisplayValue(singleValue, config.format)
-          : config.mode === "range"
-            ? `${formatDisplayValue(rangeValue.start, config.format)}${
-                rangeValue.end
-                  ? ` → ${formatDisplayValue(rangeValue.end, config.format)}`
-                  : ""
-              }`
-            : multipleValue
-                .map((value) => formatDisplayValue(value, config.format))
-                .join(", ")}
+        {config.mode === "single" ? (
+          <input
+            type="date"
+            value={singleValue}
+            min={config.min}
+            max={config.max}
+            placeholder={config.placeholder}
+            data-snapshot-id={`${rootId}-singleInput`}
+            className={singleInputSurface.className}
+            style={singleInputSurface.style}
+            onChange={(event) => {
+              const nextValue = event.target.value;
+              if (isDisabledDate(nextValue, config.disabledDates)) {
+                return;
+              }
+              setSingleValue(nextValue);
+              triggerChange(toOutputValue(nextValue, config.valueFormat));
+            }}
+          />
+        ) : null}
+
+        {config.mode === "range" ? (
+          <div
+            data-snapshot-id={`${rootId}-range`}
+            className={rangeSurface.className}
+            style={rangeSurface.style}
+          >
+            <input
+              type="date"
+              value={rangeValue.start}
+              min={config.min}
+              max={config.max}
+              data-snapshot-id={`${rootId}-rangeStart`}
+              className={rangeStartSurface.className}
+              style={rangeStartSurface.style}
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                if (isDisabledDate(nextValue, config.disabledDates)) {
+                  return;
+                }
+                const updated = { ...rangeValue, start: nextValue };
+                setRangeValue(updated);
+                triggerChange(toOutputValue(updated, config.valueFormat));
+              }}
+            />
+            <input
+              type="date"
+              value={rangeValue.end}
+              min={rangeValue.start || config.min}
+              max={config.max}
+              data-snapshot-id={`${rootId}-rangeEnd`}
+              className={rangeEndSurface.className}
+              style={rangeEndSurface.style}
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                if (isDisabledDate(nextValue, config.disabledDates)) {
+                  return;
+                }
+                const updated = { ...rangeValue, end: nextValue };
+                setRangeValue(updated);
+                triggerChange(toOutputValue(updated, config.valueFormat));
+              }}
+            />
+          </div>
+        ) : null}
+
+        {config.mode === "multiple" ? (
+          <div
+            data-snapshot-id={`${rootId}-multiple`}
+            className={multipleSurface.className}
+            style={multipleSurface.style}
+          >
+            <div
+              data-snapshot-id={`${rootId}-multipleEntry`}
+              className={multipleEntrySurface.className}
+              style={multipleEntrySurface.style}
+            >
+              <input
+                type="date"
+                value={multipleInput}
+                min={config.min}
+                max={config.max}
+                data-snapshot-id={`${rootId}-multipleInput`}
+                className={multipleInputSurface.className}
+                style={multipleInputSurface.style}
+                onChange={(event) => setMultipleInput(event.target.value)}
+              />
+              <button
+                type="button"
+                data-snapshot-id={`${rootId}-multipleAddButton`}
+                className={multipleAddButtonSurface.className}
+                style={multipleAddButtonSurface.style}
+                onClick={() => {
+                  if (
+                    multipleInput.length === 0 ||
+                    isDisabledDate(multipleInput, config.disabledDates)
+                  ) {
+                    return;
+                  }
+                  const nextValue = [...multipleValue, multipleInput]
+                    .filter((value, index, array) => array.indexOf(value) === index)
+                    .sort();
+                  setMultipleValue(nextValue);
+                  setMultipleInput("");
+                  triggerChange(toOutputValue(nextValue, config.valueFormat));
+                }}
+              >
+                Add
+              </button>
+            </div>
+            <div
+              data-snapshot-id={`${rootId}-multipleValues`}
+              className={multipleValuesSurface.className}
+              style={multipleValuesSurface.style}
+            >
+              {multipleValue.map((value, index) => (
+                <button
+                  key={value}
+                  type="button"
+                  data-snapshot-id={`${rootId}-multipleValue-${index}`}
+                  className={multipleValueSurface.className}
+                  style={multipleValueSurface.style}
+                  onClick={() => {
+                    const nextValue = multipleValue.filter((entry) => entry !== value);
+                    setMultipleValue(nextValue);
+                    triggerChange(toOutputValue(nextValue, config.valueFormat));
+                  }}
+                >
+                  {formatDisplayValue(value, config.format)} x
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div
+          data-snapshot-id={`${rootId}-summary`}
+          className={summarySurface.className}
+          style={summarySurface.style}
+        >
+          {config.mode === "single"
+            ? formatDisplayValue(singleValue, config.format)
+            : config.mode === "range"
+              ? `${formatDisplayValue(rangeValue.start, config.format)}${
+                  rangeValue.end
+                    ? ` -> ${formatDisplayValue(rangeValue.end, config.format)}`
+                    : ""
+                }`
+              : multipleValue
+                  .map((value) => formatDisplayValue(value, config.format))
+                  .join(", ")}
+        </div>
       </div>
-    </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={presetsSurface.scopedCss} />
+      <SurfaceStyles css={presetButtonSurface.scopedCss} />
+      <SurfaceStyles css={singleInputSurface.scopedCss} />
+      <SurfaceStyles css={rangeSurface.scopedCss} />
+      <SurfaceStyles css={rangeStartSurface.scopedCss} />
+      <SurfaceStyles css={rangeEndSurface.scopedCss} />
+      <SurfaceStyles css={multipleSurface.scopedCss} />
+      <SurfaceStyles css={multipleEntrySurface.scopedCss} />
+      <SurfaceStyles css={multipleInputSurface.scopedCss} />
+      <SurfaceStyles css={multipleAddButtonSurface.scopedCss} />
+      <SurfaceStyles css={multipleValuesSurface.scopedCss} />
+      <SurfaceStyles css={multipleValueSurface.scopedCss} />
+      <SurfaceStyles css={summarySurface.scopedCss} />
+    </>
   );
 }

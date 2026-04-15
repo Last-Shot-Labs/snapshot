@@ -1,43 +1,43 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import type { CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
+import { usePublish, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
-// Internal composition — EmojiPicker is used as a sub-component, not via from-ref binding
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { EmojiPicker } from "../emoji-picker/component";
-import type { ReactionBarConfig } from "./types";
 import type { EmojiPickerConfig } from "../emoji-picker/types";
+import type { ReactionBarConfig } from "./types";
 
-/**
- * ReactionBar — displays emoji reactions with counts and an optional
- * add button that opens an emoji picker popover.
- *
- * @param props - Component props containing the reaction bar configuration
- */
 export function ReactionBar({ config }: { config: ReactionBarConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const [showPicker, setShowPicker] = useState(false);
   const pickerPopoverRef = useRef<HTMLDivElement>(null);
+  const rootId = config.id ?? "reaction-bar";
 
-  // Close picker on click outside
   useEffect(() => {
-    if (!showPicker) return;
-    const handleMouseDown = (e: MouseEvent) => {
+    if (!showPicker) {
+      return;
+    }
+
+    const handleMouseDown = (event: MouseEvent) => {
       if (
         pickerPopoverRef.current &&
-        !pickerPopoverRef.current.contains(e.target as Node)
+        !pickerPopoverRef.current.contains(event.target as Node)
       ) {
         setShowPicker(false);
       }
     };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
         setShowPicker(false);
       }
     };
+
     document.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("keydown", handleKeyDown);
     return () => {
@@ -56,6 +56,7 @@ export function ReactionBar({ config }: { config: ReactionBarConfig }) {
       } else if (!active && config.addAction) {
         void execute(config.addAction, { emoji });
       }
+
       if (publish) {
         publish({ emoji, action: active ? "remove" : "add" });
       }
@@ -76,147 +77,216 @@ export function ReactionBar({ config }: { config: ReactionBarConfig }) {
     [config.addAction, execute, publish],
   );
 
-  if (visible === false) return null;
+  if (visible === false) {
+    return null;
+  }
 
-  // Build an internal emoji picker config for the popover
   const pickerConfig: EmojiPickerConfig = {
-    type: "emoji-picker" as const,
+    type: "emoji-picker",
     maxHeight: "200px",
     perRow: 8,
   };
 
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: "xs",
+      position: "relative",
+      overflow: "visible",
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const addWrapperSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-addWrapper`,
+    implementationBase: {
+      position: "relative",
+    },
+    componentSurface: config.slots?.addWrapper,
+  });
+  const addButtonSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-addButton`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: "2rem",
+      height: "2rem",
+      borderRadius: "full",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      bg: "var(--sn-color-card, #ffffff)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      cursor: "pointer",
+      hover: {
+        bg: "var(--sn-color-accent, #f3f4f6)",
+      },
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+      style: {
+        padding: 0,
+      },
+    },
+    componentSurface: config.slots?.addButton,
+    activeStates: showPicker ? ["open"] : [],
+  });
+  const pickerSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-picker`,
+    implementationBase: {
+      position: "absolute",
+      zIndex: "popover",
+      style: {
+        bottom: "calc(100% + 4px)",
+        left: 0,
+      },
+    },
+    componentSurface: config.slots?.picker,
+    activeStates: showPicker ? ["open"] : [],
+  });
+
   return (
-    <div
-      data-snapshot-component="reaction-bar"
-      data-testid="reaction-bar"
-      className={config.className}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: "var(--sn-spacing-xs, 0.25rem)",
-        position: "relative",
-        overflow: "visible",
-        ...(config.style as React.CSSProperties),
-      }}
-    >
-      {/* Hover/transition/focus styles */}
-      <style>{`
-[data-snapshot-component="reaction-bar"] [data-testid="reaction-button"]:hover {
-  transform: scale(1.05);
-  box-shadow: var(--sn-shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
-}
-[data-snapshot-component="reaction-bar"] [data-testid="reaction-button"]:focus {
-  outline: none;
-}
-[data-snapshot-component="reaction-bar"] [data-testid="reaction-button"]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-[data-snapshot-component="reaction-bar"] [data-testid="reaction-add"]:hover {
-  background-color: var(--sn-color-accent, #f3f4f6) !important;
-}
-[data-snapshot-component="reaction-bar"] [data-testid="reaction-add"]:focus {
-  outline: none;
-}
-[data-snapshot-component="reaction-bar"] [data-testid="reaction-add"]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-`}</style>
-      {reactions.map((reaction, idx) => (
-        <button
-          type="button"
-          key={`${reaction.emoji}-${idx}`}
-          data-testid="reaction-button"
-          aria-label={`React with ${reaction.emoji}`}
-          onClick={() =>
-            handleReactionClick(reaction.emoji, reaction.active ?? false)
-          }
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "var(--sn-spacing-xs, 0.25rem)",
-            padding:
-              "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-            borderRadius: "var(--sn-radius-full, 9999px)",
-            border: `1px solid ${
-              reaction.active
-                ? "var(--sn-color-primary, #2563eb)"
-                : "var(--sn-color-border, #e5e7eb)"
-            }`,
-            backgroundColor: reaction.active
-              ? "color-mix(in oklch, var(--sn-color-primary, #2563eb) 10%, transparent)"
-              : "var(--sn-color-card, #ffffff)",
-            cursor: "pointer",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            transition:
-              "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-          }}
-        >
-          <span>{reaction.emoji}</span>
-          <span
-            style={{
-              fontSize: "var(--sn-font-size-xs, 0.75rem)",
+    <>
+      <div
+        data-snapshot-component="reaction-bar"
+        data-testid="reaction-bar"
+        data-snapshot-id={rootId}
+        className={[config.className, rootSurface.className].filter(Boolean).join(" ") || undefined}
+        style={{
+          ...(rootSurface.style ?? {}),
+          ...((config.style as CSSProperties | undefined) ?? {}),
+        }}
+      >
+        {reactions.map((reaction, idx) => {
+          const reactionId = `${rootId}-reaction-${idx}`;
+          const reactionSurface = resolveSurfacePresentation({
+            surfaceId: reactionId,
+            implementationBase: {
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "xs",
+              paddingY: "xs",
+              paddingX: "sm",
+              borderRadius: "full",
+              cursor: "pointer",
+              transition: "all",
+              style: {
+                border: `1px solid ${
+                  reaction.active
+                    ? "var(--sn-color-primary, #2563eb)"
+                    : "var(--sn-color-border, #e5e7eb)"
+                }`,
+                backgroundColor: reaction.active
+                  ? "color-mix(in oklch, var(--sn-color-primary, #2563eb) 10%, transparent)"
+                  : "var(--sn-color-card, #ffffff)",
+                fontSize: "var(--sn-font-size-sm, 0.875rem)",
+              },
+              hover: {
+                transform: "scale(1.05)",
+                shadow: "sm",
+              },
+              focus: {
+                ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+              },
+            },
+            componentSurface: config.slots?.reaction,
+            activeStates: reaction.active ? ["active"] : [],
+          });
+          const emojiSurface = resolveSurfacePresentation({
+            surfaceId: `${reactionId}-emoji`,
+            implementationBase: {},
+            componentSurface: config.slots?.emoji,
+          });
+          const countSurface = resolveSurfacePresentation({
+            surfaceId: `${reactionId}-count`,
+            implementationBase: {
+              fontSize: "xs",
               color: reaction.active
                 ? "var(--sn-color-primary, #2563eb)"
                 : "var(--sn-color-muted-foreground, #6b7280)",
-              fontWeight:
-                "var(--sn-font-weight-medium, 500)" as React.CSSProperties["fontWeight"],
-            }}
-          >
-            {reaction.count}
-          </span>
-        </button>
-      ))}
+              fontWeight: "medium",
+            },
+            componentSurface: config.slots?.count,
+            activeStates: reaction.active ? ["active"] : [],
+          });
 
-      {/* Add reaction button */}
-      {showAddButton && (
-        <div style={{ position: "relative" }}>
-          <button
-            type="button"
-            data-testid="reaction-add"
-            aria-label="Add reaction"
-            onClick={() => setShowPicker(!showPicker)}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "2rem",
-              height: "2rem",
-              padding: 0,
-              borderRadius: "var(--sn-radius-full, 9999px)",
-              border:
-                "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-              backgroundColor: "var(--sn-color-card, #ffffff)",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-              cursor: "pointer",
-            }}
-          >
-            <Icon name="plus" size={14} />
-          </button>
-
-          {/* Emoji picker popover */}
-          {showPicker && (
-            <div
-              ref={pickerPopoverRef}
-              style={{
-                position: "absolute",
-                bottom: "calc(100% + 4px)",
-                left: 0,
-                zIndex: "var(--sn-z-index-popover, 60)" as unknown as number,
-              }}
-            >
-              <EmojiPicker
-                config={{
-                  ...pickerConfig,
-                  selectAction: undefined,
-                }}
-              />
+          return (
+            <div key={`${reaction.emoji}-${idx}`}>
+              <button
+                type="button"
+                data-testid="reaction-button"
+                aria-label={`React with ${reaction.emoji}`}
+                data-snapshot-id={reactionId}
+                onClick={() =>
+                  handleReactionClick(reaction.emoji, reaction.active ?? false)
+                }
+                className={reactionSurface.className}
+                style={reactionSurface.style}
+              >
+                <span
+                  data-snapshot-id={`${reactionId}-emoji`}
+                  className={emojiSurface.className}
+                  style={emojiSurface.style}
+                >
+                  {reaction.emoji}
+                </span>
+                <span
+                  data-snapshot-id={`${reactionId}-count`}
+                  className={countSurface.className}
+                  style={countSurface.style}
+                >
+                  {reaction.count}
+                </span>
+              </button>
+              <SurfaceStyles css={reactionSurface.scopedCss} />
+              <SurfaceStyles css={emojiSurface.scopedCss} />
+              <SurfaceStyles css={countSurface.scopedCss} />
             </div>
-          )}
-        </div>
-      )}
-    </div>
+          );
+        })}
+
+        {showAddButton ? (
+          <div
+            data-snapshot-id={`${rootId}-addWrapper`}
+            className={addWrapperSurface.className}
+            style={addWrapperSurface.style}
+          >
+            <button
+              type="button"
+              data-testid="reaction-add"
+              aria-label="Add reaction"
+              data-snapshot-id={`${rootId}-addButton`}
+              onClick={() => setShowPicker(!showPicker)}
+              className={addButtonSurface.className}
+              style={addButtonSurface.style}
+            >
+              <Icon name="plus" size={14} />
+            </button>
+
+            {showPicker ? (
+              <div
+                ref={pickerPopoverRef}
+                data-snapshot-id={`${rootId}-picker`}
+                className={pickerSurface.className}
+                style={pickerSurface.style}
+              >
+                <EmojiPicker
+                  config={{
+                    ...pickerConfig,
+                    selectAction: undefined,
+                  }}
+                />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={addWrapperSurface.scopedCss} />
+      <SurfaceStyles css={addButtonSurface.scopedCss} />
+      <SurfaceStyles css={pickerSurface.scopedCss} />
+    </>
   );
 }

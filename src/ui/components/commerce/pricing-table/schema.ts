@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
-import { fromRefSchema } from "../../_base/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 
 /**
  * Zod schema for a single feature in a pricing tier.
@@ -78,8 +78,7 @@ const pricingTierSchema = z
  * }
  * ```
  */
-export const pricingTableConfigSchema = z
-  .object({
+export const pricingTableConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("pricing-table"),
     /** Pricing tiers to display. */
@@ -90,14 +89,29 @@ export const pricingTableConfigSchema = z
     columns: z.enum(["auto", "2", "3", "4"]).optional(),
     /** Visual layout variant. Default: "cards". */
     variant: z.enum(["cards", "table"]).optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    slots: slotsSchema([
+      "root",
+      "grid",
+      "card",
+      "badge",
+      "tierName",
+      "priceRow",
+      "price",
+      "period",
+      "description",
+      "featureList",
+      "featureItem",
+      "featureIcon",
+      "featureText",
+      "cta",
+      "tableScroll",
+      "table",
+      "headerCell",
+      "headerTierName",
+      "headerPrice",
+      "featureCell",
+      "valueCell",
+      "ctaCell",
+    ]).optional(),
   })
   .strict();

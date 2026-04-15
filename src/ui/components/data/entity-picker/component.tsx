@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import type { CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import { AutoErrorState } from "../../_base/auto-error-state";
-import { useComponentData } from "../../_base/use-component-data";
+import { usePublish, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
+import { AutoErrorState } from "../../_base/auto-error-state";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { useComponentData } from "../../_base/use-component-data";
 import type { EntityPickerConfig } from "./types";
 
-/** Resolved entity shape used internally. */
 interface ResolvedEntity {
   label: string;
   value: string;
@@ -17,35 +19,247 @@ interface ResolvedEntity {
   avatar?: string;
 }
 
-/**
- * EntityPicker component — a searchable dropdown for selecting entities.
- *
- * Fetches entities from an API endpoint and presents them in a filterable
- * popover list. Supports single and multi-select with avatar/icon display.
- *
- * @param props - Component props containing the entity picker configuration
- *
- * @example
- * ```json
- * {
- *   "type": "entity-picker",
- *   "id": "assignee",
- *   "data": "GET /api/users",
- *   "labelField": "name",
- *   "valueField": "id",
- *   "multiple": false
- * }
- * ```
- */
-/** Stable empty array to avoid re-render loops when config.value is unset. */
 const EMPTY_ARRAY: string[] = [];
 
-/**
- * Render a searchable entity picker from manifest-provided options or data.
- */
+function joinClassNames(
+  ...values: Array<string | undefined | null | false>
+): string | undefined {
+  const className = values.filter(Boolean).join(" ");
+  return className || undefined;
+}
+
+function EntityPickerItem({
+  config,
+  entity,
+  isMultiple,
+  isSelected,
+  onToggle,
+  rootId,
+}: {
+  config: EntityPickerConfig;
+  entity: ResolvedEntity;
+  isMultiple: boolean;
+  isSelected: boolean;
+  onToggle: (value: string) => void;
+  rootId: string;
+}) {
+  const itemBaseId = `${rootId}-item-${entity.value}`;
+  const itemSurface = resolveSurfacePresentation({
+    surfaceId: itemBaseId,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      gap: "sm",
+      width: "100%",
+      color: "var(--sn-color-foreground, #111827)",
+      cursor: "pointer",
+      transition: "colors",
+      style: {
+        padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+        border: "none",
+        background: isSelected
+          ? "color-mix(in oklch, var(--sn-color-primary, #2563eb) 10%, var(--sn-color-card, #ffffff))"
+          : "none",
+        textAlign: "left",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+      },
+      hover: {
+        bg: isSelected
+          ? "color-mix(in oklch, var(--sn-color-primary, #2563eb) 15%, var(--sn-color-card, #ffffff))"
+          : "var(--sn-color-accent, var(--sn-color-secondary, #f3f4f6))",
+      },
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+    },
+    componentSurface: config.slots?.item,
+    activeStates: isSelected ? ["selected"] : [],
+  });
+  const itemSelectionSurface = resolveSurfacePresentation({
+    surfaceId: `${itemBaseId}-selection`,
+    implementationBase: {
+      style: {
+        width: "1rem",
+        height: "1rem",
+        borderRadius: "var(--sn-radius-xs, 0.125rem)",
+        border: `var(--sn-border-default, 1px) solid ${
+          isSelected
+            ? "var(--sn-color-primary, #2563eb)"
+            : "var(--sn-color-border, #e5e7eb)"
+        }`,
+        backgroundColor: isSelected
+          ? "var(--sn-color-primary, #2563eb)"
+          : "transparent",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "var(--sn-font-size-xs, 0.75rem)",
+        color: "var(--sn-color-primary-foreground, #ffffff)",
+        flexShrink: 0,
+      },
+    },
+    componentSurface: config.slots?.itemSelection,
+    activeStates: isSelected ? ["selected"] : [],
+  });
+  const itemAvatarSurface = resolveSurfacePresentation({
+    surfaceId: `${itemBaseId}-avatar`,
+    implementationBase: {
+      style: {
+        width: "1.5rem",
+        height: "1.5rem",
+        borderRadius: "var(--sn-radius-full, 9999px)",
+        objectFit: "cover",
+        flexShrink: 0,
+      },
+    },
+    componentSurface: config.slots?.itemAvatar,
+  });
+  const itemIconSurface = resolveSurfacePresentation({
+    surfaceId: `${itemBaseId}-icon`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        flexShrink: 0,
+      },
+    },
+    componentSurface: config.slots?.itemIcon,
+  });
+  const itemContentSurface = resolveSurfacePresentation({
+    surfaceId: `${itemBaseId}-content`,
+    implementationBase: {
+      flex: "1",
+      style: {
+        minWidth: 0,
+      },
+    },
+    componentSurface: config.slots?.itemContent,
+  });
+  const itemLabelSurface = resolveSurfacePresentation({
+    surfaceId: `${itemBaseId}-label`,
+    implementationBase: {
+      fontWeight: "medium",
+      style: {
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      },
+    },
+    componentSurface: config.slots?.itemLabel,
+  });
+  const itemDescriptionSurface = resolveSurfacePresentation({
+    surfaceId: `${itemBaseId}-description`,
+    implementationBase: {
+      fontSize: "xs",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      },
+    },
+    componentSurface: config.slots?.itemDescription,
+  });
+  const itemCheckSurface = resolveSurfacePresentation({
+    surfaceId: `${itemBaseId}-check`,
+    implementationBase: {
+      color: "var(--sn-color-primary, #2563eb)",
+      style: {
+        flexShrink: 0,
+      },
+    },
+    componentSurface: config.slots?.itemCheck,
+    activeStates: isSelected ? ["selected"] : [],
+  });
+
+  return (
+    <>
+      <button
+        type="button"
+        key={entity.value}
+        data-testid="entity-picker-item"
+        data-selected={isSelected ? "true" : undefined}
+        data-snapshot-id={itemBaseId}
+        onClick={() => onToggle(entity.value)}
+        className={itemSurface.className}
+        style={itemSurface.style}
+      >
+        {isMultiple ? (
+          <span
+            data-snapshot-id={`${itemBaseId}-selection`}
+            className={itemSelectionSurface.className}
+            style={itemSelectionSurface.style}
+          >
+            {isSelected ? "\u2713" : ""}
+          </span>
+        ) : null}
+
+        {entity.avatar ? (
+          <img
+            src={entity.avatar}
+            alt=""
+            data-snapshot-id={`${itemBaseId}-avatar`}
+            className={itemAvatarSurface.className}
+            style={itemAvatarSurface.style}
+          />
+        ) : null}
+
+        {!entity.avatar && entity.icon ? (
+          <span
+            data-snapshot-id={`${itemBaseId}-icon`}
+            className={itemIconSurface.className}
+            style={itemIconSurface.style}
+          >
+            <Icon name={entity.icon} size={16} />
+          </span>
+        ) : null}
+
+        <div
+          data-snapshot-id={`${itemBaseId}-content`}
+          className={itemContentSurface.className}
+          style={itemContentSurface.style}
+        >
+          <div
+            data-snapshot-id={`${itemBaseId}-label`}
+            className={itemLabelSurface.className}
+            style={itemLabelSurface.style}
+          >
+            {entity.label}
+          </div>
+          {entity.description ? (
+            <div
+              data-snapshot-id={`${itemBaseId}-description`}
+              className={itemDescriptionSurface.className}
+              style={itemDescriptionSurface.style}
+            >
+              {entity.description}
+            </div>
+          ) : null}
+        </div>
+
+        {!isMultiple && isSelected ? (
+          <span
+            data-snapshot-id={`${itemBaseId}-check`}
+            className={itemCheckSurface.className}
+            style={itemCheckSurface.style}
+          >
+            \u2713
+          </span>
+        ) : null}
+      </button>
+      <SurfaceStyles css={itemSurface.scopedCss} />
+      <SurfaceStyles css={itemSelectionSurface.scopedCss} />
+      <SurfaceStyles css={itemAvatarSurface.scopedCss} />
+      <SurfaceStyles css={itemIconSurface.scopedCss} />
+      <SurfaceStyles css={itemContentSurface.scopedCss} />
+      <SurfaceStyles css={itemLabelSurface.scopedCss} />
+      <SurfaceStyles css={itemDescriptionSurface.scopedCss} />
+      <SurfaceStyles css={itemCheckSurface.scopedCss} />
+    </>
+  );
+}
+
 export function EntityPicker({ config }: { config: EntityPickerConfig }) {
   const visible = useSubscribe(config.visible ?? true);
-  // Use a stable default so useSubscribe doesn't create a new ref each render
   const externalDefault = config.multiple ? EMPTY_ARRAY : "";
   const resolvedValue = useSubscribe(config.value ?? externalDefault);
   const executeAction = useActionExecutor();
@@ -56,6 +270,7 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
     error: dataError,
     refetch: dataRefetch,
   } = useComponentData(config.data ?? "");
+  const rootId = config.id ?? "entity-picker";
 
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -69,29 +284,32 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
   const valueField = config.valueField ?? "id";
   const maxHeight = config.maxHeight ?? "300px";
 
-  // Sync external value — only when config.value is actually provided
   useEffect(() => {
-    if (config.value === undefined) return;
+    if (config.value === undefined) {
+      return;
+    }
+
     if (Array.isArray(resolvedValue)) {
       setSelected(resolvedValue as string[]);
     } else if (typeof resolvedValue === "string" && resolvedValue) {
       setSelected([resolvedValue]);
+    } else {
+      setSelected([]);
     }
-  }, [resolvedValue, config.value]);
+  }, [config.value, resolvedValue]);
 
-  // Build entities from API data
   const entities: ResolvedEntity[] = useMemo(() => {
-    if (!apiData) return [];
+    if (!apiData) {
+      return [];
+    }
+
     const items = Array.isArray(apiData)
       ? apiData
       : Array.isArray((apiData as Record<string, unknown>).data)
-        ? ((apiData as Record<string, unknown>).data as Record<
-            string,
-            unknown
-          >[])
+        ? ((apiData as Record<string, unknown>).data as Record<string, unknown>[])
         : [];
 
-    return (items as Record<string, unknown>[]).map((item) => ({
+    return items.map((item) => ({
       label: String(item[labelField] ?? ""),
       value: String(item[valueField] ?? ""),
       description: config.descriptionField
@@ -104,44 +322,47 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
     }));
   }, [
     apiData,
-    labelField,
-    valueField,
+    config.avatarField,
     config.descriptionField,
     config.iconField,
-    config.avatarField,
+    labelField,
+    valueField,
   ]);
 
-  // Filter by search
   const filtered = useMemo(() => {
-    if (!search) return entities;
-    const q = search.toLowerCase();
+    if (!search) {
+      return entities;
+    }
+
+    const query = search.toLowerCase();
     return entities.filter(
-      (e) =>
-        e.label.toLowerCase().includes(q) ||
-        (e.description && e.description.toLowerCase().includes(q)),
+      (entity) =>
+        entity.label.toLowerCase().includes(query) ||
+        entity.description?.toLowerCase().includes(query),
     );
   }, [entities, search]);
 
-  // Publish and notify
   const updateSelection = useCallback(
     (newSelected: string[]) => {
       setSelected(newSelected);
       const publishValue = isMultiple ? newSelected : (newSelected[0] ?? "");
-      if (publish) publish({ value: publishValue });
+      if (publish) {
+        publish({ value: publishValue });
+      }
       if (config.changeAction) {
         void executeAction(config.changeAction, { value: publishValue });
       }
     },
-    [isMultiple, publish, config.changeAction, executeAction],
+    [config.changeAction, executeAction, isMultiple, publish],
   );
 
   const toggleEntity = useCallback(
     (value: string) => {
       if (isMultiple) {
-        const next = selected.includes(value)
-          ? selected.filter((v) => v !== value)
+        const nextValue = selected.includes(value)
+          ? selected.filter((entry) => entry !== value)
           : [...selected, value];
-        updateSelection(next);
+        updateSelection(nextValue);
       } else {
         updateSelection([value]);
         setIsOpen(false);
@@ -150,44 +371,49 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
     [isMultiple, selected, updateSelection],
   );
 
-  // Close on outside click
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    function handleClickOutside(event: MouseEvent) {
       if (
         containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
+        !containerRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
-    };
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close on Escape key
   useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+    if (!isOpen) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
         setIsOpen(false);
       }
-    };
+    }
+
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
-  // Focus search on open
   useEffect(() => {
-    if (isOpen && searchable) {
-      const timer = setTimeout(() => searchInputRef.current?.focus(), 0);
-      return () => clearTimeout(timer);
+    if (!isOpen || !searchable) {
+      return;
     }
+
+    const timer = setTimeout(() => searchInputRef.current?.focus(), 0);
+    return () => clearTimeout(timer);
   }, [isOpen, searchable]);
 
-  if (visible === false) return null;
+  if (visible === false) {
+    return null;
+  }
 
-  // Build trigger label
-  const selectedEntities = entities.filter((e) => selected.includes(e.value));
+  const selectedEntities = entities.filter((entity) => selected.includes(entity.value));
   const triggerLabel =
     selectedEntities.length === 0
       ? (config.label ?? "Select...")
@@ -195,322 +421,300 @@ export function EntityPicker({ config }: { config: EntityPickerConfig }) {
         ? `${selectedEntities.length} selected`
         : (selectedEntities[0]?.label ?? "");
 
-  return (
-    <div
-      data-snapshot-component="entity-picker"
-      data-testid="entity-picker"
-      className={config.className}
-      ref={containerRef}
-      style={{
-        position: "relative",
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {
+      position: "relative",
+      display: "inline-block",
+      style: {
         fontFamily: "var(--sn-font-sans, system-ui, sans-serif)",
-        display: "inline-block",
-        ...(config.style as React.CSSProperties),
-      }}
-    >
-      {/* Hover/focus styles */}
-      <style>{`
-[data-snapshot-component="entity-picker"] [data-testid="entity-picker-trigger"]:hover {
-  background-color: var(--sn-color-secondary, #f3f4f6);
-}
-[data-snapshot-component="entity-picker"] [data-testid="entity-picker-trigger"]:focus {
-  outline: none;
-}
-[data-snapshot-component="entity-picker"] [data-testid="entity-picker-trigger"]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-[data-snapshot-component="entity-picker"] [data-testid="entity-picker-search"]:focus {
-  outline: none;
-}
-[data-snapshot-component="entity-picker"] [data-testid="entity-picker-search"]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-[data-snapshot-component="entity-picker"] [data-testid="entity-picker-item"]:hover {
-  background: var(--sn-color-accent, var(--sn-color-secondary, #f3f4f6)) !important;
-}
-[data-snapshot-component="entity-picker"] [data-testid="entity-picker-item"][data-selected="true"]:hover {
-  background: color-mix(in oklch, var(--sn-color-primary, #2563eb) 15%, var(--sn-color-card, #ffffff)) !important;
-}
-[data-snapshot-component="entity-picker"] [data-testid="entity-picker-item"]:focus {
-  outline: none;
-}
-[data-snapshot-component="entity-picker"] [data-testid="entity-picker-item"]:focus-visible {
-  outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-  outline-offset: var(--sn-ring-offset, 2px);
-}
-`}</style>
-      {/* Trigger button */}
-      <button
-        type="button"
-        data-testid="entity-picker-trigger"
-        onClick={() => setIsOpen(!isOpen)}
+      },
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const triggerSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-trigger`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "between",
+      gap: "sm",
+      paddingY: "sm",
+      paddingX: "md",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      borderRadius: "md",
+      bg: "var(--sn-color-input, #ffffff)",
+      fontSize: "sm",
+      cursor: "pointer",
+      transition: "colors",
+      style: {
+        minWidth: "160px",
+      },
+      hover: {
+        bg: "var(--sn-color-secondary, #f3f4f6)",
+      },
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+      states: {
+        open: {
+          bg: "var(--sn-color-secondary, #f3f4f6)",
+        },
+      },
+    },
+    componentSurface: config.slots?.trigger,
+    activeStates: isOpen ? ["open"] : [],
+  });
+  const triggerLabelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-triggerLabel`,
+    implementationBase: {
+      color:
+        selectedEntities.length > 0
+          ? "var(--sn-color-foreground, #111827)"
+          : "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      },
+    },
+    componentSurface: config.slots?.triggerLabel,
+  });
+  const triggerIconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-triggerIcon`,
+    implementationBase: {
+      fontSize: "xs",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      style: {
+        flexShrink: 0,
+      },
+    },
+    componentSurface: config.slots?.triggerIcon,
+  });
+  const dropdownSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-dropdown`,
+    implementationBase: {
+      position: "absolute",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      borderRadius: "md",
+      bg: "var(--sn-color-popover, #ffffff)",
+      shadow: "lg",
+      overflow: "hidden",
+      zIndex: "dropdown",
+      style: {
+        top: "100%",
+        left: 0,
+        width: "100%",
+        minWidth: "240px",
+        marginTop: "var(--sn-spacing-2xs, 0.125rem)",
+      },
+    },
+    componentSurface: config.slots?.dropdown,
+  });
+  const searchContainerSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-searchContainer`,
+    implementationBase: {
+      padding: "sm",
+      style: {
+        borderBottom:
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      },
+    },
+    componentSurface: config.slots?.searchContainer,
+  });
+  const searchInputSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-searchInput`,
+    implementationBase: {
+      width: "100%",
+      paddingY: "xs",
+      paddingX: "sm",
+      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
+      borderRadius: "sm",
+      fontSize: "sm",
+      color: "var(--sn-color-foreground, #111827)",
+      bg: "var(--sn-color-input, #ffffff)",
+      focus: {
+        ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
+      },
+      style: {
+        boxSizing: "border-box",
+      },
+    },
+    componentSurface: config.slots?.searchInput,
+  });
+  const listSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-list`,
+    implementationBase: {
+      overflow: "auto",
+      style: {
+        maxHeight,
+      },
+    },
+    componentSurface: config.slots?.list,
+  });
+  const loadingSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-loading`,
+    implementationBase: {
+      padding: "md",
+      textAlign: "center",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      fontSize: "sm",
+    },
+    componentSurface: config.slots?.loading,
+  });
+  const errorSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-error`,
+    implementationBase: {},
+    componentSurface: config.slots?.error,
+  });
+  const emptySurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-empty`,
+    implementationBase: {
+      padding: "md",
+      textAlign: "center",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      fontSize: "sm",
+    },
+    componentSurface: config.slots?.empty,
+  });
+
+  return (
+    <>
+      <div
+        data-snapshot-component="entity-picker"
+        data-snapshot-id={rootId}
+        data-testid="entity-picker"
+        ref={containerRef}
+        className={joinClassNames(config.className, rootSurface.className)}
         style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "var(--sn-spacing-sm, 0.5rem)",
-          padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
-          border:
-            "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-          borderRadius: "var(--sn-radius-md, 0.5rem)",
-          backgroundColor: "var(--sn-color-input, #ffffff)",
-          color:
-            selectedEntities.length > 0
-              ? "var(--sn-color-foreground, #111827)"
-              : "var(--sn-color-muted-foreground, #6b7280)",
-          fontSize: "var(--sn-font-size-sm, 0.875rem)",
-          cursor: "pointer",
-          minWidth: "160px",
-          justifyContent: "space-between",
+          ...(rootSurface.style ?? {}),
+          ...((config.style as CSSProperties | undefined) ?? {}),
         }}
       >
-        <span
-          style={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
+        <button
+          type="button"
+          data-testid="entity-picker-trigger"
+          data-snapshot-id={`${rootId}-trigger`}
+          onClick={() => setIsOpen((open) => !open)}
+          className={triggerSurface.className}
+          style={triggerSurface.style}
         >
-          {triggerLabel}
-        </span>
-        <span
-          style={{
-            fontSize: "var(--sn-font-size-xs, 0.75rem)",
-            color: "var(--sn-color-muted-foreground, #6b7280)",
-            flexShrink: 0,
-          }}
-          aria-hidden="true"
-        >
-          {isOpen ? "\u25B2" : "\u25BC"}
-        </span>
-      </button>
-
-      {/* Dropdown popover */}
-      {isOpen && (
-        <div
-          data-testid="entity-picker-dropdown"
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            marginTop: "var(--sn-spacing-2xs, 0.125rem)",
-            minWidth: "240px",
-            width: "100%",
-            backgroundColor: "var(--sn-color-popover, #ffffff)",
-            border:
-              "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-            borderRadius: "var(--sn-radius-md, 0.5rem)",
-            boxShadow: "var(--sn-shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1))",
-            zIndex: "var(--sn-z-index-dropdown, 100)" as string,
-            overflow: "hidden",
-          }}
-        >
-          {/* Search input */}
-          {searchable && (
-            <div
-              style={{
-                padding: "var(--sn-spacing-sm, 0.5rem)",
-                borderBottom:
-                  "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-              }}
-            >
-              <input
-                ref={searchInputRef}
-                data-testid="entity-picker-search"
-                type="text"
-                placeholder="Search..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding:
-                    "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-                  border:
-                    "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-                  borderRadius: "var(--sn-radius-sm, 0.25rem)",
-                  fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                  color: "var(--sn-color-foreground, #111827)",
-                  backgroundColor: "var(--sn-color-input, #ffffff)",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
-          )}
-
-          {/* Entity list */}
-          <div
-            style={{
-              maxHeight,
-              overflowY: "auto",
-            }}
+          <span
+            data-snapshot-id={`${rootId}-triggerLabel`}
+            className={triggerLabelSurface.className}
+            style={triggerLabelSurface.style}
           >
-            {isLoading && (
-              <div
-                data-testid="entity-picker-loading"
-                style={{
-                  padding: "var(--sn-spacing-md, 0.75rem)",
-                  textAlign: "center",
-                  color: "var(--sn-color-muted-foreground, #6b7280)",
-                  fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                }}
-              >
-                Loading...
-              </div>
-            )}
+            {triggerLabel}
+          </span>
+          <span
+            aria-hidden="true"
+            data-snapshot-id={`${rootId}-triggerIcon`}
+            className={triggerIconSurface.className}
+            style={triggerIconSurface.style}
+          >
+            {isOpen ? "\u25B2" : "\u25BC"}
+          </span>
+        </button>
 
-            {!isLoading && dataError && (
-              <div data-testid="entity-picker-error">
-                <AutoErrorState
-                  config={config.error ?? {}}
-                  onRetry={
-                    config.error?.retry !== undefined ? dataRefetch : undefined
-                  }
+        {isOpen ? (
+          <div
+            data-testid="entity-picker-dropdown"
+            data-snapshot-id={`${rootId}-dropdown`}
+            className={dropdownSurface.className}
+            style={dropdownSurface.style}
+          >
+            {searchable ? (
+              <div
+                data-snapshot-id={`${rootId}-searchContainer`}
+                className={searchContainerSurface.className}
+                style={searchContainerSurface.style}
+              >
+                <input
+                  ref={searchInputRef}
+                  data-testid="entity-picker-search"
+                  data-snapshot-id={`${rootId}-searchInput`}
+                  type="text"
+                  placeholder="Search..."
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  className={searchInputSurface.className}
+                  style={searchInputSurface.style}
                 />
               </div>
-            )}
+            ) : null}
 
-            {!isLoading && !dataError && filtered.length === 0 && (
-              <div
-                data-testid="entity-picker-empty"
-                style={{
-                  padding: "var(--sn-spacing-md, 0.75rem)",
-                  textAlign: "center",
-                  color: "var(--sn-color-muted-foreground, #6b7280)",
-                  fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                }}
-              >
-                No results found
-              </div>
-            )}
-
-            {filtered.map((entity) => {
-              const isSelected = selected.includes(entity.value);
-              return (
-                <button
-                  type="button"
-                  key={entity.value}
-                  data-testid="entity-picker-item"
-                  data-selected={isSelected ? "true" : undefined}
-                  onClick={() => toggleEntity(entity.value)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "var(--sn-spacing-sm, 0.5rem)",
-                    width: "100%",
-                    padding:
-                      "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
-                    border: "none",
-                    background: isSelected
-                      ? "color-mix(in oklch, var(--sn-color-primary, #2563eb) 10%, var(--sn-color-card, #ffffff))"
-                      : "none",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    fontSize: "var(--sn-font-size-sm, 0.875rem)",
-                    color: "var(--sn-color-foreground, #111827)",
-                    transition: `background var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)`,
-                  }}
+            <div
+              data-snapshot-id={`${rootId}-list`}
+              className={listSurface.className}
+              style={listSurface.style}
+            >
+              {isLoading ? (
+                <div
+                  data-testid="entity-picker-loading"
+                  data-snapshot-id={`${rootId}-loading`}
+                  className={loadingSurface.className}
+                  style={loadingSurface.style}
                 >
-                  {/* Selection indicator */}
-                  {isMultiple && (
-                    <span
-                      style={{
-                        width: "1rem",
-                        height: "1rem",
-                        borderRadius: "var(--sn-radius-xs, 0.125rem)",
-                        border: `var(--sn-border-default, 1px) solid ${
-                          isSelected
-                            ? "var(--sn-color-primary, #2563eb)"
-                            : "var(--sn-color-border, #e5e7eb)"
-                        }`,
-                        backgroundColor: isSelected
-                          ? "var(--sn-color-primary, #2563eb)"
-                          : "transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                        color: "var(--sn-color-primary-foreground, #ffffff)",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {isSelected ? "\u2713" : ""}
-                    </span>
-                  )}
+                  Loading...
+                </div>
+              ) : null}
 
-                  {/* Avatar */}
-                  {entity.avatar && (
-                    <img
-                      src={entity.avatar}
-                      alt=""
-                      style={{
-                        width: "1.5rem",
-                        height: "1.5rem",
-                        borderRadius: "var(--sn-radius-full, 9999px)",
-                        objectFit: "cover",
-                        flexShrink: 0,
-                      }}
+              {!isLoading && dataError ? (
+                <div
+                  data-testid="entity-picker-error"
+                  data-snapshot-id={`${rootId}-error`}
+                  className={errorSurface.className}
+                  style={errorSurface.style}
+                >
+                  <AutoErrorState
+                    config={config.error ?? {}}
+                    onRetry={
+                      config.error?.retry !== undefined ? dataRefetch : undefined
+                    }
+                  />
+                </div>
+              ) : null}
+
+              {!isLoading && !dataError && filtered.length === 0 ? (
+                <div
+                  data-testid="entity-picker-empty"
+                  data-snapshot-id={`${rootId}-empty`}
+                  className={emptySurface.className}
+                  style={emptySurface.style}
+                >
+                  No results found
+                </div>
+              ) : null}
+
+              {!isLoading && !dataError
+                ? filtered.map((entity) => (
+                    <EntityPickerItem
+                      key={entity.value}
+                      config={config}
+                      entity={entity}
+                      isMultiple={isMultiple}
+                      isSelected={selected.includes(entity.value)}
+                      onToggle={toggleEntity}
+                      rootId={rootId}
                     />
-                  )}
-
-                  {/* Icon */}
-                  {!entity.avatar && entity.icon && (
-                    <span
-                      style={{
-                        flexShrink: 0,
-                        color: "var(--sn-color-muted-foreground, #6b7280)",
-                      }}
-                    >
-                      <Icon name={entity.icon} size={16} />
-                    </span>
-                  )}
-
-                  {/* Label + description */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        fontWeight:
-                          "var(--sn-font-weight-medium, 500)" as string,
-                      }}
-                    >
-                      {entity.label}
-                    </div>
-                    {entity.description && (
-                      <div
-                        style={{
-                          fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                          color: "var(--sn-color-muted-foreground, #6b7280)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {entity.description}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Single-select check */}
-                  {!isMultiple && isSelected && (
-                    <span
-                      style={{
-                        color: "var(--sn-color-primary, #2563eb)",
-                        flexShrink: 0,
-                      }}
-                    >
-                      \u2713
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                  ))
+                : null}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        ) : null}
+      </div>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={triggerSurface.scopedCss} />
+      <SurfaceStyles css={triggerLabelSurface.scopedCss} />
+      <SurfaceStyles css={triggerIconSurface.scopedCss} />
+      <SurfaceStyles css={dropdownSurface.scopedCss} />
+      <SurfaceStyles css={searchContainerSurface.scopedCss} />
+      <SurfaceStyles css={searchInputSurface.scopedCss} />
+      <SurfaceStyles css={listSurface.scopedCss} />
+      <SurfaceStyles css={loadingSurface.scopedCss} />
+      <SurfaceStyles css={errorSurface.scopedCss} />
+      <SurfaceStyles css={emptySurface.scopedCss} />
+    </>
   );
 }

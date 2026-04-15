@@ -16,6 +16,10 @@ vi.mock("../../../../actions/executor", () => ({
   useActionExecutor: () => mockExecute,
 }));
 
+vi.mock("../../../_base/use-component-data", () => ({
+  useComponentData: () => ({ data: [], isLoading: false, error: null, refetch: vi.fn() }),
+}));
+
 describe("EmojiPicker", () => {
   it("renders custom emojis and publishes selection", () => {
     render(

@@ -1,9 +1,12 @@
 'use client';
 
+import type { CSSProperties } from "react";
 import { useEffect, useMemo } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { AutoErrorState } from "../../_base/auto-error-state";
+import { SurfaceStyles } from "../../_base/surface-styles";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
 import { Icon } from "../../../icons/index";
 import {
@@ -197,6 +200,7 @@ export function StatCard({ config }: { config: StatCardConfig }) {
   const handleClick = config.action
     ? () => void execute(config.action!)
     : undefined;
+  const rootId = config.id ?? "stat-card";
 
   const loadingVariant = config.loading ?? "skeleton";
 
@@ -214,12 +218,125 @@ export function StatCard({ config }: { config: StatCardConfig }) {
       : trend?.direction === "down"
         ? "\u2193"
         : "\u2192";
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: rootId,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
+      minWidth: "0",
+      overflow: "hidden",
+      cursor: handleClick ? "pointer" : undefined,
+      hover: handleClick
+        ? {
+            bg: "var(--sn-color-accent, var(--sn-color-muted))",
+          }
+        : undefined,
+      focus: handleClick
+        ? {
+            ring: true,
+          }
+        : undefined,
+      style: {
+        padding: "var(--sn-card-padding, var(--sn-spacing-lg, 1.5rem))",
+        borderRadius: "var(--sn-radius-lg, 0.75rem)",
+        boxShadow:
+          "var(--sn-card-shadow, var(--sn-shadow-sm, 0 1px 3px rgba(0,0,0,0.1)))",
+        border: "var(--sn-card-border, 1px solid var(--sn-color-border, #e5e7eb))",
+        backgroundColor: "var(--sn-color-card, #ffffff)",
+      },
+    },
+    componentSurface: config,
+    itemSurface: config.slots?.root,
+  });
+  const loadingSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-loading`,
+    componentSurface: config.slots?.loading,
+  });
+  const errorSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-error`,
+    componentSurface: config.slots?.error,
+  });
+  const labelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-label`,
+    implementationBase: {
+      style: {
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        color: "var(--sn-color-muted-foreground, #6b7280)",
+        fontWeight: "var(--sn-font-weight-medium, 500)",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      },
+    },
+    componentSurface: config.slots?.label,
+  });
+  const valueRowSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-value-row`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
+    },
+    componentSurface: config.slots?.valueRow,
+  });
+  const valueSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-value`,
+    implementationBase: {
+      style: {
+        fontSize: "var(--sn-font-size-2xl, 1.5rem)",
+        fontWeight: "var(--sn-font-weight-bold, 700)",
+        color: "var(--sn-color-foreground, #111827)",
+        lineHeight: "var(--sn-leading-tight, 1.25)",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        minWidth: 0,
+      },
+    },
+    componentSurface: config.slots?.value,
+  });
+  const iconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-icon`,
+    implementationBase: {
+      style: {
+        flexShrink: 0,
+        opacity: "var(--sn-opacity-muted, 0.5)",
+      },
+    },
+    componentSurface: config.slots?.icon,
+  });
+  const trendSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-trend`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: "var(--sn-spacing-xs, 0.25rem)",
+      style: {
+        fontSize: "var(--sn-font-size-xs, 0.75rem)",
+      },
+    },
+    componentSurface: config.slots?.trend,
+  });
+  const emptySurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-empty`,
+    implementationBase: {
+      style: {
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        color: "var(--sn-color-muted-foreground, #6b7280)",
+      },
+    },
+    componentSurface: config.slots?.empty,
+  });
 
   return (
     <div
       data-snapshot-component="stat-card"
+      data-snapshot-id={rootId}
       data-testid="stat-card"
-      className={config.className}
+      className={[config.className, rootSurface.className].filter(Boolean).join(" ") || undefined}
       onClick={handleClick}
       onKeyDown={
         handleClick
@@ -231,26 +348,18 @@ export function StatCard({ config }: { config: StatCardConfig }) {
       role={handleClick ? "button" : undefined}
       tabIndex={handleClick ? 0 : undefined}
       style={{
-        padding: "var(--sn-card-padding, var(--sn-spacing-lg, 1.5rem))",
-        borderRadius: "var(--sn-radius-lg, 0.75rem)",
-        boxShadow: "var(--sn-card-shadow, var(--sn-shadow-sm, 0 1px 3px rgba(0,0,0,0.1)))",
-        border:
-          "var(--sn-card-border, 1px solid var(--sn-color-border, #e5e7eb))",
-        backgroundColor: "var(--sn-color-card, #ffffff)",
-        cursor: handleClick ? "pointer" : undefined,
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--sn-spacing-sm, 0.5rem)",
-        minWidth: 0,
-        overflow: "hidden",
-        ...(config.style as React.CSSProperties),
+        ...(rootSurface.style ?? {}),
+        ...((config.style as CSSProperties | undefined) ?? {}),
       }}
     >
       {/* Loading state */}
       {isLoading && (
         <div
+          data-snapshot-id={`${rootId}-loading`}
           data-testid="stat-card-loading"
           data-loading-variant={loadingVariant}
+          className={loadingSurface.className}
+          style={loadingSurface.style}
         >
           <div
             style={{
@@ -282,7 +391,12 @@ export function StatCard({ config }: { config: StatCardConfig }) {
 
       {/* Error state */}
       {!isLoading && error && (
-        <div data-testid="stat-card-error">
+        <div
+          data-snapshot-id={`${rootId}-error`}
+          data-testid="stat-card-error"
+          className={errorSurface.className}
+          style={errorSurface.style}
+        >
           <AutoErrorState
             config={config.error ?? {}}
             onRetry={config.error?.retry !== undefined ? refetch : undefined}
@@ -295,53 +409,38 @@ export function StatCard({ config }: { config: StatCardConfig }) {
         <>
           {/* Label */}
           <span
+            data-snapshot-id={`${rootId}-label`}
             data-testid="stat-card-label"
-            style={{
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-              fontWeight:
-                "var(--sn-font-weight-medium, 500)" as React.CSSProperties["fontWeight"],
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
+            className={labelSurface.className}
+            style={labelSurface.style}
           >
             {label}
           </span>
 
           {/* Value + Icon row */}
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "var(--sn-spacing-sm, 0.5rem)",
-            }}
+            data-snapshot-id={`${rootId}-value-row`}
+            className={valueRowSurface.className}
+            style={valueRowSurface.style}
           >
             <div
+              data-snapshot-id={`${rootId}-value`}
               data-testid="stat-card-value"
-              style={{
-                fontSize: "var(--sn-font-size-2xl, 1.5rem)",
-                fontWeight: "var(--sn-font-weight-bold, 700)" as string,
-                color: "var(--sn-color-foreground, #111827)",
-                lineHeight: "var(--sn-leading-tight, 1.25)",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                minWidth: 0,
-              }}
+              className={valueSurface.className}
+              style={valueSurface.style}
             >
               {value}
             </div>
             {config.icon && (
               <span
+                data-snapshot-id={`${rootId}-icon`}
                 data-testid="stat-card-icon"
+                className={iconSurface.className}
                 style={{
+                  ...(iconSurface.style ?? {}),
                   color: config.iconColor
                     ? `var(--sn-color-${config.iconColor}, ${config.iconColor})`
                     : "var(--sn-color-muted-foreground, #6b7280)",
-                  flexShrink: 0,
-                  opacity: "var(--sn-opacity-muted, 0.5)" as unknown as number,
                 }}
                 aria-hidden="true"
               >
@@ -353,13 +452,11 @@ export function StatCard({ config }: { config: StatCardConfig }) {
           {/* Trend */}
           {trend && (
             <div
+              data-snapshot-id={`${rootId}-trend`}
               data-testid="stat-card-trend"
+              className={trendSurface.className}
               style={{
-                display: "flex",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: "var(--sn-spacing-xs, 0.25rem)",
-                fontSize: "var(--sn-font-size-xs, 0.75rem)",
+                ...(trendSurface.style ?? {}),
                 color: trendColor,
               }}
             >
@@ -373,37 +470,23 @@ export function StatCard({ config }: { config: StatCardConfig }) {
       {/* Empty state — no data and no error */}
       {!isLoading && !error && value === null && (
         <div
+          data-snapshot-id={`${rootId}-empty`}
           data-testid="stat-card-empty"
-          style={{
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            color: "var(--sn-color-muted-foreground, #6b7280)",
-          }}
+          className={emptySurface.className}
+          style={emptySurface.style}
         >
           No data available
         </div>
       )}
-      <style>{`
-        [data-snapshot-component="stat-card"][role="button"]:hover {
-          background: var(--sn-color-accent, var(--sn-color-muted));
-        }
-        [data-snapshot-component="stat-card"][role="button"]:focus {
-          outline: none;
-        }
-        [data-snapshot-component="stat-card"][role="button"]:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-        [data-snapshot-component="stat-card"] button:hover {
-          background: var(--sn-color-accent, var(--sn-color-muted));
-        }
-        [data-snapshot-component="stat-card"] button:focus {
-          outline: none;
-        }
-        [data-snapshot-component="stat-card"] button:focus-visible {
-          outline: 2px solid var(--sn-ring-color, var(--sn-color-primary, #2563eb));
-          outline-offset: var(--sn-ring-offset, 2px);
-        }
-      `}</style>
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={loadingSurface.scopedCss} />
+      <SurfaceStyles css={errorSurface.scopedCss} />
+      <SurfaceStyles css={labelSurface.scopedCss} />
+      <SurfaceStyles css={valueRowSurface.scopedCss} />
+      <SurfaceStyles css={valueSurface.scopedCss} />
+      <SurfaceStyles css={iconSurface.scopedCss} />
+      <SurfaceStyles css={trendSurface.scopedCss} />
+      <SurfaceStyles css={emptySurface.scopedCss} />
     </div>
   );
 }

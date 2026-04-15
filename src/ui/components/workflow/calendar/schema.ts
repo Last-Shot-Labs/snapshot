@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
-import { dataSourceSchema, fromRefSchema } from "../../_base/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import { dataSourceSchema } from "../../_base/types";
 
 /**
  * Schema for a static event definition.
@@ -48,8 +49,7 @@ export const calendarEventSchema = z
  * }
  * ```
  */
-export const calendarConfigSchema = z
-  .object({
+export const calendarConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("calendar"),
     /** API endpoint for events. Supports FromRef. */
@@ -72,14 +72,27 @@ export const calendarConfigSchema = z
     showWeekNumbers: z.boolean().optional(),
     /** Label for the "Today" button. Default: "Today". */
     todayLabel: z.string().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    slots: slotsSchema([
+      "root",
+      "header",
+      "title",
+      "navGroup",
+      "navButton",
+      "loadingState",
+      "errorState",
+      "frame",
+      "scroller",
+      "dayHeaderRow",
+      "dayHeader",
+      "weekNumber",
+      "weekRow",
+      "cell",
+      "dateNumber",
+      "currentDateNumber",
+      "events",
+      "event",
+      "overflowMore",
+      "weekDayHeader",
+    ]).optional(),
   })
   .strict();

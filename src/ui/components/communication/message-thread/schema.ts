@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
-import { dataSourceSchema, fromRefSchema } from "../../_base/types";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import { dataSourceSchema } from "../../_base/types";
 
 /**
  * Zod config schema for the MessageThread component.
@@ -19,8 +20,7 @@ import { dataSourceSchema, fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const messageThreadConfigSchema = z
-  .object({
+export const messageThreadConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("message-thread"),
     /** API endpoint for message data, or static data via FromRef. */
@@ -53,14 +53,27 @@ export const messageThreadConfigSchema = z
     maxHeight: z.string().optional(),
     /** Message to show when there are no messages. */
     emptyMessage: z.string().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
+    slots: slotsSchema([
+      "root",
+      "scrollArea",
+      "loadingItem",
+      "loadingAvatar",
+      "loadingTitle",
+      "loadingBody",
+      "errorState",
+      "emptyState",
+      "dateSeparator",
+      "dateRule",
+      "dateLabel",
+      "messageItem",
+      "avatarImage",
+      "avatarFallback",
+      "contentColumn",
+      "header",
+      "authorName",
+      "timestamp",
+      "body",
+      "embeds",
+    ]).optional(),
   })
   .strict();

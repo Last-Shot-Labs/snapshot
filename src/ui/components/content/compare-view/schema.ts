@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
 
 /**
@@ -18,8 +19,7 @@ import { fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const compareViewConfigSchema = z
-  .object({
+export const compareViewConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("compare-view"),
     /** Left (original) content text. Supports FromRef. */
@@ -34,14 +34,17 @@ export const compareViewConfigSchema = z
     maxHeight: z.string().optional(),
     /** Whether to show line numbers. Default: true. */
     showLineNumbers: z.boolean().optional(),
-    // --- BaseComponentConfig fields ---
-    /** Component id for publishing/subscribing. */
-    id: z.string().optional(),
-    /** Visibility toggle. Can be a FromRef for conditional display. */
-    visible: z.union([z.boolean(), fromRefSchema]).optional(),
-    /** Inline style overrides. */
-    style: z.record(z.union([z.string(), z.number()])).optional(),
-    /** Additional CSS class name. */
-    className: z.string().optional(),
-  })
-  .strict();
+    slots: slotsSchema([
+      "root",
+      "header",
+      "leftLabel",
+      "rightLabel",
+      "divider",
+      "panes",
+      "pane",
+      "line",
+      "lineNumber",
+      "prefix",
+      "text",
+    ]).optional(),
+  }).strict();

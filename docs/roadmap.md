@@ -112,6 +112,13 @@ Spec at [`docs/specs/completed/manifest-only.md`](./specs/completed/manifest-onl
 
 ## Now - Active Specs
 
+**Shared frontend contract + Pocketshot alignment (`shared-frontend-core-and-pocketshot-alignment.md`) - Active 2026-04-14:**
+
+- Extract the cross-platform frontend contract into a dedicated shared package instead of letting it remain web-owned inside Snapshot.
+- Rebase Snapshot and Pocketshot as peer runtimes over that shared contract package.
+- Finish Pocketshot's declarative runtime against the same manifest, token, action, resource, workflow, state, policy, i18n, and component metadata contract.
+- This is replacement work: both packages are pre-production and incorrect contracts should be replaced outright.
+
 **Documentation infrastructure (`documentation-infrastructure.md`) - Active 2026-04-13:**
 
 - Phases 1-4 are effectively landed: governance, the public docs app, source-backed

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { extendComponentSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 import { fromRefSchema } from "../../_base/types";
 
 /**
@@ -9,4 +9,5 @@ export const codeConfigSchema = extendComponentSchema({
   type: z.literal("code"),
   value: z.union([z.string(), fromRefSchema]),
   fallback: z.string().optional(),
+  slots: slotsSchema(["root"]).optional(),
 }).strict();
