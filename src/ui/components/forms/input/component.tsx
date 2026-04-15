@@ -13,13 +13,18 @@ export function InputControl({
   inputId,
   type = "text",
   value,
+  checked,
   placeholder,
   autoComplete,
   autoFocus,
   disabled,
   readOnly,
+  accept,
+  multiple,
+  list,
   min,
   max,
+  step,
   maxLength,
   pattern,
   required,
@@ -27,6 +32,8 @@ export function InputControl({
   ariaDescribedBy,
   ariaLabel,
   onChangeText,
+  onChangeChecked,
+  onChangeFiles,
   onBlur,
   onFocus,
   onClick,
@@ -102,13 +109,18 @@ export function InputControl({
         id={inputId}
         type={type}
         value={value}
+        checked={checked}
         placeholder={placeholder}
         autoComplete={autoComplete}
         autoFocus={autoFocus}
         disabled={disabled}
         readOnly={readOnly}
+        accept={accept}
+        multiple={multiple}
+        list={list}
         min={min}
         max={max}
+        step={step}
         maxLength={maxLength}
         pattern={pattern}
         required={required}
@@ -122,7 +134,17 @@ export function InputControl({
           ...(controlSurface.style ?? {}),
           ...(style ?? {}),
         }}
-        onChange={(event) => onChangeText?.(event.target.value)}
+        onChange={(event) => {
+          if (type === "checkbox" || type === "radio") {
+            onChangeChecked?.(event.target.checked);
+            return;
+          }
+          if (type === "file") {
+            onChangeFiles?.(event.target.files);
+            return;
+          }
+          onChangeText?.(event.target.value);
+        }}
         onBlur={onBlur}
         onFocus={onFocus}
         onClick={onClick}

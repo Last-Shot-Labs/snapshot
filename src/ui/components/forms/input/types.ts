@@ -15,15 +15,26 @@ export type InputConfig = z.input<typeof inputConfigSchema>;
 export interface InputControlProps {
   inputRef?: Ref<HTMLInputElement>;
   inputId?: string;
-  type?: InputConfig["inputType"];
-  value: string;
+  type?:
+    | InputConfig["inputType"]
+    | "date"
+    | "datetime-local"
+    | "color"
+    | "range"
+    | "file";
+  value?: string;
+  checked?: boolean;
   placeholder?: string;
   autoComplete?: string;
   autoFocus?: boolean;
   disabled?: boolean;
   readOnly?: boolean;
+  accept?: string;
+  multiple?: boolean;
+  list?: string;
   min?: string;
   max?: string;
+  step?: number | string;
   maxLength?: number;
   pattern?: string;
   required?: boolean;
@@ -31,6 +42,8 @@ export interface InputControlProps {
   ariaDescribedBy?: string;
   ariaLabel?: string;
   onChangeText?: (value: string) => void;
+  onChangeChecked?: (checked: boolean) => void;
+  onChangeFiles?: (files: FileList | null) => void;
   onBlur?: () => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onClick?: MouseEventHandler<HTMLInputElement>;

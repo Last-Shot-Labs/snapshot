@@ -123,7 +123,7 @@ function TagPill({
           size="icon"
           ariaLabel={`Remove ${tag.label}`}
           surfaceId={`${pillId}-remove`}
-          data-testid="tag-remove"
+          testId="tag-remove"
           onClick={(event) => {
             event.stopPropagation();
             onRemove(tag.value);
@@ -200,7 +200,7 @@ function TagOption({
         variant="ghost"
         size="sm"
         surfaceId={optionId}
-        data-testid="tag-option"
+        testId="tag-option"
         onClick={() => onSelect(tag.value)}
         className={optionSurface.className}
         style={optionSurface.style}
@@ -659,7 +659,7 @@ export function TagSelector({ config }: { config: TagSelectorConfig }) {
                 variant="ghost"
                 size="sm"
                 surfaceId={`${rootId}-createOption`}
-                data-testid="tag-create-option"
+                testId="tag-create-option"
                 onClick={handleCreate}
                 className={createOptionSurface.className}
                 style={createOptionSurface.style}

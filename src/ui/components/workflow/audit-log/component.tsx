@@ -421,7 +421,7 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
                   <SelectControl
                     value={activeFilters[filter.field] ?? ""}
                     onChangeValue={(value) => handleFilterChange(filter.field, value)}
-                    aria-label={filter.label}
+                    ariaLabel={filter.label}
                     surfaceId={`${rootId}-filter-${filter.field}`}
                     className={filterSurface.className}
                     style={filterSurface.style}

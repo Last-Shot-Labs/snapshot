@@ -338,7 +338,9 @@ export function ColorPicker({ config }: { config: ColorPickerConfig }) {
                     style={swatchSurface.style}
                     variant="ghost"
                     size="icon"
-                  />
+                  >
+                    {" "}
+                  </ButtonControl>
                   <SurfaceStyles css={swatchSurface.scopedCss} />
                 </span>
               );

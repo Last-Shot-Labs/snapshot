@@ -115,7 +115,7 @@ function LocationResultRow({
     <>
       <ButtonControl
         type="button"
-        data-testid="location-result"
+        testId="location-result"
         surfaceId={resultId}
         className={resultSurface.className}
         style={resultSurface.style}

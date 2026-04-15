@@ -5,6 +5,7 @@ import { useActionExecutor } from "../../../actions/executor";
 import { usePublish, useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { InputControl } from "../input";
 import type { SliderConfig } from "./types";
 
 function formatSliderValue(
@@ -236,61 +237,61 @@ export function Slider({ config }: { config: SliderConfig }) {
         />
         {config.range ? (
           <>
-            <input
+            <InputControl
               type="range"
-              min={min}
-              max={max}
+              min={String(min)}
+              max={String(max)}
               step={step}
-              value={rangeValue[0]}
+              value={String(rangeValue[0])}
               disabled={disabled}
-              onChange={(event) => {
+              onChangeText={(nextRawValue) => {
                 const nextValue = Math.min(
-                  Number(event.target.value),
+                  Number(nextRawValue),
                   rangeValue[1],
                 );
                 const updated: [number, number] = [nextValue, rangeValue[1]];
                 setRangeValue(updated);
                 triggerChange(updated);
               }}
-              data-snapshot-id={`${rootId}-input`}
+              surfaceId={`${rootId}-input-start`}
               className={inputSurface.className}
               style={{ ...rangeInputStyle, ...(inputSurface.style ?? {}), zIndex: 2 }}
             />
-            <input
+            <InputControl
               type="range"
-              min={min}
-              max={max}
+              min={String(min)}
+              max={String(max)}
               step={step}
-              value={rangeValue[1]}
+              value={String(rangeValue[1])}
               disabled={disabled}
-              onChange={(event) => {
+              onChangeText={(nextRawValue) => {
                 const nextValue = Math.max(
-                  Number(event.target.value),
+                  Number(nextRawValue),
                   rangeValue[0],
                 );
                 const updated: [number, number] = [rangeValue[0], nextValue];
                 setRangeValue(updated);
                 triggerChange(updated);
               }}
-              data-snapshot-id={`${rootId}-input`}
+              surfaceId={`${rootId}-input-end`}
               className={inputSurface.className}
               style={{ ...rangeInputStyle, ...(inputSurface.style ?? {}), zIndex: 3 }}
             />
           </>
         ) : (
-          <input
+          <InputControl
             type="range"
-            min={min}
-            max={max}
+            min={String(min)}
+            max={String(max)}
             step={step}
-            value={singleValue}
+            value={String(singleValue)}
             disabled={disabled}
-            onChange={(event) => {
-              const nextValue = Number(event.target.value);
+            onChangeText={(nextRawValue) => {
+              const nextValue = Number(nextRawValue);
               setSingleValue(nextValue);
               triggerChange(nextValue);
             }}
-            data-snapshot-id={`${rootId}-input`}
+            surfaceId={`${rootId}-input`}
             className={inputSurface.className}
             style={{ ...rangeInputStyle, ...(inputSurface.style ?? {}) }}
           />

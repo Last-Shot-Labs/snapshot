@@ -1,3 +1,3 @@
-export { Select } from "./component";
+export { Select, SelectControl } from "./component";
 export { selectConfigSchema } from "./schema";
-export type { SelectConfig } from "./types";
+export type { SelectConfig, SelectControlProps } from "./types";
