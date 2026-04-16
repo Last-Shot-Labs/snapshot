@@ -1,6 +1,5 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import { useSubscribe } from "../../../context/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -73,10 +72,7 @@ export function NavLink({
       data-snapshot-component="nav-link"
       data-snapshot-id={`${rootId}-nav-link`}
       className={rootSurface.className}
-      style={{
-        ...(rootSurface.style ?? {}),
-        ...((config.style as CSSProperties | undefined) ?? {}),
-      }}
+      style={rootSurface.style}
     >
       <Link
         config={{

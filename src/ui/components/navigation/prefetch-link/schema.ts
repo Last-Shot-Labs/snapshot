@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { z } from "zod";
-import { slotsSchema } from "../../_base/schema";
+import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 
 export const prefetchLinkSlotNames = ["root"] as const;
 
@@ -14,7 +14,7 @@ export const prefetchLinkSlotNames = ["root"] as const;
  * It is not a router-aware component — consumers wire their own router.
  * This avoids a peer dependency on TanStack Router.
  */
-export const prefetchLinkSchema = z.object({
+export const prefetchLinkSchema = extendComponentSchema({
   /** The `href` of the link. Must be a non-empty string. */
   to: z.string().min(1),
   /**
@@ -30,12 +30,6 @@ export const prefetchLinkSchema = z.object({
     .default("hover"),
   /** Content rendered inside the anchor. */
   children: z.custom<ReactNode>().optional(),
-  /** Optional id used to scope root slot CSS. */
-  id: z.string().optional(),
-  /** Additional CSS class name applied to the anchor. */
-  className: z.string().optional(),
-  /** Inline style overrides applied to the anchor. */
-  style: z.record(z.union([z.string(), z.number()])).optional(),
   /** Canonical root slot overrides. */
   slots: slotsSchema(prefetchLinkSlotNames).optional(),
   /** `target` attribute forwarded to the `<a>` element. */

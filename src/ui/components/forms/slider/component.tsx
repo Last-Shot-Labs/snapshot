@@ -269,8 +269,8 @@ export function Slider({ config }: { config: SliderConfig }) {
                 triggerChange(updated);
               }}
               surfaceId={`${rootId}-input-start`}
-              className={inputStartSurface.className}
-              style={{ ...rangeInputStyle, ...(inputStartSurface.style ?? {}), zIndex: 2 }}
+              itemSurfaceConfig={inputStartSurface.resolvedConfigForWrapper}
+              style={{ ...rangeInputStyle, zIndex: 2 }}
             />
             <InputControl
               type="range"
@@ -289,8 +289,8 @@ export function Slider({ config }: { config: SliderConfig }) {
                 triggerChange(updated);
               }}
               surfaceId={`${rootId}-input-end`}
-              className={inputEndSurface.className}
-              style={{ ...rangeInputStyle, ...(inputEndSurface.style ?? {}), zIndex: 3 }}
+              itemSurfaceConfig={inputEndSurface.resolvedConfigForWrapper}
+              style={{ ...rangeInputStyle, zIndex: 3 }}
             />
           </>
         ) : (
@@ -307,8 +307,8 @@ export function Slider({ config }: { config: SliderConfig }) {
               triggerChange(nextValue);
             }}
             surfaceId={`${rootId}-input`}
-            className={inputSurface.className}
-            style={{ ...rangeInputStyle, ...(inputSurface.style ?? {}) }}
+            itemSurfaceConfig={inputSurface.resolvedConfigForWrapper}
+            style={rangeInputStyle}
           />
         )}
       </div>
@@ -345,9 +345,6 @@ export function Slider({ config }: { config: SliderConfig }) {
       <SurfaceStyles css={railSurface.scopedCss} />
       <SurfaceStyles css={trackSurface.scopedCss} />
       <SurfaceStyles css={fillSurface.scopedCss} />
-      <SurfaceStyles css={inputSurface.scopedCss} />
-      <SurfaceStyles css={inputStartSurface.scopedCss} />
-      <SurfaceStyles css={inputEndSurface.scopedCss} />
       <SurfaceStyles css={limitsSurface.scopedCss} />
       <SurfaceStyles css={minLabelSurface.scopedCss} />
       <SurfaceStyles css={maxLabelSurface.scopedCss} />

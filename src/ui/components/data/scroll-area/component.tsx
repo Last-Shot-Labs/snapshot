@@ -5,7 +5,11 @@ import { useSubscribe } from "../../../context/hooks";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  extractSurfaceConfig,
+  mergeClassNames,
+  resolveSurfacePresentation,
+} from "../../_base/style-surfaces";
 import type { ScrollAreaConfig } from "./types";
 
 /**
@@ -123,10 +127,8 @@ export function ScrollArea({ config }: { config: ScrollAreaConfig }) {
     >
       <div
         data-snapshot-id={`${rootId}-viewport`}
-        className={[scopeClass, viewportSurface.className].filter(Boolean).join(" ")}
-        style={{
-          ...(viewportSurface.style ?? {}),
-        }}
+        className={mergeClassNames(scopeClass, viewportSurface.className)}
+        style={viewportSurface.style}
       >
         {content.map((child, i) => (
           <ComponentRenderer

@@ -70,11 +70,25 @@ describe("PrefetchLink", () => {
     expect(screen.getByText("Read Posts")).toBeDefined();
   });
 
-  it("forwards className to the anchor", () => {
-    const { container } = render(
-      createElement(PrefetchLink, { to: "/posts", className: "nav-link" }),
+  it("merges direct and slot root styling on the anchor", () => {
+    render(
+      createElement(PrefetchLink, {
+        to: "/posts",
+        id: "prefetch-root",
+        className: "nav-link",
+        style: { opacity: 0.8 },
+        slots: {
+          root: {
+            className: "prefetch-slot",
+          },
+        },
+      }),
     );
-    expect(container.querySelector(".nav-link")).not.toBeNull();
+
+    const anchor = screen.getByRole("link");
+    expect(anchor.className).toContain("nav-link");
+    expect(anchor.className).toContain("prefetch-slot");
+    expect((anchor as HTMLAnchorElement).style.opacity).toBe("0.8");
   });
 
   it("forwards target to the anchor", () => {
@@ -194,21 +208,5 @@ describe("PrefetchLink", () => {
 
       expect(disconnectSpy).toHaveBeenCalled();
     });
-  });
-
-  it("applies canonical root slot classes", () => {
-    render(
-      createElement(PrefetchLink, {
-        to: "/posts",
-        id: "prefetch-root",
-        slots: {
-          root: {
-            className: "prefetch-slot",
-          },
-        },
-      }),
-    );
-
-    expect(screen.getByRole("link").className).toContain("prefetch-slot");
   });
 });

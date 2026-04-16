@@ -25,6 +25,7 @@ describe("ScrollArea", () => {
           content: [{ type: "markdown", id: "scroll-copy", content: "Hello" } as never],
           slots: {
             root: { className: "slot-root" },
+            viewport: { className: "slot-viewport" },
           },
         }}
       />,
@@ -34,6 +35,13 @@ describe("ScrollArea", () => {
     expect(root).toBeTruthy();
     expect((root as HTMLElement | null)?.className).toContain("component-root");
     expect((root as HTMLElement | null)?.className).toContain("slot-root");
+    expect(
+      (
+        container.querySelector('[data-snapshot-id="scroll-area-viewport"]') as
+          | HTMLElement
+          | null
+      )?.className,
+    ).toContain("slot-viewport");
     expect(screen.getByTestId("scroll-area-child").textContent).toContain("scroll-copy");
   });
 });

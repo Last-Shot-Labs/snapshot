@@ -21,12 +21,20 @@ describe("Layout component", () => {
   describe("sidebar variant", () => {
     it("renders with data-layout-variant=sidebar", () => {
       const { container } = render(
-        <Layout config={sidebarConfig}>
+        <Layout
+          config={{
+            ...sidebarConfig,
+            className: "layout-root-class",
+            style: { opacity: 0.8 },
+          }}
+        >
           <div>Page content</div>
         </Layout>,
       );
       const el = container.querySelector('[data-layout-variant="sidebar"]');
       expect(el).not.toBeNull();
+      expect(el?.className).toContain("layout-root-class");
+      expect((el as HTMLElement | null)?.style.opacity).toBe("0.8");
     });
 
     it("renders sidebar aside when nav is provided", () => {

@@ -82,13 +82,18 @@ describe("Slider", () => {
       />,
     );
 
-    expect(
-      container.querySelector('[data-snapshot-id="price-range-input-start"]')
-        ?.className,
-    ).toContain("input-start-slot");
-    expect(
-      container.querySelector('[data-snapshot-id="price-range-input-end"]')
-        ?.className,
-    ).toContain("input-end-slot");
+    const startInput = container.querySelector(
+      '[data-snapshot-id="price-range-input-start"]',
+    ) as HTMLInputElement | null;
+    const endInput = container.querySelector(
+      '[data-snapshot-id="price-range-input-end"]',
+    ) as HTMLInputElement | null;
+
+    expect(startInput?.className).toContain("input-start-slot");
+    expect(endInput?.className).toContain("input-end-slot");
+    expect(startInput?.style.position).toBe("relative");
+    expect(startInput?.style.zIndex).toBe("2");
+    expect(endInput?.style.position).toBe("relative");
+    expect(endInput?.style.zIndex).toBe("3");
   });
 });

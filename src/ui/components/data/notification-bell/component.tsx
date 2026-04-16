@@ -1,6 +1,5 @@
 'use client';
 
-import type { CSSProperties } from "react";
 import { useEffect } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
@@ -150,10 +149,7 @@ export function NotificationBell({
       data-snapshot-component="notification-bell"
       data-snapshot-id={rootId}
       className={rootSurface.className}
-      style={{
-        ...(rootSurface.style ?? {}),
-        ...((config.style as CSSProperties | undefined) ?? {}),
-      }}
+      style={rootSurface.style}
     >
       <ButtonControl
         onClick={handleClick}

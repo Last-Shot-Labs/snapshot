@@ -505,9 +505,19 @@ describe("DataTable component", () => {
           config={baseConfig({
             id: "users-table",
             className: "table-root-class",
+            selectable: true,
+            actions: [
+              {
+                label: "Edit",
+                action: { type: "navigate", to: "/users/{id}" },
+              },
+            ],
             slots: {
               root: { className: "table-root-slot" },
-              headerCell: { className: "table-header-cell-slot" },
+              headerCell: {
+                className: "table-header-cell-slot",
+                style: { letterSpacing: "0.1em" },
+              },
               pagination: { className: "table-pagination-slot" },
             },
           })}
@@ -524,6 +534,27 @@ describe("DataTable component", () => {
     expect(
       container.querySelector('[data-snapshot-id="users-table-header-cell-name"]')?.className,
     ).toContain("table-header-cell-slot");
+    expect(
+      (
+        container.querySelector(
+          '[data-snapshot-id="users-table-header-cell-name"]',
+        ) as HTMLElement | null
+      )?.style.letterSpacing,
+    ).toBe("0.1em");
+    expect(
+      (
+        container.querySelector(
+          '[data-snapshot-id="users-table-header-cell-select"]',
+        ) as HTMLElement | null
+      )?.style.width,
+    ).toBe("40px");
+    expect(
+      (
+        container.querySelector(
+          '[data-snapshot-id="users-table-header-cell-actions"]',
+        ) as HTMLElement | null
+      )?.style.textAlign,
+    ).toBe("right");
     expect(
       container.querySelector('[data-snapshot-id="users-table-pagination"]')?.className,
     ).toContain("table-pagination-slot");

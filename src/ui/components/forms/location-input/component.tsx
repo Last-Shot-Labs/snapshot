@@ -1,6 +1,5 @@
 'use client';
 
-import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { usePublish, useSubscribe } from "../../../context/hooks";
@@ -20,13 +19,6 @@ interface LocationResult {
   address?: string;
   lat: number;
   lng: number;
-}
-
-function joinClassNames(
-  ...values: Array<string | undefined | null | false>
-): string | undefined {
-  const className = values.filter(Boolean).join(" ");
-  return className || undefined;
 }
 
 function LocationResultRow({
@@ -476,11 +468,8 @@ export function LocationInput({ config }: { config: LocationInputConfig }) {
         data-snapshot-component="location-input"
         data-snapshot-id={rootId}
         data-testid="location-input"
-        className={joinClassNames(config.className, rootSurface.className)}
-        style={{
-          ...(rootSurface.style ?? {}),
-          ...((config.style as CSSProperties | undefined) ?? {}),
-        }}
+        className={rootSurface.className}
+        style={rootSurface.style}
       >
         {resolvedLabel ? (
           <label

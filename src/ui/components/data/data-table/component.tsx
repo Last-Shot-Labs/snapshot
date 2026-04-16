@@ -756,10 +756,23 @@ export function DataTable({ config }: { config: DataTableConfig }) {
     surfaceId: `${rootId}-header-row`,
     componentSurface: config.slots?.headerRow,
   });
-  const headerCellBaseSurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-header-cell`,
-    componentSurface: config.slots?.headerCell,
-  });
+  const headerCellScopedCss: string[] = [];
+  const resolveHeaderCellSurface = (
+    surfaceId: string,
+    style: Record<string, string | number | undefined>,
+  ) => {
+    const surface = resolveSurfacePresentation({
+      surfaceId,
+      implementationBase: {
+        style,
+      },
+      componentSurface: config.slots?.headerCell,
+    });
+    if (surface.scopedCss) {
+      headerCellScopedCss.push(surface.scopedCss);
+    }
+    return surface;
+  };
 
   // Bulk actions toolbar
   const showBulkActions =
@@ -1215,39 +1228,60 @@ export function DataTable({ config }: { config: DataTableConfig }) {
               )}
               {/* Select all checkbox */}
               {config.selectable && (
-                <th
-                  data-snapshot-id={`${rootId}-header-cell-select`}
-                  className={headerCellBaseSurface.className}
-                  style={{ padding: cellPadding, width: "40px", ...headerCellBaseSurface.style }}
-                >
-                  <InputControl
-                    type="checkbox"
-                    checked={
-                      renderedRows.length > 0 &&
-                      renderedRows.every((row, i) => {
-                        const id = (row as Record<string, unknown>)["id"];
-                        const rowId =
-                          typeof id === "string" || typeof id === "number"
-                            ? id
-                            : i;
-                        return table.selection.has(rowId);
-                      })
-                    }
-                    onChangeChecked={() => table.toggleAll()}
-                    ariaLabel="Select all rows"
-                    surfaceId={`${rootId}-header-select-all`}
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      accentColor: "var(--sn-color-primary, #2563eb)",
-                    }}
-                  />
-                </th>
+                (() => {
+                  const selectHeaderCellSurface = resolveHeaderCellSurface(
+                    `${rootId}-header-cell-select`,
+                    {
+                      padding: cellPadding,
+                      width: "40px",
+                    },
+                  );
+
+                  return (
+                    <th
+                      data-snapshot-id={`${rootId}-header-cell-select`}
+                      className={selectHeaderCellSurface.className}
+                      style={selectHeaderCellSurface.style}
+                    >
+                      <InputControl
+                        type="checkbox"
+                        checked={
+                          renderedRows.length > 0 &&
+                          renderedRows.every((row, i) => {
+                            const id = (row as Record<string, unknown>)["id"];
+                            const rowId =
+                              typeof id === "string" || typeof id === "number"
+                                ? id
+                                : i;
+                            return table.selection.has(rowId);
+                          })
+                        }
+                        onChangeChecked={() => table.toggleAll()}
+                        ariaLabel="Select all rows"
+                        surfaceId={`${rootId}-header-select-all`}
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          accentColor: "var(--sn-color-primary, #2563eb)",
+                        }}
+                      />
+                    </th>
+                  );
+                })()
               )}
 
               {/* Column headers */}
               {table.columns.map((col) => {
                 const isSorted = table.sort?.column === col.field;
+                const headerCellSurface = resolveHeaderCellSurface(
+                  `${rootId}-header-cell-${col.field}`,
+                  {
+                    padding: cellPadding,
+                    textAlign: col.align ?? "left",
+                    width: col.width,
+                    userSelect: "none",
+                  },
+                );
                 const headerButtonSurface = col.sortable
                   ? resolveSurfacePresentation({
                       surfaceId: `${rootId}-header-button-${col.field}`,
@@ -1289,14 +1323,8 @@ export function DataTable({ config }: { config: DataTableConfig }) {
                   <th
                     key={col.field}
                     data-snapshot-id={`${rootId}-header-cell-${col.field}`}
-                    className={headerCellBaseSurface.className}
-                    style={{
-                      padding: cellPadding,
-                      textAlign: col.align ?? "left",
-                      width: col.width,
-                      userSelect: "none",
-                      ...headerCellBaseSurface.style,
-                    }}
+                    className={headerCellSurface.className}
+                    style={headerCellSurface.style}
                     aria-sort={
                       table.sort?.column === col.field
                         ? table.sort.direction === "asc"
@@ -1334,13 +1362,25 @@ export function DataTable({ config }: { config: DataTableConfig }) {
 
               {/* Actions column header */}
               {hasActions && (
-                <th
-                  data-snapshot-id={`${rootId}-header-cell-actions`}
-                  className={headerCellBaseSurface.className}
-                  style={{ padding: cellPadding, textAlign: "right", ...headerCellBaseSurface.style }}
-                >
-                  Actions
-                </th>
+                (() => {
+                  const actionsHeaderCellSurface = resolveHeaderCellSurface(
+                    `${rootId}-header-cell-actions`,
+                    {
+                      padding: cellPadding,
+                      textAlign: "right",
+                    },
+                  );
+
+                  return (
+                    <th
+                      data-snapshot-id={`${rootId}-header-cell-actions`}
+                      className={actionsHeaderCellSurface.className}
+                      style={actionsHeaderCellSurface.style}
+                    >
+                      Actions
+                    </th>
+                  );
+                })()
               )}
             </tr>
           </thead>
@@ -1522,7 +1562,7 @@ export function DataTable({ config }: { config: DataTableConfig }) {
       <SurfaceStyles css={emptySurface.scopedCss} />
       <SurfaceStyles css={paginationSurface.scopedCss} />
       <SurfaceStyles css={headerRowSurface.scopedCss} />
-      <SurfaceStyles css={headerCellBaseSurface.scopedCss} />
+      <SurfaceStyles css={headerCellScopedCss.join("\n") || undefined} />
     </div>
   );
 }

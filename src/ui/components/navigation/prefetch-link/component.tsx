@@ -4,7 +4,10 @@ import type { CSSProperties } from "react";
 import { useEffect, useRef } from "react";
 import { usePrefetchRoute } from "../../../../ssr/prefetch";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  extractSurfaceConfig,
+  resolveSurfacePresentation,
+} from "../../_base/style-surfaces";
 import type { PrefetchLinkProps } from "./schema";
 
 /**
@@ -23,25 +26,19 @@ import type { PrefetchLinkProps } from "./schema";
  *
  * @param config - Config object validated by `prefetchLinkSchema`.
  */
-export function PrefetchLink({
-  id,
-  to,
-  prefetch = "hover",
-  children,
-  className,
-  style,
-  slots,
-  target,
-  rel,
-}: PrefetchLinkProps) {
+export function PrefetchLink(config: PrefetchLinkProps) {
   const prefetchRoute = usePrefetchRoute();
   const ref = useRef<HTMLAnchorElement>(null);
-  const rootId = id ?? "prefetch-link";
+  const rootId = config.id ?? "prefetch-link";
+  const prefetch = config.prefetch ?? "hover";
 
   // Viewport prefetch via IntersectionObserver.
   // Only active when prefetch === 'viewport'.
   useEffect(() => {
-    if ((prefetch !== "viewport" && prefetch !== "visible") || !ref.current) {
+    if (
+      (prefetch !== "viewport" && prefetch !== "visible") ||
+      !ref.current
+    ) {
       return;
     }
 
@@ -51,7 +48,7 @@ export function PrefetchLink({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
-          prefetchRoute(to);
+          prefetchRoute(config.to);
           observer.disconnect();
         }
       },
@@ -60,18 +57,18 @@ export function PrefetchLink({
 
     observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [to, prefetch, prefetchRoute]);
+  }, [prefetch, config.to, prefetchRoute]);
 
   useEffect(() => {
     if (prefetch !== "eager") {
       return;
     }
 
-    prefetchRoute(to);
-  }, [prefetch, prefetchRoute, to]);
+    prefetchRoute(config.to);
+  }, [prefetch, config.to, prefetchRoute]);
 
   const handlePrefetch =
-    prefetch === "hover" ? () => prefetchRoute(to) : undefined;
+    prefetch === "hover" ? () => prefetchRoute(config.to) : undefined;
   const rootSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-root`,
     implementationBase: {
@@ -87,27 +84,24 @@ export function PrefetchLink({
         textDecoration: "none",
       },
     },
-    componentSurface: {
-      className,
-      style,
-    },
-    itemSurface: slots?.root,
+    componentSurface: extractSurfaceConfig(config),
+    itemSurface: config.slots?.root,
   });
 
   return (
     <>
       <a
         ref={ref}
-        href={to}
+        href={config.to}
         onPointerEnter={handlePrefetch}
         onFocus={handlePrefetch}
         data-snapshot-id={`${rootId}-root`}
         className={rootSurface.className}
         style={rootSurface.style as CSSProperties | undefined}
-        target={target}
-        rel={rel}
+        target={config.target}
+        rel={config.rel}
       >
-        {children}
+        {config.children}
       </a>
       <SurfaceStyles css={rootSurface.scopedCss} />
     </>

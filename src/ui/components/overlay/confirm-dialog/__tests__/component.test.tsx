@@ -23,6 +23,8 @@ describe("ConfirmDialogComponent", () => {
         config={{
           type: "confirm-dialog",
           id: "delete-confirmation",
+          className: "confirm-root-class",
+          style: { opacity: 0.85 },
           title: "Delete item",
           description: "This action cannot be undone.",
           confirmLabel: "Delete",
@@ -34,6 +36,8 @@ describe("ConfirmDialogComponent", () => {
 
     expect(screen.getByTestId("confirm-dialog-modal")).toBeDefined();
     expect(modalCapture.config?.type).toBe("modal");
+    expect(modalCapture.config?.className).toContain("confirm-root-class");
+    expect((modalCapture.config?.style as { opacity?: number } | undefined)?.opacity).toBe(0.85);
     const content = modalCapture.config?.content as Array<{ value: string }> | undefined;
     const footer = modalCapture.config?.footer as
       | { actions: Array<{ label: string }> }

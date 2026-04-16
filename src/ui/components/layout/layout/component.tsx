@@ -4,7 +4,10 @@ import type { CSSProperties, ReactNode } from "react";
 import type { LayoutProps, LayoutSlots } from "./types";
 import { resolveLayout } from "../../../layouts/registry";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  extractSurfaceConfig,
+  resolveSurfacePresentation,
+} from "../../_base/style-surfaces";
 
 const SIDEBAR_LAYOUT_MOBILE_CSS = `
   @media (max-width: 768px) {
@@ -33,17 +36,13 @@ function readSlot(
 
 function resolveLayoutRootSurface(params: {
   surfaceId: string;
-  className?: string;
-  style?: CSSProperties;
+  surfaceConfig?: Record<string, unknown>;
   implementationBase: Record<string, unknown>;
 }) {
   return resolveSurfacePresentation({
     surfaceId: params.surfaceId,
     implementationBase: params.implementationBase,
-    componentSurface: {
-      className: params.className,
-      style: params.style,
-    },
+    componentSurface: extractSurfaceConfig(params.surfaceConfig),
   });
 }
 
@@ -57,14 +56,12 @@ function SidebarLayout({
   slots,
   nav,
   children,
-  style,
-  className,
+  surfaceConfig,
 }: {
   slots?: LayoutSlots;
   nav?: ReactNode;
   children: ReactNode;
-  style?: CSSProperties;
-  className?: string;
+  surfaceConfig?: Record<string, unknown>;
 }) {
   const header = readSlot(slots, "header");
   const sidebar = readSlot(slots, "sidebar", nav);
@@ -72,8 +69,7 @@ function SidebarLayout({
   const footer = readSlot(slots, "footer");
   const rootSurface = resolveLayoutRootSurface({
     surfaceId: "layout-sidebar",
-    className,
-    style,
+    surfaceConfig,
     implementationBase: {
       display: "flex",
       minHeight: "100vh",
@@ -166,14 +162,12 @@ function TopNavLayout({
   slots,
   nav,
   children,
-  style,
-  className,
+  surfaceConfig,
 }: {
   slots?: LayoutSlots;
   nav?: ReactNode;
   children: ReactNode;
-  style?: CSSProperties;
-  className?: string;
+  surfaceConfig?: Record<string, unknown>;
 }) {
   const header = readSlot(slots, "header", nav);
   const sidebar = readSlot(slots, "sidebar");
@@ -181,8 +175,7 @@ function TopNavLayout({
   const footer = readSlot(slots, "footer");
   const rootSurface = resolveLayoutRootSurface({
     surfaceId: "layout-top-nav",
-    className,
-    style,
+    surfaceConfig,
     implementationBase: {
       display: "flex",
       flexDirection: "column",
@@ -271,13 +264,11 @@ function TopNavLayout({
 function StackedLayout({
   slots,
   children,
-  style,
-  className,
+  surfaceConfig,
 }: {
   slots?: LayoutSlots;
   children: ReactNode;
-  style?: CSSProperties;
-  className?: string;
+  surfaceConfig?: Record<string, unknown>;
 }) {
   const header = readSlot(slots, "header");
   const sidebar = readSlot(slots, "sidebar");
@@ -285,8 +276,7 @@ function StackedLayout({
   const footer = readSlot(slots, "footer");
   const rootSurface = resolveLayoutRootSurface({
     surfaceId: "layout-stacked",
-    className,
-    style,
+    surfaceConfig,
     implementationBase: {
       display: "flex",
       flexDirection: "column",
@@ -353,19 +343,16 @@ function StackedLayout({
 function MinimalLayout({
   slots,
   children,
-  style,
-  className,
+  surfaceConfig,
 }: {
   slots?: LayoutSlots;
   children: ReactNode;
-  style?: CSSProperties;
-  className?: string;
+  surfaceConfig?: Record<string, unknown>;
 }) {
   const main = readSlot(slots, "main", children);
   const rootSurface = resolveLayoutRootSurface({
     surfaceId: "layout-minimal",
-    className,
-    style,
+    surfaceConfig,
     implementationBase: {
       display: "flex",
       alignItems: "center",
@@ -410,17 +397,14 @@ function MinimalLayout({
  */
 function FullWidthLayout({
   children,
-  style,
-  className,
+  surfaceConfig,
 }: {
   children: ReactNode;
-  style?: CSSProperties;
-  className?: string;
+  surfaceConfig?: Record<string, unknown>;
 }) {
   const rootSurface = resolveLayoutRootSurface({
     surfaceId: "layout-full-width",
-    className,
-    style,
+    surfaceConfig,
     implementationBase: {
       minHeight: "100vh",
       style: {
@@ -462,8 +446,6 @@ function FullWidthLayout({
  * @param props - Layout configuration, optional nav element, and children
  */
 export function Layout({ config, nav, slots, children }: LayoutProps) {
-  const rootStyle = (config.style as CSSProperties) ?? undefined;
-  const cn = config.className;
   const registeredLayout = resolveLayout(config.variant);
   if (registeredLayout) {
     const RegisteredLayout = registeredLayout.component;
@@ -501,8 +483,7 @@ export function Layout({ config, nav, slots, children }: LayoutProps) {
         <SidebarLayout
           nav={nav}
           slots={slots}
-          style={rootStyle}
-          className={cn}
+          surfaceConfig={config}
         >
           {children}
         </SidebarLayout>
@@ -512,33 +493,32 @@ export function Layout({ config, nav, slots, children }: LayoutProps) {
         <TopNavLayout
           nav={nav}
           slots={slots}
-          style={rootStyle}
-          className={cn}
+          surfaceConfig={config}
         >
           {children}
         </TopNavLayout>
       );
     case "stacked":
       return (
-        <StackedLayout slots={slots} style={rootStyle} className={cn}>
+        <StackedLayout slots={slots} surfaceConfig={config}>
           {children}
         </StackedLayout>
       );
     case "minimal":
       return (
-        <MinimalLayout slots={slots} style={rootStyle} className={cn}>
+        <MinimalLayout slots={slots} surfaceConfig={config}>
           {children}
         </MinimalLayout>
       );
     case "full-width":
       return (
-        <FullWidthLayout style={rootStyle} className={cn}>
+        <FullWidthLayout surfaceConfig={config}>
           {children}
         </FullWidthLayout>
       );
     case "centered":
       return (
-        <MinimalLayout slots={slots} style={rootStyle} className={cn}>
+        <MinimalLayout slots={slots} surfaceConfig={config}>
           {children}
         </MinimalLayout>
       );
@@ -547,8 +527,7 @@ export function Layout({ config, nav, slots, children }: LayoutProps) {
         <SidebarLayout
           nav={nav}
           slots={slots}
-          style={rootStyle}
-          className={cn}
+          surfaceConfig={config}
         >
           {children}
         </SidebarLayout>

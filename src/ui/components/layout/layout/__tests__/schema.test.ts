@@ -35,6 +35,25 @@ describe("layoutConfigSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts shared root styling fields", () => {
+    const result = layoutConfigSchema.safeParse({
+      type: "layout",
+      variant: "sidebar",
+      className: "layout-root-class",
+      style: { opacity: 0.8 },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts explicit layout slot declarations", () => {
+    const result = layoutConfigSchema.safeParse({
+      type: "layout",
+      variant: "sidebar",
+      slots: [{ name: "rail", required: true }],
+    });
+    expect(result.success).toBe(true);
+  });
+
   it("rejects an empty variant", () => {
     const result = layoutConfigSchema.safeParse({
       type: "layout",
