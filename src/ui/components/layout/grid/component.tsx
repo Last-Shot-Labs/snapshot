@@ -18,6 +18,76 @@ const GAP_MAP: Record<string, string> = {
   "2xl": "var(--sn-spacing-2xl, 2.5rem)",
 };
 
+function GridItem({
+  child,
+  index,
+  rootId,
+  itemSurface,
+  stagger,
+}: {
+  child: GridConfig["children"][number];
+  index: number;
+  rootId: string;
+  itemSurface: ReturnType<typeof resolveSurfacePresentation>;
+  stagger?: number;
+}) {
+  const childArea =
+    typeof child === "object" && child && "area" in child
+      ? String((child as Record<string, unknown>).area ?? "")
+      : "";
+  const rawChildSpan =
+    typeof child === "object" && child && "span" in child
+      ? ((child as Record<string, unknown>).span as
+          | number
+          | {
+              default?: number;
+              sm?: number;
+              md?: number;
+              lg?: number;
+              xl?: number;
+              "2xl"?: number;
+            }
+          | undefined)
+      : undefined;
+  const normalizedChildSpan =
+    typeof rawChildSpan === "number"
+      ? rawChildSpan
+      : rawChildSpan && typeof rawChildSpan === "object"
+        ? {
+            default: rawChildSpan.default,
+            sm: rawChildSpan.sm,
+            md: rawChildSpan.md,
+            lg: rawChildSpan.lg,
+            xl: rawChildSpan.xl,
+            "2xl": rawChildSpan["2xl"],
+          }
+        : undefined;
+  const childSpan = useResponsiveValue(
+    normalizedChildSpan,
+  );
+
+  return (
+    <div
+      data-snapshot-id={`${rootId}-item`}
+      className={itemSurface.className}
+      style={{
+        ...(itemSurface.style ?? {}),
+        ...(childArea ? { gridArea: childArea } : null),
+        ...(typeof childSpan === "number"
+          ? { gridColumn: `span ${childSpan}` }
+          : null),
+        ...(typeof stagger === "number"
+          ? ({
+              ["--sn-stagger-index" as "--sn-stagger-index"]: index,
+            } as CSSProperties)
+          : null),
+      }}
+    >
+      <ComponentRenderer config={child} />
+    </div>
+  );
+}
+
 export function Grid({ config }: { config: GridConfig }) {
   const areas = useResponsiveValue(config.areas);
   const columns = useResponsiveValue(config.columns);
@@ -57,32 +127,19 @@ export function Grid({ config }: { config: GridConfig }) {
         ...(rootSurface.style ?? {}),
         ...(config.style ?? {}),
       }}
-    >
-      {config.children.map((child, index) => {
-        const childArea =
-          typeof child === "object" && child && "area" in child
-            ? String((child as Record<string, unknown>).area ?? "")
-            : "";
-
-        return (
-          <div
-            key={child.id ?? `grid-child-${index}`}
-            data-snapshot-id={`${rootId}-item`}
-            className={itemSurface.className}
-            style={{
-              ...(itemSurface.style ?? {}),
-              ...(childArea ? { gridArea: childArea } : null),
-              ...(typeof config.animation?.stagger === "number"
-                ? ({
-                    ["--sn-stagger-index" as "--sn-stagger-index"]: index,
-                  } as CSSProperties)
-                : null),
-            }}
-          >
-            <ComponentRenderer config={child} />
-          </div>
-        );
-      })}
+      >
+        {config.children.map((child, index) => {
+          return (
+            <GridItem
+              key={child.id ?? `grid-child-${index}`}
+              child={child}
+              index={index}
+              rootId={rootId}
+              itemSurface={itemSurface}
+              stagger={config.animation?.stagger}
+            />
+          );
+        })}
       <SurfaceStyles css={rootSurface.scopedCss} />
       <SurfaceStyles css={itemSurface.scopedCss} />
     </div>
