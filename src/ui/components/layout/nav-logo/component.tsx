@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { useActionExecutor } from "../../../actions/executor";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { NavLogoConfig } from "./types";
 
 export function NavLogo({
@@ -52,7 +52,7 @@ export function NavLogo({
       textDecoration: "none",
       flexShrink: 0,
     },
-    componentSurface: config,
+    componentSurface: extractSurfaceConfig(config),
     itemSurface: config.slots?.root,
   });
   const iconSurface = resolveSurfacePresentation({

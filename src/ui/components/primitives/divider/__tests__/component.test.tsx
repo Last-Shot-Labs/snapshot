@@ -23,9 +23,13 @@ describe("Divider", () => {
       <Divider
         config={{
           type: "divider",
+          className: "component-root",
           label: "Section",
           orientation: "horizontal",
           slots: {
+            root: {
+              className: "divider-root-slot",
+            },
             label: {
               className: "divider-label-slot",
             },
@@ -36,5 +40,7 @@ describe("Divider", () => {
 
     const label = screen.getByText("Section");
     expect(label.className).toContain("divider-label-slot");
+    expect(screen.getByRole("separator").className).toContain("component-root");
+    expect(screen.getByRole("separator").className).toContain("divider-root-slot");
   });
 });

@@ -14,12 +14,18 @@ describe("TypingIndicator", () => {
       <TypingIndicator
         config={{
           type: "typing-indicator",
+          className: "component-root",
           users: [{ name: "Ada" }, { name: "Lin" }],
+          slots: {
+            root: { className: "slot-root" },
+          },
         }}
       />,
     );
 
-    expect(screen.getByTestId("typing-indicator")).toBeTruthy();
+    const indicator = screen.getByTestId("typing-indicator");
+    expect(indicator.className).toContain("component-root");
+    expect(indicator.className).toContain("slot-root");
     expect(screen.getByTestId("typing-text").textContent).toContain(
       "Ada and Lin are typing",
     );

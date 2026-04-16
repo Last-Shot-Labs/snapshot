@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 import { useMemo, useEffect } from "react";
 import { useSubscribe, usePublish } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { HighlightedTextConfig } from "./types";
 
 /** A segment of text, either a match or a plain string. */
@@ -113,7 +113,7 @@ export function HighlightedText({ config }: { config: HighlightedTextConfig }) {
         fontFamily: "var(--sn-font-sans, system-ui, sans-serif)",
       },
     },
-    componentSurface: config,
+    componentSurface: extractSurfaceConfig(config),
     itemSurface: config.slots?.root,
   });
   const markSurface = resolveSurfacePresentation({

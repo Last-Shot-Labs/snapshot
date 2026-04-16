@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import { useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { TypingIndicatorConfig } from "./types";
 
 /** CSS keyframes for bouncing dot animation. */
@@ -65,7 +65,7 @@ export function TypingIndicator({ config }: { config: TypingIndicatorConfig }) {
           "opacity var(--sn-duration-normal, 250ms) var(--sn-ease-default, ease)",
       },
     },
-    componentSurface: config,
+    componentSurface: extractSurfaceConfig(config),
     itemSurface: config.slots?.root,
   });
   const dotsSurface = resolveSurfacePresentation({

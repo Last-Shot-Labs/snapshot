@@ -20,6 +20,7 @@ describe("Stack", () => {
         config={{
           type: "stack",
           id: "stack-test",
+          className: "component-root",
           gap: "md",
           align: "stretch",
           justify: "start",
@@ -33,6 +34,7 @@ describe("Stack", () => {
     );
 
     const root = document.querySelector('[data-snapshot-component="stack"]');
+    expect(root?.className).toContain("component-root");
     expect(root?.className).toContain("stack-root-slot");
     const item = document.querySelector('[data-snapshot-id="stack-test-item-0"]');
     expect(item?.className).toContain("stack-item-slot");

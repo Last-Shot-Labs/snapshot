@@ -4,7 +4,7 @@ import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { resolveOptionalPrimitiveValue } from "../resolve-value";
 import type { DividerConfig } from "./types";
 
@@ -43,7 +43,7 @@ export function Divider({ config }: { config: DividerConfig }) {
           background: "var(--sn-color-border)",
         },
       },
-      componentSurface: config,
+      componentSurface: extractSurfaceConfig(config),
       itemSurface: config.slots?.root,
     });
 
@@ -69,7 +69,7 @@ export function Divider({ config }: { config: DividerConfig }) {
         border: "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
         style: { borderLeft: "none", borderRight: "none", borderBottom: "none" },
       },
-      componentSurface: config,
+      componentSurface: extractSurfaceConfig(config),
       itemSurface: config.slots?.root,
     });
 
@@ -94,7 +94,7 @@ export function Divider({ config }: { config: DividerConfig }) {
       alignItems: "center",
       gap: "md",
     },
-    componentSurface: config,
+    componentSurface: extractSurfaceConfig(config),
     itemSurface: config.slots?.root,
   });
   const startLineSurface = resolveSurfacePresentation({

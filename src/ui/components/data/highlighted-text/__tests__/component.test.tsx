@@ -15,13 +15,20 @@ describe("HighlightedText", () => {
       <HighlightedText
         config={{
           type: "highlighted-text",
+          className: "component-root",
           text: "The quick brown fox",
           highlight: "fox",
+          slots: {
+            root: { className: "slot-root" },
+          },
         }}
       />,
     );
 
-    expect(screen.getByTestId("highlighted-text").textContent).toContain("The quick brown fox");
+    const text = screen.getByTestId("highlighted-text");
+    expect(text.className).toContain("component-root");
+    expect(text.className).toContain("slot-root");
+    expect(text.textContent).toContain("The quick brown fox");
     expect(screen.getByTestId("highlight-mark").textContent).toBe("fox");
   });
 });

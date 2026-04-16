@@ -18,9 +18,24 @@ describe("NavLogo", () => {
   it("dispatches navigation when clicked", () => {
     executeSpy.mockReset();
 
-    render(<NavLogo config={{ type: "nav-logo", text: "Snapshot", path: "/home" }} />);
+    render(
+      <NavLogo
+        config={{
+          type: "nav-logo",
+          text: "Snapshot",
+          path: "/home",
+          className: "component-root",
+          slots: {
+            root: { className: "slot-root" },
+          },
+        }}
+      />,
+    );
 
-    fireEvent.click(screen.getByRole("link"));
+    const logo = screen.getByRole("link");
+    expect(logo.className).toContain("component-root");
+    expect(logo.className).toContain("slot-root");
+    fireEvent.click(logo);
 
     expect(executeSpy).toHaveBeenCalledWith({ type: "navigate", to: "/home" });
   });

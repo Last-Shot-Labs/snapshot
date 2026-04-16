@@ -30,6 +30,9 @@ describe("Heading", () => {
           level: 1,
           className: "hero-title",
           style: { opacity: 0.7 },
+          slots: {
+            root: { className: "heading-slot" },
+          },
         }}
       />,
     );
@@ -37,6 +40,7 @@ describe("Heading", () => {
     const heading = container.querySelector("h1");
     expect(heading?.textContent).toBe("Snapshot");
     expect(heading?.classList.contains("hero-title")).toBe(true);
+    expect(heading?.classList.contains("heading-slot")).toBe(true);
     expect((heading as HTMLElement | null)?.style.opacity).toBe("0.7");
   });
 });

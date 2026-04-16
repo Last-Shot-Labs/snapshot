@@ -14,13 +14,19 @@ describe("PresenceIndicator", () => {
       <PresenceIndicator
         config={{
           type: "presence-indicator",
+          className: "component-root",
           status: "online",
           label: "Ada",
+          slots: {
+            root: { className: "slot-root" },
+          },
         }}
       />,
     );
 
-    expect(screen.getByTestId("presence-indicator")).toBeTruthy();
+    const indicator = screen.getByTestId("presence-indicator");
+    expect(indicator.className).toContain("component-root");
+    expect(indicator.className).toContain("slot-root");
     expect(screen.getByTestId("presence-label").textContent).toBe("Ada");
     expect(screen.getByTestId("presence-dot")).toBeTruthy();
   });

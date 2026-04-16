@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import { useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { PresenceIndicatorConfig } from "./types";
 
 /** Status → dot color mapping. */
@@ -69,7 +69,7 @@ export function PresenceIndicator({
       alignItems: "center",
       gap: "var(--sn-spacing-xs, 0.25rem)",
     },
-    componentSurface: config,
+    componentSurface: extractSurfaceConfig(config),
     itemSurface: config.slots?.root,
   });
   const dotSurface = resolveSurfacePresentation({

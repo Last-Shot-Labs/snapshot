@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { FloatingPanel } from "../../primitives/floating-menu";
 import type { HoverCardConfig } from "./types";
 
@@ -23,7 +23,7 @@ export function HoverCard({ config }: { config: HoverCardConfig }) {
       position: "relative",
       display: "inline-block",
     },
-    componentSurface: config,
+    componentSurface: extractSurfaceConfig(config, { omit: ["width"] }),
     itemSurface: config.slots?.root,
   });
   const contentSurface = resolveSurfacePresentation({

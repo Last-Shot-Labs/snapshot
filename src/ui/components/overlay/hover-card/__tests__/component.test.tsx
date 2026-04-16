@@ -44,13 +44,19 @@ describe("HoverCard", () => {
       <HoverCard
         config={{
           type: "hover-card",
+          className: "component-root",
           trigger: { type: "markdown", id: "hover-trigger", content: "Open" } as never,
           content: [{ type: "markdown", id: "hover-body", content: "Body" } as never],
+          slots: {
+            root: { className: "slot-root" },
+          },
         }}
       />,
     );
 
     const root = container.querySelector('[data-snapshot-id="hover-card-root"]');
+    expect((root as HTMLElement | null)?.className).toContain("component-root");
+    expect((root as HTMLElement | null)?.className).toContain("slot-root");
     expect((root as HTMLElement | null)?.style.position).toBe("relative");
   });
 });

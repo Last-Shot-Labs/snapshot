@@ -2,7 +2,7 @@
 
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import type { StackConfig } from "./types";
 
 const GAP_MAP: Record<string, string> = {
@@ -81,7 +81,7 @@ export function Stack({ config }: { config: StackConfig }) {
         marginInline: config.maxWidth ? "auto" : undefined,
       },
     },
-    componentSurface: config,
+    componentSurface: extractSurfaceConfig(config, { omit: ["maxWidth", "padding"] }),
     itemSurface: config.slots?.root,
   });
   const itemSurface = resolveSurfacePresentation({

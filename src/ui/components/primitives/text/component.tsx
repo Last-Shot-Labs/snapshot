@@ -6,7 +6,7 @@ import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { useRouteRuntime } from "../../../manifest/runtime";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { resolvePrimitiveValue } from "../resolve-value";
 import type { TextConfig } from "./types";
 
@@ -65,7 +65,7 @@ export function Text({ config }: { config: TextConfig }) {
       textAlign: config.align ?? "left",
       style: { margin: 0 },
     },
-    componentSurface: config,
+    componentSurface: extractSurfaceConfig(config),
     itemSurface: config.slots?.root,
   });
 

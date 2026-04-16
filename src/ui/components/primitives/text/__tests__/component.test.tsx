@@ -23,6 +23,7 @@ describe("Text", () => {
       <Text
         config={{
           type: "text",
+          className: "component-root",
           value: "Hello world",
           variant: "default",
           size: "md",
@@ -39,6 +40,7 @@ describe("Text", () => {
     );
 
     const element = screen.getByText("Hello world");
+    expect(element.className).toContain("component-root");
     expect(element.className).toContain("text-slot");
     expect(element.getAttribute("style")).toContain(
       "color: var(--sn-color-primary)",
