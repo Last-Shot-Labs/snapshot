@@ -54,6 +54,10 @@ function createWrapper(options?: { api?: ApiClient }) {
               retry: 2,
               retryDelayMs: 10,
             },
+            cursorUsers: {
+              method: "GET",
+              endpoint: "/api/cursor-users?pageSize=2",
+            },
             mountUsers: {
               method: "GET",
               endpoint: "/api/mount-users",
@@ -155,6 +159,117 @@ describe("ManifestRuntimeProvider", () => {
     expect(result.current?.getData({ resource: "flakyUsers" })).toEqual([
       { id: 1 },
     ]);
+    unmount();
+  });
+
+  it("drains cursor-paginated list resources into a single cached dataset", async () => {
+    const get = vi
+      .fn()
+      .mockImplementation(async (endpoint: string) => {
+        if (endpoint === "/api/cursor-users?pageSize=2") {
+          return {
+            items: [{ id: 1 }, { id: 2 }],
+            hasMore: true,
+            nextCursor: "page-2",
+          };
+        }
+        if (endpoint === "/api/cursor-users?pageSize=2&cursor=page-2") {
+          return {
+            items: [{ id: 3 }, { id: 4 }],
+            hasMore: true,
+            nextCursor: "page-3",
+          };
+        }
+        if (endpoint === "/api/cursor-users?pageSize=2&cursor=page-3") {
+          return {
+            items: [{ id: 5 }],
+            hasMore: false,
+          };
+        }
+        throw new Error(`Unexpected endpoint ${endpoint}`);
+      });
+    const api = {
+      get,
+      post: vi.fn(),
+      put: vi.fn(),
+      patch: vi.fn(),
+      delete: vi.fn(),
+    } as unknown as ApiClient;
+    const { result, unmount } = renderHook(() => useManifestResourceCache(), {
+      wrapper: createWrapper({ api }),
+    });
+
+    let data: unknown;
+    await act(async () => {
+      data = await result.current?.loadTarget({ resource: "cursorUsers" });
+    });
+
+    expect(get).toHaveBeenCalledTimes(3);
+    expect(get).toHaveBeenNthCalledWith(1, "/api/cursor-users?pageSize=2");
+    expect(get).toHaveBeenNthCalledWith(
+      2,
+      "/api/cursor-users?pageSize=2&cursor=page-2",
+    );
+    expect(get).toHaveBeenNthCalledWith(
+      3,
+      "/api/cursor-users?pageSize=2&cursor=page-3",
+    );
+    expect(data).toEqual({
+      items: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
+      hasMore: false,
+    });
+    expect(result.current?.getData({ resource: "cursorUsers" })).toEqual({
+      items: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
+      hasMore: false,
+    });
+    unmount();
+  });
+
+  it("stops merging when a cursor endpoint replays the same page", async () => {
+    const get = vi
+      .fn()
+      .mockImplementation(async (endpoint: string) => {
+        if (endpoint === "/api/cursor-users?pageSize=2") {
+          return {
+            items: [{ id: 1 }, { id: 2 }],
+            hasMore: true,
+            nextCursor: "stuck-page",
+          };
+        }
+        if (endpoint === "/api/cursor-users?pageSize=2&cursor=stuck-page") {
+          return {
+            items: [{ id: 1 }, { id: 2 }],
+            hasMore: true,
+            nextCursor: "stuck-page",
+          };
+        }
+        throw new Error(`Unexpected endpoint ${endpoint}`);
+      });
+    const api = {
+      get,
+      post: vi.fn(),
+      put: vi.fn(),
+      patch: vi.fn(),
+      delete: vi.fn(),
+    } as unknown as ApiClient;
+    const { result, unmount } = renderHook(() => useManifestResourceCache(), {
+      wrapper: createWrapper({ api }),
+    });
+
+    let data: unknown;
+    await act(async () => {
+      data = await result.current?.loadTarget({ resource: "cursorUsers" });
+    });
+
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(data).toEqual({
+      items: [{ id: 1 }, { id: 2 }],
+      hasMore: false,
+    });
+    expect(result.current?.getData({ resource: "cursorUsers" })).toEqual({
+      items: [{ id: 1 }, { id: 2 }],
+      hasMore: false,
+    });
     unmount();
   });
 

@@ -153,6 +153,63 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function isCursorPaginatedListResponse(
+  value: unknown,
+): value is {
+  items: unknown[];
+  nextCursor?: string;
+  hasMore?: boolean;
+} {
+  if (!isRecord(value) || !Array.isArray(value.items)) {
+    return false;
+  }
+
+  if (
+    value.nextCursor != null &&
+    typeof value.nextCursor !== "string"
+  ) {
+    return false;
+  }
+
+  if (value.hasMore != null && typeof value.hasMore !== "boolean") {
+    return false;
+  }
+
+  return typeof value.nextCursor === "string" || typeof value.hasMore === "boolean";
+}
+
+function appendCursorParam(url: string, cursor: string): string {
+  const parsed = new URL(url, "http://snapshot.local");
+  parsed.searchParams.set("cursor", cursor);
+  return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+}
+
+function getStableListItemKey(item: unknown): string | null {
+  if (!isRecord(item)) {
+    return null;
+  }
+
+  const id = item.id;
+  if (typeof id === "string" || typeof id === "number") {
+    return `id:${String(id)}`;
+  }
+
+  const externalId = item.externalId;
+  if (typeof externalId === "string" || typeof externalId === "number") {
+    return `externalId:${String(externalId)}`;
+  }
+
+  return null;
+}
+
+function getPageReplaySignature(items: unknown[]): string | null {
+  const keys = items.map(getStableListItemKey);
+  if (keys.some((key) => key == null)) {
+    return null;
+  }
+  return keys.join("|");
+}
+
 function devWarn(message: string): void {
   if (typeof process !== "undefined" && process.env.NODE_ENV === "production") {
     return;
@@ -426,37 +483,130 @@ export function ManifestRuntimeProvider({
         let data: unknown;
         let lastError: unknown;
 
+        const requestData = async (url: string): Promise<unknown> => {
+          const reqOptions = options?.signal
+            ? { signal: options.signal }
+            : undefined;
+          switch (request.method) {
+            case "POST":
+              return reqOptions
+                ? await selectedClient.post(url, undefined, reqOptions)
+                : await selectedClient.post(url, undefined);
+            case "PUT":
+              return reqOptions
+                ? await selectedClient.put(url, undefined, reqOptions)
+                : await selectedClient.put(url, undefined);
+            case "PATCH":
+              return reqOptions
+                ? await selectedClient.patch(url, undefined, reqOptions)
+                : await selectedClient.patch(url, undefined);
+            case "DELETE":
+              return reqOptions
+                ? await selectedClient.delete(url, undefined, reqOptions)
+                : await selectedClient.delete(url);
+            default:
+              return reqOptions
+                ? await selectedClient.get(url, reqOptions)
+                : await selectedClient.get(url);
+          }
+        };
+
+        const loadAllCursorPages = async (
+          initialUrl: string,
+          initialData: unknown,
+        ): Promise<unknown> => {
+          if (
+            request.method !== "GET" ||
+            !isCursorPaginatedListResponse(initialData)
+          ) {
+            return initialData;
+          }
+
+          const mergedItems = [...initialData.items];
+          const seenCursors = new Set<string>();
+          const seenItemKeys = new Set<string>();
+          let nextCursor = initialData.nextCursor;
+          let lastPage = initialData;
+          let pageCount = 1;
+          let lastSignature = getPageReplaySignature(initialData.items);
+
+          for (const item of initialData.items) {
+            const key = getStableListItemKey(item);
+            if (key) {
+              seenItemKeys.add(key);
+            }
+          }
+
+          while (nextCursor) {
+            if (seenCursors.has(nextCursor)) {
+              devWarn(
+                `snapshot: repeated cursor "${nextCursor}" detected while draining "${initialUrl}". Stopping pagination merge.`,
+              );
+              break;
+            }
+            if (pageCount >= 100) {
+              devWarn(
+                `snapshot: exceeded cursor pagination safety limit while draining "${initialUrl}". Stopping pagination merge.`,
+              );
+              break;
+            }
+
+            seenCursors.add(nextCursor);
+            const pageData = await requestData(
+              appendCursorParam(initialUrl, nextCursor),
+            );
+            if (!isCursorPaginatedListResponse(pageData)) {
+              break;
+            }
+
+            const pageSignature = getPageReplaySignature(pageData.items);
+            if (pageSignature && pageSignature === lastSignature) {
+              devWarn(
+                `snapshot: repeated page detected while draining "${initialUrl}". Stopping pagination merge.`,
+              );
+              break;
+            }
+
+            let appendedCount = 0;
+            for (const item of pageData.items) {
+              const key = getStableListItemKey(item);
+              if (key) {
+                if (seenItemKeys.has(key)) {
+                  continue;
+                }
+                seenItemKeys.add(key);
+              }
+              mergedItems.push(item);
+              appendedCount += 1;
+            }
+
+            if (appendedCount === 0) {
+              devWarn(
+                `snapshot: cursor page for "${initialUrl}" contained only duplicate rows. Stopping pagination merge.`,
+              );
+              break;
+            }
+
+            lastPage = pageData;
+            lastSignature = pageSignature;
+            nextCursor = pageData.nextCursor;
+            pageCount += 1;
+          }
+
+          const normalized = {
+            ...initialData,
+            ...lastPage,
+            items: mergedItems,
+            hasMore: false,
+          };
+          delete normalized.nextCursor;
+          return normalized;
+        };
+
         for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
           try {
-            const reqOptions = options?.signal
-              ? { signal: options.signal }
-              : undefined;
-            switch (request.method) {
-              case "POST":
-                data = reqOptions
-                  ? await selectedClient.post(url, undefined, reqOptions)
-                  : await selectedClient.post(url, undefined);
-                break;
-              case "PUT":
-                data = reqOptions
-                  ? await selectedClient.put(url, undefined, reqOptions)
-                  : await selectedClient.put(url, undefined);
-                break;
-              case "PATCH":
-                data = reqOptions
-                  ? await selectedClient.patch(url, undefined, reqOptions)
-                  : await selectedClient.patch(url, undefined);
-                break;
-              case "DELETE":
-                data = reqOptions
-                  ? await selectedClient.delete(url, undefined, reqOptions)
-                  : await selectedClient.delete(url);
-                break;
-              default:
-                data = reqOptions
-                  ? await selectedClient.get(url, reqOptions)
-                  : await selectedClient.get(url);
-            }
+            data = await requestData(url);
+            data = await loadAllCursorPages(url, data);
             lastError = undefined;
             break;
           } catch (error) {
