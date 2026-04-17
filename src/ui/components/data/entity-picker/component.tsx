@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import { usePublish, useSubscribe } from "../../../context/hooks";
+import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
 import { AutoErrorState } from "../../_base/auto-error-state";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -11,6 +11,10 @@ import {
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../../forms/button";
 import { InputControl } from "../../forms/input";
 import type { EntityPickerConfig } from "./types";
@@ -256,7 +260,12 @@ function EntityPickerItem({
 
 export function EntityPicker({ config }: { config: EntityPickerConfig }) {
   const visible = useSubscribe(config.visible ?? true);
-  const triggerBaseLabel = useSubscribe(config.label) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ label: config.label });
+  const triggerBaseLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
   const externalDefault = config.multiple ? EMPTY_ARRAY : "";
   const resolvedValue = useSubscribe(config.value ?? externalDefault);
   const executeAction = useActionExecutor();

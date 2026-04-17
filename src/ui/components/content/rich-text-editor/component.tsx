@@ -5,13 +5,17 @@ import { EditorState } from "@codemirror/state";
 import { markdown } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
 import { EditorView, keymap, placeholder as cmPlaceholder } from "@codemirror/view";
-import { usePublish, useSubscribe } from "../../../context/hooks";
+import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/icon";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../../forms/button";
 import { Markdown } from "../markdown/component";
 import { snEditorTheme, snSyntaxHighlight } from "./cm-theme";
@@ -27,7 +31,12 @@ function resolveToolbar(toolbar: RichTextEditorConfig["toolbar"]): ToolbarItem[]
 
 export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
   const resolvedContent = useSubscribe(config.content ?? "") as string;
-  const resolvedPlaceholder = useSubscribe(config.placeholder) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ placeholder: config.placeholder });
+  const resolvedPlaceholder = resolveOptionalPrimitiveValue(
+    resolvedConfig.placeholder,
+    primitiveOptions,
+  );
   const resolvedReadonly = useSubscribe(config.readonly ?? false) as boolean;
   const visible = useSubscribe(config.visible ?? true);
   const publish = usePublish(config.id);

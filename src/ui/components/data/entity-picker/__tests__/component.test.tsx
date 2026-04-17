@@ -15,6 +15,25 @@ vi.mock("../../../../actions/executor", () => ({
   useActionExecutor: () => executeSpy,
 }));
 
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: { routes: [] },
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "users" },
+      currentPath: "/users/team-a",
+      params: { id: "team-a" },
+      query: {},
+    }),
+  };
+});
+
 vi.mock("../../../_base/use-component-data", () => ({
   useComponentData: () => ({
     data: [
@@ -92,5 +111,26 @@ describe("EntityPicker", () => {
     expect(screen.getByText("Assign reviewer")).toBeTruthy();
     fireEvent.click(screen.getByTestId("entity-picker-trigger"));
     expect(screen.getByTestId("entity-picker-dropdown")).toBeTruthy();
+  });
+
+  it("resolves template labels through the shared primitive pipeline", () => {
+    const registry = new AtomRegistryImpl();
+
+    render(
+      <AppRegistryContext.Provider value={null}>
+        <PageRegistryContext.Provider value={registry}>
+          <EntityPicker
+            config={{
+              type: "entity-picker",
+              id: "review-template",
+              data: "/api/users" as never,
+              label: "Assign reviewer for {route.params.id}",
+            }}
+          />
+        </PageRegistryContext.Provider>
+      </AppRegistryContext.Provider>,
+    );
+
+    expect(screen.getByText("Assign reviewer for team-a")).toBeTruthy();
   });
 });

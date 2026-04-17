@@ -13,13 +13,17 @@ import sql from "highlight.js/lib/languages/sql";
 import go from "highlight.js/lib/languages/go";
 import rust from "highlight.js/lib/languages/rust";
 import java from "highlight.js/lib/languages/java";
-import { useSubscribe } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import "./hljs-theme.css";
 import type { CodeBlockConfig } from "./types";
 
@@ -63,7 +67,12 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
 
   const visible = useSubscribe(config.visible ?? true);
   const resolvedCode = useSubscribe(config.code);
-  const resolvedTitle = useSubscribe(config.title) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ title: config.title });
+  const resolvedTitle = resolveOptionalPrimitiveValue(
+    resolvedConfig.title,
+    primitiveOptions,
+  );
   const codeText = typeof resolvedCode === "string" ? resolvedCode : "";
   const rootId = config.id ?? "code-block";
 

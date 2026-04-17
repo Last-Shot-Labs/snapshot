@@ -1,9 +1,14 @@
 'use client';
 
-import { useEffect, useId } from "react";
+import React, { useEffect, useId } from "react";
 import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  extractSurfaceConfig,
+  mergeClassNames,
+  mergeStyles,
+  resolveSurfacePresentation,
+} from "../../_base/style-surfaces";
 import {
   resolveOptionalPrimitiveValue,
   usePrimitiveValueOptions,
@@ -113,38 +118,71 @@ export function Progress({ config }: { config: ProgressConfig }) {
       componentSurface: config.slots?.circularTrack,
       activeStates: [...states],
     });
+    const circularContainerSurface = resolveSurfacePresentation({
+      surfaceId: rootId,
+      implementationBase: {
+        alignItems: "center",
+        display: "inline-flex",
+      },
+      componentSurface: config.slots?.circularContainer,
+      activeStates: [...states],
+    });
+    const circularSvgSurface = resolveSurfacePresentation({
+      surfaceId: `${rootId}-circular-svg`,
+      implementationBase: {
+        transform: "rotate(-90deg)",
+        active: {
+          transform: `rotate(-90deg)`,
+        },
+      },
+      componentSurface: config.slots?.circularSvg,
+      activeStates: [...states],
+    });
     const circularFillSurface = resolveSurfacePresentation({
       surfaceId: `${rootId}-circular-fill`,
       implementationBase: {},
       componentSurface: config.slots?.circularFill ?? config.slots?.fill,
       activeStates: [...states],
     });
+    const circularFillRuntimeSurface = resolveSurfacePresentation({
+      surfaceId: `${rootId}-circular-fill-runtime`,
+      implementationBase: circularFillSurface.resolvedConfigForWrapper,
+      itemSurface: !isIndeterminate
+        ? {
+            transition:
+              "stroke-dashoffset var(--sn-duration-normal, 250ms) var(--sn-ease-out, ease-out)",
+          }
+        : undefined,
+      activeStates: [...states],
+    });
+    const circularSvgRuntimeStyle = mergeStyles(
+      circularSvgSurface.style,
+      isIndeterminate
+        ? {
+            animation: `sn-progress-spin-${uniqueId} var(--sn-duration-slow, 1.5s) linear infinite`,
+          }
+        : undefined,
+    );
 
     return (
       <div
         data-snapshot-component="progress"
         data-testid="progress"
         data-snapshot-id={rootId}
-        className={rootSurface.className}
-        style={{
-          ...(rootSurface.style ?? {}),
-          alignItems: "center",
-          display: "inline-flex",
-        }}
+        className={mergeClassNames(
+          rootSurface.className,
+          circularContainerSurface.className,
+        )}
+        style={mergeStyles(rootSurface.style, circularContainerSurface.style)}
       >
         {isIndeterminate ? <SurfaceStyles css={circularSpinCss} /> : null}
         <svg
+          data-snapshot-id={`${rootId}-circular-svg`}
           width={svgSize}
           height={svgSize}
           viewBox={`0 0 ${svgSize} ${svgSize}`}
-          style={{
-            transform: "rotate(-90deg)",
-            ...(isIndeterminate
-              ? {
-                  animation: `sn-progress-spin-${uniqueId} var(--sn-duration-slow, 1.5s) linear infinite`,
-                }
-              : {}),
-          }}
+          className={circularSvgSurface.className}
+          style={circularSvgRuntimeStyle}
           role="progressbar"
           aria-valuenow={isIndeterminate ? undefined : percentage}
           aria-valuemin={0}
@@ -170,16 +208,8 @@ export function Progress({ config }: { config: ProgressConfig }) {
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
-            className={circularFillSurface.className}
-            style={{
-              ...(circularFillSurface.style ?? {}),
-              ...(isIndeterminate
-                ? {}
-                : {
-                    transition:
-                      "stroke-dashoffset var(--sn-duration-normal, 250ms) var(--sn-ease-out, ease-out)",
-                  }),
-            }}
+            className={circularFillRuntimeSurface.className}
+            style={circularFillRuntimeSurface.style}
           />
         </svg>
         {resolvedLabel || showValue ? (
@@ -212,8 +242,11 @@ export function Progress({ config }: { config: ProgressConfig }) {
         <SurfaceStyles css={labelRowSurface.scopedCss} />
         <SurfaceStyles css={labelSurface.scopedCss} />
         <SurfaceStyles css={valueSurface.scopedCss} />
+        <SurfaceStyles css={circularContainerSurface.scopedCss} />
+        <SurfaceStyles css={circularSvgSurface.scopedCss} />
         <SurfaceStyles css={circularTrackSurface.scopedCss} />
         <SurfaceStyles css={circularFillSurface.scopedCss} />
+        <SurfaceStyles css={circularFillRuntimeSurface.scopedCss} />
       </div>
     );
   }
@@ -224,12 +257,10 @@ export function Progress({ config }: { config: ProgressConfig }) {
     implementationBase: {
       width: "100%",
       overflow: "hidden",
-      style: {
-        height: barHeight,
-        backgroundColor: trackColor,
-        borderRadius: "var(--sn-radius-full, 9999px)",
-        position: "relative",
-      },
+      height: `${barHeight}px`,
+      bg: trackColor,
+      borderRadius: "var(--sn-radius-full, 9999px)",
+      position: "relative",
     },
     componentSurface: config.slots?.track,
     activeStates: [...states],
@@ -244,6 +275,47 @@ export function Progress({ config }: { config: ProgressConfig }) {
     surfaceId: `${rootId}-segment`,
     implementationBase: {},
     componentSurface: config.slots?.segment,
+    activeStates: [...states],
+  });
+  const segmentsRowSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-segments-row`,
+    implementationBase: {
+      display: "flex",
+      height: "100%",
+      gap: "var(--sn-spacing-2xs, 2px)",
+    },
+    componentSurface: config.slots?.segmentsRow,
+    activeStates: [...states],
+  });
+  const indeterminateFillSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-fill-indeterminate`,
+    implementationBase: fillSurface.resolvedConfigForWrapper,
+    itemSurface: {
+      position: "absolute",
+      inset: "0 auto 0 0",
+      width: "33%",
+      height: "100%",
+      bg: fillColor,
+      borderRadius: "var(--sn-radius-full, 9999px)",
+      transition:
+        "transform var(--sn-duration-slow, 1.5s) var(--sn-ease-in-out, ease-in-out)",
+      style: {
+        animation: `sn-progress-indeterminate-${uniqueId} var(--sn-duration-slow, 1.5s) var(--sn-ease-in-out, ease-in-out) infinite`,
+      },
+    },
+    activeStates: [...states],
+  });
+  const determinateFillSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-fill-determinate`,
+    implementationBase: fillSurface.resolvedConfigForWrapper,
+    itemSurface: {
+      width: `${percentage ?? 0}%`,
+      height: "100%",
+      bg: fillColor,
+      borderRadius: "var(--sn-radius-full, 9999px)",
+      transition:
+        "width var(--sn-duration-normal, 250ms) var(--sn-ease-out, ease-out)",
+    },
     activeStates: [...states],
   });
 
@@ -298,65 +370,52 @@ export function Progress({ config }: { config: ProgressConfig }) {
         {isIndeterminate ? (
           <div
             data-snapshot-id={`${rootId}-fill`}
-            className={fillSurface.className}
-            style={{
-              ...(fillSurface.style ?? {}),
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "33%",
-              height: "100%",
-              backgroundColor: fillColor,
-              borderRadius: "var(--sn-radius-full, 9999px)",
-              animation: `sn-progress-indeterminate-${uniqueId} var(--sn-duration-slow, 1.5s) var(--sn-ease-in-out, ease-in-out) infinite`,
-            }}
+            className={indeterminateFillSurface.className}
+            style={indeterminateFillSurface.style}
           />
         ) : segments && segments > 1 ? (
           <div
-            style={{
-              display: "flex",
-              height: "100%",
-              gap: "var(--sn-spacing-2xs, 2px)",
-            }}
+            data-snapshot-id={`${rootId}-segments-row`}
+            className={segmentsRowSurface.className}
+            style={segmentsRowSurface.style}
           >
             {Array.from({ length: segments }).map((_, index) => {
               const segmentThreshold = ((index + 1) / segments) * 100;
               const isFilled = (percentage ?? 0) >= segmentThreshold;
               const isPartial =
                 !isFilled && (percentage ?? 0) > (index / segments) * 100;
+              const segmentItemSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-segment-${index}`,
+                implementationBase: segmentSurface.resolvedConfigForWrapper,
+                itemSurface: {
+                  flex: "1",
+                  height: "100%",
+                  bg: isFilled || isPartial ? fillColor : "transparent",
+                  opacity: isPartial ? 0.5 : 1,
+                  borderRadius: "var(--sn-radius-full, 9999px)",
+                  transition:
+                    "background-color var(--sn-duration-normal, 250ms) var(--sn-ease-out, ease-out)",
+                },
+                activeStates: [...states],
+              });
               return (
-                <div
+                <React.Fragment key={index}>
+                  <div
                   key={index}
-                  data-snapshot-id={`${rootId}-segment`}
-                  className={segmentSurface.className}
-                  style={{
-                    ...(segmentSurface.style ?? {}),
-                    flex: 1,
-                    height: "100%",
-                    backgroundColor:
-                      isFilled || isPartial ? fillColor : "transparent",
-                    opacity: isPartial ? 0.5 : 1,
-                    borderRadius: "var(--sn-radius-full, 9999px)",
-                    transition:
-                      "background-color var(--sn-duration-normal, 250ms) var(--sn-ease-out, ease-out)",
-                  }}
-                />
+                    data-snapshot-id={`${rootId}-segment-${index}`}
+                    className={segmentItemSurface.className}
+                    style={segmentItemSurface.style}
+                  />
+                  <SurfaceStyles css={segmentItemSurface.scopedCss} />
+                </React.Fragment>
               );
             })}
           </div>
         ) : (
           <div
             data-snapshot-id={`${rootId}-fill`}
-            className={fillSurface.className}
-            style={{
-              ...(fillSurface.style ?? {}),
-              width: `${percentage ?? 0}%`,
-              height: "100%",
-              backgroundColor: fillColor,
-              borderRadius: "var(--sn-radius-full, 9999px)",
-              transition:
-                "width var(--sn-duration-normal, 250ms) var(--sn-ease-out, ease-out)",
-            }}
+            className={determinateFillSurface.className}
+            style={determinateFillSurface.style}
           />
         )}
       </div>
@@ -367,6 +426,9 @@ export function Progress({ config }: { config: ProgressConfig }) {
       <SurfaceStyles css={valueSurface.scopedCss} />
       <SurfaceStyles css={trackSurface.scopedCss} />
       <SurfaceStyles css={fillSurface.scopedCss} />
+      <SurfaceStyles css={indeterminateFillSurface.scopedCss} />
+      <SurfaceStyles css={determinateFillSurface.scopedCss} />
+      <SurfaceStyles css={segmentsRowSurface.scopedCss} />
       <SurfaceStyles css={segmentSurface.scopedCss} />
     </div>
   );

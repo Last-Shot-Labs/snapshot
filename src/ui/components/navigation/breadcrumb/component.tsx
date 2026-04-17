@@ -2,13 +2,16 @@
 
 import React, { useMemo } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import { interpolate } from "../../../actions/interpolate";
 import { useResolveFrom } from "../../../context/hooks";
 import { useAutoBreadcrumbs } from "../../../hooks/use-auto-breadcrumbs";
 import { renderIcon } from "../../../icons/render";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { BreadcrumbConfig, BreadcrumbItemConfig } from "./types";
 
 const SEPARATORS: Record<string, string> = {
@@ -17,10 +20,6 @@ const SEPARATORS: Record<string, string> = {
   dot: "\u00B7",
   arrow: "\u2192",
 };
-
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
 
 function collapseItems(
   items: BreadcrumbItemConfig[],
@@ -33,6 +32,7 @@ function collapseItems(
 
 export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
   const execute = useActionExecutor();
+  const primitiveOptions = usePrimitiveValueOptions();
   const resolvedConfig = useResolveFrom({ items: config.items });
   const manifest = useManifestRuntime();
   const routeRuntime = useRouteRuntime();
@@ -76,10 +76,10 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
 
     return baseItems.map((item: BreadcrumbItemConfig) => ({
       ...item,
-      label: interpolate(resolveText(item.label) ?? "", context),
-      path: item.path ? interpolate(item.path, context) : undefined,
+      label: resolveOptionalPrimitiveValue(item.label, primitiveOptions) ?? "",
+      path: resolveOptionalPrimitiveValue(item.path, primitiveOptions),
     }));
-  }, [autoItems, config.items, context, resolvedConfig.items]);
+  }, [autoItems, config.items, primitiveOptions, resolvedConfig.items]);
 
   const visibleItems =
     config.maxItems != null

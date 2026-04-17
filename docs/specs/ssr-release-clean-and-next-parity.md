@@ -39,7 +39,7 @@ Authoritative product bar for implementing agents:
 
 - release sign-off requires `typecheck`, `build`, `test`, and `docs:ci`
 - release sign-off includes the SSG path, not only request-time SSR
-- implementing agents should follow the authoritative phase map and product bar below
+- implementing agents must follow the authoritative phase map and product bar below
 
 ## Vision
 
@@ -332,7 +332,7 @@ export interface SsrRequestEnvelope {
 }
 ```
 
-Snapshot renderers should consume this envelope first. Structural probing of `bsCtx` remains
+Snapshot renderers must consume this envelope first. Structural probing of `bsCtx` remains
 only as a temporary compatibility fallback and is marked deprecated in JSDoc.
 
 Target renderer preference order:
@@ -795,7 +795,7 @@ Make the public documentation and the release gate reflect actual runtime truth.
 - document the exact SSR and SSG package expectations:
   - `@lastshotlabs/bunshot-ssr`
   - `@lastshotlabs/bunshot-ssg`
-  - the canonical install example in docs should be:
+  - the canonical install example in docs must be:
 
 ```sh
 bun add @lastshotlabs/bunshot-ssr
@@ -873,13 +873,16 @@ bun run docs:ci
 
 ### Branch strategy
 
-Track B includes two concrete branches:
+The authoritative branch list for this spec is:
 
+- `feature/ssr-release-clean-build`
 - `feature/ssr-request-contract-and-conformance`
 - `feature/ssg-contract-and-build-integration`
+- `feature/universal-styling-layout-normalization`
+- `feature/ssr-docs-and-certification`
 
-The explicit branch names above are authoritative. The ASCII diagram below is illustrative only
-and omits the dedicated SSG branch.
+The branch names above are authoritative. The ASCII diagram below is illustrative only and omits
+the dedicated SSG branch.
 
 ```text
 origin/main

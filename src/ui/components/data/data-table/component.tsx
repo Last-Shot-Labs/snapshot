@@ -146,7 +146,7 @@ function formatCellValue(
             color: colors.fg,
           }}
         >
-          {String(value)}
+          {String(value).replace(/\b\w/g, (c) => c.toUpperCase())}
         </span>
       );
     }

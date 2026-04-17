@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import { usePublish, useSubscribe } from "../../../context/hooks";
+import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import {
   executeEventAction,
   focusEventPayload,
@@ -19,6 +19,10 @@ import {
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
 import type { SelectConfig, SelectControlProps } from "./types";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 
 type SelectOption = {
   label: string;
@@ -192,33 +196,43 @@ export function Select({ config }: { config: SelectConfig }) {
   const execute = useActionExecutor();
   const publish = config.id ? usePublish(config.id) : null;
   const resolvedDefault = useSubscribe(config.default ?? "");
-  const resolvedPlaceholder = useSubscribe(config.placeholder ?? "");
   const visible = useSubscribe(config.visible ?? true);
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    placeholder: config.placeholder,
+    options: Array.isArray(config.options) ? config.options : undefined,
+  });
 
   const dataResult = useComponentData(
     !Array.isArray(config.options) && config.options ? config.options : "",
   );
 
   const options = useMemo(() => {
-    if (Array.isArray(config.options)) {
-      return config.options.map((option) => ({
+    const staticOptions = resolvedConfig.options as SelectConfig["options"];
+
+    if (Array.isArray(staticOptions)) {
+      return staticOptions.map((option) => ({
         label:
-          typeof option.label === "string" ? option.label : String(option.label),
+          resolveOptionalPrimitiveValue(option.label, primitiveOptions) ?? option.value,
         value: option.value,
       }));
     }
 
     return toOptions(dataResult.data, config.labelField, config.valueField);
-  }, [config.labelField, config.options, config.valueField, dataResult.data]);
+  }, [
+    config.labelField,
+    config.valueField,
+    dataResult.data,
+    primitiveOptions,
+    resolvedConfig.options,
+  ]);
 
   const defaultValue =
     typeof resolvedDefault === "string"
       ? resolvedDefault
       : String(resolvedDefault ?? "");
   const placeholder =
-    typeof resolvedPlaceholder === "string"
-      ? resolvedPlaceholder
-      : String(resolvedPlaceholder ?? "");
+    resolveOptionalPrimitiveValue(resolvedConfig.placeholder, primitiveOptions) ?? "";
   const [value, setValue] = useState(defaultValue);
 
   useEffect(() => {

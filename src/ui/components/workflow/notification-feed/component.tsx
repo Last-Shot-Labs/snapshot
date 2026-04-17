@@ -39,7 +39,6 @@ function TypeIcon({
   className?: string;
   style?: CSSProperties;
 }) {
-  const color = typeColorMap[type] ?? typeColorMap.info!;
   const size = 20;
   const iconStyle: CSSProperties = {
     width: size,
@@ -55,7 +54,7 @@ function TypeIcon({
           data-snapshot-id={surfaceId}
           viewBox="0 0 24 24"
           fill="none"
-          stroke={color}
+          stroke="currentColor"
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -73,7 +72,7 @@ function TypeIcon({
           data-snapshot-id={surfaceId}
           viewBox="0 0 24 24"
           fill="none"
-          stroke={color}
+          stroke="currentColor"
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -92,7 +91,7 @@ function TypeIcon({
           data-snapshot-id={surfaceId}
           viewBox="0 0 24 24"
           fill="none"
-          stroke={color}
+          stroke="currentColor"
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -111,7 +110,7 @@ function TypeIcon({
           data-snapshot-id={surfaceId}
           viewBox="0 0 24 24"
           fill="none"
-          stroke={color}
+          stroke="currentColor"
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -196,8 +195,8 @@ export function NotificationFeed({
       display: "flex",
       alignItems: "center",
       justifyContent: "between",
+      padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
       style: {
-        padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
         borderBottom:
           "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)",
       },
@@ -244,16 +243,14 @@ export function NotificationFeed({
       color: "var(--sn-color-primary, #2563eb)",
       cursor: "pointer",
       fontSize: "xs",
+      bg: "transparent",
+      border: "none",
+      padding: 0,
       hover: {
         opacity: 0.85,
       },
       focus: {
         ring: true,
-      },
-      style: {
-        background: "none",
-        border: "none",
-        padding: 0,
       },
     },
     componentSurface: config.slots?.markAllButton,
@@ -261,10 +258,8 @@ export function NotificationFeed({
   const listSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-list`,
     implementationBase: {
-      style: {
-        maxHeight: config.maxHeight ?? "auto",
-        overflowY: config.maxHeight ? "auto" : undefined,
-      },
+      maxHeight: config.maxHeight ?? "auto",
+      overflow: config.maxHeight ? "auto" : undefined,
     },
     componentSurface: config.slots?.list,
   });
@@ -278,35 +273,41 @@ export function NotificationFeed({
     implementationBase: {
       display: "flex",
       gap: "var(--sn-spacing-sm, 8px)",
-      style: {
-        padding: "var(--sn-spacing-md, 12px)",
-      },
+      padding: "var(--sn-spacing-md, 12px)",
     },
     componentSurface: config.slots?.loadingItem,
   });
   const loadingIconSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-loading-icon`,
     implementationBase: {
+      width: "20px",
+      height: "20px",
+      borderRadius: "var(--sn-radius-full, 9999px)",
+      bg: "var(--sn-color-muted, #e5e7eb)",
+      opacity: 0.5,
       style: {
-        width: "20px",
-        height: "20px",
-        borderRadius: "var(--sn-radius-full, 9999px)",
-        backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-        opacity: "var(--sn-opacity-muted, 0.5)",
         flexShrink: 0,
       },
     },
     componentSurface: config.slots?.loadingIcon,
   });
+  const loadingBodySurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-loading-body`,
+    implementationBase: {
+      flex: "1",
+      minWidth: 0,
+    },
+    componentSurface: config.slots?.loadingBody,
+  });
   const loadingTitleSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-loading-title`,
     implementationBase: {
+      height: "1em",
+      width: "50%",
+      borderRadius: "var(--sn-radius-xs, 2px)",
+      bg: "var(--sn-color-muted, #e5e7eb)",
+      opacity: 0.5,
       style: {
-        height: "1em",
-        width: "50%",
-        borderRadius: "var(--sn-radius-xs, 2px)",
-        backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-        opacity: "var(--sn-opacity-muted, 0.5)",
         marginBottom: "var(--sn-spacing-xs, 4px)",
       },
     },
@@ -315,25 +316,21 @@ export function NotificationFeed({
   const loadingMessageSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-loading-message`,
     implementationBase: {
-      style: {
-        height: "0.75em",
-        width: "80%",
-        borderRadius: "var(--sn-radius-xs, 2px)",
-        backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-        opacity: "var(--sn-opacity-disabled, 0.3)",
-      },
+      height: "0.75em",
+      width: "80%",
+      borderRadius: "var(--sn-radius-xs, 2px)",
+      bg: "var(--sn-color-muted, #e5e7eb)",
+      opacity: 0.3,
     },
     componentSurface: config.slots?.loadingMessage,
   });
   const errorStateSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-error-state`,
     implementationBase: {
-      style: {
-        padding: "var(--sn-spacing-md, 12px)",
-        color: "var(--sn-color-destructive, #ef4444)",
-        fontSize: "var(--sn-font-size-sm, 0.875rem)",
-        textAlign: "center",
-      },
+      padding: "var(--sn-spacing-md, 12px)",
+      color: "var(--sn-color-destructive, #ef4444)",
+      fontSize: "var(--sn-font-size-sm, 0.875rem)",
+      textAlign: "center",
     },
     componentSurface: config.slots?.errorState,
   });
@@ -423,7 +420,11 @@ export function NotificationFeed({
                   className={loadingIconSurface.className}
                   style={loadingIconSurface.style}
                 />
-                <div style={{ flex: 1 }}>
+                <div
+                  data-snapshot-id={`${rootId}-loading-body-${index}`}
+                  className={loadingBodySurface.className}
+                  style={loadingBodySurface.style}
+                >
                   <div
                     data-snapshot-id={`${rootId}-loading-title-${index}`}
                     className={loadingTitleSurface.className}
@@ -520,12 +521,19 @@ export function NotificationFeed({
             const itemIconSurface = resolveSurfacePresentation({
               surfaceId: `${rootId}-item-${itemKey}-icon`,
               implementationBase: {
+                color: typeColorMap[notifType] ?? typeColorMap.info!,
                 style: {
                   paddingTop: "var(--sn-spacing-2xs, 2px)",
                 } as CSSProperties,
               },
               componentSurface: config.slots?.itemIcon,
               itemSurface: asSurfaceConfig(itemSlots?.itemIcon),
+            });
+            const itemIconGlyphSurface = resolveSurfacePresentation({
+              surfaceId: `${rootId}-item-${itemKey}-icon-glyph`,
+              implementationBase: {},
+              componentSurface: config.slots?.itemIconGlyph,
+              itemSurface: asSurfaceConfig(itemSlots?.itemIconGlyph),
             });
             const itemTitleSurface = resolveSurfacePresentation({
               surfaceId: `${rootId}-item-${itemKey}-title`,
@@ -612,9 +620,9 @@ export function NotificationFeed({
                 >
                   <TypeIcon
                     type={notifType}
-                    surfaceId={`${rootId}-item-${itemKey}-icon-svg`}
-                    className={undefined}
-                    style={undefined}
+                    surfaceId={`${rootId}-item-${itemKey}-icon-glyph`}
+                    className={itemIconGlyphSurface.className}
+                    style={itemIconGlyphSurface.style}
                   />
                 </div>
 
@@ -656,6 +664,7 @@ export function NotificationFeed({
                 <SurfaceStyles css={itemSurface.scopedCss} />
                 <SurfaceStyles css={itemBodySurface.scopedCss} />
                 <SurfaceStyles css={itemIconSurface.scopedCss} />
+                <SurfaceStyles css={itemIconGlyphSurface.scopedCss} />
                 <SurfaceStyles css={itemTitleSurface.scopedCss} />
                 <SurfaceStyles css={itemMessageSurface.scopedCss} />
                 <SurfaceStyles css={itemTimestampSurface.scopedCss} />
@@ -673,6 +682,7 @@ export function NotificationFeed({
       <SurfaceStyles css={loadingStateSurface.scopedCss} />
       <SurfaceStyles css={loadingItemSurface.scopedCss} />
       <SurfaceStyles css={loadingIconSurface.scopedCss} />
+      <SurfaceStyles css={loadingBodySurface.scopedCss} />
       <SurfaceStyles css={loadingTitleSurface.scopedCss} />
       <SurfaceStyles css={loadingMessageSurface.scopedCss} />
       <SurfaceStyles css={errorStateSurface.scopedCss} />

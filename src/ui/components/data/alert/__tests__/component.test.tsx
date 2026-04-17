@@ -6,18 +6,64 @@ import { Alert } from "../component";
 
 const mockExecute = vi.fn();
 const refValues: Record<string, unknown> = {
-  "alert.actionLabel": "Resolved Retry",
+  "alert.actionLabel": "Resolved Retry {route.params.id}",
 };
 
-vi.mock("../../../../context/hooks", () => ({
-  useSubscribe: (value: unknown) =>
-    value &&
-    typeof value === "object" &&
-    "from" in (value as Record<string, unknown>)
-      ? refValues[(value as { from: string }).from]
-      : value,
-  usePublish: () => vi.fn(),
-}));
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    if ("from" in (value as Record<string, unknown>)) {
+      return refValues[(value as unknown as { from: string }).from] as T;
+    }
+
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+        key,
+        resolveRefs(entry),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
+vi.mock("../../../../context/hooks", async () => {
+  const actual = await vi.importActual("../../../../context/hooks");
+
+  return {
+    ...actual,
+    useSubscribe: (value: unknown) =>
+      value &&
+      typeof value === "object" &&
+      "from" in (value as Record<string, unknown>)
+        ? refValues[(value as { from: string }).from]
+        : value,
+    usePublish: () => vi.fn(),
+    useResolveFrom: resolveRefs,
+  };
+});
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: { routes: [] },
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "alerts" },
+      currentPath: "/alerts/urgent",
+      params: { id: "urgent" },
+      query: {},
+    }),
+  };
+});
 
 vi.mock("../../../../actions/executor", () => ({
   useActionExecutor: () => mockExecute,
@@ -70,7 +116,7 @@ describe("Alert", () => {
     );
 
     expect(screen.getByTestId("alert-action").textContent).toContain(
-      "Resolved Retry",
+      "Resolved Retry urgent",
     );
   });
 });

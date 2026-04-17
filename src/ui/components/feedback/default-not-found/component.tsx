@@ -1,13 +1,28 @@
 "use client";
 
-import { useSubscribe } from "../../../context/hooks";
+import { useResolveFrom } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { NotFoundConfig } from "./types";
 
 export function DefaultNotFound({ config }: { config: NotFoundConfig }) {
-  const resolvedTitle = useSubscribe(config.title) as string | undefined;
-  const resolvedDescription = useSubscribe(config.description) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    title: config.title,
+    description: config.description,
+  });
+  const resolvedTitle = resolveOptionalPrimitiveValue(
+    resolvedConfig.title,
+    primitiveOptions,
+  );
+  const resolvedDescription = resolveOptionalPrimitiveValue(
+    resolvedConfig.description,
+    primitiveOptions,
+  );
   const rootId = config.id ?? "not-found";
   const rootSurface = resolveSurfacePresentation({
     surfaceId: rootId,

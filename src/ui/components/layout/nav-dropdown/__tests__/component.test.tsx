@@ -10,8 +10,29 @@ import {
 } from "../../../../context/providers";
 
 const refValues: Record<string, unknown> = {
-  "navDropdown.label": "Resolved Products",
+  "navDropdown.label": "Resolved Products {route.params.id}",
 };
+
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    if ("from" in (value as Record<string, unknown>)) {
+      return refValues[(value as unknown as { from: string }).from] as T;
+    }
+
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+        key,
+        resolveRefs(entry),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
 
 vi.mock("../../../../context/index", async () => {
   const actual = await vi.importActual("../../../../context/index");
@@ -24,6 +45,26 @@ vi.mock("../../../../context/index", async () => {
       "from" in (value as Record<string, unknown>)
         ? refValues[(value as { from: string }).from]
         : value,
+    useResolveFrom: resolveRefs,
+  };
+});
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: { routes: [] },
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "products" },
+      currentPath: "/products/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
   };
 });
 
@@ -211,7 +252,7 @@ describe("NavDropdown", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Resolved Products" }),
+      screen.getByRole("button", { name: "Resolved Products alpha" }),
     ).toBeTruthy();
   });
 });

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import { usePublish, useSubscribe } from "../../../context/hooks";
+import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
 import { executeEventAction } from "../../_base/events";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -11,6 +11,10 @@ import {
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../button";
 import { InputControl } from "../input";
 import type { LocationInputConfig } from "./types";
@@ -159,14 +163,27 @@ function LocationResultRow({
 export function LocationInput({ config }: { config: LocationInputConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const disabled = Boolean(useSubscribe(config.disabled ?? false));
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
-  const resolvedPlaceholder = useSubscribe(config.placeholder) as
-    | string
-    | undefined;
-  const resolvedHelperText = useSubscribe(config.helperText) as
-    | string
-    | undefined;
-  const errorText = useSubscribe(config.errorText ?? "") as string;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    label: config.label,
+    placeholder: config.placeholder,
+    helperText: config.helperText,
+    errorText: config.errorText,
+  });
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
+  const resolvedPlaceholder = resolveOptionalPrimitiveValue(
+    resolvedConfig.placeholder,
+    primitiveOptions,
+  );
+  const resolvedHelperText = resolveOptionalPrimitiveValue(
+    resolvedConfig.helperText,
+    primitiveOptions,
+  );
+  const errorText =
+    resolveOptionalPrimitiveValue(resolvedConfig.errorText, primitiveOptions) ?? "";
   const initialValue = useSubscribe(config.value ?? "") as string;
   const execute = useActionExecutor();
   const publish = usePublish(config.id);

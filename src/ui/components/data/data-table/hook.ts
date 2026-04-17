@@ -275,10 +275,10 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
       } else if (resolvedData != null && typeof resolvedData === "object") {
         // Object with a list envelope (e.g., { items: [...] } or { data: [...] })
         const obj = resolvedData as Record<string, unknown>;
-        if (Array.isArray(obj["items"])) {
-          setAllRows(obj["items"] as Record<string, unknown>[]);
-        } else if (Array.isArray(obj["data"])) {
-          setAllRows(obj["data"] as Record<string, unknown>[]);
+        const nested =
+          Object.values(obj).find((v) => Array.isArray(v)) ?? null;
+        if (nested) {
+          setAllRows(nested as Record<string, unknown>[]);
         } else {
           setAllRows([]);
         }
@@ -342,10 +342,10 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
           setAllRows(result as Record<string, unknown>[]);
         } else if (result != null && typeof result === "object") {
           const obj = result as Record<string, unknown>;
-          if (Array.isArray(obj["items"])) {
-            setAllRows(obj["items"] as Record<string, unknown>[]);
-          } else if (Array.isArray(obj["data"])) {
-            setAllRows(obj["data"] as Record<string, unknown>[]);
+          const nested =
+            Object.values(obj).find((v) => Array.isArray(v)) ?? null;
+          if (nested) {
+            setAllRows(nested as Record<string, unknown>[]);
           } else {
             setAllRows([obj] as Record<string, unknown>[]);
           }
@@ -355,9 +355,13 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
         setError(null);
       } catch (err) {
         if (!cancelled) {
-          setError(
-            err instanceof Error ? err : new Error("Failed to fetch data"),
-          );
+          const errObj =
+            err instanceof Error ? err : new Error("Failed to fetch data");
+          if (/not found|404/i.test(errObj.message)) {
+            setError(null);
+          } else {
+            setError(errObj);
+          }
           setAllRows([]);
         }
       } finally {

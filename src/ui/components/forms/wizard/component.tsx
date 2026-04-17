@@ -12,24 +12,35 @@ import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  type PrimitiveValueOptions,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { WizardConfig, WizardStepConfig } from "./types";
 import type { FieldConfig } from "../auto-form/types";
 
 const ANIMATION_DURATION_VAR = "var(--sn-duration-normal, 200ms)";
 const ANIMATION_EASE_VAR = "var(--sn-ease-default, ease)";
 
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
+function resolveText(
+  value: unknown,
+  primitiveOptions: PrimitiveValueOptions,
+): string | undefined {
+  return resolveOptionalPrimitiveValue(value, primitiveOptions);
 }
 
-function resolveStaticFieldOptions(field: FieldConfig) {
+function resolveStaticFieldOptions(
+  field: FieldConfig,
+  primitiveOptions: PrimitiveValueOptions,
+) {
   if (!Array.isArray(field.options)) {
     return field.options;
   }
 
   return field.options.map((option) => ({
     ...option,
-    label: resolveText(option.label) ?? option.value,
+    label: resolveText(option.label, primitiveOptions) ?? option.value,
   }));
 }
 
@@ -63,6 +74,7 @@ function WizardFieldRenderer({
   showError,
   onChange,
   onBlur,
+  primitiveOptions,
 }: {
   rootId: string;
   stepIndex: number;
@@ -72,12 +84,13 @@ function WizardFieldRenderer({
   showError: boolean;
   onChange: (value: unknown) => void;
   onBlur: () => void;
+  primitiveOptions: PrimitiveValueOptions;
 }) {
-  const label = resolveText(field.label) ?? field.name;
-  const description = resolveText(field.description);
-  const helperText = resolveText(field.helperText);
-  const placeholder = resolveText(field.placeholder);
-  const staticFieldOptions = resolveStaticFieldOptions(field);
+  const label = resolveText(field.label, primitiveOptions) ?? field.name;
+  const description = resolveText(field.description, primitiveOptions);
+  const helperText = resolveText(field.helperText, primitiveOptions);
+  const placeholder = resolveText(field.placeholder, primitiveOptions);
+  const staticFieldOptions = resolveStaticFieldOptions(field, primitiveOptions);
   const fieldId = `sn-wizard-field-${stepIndex}-${field.name}`;
   const hasError = showError && Boolean(error);
   const describedBy = [
@@ -463,12 +476,14 @@ function WizardProgress({
   totalSteps,
   steps,
   slots,
+  primitiveOptions,
 }: {
   rootId: string;
   currentStep: number;
   totalSteps: number;
   steps: WizardStepConfig[];
   slots?: WizardConfig["slots"];
+  primitiveOptions: PrimitiveValueOptions;
 }) {
   const stepsSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-steps`,
@@ -488,8 +503,9 @@ function WizardProgress({
       style={stepsSurface.style}
     >
       {steps.map((step, index) => {
-        const stepTitle = resolveText(step.title) ?? `Step ${index + 1}`;
-        const stepDescription = resolveText(step.description);
+        const stepTitle =
+          resolveText(step.title, primitiveOptions) ?? `Step ${index + 1}`;
+        const stepDescription = resolveText(step.description, primitiveOptions);
         const isCurrent = index === currentStep;
         const isCompleted = index < currentStep;
         const stepStates = [
@@ -653,6 +669,7 @@ function WizardProgress({
 export function Wizard({ config }: { config: WizardConfig }) {
   const wizard = useWizard(config);
   const currentStepConfig = config.steps[wizard.currentStep];
+  const primitiveOptions = usePrimitiveValueOptions();
   const resolvedConfig = useResolveFrom({
     submitLabel: config.submitLabel,
     steps: config.steps,
@@ -661,13 +678,15 @@ export function Wizard({ config }: { config: WizardConfig }) {
     (resolvedConfig.steps as WizardStepConfig[] | undefined) ?? config.steps;
   const currentResolvedStep = resolvedSteps[wizard.currentStep];
   const resolvedSubmitLabel =
-    typeof resolvedConfig.submitLabel === "string"
-      ? resolvedConfig.submitLabel
-      : "Submit";
-  const currentStepTitle = resolveText(currentResolvedStep?.title) ?? "";
-  const currentStepDescription = resolveText(currentResolvedStep?.description);
+    resolveText(resolvedConfig.submitLabel, primitiveOptions) ?? "Submit";
+  const currentStepTitle =
+    resolveText(currentResolvedStep?.title, primitiveOptions) ?? "";
+  const currentStepDescription = resolveText(
+    currentResolvedStep?.description,
+    primitiveOptions,
+  );
   const submitLabel =
-    resolveText(currentResolvedStep?.submitLabel) ??
+    resolveText(currentResolvedStep?.submitLabel, primitiveOptions) ??
     (wizard.isLastStep ? resolvedSubmitLabel : "Next");
   const isSkippable = wizard.canSkip;
   const rootId = config.id ?? "wizard";
@@ -869,6 +888,7 @@ export function Wizard({ config }: { config: WizardConfig }) {
           totalSteps={wizard.totalSteps}
           steps={resolvedSteps}
           slots={config.slots}
+          primitiveOptions={primitiveOptions}
         />
       </div>
 
@@ -916,6 +936,7 @@ export function Wizard({ config }: { config: WizardConfig }) {
             showError={Boolean(wizard.stepTouched[field.name])}
             onChange={(value) => wizard.setStepValue(field.name, value)}
             onBlur={() => wizard.touchField(field.name)}
+            primitiveOptions={primitiveOptions}
           />
         ))}
 

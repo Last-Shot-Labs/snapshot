@@ -88,4 +88,51 @@ describe("Progress", () => {
 
     expect(screen.getByText("Upload alpha")).toBeTruthy();
   });
+
+  it("applies canonical circular and segmented wrapper slots", () => {
+    const { container, rerender } = render(
+      <Progress
+        config={{
+          type: "progress",
+          id: "variant-progress",
+          value: 72,
+          variant: "circular",
+          slots: {
+            circularContainer: { className: "progress-circular-container-slot" },
+            circularSvg: { className: "progress-circular-svg-slot" },
+          },
+        }}
+      />,
+    );
+
+    expect(
+      container.querySelector('[data-snapshot-id="variant-progress"]')?.className,
+    ).toContain(
+      "progress-circular-container-slot",
+    );
+    expect(
+      container
+        .querySelector('[data-snapshot-id="variant-progress-circular-svg"]')
+        ?.getAttribute("class"),
+    ).toContain("progress-circular-svg-slot");
+
+    rerender(
+      <Progress
+        config={{
+          type: "progress",
+          id: "variant-progress",
+          value: 72,
+          segments: 4,
+          slots: {
+            segmentsRow: { className: "progress-segments-row-slot" },
+          },
+        }}
+      />,
+    );
+
+    expect(
+      container.querySelector('[data-snapshot-id="variant-progress-segments-row"]')
+        ?.className,
+    ).toContain("progress-segments-row-slot");
+  });
 });

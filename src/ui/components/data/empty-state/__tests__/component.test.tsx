@@ -6,19 +6,65 @@ import { EmptyState } from "../component";
 
 const executeSpy = vi.fn();
 const refValues: Record<string, unknown> = {
-  "emptyState.title": "Resolved title",
-  "emptyState.description": "Resolved description",
-  "emptyState.actionLabel": "Resolved action",
+  "emptyState.title": "Resolved title {route.params.id}",
+  "emptyState.description": "Resolved description on {route.path}",
+  "emptyState.actionLabel": "Resolved action {route.params.id}",
 };
 
-vi.mock("../../../../context/hooks", () => ({
-  useSubscribe: (value: unknown) =>
-    value &&
-    typeof value === "object" &&
-    "from" in (value as Record<string, unknown>)
-      ? refValues[(value as { from: string }).from]
-      : value,
-}));
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    if ("from" in (value as Record<string, unknown>)) {
+      return refValues[(value as unknown as { from: string }).from] as T;
+    }
+
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+        key,
+        resolveRefs(entry),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
+vi.mock("../../../../context/hooks", async () => {
+  const actual = await vi.importActual("../../../../context/hooks");
+
+  return {
+    ...actual,
+    useSubscribe: (value: unknown) =>
+      value &&
+      typeof value === "object" &&
+      "from" in (value as Record<string, unknown>)
+        ? refValues[(value as { from: string }).from]
+        : value,
+    useResolveFrom: resolveRefs,
+  };
+});
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: { routes: [] },
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "empty" },
+      currentPath: "/search/results",
+      params: { id: "results" },
+      query: {},
+    }),
+  };
+});
 
 vi.mock("../../../../actions/executor", () => ({
   useActionExecutor: () => executeSpy,
@@ -101,13 +147,13 @@ describe("EmptyState", () => {
     );
 
     expect(screen.getByTestId("empty-state-title").textContent).toBe(
-      "Resolved title",
+      "Resolved title results",
     );
     expect(screen.getByTestId("empty-state-description").textContent).toBe(
-      "Resolved description",
+      "Resolved description on /search/results",
     );
     expect(screen.getByTestId("empty-state-action").textContent).toContain(
-      "Resolved action",
+      "Resolved action results",
     );
   });
 });

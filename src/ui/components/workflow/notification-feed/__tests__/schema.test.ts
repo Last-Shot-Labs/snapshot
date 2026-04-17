@@ -11,7 +11,9 @@ describe("notificationFeedConfigSchema", () => {
       slots: {
         header: { className: "feed-header" },
         loadingState: { className: "feed-loading" },
+        loadingBody: { className: "feed-loading-body" },
         errorState: { className: "feed-error" },
+        itemIconGlyph: { className: "feed-item-icon-glyph" },
         itemBody: { className: "feed-item-body" },
         item: { className: "feed-item" },
       },

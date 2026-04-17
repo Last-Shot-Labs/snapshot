@@ -3,10 +3,56 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Select, SelectControl } from "../component";
 
-vi.mock("../../../../context/hooks", () => ({
-  usePublish: () => null,
-  useSubscribe: (value: unknown) => value,
-}));
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    if ("from" in (value as Record<string, unknown>)) {
+      return value;
+    }
+
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+        key,
+        resolveRefs(entry),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
+vi.mock("../../../../context/hooks", async () => {
+  const actual = await vi.importActual("../../../../context/hooks");
+
+  return {
+    ...actual,
+    usePublish: () => null,
+    useSubscribe: (value: unknown) => value,
+    useResolveFrom: resolveRefs,
+  };
+});
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: { routes: [] },
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "settings" },
+      currentPath: "/settings/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
 
 vi.mock("../../../_base/use-component-data", () => ({
   useComponentData: () => ({
@@ -48,15 +94,16 @@ describe("Select", () => {
         config={{
           type: "select",
           options: [
-            { label: "One", value: "1" },
+            { label: "One {route.params.id}", value: "1" },
             { label: "Two", value: "2" },
           ],
-          placeholder: "Choose one",
+          placeholder: "Choose {route.params.id}",
         }}
       />,
     );
 
-    const select = screen.getByLabelText("Choose one") as HTMLSelectElement;
+    const select = screen.getByLabelText("Choose alpha") as HTMLSelectElement;
+    expect(screen.getByRole("option", { name: "One alpha" })).toBeDefined();
     fireEvent.change(select, { target: { value: "2" } });
     expect(select.value).toBe("2");
   });

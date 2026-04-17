@@ -6,21 +6,67 @@ import { afterEach } from "vitest";
 import { ChatWindow } from "../component";
 
 const refValues: Record<string, unknown> = {
-  "state.chat.title": "#general",
-  "state.chat.subtitle": "Team chat",
+  "state.chat.title": "#general-{route.params.id}",
+  "state.chat.subtitle": "Team chat on {route.path}",
   "state.chat.placeholder": "Reply to thread",
 };
 const richInputCapture = vi.hoisted(
   () => ({ config: null as Record<string, unknown> | null }),
 );
 
-vi.mock("../../../../context/hooks", () => ({
-  useSubscribe: (value: unknown) =>
-    value && typeof value === "object" && "from" in (value as Record<string, unknown>)
-      ? refValues[(value as { from: string }).from]
-      : value,
-  usePublish: () => vi.fn(),
-}));
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    if ("from" in (value as Record<string, unknown>)) {
+      return refValues[(value as unknown as { from: string }).from] as T;
+    }
+
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+        key,
+        resolveRefs(entry),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
+vi.mock("../../../../context/hooks", async () => {
+  const actual = await vi.importActual("../../../../context/hooks");
+
+  return {
+    ...actual,
+    useSubscribe: (value: unknown) =>
+      value && typeof value === "object" && "from" in (value as Record<string, unknown>)
+        ? refValues[(value as { from: string }).from]
+        : value,
+    usePublish: () => vi.fn(),
+    useResolveFrom: resolveRefs,
+  };
+});
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: { routes: [] },
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "chat" },
+      currentPath: "/threads/thread-9",
+      params: { id: "thread-9" },
+      query: {},
+    }),
+  };
+});
 
 vi.mock("../../message-thread/component", () => ({
   MessageThread: () => <div data-testid="mock-message-thread">Thread</div>,
@@ -89,8 +135,8 @@ describe("ChatWindow", () => {
       />,
     );
 
-    expect(screen.getByTestId("chat-header").textContent).toContain("#general");
-    expect(screen.getByTestId("chat-header").textContent).toContain("Team chat");
+    expect(screen.getByTestId("chat-header").textContent).toContain("#general-thread-9");
+    expect(screen.getByTestId("chat-header").textContent).toContain("Team chat on /threads/thread-9");
     expect(richInputCapture.config?.placeholder).toEqual({
       from: "state.chat.placeholder",
     });

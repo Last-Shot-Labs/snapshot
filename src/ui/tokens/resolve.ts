@@ -1152,10 +1152,15 @@ ${surfaceSelector} {
 }
 [data-snapshot-component="data-table"] th {
   color: var(--sn-color-muted-foreground, #667085);
-  font-size: 0.73rem;
+  font-size: var(--sn-font-size-sm, 0.875rem);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
+}
+[data-snapshot-component="data-table"] th [data-sn-button] {
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  color: inherit;
 }
 [data-snapshot-component="data-table"] td,
 [data-snapshot-component="data-table"] th {

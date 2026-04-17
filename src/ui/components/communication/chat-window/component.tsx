@@ -1,12 +1,16 @@
 'use client';
 
-import { useSubscribe } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { RichInput } from "../../content/rich-input/component";
 import type { RichInputConfig } from "../../content/rich-input/types";
 import { MessageThread } from "../message-thread/component";
@@ -17,8 +21,15 @@ import type { ChatWindowConfig } from "./types";
 
 export function ChatWindow({ config }: { config: ChatWindowConfig }) {
   const visible = useSubscribe(config.visible ?? true);
-  const title = useSubscribe(config.title ?? "") as string;
-  const subtitle = useSubscribe(config.subtitle ?? "") as string;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    title: config.title,
+    subtitle: config.subtitle,
+  });
+  const title =
+    resolveOptionalPrimitiveValue(resolvedConfig.title, primitiveOptions) ?? "";
+  const subtitle =
+    resolveOptionalPrimitiveValue(resolvedConfig.subtitle, primitiveOptions) ?? "";
   const rootId = config.id ?? "chat-window";
 
   if (visible === false) {

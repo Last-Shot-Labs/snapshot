@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from "react";
-import { useSubscribe } from "../../context/hooks";
+import { useResolveFrom } from "../../context/hooks";
 import { renderIcon } from "../../icons/render";
 import { SurfaceStyles } from "./surface-styles";
 import {
@@ -9,6 +9,10 @@ import {
   resolveSurfacePresentation,
 } from "./style-surfaces";
 import { ButtonControl } from "../forms/button";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../primitives/resolve-value";
 
 export interface AutoErrorStateConfig extends Record<string, unknown> {
   id?: string;
@@ -34,11 +38,24 @@ export function AutoErrorState({
   config: AutoErrorStateConfig;
   onRetry?: () => void;
 }): ReactNode {
-  const title = useSubscribe(config.title) as string | undefined;
-  const description = useSubscribe(config.description) as string | undefined;
-  const retryLabel = useSubscribe(
-    typeof config.retry === "object" ? config.retry.label : undefined,
-  ) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    title: config.title,
+    description: config.description,
+    retryLabel: typeof config.retry === "object" ? config.retry.label : undefined,
+  });
+  const title = resolveOptionalPrimitiveValue(
+    resolvedConfig.title,
+    primitiveOptions,
+  );
+  const description = resolveOptionalPrimitiveValue(
+    resolvedConfig.description,
+    primitiveOptions,
+  );
+  const retryLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.retryLabel,
+    primitiveOptions,
+  );
   const showRetry = Boolean(config.retry) && Boolean(onRetry);
   const rootId = config.id ?? "auto-error-state";
   const rootSurface = resolveSurfacePresentation({

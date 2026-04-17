@@ -7,13 +7,17 @@ import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useActionExecutor } from "../../../actions/executor";
-import { usePublish, useSubscribe } from "../../../context/hooks";
+import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../../forms/button";
 import { InputControl } from "../../forms/input";
 import type { RichInputConfig } from "./types";
@@ -57,7 +61,12 @@ function createSendOnEnterExtension(onSend: () => void) {
 export function RichInput({ config }: { config: RichInputConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const readonly = useSubscribe(config.readonly ?? false) as boolean;
-  const resolvedPlaceholder = useSubscribe(config.placeholder) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ placeholder: config.placeholder });
+  const resolvedPlaceholder = resolveOptionalPrimitiveValue(
+    resolvedConfig.placeholder,
+    primitiveOptions,
+  );
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const [charCount, setCharCount] = useState(0);

@@ -7,16 +7,62 @@ import { InlineEdit } from "../component";
 const mockExecute = vi.fn();
 const mockPublish = vi.fn();
 const subscribedValues: Record<string, unknown> = {
-  "copy.inlineEditPlaceholder": "Rename this item",
+  "copy.inlineEditPlaceholder": "Rename item {route.params.id}",
 };
 
-vi.mock("../../../../context/hooks", () => ({
-  usePublish: () => mockPublish,
-  useSubscribe: (value: unknown) =>
-    typeof value === "object" && value !== null && "from" in value
-      ? subscribedValues[(value as { from: string }).from]
-      : value,
-}));
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    if ("from" in (value as Record<string, unknown>)) {
+      return subscribedValues[(value as unknown as { from: string }).from] as T;
+    }
+
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+        key,
+        resolveRefs(entry),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
+vi.mock("../../../../context/hooks", async () => {
+  const actual = await vi.importActual("../../../../context/hooks");
+
+  return {
+    ...actual,
+    usePublish: () => mockPublish,
+    useSubscribe: (value: unknown) =>
+      typeof value === "object" && value !== null && "from" in value
+        ? subscribedValues[(value as { from: string }).from]
+        : value,
+    useResolveFrom: resolveRefs,
+  };
+});
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: { routes: [] },
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "item" },
+      currentPath: "/items/99",
+      params: { id: "99" },
+      query: {},
+    }),
+  };
+});
 
 vi.mock("../../../../actions/executor", () => ({
   useActionExecutor: () => mockExecute,
@@ -80,6 +126,6 @@ describe("InlineEdit", () => {
       />,
     );
 
-    expect(screen.getByText("Rename this item")).toBeDefined();
+    expect(screen.getByText("Rename item 99")).toBeDefined();
   });
 });

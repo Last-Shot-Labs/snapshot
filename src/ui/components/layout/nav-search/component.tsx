@@ -1,18 +1,27 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePublish, useSubscribe } from "../../../context/index";
+import { usePublish, useResolveFrom, useSubscribe } from "../../../context/index";
 import { useActionExecutor } from "../../../actions/executor";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { InputControl } from "../../forms/input";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { NavSearchConfig } from "./types";
 
 export function NavSearch({ config }: { config: NavSearchConfig }) {
   const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const publish = usePublish(config.publishTo);
-  const resolvedPlaceholder = useSubscribe(config.placeholder) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ placeholder: config.placeholder });
+  const resolvedPlaceholder = resolveOptionalPrimitiveValue(
+    resolvedConfig.placeholder,
+    primitiveOptions,
+  );
   const execute = useActionExecutor();
 
   // Publish search value to state

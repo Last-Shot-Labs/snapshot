@@ -4,17 +4,63 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 const refValues: Record<string, unknown> = {
-  "navSection.label": "Resolved Resources",
+  "navSection.label": "Resolved Resources {route.params.id}",
 };
 
-vi.mock("../../../../context/hooks", () => ({
-  useSubscribe: (value: unknown) =>
-    value &&
-    typeof value === "object" &&
-    "from" in (value as Record<string, unknown>)
-      ? refValues[(value as { from: string }).from]
-      : value,
-}));
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    if ("from" in (value as Record<string, unknown>)) {
+      return refValues[(value as unknown as { from: string }).from] as T;
+    }
+
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+        key,
+        resolveRefs(entry),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
+vi.mock("../../../../context/hooks", async () => {
+  const actual = await vi.importActual("../../../../context/hooks");
+
+  return {
+    ...actual,
+    useSubscribe: (value: unknown) =>
+      value &&
+      typeof value === "object" &&
+      "from" in (value as Record<string, unknown>)
+        ? refValues[(value as { from: string }).from]
+        : value,
+    useResolveFrom: resolveRefs,
+  };
+});
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: { routes: [] },
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "resources" },
+      currentPath: "/resources/guides",
+      params: { id: "guides" },
+      query: {},
+    }),
+  };
+});
 
 vi.mock("../../../../manifest/renderer", () => ({
   ComponentRenderer: ({ config }: { config: { id?: string; type: string } }) => (
@@ -80,7 +126,7 @@ describe("NavSection", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Resolved Resources" }),
+      screen.getByRole("button", { name: "Resolved Resources guides" }),
     ).toBeTruthy();
   });
 });

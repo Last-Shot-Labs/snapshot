@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
 import { renderIcon } from "../../../icons/render";
@@ -9,6 +9,10 @@ import { ButtonControl } from "../../forms/button";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { FloatingPanel } from "../../primitives/floating-menu";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { PopoverConfig } from "./types";
 
 /**
@@ -18,9 +22,22 @@ import type { PopoverConfig } from "./types";
  * surfaces, and publishes `{ isOpen }` when an `id` is configured.
  */
 export function Popover({ config }: { config: PopoverConfig }) {
-  const triggerText = useSubscribe(config.trigger) as string;
-  const resolvedTitle = useSubscribe(config.title) as string | undefined;
-  const resolvedDescription = useSubscribe(config.description) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    trigger: config.trigger,
+    title: config.title,
+    description: config.description,
+  });
+  const triggerText =
+    resolveOptionalPrimitiveValue(resolvedConfig.trigger, primitiveOptions) ?? "";
+  const resolvedTitle = resolveOptionalPrimitiveValue(
+    resolvedConfig.title,
+    primitiveOptions,
+  );
+  const resolvedDescription = resolveOptionalPrimitiveValue(
+    resolvedConfig.description,
+    primitiveOptions,
+  );
   const visible = useSubscribe(config.visible ?? true);
   const publish = usePublish(config.id);
   const [isOpen, setIsOpen] = useState(false);

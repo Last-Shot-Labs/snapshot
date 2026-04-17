@@ -13,12 +13,33 @@ import { FileUploader } from "../component";
 import type { FileUploaderConfig } from "../types";
 
 const refValues: Record<string, unknown> = {
-  "uploader.label": "Resolved upload",
-  "uploader.description": "Resolved description",
+  "uploader.label": "Resolved upload for {route.params.id}",
+  "uploader.description": "Resolved description on {route.path}",
 };
 
 vi.mock("../../../../context/hooks", async () => {
   const actual = await vi.importActual("../../../../context/hooks");
+
+  function resolveRefs<T>(value: T): T {
+    if (Array.isArray(value)) {
+      return value.map((entry) => resolveRefs(entry)) as T;
+    }
+
+    if (value && typeof value === "object") {
+      if ("from" in (value as Record<string, unknown>)) {
+        return refValues[(value as unknown as { from: string }).from] as T;
+      }
+
+      return Object.fromEntries(
+        Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+          key,
+          resolveRefs(entry),
+        ]),
+      ) as T;
+    }
+
+    return value;
+  }
 
   return {
     ...actual,
@@ -28,6 +49,21 @@ vi.mock("../../../../context/hooks", async () => {
       "from" in (value as Record<string, unknown>)
         ? refValues[(value as { from: string }).from]
         : value,
+    useResolveFrom: resolveRefs,
+  };
+});
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useRouteRuntime: () => ({
+      currentRoute: { id: "uploads" },
+      currentPath: "/uploads/contracts",
+      params: { id: "contracts" },
+      query: {},
+    }),
   };
 });
 
@@ -344,7 +380,7 @@ describe("FileUploader", () => {
     );
 
     const dropzone = screen.getByTestId("file-uploader-dropzone");
-    expect(dropzone.textContent).toContain("Resolved upload");
-    expect(dropzone.textContent).toContain("Resolved description");
+    expect(dropzone.textContent).toContain("Resolved upload for contracts");
+    expect(dropzone.textContent).toContain("Resolved description on /uploads/contracts");
   });
 });

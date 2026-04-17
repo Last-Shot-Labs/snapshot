@@ -13,6 +13,10 @@ import {
 } from "../../_base/style-surfaces";
 import { useFocusTrap } from "../../_base/use-focus-trap";
 import { ButtonControl } from "../../forms/button";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { useDrawer } from "./hook";
 import type { DrawerConfig } from "./schema";
 
@@ -146,8 +150,15 @@ function DrawerSurface({
   handleOverlayClick: (e: React.MouseEvent) => void;
 }) {
   const execute = useActionExecutor();
-  const title = useSubscribe(config.title) as string | undefined;
-  const resolvedConfig = useResolveFrom({ footer: config.footer });
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    title: config.title,
+    footer: config.footer,
+  });
+  const title = resolveOptionalPrimitiveValue(
+    resolvedConfig.title,
+    primitiveOptions,
+  );
   const payload = useSubscribe({ from: "overlay.payload" });
   const result = useSubscribe({ from: "overlay.result" });
   const previousOpenRef = useRef<boolean | undefined>(undefined);

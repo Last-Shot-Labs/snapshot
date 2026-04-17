@@ -445,6 +445,50 @@ describe("AutoForm", () => {
     expect(screen.getByText("Save Contact")).toBeDefined();
   });
 
+  it("resolves route-templated section, field, and submit copy", () => {
+    const wrapper = createWrapper({
+      api: mockApi,
+      pageRegistry,
+      routeRuntime: {
+        currentPath: "/accounts/acct-42",
+        currentRoute: { id: "account-edit", path: "/accounts/{id}" },
+        params: { id: "acct-42" },
+      },
+    });
+    const config: AutoFormConfig = {
+      type: "form",
+      submit: "/api/accounts/{route.params.id}",
+      fields: [],
+      sections: [
+        {
+          title: "Account {route.params.id}",
+          description: "Editing {route.path}",
+          fields: [
+            {
+              name: "email",
+              type: "email",
+              label: "Email for {route.params.id}",
+              placeholder: "name+{route.params.id}@example.com",
+              helperText: "Helper for {route.path}",
+              description: "Description for {route.params.id}",
+            },
+          ],
+        },
+      ],
+      submitLabel: "Save {route.params.id}",
+    };
+
+    render(createElement(AutoForm, { config }), { wrapper });
+
+    expect(screen.getByText("Account acct-42")).toBeDefined();
+    expect(screen.getByText("Editing /accounts/acct-42")).toBeDefined();
+    expect(screen.getByLabelText("Email for acct-42")).toBeDefined();
+    expect(screen.getByPlaceholderText("name+acct-42@example.com")).toBeDefined();
+    expect(screen.getByText("Helper for /accounts/acct-42")).toBeDefined();
+    expect(screen.getByText("Description for acct-42")).toBeDefined();
+    expect(screen.getByText("Save acct-42")).toBeDefined();
+  });
+
   it("renders select field with options", () => {
     const wrapper = createWrapper({ api: mockApi, pageRegistry });
     const config: AutoFormConfig = {

@@ -1,16 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { useSubscribe } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { ButtonControl } from "../../forms/button";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { NavSectionConfig } from "./types";
 
 export function NavSection({ config }: { config: NavSectionConfig }) {
   const [isCollapsed, setIsCollapsed] = useState(config.defaultCollapsed ?? false);
-  const label = useSubscribe(config.label);
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ label: config.label });
+  const label = resolveOptionalPrimitiveValue(resolvedConfig.label, primitiveOptions);
   const showItems = !config.collapsible || !isCollapsed;
   const rootId = config.id ?? "nav-section";
   const rootSurface = resolveSurfacePresentation({
@@ -45,7 +51,7 @@ export function NavSection({ config }: { config: NavSectionConfig }) {
       className={rootSurface.className}
       style={rootSurface.style}
     >
-      {typeof label === "string" ? (
+      {label ? (
         <ButtonControl
           variant="ghost"
           onClick={config.collapsible ? () => setIsCollapsed((value) => !value) : undefined}

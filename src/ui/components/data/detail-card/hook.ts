@@ -15,6 +15,10 @@ import {
   useManifestRuntime,
 } from "../../../manifest/runtime";
 import { useApiClient } from "../../../state";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { DetailCardConfig, DetailFieldConfig } from "./schema";
 import type { ResolvedField, UseDetailCardResult } from "./types";
 import { getFieldValue } from "../_shared/lookups";
@@ -79,6 +83,7 @@ function detectFormat(
 function resolveFields(
   data: Record<string, unknown>,
   fieldsConfig: "auto" | DetailFieldConfig[],
+  primitiveOptions: ReturnType<typeof usePrimitiveValueOptions>,
 ): ResolvedField[] {
   if (fieldsConfig === "auto") {
     return Object.entries(data).map(([key, value]) => ({
@@ -92,7 +97,9 @@ function resolveFields(
 
   return fieldsConfig.map((fc) => ({
     field: fc.field,
-    label: typeof fc.label === "string" ? fc.label : humanizeFieldName(fc.field),
+    label:
+      resolveOptionalPrimitiveValue(fc.label, primitiveOptions) ??
+      humanizeFieldName(fc.field),
     value: getFieldValue(data, fc.field),
     format: fc.format ?? "text",
     copyable: fc.copyable ?? false,
@@ -124,16 +131,21 @@ export function useDetailCard(config: DetailCardConfig): UseDetailCardResult {
   const queryClient = useQueryClient();
   const runtime = useManifestRuntime();
   const resourceCache = useManifestResourceCache();
+  const primitiveOptions = usePrimitiveValueOptions();
 
   // Resolve data source — could be a FromRef or an endpoint string
   const isDataFromRef = isFromRef(config.data);
   const resolvedDataSource = useSubscribe(config.data);
 
   // Resolve title — could be a FromRef or a static string
-  const resolvedTitle = useSubscribe(config.title) as string | undefined;
-  const resolvedStaticConfig = useResolveFrom({
+  const resolvedConfig = useResolveFrom({
+    title: config.title,
     fields: Array.isArray(config.fields) ? config.fields : undefined,
   });
+  const resolvedTitle = resolveOptionalPrimitiveValue(
+    resolvedConfig.title,
+    primitiveOptions,
+  );
 
   // Resolve params — each value could be a FromRef
   const resolvedParams: Record<string, unknown> = {};
@@ -230,11 +242,11 @@ export function useDetailCard(config: DetailCardConfig): UseDetailCardResult {
   const fieldsConfig =
     config.fields === "auto" || config.fields === undefined
       ? (config.fields ?? "auto")
-      : ((resolvedStaticConfig.fields as DetailFieldConfig[] | undefined) ??
+      : ((resolvedConfig.fields as DetailFieldConfig[] | undefined) ??
         config.fields);
   const fields = useMemo(
-    () => (data ? resolveFields(data, fieldsConfig) : []),
-    [data, fieldsConfig],
+    () => (data ? resolveFields(data, fieldsConfig, primitiveOptions) : []),
+    [data, fieldsConfig, primitiveOptions],
   );
 
   // Publish data for other components
@@ -255,13 +267,18 @@ export function useDetailCard(config: DetailCardConfig): UseDetailCardResult {
   }, [isDataFromRef, path, request?.method, queryClient]);
 
   const isLoading = isDataFromRef ? false : queryResult.isLoading;
-  const error = isDataFromRef
+  const rawError = isDataFromRef
     ? null
     : queryResult.error instanceof Error
       ? queryResult.error
       : queryResult.error
         ? new Error(String(queryResult.error))
         : null;
+  // Treat 404 / "not found" as empty rather than error
+  const is404 =
+    rawError != null &&
+    /not found|404/i.test(rawError.message);
+  const error = is404 ? null : rawError;
 
   return {
     data,

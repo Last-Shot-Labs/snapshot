@@ -5,18 +5,64 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CodeBlock } from "../component";
 
 const refValues: Record<string, unknown> = {
-  "codeBlock.title": "resolved.ts",
+  "codeBlock.title": "resolved-{route.params.id}.ts",
 };
 
-vi.mock("../../../../context/hooks", () => ({
-  useSubscribe: (value: unknown) =>
-    value &&
-    typeof value === "object" &&
-    "from" in (value as Record<string, unknown>)
-      ? refValues[(value as { from: string }).from]
-      : value,
-  usePublish: () => vi.fn(),
-}));
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    if ("from" in (value as Record<string, unknown>)) {
+      return refValues[(value as unknown as { from: string }).from] as T;
+    }
+
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+        key,
+        resolveRefs(entry),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
+vi.mock("../../../../context/hooks", async () => {
+  const actual = await vi.importActual("../../../../context/hooks");
+
+  return {
+    ...actual,
+    useSubscribe: (value: unknown) =>
+      value &&
+      typeof value === "object" &&
+      "from" in (value as Record<string, unknown>)
+        ? refValues[(value as { from: string }).from]
+        : value,
+    usePublish: () => vi.fn(),
+    useResolveFrom: resolveRefs,
+  };
+});
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: { routes: [] },
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "code" },
+      currentPath: "/code/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
 
 describe("CodeBlock", () => {
   const writeText = vi.fn();
@@ -81,7 +127,7 @@ describe("CodeBlock", () => {
     );
 
     expect(screen.getByTestId("code-block-title").textContent).toBe(
-      "resolved.ts",
+      "resolved-alpha.ts",
     );
   });
 });

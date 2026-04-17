@@ -2,17 +2,63 @@ import { describe, it, expect, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 
 const subscribedValues: Record<string, unknown> = {
-  "copy.error.title": "Request failed",
-  "copy.error.description": "Please try again in a moment.",
-  "copy.error.retry": "Retry now",
+  "copy.error.title": "Request failed for {route.params.id}",
+  "copy.error.description": "Please try again on {route.path}.",
+  "copy.error.retry": "Retry {route.params.id}",
 };
 
-vi.mock("../../../../context/hooks", () => ({
-  useSubscribe: (value: unknown) =>
-    typeof value === "object" && value !== null && "from" in value
-      ? subscribedValues[(value as { from: string }).from]
-      : value,
-}));
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    if ("from" in (value as Record<string, unknown>)) {
+      return subscribedValues[(value as unknown as { from: string }).from] as T;
+    }
+
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+        key,
+        resolveRefs(entry),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
+vi.mock("../../../../context/hooks", async () => {
+  const actual = await vi.importActual("../../../../context/hooks");
+
+  return {
+    ...actual,
+    useSubscribe: (value: unknown) =>
+      typeof value === "object" && value !== null && "from" in value
+        ? subscribedValues[(value as { from: string }).from]
+        : value,
+    useResolveFrom: resolveRefs,
+  };
+});
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: { routes: [] },
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "error" },
+      currentPath: "/errors/500",
+      params: { id: "500" },
+      query: {},
+    }),
+  };
+});
 
 import { DefaultError } from "../component";
 
@@ -50,8 +96,8 @@ describe("DefaultError", () => {
       />,
     );
 
-    expect(html).toContain("Request failed");
-    expect(html).toContain("Please try again in a moment.");
-    expect(html).toContain("Retry now");
+    expect(html).toContain("Request failed for 500");
+    expect(html).toContain("Please try again on /errors/500.");
+    expect(html).toContain("Retry 500");
   });
 });

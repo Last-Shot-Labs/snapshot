@@ -25,6 +25,10 @@ import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  type PrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { SelectControl } from "../select";
 import { TextareaControl } from "../textarea";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
@@ -331,18 +335,24 @@ function resolveFields(config: AutoFormConfig): FieldConfig[] {
   return config.fields;
 }
 
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
+function resolveText(
+  value: unknown,
+  primitiveOptions: PrimitiveValueOptions,
+): string | undefined {
+  return resolveOptionalPrimitiveValue(value, primitiveOptions);
 }
 
-function resolveStaticFieldOptions(field: FieldConfig) {
+function resolveStaticFieldOptions(
+  field: FieldConfig,
+  primitiveOptions: PrimitiveValueOptions,
+) {
   if (!Array.isArray(field.options)) {
     return field.options;
   }
 
   return field.options.map((option) => ({
     ...option,
-    label: resolveText(option.label) ?? option.value,
+    label: resolveText(option.label, primitiveOptions) ?? option.value,
   }));
 }
 
@@ -358,6 +368,7 @@ function FieldRenderer({
   onChange,
   onBlur,
   slots,
+  primitiveOptions,
 }: {
   rootId: string;
   field: FieldConfig;
@@ -368,17 +379,24 @@ function FieldRenderer({
   onChange: (value: unknown) => void;
   onBlur: () => void;
   slots?: AutoFormConfig["slots"];
+  primitiveOptions: PrimitiveValueOptions;
 }) {
   const executeAction = useActionExecutor();
   const showByExpression = useEvaluateExpression(field.visibleWhen);
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const label = resolveText(field.label) ?? field.name;
-  const placeholder = resolveText(field.placeholder);
-  const helperText = resolveText(field.helperText);
-  const description = resolveText(field.description);
-  const inlineActionLabel = resolveText(field.inlineAction?.label);
-  const inlineActionTarget = resolveText(field.inlineAction?.to);
-  const staticFieldOptions = resolveStaticFieldOptions(field);
+  const label = resolveText(field.label, primitiveOptions) ?? field.name;
+  const placeholder = resolveText(field.placeholder, primitiveOptions);
+  const helperText = resolveText(field.helperText, primitiveOptions);
+  const description = resolveText(field.description, primitiveOptions);
+  const inlineActionLabel = resolveText(
+    field.inlineAction?.label,
+    primitiveOptions,
+  );
+  const inlineActionTarget = resolveText(
+    field.inlineAction?.to,
+    primitiveOptions,
+  );
+  const staticFieldOptions = resolveStaticFieldOptions(field, primitiveOptions);
   const validation = field.validate ?? field.validation;
   const fieldId = `sn-field-${field.name}`;
   const hasError = showError && !!error;
@@ -1412,6 +1430,18 @@ function resolveEndpointTemplates<T>(
 
 // ── Section renderer ──────────────────────────────────────────────────────
 
+function buildPrimitiveOptions(
+  locale: string | undefined,
+  runtime: ReturnType<typeof useManifestRuntime>,
+  routeRuntime: ReturnType<typeof useRouteRuntime>,
+): PrimitiveValueOptions {
+  return {
+    context: buildTemplateContext(runtime, routeRuntime),
+    locale,
+    i18n: runtime?.raw.i18n,
+  };
+}
+
 function SectionRenderer({
   rootId,
   section,
@@ -1419,6 +1449,7 @@ function SectionRenderer({
   columns,
   gap,
   slots,
+  primitiveOptions,
 }: {
   rootId: string;
   section: FieldSectionConfig;
@@ -1426,10 +1457,15 @@ function SectionRenderer({
   columns: number;
   gap: string;
   slots?: AutoFormConfig["slots"];
+  primitiveOptions: PrimitiveValueOptions;
 }) {
   const [collapsed, setCollapsed] = useState(section.defaultCollapsed ?? false);
-  const sectionTitle = resolveText(section.title) ?? "section";
-  const sectionDescription = resolveText(section.description);
+  const sectionTitle =
+    resolveText(section.title, primitiveOptions) ?? "section";
+  const sectionDescription = resolveText(
+    section.description,
+    primitiveOptions,
+  );
   const sectionSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-section-${sectionTitle}`,
     implementationBase: {
@@ -1545,6 +1581,7 @@ function SectionRenderer({
           columns={columns}
           gap={gap}
           slots={slots}
+          primitiveOptions={primitiveOptions}
         />
       )}
       <SurfaceStyles css={sectionSurface.scopedCss} />
@@ -1566,6 +1603,7 @@ function FieldGrid({
   columns,
   gap,
   slots,
+  primitiveOptions,
 }: {
   gridId: string;
   rootId: string;
@@ -1574,6 +1612,7 @@ function FieldGrid({
   columns: number;
   gap: string;
   slots?: AutoFormConfig["slots"];
+  primitiveOptions: PrimitiveValueOptions;
 }) {
   const gridSurface = resolveSurfacePresentation({
     surfaceId: gridId,
@@ -1622,6 +1661,7 @@ function FieldGrid({
               onChange={(value) => form.setValue(field.name, value)}
               onBlur={() => form.touchField(field.name)}
               slots={slots}
+              primitiveOptions={primitiveOptions}
             />
             <SurfaceStyles css={cellSurface.scopedCss} />
           </div>
@@ -1694,6 +1734,10 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
     "idle" | "saving" | "saved" | "error"
   >("idle");
   const activeLocale = resolveRuntimeLocale(runtime?.raw.i18n, localeState);
+  const primitiveOptions = useMemo(
+    () => buildPrimitiveOptions(activeLocale, runtime, routeRuntime),
+    [activeLocale, routeRuntime, runtime],
+  );
   const resolvedDataTarget = useMemo(
     () =>
       resolveEndpointTemplates(
@@ -1741,44 +1785,10 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
     () =>
       fieldsWithRefs.map((field) => ({
         ...field,
-        label:
-          resolveText(
-            resolveMaybeTemplate(
-              field.label,
-              activeLocale,
-              runtime,
-              routeRuntime,
-            ),
-          ) ??
-          resolveText(field.label) ??
-          field.name,
-        placeholder:
-          resolveText(
-            resolveMaybeTemplate(
-              field.placeholder,
-              activeLocale,
-              runtime,
-              routeRuntime,
-            ),
-          ) ?? resolveText(field.placeholder),
-        helperText:
-          resolveText(
-            resolveMaybeTemplate(
-              field.helperText,
-              activeLocale,
-              runtime,
-              routeRuntime,
-            ),
-          ) ?? resolveText(field.helperText),
-        description:
-          resolveText(
-            resolveMaybeTemplate(
-              field.description,
-              activeLocale,
-              runtime,
-              routeRuntime,
-            ),
-          ) ?? resolveText(field.description),
+        label: resolveText(field.label, primitiveOptions) ?? field.name,
+        placeholder: resolveText(field.placeholder, primitiveOptions),
+        helperText: resolveText(field.helperText, primitiveOptions),
+        description: resolveText(field.description, primitiveOptions),
         default: resolveMaybeTemplate(
           field.default,
           activeLocale,
@@ -1788,17 +1798,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
         options: Array.isArray(field.options)
           ? field.options.map((option) => ({
               ...option,
-              label:
-                resolveText(
-                  resolveMaybeTemplate(
-                    option.label,
-                    activeLocale,
-                    runtime,
-                    routeRuntime,
-                  ),
-                ) ??
-                resolveText(option.label) ??
-                option.value,
+              label: resolveText(option.label, primitiveOptions) ?? option.value,
             }))
           : resolveEndpointTemplates(
               field.options,
@@ -1810,31 +1810,13 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
           ? {
               ...field.inlineAction,
               label:
-                resolveText(
-                  resolveMaybeTemplate(
-                    field.inlineAction.label,
-                    activeLocale,
-                    runtime,
-                    routeRuntime,
-                  ),
-                ) ??
-                resolveText(field.inlineAction.label) ??
-                "",
-              to:
-                resolveText(
-                  resolveMaybeTemplate(
-                    field.inlineAction.to,
-                    activeLocale,
-                    runtime,
-                    routeRuntime,
-                  ),
-                ) ??
-                resolveText(field.inlineAction.to) ??
-                "",
+                resolveText(field.inlineAction.label, primitiveOptions) ?? "",
+              to: resolveText(field.inlineAction.to, primitiveOptions) ?? "",
             }
           : undefined,
       })),
     [
+      primitiveOptions,
       activeLocale,
       fieldsWithRefs,
       routeRuntime,
@@ -1851,52 +1833,26 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
     () =>
       sectionsWithRefs?.map((section: FieldSectionConfig) => ({
         ...section,
-        title:
-          resolveText(
-            resolveMaybeTemplate(
-              section.title,
-              activeLocale,
-              runtime,
-              routeRuntime,
-            ),
-          ) ??
-          resolveText(section.title) ??
-          "section",
-        description:
-          resolveText(
-            resolveMaybeTemplate(
-              section.description,
-              activeLocale,
-              runtime,
-              routeRuntime,
-            ),
-          ) ?? resolveText(section.description),
+        title: resolveText(section.title, primitiveOptions) ?? "section",
+        description: resolveText(section.description, primitiveOptions),
         fields: section.fields.map(
           (field: FieldConfig) => resolvedFieldMap.get(field.name) ?? field,
         ),
       })),
-    [activeLocale, resolvedFieldMap, routeRuntime, runtime, sectionsWithRefs],
+    [primitiveOptions, resolvedFieldMap, sectionsWithRefs],
   );
   const method = config.method ?? "POST";
   const submitLabel =
     resolveText(
-      resolveMaybeTemplate(
-        formCopyRefValues.submitLabel ?? config.submitLabel ?? "Submit",
-        activeLocale,
-        runtime,
-        routeRuntime,
-      ),
+      formCopyRefValues.submitLabel ?? config.submitLabel ?? "Submit",
+      primitiveOptions,
     ) ?? "Submit";
   const submitLoadingLabel =
     resolveText(
-      resolveMaybeTemplate(
-        formCopyRefValues.submitLoadingLabel ??
-          config.submitLoadingLabel ??
-          "Submitting...",
-        activeLocale,
-        runtime,
-        routeRuntime,
-      ),
+      formCopyRefValues.submitLoadingLabel ??
+        config.submitLoadingLabel ??
+        "Submitting...",
+      primitiveOptions,
     ) ?? "Submitting...";
   const columns = config.columns ?? 1;
   const gap = GAP_MAP[config.gap ?? "md"] ?? GAP_MAP.md!;
@@ -2185,13 +2141,14 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
       {resolvedSections ? (
         resolvedSections.map((section: FieldSectionConfig, index: number) => (
           <SectionRenderer
-            key={`${resolveText(section.title) ?? "section"}-${index}`}
+            key={`${resolveText(section.title, primitiveOptions) ?? "section"}-${index}`}
             rootId={rootId}
             section={section}
             form={form}
             columns={columns}
             gap={gap}
             slots={config.slots}
+            primitiveOptions={primitiveOptions}
           />
         ))
       ) : (
@@ -2204,6 +2161,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
           columns={columns}
           gap={gap}
           slots={config.slots}
+          primitiveOptions={primitiveOptions}
         />
       )}
 

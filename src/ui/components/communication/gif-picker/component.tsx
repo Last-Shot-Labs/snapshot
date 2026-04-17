@@ -10,6 +10,10 @@ import {
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../../forms/button";
 import { InputControl } from "../../forms/input";
 import type { GifEntry, GifPickerConfig } from "./types";
@@ -43,8 +47,7 @@ function toGifEntries(
 
 export function GifPicker({ config }: { config: GifPickerConfig }) {
   const visible = useSubscribe(config.visible ?? true);
-  const placeholder = useSubscribe(config.placeholder) as string | undefined;
-  const attribution = useSubscribe(config.attribution) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const [search, setSearch] = useState("");
@@ -56,7 +59,19 @@ export function GifPicker({ config }: { config: GifPickerConfig }) {
   const urlField = config.urlField ?? "url";
   const previewField = config.previewField ?? "preview";
   const titleField = config.titleField ?? "title";
-  const resolvedConfig = useResolveFrom({ gifs: config.gifs });
+  const resolvedConfig = useResolveFrom({
+    placeholder: config.placeholder,
+    attribution: config.attribution,
+    gifs: config.gifs,
+  });
+  const placeholder = resolveOptionalPrimitiveValue(
+    resolvedConfig.placeholder,
+    primitiveOptions,
+  );
+  const attribution = resolveOptionalPrimitiveValue(
+    resolvedConfig.attribution,
+    primitiveOptions,
+  );
 
   const staticGifs = useMemo(() => {
     const gifs = (resolvedConfig.gifs ?? config.gifs) as GifPickerConfig["gifs"];
@@ -70,9 +85,9 @@ export function GifPicker({ config }: { config: GifPickerConfig }) {
       preview: gif.preview ?? gif.url,
       width: gif.width,
       height: gif.height,
-      title: typeof gif.title === "string" ? gif.title : undefined,
+      title: resolveOptionalPrimitiveValue(gif.title, primitiveOptions),
     }));
-  }, [config.gifs, resolvedConfig.gifs]);
+  }, [config.gifs, primitiveOptions, resolvedConfig.gifs]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {

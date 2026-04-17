@@ -1,13 +1,17 @@
 'use client';
 
 import type { CSSProperties } from "react";
-import { useSubscribe } from "../../../context";
+import { useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { useResponsiveValue } from "../../../hooks/use-breakpoint";
 import { resolveComponentBackgroundStyle } from "../../_base/background-style";
 import { ComponentWrapper } from "../../_base/component-wrapper";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { CardConfig } from "./types";
 
 const GAP_MAP: Record<string, string> = {
@@ -24,8 +28,19 @@ const GAP_MAP: Record<string, string> = {
 export function Card({ config }: { config: CardConfig }) {
   const gap = useResponsiveValue(config.gap);
   const resolvedGap = gap ? GAP_MAP[gap] ?? gap : GAP_MAP.md;
-  const title = useSubscribe(config.title ?? "");
-  const subtitle = useSubscribe(config.subtitle ?? "");
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    title: config.title,
+    subtitle: config.subtitle,
+  });
+  const title = resolveOptionalPrimitiveValue(
+    resolvedConfig.title,
+    primitiveOptions,
+  );
+  const subtitle = resolveOptionalPrimitiveValue(
+    resolvedConfig.subtitle,
+    primitiveOptions,
+  );
   const backgroundStyle = resolveComponentBackgroundStyle(config.background);
   const rootId = config.id ?? "card";
 
@@ -116,7 +131,7 @@ export function Card({ config }: { config: CardConfig }) {
                 className={titleSurface.className}
                 style={titleSurface.style}
               >
-                {String(title)}
+                {title}
               </h3>
             ) : null}
             {subtitle ? (
@@ -125,7 +140,7 @@ export function Card({ config }: { config: CardConfig }) {
                 className={subtitleSurface.className}
                 style={subtitleSurface.style}
               >
-                {String(subtitle)}
+                {subtitle}
               </p>
             ) : null}
           </div>

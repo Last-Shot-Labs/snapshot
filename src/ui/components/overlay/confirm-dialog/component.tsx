@@ -1,7 +1,11 @@
 'use client';
 
-import { useSubscribe } from "../../../context/hooks";
+import { useResolveFrom } from "../../../context/hooks";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ModalComponent } from "../modal";
 import type { ModalConfig } from "../modal";
 import type { ConfirmDialogConfig } from "./types";
@@ -14,9 +18,22 @@ export function ConfirmDialogComponent({
 }: {
   config: ConfirmDialogConfig;
 }) {
-  const description = useSubscribe(config.description ?? "") as string;
-  const confirmLabel = useSubscribe(config.confirmLabel) as string | undefined;
-  const cancelLabel = useSubscribe(config.cancelLabel) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    description: config.description,
+    confirmLabel: config.confirmLabel,
+    cancelLabel: config.cancelLabel,
+  });
+  const description =
+    resolveOptionalPrimitiveValue(resolvedConfig.description, primitiveOptions) ?? "";
+  const confirmLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.confirmLabel,
+    primitiveOptions,
+  );
+  const cancelLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.cancelLabel,
+    primitiveOptions,
+  );
   const modalSurfaceConfig = extractSurfaceConfig(config);
 
   const modalConfig: ModalConfig = {

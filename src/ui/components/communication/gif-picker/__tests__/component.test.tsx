@@ -5,9 +5,9 @@ import { GifPicker } from "../component";
 
 const publishSpy = vi.hoisted(() => vi.fn());
 const refValues: Record<string, unknown> = {
-  "gif.placeholder": "Resolved GIF search",
-  "gif.attribution": "Resolved attribution",
-  "gif.title": "Resolved party parrot",
+  "gif.placeholder": "Resolved GIF search {route.params.id}",
+  "gif.attribution": "Resolved attribution on {route.path}",
+  "gif.title": "Resolved party parrot {route.params.id}",
 };
 
 vi.mock("../../../../context/hooks", () => ({
@@ -44,6 +44,25 @@ vi.mock("../../../../context/hooks", () => ({
     return resolveRefs(value);
   },
 }));
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual = await vi.importActual("../../../../manifest/runtime");
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: { routes: [] },
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "gifs" },
+      currentPath: "/gifs/team-a",
+      params: { id: "team-a" },
+      query: {},
+    }),
+  };
+});
 
 vi.mock("../../../../actions/executor", () => ({
   useActionExecutor: () => vi.fn(),
@@ -121,9 +140,9 @@ describe("GifPicker", () => {
     );
 
     expect(screen.getByTestId("gif-search").getAttribute("placeholder")).toBe(
-      "Resolved GIF search",
+      "Resolved GIF search team-a",
     );
-    expect(screen.getByText("Resolved attribution")).toBeTruthy();
+    expect(screen.getByText("Resolved attribution on /gifs/team-a")).toBeTruthy();
   });
 
   it("renders ref-backed static GIF titles", () => {
@@ -142,6 +161,6 @@ describe("GifPicker", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Resolved party parrot" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Resolved party parrot team-a" })).toBeTruthy();
   });
 });

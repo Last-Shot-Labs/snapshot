@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
 import { setDomRef } from "../../_base/dom-ref";
@@ -18,6 +18,10 @@ import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { InputConfig, InputControlProps } from "./types";
 
 export function InputControl({
@@ -199,21 +203,34 @@ export function InputControl({
 export function Input({ config }: { config: InputConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
+  const primitiveOptions = usePrimitiveValueOptions();
 
   const visible = useSubscribe(config.visible ?? true);
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
-  const resolvedPlaceholder = useSubscribe(config.placeholder) as
-    | string
-    | undefined;
+  const resolvedConfig = useResolveFrom({
+    label: config.label,
+    placeholder: config.placeholder,
+    helperText: config.helperText,
+    errorText: config.errorText,
+  });
   const resolvedValue = useSubscribe(config.value) as string | undefined;
   const resolvedDisabled = useSubscribe(config.disabled ?? false) as boolean;
   const resolvedReadonly = useSubscribe(config.readonly ?? false) as boolean;
-  const resolvedHelperText = useSubscribe(config.helperText) as
-    | string
-    | undefined;
-  const resolvedErrorText = useSubscribe(config.errorText) as
-    | string
-    | undefined;
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
+  const resolvedPlaceholder = resolveOptionalPrimitiveValue(
+    resolvedConfig.placeholder,
+    primitiveOptions,
+  );
+  const resolvedHelperText = resolveOptionalPrimitiveValue(
+    resolvedConfig.helperText,
+    primitiveOptions,
+  );
+  const resolvedErrorText = resolveOptionalPrimitiveValue(
+    resolvedConfig.errorText,
+    primitiveOptions,
+  );
 
   const inputType = config.inputType ?? "text";
   const [value, setValue] = useState(resolvedValue ?? "");

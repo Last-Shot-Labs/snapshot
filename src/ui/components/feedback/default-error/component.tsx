@@ -1,15 +1,34 @@
 "use client";
 
-import { useSubscribe } from "../../../context/hooks";
+import { useResolveFrom } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { ErrorPageConfig } from "./types";
 
 export function DefaultError({ config }: { config: ErrorPageConfig }) {
-  const resolvedTitle = useSubscribe(config.title) as string | undefined;
-  const resolvedDescription = useSubscribe(config.description) as string | undefined;
-  const resolvedRetryLabel = useSubscribe(config.retryLabel) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    title: config.title,
+    description: config.description,
+    retryLabel: config.retryLabel,
+  });
+  const resolvedTitle = resolveOptionalPrimitiveValue(
+    resolvedConfig.title,
+    primitiveOptions,
+  );
+  const resolvedDescription = resolveOptionalPrimitiveValue(
+    resolvedConfig.description,
+    primitiveOptions,
+  );
+  const resolvedRetryLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.retryLabel,
+    primitiveOptions,
+  );
   const rootId = config.id ?? "error-page";
   const rootSurface = resolveSurfacePresentation({
     surfaceId: rootId,

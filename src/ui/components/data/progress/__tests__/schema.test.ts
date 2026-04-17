@@ -10,6 +10,11 @@ describe("progressConfigSchema", () => {
       label: "Upload",
       showValue: true,
       color: "success",
+      slots: {
+        circularContainer: { className: "progress-circular-container" },
+        circularSvg: { className: "progress-circular-svg" },
+        segmentsRow: { className: "progress-segments-row" },
+      },
     });
 
     expect(result.success).toBe(true);

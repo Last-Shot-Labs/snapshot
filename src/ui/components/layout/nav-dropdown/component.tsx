@@ -1,13 +1,17 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { useSubscribe } from "../../../context/index";
+import { useResolveFrom, useSubscribe } from "../../../context/index";
 import { renderIcon } from "../../../icons/render";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { useRouteRuntime } from "../../../manifest/runtime";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { FloatingMenuStyles, FloatingPanel } from "../../primitives/floating-menu";
 import { NavLink } from "../nav-link";
 import type { NavLinkConfig } from "../nav-link/types";
@@ -56,7 +60,10 @@ export function NavDropdown({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const label = useSubscribe(config.label) as string;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ label: config.label });
+  const label =
+    resolveOptionalPrimitiveValue(resolvedConfig.label, primitiveOptions) ?? "";
   const triggerMode = config.trigger ?? "click";
   const routeRuntime = useRouteRuntime();
 

@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useActionExecutor } from "../../actions/executor";
 import type { ActionConfig } from "../../actions/types";
-import { useSubscribe } from "../../context/hooks";
+import { useResolveFrom } from "../../context/hooks";
 import { renderIcon } from "../../icons/render";
 import { SurfaceStyles } from "./surface-styles";
 import {
@@ -11,6 +11,10 @@ import {
   resolveSurfacePresentation,
 } from "./style-surfaces";
 import { ButtonControl } from "../forms/button";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../primitives/resolve-value";
 
 export interface AutoEmptyStateConfig extends Record<string, unknown> {
   id?: string;
@@ -42,9 +46,24 @@ export function AutoEmptyState({
   config: AutoEmptyStateConfig;
 }): ReactNode {
   const execute = useActionExecutor();
-  const title = useSubscribe(config.title) as string | undefined;
-  const description = useSubscribe(config.description) as string | undefined;
-  const actionLabel = useSubscribe(config.action?.label) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    title: config.title,
+    description: config.description,
+    actionLabel: config.action?.label,
+  });
+  const title = resolveOptionalPrimitiveValue(
+    resolvedConfig.title,
+    primitiveOptions,
+  );
+  const description = resolveOptionalPrimitiveValue(
+    resolvedConfig.description,
+    primitiveOptions,
+  );
+  const actionLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.actionLabel,
+    primitiveOptions,
+  );
   const rootId = config.id ?? "auto-empty-state";
   const size = config.size ?? "md";
   const iconSize = size === "sm" ? 20 : size === "lg" ? 36 : 28;

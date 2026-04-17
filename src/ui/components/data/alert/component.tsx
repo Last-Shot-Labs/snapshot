@@ -1,12 +1,16 @@
 'use client';
 
 import { useState } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { AlertConfig } from "./types";
 
 const DEFAULT_ICONS: Record<string, string> = {
@@ -32,9 +36,20 @@ function variantColor(variant: string): string {
 }
 
 export function Alert({ config }: { config: AlertConfig }) {
-  const resolvedTitle = useSubscribe(config.title ?? "") as string;
-  const resolvedDescription = useSubscribe(config.description) as string;
-  const resolvedActionLabel = useSubscribe(config.actionLabel) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    title: config.title ?? "",
+    description: config.description,
+    actionLabel: config.actionLabel,
+  });
+  const resolvedTitle =
+    resolveOptionalPrimitiveValue(resolvedConfig.title, primitiveOptions) ?? "";
+  const resolvedDescription =
+    resolveOptionalPrimitiveValue(resolvedConfig.description, primitiveOptions) ?? "";
+  const resolvedActionLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.actionLabel,
+    primitiveOptions,
+  );
   const visible = useSubscribe(config.visible ?? true);
   const execute = useActionExecutor();
   const publish = usePublish(config.id);

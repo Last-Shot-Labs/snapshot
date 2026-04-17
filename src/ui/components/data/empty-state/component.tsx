@@ -1,6 +1,6 @@
 'use client';
 
-import { useSubscribe } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -8,6 +8,10 @@ import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../../forms/button";
 import type { EmptyStateConfig } from "./types";
 
@@ -21,9 +25,24 @@ const SPACING_MAP = {
 export function EmptyState({ config }: { config: EmptyStateConfig }) {
   const execute = useActionExecutor();
   const visible = useSubscribe(config.visible ?? true);
-  const title = useSubscribe(config.title);
-  const description = useSubscribe(config.description);
-  const actionLabel = useSubscribe(config.actionLabel);
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    title: config.title,
+    description: config.description,
+    actionLabel: config.actionLabel,
+  });
+  const title = resolveOptionalPrimitiveValue(
+    resolvedConfig.title,
+    primitiveOptions,
+  );
+  const description = resolveOptionalPrimitiveValue(
+    resolvedConfig.description,
+    primitiveOptions,
+  );
+  const actionLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.actionLabel,
+    primitiveOptions,
+  );
 
   if (visible === false) {
     return null;
@@ -118,10 +137,10 @@ export function EmptyState({ config }: { config: EmptyStateConfig }) {
         className={titleSurface.className}
         style={titleSurface.style}
       >
-        {typeof title === "string" ? title : ""}
+        {title ?? ""}
       </h3>
 
-      {typeof description === "string" ? (
+      {description ? (
         <p
           data-testid="empty-state-description"
           data-snapshot-id={`${rootId}-description`}
@@ -132,7 +151,7 @@ export function EmptyState({ config }: { config: EmptyStateConfig }) {
         </p>
       ) : null}
 
-      {config.action && typeof actionLabel === "string" ? (
+      {config.action && actionLabel ? (
         <ButtonControl
           variant="default"
           size="md"

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { usePublish, useSubscribe } from "../../../context/hooks";
+import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -9,6 +9,10 @@ import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../button";
 import { InputControl } from "../input";
 import type { InlineEditConfig } from "./types";
@@ -23,9 +27,12 @@ export function InlineEdit({ config }: { config: InlineEditConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const resolvedValue = useSubscribe(config.value);
-  const resolvedPlaceholder = useSubscribe(config.placeholder) as
-    | string
-    | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ placeholder: config.placeholder });
+  const resolvedPlaceholder = resolveOptionalPrimitiveValue(
+    resolvedConfig.placeholder,
+    primitiveOptions,
+  );
   const displayValue =
     typeof resolvedValue === "string" || typeof resolvedValue === "number"
       ? String(resolvedValue)

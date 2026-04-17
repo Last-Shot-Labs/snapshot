@@ -153,4 +153,64 @@ describe("NotificationFeed", () => {
 
     expect(screen.getByText("All caught up")).toBeTruthy();
   });
+
+  it("applies canonical loading and icon glyph slots", () => {
+    useComponentDataMock.mockReturnValue({
+      data: null,
+      isLoading: true,
+      error: null,
+    });
+
+    const { container, rerender } = render(
+      <NotificationFeed
+        config={{
+          type: "notification-feed",
+          id: "status-feed",
+          data: "/api/notifications",
+          slots: {
+            loadingBody: { className: "feed-loading-body-slot" },
+          },
+        }}
+      />,
+    );
+
+    expect(
+      container.querySelector('[data-snapshot-id="status-feed-loading-body-0"]')
+        ?.className,
+    ).toContain("feed-loading-body-slot");
+
+    useComponentDataMock.mockReturnValue({
+      data: [
+        {
+          id: "n1",
+          title: "Build passed",
+          message: "CI is green",
+          read: false,
+          type: "success",
+          timestamp: "2026-04-13T00:00:00.000Z",
+          slots: {
+            itemIconGlyph: { className: "feed-item-icon-glyph-slot" },
+          },
+        },
+      ],
+      isLoading: false,
+      error: null,
+    });
+
+    rerender(
+      <NotificationFeed
+        config={{
+          type: "notification-feed",
+          id: "status-feed",
+          data: "/api/notifications",
+        }}
+      />,
+    );
+
+    expect(
+      container
+        .querySelector('[data-snapshot-id="status-feed-item-n1-icon-glyph"]')
+        ?.getAttribute("class"),
+    ).toContain("feed-item-icon-glyph-slot");
+  });
 });

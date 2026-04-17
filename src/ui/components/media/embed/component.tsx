@@ -1,18 +1,32 @@
 'use client';
 
-import { useSubscribe } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { EmbedSchemaConfig } from "./types";
 
 export function Embed({ config }: { config: EmbedSchemaConfig }) {
-  const rawUrl = useSubscribe(config.url);
-  const rawAspectRatio = useSubscribe(config.aspectRatio);
-  const rawTitle = useSubscribe(config.title);
-  const url = typeof rawUrl === "string" ? rawUrl : "";
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    url: config.url,
+    aspectRatio: config.aspectRatio,
+    title: config.title,
+  });
+  const url = resolveOptionalPrimitiveValue(
+    resolvedConfig.url,
+    primitiveOptions,
+  ) ?? "";
   const aspectRatio =
-    typeof rawAspectRatio === "string" ? rawAspectRatio : "16/9";
-  const title = typeof rawTitle === "string" ? rawTitle : undefined;
+    resolveOptionalPrimitiveValue(resolvedConfig.aspectRatio, primitiveOptions) ??
+    "16/9";
+  const title = resolveOptionalPrimitiveValue(
+    resolvedConfig.title,
+    primitiveOptions,
+  );
   const rootId = config.id ?? "embed";
   const rootSurface = resolveSurfacePresentation({
     surfaceId: rootId,

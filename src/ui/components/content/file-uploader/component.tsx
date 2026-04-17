@@ -3,7 +3,7 @@
 import type { DragEvent, KeyboardEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import { usePublish, useSubscribe } from "../../../context/hooks";
+import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import {
   buildRequestUrl,
   resolveEndpointTarget,
@@ -14,6 +14,10 @@ import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../../forms/button";
 import { InputControl } from "../../forms/input";
 import type { FileUploaderConfig, UploadFileEntry } from "./types";
@@ -248,6 +252,11 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
   const publish = usePublish(config.id);
   const visible = useSubscribe(config.visible ?? true);
   const runtime = useManifestRuntime();
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    label: config.label,
+    description: config.description,
+  });
   const inputRef = useRef<HTMLInputElement>(null);
   const fileIdCounterRef = useRef(0);
   const [files, setFiles] = useState<UploadFileEntry[]>([]);
@@ -256,8 +265,14 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
 
   const variant = config.variant ?? "dropzone";
   const maxFiles = config.maxFiles ?? 1;
-  const label = useSubscribe(config.label) as string | undefined;
-  const description = useSubscribe(config.description) as string | undefined;
+  const label = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
+  const description = resolveOptionalPrimitiveValue(
+    resolvedConfig.description,
+    primitiveOptions,
+  );
   const resolvedLabel = label ?? "Drop files here or click to browse";
 
   useEffect(() => {
