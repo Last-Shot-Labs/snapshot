@@ -152,6 +152,9 @@ describe("detailCardConfigSchema", () => {
         panel: {
           borderRadius: "lg",
         },
+        skeleton: {
+          className: "detail-skeleton-slot",
+        },
         actionButton: {
           states: {
             hover: {
@@ -167,6 +170,9 @@ describe("detailCardConfigSchema", () => {
           slots: {
             fieldValue: {
               color: "text.default",
+            },
+            badgeValue: {
+              className: "badge-value-slot",
             },
             copyButton: {
               className: "copy-slot",

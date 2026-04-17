@@ -11,6 +11,7 @@ describe("oauthButtonsConfigSchema", () => {
       heading: "Continue with",
       slots: {
         root: { className: "oauth-root" },
+        providerGroup: { className: "oauth-provider-group" },
         provider: { className: "oauth-provider" },
         providerLabel: { className: "oauth-provider-label" },
       },

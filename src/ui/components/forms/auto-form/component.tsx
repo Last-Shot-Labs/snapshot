@@ -255,16 +255,12 @@ export function toFieldOptions(
       );
   }
 
-  if (
-    data &&
-    typeof data === "object" &&
-    Array.isArray((data as Record<string, unknown>)["data"])
-  ) {
-    return toFieldOptions(
-      (data as Record<string, unknown>)["data"],
-      labelField,
-      valueField,
-    );
+  if (data && typeof data === "object") {
+    const record = data as Record<string, unknown>;
+    const nested = record["data"] ?? record["items"];
+    if (Array.isArray(nested)) {
+      return toFieldOptions(nested, labelField, valueField);
+    }
   }
 
   return [];
@@ -409,7 +405,30 @@ function FieldRenderer({
   const labelSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-label-${field.name}`,
     implementationBase: {
-      display: "block",
+      display:
+        field.type === "checkbox"
+          ? "inline-flex"
+          : inlineActionLabel && inlineActionTarget
+            ? "flex"
+            : "block",
+      alignItems:
+        field.type === "checkbox"
+          ? "center"
+          : inlineActionLabel && inlineActionTarget
+            ? "baseline"
+            : undefined,
+      justifyContent:
+        inlineActionLabel && inlineActionTarget && field.type !== "checkbox"
+          ? "between"
+          : undefined,
+      gap:
+        field.type === "checkbox"
+          ? "var(--sn-spacing-sm, 0.5rem)"
+          : undefined,
+      cursor:
+        field.type === "checkbox"
+          ? (field.disabled ? "not-allowed" : "pointer")
+          : undefined,
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
       fontWeight: "var(--sn-font-weight-medium, 500)",
       color: "var(--sn-color-foreground, #111827)",
@@ -631,31 +650,18 @@ function FieldRenderer({
       const selectedValues = Array.isArray(value)
         ? value.map((item) => toNormalizedString(item)).filter(Boolean)
         : [];
-
-      input = (
-        <select
-          id={fieldId}
-          name={field.name}
-          multiple
-          disabled={field.disabled}
-          required={required}
-          aria-invalid={hasError}
-          aria-describedby={describedBy}
-          aria-label={label}
-          value={selectedValues}
-          onChange={(event) =>
-            onChange(
-              Array.from(event.currentTarget.selectedOptions).map(
-                (option) => option.value,
-              ),
-            )
-          }
-          onBlur={onBlur}
-          data-snapshot-id={`${rootId}-input-${field.name}`}
-          className={inputSurface.className}
-          style={{
-            width: "100%",
-            padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+      const multiSelectSurface = resolveSurfacePresentation({
+        surfaceId: `${rootId}-input-${field.name}`,
+        implementationBase: {
+          width: "100%",
+          minHeight: `${Math.min(fieldOptions.length + 0.5, 8) * 1.75}rem`,
+          cursor: field.disabled ? "not-allowed" : "pointer",
+          style: {
+            appearance: "none",
+            boxSizing: "border-box",
+            padding:
+              "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+            paddingRight: "var(--sn-spacing-sm, 0.5rem)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
             lineHeight: "var(--sn-leading-normal, 1.5)",
             color: "var(--sn-color-foreground, #111827)",
@@ -664,21 +670,66 @@ function FieldRenderer({
               "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
             borderRadius: "var(--sn-radius-md, 0.375rem)",
             outline: "none",
-            boxSizing: "border-box",
             fontFamily: "inherit",
             transition:
               "border-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out), box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)",
-            ...(inputStyle ?? {}),
-            minHeight: `${Math.min(fieldOptions.length + 0.5, 8) * 1.75}rem`,
-            paddingRight: "var(--sn-spacing-sm, 0.5rem)",
-          }}
-        >
-          {fieldOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+          },
+          states: {
+            focus: {
+              style: {
+                borderColor: "var(--sn-color-primary, #2563eb)",
+                boxShadow:
+                  "0 0 0 var(--sn-ring-width, 2px) color-mix(in oklch, var(--sn-color-primary, #2563eb) 25%, transparent)",
+              },
+            },
+            invalid: {
+              style: {
+                borderColor: "var(--sn-color-destructive, #ef4444)",
+              },
+            },
+            disabled: {
+              opacity: 0.5,
+              cursor: "not-allowed",
+            },
+          },
+        },
+        componentSurface: slots?.input,
+        itemSurface: field.slots?.input,
+        activeStates,
+      });
+
+      input = (
+        <>
+          <select
+            id={fieldId}
+            name={field.name}
+            multiple
+            disabled={field.disabled}
+            required={required}
+            aria-invalid={hasError}
+            aria-describedby={describedBy}
+            aria-label={label}
+            value={selectedValues}
+            onChange={(event) =>
+              onChange(
+                Array.from(event.currentTarget.selectedOptions).map(
+                  (option) => option.value,
+                ),
+              )
+            }
+            onBlur={onBlur}
+            data-snapshot-id={`${rootId}-input-${field.name}`}
+            className={multiSelectSurface.className}
+            style={multiSelectSurface.style}
+          >
+            {fieldOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <SurfaceStyles css={multiSelectSurface.scopedCss} />
+        </>
       );
       break;
     }
@@ -719,67 +770,118 @@ function FieldRenderer({
       const switchThumbTranslate = switchChecked
         ? switchTrackW - switchThumb - switchThumbOffset * 2
         : 0;
+      const switchStates = [
+        ...(switchChecked ? (["active"] as const) : []),
+        ...(field.disabled ? (["disabled"] as const) : []),
+      ];
+      const switchButtonSurface = resolveSurfacePresentation({
+        surfaceId: `${rootId}-input-${field.name}`,
+        implementationBase: {
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "var(--sn-spacing-sm, 0.5rem)",
+          padding: 0,
+          border: "none",
+          bg: "transparent",
+          cursor: field.disabled ? "not-allowed" : "pointer",
+          style: {
+            appearance: "none",
+          },
+          states: {
+            disabled: {
+              opacity: 0.5,
+            },
+          },
+        },
+        componentSurface: slots?.input,
+        itemSurface: field.slots?.input,
+        activeStates: switchStates,
+      });
+      const switchTrackSurface = resolveSurfacePresentation({
+        surfaceId: `${rootId}-switch-track-${field.name}`,
+        implementationBase: {
+          position: "relative",
+          display: "inline-flex",
+          alignItems: "center",
+          width: `${switchTrackW}px`,
+          height: `${switchTrackH}px`,
+          borderRadius: "9999px",
+          bg: "var(--sn-color-secondary, #e5e7eb)",
+          style: {
+            flexShrink: 0,
+          },
+          transition:
+            "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)",
+          states: {
+            active: {
+              bg: "var(--sn-color-primary, #2563eb)",
+            },
+          },
+        },
+        componentSurface: slots?.switchTrack,
+        itemSurface: field.slots?.switchTrack,
+        activeStates: switchStates,
+      });
+      const switchThumbSurface = resolveSurfacePresentation({
+        surfaceId: `${rootId}-switch-thumb-${field.name}`,
+        implementationBase: {
+          position: "absolute",
+          width: `${switchThumb}px`,
+          height: `${switchThumb}px`,
+          borderRadius: "9999px",
+          bg: "var(--sn-color-card, #ffffff)",
+          transform: "translateX(0px)",
+          style: {
+            top: `${switchThumbOffset}px`,
+            left: `${switchThumbOffset}px`,
+            boxShadow: "var(--sn-shadow-sm, 0 1px 3px rgba(0,0,0,0.2))",
+          },
+          transition:
+            "transform var(--sn-duration-fast, 150ms) cubic-bezier(0.34, 1.56, 0.64, 1)",
+          states: {
+            active: {
+              transform: `translateX(${switchThumbTranslate}px)`,
+            },
+          },
+        },
+        componentSurface: slots?.switchThumb,
+        itemSurface: field.slots?.switchThumb,
+        activeStates: switchStates,
+      });
 
       input = (
-        <button
-          type="button"
-          id={fieldId}
-          role="switch"
-          aria-checked={switchChecked}
-          aria-invalid={hasError}
-          aria-describedby={describedBy}
-          aria-label={label}
-          disabled={field.disabled}
-          onClick={() => onChange(!switchChecked)}
-          onBlur={onBlur}
-          data-snapshot-id={`${rootId}-input-${field.name}`}
-          className={inputSurface.className}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "var(--sn-spacing-sm, 0.5rem)",
-            padding: 0,
-            border: "none",
-            background: "none",
-            cursor: field.disabled ? "not-allowed" : "pointer",
-            opacity: field.disabled ? 0.5 : undefined,
-            ...(inputSurface.style as React.CSSProperties),
-          }}
-        >
-          <span
-            style={{
-              position: "relative",
-              display: "inline-flex",
-              alignItems: "center",
-              width: switchTrackW,
-              height: switchTrackH,
-              flexShrink: 0,
-              borderRadius: "9999px",
-              backgroundColor: switchChecked
-                ? "var(--sn-color-primary, #2563eb)"
-                : "var(--sn-color-secondary, #e5e7eb)",
-              transition:
-                "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-out, ease-out)",
-            }}
+        <>
+          <button
+            type="button"
+            id={fieldId}
+            role="switch"
+            aria-checked={switchChecked}
+            aria-invalid={hasError}
+            aria-describedby={describedBy}
+            aria-label={label}
+            disabled={field.disabled}
+            onClick={() => onChange(!switchChecked)}
+            onBlur={onBlur}
+            data-snapshot-id={`${rootId}-input-${field.name}`}
+            className={switchButtonSurface.className}
+            style={switchButtonSurface.style}
           >
             <span
-              style={{
-                position: "absolute",
-                top: switchThumbOffset,
-                left: switchThumbOffset,
-                width: switchThumb,
-                height: switchThumb,
-                borderRadius: "9999px",
-                backgroundColor: "var(--sn-color-card, #ffffff)",
-                boxShadow:
-                  "var(--sn-shadow-sm, 0 1px 3px rgba(0,0,0,0.2))",
-                transform: `translateX(${switchThumbTranslate}px)`,
-                transition:
-                  "transform var(--sn-duration-fast, 150ms) cubic-bezier(0.34, 1.56, 0.64, 1)",
-              }}
-            />
-          </span>
-        </button>
+              data-snapshot-id={`${rootId}-switch-track-${field.name}`}
+              className={switchTrackSurface.className}
+              style={switchTrackSurface.style}
+            >
+              <span
+                data-snapshot-id={`${rootId}-switch-thumb-${field.name}`}
+                className={switchThumbSurface.className}
+                style={switchThumbSurface.style}
+              />
+            </span>
+          </button>
+          <SurfaceStyles css={switchButtonSurface.scopedCss} />
+          <SurfaceStyles css={switchTrackSurface.scopedCss} />
+          <SurfaceStyles css={switchThumbSurface.scopedCss} />
+        </>
       );
       break;
     }
@@ -1118,13 +1220,7 @@ function FieldRenderer({
           htmlFor={fieldId}
           data-snapshot-id={`${rootId}-label-${field.name}`}
           className={labelSurface.className}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "var(--sn-spacing-sm, 0.5rem)",
-            cursor: field.disabled ? "not-allowed" : "pointer",
-            ...(labelSurface.style as React.CSSProperties),
-          }}
+          style={labelSurface.style}
         >
           {input}
           <span>{label}</span>
@@ -1171,14 +1267,7 @@ function FieldRenderer({
         htmlFor={fieldId}
         data-snapshot-id={`${rootId}-label-${field.name}`}
         className={labelSurface.className}
-        style={{
-          display: inlineActionLabel && inlineActionTarget ? "flex" : "block",
-          justifyContent:
-            inlineActionLabel && inlineActionTarget ? "space-between" : undefined,
-          alignItems:
-            inlineActionLabel && inlineActionTarget ? "baseline" : undefined,
-          ...(labelSurface.style as React.CSSProperties),
-        }}
+        style={labelSurface.style}
       >
           <span>
             {label}
@@ -1449,6 +1538,7 @@ function SectionRenderer({
       {/* Section fields */}
       {!collapsed && (
         <FieldGrid
+          gridId={`${rootId}-section-fields-${sectionTitle}`}
           rootId={rootId}
           fields={section.fields}
           form={form}
@@ -1469,6 +1559,7 @@ function SectionRenderer({
 // ── Field grid ────────────────────────────────────────────────────────────
 
 function FieldGrid({
+  gridId,
   rootId,
   fields,
   form,
@@ -1476,6 +1567,7 @@ function FieldGrid({
   gap,
   slots,
 }: {
+  gridId: string;
   rootId: string;
   fields: FieldConfig[];
   form: ReturnType<typeof useAutoForm>;
@@ -1483,25 +1575,42 @@ function FieldGrid({
   gap: string;
   slots?: AutoFormConfig["slots"];
 }) {
+  const gridSurface = resolveSurfacePresentation({
+    surfaceId: gridId,
+    implementationBase: {
+      display: "grid",
+      gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+      gap,
+    },
+    componentSurface: slots?.fieldGrid,
+  });
+
   return (
     <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${columns}, 1fr)`,
-        gap,
-      }}
+      data-snapshot-id={gridId}
+      className={gridSurface.className}
+      style={gridSurface.style}
     >
       {fields.map((field) => {
         if (!isFieldVisible(field, form.values)) return null;
 
+        const cellSurface = resolveSurfacePresentation({
+          surfaceId: `${gridId}-cell-${field.name}`,
+          implementationBase: {
+            gridColumn: field.span
+              ? `span ${Math.min(field.span, columns)}`
+              : `span ${columns}`,
+          },
+          componentSurface: slots?.fieldCell,
+          itemSurface: field.slots?.fieldCell,
+        });
+
         return (
           <div
             key={field.name}
-            style={{
-              gridColumn: field.span
-                ? `span ${Math.min(field.span, columns)}`
-                : `span ${columns}`,
-            }}
+            data-snapshot-id={`${gridId}-cell-${field.name}`}
+            className={cellSurface.className}
+            style={cellSurface.style}
           >
             <FieldRenderer
               rootId={rootId}
@@ -1514,9 +1623,11 @@ function FieldGrid({
               onBlur={() => form.touchField(field.name)}
               slots={slots}
             />
+            <SurfaceStyles css={cellSurface.scopedCss} />
           </div>
         );
       })}
+      <SurfaceStyles css={gridSurface.scopedCss} />
     </div>
   );
 }
@@ -2086,6 +2197,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
       ) : (
         /* Flat fields mode */
         <FieldGrid
+          gridId={`${rootId}-fields`}
           rootId={rootId}
           fields={resolvedFields}
           form={form}

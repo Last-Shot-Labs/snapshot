@@ -200,6 +200,70 @@ describe("DetailCard", () => {
     expect(screen.queryByText("Age")).toBeNull();
   });
 
+  it("applies canonical slots to formatted values and the fallback skeleton", () => {
+    const SourceWrapper = createTestWrapper(registry);
+    const atom = registry.register("source");
+    registry.store.set(atom, { role: "admin" });
+
+    render(
+      <SourceWrapper>
+        <DetailCard
+          config={{
+            ...baseConfig,
+            fields: [
+              {
+                field: "role",
+                format: "badge",
+                slots: {
+                  badgeValue: {
+                    className: "detail-badge-slot",
+                  },
+                },
+              },
+            ],
+          }}
+        />
+      </SourceWrapper>,
+    );
+
+    expect(screen.getByText("admin").className).toContain("detail-badge-slot");
+
+    cleanup();
+
+    const EndpointWrapper = createTestWrapper(registry, {
+      get: vi.fn().mockResolvedValue({}),
+      post: vi.fn(),
+      put: vi.fn(),
+      patch: vi.fn(),
+      delete: vi.fn(),
+    });
+
+    render(
+      <EndpointWrapper>
+        <DetailCard
+          config={{
+            type: "detail-card",
+            id: "detail-card-skeleton-slots",
+            data: "GET /api/users/1",
+            fields: "auto",
+            slots: {
+              skeleton: {
+                className: "detail-skeleton-slot",
+              },
+            },
+            loading: {
+              disabled: true,
+            },
+          }}
+        />
+      </EndpointWrapper>,
+    );
+
+    expect(screen.getByTestId("detail-card-skeleton").className).toContain(
+      "detail-skeleton-slot",
+    );
+  });
+
   it("renders a title when provided", () => {
     const Wrapper = createTestWrapper(registry);
     const atom = registry.register("source");

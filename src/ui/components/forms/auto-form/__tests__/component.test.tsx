@@ -1053,6 +1053,11 @@ describe("AutoForm", () => {
                 { label: "User", value: "user" },
               ],
             },
+            {
+              name: "notifications",
+              type: "switch",
+              label: "Notifications",
+            },
           ],
           slots: {
             section: { className: "section-slot" },
@@ -1065,11 +1070,15 @@ describe("AutoForm", () => {
       ],
       slots: {
         root: { className: "form-root-slot" },
+        fieldGrid: { className: "field-grid-slot" },
+        fieldCell: { className: "field-cell-slot" },
         inlineAction: { className: "inline-action-slot" },
         passwordToggle: { className: "password-toggle-slot" },
         options: { className: "options-slot" },
         option: { className: "option-slot" },
         optionLabel: { className: "option-label-slot" },
+        switchTrack: { className: "switch-track-slot" },
+        switchThumb: { className: "switch-thumb-slot" },
         submitButton: { className: "submit-slot" },
       },
     };
@@ -1097,6 +1106,12 @@ describe("AutoForm", () => {
     expect(container.querySelector('[data-snapshot-id="user-form-section-description-Profile"]')?.className).toContain(
       "section-description-slot",
     );
+    expect(container.querySelector('[data-snapshot-id="user-form-section-fields-Profile"]')?.className).toContain(
+      "field-grid-slot",
+    );
+    expect(container.querySelector('[data-snapshot-id="user-form-section-fields-Profile-cell-password"]')?.className).toContain(
+      "field-cell-slot",
+    );
     expect(container.querySelector('[data-snapshot-id="user-form-field-password"]')?.className).toContain(
       "field-slot",
     );
@@ -1118,6 +1133,12 @@ describe("AutoForm", () => {
     );
     expect(container.querySelector('[data-snapshot-id="user-form-optionLabel-role-admin"]')?.className).toContain(
       "option-label-slot",
+    );
+    expect(container.querySelector('[data-snapshot-id="user-form-switch-track-notifications"]')?.className).toContain(
+      "switch-track-slot",
+    );
+    expect(container.querySelector('[data-snapshot-id="user-form-switch-thumb-notifications"]')?.className).toContain(
+      "switch-thumb-slot",
     );
     expect(screen.getByText("Submit").closest("button")?.className).toContain(
       "submit-slot",

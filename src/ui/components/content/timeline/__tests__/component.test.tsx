@@ -66,6 +66,28 @@ vi.mock("../../../../manifest/renderer", () => ({
   ),
 }));
 
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: {},
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
+
 vi.mock("../../../../icons/icon", () => ({
   Icon: ({ name }: { name: string }) => <span data-testid={`timeline-icon-${name}`}>{name}</span>,
 }));
@@ -180,6 +202,29 @@ describe("Timeline", () => {
     );
     expect(screen.getByTestId("timeline-description").textContent).toBe(
       "Resolved description",
+    );
+  });
+
+  it("resolves templated static item copy against route runtime", () => {
+    render(
+      <Timeline
+        config={{
+          type: "timeline",
+          items: [
+            {
+              title: "Opened {route.params.id}",
+              description: "At {route.path}",
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId("timeline-title").textContent).toBe(
+      "Opened alpha",
+    );
+    expect(screen.getByTestId("timeline-description").textContent).toBe(
+      "At /workspace/alpha",
     );
   });
 });

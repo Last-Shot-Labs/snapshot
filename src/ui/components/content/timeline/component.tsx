@@ -13,11 +13,11 @@ import {
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { Icon } from "../../../icons/icon";
 import type { ComponentConfig } from "../../../manifest/types";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { TimelineConfig, TimelineItem } from "./types";
-
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
 
 /**
  * Resolve timeline items from either static config or API data.
@@ -74,6 +74,7 @@ function useTimelineItems(
  * Timeline component: grouped timeline sugar over canonical visible surfaces.
  */
 export function Timeline({ config }: { config: TimelineConfig }) {
+  const primitiveOptions = usePrimitiveValueOptions();
   const resolvedConfig = useResolveFrom({ items: config.items });
   const staticItems = useMemo<TimelineItem[]>(
     () =>
@@ -81,10 +82,13 @@ export function Timeline({ config }: { config: TimelineConfig }) {
         config.items ??
         []) as TimelineItem[]).map((item) => ({
         ...item,
-        title: resolveText(item.title) ?? "",
-        description: resolveText(item.description),
+        title: resolveOptionalPrimitiveValue(item.title, primitiveOptions) ?? "",
+        description: resolveOptionalPrimitiveValue(
+          item.description,
+          primitiveOptions,
+        ),
       })),
-    [config.items, resolvedConfig.items],
+    [config.items, primitiveOptions, resolvedConfig.items],
   );
   const { items, isLoading, error, refetch } = useTimelineItems(
     config,

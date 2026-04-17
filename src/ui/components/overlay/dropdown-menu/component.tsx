@@ -14,16 +14,14 @@ import {
   MenuSeparator,
 } from "../../primitives/floating-menu";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { resolveOptionalPrimitiveValue, usePrimitiveValueOptions } from "../../primitives/resolve-value";
 import type { DropdownMenuConfig } from "./types";
 
 type DropdownMenuItem = DropdownMenuConfig["items"][number];
 
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
-
 export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
   const execute = useActionExecutor();
+  const primitiveOptions = usePrimitiveValueOptions();
   const resolvedConfig = useResolveFrom({
     trigger: config.trigger,
     items: config.items,
@@ -35,28 +33,30 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
   const trigger =
     (resolvedConfig.trigger as DropdownMenuConfig["trigger"] | undefined) ??
     config.trigger;
-  const items = (
-    ((resolvedConfig.items as DropdownMenuConfig["items"] | undefined) ??
-      config.items) as DropdownMenuConfig["items"]
-  ).map((entry: DropdownMenuItem) => {
-    if (entry.type === "item") {
-      return {
-        ...entry,
-        label: resolveText(entry.label) ?? "",
-      };
-    }
+  const resolvedTrigger = {
+    ...trigger,
+    label: resolveOptionalPrimitiveValue(trigger.label, primitiveOptions),
+  };
+  const items = (((resolvedConfig.items as DropdownMenuConfig["items"] | undefined) ??
+    config.items) as DropdownMenuConfig["items"]).map((entry: DropdownMenuItem) => {
+      if (entry.type === "item") {
+        return {
+          ...entry,
+          label: resolveOptionalPrimitiveValue(entry.label, primitiveOptions) ?? "",
+        };
+      }
 
-    if (entry.type === "label") {
-      return {
-        ...entry,
-        text: resolveText(entry.text) ?? "",
-      };
-    }
+      if (entry.type === "label") {
+        return {
+          ...entry,
+          text: resolveOptionalPrimitiveValue(entry.text, primitiveOptions) ?? "",
+        };
+      }
 
-    return entry;
-  });
+      return entry;
+    });
 
-  const variant = trigger.variant ?? "default";
+  const variant = resolvedTrigger.variant ?? "default";
   const align = config.align ?? "start";
   const side = config.side ?? "bottom";
   const rootId = config.id ?? "dropdown-menu";
@@ -173,22 +173,22 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
         ariaHasPopup="menu"
         activeStates={isOpen ? ["open"] : []}
       >
-        {trigger.icon ? (
+        {resolvedTrigger.icon ? (
           <span
             data-snapshot-id={`${rootId}-trigger-icon`}
             className={triggerIconSurface.className}
             style={triggerIconSurface.style}
           >
-            {renderIcon(trigger.icon, 16)}
+            {renderIcon(resolvedTrigger.icon, 16)}
           </span>
         ) : null}
-        {trigger.label ? (
+        {resolvedTrigger.label ? (
           <span
             data-snapshot-id={`${rootId}-trigger-label`}
             className={triggerLabelSurface.className}
             style={triggerLabelSurface.style}
           >
-            {trigger.label}
+            {resolvedTrigger.label}
           </span>
         ) : null}
       </ButtonControl>

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React, { createContext } from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CommandPalette } from "../component";
 
@@ -50,9 +50,27 @@ vi.mock("../../../_base/use-component-data", () => ({
   useComponentData: () => ({ data: undefined }),
 }));
 
-vi.mock("../../../../manifest/runtime", () => ({
-  useManifestRuntime: () => undefined,
-}));
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: {},
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
 
 vi.mock("../../../../shortcuts", () => ({
   parseChord: () => [],
@@ -71,6 +89,7 @@ describe("CommandPalette", () => {
   afterEach(() => {
     vi.runOnlyPendingTimers();
     vi.useRealTimers();
+    cleanup();
   });
 
   it("applies canonical panel and current-item slot styling", () => {
@@ -187,5 +206,41 @@ describe("CommandPalette", () => {
     expect(screen.getByText("Ref Actions")).toBeTruthy();
     expect(screen.getByText("Ref First")).toBeTruthy();
     expect(screen.getByText("Open the ref command")).toBeTruthy();
+  });
+
+  it("resolves templated placeholder and group/item copy against route runtime", () => {
+    render(
+      <CommandPalette
+        config={{
+          type: "command-palette",
+          id: "palette-template",
+          visible: true,
+          autoRegisterShortcuts: false,
+          shortcut: "ctrl+k",
+          placeholder: "Search {route.params.id}",
+          emptyMessage: "Nothing for {route.path}",
+          groups: [
+            {
+              label: "Workspace {route.params.id}",
+              items: [
+                {
+                  label: "Open {route.path}",
+                  description: "Context {route.params.id}",
+                },
+              ],
+            },
+          ],
+        }}
+      />,
+    );
+
+    act(() => {
+      vi.runAllTimers();
+    });
+
+    expect(screen.getByPlaceholderText("Search alpha")).toBeTruthy();
+    expect(screen.getByText("Workspace alpha")).toBeTruthy();
+    expect(screen.getByText("Open /workspace/alpha")).toBeTruthy();
+    expect(screen.getByText("Context alpha")).toBeTruthy();
   });
 });

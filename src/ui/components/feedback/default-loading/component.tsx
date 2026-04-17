@@ -1,12 +1,21 @@
 "use client";
 
-import { useSubscribe } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { SpinnerConfig } from "./types";
 
 export function DefaultLoading({ config }: { config: SpinnerConfig }) {
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ label: config.label });
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
   const size = config.size ?? "md";
   const diameter = size === "sm" ? "1rem" : size === "lg" ? "2rem" : "1.5rem";
   const rootId = config.id ?? "spinner";

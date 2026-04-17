@@ -17,124 +17,214 @@ import type { DetailCardConfig } from "./schema";
 import type { ResolvedField } from "./types";
 import { resolveLookupValue, useLookupMaps } from "../_shared/lookups";
 
-function formatValue(field: ResolvedField): React.ReactNode {
+function FormattedFieldValue({
+  rootId,
+  field,
+  fieldIndex,
+  componentSlots,
+}: {
+  rootId: string;
+  field: ResolvedField;
+  fieldIndex: number;
+  componentSlots?: DetailCardConfig["slots"];
+}) {
   const { value, format } = field;
+  const fieldSlots = field.slots;
+  const emptyValueSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-field-empty-value-${fieldIndex}`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground, #64748b)",
+    },
+    componentSurface: componentSlots?.emptyValue,
+    itemSurface: fieldSlots?.emptyValue,
+  });
+  const booleanValueSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-field-boolean-value-${fieldIndex}`,
+    implementationBase: {
+      color: "var(--sn-color-muted-foreground, #94a3b8)",
+      states: {
+        active: {
+          color: "var(--sn-color-success, #22c55e)",
+        },
+      },
+    },
+    componentSurface: componentSlots?.booleanValue,
+    itemSurface: fieldSlots?.booleanValue,
+    activeStates: value ? ["active"] : [],
+  });
+  const badgeValueSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-field-badge-value-${fieldIndex}`,
+    implementationBase: {
+      display: "inline-block",
+      padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+      borderRadius: "var(--sn-radius-full, 9999px)",
+      bg: "var(--sn-color-secondary, #f1f5f9)",
+      color: "var(--sn-color-secondary-foreground, #0f172a)",
+      fontSize: "var(--sn-font-size-sm, 0.875rem)",
+      fontWeight: "var(--sn-font-weight-medium, 500)",
+    },
+    componentSurface: componentSlots?.badgeValue,
+    itemSurface: fieldSlots?.badgeValue,
+  });
+  const linkValueSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-field-link-value-${fieldIndex}`,
+    implementationBase: {
+      color: "var(--sn-color-primary, #3b82f6)",
+    },
+    componentSurface: componentSlots?.linkValue,
+    itemSurface: fieldSlots?.linkValue,
+  });
+  const imageValueSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-field-image-value-${fieldIndex}`,
+    implementationBase: {
+      display: "block",
+      width: "var(--sn-spacing-3xl, 3rem)",
+      height: "var(--sn-spacing-3xl, 3rem)",
+      borderRadius: "var(--sn-radius-full, 9999px)",
+      style: {
+        objectFit: "cover",
+      },
+    },
+    componentSurface: componentSlots?.imageValue,
+    itemSurface: fieldSlots?.imageValue,
+  });
 
-  if (value == null) {
-    return (
-      <span style={{ color: "var(--sn-color-muted-foreground, #64748b)" }}>
-        --
-      </span>
-    );
-  }
+  let content: React.ReactNode = null;
 
-  switch (format) {
-    case "boolean":
-      return (
-        <span
-          style={{
-            color: value
-              ? "var(--sn-color-success, #22c55e)"
-              : "var(--sn-color-muted-foreground, #94a3b8)",
-          }}
-        >
-          {value ? "Yes" : "No"}
-        </span>
-      );
+  if (value != null) {
+    switch (format) {
+      case "boolean":
+        content = (
+          <span
+            data-snapshot-id={`${rootId}-field-boolean-value-${fieldIndex}`}
+            className={booleanValueSurface.className}
+            style={booleanValueSurface.style}
+          >
+            {value ? "Yes" : "No"}
+          </span>
+        );
+        break;
 
-    case "date":
-      return (
-        <span>{new Date(value as string | number).toLocaleDateString()}</span>
-      );
+      case "date":
+        content = (
+          <span>{new Date(value as string | number).toLocaleDateString()}</span>
+        );
+        break;
 
-    case "datetime":
-      return <span>{new Date(value as string | number).toLocaleString()}</span>;
+      case "datetime":
+        content = <span>{new Date(value as string | number).toLocaleString()}</span>;
+        break;
 
-    case "number":
-      return <span>{Number(value).toLocaleString()}</span>;
+      case "number":
+        content = <span>{Number(value).toLocaleString()}</span>;
+        break;
 
-    case "currency": {
-      const divisor = field.divisor;
-      const adjusted = divisor && divisor !== 1 ? Number(value) / divisor : Number(value);
-      return (
-        <span>
-          {adjusted.toLocaleString(undefined, {
-            style: "currency",
-            currency: "USD",
-          })}
-        </span>
-      );
+      case "currency": {
+        const divisor = field.divisor;
+        const adjusted = divisor && divisor !== 1 ? Number(value) / divisor : Number(value);
+        content = (
+          <span>
+            {adjusted.toLocaleString(undefined, {
+              style: "currency",
+              currency: "USD",
+            })}
+          </span>
+        );
+        break;
+      }
+
+      case "badge":
+        content = (
+          <span
+            data-snapshot-id={`${rootId}-field-badge-value-${fieldIndex}`}
+            className={badgeValueSurface.className}
+            style={badgeValueSurface.style}
+          >
+            {String(value)}
+          </span>
+        );
+        break;
+
+      case "email":
+        content = (
+          <a
+            href={`mailto:${String(value)}`}
+            data-snapshot-id={`${rootId}-field-link-value-${fieldIndex}`}
+            className={linkValueSurface.className}
+            style={linkValueSurface.style}
+          >
+            {String(value)}
+          </a>
+        );
+        break;
+
+      case "url":
+      case "link":
+        content = (
+          <a
+            href={String(value)}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-snapshot-id={`${rootId}-field-link-value-${fieldIndex}`}
+            className={linkValueSurface.className}
+            style={linkValueSurface.style}
+          >
+            {String(value)}
+          </a>
+        );
+        break;
+
+      case "image":
+        content = (
+          <img
+            src={String(value)}
+            alt=""
+            data-snapshot-id={`${rootId}-field-image-value-${fieldIndex}`}
+            className={imageValueSurface.className}
+            style={imageValueSurface.style}
+          />
+        );
+        break;
+
+      case "list":
+        if (Array.isArray(value)) {
+          content = <span>{value.join(", ")}</span>;
+          break;
+        }
+        content = <span>{String(value)}</span>;
+        break;
+
+      case "text":
+      default:
+        if (Array.isArray(value)) {
+          content = <span>{value.map((entry) => String(entry)).join(", ")}</span>;
+          break;
+        }
+        content = <span>{String(value)}</span>;
+        break;
     }
-
-    case "badge":
-      return (
-        <span
-          style={{
-            display: "inline-block",
-            padding:
-              "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
-            borderRadius: "var(--sn-radius-full, 9999px)",
-            backgroundColor: "var(--sn-color-secondary, #f1f5f9)",
-            color: "var(--sn-color-secondary-foreground, #0f172a)",
-            fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            fontWeight:
-              "var(--sn-font-weight-medium, 500)" as unknown as number,
-          }}
-        >
-          {String(value)}
-        </span>
-      );
-
-    case "email":
-      return (
-        <a
-          href={`mailto:${String(value)}`}
-          style={{ color: "var(--sn-color-primary, #3b82f6)" }}
-        >
-          {String(value)}
-        </a>
-      );
-
-    case "url":
-    case "link":
-      return (
-        <a
-          href={String(value)}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "var(--sn-color-primary, #3b82f6)" }}
-        >
-          {String(value)}
-        </a>
-      );
-
-    case "image":
-      return (
-        <img
-          src={String(value)}
-          alt=""
-          style={{
-            width: "var(--sn-spacing-3xl, 3rem)",
-            height: "var(--sn-spacing-3xl, 3rem)",
-            borderRadius: "var(--sn-radius-full, 9999px)",
-            objectFit: "cover",
-          }}
-        />
-      );
-
-    case "list":
-      if (Array.isArray(value)) {
-        return <span>{value.join(", ")}</span>;
-      }
-      return <span>{String(value)}</span>;
-
-    case "text":
-    default:
-      if (Array.isArray(value)) {
-        return <span>{value.map((entry) => String(entry)).join(", ")}</span>;
-      }
-      return <span>{String(value)}</span>;
   }
+
+  return (
+    <>
+      {value == null ? (
+        <span
+          data-snapshot-id={`${rootId}-field-empty-value-${fieldIndex}`}
+          className={emptyValueSurface.className}
+          style={emptyValueSurface.style}
+        >
+          --
+        </span>
+      ) : (
+        content
+      )}
+      <SurfaceStyles css={emptyValueSurface.scopedCss} />
+      <SurfaceStyles css={booleanValueSurface.scopedCss} />
+      <SurfaceStyles css={badgeValueSurface.scopedCss} />
+      <SurfaceStyles css={linkValueSurface.scopedCss} />
+      <SurfaceStyles css={imageValueSurface.scopedCss} />
+    </>
+  );
 }
 
 async function copyToClipboard(value: unknown): Promise<void> {
@@ -143,44 +233,85 @@ async function copyToClipboard(value: unknown): Promise<void> {
   }
 }
 
-function DetailCardSkeleton() {
+function DetailCardSkeleton({
+  rootId,
+  componentSlots,
+}: {
+  rootId: string;
+  componentSlots?: DetailCardConfig["slots"];
+}) {
+  const skeletonSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-skeleton`,
+    implementationBase: {
+      border: "var(--sn-card-border, 1px solid #e2e8f0)",
+      borderRadius: "lg",
+      padding: "var(--sn-card-padding, var(--sn-spacing-lg, 1.5rem))",
+      bg: "var(--sn-color-surface, #ffffff)",
+    },
+    componentSurface: componentSlots?.skeleton,
+  });
+  const skeletonRowSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-skeleton-row`,
+    implementationBase: {
+      display: "flex",
+      gap: "md",
+      style: {
+        marginBottom: "var(--sn-spacing-sm, 0.5rem)",
+      },
+    },
+    componentSurface: componentSlots?.skeletonRow,
+  });
+  const skeletonLabelSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-skeleton-label`,
+    implementationBase: {
+      width: "6rem",
+      height: "1rem",
+      borderRadius: "sm",
+      bg: "var(--sn-color-muted, #e2e8f0)",
+    },
+    componentSurface: componentSlots?.skeletonLabel,
+  });
+  const skeletonValueSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-skeleton-value`,
+    implementationBase: {
+      flex: "1",
+      height: "1rem",
+      borderRadius: "sm",
+      bg: "var(--sn-color-muted, #e2e8f0)",
+    },
+    componentSurface: componentSlots?.skeletonValue,
+  });
+
   return (
     <div
       data-testid="detail-card-skeleton"
-      style={{
-        border: "var(--sn-card-border, 1px solid #e2e8f0)",
-        borderRadius: "var(--sn-radius-lg, 0.5rem)",
-        padding: "var(--sn-card-padding, var(--sn-spacing-lg, 1.5rem))",
-        backgroundColor: "var(--sn-color-surface, #ffffff)",
-      }}
+      data-snapshot-id={`${rootId}-skeleton`}
+      className={skeletonSurface.className}
+      style={skeletonSurface.style}
     >
       {[1, 2, 3].map((n) => (
         <div
           key={n}
-          style={{
-            display: "flex",
-            gap: "var(--sn-spacing-md, 1rem)",
-            marginBottom: "var(--sn-spacing-sm, 0.5rem)",
-          }}
+          data-snapshot-id={`${rootId}-skeleton-row-${n}`}
+          className={skeletonRowSurface.className}
+          style={skeletonRowSurface.style}
         >
           <div
-            style={{
-              width: "6rem",
-              height: "1rem",
-              borderRadius: "var(--sn-radius-sm, 0.25rem)",
-              backgroundColor: "var(--sn-color-muted, #e2e8f0)",
-            }}
+            data-snapshot-id={`${rootId}-skeleton-label-${n}`}
+            className={skeletonLabelSurface.className}
+            style={skeletonLabelSurface.style}
           />
           <div
-            style={{
-              flex: 1,
-              height: "1rem",
-              borderRadius: "var(--sn-radius-sm, 0.25rem)",
-              backgroundColor: "var(--sn-color-muted, #e2e8f0)",
-            }}
+            data-snapshot-id={`${rootId}-skeleton-value-${n}`}
+            className={skeletonValueSurface.className}
+            style={skeletonValueSurface.style}
           />
         </div>
       ))}
+      <SurfaceStyles css={skeletonSurface.scopedCss} />
+      <SurfaceStyles css={skeletonRowSurface.scopedCss} />
+      <SurfaceStyles css={skeletonLabelSurface.scopedCss} />
+      <SurfaceStyles css={skeletonValueSurface.scopedCss} />
     </div>
   );
 }
@@ -267,7 +398,12 @@ function FieldRow({
         className={valueSurface.className}
         style={valueSurface.style}
       >
-        {formatValue(field)}
+        <FormattedFieldValue
+          rootId={rootId}
+          field={field}
+          fieldIndex={fieldIndex}
+          componentSlots={componentSlots}
+        />
         {field.copyable ? (
           <ButtonControl
             surfaceId={`${rootId}-copy-button-${fieldIndex}`}
@@ -419,7 +555,7 @@ export function DetailCard({ config }: { config: DetailCardConfig }) {
           {config.loading && !config.loading.disabled ? (
             <AutoSkeleton componentType="card" config={config.loading} />
           ) : (
-            <DetailCardSkeleton />
+            <DetailCardSkeleton rootId={rootId} componentSlots={config.slots} />
           )}
         </div>
       ) : error ? (

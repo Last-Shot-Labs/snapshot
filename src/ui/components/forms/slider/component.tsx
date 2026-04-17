@@ -2,10 +2,14 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import { usePublish, useSubscribe } from "../../../context/hooks";
+import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { executeEventAction } from "../../_base/events";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { InputControl } from "../input";
 import type { SliderConfig } from "./types";
 
@@ -25,9 +29,20 @@ function formatSliderValue(
 export function Slider({ config }: { config: SliderConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
+  const primitiveOptions = usePrimitiveValueOptions();
   const visible = useSubscribe(config.visible ?? true);
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
-  const resolvedSuffix = useSubscribe(config.suffix) as string | undefined;
+  const resolvedConfig = useResolveFrom({
+    label: config.label,
+    suffix: config.suffix,
+  });
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
+  const resolvedSuffix = resolveOptionalPrimitiveValue(
+    resolvedConfig.suffix,
+    primitiveOptions,
+  );
   const disabled = Boolean(useSubscribe(config.disabled ?? false));
   const rootId = config.id ?? "slider";
   const min = config.min ?? 0;

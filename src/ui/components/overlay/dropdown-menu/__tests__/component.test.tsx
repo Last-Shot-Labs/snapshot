@@ -53,6 +53,28 @@ vi.mock("../../../../context/hooks", async () => {
   };
 });
 
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: {},
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
+
 function createTestWrapper() {
   const registry = new AtomRegistryImpl();
   return function TestWrapper({ children }: { children: ReactNode }) {
@@ -242,5 +264,32 @@ describe("DropdownMenu", () => {
 
     expect(screen.getByText("Resolved section")).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: "Resolved edit" })).toBeTruthy();
+  });
+
+  it("resolves templated trigger and menu copy against route runtime", () => {
+    const wrapper = createTestWrapper();
+    const config: DropdownMenuConfig = {
+      type: "dropdown-menu",
+      trigger: { label: "Actions {route.params.id}" },
+      items: [
+        { type: "label", text: "Workspace {route.params.id}" },
+        {
+          type: "item",
+          label: "Edit {route.path}",
+          action: { type: "navigate", to: "/edit" },
+        },
+      ],
+    };
+
+    render(<DropdownMenu config={config} />, { wrapper });
+
+    expect(screen.getByTestId("dropdown-menu-trigger").textContent).toContain(
+      "Actions alpha",
+    );
+
+    fireEvent.click(screen.getByTestId("dropdown-menu-trigger"));
+
+    expect(screen.getByText("Workspace alpha")).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "Edit /workspace/alpha" })).toBeTruthy();
   });
 });

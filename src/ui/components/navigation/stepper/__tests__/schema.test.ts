@@ -11,11 +11,13 @@ describe("stepperConfigSchema", () => {
           slots: {
             item: { className: "step-item" },
             marker: { className: "step-marker" },
+            textGroup: { className: "step-text-group" },
           },
         },
       ],
       slots: {
         root: { className: "stepper-root" },
+        track: { className: "stepper-track" },
         content: { className: "stepper-content" },
       },
     });

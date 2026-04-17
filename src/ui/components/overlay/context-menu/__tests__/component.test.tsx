@@ -16,6 +16,28 @@ vi.mock("../../../../actions/executor", () => ({
   useActionExecutor: () => execute,
 }));
 
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: {},
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
+
 import { ContextMenu } from "../component";
 
 function createMockRegistry(initialValues?: Record<string, unknown>) {
@@ -152,5 +174,30 @@ describe("ContextMenu", () => {
     );
 
     expect(screen.queryByTestId("context-menu-area")).toBeNull();
+  });
+
+  it("resolves templated trigger and item copy against route runtime", () => {
+    renderWithContext(
+        <ContextMenu
+        config={{
+          type: "context-menu",
+          triggerText: "Open {route.params.id}",
+          items: [
+            { type: "label", text: "Workspace {route.params.id}" },
+            { type: "item", label: "Edit {route.path}" },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Open alpha")).toBeTruthy();
+
+    fireEvent.contextMenu(screen.getByTestId("context-menu-area"), {
+      clientX: 12,
+      clientY: 18,
+    });
+
+    expect(screen.getByText("Workspace alpha")).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "Edit /workspace/alpha" })).toBeTruthy();
   });
 });

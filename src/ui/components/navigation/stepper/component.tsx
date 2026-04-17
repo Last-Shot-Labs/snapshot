@@ -9,11 +9,11 @@ import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { StepConfig, StepperConfig } from "./types";
-
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
 
 function getStepStates(
   step: StepConfig,
@@ -29,6 +29,7 @@ function getStepStates(
 
 export function Stepper({ config }: { config: StepperConfig }) {
   const resolvedActiveStep = useSubscribe(config.activeStep ?? 0);
+  const primitiveOptions = usePrimitiveValueOptions();
   const resolvedConfig = useResolveFrom({ steps: config.steps });
   const initialStep =
     typeof resolvedActiveStep === "number" ? resolvedActiveStep : 0;
@@ -40,10 +41,13 @@ export function Stepper({ config }: { config: StepperConfig }) {
       (((resolvedConfig.steps as StepperConfig["steps"] | undefined) ??
         config.steps) as StepConfig[]).map((step) => ({
         ...step,
-        title: resolveText(step.title) ?? "",
-        description: resolveText(step.description),
+        title: resolveOptionalPrimitiveValue(step.title, primitiveOptions) ?? "",
+        description: resolveOptionalPrimitiveValue(
+          step.description,
+          primitiveOptions,
+        ),
       })),
-    [config.steps, resolvedConfig.steps],
+    [config.steps, primitiveOptions, resolvedConfig.steps],
   );
 
   useEffect(() => {
@@ -92,6 +96,19 @@ export function Stepper({ config }: { config: StepperConfig }) {
     itemSurface: resolvedSteps[currentStep]?.slots?.content,
     activeStates: activeStepContent?.length ? ["active"] : [],
   });
+  const trackSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-track`,
+    implementationBase: {
+      display: "flex",
+      flexDirection: isHorizontal ? "row" : "column",
+      alignItems: isHorizontal ? "stretch" : "start",
+      gap:
+        variant === "dots"
+          ? "var(--sn-spacing-sm, 0.5rem)"
+          : "var(--sn-spacing-xs, 0.25rem)",
+    } as Record<string, unknown>,
+    componentSurface: config.slots?.track,
+  });
 
   const handleStepClick = (index: number) => {
     const step = resolvedSteps[index];
@@ -112,15 +129,9 @@ export function Stepper({ config }: { config: StepperConfig }) {
     >
       <div
         data-testid="stepper-track"
-        style={{
-          display: "flex",
-          flexDirection: isHorizontal ? "row" : "column",
-          alignItems: isHorizontal ? "stretch" : "flex-start",
-          gap:
-            variant === "dots"
-              ? "var(--sn-spacing-sm, 0.5rem)"
-              : "var(--sn-spacing-xs, 0.25rem)",
-        }}
+        data-snapshot-id={`${rootId}-track`}
+        className={trackSurface.className}
+        style={trackSurface.style}
       >
         {resolvedSteps.map((step: StepConfig, index: number) => {
           const isCompleted = index < currentStep;
@@ -217,6 +228,7 @@ export function Stepper({ config }: { config: StepperConfig }) {
           const labelSurface = resolveSurfacePresentation({
             surfaceId: `${rootId}-label-${index}`,
             implementationBase: {
+              display: variant === "simple" ? "block" : undefined,
               fontSize: "var(--sn-font-size-sm, 0.875rem)",
               fontWeight: isActive
                 ? "var(--sn-font-weight-semibold, 600)"
@@ -237,6 +249,7 @@ export function Stepper({ config }: { config: StepperConfig }) {
           const descriptionSurface = resolveSurfacePresentation({
             surfaceId: `${rootId}-description-${index}`,
             implementationBase: {
+              display: "block",
               fontSize: "var(--sn-font-size-xs, 0.75rem)",
               color: "var(--sn-color-muted-foreground, #6b7280)",
               marginTop:
@@ -246,6 +259,14 @@ export function Stepper({ config }: { config: StepperConfig }) {
             } as Record<string, unknown>,
             componentSurface: config.slots?.description,
             itemSurface: step.slots?.description,
+          });
+          const textGroupSurface = resolveSurfacePresentation({
+            surfaceId: `${rootId}-text-group-${index}`,
+            implementationBase: {
+              minWidth: 0,
+            },
+            componentSurface: config.slots?.textGroup,
+            itemSurface: step.slots?.textGroup,
           });
           const connectorSurface = resolveSurfacePresentation({
             surfaceId: `${rootId}-connector-${index}`,
@@ -325,7 +346,11 @@ export function Stepper({ config }: { config: StepperConfig }) {
                     >
                       {isCompleted ? "\u2713" : step.icon ?? index + 1}
                     </span>
-                    <span style={{ minWidth: 0 }}>
+                    <span
+                      data-snapshot-id={`${rootId}-text-group-${index}`}
+                      className={textGroupSurface.className}
+                      style={textGroupSurface.style}
+                    >
                       <span
                         data-testid="stepper-step-title"
                         data-snapshot-id={`${rootId}-label-${index}`}
@@ -339,10 +364,7 @@ export function Stepper({ config }: { config: StepperConfig }) {
                           data-testid="stepper-step-description"
                           data-snapshot-id={`${rootId}-description-${index}`}
                           className={descriptionSurface.className}
-                          style={{
-                            display: "block",
-                            ...(descriptionSurface.style as React.CSSProperties),
-                          }}
+                          style={descriptionSurface.style}
                         >
                           {step.description}
                         </span>
@@ -362,10 +384,7 @@ export function Stepper({ config }: { config: StepperConfig }) {
                     data-testid="stepper-step-title"
                     data-snapshot-id={`${rootId}-label-${index}`}
                     className={labelSurface.className}
-                    style={{
-                      display: "block",
-                      ...(labelSurface.style as React.CSSProperties),
-                    }}
+                    style={labelSurface.style}
                   >
                     {step.title}
                   </span>
@@ -384,6 +403,7 @@ export function Stepper({ config }: { config: StepperConfig }) {
               <SurfaceStyles css={markerSurface.scopedCss} />
               <SurfaceStyles css={labelSurface.scopedCss} />
               <SurfaceStyles css={descriptionSurface.scopedCss} />
+              <SurfaceStyles css={textGroupSurface.scopedCss} />
               <SurfaceStyles css={connectorSurface.scopedCss} />
             </React.Fragment>
           );
@@ -409,6 +429,7 @@ export function Stepper({ config }: { config: StepperConfig }) {
         </div>
       ) : null}
       <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={trackSurface.scopedCss} />
       <SurfaceStyles css={contentSurface.scopedCss} />
     </div>
   );

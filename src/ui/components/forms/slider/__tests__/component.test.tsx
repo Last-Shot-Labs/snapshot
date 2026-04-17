@@ -12,17 +12,57 @@ const subscribedValues: Record<string, unknown> = {
   "copy.sliderDisabled": false,
 };
 
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (typeof value === "object" && value !== null && "from" in value) {
+    return subscribedValues[(value as { from: string }).from] as T;
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, nested]) => [
+        key,
+        resolveRefs(nested),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
 vi.mock("../../../../context/hooks", () => ({
   useSubscribe: (value: unknown) =>
     typeof value === "object" && value !== null && "from" in value
       ? subscribedValues[(value as { from: string }).from]
       : value,
   usePublish: () => publishSpy,
+  useResolveFrom: <T,>(value: T) => resolveRefs(value),
 }));
 
 vi.mock("../../../../actions/executor", () => ({
   useActionExecutor: () => executeSpy,
 }));
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({ raw: {}, app: {}, auth: {} }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
 
 afterEach(() => {
   cleanup();
@@ -100,5 +140,26 @@ describe("Slider", () => {
     expect(startInput?.style.zIndex).toBe("2");
     expect(endInput?.style.position).toBe("relative");
     expect(endInput?.style.zIndex).toBe("3");
+  });
+
+  it("resolves templated labels and suffixes against route runtime", () => {
+    render(
+      <Slider
+        config={{
+          type: "slider",
+          min: 0,
+          max: 100,
+          range: false,
+          defaultValue: 25,
+          label: "Opacity {route.params.id}",
+          suffix: " {route.params.id}",
+          showValue: true,
+          showLimits: false,
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Opacity alpha")).toBeDefined();
+    expect(screen.getByText("25 alpha")).toBeTruthy();
   });
 });

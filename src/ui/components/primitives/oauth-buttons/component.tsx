@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveTemplate } from "../../../expressions/template";
-import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { renderIcon } from "../../../icons/render";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -12,7 +11,10 @@ import {
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
-import { resolveOptionalPrimitiveValue } from "../resolve-value";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../resolve-value";
 import type { OAuthButtonsConfig } from "./types";
 
 const PROVIDER_ICON_MAP: Record<string, string> = {
@@ -33,9 +35,9 @@ function titleCase(value: string): string {
 export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
   const manifest = useManifestRuntime();
   const routeRuntime = useRouteRuntime();
-  const localeState = useSubscribe({ from: "global.locale" });
+  useSubscribe({ from: "global.locale" });
   const autoRedirectedRef = useRef(false);
-  const activeLocale = resolveRuntimeLocale(manifest?.raw.i18n, localeState);
+  const primitiveOptions = usePrimitiveValueOptions();
   const routeId = routeRuntime?.currentRoute?.id;
   const rootId = config.id ?? "oauth-buttons";
   const screenOptions = useMemo(
@@ -83,33 +85,20 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
     config.heading ??
     (screenOptions?.labels &&
     typeof screenOptions.labels === "object" &&
-    typeof (screenOptions.labels as Record<string, unknown>).providersHeading ===
-      "string"
-      ? String(
-          (screenOptions.labels as Record<string, unknown>).providersHeading,
-        )
+    Object.prototype.hasOwnProperty.call(screenOptions.labels, "providersHeading")
+      ? (screenOptions.labels as Record<string, unknown>).providersHeading
       : undefined);
   const resolvedConfig = useResolveFrom({
     heading,
   });
-  const templateContext = {
-    app: manifest?.app ?? {},
-    auth: manifest?.auth ?? {},
-    route: {
-      ...(routeRuntime?.currentRoute ?? {}),
-      path: routeRuntime?.currentPath,
-      params: routeRuntime?.params,
-      query: routeRuntime?.query,
-    },
-  };
-  const templateOptions = {
-    locale: activeLocale,
-    i18n: manifest?.raw.i18n,
-  };
   const resolvedHeading = resolveOptionalPrimitiveValue(resolvedConfig.heading, {
-    context: templateContext,
-    ...templateOptions,
+    ...primitiveOptions,
   });
+  const templateContext = primitiveOptions.context;
+  const templateOptions = {
+    locale: primitiveOptions.locale,
+    i18n: primitiveOptions.i18n,
+  };
   const resolvedProviders = providers.map(([providerName, provider]) => {
     const providerRecord = provider as Record<string, unknown>;
     const label = resolveTemplate(
@@ -201,10 +190,19 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
     surfaceId: `${rootId}-heading`,
     implementationBase: {
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
-      fontWeight: 500,
+      fontWeight: "var(--sn-font-weight-medium, 500)",
       color: "var(--sn-color-foreground, #111827)",
     },
     componentSurface: config.slots?.heading,
+  });
+  const providerGroupSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-provider-group`,
+    implementationBase: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "var(--sn-spacing-2xs, 0.125rem)",
+    },
+    componentSurface: config.slots?.providerGroup,
   });
   const providerButtonSurface = config.slots?.provider;
   const providerIconSurface = resolveSurfacePresentation({
@@ -218,6 +216,10 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
   });
   const providerLabelSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-provider-label`,
+    implementationBase: {
+      flex: 1,
+      textAlign: "center",
+    },
     componentSurface: config.slots?.providerLabel,
   });
   const providerDescriptionSurface = resolveSurfacePresentation({
@@ -253,11 +255,9 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
           return (
             <div
               key={provider.providerName}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--sn-spacing-2xs, 0.125rem)",
-              }}
+              data-snapshot-id={`${rootId}-provider-group-${index}`}
+              className={providerGroupSurface.className}
+              style={providerGroupSurface.style}
             >
               <ButtonControl
                 surfaceId={`${rootId}-provider-${index}`}
@@ -309,6 +309,7 @@ export function OAuthButtons({ config }: { config: OAuthButtonsConfig }) {
       </div>
       <SurfaceStyles css={rootSurface.scopedCss} />
       <SurfaceStyles css={headingSurface.scopedCss} />
+      <SurfaceStyles css={providerGroupSurface.scopedCss} />
       <SurfaceStyles css={providerIconSurface.scopedCss} />
       <SurfaceStyles css={providerLabelSurface.scopedCss} />
       <SurfaceStyles css={providerDescriptionSurface.scopedCss} />

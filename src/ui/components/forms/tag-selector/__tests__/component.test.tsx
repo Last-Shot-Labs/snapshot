@@ -62,6 +62,28 @@ vi.mock("../../../_base/use-component-data", () => ({
   }),
 }));
 
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: {},
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
+
 import { TagSelector } from "../component";
 
 afterEach(() => {
@@ -133,5 +155,26 @@ describe("TagSelector", () => {
       container.querySelector('[data-snapshot-id="tag-selector-createOptionLabel"]')
         ?.className,
     ).toContain("create-option-label-slot");
+  });
+
+  it("resolves templated label and tag copy against route runtime", () => {
+    render(
+      <TagSelector
+        config={{
+          type: "tag-selector",
+          label: "Skills {route.params.id}",
+          tags: [
+            { label: "React {route.params.id}", value: "react" },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Skills alpha")).toBeDefined();
+    const input = screen.getByTestId("tag-input");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "React" } });
+
+    expect(screen.getByText("React alpha")).toBeTruthy();
   });
 });

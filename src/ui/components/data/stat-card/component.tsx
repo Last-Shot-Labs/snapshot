@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { AutoEmptyState } from "../../_base/auto-empty-state";
 import { AutoErrorState } from "../../_base/auto-error-state";
@@ -25,6 +25,10 @@ import {
   resolveMetricFieldName,
   summarizeMetricRows,
 } from "../_shared/metric-fields";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 
 /**
  * Derive the sentiment label from direction and sentiment config.
@@ -46,7 +50,12 @@ function deriveSentiment(
  * Extracts from the config, fetches data, formats values, and computes trend.
  */
 function useStatCardLogic(config: StatCardConfig): UseStatCardResult {
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ label: config.label });
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
   const { data, isLoading, error, refetch } = useComponentData(
     config.data,
     config.params as Record<string, unknown | FromRef> | undefined,

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { AtomRegistryImpl } from "../../../../context/registry";
@@ -48,14 +48,38 @@ vi.mock("../../../../context/hooks", async () => {
   };
 });
 
+const componentDataState = {
+  data: null as unknown,
+  isLoading: false,
+  error: null as unknown,
+  refetch: vi.fn(),
+};
+
 vi.mock("../../../_base/use-component-data", () => ({
-  useComponentData: () => ({
-    data: null,
-    isLoading: false,
-    error: null,
-    refetch: vi.fn(),
-  }),
+  useComponentData: () => componentDataState,
 }));
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: {},
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
 
 function createWrapper() {
   const registry = new AtomRegistryImpl();
@@ -74,6 +98,13 @@ function createWrapper() {
 }
 
 describe("TreeView", () => {
+  beforeEach(() => {
+    componentDataState.data = null;
+    componentDataState.isLoading = false;
+    componentDataState.error = null;
+    componentDataState.refetch = vi.fn();
+  });
+
   afterEach(() => {
     cleanup();
   });
@@ -180,5 +211,76 @@ describe("TreeView", () => {
 
     expect(screen.getByText("Resolved Docs")).toBeTruthy();
     expect(screen.getByText("7")).toBeTruthy();
+  });
+
+  it("resolves templated labels and badges against route runtime", () => {
+    const Wrapper = createWrapper();
+
+    render(
+      <Wrapper>
+        <TreeView
+          config={{
+            type: "tree-view",
+            items: [
+              {
+                label: "Docs {route.params.id}",
+                badge: "{route.params.id}",
+              },
+            ],
+          }}
+        />
+      </Wrapper>,
+    );
+
+    expect(screen.getByText("Docs alpha")).toBeTruthy();
+    expect(screen.getByText("alpha")).toBeTruthy();
+  });
+
+  it("applies canonical loading skeleton slots", () => {
+    componentDataState.isLoading = true;
+
+    const Wrapper = createWrapper();
+    const { container } = render(
+      <Wrapper>
+        <TreeView
+          config={{
+            type: "tree-view",
+            id: "loading-tree",
+            data: "GET /api/tree" as never,
+            slots: {
+              loadingState: { className: "tree-loading-state" },
+              loadingItem: { className: "tree-loading-item" },
+              loadingMarker: { className: "tree-loading-marker" },
+              loadingLabel: { className: "tree-loading-label" },
+              loadingLabelSecondary: {
+                className: "tree-loading-label-secondary",
+              },
+            },
+          }}
+        />
+      </Wrapper>,
+    );
+
+    expect(screen.getByTestId("tree-view-loading").className).toContain(
+      "tree-loading-state",
+    );
+    expect(
+      container.querySelector('[data-snapshot-id="loading-tree-loading-item-0"]')
+        ?.className,
+    ).toContain("tree-loading-item");
+    expect(
+      container.querySelector(
+        '[data-snapshot-id="loading-tree-loading-marker-0"]',
+      )?.className,
+    ).toContain("tree-loading-marker");
+    expect(
+      container.querySelector('[data-snapshot-id="loading-tree-loading-label-0"]')
+        ?.className,
+    ).toContain("tree-loading-label");
+    expect(
+      container.querySelector(
+        '[data-snapshot-id="loading-tree-loading-label-secondary-0"]',
+      )?.className,
+    ).toContain("tree-loading-label-secondary");
   });
 });

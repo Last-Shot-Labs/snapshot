@@ -1,9 +1,13 @@
 'use client';
 
 import { useEffect, useId } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { ProgressConfig } from "./types";
 
 const SIZE_MAP = { sm: 4, md: 8, lg: 12 } as const;
@@ -13,7 +17,12 @@ export function Progress({ config }: { config: ProgressConfig }) {
   const uniqueId = useId().replace(/:/g, "");
   const publish = usePublish(config.id);
   const visible = useSubscribe(config.visible ?? true);
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ label: config.label });
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
   const resolvedValue = useSubscribe(config.value) as number | undefined;
 
   const max = config.max ?? 100;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { Icon } from "../../../icons/index";
 import { executeEventAction } from "../../_base/events";
@@ -10,6 +10,10 @@ import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../button";
 import type { ToggleConfig } from "./types";
 
@@ -31,9 +35,14 @@ const SIZE_MAP = {
 export function Toggle({ config }: { config: ToggleConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
+  const primitiveOptions = usePrimitiveValueOptions();
 
   const visible = useSubscribe(config.visible ?? true);
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
+  const resolvedConfig = useResolveFrom({ label: config.label });
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
   const resolvedPressed = useSubscribe(config.pressed ?? false) as boolean;
   const resolvedDisabled = useSubscribe(config.disabled ?? false) as boolean;
 

@@ -5,6 +5,7 @@ import { primitiveTextValueSchema } from "../schema-helpers";
 export const oauthButtonsSlotNames = [
   "root",
   "heading",
+  "providerGroup",
   "provider",
   "providerIcon",
   "providerLabel",

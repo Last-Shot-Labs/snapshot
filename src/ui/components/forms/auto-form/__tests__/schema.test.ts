@@ -301,6 +301,7 @@ describe("autoFormConfigSchema", () => {
               type: "password",
               slots: {
                 field: { className: "field-slot" },
+                fieldCell: { className: "field-cell-slot" },
                 inputWrapper: { className: "input-wrapper-slot" },
                 input: { className: "input-slot" },
                 options: { className: "options-slot" },
@@ -308,6 +309,8 @@ describe("autoFormConfigSchema", () => {
                 optionLabel: { className: "option-label-slot" },
                 inlineAction: { className: "inline-action-slot" },
                 passwordToggle: { className: "password-toggle-slot" },
+                switchTrack: { className: "switch-track-slot" },
+                switchThumb: { className: "switch-thumb-slot" },
               },
             },
           ],
@@ -315,9 +318,13 @@ describe("autoFormConfigSchema", () => {
       ],
       slots: {
         root: { className: "form-root" },
+        fieldGrid: { className: "field-grid" },
+        fieldCell: { className: "field-cell" },
         sectionHeader: { className: "section-header" },
         inlineAction: { className: "inline-action" },
         passwordToggle: { className: "password-toggle" },
+        switchTrack: { className: "switch-track" },
+        switchThumb: { className: "switch-thumb" },
         submitButton: { className: "submit-slot" },
       },
     });

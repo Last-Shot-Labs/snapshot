@@ -49,6 +49,28 @@ vi.mock("../../../../context/hooks", async () => {
   };
 });
 
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: {},
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
+
 function TestChild({ config }: { config: Record<string, unknown> }) {
   return createElement(
     "div",
@@ -296,5 +318,25 @@ describe("TabsComponent", () => {
     });
 
     expect(screen.getByText("Resolved Tab 1")).toBeDefined();
+  });
+
+  it("resolves templated tab labels against route runtime", () => {
+    const config: TabsConfig = {
+      type: "tabs",
+      children: [
+        {
+          label: "Tab {route.params.id}",
+          content: [],
+        },
+      ],
+      defaultTab: 0,
+      variant: "default",
+    };
+
+    render(createElement(TabsComponent, { config }), {
+      wrapper: createWrapper(store),
+    });
+
+    expect(screen.getByText("Tab alpha")).toBeDefined();
   });
 });

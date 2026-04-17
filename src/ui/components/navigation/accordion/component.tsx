@@ -11,11 +11,8 @@ import {
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
+import { resolveOptionalPrimitiveValue, usePrimitiveValueOptions } from "../../primitives/resolve-value";
 import type { AccordionConfig } from "./types";
-
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
 
 function resolveDefaultOpen(
   defaultOpen: number | number[] | undefined,
@@ -45,6 +42,7 @@ function Chevron({ open }: { open: boolean }) {
 }
 
 export function AccordionComponent({ config }: { config: AccordionConfig }) {
+  const primitiveOptions = usePrimitiveValueOptions();
   const resolvedConfig = useResolveFrom({ items: config.items });
   const [openIndices, setOpenIndices] = useState<Set<number>>(() =>
     resolveDefaultOpen(config.defaultOpen),
@@ -54,9 +52,9 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
       (((resolvedConfig.items as AccordionConfig["items"] | undefined) ??
         config.items) as AccordionConfig["items"]).map((item) => ({
         ...item,
-        title: resolveText(item.title) ?? "",
+        title: resolveOptionalPrimitiveValue(item.title, primitiveOptions) ?? "",
       })),
-    [config.items, resolvedConfig.items],
+    [config.items, primitiveOptions, resolvedConfig.items],
   );
 
   const mode = config.mode ?? "single";

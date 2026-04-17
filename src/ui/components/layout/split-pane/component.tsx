@@ -4,7 +4,12 @@ import { useCallback, useRef, useState } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { ComponentWrapper } from "../../_base/component-wrapper";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  extractSurfaceConfig,
+  mergeClassNames,
+  mergeStyles,
+  resolveSurfacePresentation,
+} from "../../_base/style-surfaces";
 import type { SplitPaneConfig } from "./types";
 
 export function SplitPane({ config }: { config: SplitPaneConfig }) {
@@ -58,10 +63,8 @@ export function SplitPane({ config }: { config: SplitPaneConfig }) {
       flexDirection: isHorizontal ? "row" : "column",
       width: "100%",
       overflow: "hidden",
-      style: {
-        height: isHorizontal ? "100%" : undefined,
-        minHeight: isHorizontal ? "400px" : undefined,
-      },
+      height: isHorizontal ? "100%" : undefined,
+      minHeight: isHorizontal ? "400px" : undefined,
     },
     componentSurface: extractSurfaceConfig(config),
     itemSurface: config.slots?.root,
@@ -77,11 +80,10 @@ export function SplitPane({ config }: { config: SplitPaneConfig }) {
     surfaceId: `${rootId}-first-pane`,
     implementationBase: {
       overflow: "auto",
-      style: {
-        [isHorizontal ? "width" : "height"]: `${split}%`,
-        minWidth: isHorizontal ? minSize : undefined,
-        minHeight: !isHorizontal ? minSize : undefined,
-      },
+      width: isHorizontal ? `${split}%` : undefined,
+      height: !isHorizontal ? `${split}%` : undefined,
+      minWidth: isHorizontal ? `${minSize}px` : undefined,
+      minHeight: !isHorizontal ? `${minSize}px` : undefined,
     },
     componentSurface: config.slots?.firstPane,
   });
@@ -90,10 +92,8 @@ export function SplitPane({ config }: { config: SplitPaneConfig }) {
     implementationBase: {
       overflow: "auto",
       flex: "1",
-      style: {
-        minWidth: isHorizontal ? minSize : undefined,
-        minHeight: !isHorizontal ? minSize : undefined,
-      },
+      minWidth: isHorizontal ? `${minSize}px` : undefined,
+      minHeight: !isHorizontal ? `${minSize}px` : undefined,
     },
     componentSurface: config.slots?.secondPane,
   });
@@ -108,14 +108,14 @@ export function SplitPane({ config }: { config: SplitPaneConfig }) {
           bg: "var(--sn-color-primary, #2563eb)",
         },
       },
-      style: {
-        [isHorizontal ? "width" : "height"]: "4px",
-        [isHorizontal ? "minWidth" : "minHeight"]: "4px",
-        background: "var(--sn-color-border, #e5e7eb)",
-        cursor: isHorizontal ? "col-resize" : "row-resize",
-        flexShrink: 0,
-        transition: "background 0.15s",
-      },
+      width: isHorizontal ? "4px" : "100%",
+      height: !isHorizontal ? "4px" : "100%",
+      minWidth: isHorizontal ? "4px" : undefined,
+      minHeight: !isHorizontal ? "4px" : undefined,
+      bg: "var(--sn-color-border, #e5e7eb)",
+      cursor: isHorizontal ? "col-resize" : "row-resize",
+      flex: "0 0 auto",
+      transition: "background 0.15s",
     },
     componentSurface: config.slots?.divider,
     activeStates: dragging ? ["active"] : [],
@@ -133,13 +133,11 @@ export function SplitPane({ config }: { config: SplitPaneConfig }) {
       >
         <div
           data-snapshot-id={`${rootId}-first-pane`}
-          className={[paneSurface.className, firstPaneSurface.className]
-            .filter(Boolean)
-            .join(" ") || undefined}
-          style={{
-            ...(paneSurface.style ?? {}),
-            ...(firstPaneSurface.style ?? {}),
-          }}
+          className={mergeClassNames(
+            paneSurface.className,
+            firstPaneSurface.className,
+          )}
+          style={mergeStyles(paneSurface.style, firstPaneSurface.style)}
         >
           {children[0] != null ? <ComponentRenderer config={children[0]} /> : null}
         </div>
@@ -156,13 +154,11 @@ export function SplitPane({ config }: { config: SplitPaneConfig }) {
 
         <div
           data-snapshot-id={`${rootId}-second-pane`}
-          className={[paneSurface.className, secondPaneSurface.className]
-            .filter(Boolean)
-            .join(" ") || undefined}
-          style={{
-            ...(paneSurface.style ?? {}),
-            ...(secondPaneSurface.style ?? {}),
-          }}
+          className={mergeClassNames(
+            paneSurface.className,
+            secondPaneSurface.className,
+          )}
+          style={mergeStyles(paneSurface.style, secondPaneSurface.style)}
         >
           {children[1] != null ? <ComponentRenderer config={children[1]} /> : null}
         </div>

@@ -594,6 +594,9 @@ export function MenuItem({
       userSelect: "none",
       whiteSpace: "nowrap",
       overflow: "hidden",
+      color: destructive
+        ? "var(--sn-color-destructive, #dc2626)"
+        : "var(--sn-color-foreground, #111827)",
       transition:
         "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease), color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease), opacity var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
       hover: disabled
@@ -660,12 +663,7 @@ export function MenuItem({
         surfaceId={surfaceId}
         surfaceConfig={itemSurface.resolvedConfigForWrapper}
         className={className}
-        style={{
-          ...(style ?? {}),
-          ...(destructive
-            ? { color: "var(--sn-color-destructive, #dc2626)" }
-            : undefined),
-        }}
+        style={style}
         variant="ghost"
         size="sm"
         activeStates={activeStates}

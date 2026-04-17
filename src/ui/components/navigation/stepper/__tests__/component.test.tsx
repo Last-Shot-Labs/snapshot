@@ -49,6 +49,28 @@ vi.mock("../../../../context/hooks", async () => {
   };
 });
 
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: {},
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
+
 afterEach(() => {
   cleanup();
 });
@@ -85,6 +107,7 @@ describe("Stepper", () => {
                 title: "Account",
                 slots: {
                   label: { className: "step-label" },
+                  textGroup: { className: "step-text-group" },
                 },
               },
               {
@@ -97,6 +120,7 @@ describe("Stepper", () => {
             ],
             slots: {
               root: { className: "stepper-root" },
+              track: { className: "stepper-track" },
               connector: { className: "step-connector" },
             },
           }}
@@ -112,7 +136,15 @@ describe("Stepper", () => {
       container.querySelector('[data-snapshot-id="checkout-stepper-root"]')
         ?.className,
     ).toContain("stepper-root");
+    expect(
+      container.querySelector('[data-snapshot-id="checkout-stepper-track"]')
+        ?.className,
+    ).toContain("stepper-track");
     expect(screen.getByText("Account").className).toContain("step-label");
+    expect(
+      container.querySelector('[data-snapshot-id="checkout-stepper-text-group-0"]')
+        ?.className,
+    ).toContain("step-text-group");
     expect(
       container.querySelector('[data-snapshot-id="checkout-stepper-connector-0"]')
         ?.className,
@@ -148,5 +180,28 @@ describe("Stepper", () => {
 
     expect(screen.getByText("Resolved account")).toBeTruthy();
     expect(screen.getByText("Resolved description")).toBeTruthy();
+  });
+
+  it("resolves templated step copy against route runtime", () => {
+    const Wrapper = createWrapper();
+
+    render(
+      <Wrapper>
+        <Stepper
+          config={{
+            type: "stepper",
+            steps: [
+              {
+                title: "Account {route.params.id}",
+                description: "Path {route.path}",
+              },
+            ],
+          }}
+        />
+      </Wrapper>,
+    );
+
+    expect(screen.getByText("Account alpha")).toBeTruthy();
+    expect(screen.getByText("Path /workspace/alpha")).toBeTruthy();
   });
 });

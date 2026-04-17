@@ -4,10 +4,12 @@ import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 
 export const stepperSlotNames = [
   "root",
+  "track",
   "item",
   "marker",
   "label",
   "description",
+  "textGroup",
   "connector",
   "content",
 ] as const;
@@ -26,7 +28,15 @@ export const stepConfigSchema: z.ZodType<Record<string, any>> = z.object({
   disabled: z.boolean().optional(),
   /** Child components rendered when this step is active. */
   content: z.array(componentConfigSchema).optional(),
-  slots: slotsSchema(["item", "marker", "label", "description", "connector", "content"]).optional(),
+  slots: slotsSchema([
+    "item",
+    "marker",
+    "label",
+    "description",
+    "textGroup",
+    "connector",
+    "content",
+  ]).optional(),
 });
 
 /**

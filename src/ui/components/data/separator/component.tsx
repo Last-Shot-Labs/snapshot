@@ -1,13 +1,22 @@
 'use client';
 
 import { useEffect } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { SeparatorConfig } from "./types";
 
 export function Separator({ config }: { config: SeparatorConfig }) {
-  const label = useSubscribe(config.label ?? undefined) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ label: config.label ?? undefined });
+  const label = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
   const visible = useSubscribe(config.visible ?? true);
   const publish = usePublish(config.id);
 

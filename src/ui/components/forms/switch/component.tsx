@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from "react";
-import { useSubscribe, usePublish } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { executeEventAction } from "../../_base/events";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -9,6 +9,10 @@ import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../button";
 import type { SwitchConfig } from "./types";
 
@@ -21,12 +25,21 @@ const SIZE_MAP = {
 export function Switch({ config }: { config: SwitchConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
+  const primitiveOptions = usePrimitiveValueOptions();
 
   const visible = useSubscribe(config.visible ?? true);
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
-  const resolvedDescription = useSubscribe(config.description) as
-    | string
-    | undefined;
+  const resolvedConfig = useResolveFrom({
+    label: config.label,
+    description: config.description,
+  });
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
+  const resolvedDescription = resolveOptionalPrimitiveValue(
+    resolvedConfig.description,
+    primitiveOptions,
+  );
   const resolvedDisabled = useSubscribe(config.disabled ?? false) as boolean;
 
   const size = config.size ?? "md";

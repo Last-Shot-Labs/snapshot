@@ -28,6 +28,9 @@ describe("SplitPane", () => {
           ],
           slots: {
             root: { className: "split-root-slot" },
+            pane: { className: "split-pane-slot" },
+            firstPane: { className: "split-first-pane-slot" },
+            secondPane: { className: "split-second-pane-slot" },
             divider: { className: "split-divider-slot" },
           },
         }}
@@ -35,9 +38,19 @@ describe("SplitPane", () => {
     );
 
     const root = document.querySelector('[data-snapshot-id="workspace-split-root"]');
+    const firstPane = document.querySelector(
+      '[data-snapshot-id="workspace-split-first-pane"]',
+    );
+    const secondPane = document.querySelector(
+      '[data-snapshot-id="workspace-split-second-pane"]',
+    );
     const divider = document.querySelector('[data-snapshot-id="workspace-split-divider"]');
     expect(root?.className).toContain("component-root");
     expect(root?.className).toContain("split-root-slot");
+    expect(firstPane?.className).toContain("split-pane-slot");
+    expect(firstPane?.className).toContain("split-first-pane-slot");
+    expect(secondPane?.className).toContain("split-pane-slot");
+    expect(secondPane?.className).toContain("split-second-pane-slot");
     expect(divider?.className).toContain("split-divider-slot");
     expect(screen.getByText("left-pane")).toBeTruthy();
     expect(screen.getByText("right-pane")).toBeTruthy();

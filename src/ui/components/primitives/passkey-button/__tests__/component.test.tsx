@@ -6,6 +6,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const execute = vi.fn();
+const refValues: Record<string, unknown> = {
+  "global.labels.passkey": "Use passkey alpha",
+};
 let manifestRuntime: {
   raw: Record<string, unknown>;
   auth: {
@@ -17,9 +20,35 @@ let manifestRuntime: {
   };
 };
 
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (
+    value &&
+    typeof value === "object" &&
+    "from" in (value as Record<string, unknown>) &&
+    typeof (value as unknown as { from: unknown }).from === "string"
+  ) {
+    return refValues[(value as unknown as { from: string }).from] as T;
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+        key,
+        resolveRefs(entry),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
 vi.mock("../../../../context", () => ({
   useSubscribe: () => null,
-  useResolveFrom: <T extends Record<string, unknown>>(value: T) => value,
+  useResolveFrom: <T extends Record<string, unknown>>(value: T) => resolveRefs(value),
 }));
 
 vi.mock("../../../../actions/executor", async () => {
@@ -273,6 +302,39 @@ describe("PasskeyButton", () => {
     expect(
       screen.getByRole("button", {
         name: "Sign in with passkey",
+      }),
+    ).toBeTruthy();
+  });
+
+  it("resolves ref-backed screen-level labels", () => {
+    manifestRuntime = {
+      raw: {},
+      auth: {
+        passkey: { enabled: true },
+        screenOptions: {
+          signin: {
+            labels: {
+              passkeyButton: { from: "global.labels.passkey" },
+            },
+          },
+        },
+      },
+    };
+
+    render(
+      <SnapshotApiContext.Provider value={null as never}>
+        <PasskeyButton
+          config={{
+            type: "passkey-button",
+            label: "Fallback",
+          }}
+        />
+      </SnapshotApiContext.Provider>,
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: "Use passkey alpha",
       }),
     ).toBeTruthy();
   });

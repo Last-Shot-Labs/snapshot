@@ -10,6 +10,8 @@ import { extendComponentSchema, slotsSchema } from "../../_base/schema";
 
 export const autoFormSlotNames = [
   "root",
+  "fieldGrid",
+  "fieldCell",
   "section",
   "sectionHeader",
   "sectionToggle",
@@ -28,12 +30,15 @@ export const autoFormSlotNames = [
   "requiredIndicator",
   "inlineAction",
   "passwordToggle",
+  "switchTrack",
+  "switchThumb",
   "actions",
   "submitButton",
 ] as const;
 
 export const autoFormFieldSlotNames = [
   "field",
+  "fieldCell",
   "label",
   "description",
   "inputWrapper",
@@ -46,6 +51,8 @@ export const autoFormFieldSlotNames = [
   "requiredIndicator",
   "inlineAction",
   "passwordToggle",
+  "switchTrack",
+  "switchThumb",
 ] as const;
 
 /**

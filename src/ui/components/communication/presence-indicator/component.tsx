@@ -1,8 +1,12 @@
 'use client';
 
-import { useSubscribe } from "../../../context/hooks";
+import { useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { PresenceIndicatorConfig } from "./types";
 
 /** Status → dot color mapping. */
@@ -50,7 +54,10 @@ export function PresenceIndicator({
 }) {
   const visible = useSubscribe(config.visible ?? true);
   const status = useSubscribe(config.status) as string;
-  const label = useSubscribe(config.label ?? "") as string;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ label: config.label ?? "" });
+  const label =
+    resolveOptionalPrimitiveValue(resolvedConfig.label, primitiveOptions) ?? "";
 
   if (visible === false) return null;
 

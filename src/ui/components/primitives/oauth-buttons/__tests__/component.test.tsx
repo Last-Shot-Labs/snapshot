@@ -13,6 +13,7 @@ let manifestRuntime: {
   auth: {
     providers: Record<string, unknown>;
     providerMode?: string;
+    screenOptions?: Record<string, unknown>;
     contract?: {
       endpoints?: {
         oauthStart?: string;
@@ -22,9 +23,39 @@ let manifestRuntime: {
   };
 };
 
+const refValues: Record<string, unknown> = {
+  "global.labels.providersHeading": "Continue in alpha",
+};
+
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (
+    value &&
+    typeof value === "object" &&
+    "from" in (value as Record<string, unknown>) &&
+    typeof (value as unknown as { from: unknown }).from === "string"
+  ) {
+    return refValues[(value as unknown as { from: string }).from] as T;
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+        key,
+        resolveRefs(entry),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
 vi.mock("../../../../context", () => ({
   useSubscribe: () => null,
-  useResolveFrom: <T extends Record<string, unknown>>(value: T) => value,
+  useResolveFrom: <T extends Record<string, unknown>>(value: T) => resolveRefs(value),
 }));
 
 vi.mock("../../../../manifest/runtime", () => ({
@@ -109,6 +140,7 @@ describe("OAuthButtons", () => {
           heading: "Continue with",
           slots: {
             root: { className: "oauth-root-slot" },
+            providerGroup: { className: "provider-group-slot" },
             providerLabel: { className: "provider-label-slot" },
           },
         }}
@@ -121,6 +153,9 @@ describe("OAuthButtons", () => {
     expect(
       container.querySelector('[data-snapshot-id="signin-oauth-root"]')?.className,
     ).toContain("oauth-root-slot");
+    expect(
+      container.querySelector('[data-snapshot-id="signin-oauth-provider-group-0"]')?.className,
+    ).toContain("provider-group-slot");
     expect(screen.getByText("Continue with")).toBeTruthy();
     const button = screen.getByRole("button", {
       name: "Continue with Google",
@@ -210,5 +245,30 @@ describe("OAuthButtons", () => {
     expect(submitSpy).toHaveBeenCalledTimes(1);
     const form = document.body.querySelector("form");
     expect(form?.getAttribute("action")).toBe("http://localhost:2323/auth/google");
+  });
+
+  it("resolves ref-backed screen-level headings", () => {
+    manifestRuntime = {
+      raw: {},
+      auth: {
+        providers: {
+          google: {
+            label: "Continue with Google",
+            startUrl: "/auth/google/start",
+          },
+        },
+        screenOptions: {
+          signin: {
+            labels: {
+              providersHeading: { from: "global.labels.providersHeading" },
+            },
+          },
+        },
+      },
+    };
+
+    render(<OAuthButtons config={{ type: "oauth-buttons" }} />);
+
+    expect(screen.getByText("Continue in alpha")).toBeTruthy();
   });
 });

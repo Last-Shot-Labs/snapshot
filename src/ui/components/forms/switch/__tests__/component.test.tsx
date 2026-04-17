@@ -11,17 +11,57 @@ const subscribedValues: Record<string, unknown> = {
   "copy.switchDescription": "Receive email alerts for new activity",
 };
 
+function resolveRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveRefs(entry)) as T;
+  }
+
+  if (typeof value === "object" && value !== null && "from" in value) {
+    return subscribedValues[(value as { from: string }).from] as T;
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, nested]) => [
+        key,
+        resolveRefs(nested),
+      ]),
+    ) as T;
+  }
+
+  return value;
+}
+
 vi.mock("../../../../context/hooks", () => ({
   useSubscribe: (value: unknown) =>
     typeof value === "object" && value !== null && "from" in value
       ? subscribedValues[(value as { from: string }).from]
       : value,
   usePublish: () => publishSpy,
+  useResolveFrom: <T,>(value: T) => resolveRefs(value),
 }));
 
 vi.mock("../../../../actions/executor", () => ({
   useActionExecutor: () => executeSpy,
 }));
+
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({ raw: {}, app: {}, auth: {} }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
 
 describe("Switch", () => {
   it("toggles checked state and dispatches the action", () => {
@@ -61,5 +101,20 @@ describe("Switch", () => {
       { type: "toggle-notifications" },
       { id: "notifications-switch", checked: true, value: true },
     );
+  });
+
+  it("resolves templated label and description against route runtime", () => {
+    render(
+      <Switch
+        config={{
+          type: "switch",
+          label: "Notifications {route.params.id}",
+          description: "Path {route.path}",
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Notifications alpha")).toBeDefined();
+    expect(screen.getByText("Path /workspace/alpha")).toBeDefined();
   });
 });

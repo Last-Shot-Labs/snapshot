@@ -45,6 +45,28 @@ vi.mock("../../../../context/hooks", async () => {
   };
 });
 
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: {},
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
+
 function createWrapper(store: ReturnType<typeof createStore>) {
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return <Provider store={store}>{children}</Provider>;
@@ -142,5 +164,26 @@ describe("AccordionComponent", () => {
     );
 
     expect(screen.getByText("Resolved profile")).toBeTruthy();
+  });
+
+  it("resolves templated item titles against route runtime", () => {
+    const store = createStore();
+
+    render(
+      <AccordionComponent
+        config={{
+          type: "accordion",
+          items: [
+            {
+              title: "Profile {route.params.id}",
+              content: [],
+            },
+          ],
+        }}
+      />,
+      { wrapper: createWrapper(store) },
+    );
+
+    expect(screen.getByText("Profile alpha")).toBeTruthy();
   });
 });

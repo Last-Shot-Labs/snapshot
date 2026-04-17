@@ -26,6 +26,10 @@ import { SurfaceStyles } from "../../_base/surface-styles";
 import { matchesCombo, parseChord } from "../../../shortcuts";
 import { useApiClient } from "../../../state";
 import type { ActionConfig } from "../../../actions/types";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { CommandPaletteConfig } from "./types";
 
 const ANIMATION_DURATION = 150;
@@ -42,10 +46,6 @@ interface CommandItem {
 interface CommandGroup {
   label: string;
   items: CommandItem[];
-}
-
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
 }
 
 function flattenItems(
@@ -91,6 +91,7 @@ function normalizeSearchGroups(data: unknown): CommandGroup[] {
 /** CommandPalette — search-driven command palette that renders static groups or fetches remote results, then dispatches manifest actions for the selected command. */
 export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
   const visible = useSubscribe(config.visible ?? false);
+  const primitiveOptions = usePrimitiveValueOptions();
   const resolvedConfig = useResolveFrom({
     groups: config.groups,
     placeholder: config.placeholder,
@@ -113,23 +114,28 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
   const storageKey = `${RECENT_STORAGE_PREFIX}:${config.id ?? "default"}`;
   const shortcut = config.shortcut ?? "ctrl+k";
   const placeholder =
-    resolveText(resolvedConfig.placeholder) ?? "Type a command...";
+    resolveOptionalPrimitiveValue(resolvedConfig.placeholder, primitiveOptions) ??
+    "Type a command...";
   const emptyMessage =
-    resolveText(resolvedConfig.emptyMessage) ?? "No results found";
+    resolveOptionalPrimitiveValue(resolvedConfig.emptyMessage, primitiveOptions) ??
+    "No results found";
   const maxHeight = config.maxHeight ?? "300px";
   const staticGroups = useMemo<CommandGroup[]>(
     () =>
       ((resolvedConfig.groups as CommandPaletteConfig["groups"] | undefined) ??
         config.groups ??
         []).map((group) => ({
-        label: resolveText(group.label) ?? "",
+        label: resolveOptionalPrimitiveValue(group.label, primitiveOptions) ?? "",
         items: group.items.map((item) => ({
           ...item,
-          label: resolveText(item.label) ?? "",
-          description: resolveText(item.description),
+          label: resolveOptionalPrimitiveValue(item.label, primitiveOptions) ?? "",
+          description: resolveOptionalPrimitiveValue(
+            item.description,
+            primitiveOptions,
+          ),
         })),
       })),
-    [config.groups, resolvedConfig.groups],
+    [config.groups, primitiveOptions, resolvedConfig.groups],
   );
 
   const dataResult = useComponentData(config.data ?? "");

@@ -2,13 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import { usePublish, useSubscribe } from "../../../context/hooks";
+import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { executeEventAction } from "../../_base/events";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../button";
 import { InputControl } from "../input";
 import type { ColorPickerConfig } from "./types";
@@ -88,7 +92,12 @@ export function ColorPicker({ config }: { config: ColorPickerConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const visible = useSubscribe(config.visible ?? true);
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({ label: config.label });
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
   const rootId = config.id ?? "color-picker";
   const [color, setColor] = useState(config.defaultValue ?? "#2563eb");
   const [alpha, setAlpha] = useState(1);

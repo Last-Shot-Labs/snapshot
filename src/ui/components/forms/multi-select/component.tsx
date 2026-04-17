@@ -12,13 +12,13 @@ import {
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../button";
 import { InputControl } from "../input";
 import type { MultiSelectConfig, MultiSelectOption } from "./types";
-
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
 
 function SelectedPill({
   config,
@@ -251,15 +251,16 @@ function MultiSelectOptionRow({
 export function MultiSelect({ config }: { config: MultiSelectConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
+  const primitiveOptions = usePrimitiveValueOptions();
 
   const visible = useSubscribe(config.visible ?? true);
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
-  const resolvedPlaceholder = useSubscribe(config.placeholder) as
-    | string
-    | undefined;
   const resolvedValue = useSubscribe(config.value) as string[] | undefined;
   const resolvedDisabled = Boolean(useSubscribe(config.disabled ?? false));
-  const resolvedConfig = useResolveFrom({ options: config.options });
+  const resolvedConfig = useResolveFrom({
+    label: config.label,
+    placeholder: config.placeholder,
+    options: config.options,
+  });
   const dataResult = useComponentData(config.data ?? "");
   const { error: dataError, refetch: dataRefetch } = dataResult;
   const rootId = config.id ?? "multi-select";
@@ -267,16 +268,22 @@ export function MultiSelect({ config }: { config: MultiSelectConfig }) {
   const labelField = config.labelField ?? "label";
   const valueField = config.valueField ?? "value";
   const searchable = config.searchable !== false;
-  const placeholder = resolvedPlaceholder ?? "Select...";
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
+  const placeholder =
+    resolveOptionalPrimitiveValue(resolvedConfig.placeholder, primitiveOptions) ??
+    "Select...";
   const staticOptions =
     (resolvedConfig.options as MultiSelectOption[] | undefined)?.map(
       (option) => ({
         ...option,
-        label: resolveText(option.label) ?? option.value,
+        label: resolveOptionalPrimitiveValue(option.label, primitiveOptions) ?? option.value,
       }),
     ) ?? config.options?.map((option: MultiSelectOption) => ({
       ...option,
-      label: resolveText(option.label) ?? option.value,
+      label: resolveOptionalPrimitiveValue(option.label, primitiveOptions) ?? option.value,
     }));
 
   const options = useMemo<MultiSelectOption[]>(() => {

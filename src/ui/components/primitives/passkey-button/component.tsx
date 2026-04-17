@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom, useSubscribe } from "../../../context";
-import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
 import {
   isPasskeySupported,
@@ -16,7 +15,7 @@ import {
 } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
 import { useApiClient } from "../../../state";
-import { resolvePrimitiveValue } from "../resolve-value";
+import { resolvePrimitiveValue, usePrimitiveValueOptions } from "../resolve-value";
 import type { PasskeyButtonConfig } from "./types";
 
 export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
@@ -24,11 +23,11 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
   const execute = useActionExecutor();
   const manifest = useManifestRuntime();
   const routeRuntime = useRouteRuntime();
-  const localeState = useSubscribe({ from: "global.locale" });
+  useSubscribe({ from: "global.locale" });
   const [isLoading, setIsLoading] = useState(false);
   const autoPromptedRef = useRef(false);
-  const activeLocale = resolveRuntimeLocale(manifest?.raw.i18n, localeState);
   const passkeySupported = isPasskeySupported();
+  const primitiveOptions = usePrimitiveValueOptions();
 
   const routeId = routeRuntime?.currentRoute?.id;
   const rootId = config.id ?? "passkey-button";
@@ -66,26 +65,11 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
   const loginOptionsEndpoint =
     endpoints?.passkeyLoginOptions ?? "/auth/passkey/login-options";
   const loginEndpoint = endpoints?.passkeyLogin ?? "/auth/passkey/login";
-  const templateContext = {
-    app: manifest?.app ?? {},
-    auth: manifest?.auth ?? {},
-    route: {
-      ...(routeRuntime?.currentRoute ?? {}),
-      path: routeRuntime?.currentPath,
-      params: routeRuntime?.params,
-      query: routeRuntime?.query,
-    },
-  };
-  const templateOptions = {
-    locale: activeLocale,
-    i18n: manifest?.raw.i18n,
-  };
   const label =
     (screenOptions?.labels &&
     typeof screenOptions.labels === "object" &&
-    typeof (screenOptions.labels as Record<string, unknown>).passkeyButton ===
-      "string"
-      ? String((screenOptions.labels as Record<string, unknown>).passkeyButton)
+    Object.prototype.hasOwnProperty.call(screenOptions.labels, "passkeyButton")
+      ? (screenOptions.labels as Record<string, unknown>).passkeyButton
       : config.label) ?? "Sign in with passkey";
   const resolvedConfig = useResolveFrom({
     label,
@@ -154,8 +138,7 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
   }
 
   const resolvedLabel = resolvePrimitiveValue(resolvedConfig.label, {
-    context: templateContext,
-    ...templateOptions,
+    ...primitiveOptions,
   });
 
   return (

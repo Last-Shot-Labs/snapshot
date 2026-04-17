@@ -10,6 +10,10 @@ import {
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../button";
 import { InputControl } from "../input";
 import type { TagSelectorConfig } from "./types";
@@ -18,10 +22,6 @@ interface ResolvedTag {
   label: string;
   value: string;
   color?: string;
-}
-
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
 }
 
 function contrastText(color: string): string {
@@ -230,12 +230,19 @@ function TagOption({
 
 export function TagSelector({ config }: { config: TagSelectorConfig }) {
   const visible = useSubscribe(config.visible ?? true);
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
   const resolvedValue = useSubscribe(config.value ?? []);
-  const resolvedConfig = useResolveFrom({ tags: config.tags });
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    label: config.label,
+    tags: config.tags,
+  });
   const executeAction = useActionExecutor();
   const publish = usePublish(config.id);
   const rootId = config.id ?? "tag-selector";
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
 
   const {
     data: apiData,
@@ -263,11 +270,11 @@ export function TagSelector({ config }: { config: TagSelectorConfig }) {
       (resolvedConfig.tags as TagSelectorConfig["tags"] | undefined)?.map(
         (tag) => ({
           ...tag,
-          label: resolveText(tag.label) ?? tag.value,
+          label: resolveOptionalPrimitiveValue(tag.label, primitiveOptions) ?? tag.value,
         }),
       ) ?? config.tags?.map((tag) => ({
         ...tag,
-        label: resolveText(tag.label) ?? tag.value,
+        label: resolveOptionalPrimitiveValue(tag.label, primitiveOptions) ?? tag.value,
       }));
 
     if (staticTags) {
@@ -300,6 +307,7 @@ export function TagSelector({ config }: { config: TagSelectorConfig }) {
     config.labelField,
     config.valueField,
     config.tags,
+    primitiveOptions,
     resolvedConfig.tags,
   ]);
 

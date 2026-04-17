@@ -9,6 +9,10 @@ import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../button";
 import { InputControl } from "../input";
 import type { DatePickerConfig } from "./types";
@@ -80,28 +84,33 @@ function formatDisplayValue(value: string, format?: string): string {
   return new Intl.DateTimeFormat().format(date);
 }
 
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
-
 export function DatePicker({ config }: { config: DatePickerConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
+  const primitiveOptions = usePrimitiveValueOptions();
   const visible = useSubscribe(config.visible ?? true);
-  const resolvedLabel = useSubscribe(config.label) as string | undefined;
-  const resolvedPlaceholder = useSubscribe(config.placeholder) as
-    | string
-    | undefined;
-  const resolvedConfig = useResolveFrom({ presets: config.presets });
+  const resolvedConfig = useResolveFrom({
+    label: config.label,
+    placeholder: config.placeholder,
+    presets: config.presets,
+  });
+  const resolvedLabel = resolveOptionalPrimitiveValue(
+    resolvedConfig.label,
+    primitiveOptions,
+  );
+  const resolvedPlaceholder = resolveOptionalPrimitiveValue(
+    resolvedConfig.placeholder,
+    primitiveOptions,
+  );
   const presets =
     (resolvedConfig.presets as DatePickerConfig["presets"] | undefined)?.map(
       (preset) => ({
         ...preset,
-        label: resolveText(preset.label) ?? preset.start,
+        label: resolveOptionalPrimitiveValue(preset.label, primitiveOptions) ?? preset.start,
       }),
     ) ?? config.presets?.map((preset) => ({
       ...preset,
-      label: resolveText(preset.label) ?? preset.start,
+      label: resolveOptionalPrimitiveValue(preset.label, primitiveOptions) ?? preset.start,
     }));
   const rootId = config.id ?? "date-picker";
   const [singleValue, setSingleValue] = useState("");

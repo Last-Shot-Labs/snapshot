@@ -14,12 +14,12 @@ import {
 function MediaFrame({
   config,
   rootId,
-  style,
+  frameBase,
   children,
 }: {
   config: LinkEmbedConfig;
   rootId: string;
-  style?: CSSProperties;
+  frameBase?: Record<string, unknown>;
   children: React.ReactNode;
 }) {
   const mediaSurface = resolveSurfacePresentation({
@@ -27,7 +27,7 @@ function MediaFrame({
     implementationBase: {
       borderRadius: "md",
       overflow: "hidden",
-      style,
+      ...frameBase,
     },
     componentSurface: config.slots?.media,
   });
@@ -35,9 +35,9 @@ function MediaFrame({
   return (
     <>
       <div
-        data-snapshot-id={`${rootId}-media`}
-        className={mediaSurface.className}
-        style={mediaSurface.style}
+      data-snapshot-id={`${rootId}-media`}
+      className={mediaSurface.className}
+      style={mediaSurface.style}
       >
         {children}
       </div>
@@ -61,28 +61,70 @@ function YouTubeEmbed({
     <MediaFrame
       config={config}
       rootId={rootId}
-      style={{
+      frameBase={{
         position: "relative",
         width: "100%",
         aspectRatio,
-        backgroundColor: "var(--sn-color-foreground, #000)",
+        bg: "var(--sn-color-foreground, #000)",
       }}
     >
-      <iframe
-        src={info.embedUrl}
+      <EmbedFrame
+        config={config}
+        rootId={rootId}
         title="YouTube video"
+        src={info.embedUrl}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
-        style={{
+        frameBase={{
           position: "absolute",
-          top: 0,
-          left: 0,
+          inset: 0,
           width: "100%",
           height: "100%",
-          border: "none",
+          style: {
+            border: "none",
+          },
         }}
       />
     </MediaFrame>
+  );
+}
+
+function EmbedFrame({
+  config,
+  rootId,
+  title,
+  src,
+  frameBase,
+  allow,
+  allowFullScreen,
+}: {
+  config: LinkEmbedConfig;
+  rootId: string;
+  title: string;
+  src: string;
+  frameBase?: Record<string, unknown>;
+  allow?: string;
+  allowFullScreen?: boolean;
+}) {
+  const frameSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-embed-frame`,
+    implementationBase: frameBase,
+    componentSurface: config.slots?.embedFrame,
+  });
+
+  return (
+    <>
+      <iframe
+        src={src}
+        title={title}
+        allow={allow}
+        allowFullScreen={allowFullScreen}
+        data-snapshot-id={`${rootId}-embed-frame`}
+        className={frameSurface.className}
+        style={frameSurface.style}
+      />
+      <SurfaceStyles css={frameSurface.scopedCss} />
+    </>
   );
 }
 
@@ -91,19 +133,23 @@ function InstagramEmbed({ config, rootId, info }: { config: LinkEmbedConfig; roo
     <MediaFrame
       config={config}
       rootId={rootId}
-      style={{
+      frameBase={{
         maxWidth: "min(540px, 100%)",
       }}
     >
-      <iframe
-        src={info.embedUrl}
+      <EmbedFrame
+        config={config}
+        rootId={rootId}
         title="Instagram post"
+        src={info.embedUrl}
         allowFullScreen
-        style={{
+        frameBase={{
           width: "100%",
           minHeight: "500px",
-          border: "none",
-          backgroundColor: "var(--sn-color-card, #ffffff)",
+          bg: "var(--sn-color-card, #ffffff)",
+          style: {
+            border: "none",
+          },
         }}
       />
     </MediaFrame>
@@ -115,19 +161,23 @@ function TikTokEmbed({ config, rootId, info }: { config: LinkEmbedConfig; rootId
     <MediaFrame
       config={config}
       rootId={rootId}
-      style={{
+      frameBase={{
         maxWidth: "min(325px, 100%)",
       }}
     >
-      <iframe
-        src={info.embedUrl}
+      <EmbedFrame
+        config={config}
+        rootId={rootId}
         title="TikTok video"
+        src={info.embedUrl}
         allowFullScreen
-        style={{
+        frameBase={{
           width: "100%",
           height: "min(750px, 80vh)",
-          border: "none",
-          backgroundColor: "var(--sn-color-card, #ffffff)",
+          bg: "var(--sn-color-card, #ffffff)",
+          style: {
+            border: "none",
+          },
         }}
       />
     </MediaFrame>
@@ -139,18 +189,22 @@ function TwitterEmbed({ config, rootId, info }: { config: LinkEmbedConfig; rootI
     <MediaFrame
       config={config}
       rootId={rootId}
-      style={{
+      frameBase={{
         maxWidth: "min(550px, 100%)",
       }}
     >
-      <iframe
-        src={info.embedUrl}
+      <EmbedFrame
+        config={config}
+        rootId={rootId}
         title="Tweet"
-        style={{
+        src={info.embedUrl}
+        frameBase={{
           width: "100%",
           minHeight: "250px",
-          border: "none",
-          backgroundColor: "var(--sn-color-card, #ffffff)",
+          bg: "var(--sn-color-card, #ffffff)",
+          style: {
+            border: "none",
+          },
         }}
       />
     </MediaFrame>
@@ -158,23 +212,32 @@ function TwitterEmbed({ config, rootId, info }: { config: LinkEmbedConfig; rootI
 }
 
 function GifEmbed({ config, rootId, url }: { config: LinkEmbedConfig; rootId: string; url: string }) {
+  const imageSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-gif-image`,
+    implementationBase: {
+      width: "100%",
+      height: "auto",
+      display: "block",
+    },
+    componentSurface: config.slots?.gifImage,
+  });
+
   return (
     <MediaFrame
       config={config}
       rootId={rootId}
-      style={{
+      frameBase={{
         maxWidth: "min(400px, 100%)",
       }}
     >
       <img
         src={url}
         alt="GIF"
-        style={{
-          width: "100%",
-          height: "auto",
-          display: "block",
-        }}
+        data-snapshot-id={`${rootId}-gif-image`}
+        className={imageSurface.className}
+        style={imageSurface.style}
       />
+      <SurfaceStyles css={imageSurface.scopedCss} />
     </MediaFrame>
   );
 }
@@ -240,10 +303,8 @@ function GenericCard({
       flexDirection: "column",
       justifyContent: "center",
       gap: "2xs",
-      style: {
-        padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
-        minWidth: 0,
-      },
+      padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
+      minWidth: 0,
     },
     componentSurface: config.slots?.content,
   });
@@ -255,6 +316,27 @@ function GenericCard({
       gap: "xs",
     },
     componentSurface: config.slots?.siteMeta,
+  });
+  const faviconSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-favicon`,
+    implementationBase: {
+      width: "14px",
+      height: "14px",
+      borderRadius: "var(--sn-radius-xs, 2px)",
+    },
+    componentSurface: config.slots?.favicon,
+  });
+  const siteNameSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-site-name`,
+    implementationBase: {
+      fontSize: "var(--sn-font-size-xs, 0.75rem)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      letterSpacing: "var(--sn-tracking-wide, 0.05em)",
+      style: {
+        textTransform: "uppercase",
+      },
+    },
+    componentSurface: config.slots?.siteName,
   });
   const titleSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-title`,
@@ -345,21 +427,16 @@ function GenericCard({
                 <img
                   src={meta.favicon}
                   alt=""
-                  style={{
-                    width: 14,
-                    height: 14,
-                    borderRadius: "var(--sn-radius-xs, 2px)",
-                  }}
+                  data-snapshot-id={`${rootId}-favicon`}
+                  className={faviconSurface.className}
+                  style={faviconSurface.style}
                 />
               ) : null}
               {siteName ? (
                 <span
-                  style={{
-                    fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                    color: "var(--sn-color-muted-foreground, #6b7280)",
-                    textTransform: "uppercase",
-                    letterSpacing: "var(--sn-tracking-wide, 0.05em)",
-                  }}
+                  data-snapshot-id={`${rootId}-site-name`}
+                  className={siteNameSurface.className}
+                  style={siteNameSurface.style}
                 >
                   {siteName}
                 </span>
@@ -399,6 +476,8 @@ function GenericCard({
       <SurfaceStyles css={thumbnailSurface.scopedCss} />
       <SurfaceStyles css={contentSurface.scopedCss} />
       <SurfaceStyles css={siteMetaSurface.scopedCss} />
+      <SurfaceStyles css={faviconSurface.scopedCss} />
+      <SurfaceStyles css={siteNameSurface.scopedCss} />
       <SurfaceStyles css={titleSurface.scopedCss} />
       <SurfaceStyles css={descriptionSurface.scopedCss} />
       <SurfaceStyles css={urlSurface.scopedCss} />
@@ -426,9 +505,7 @@ export function LinkEmbed({ config }: { config: LinkEmbedConfig }) {
   const rootSurface = resolveSurfacePresentation({
     surfaceId: rootId,
     implementationBase: {
-      style: {
-        maxWidth: config.maxWidth ?? "100%",
-      },
+      maxWidth: config.maxWidth ?? "100%",
     },
     componentSurface: extractSurfaceConfig(config, { omit: ["maxWidth"] }),
     itemSurface: config.slots?.root,

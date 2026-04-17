@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { DatePicker } from "../component";
 
 const executeSpy = vi.fn();
@@ -46,7 +46,33 @@ vi.mock("../../../../actions/executor", () => ({
   useActionExecutor: () => executeSpy,
 }));
 
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: {},
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
+
 describe("DatePicker", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("dispatches formatted values when a date is selected", () => {
     executeSpy.mockReset();
 
@@ -94,5 +120,30 @@ describe("DatePicker", () => {
       { type: "set-date" },
       { id: "publish-date", value: "2026-04-13T00:00:00.000Z" },
     );
+  });
+
+  it("resolves templated label, placeholder, and preset copy against route runtime", () => {
+    render(
+      <DatePicker
+        config={{
+          type: "date-picker",
+          mode: "single",
+          label: "Date {route.params.id}",
+          placeholder: "Pick {route.path}",
+          presets: [
+            {
+              label: "Sprint {route.params.id}",
+              start: "2026-04-13",
+              end: "2026-04-19",
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Date alpha")).toBeDefined();
+    expect(screen.getByText("Sprint alpha")).toBeDefined();
+    const input = document.querySelector('input[type="date"]') as HTMLInputElement;
+    expect(input.placeholder).toBe("Pick /workspace/alpha");
   });
 });

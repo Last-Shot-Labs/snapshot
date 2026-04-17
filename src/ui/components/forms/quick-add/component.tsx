@@ -3,7 +3,7 @@
 import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useActionExecutor } from "../../../actions/executor";
-import { usePublish, useSubscribe } from "../../../context/hooks";
+import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { Icon } from "../../../icons/index";
 import { executeEventAction } from "../../_base/events";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -11,18 +11,29 @@ import {
   extractSurfaceConfig,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import { ButtonControl } from "../button";
 import { InputControl } from "../input";
 import type { QuickAddConfig } from "./types";
 
 export function QuickAdd({ config }: { config: QuickAddConfig }) {
   const visible = useSubscribe(config.visible ?? true);
-  const resolvedPlaceholder = useSubscribe(config.placeholder) as
-    | string
-    | undefined;
-  const resolvedButtonText = useSubscribe(config.buttonText) as
-    | string
-    | undefined;
+  const primitiveOptions = usePrimitiveValueOptions();
+  const resolvedConfig = useResolveFrom({
+    placeholder: config.placeholder,
+    buttonText: config.buttonText,
+  });
+  const resolvedPlaceholder = resolveOptionalPrimitiveValue(
+    resolvedConfig.placeholder,
+    primitiveOptions,
+  );
+  const resolvedButtonText = resolveOptionalPrimitiveValue(
+    resolvedConfig.buttonText,
+    primitiveOptions,
+  );
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const rootId = config.id ?? "quick-add";

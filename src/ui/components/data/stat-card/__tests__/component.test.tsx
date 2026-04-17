@@ -12,6 +12,24 @@ import { StatCard } from "../component";
 import type { StatCardConfig } from "../types";
 import type { ApiClient } from "../../../../../api/client";
 
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({ raw: {}, app: {}, auth: {} }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
+
 /** Create a mock API client that returns specified data. */
 function createMockApi(
   data: unknown,
@@ -416,5 +434,23 @@ describe("StatCard", () => {
     // Should be focusable and activatable via keyboard
     fireEvent.keyDown(card, { key: "Enter" });
     // No error thrown means the action executor was called
+  });
+
+  it("resolves templated labels against route runtime", async () => {
+    const api = createMockApi({ total: 100 });
+    const wrapper = createTestWrapper(api);
+
+    render(
+      <StatCard
+        config={{
+          ...baseConfig,
+          label: "Revenue {route.params.id}",
+        }}
+      />,
+      { wrapper },
+    );
+
+    const label = await screen.findByTestId("stat-card-label");
+    expect(label.textContent).toBe("Revenue alpha");
   });
 });

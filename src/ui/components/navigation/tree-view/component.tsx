@@ -12,22 +12,26 @@ import {
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
+import {
+  resolveOptionalPrimitiveValue,
+  usePrimitiveValueOptions,
+  type PrimitiveValueOptions,
+} from "../../primitives/resolve-value";
 import type { TreeViewConfig, TreeItemInput } from "./types";
 
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
-
-function normalizeTreeItems(items: TreeItemInput[] | undefined): TreeItemInput[] {
+function normalizeTreeItems(
+  items: TreeItemInput[] | undefined,
+  primitiveOptions: PrimitiveValueOptions,
+): TreeItemInput[] {
   if (!items) {
     return [];
   }
 
   return items.map((item) => ({
     ...item,
-    label: resolveText(item.label) ?? "",
-    badge: resolveText(item.badge),
-    children: normalizeTreeItems(item.children),
+    label: resolveOptionalPrimitiveValue(item.label, primitiveOptions) ?? "",
+    badge: resolveOptionalPrimitiveValue(item.badge, primitiveOptions),
+    children: normalizeTreeItems(item.children, primitiveOptions),
   }));
 }
 
@@ -156,15 +160,11 @@ function TreeNode({
         "transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
       fontSize: "var(--sn-font-size-xs, 0.75rem)",
       color: "var(--sn-color-muted-foreground, #6b7280)",
+      transform: "rotate(0deg)",
       states: {
         open: {
-          style: {
-            transform: "rotate(90deg)",
-          },
+          transform: "rotate(90deg)",
         },
-      },
-      style: {
-        transform: "rotate(0deg)",
       },
     } as Record<string, unknown>,
     componentSurface: slots?.disclosure,
@@ -395,6 +395,7 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const visible = useSubscribe(config.visible ?? true);
+  const primitiveOptions = usePrimitiveValueOptions();
   const resolvedConfig = useResolveFrom({ items: config.items });
   const selectable = config.selectable ?? true;
   const multiSelect = config.multiSelect ?? false;
@@ -484,6 +485,7 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
       return normalizeTreeItems(
         ((resolvedConfig.items as TreeViewConfig["items"] | undefined) ??
           config.items) as TreeItemInput[] | undefined,
+        primitiveOptions,
       );
     }
     if (!data) {
@@ -499,7 +501,7 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
           : [];
 
     return rawItems as TreeItemInput[];
-  }, [config.items, data, hasEndpoint, resolvedConfig.items]);
+  }, [config.items, data, hasEndpoint, primitiveOptions, resolvedConfig.items]);
   const expansionSignature = useMemo(
     () => buildExpansionSignature(items),
     [items],
@@ -592,38 +594,62 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
           style={loadingStateSurface.style}
         >
           {[0, 1, 2].map((index) => (
-            <div
-              key={index}
-              data-snapshot-id={`${rootId}-loading-item-${index}`}
-              className={loadingItemSurface.className}
-              style={{
-                ...(loadingItemSurface.style ?? {}),
-                paddingLeft: `calc(${index === 2 ? 1 : 0} * var(--sn-spacing-lg, 1.5rem))`,
-              }}
-            >
-              <div
-                data-snapshot-id={`${rootId}-loading-marker-${index}`}
-                className={loadingMarkerSurface.className}
-                style={loadingMarkerSurface.style}
-              />
-              <div
-                data-snapshot-id={`${rootId}-loading-label-${index}`}
-                className={loadingLabelSurface.className}
-                style={{
-                  ...(loadingLabelSurface.style ?? {}),
+            (() => {
+              const loadingItemRowSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-loading-item-${index}`,
+                implementationBase: loadingItemSurface.resolvedConfigForWrapper,
+                itemSurface: {
+                  style: {
+                    paddingLeft: `calc(${index === 2 ? 1 : 0} * var(--sn-spacing-lg, 1.5rem))`,
+                  },
+                },
+              });
+              const loadingLabelRowSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-loading-label-${index}`,
+                implementationBase: loadingLabelSurface.resolvedConfigForWrapper,
+                itemSurface: {
                   width: `${40 + index * 20}%`,
-                }}
-              />
-              <div
-                data-snapshot-id={`${rootId}-loading-label-secondary-${index}`}
-                className={loadingLabelSecondarySurface.className}
-                style={{
-                  ...(loadingLabelSecondarySurface.style ?? {}),
+                },
+              });
+              const loadingLabelSecondaryRowSurface = resolveSurfacePresentation({
+                surfaceId: `${rootId}-loading-label-secondary-${index}`,
+                implementationBase: loadingLabelSecondarySurface.resolvedConfigForWrapper,
+                itemSurface: {
                   width: `${55 + index * 10}%`,
-                  opacity: "var(--sn-opacity-disabled, 0.5)",
-                }}
-              />
-            </div>
+                  style: {
+                    opacity: "var(--sn-opacity-disabled, 0.5)",
+                  },
+                },
+              });
+
+              return (
+                <div
+                  key={index}
+                  data-snapshot-id={`${rootId}-loading-item-${index}`}
+                  className={loadingItemRowSurface.className}
+                  style={loadingItemRowSurface.style}
+                >
+                  <div
+                    data-snapshot-id={`${rootId}-loading-marker-${index}`}
+                    className={loadingMarkerSurface.className}
+                    style={loadingMarkerSurface.style}
+                  />
+                  <div
+                    data-snapshot-id={`${rootId}-loading-label-${index}`}
+                    className={loadingLabelRowSurface.className}
+                    style={loadingLabelRowSurface.style}
+                  />
+                  <div
+                    data-snapshot-id={`${rootId}-loading-label-secondary-${index}`}
+                    className={loadingLabelSecondaryRowSurface.className}
+                    style={loadingLabelSecondaryRowSurface.style}
+                  />
+                  <SurfaceStyles css={loadingItemRowSurface.scopedCss} />
+                  <SurfaceStyles css={loadingLabelRowSurface.scopedCss} />
+                  <SurfaceStyles css={loadingLabelSecondaryRowSurface.scopedCss} />
+                </div>
+              );
+            })()
           ))}
         </div>
         <SurfaceStyles css={rootSurface.scopedCss} />

@@ -57,6 +57,28 @@ vi.mock("../../../_base/use-component-data", () => ({
   useComponentData: () => dataState,
 }));
 
+vi.mock("../../../../manifest/runtime", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../../../manifest/runtime")>(
+      "../../../../manifest/runtime"
+    );
+
+  return {
+    ...actual,
+    useManifestRuntime: () => ({
+      raw: {},
+      app: {},
+      auth: {},
+    }),
+    useRouteRuntime: () => ({
+      currentRoute: { id: "workspace", path: "/workspace/:id" },
+      currentPath: "/workspace/alpha",
+      params: { id: "alpha" },
+      query: {},
+    }),
+  };
+});
+
 vi.mock("../../../../icons/index", () => ({
   Icon: ({ name }: { name: string }) => <span data-testid={`multi-select-icon-${name}`}>{name}</span>,
 }));
@@ -134,5 +156,32 @@ describe("MultiSelect", () => {
       container.querySelector('[data-snapshot-id="tag-select-errorMessage"]')
         ?.className,
     ).toContain("error-message-slot");
+  });
+
+  it("resolves templated label, placeholder, and option copy against route runtime", () => {
+    dataState.data = null;
+    dataState.isLoading = false;
+    dataState.error = null;
+    dataState.refetch = vi.fn();
+
+    render(
+      <MultiSelect
+        config={{
+          type: "multi-select",
+          label: "Tags {route.params.id}",
+          placeholder: "Select {route.path}",
+          options: [
+            { label: "Bug {route.params.id}", value: "bug" },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Tags alpha")).toBeDefined();
+    expect(screen.getByText("Select /workspace/alpha")).toBeDefined();
+
+    fireEvent.click(screen.getByRole("combobox"));
+
+    expect(screen.getByRole("option", { name: /Bug alpha/ })).toBeDefined();
   });
 });

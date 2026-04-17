@@ -1,12 +1,9 @@
 import { useCallback, useMemo, useState } from "react";
 import { usePublish, useResolveFrom } from "../../../context/hooks";
 import { useUrlSync } from "../../../hooks/use-url-sync";
+import { resolveOptionalPrimitiveValue, usePrimitiveValueOptions } from "../../primitives/resolve-value";
 import type { TabsConfig } from "./schema";
 import type { ResolvedTabConfig, UseTabsReturn } from "./types";
-
-function resolveText(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
 
 /**
  * Hook that manages tab state for a given tabs config.
@@ -19,15 +16,16 @@ function resolveText(value: unknown): string | undefined {
 export function useTabs(config: TabsConfig): UseTabsReturn {
   const [activeTab, setActiveTabRaw] = useState(config.defaultTab ?? 0);
   const publish = usePublish(config.id ?? "");
+  const primitiveOptions = usePrimitiveValueOptions();
   const resolvedConfig = useResolveFrom({ children: config.children });
   const tabs = useMemo<ResolvedTabConfig[]>(
     () =>
       (((resolvedConfig.children as TabsConfig["children"] | undefined) ??
         config.children) as TabsConfig["children"]).map((tab) => ({
         ...tab,
-        label: resolveText(tab.label) ?? "",
+        label: resolveOptionalPrimitiveValue(tab.label, primitiveOptions) ?? "",
       })),
-    [config.children, resolvedConfig.children],
+    [config.children, primitiveOptions, resolvedConfig.children],
   );
   const urlSyncConfig = useMemo(() => {
     if (!config.urlSync) {
