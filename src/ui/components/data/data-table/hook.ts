@@ -355,13 +355,9 @@ export function useDataTable(config: DataTableConfig): UseDataTableResult {
         setError(null);
       } catch (err) {
         if (!cancelled) {
-          const errObj =
-            err instanceof Error ? err : new Error("Failed to fetch data");
-          if (/not found|404/i.test(errObj.message)) {
-            setError(null);
-          } else {
-            setError(errObj);
-          }
+          setError(
+            err instanceof Error ? err : new Error("Failed to fetch data"),
+          );
           setAllRows([]);
         }
       } finally {

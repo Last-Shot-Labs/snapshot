@@ -184,6 +184,10 @@ export class ApiClient implements ApiClientLike {
       throw new ApiError(403, body);
     }
 
+    if (response.status === 404) {
+      return null as T;
+    }
+
     if (!response.ok) {
       const body = await response.json().catch(() => null);
       throw new ApiError(response.status, body);

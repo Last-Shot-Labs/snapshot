@@ -267,18 +267,13 @@ export function useDetailCard(config: DetailCardConfig): UseDetailCardResult {
   }, [isDataFromRef, path, request?.method, queryClient]);
 
   const isLoading = isDataFromRef ? false : queryResult.isLoading;
-  const rawError = isDataFromRef
+  const error = isDataFromRef
     ? null
     : queryResult.error instanceof Error
       ? queryResult.error
       : queryResult.error
         ? new Error(String(queryResult.error))
         : null;
-  // Treat 404 / "not found" as empty rather than error
-  const is404 =
-    rawError != null &&
-    /not found|404/i.test(rawError.message);
-  const error = is404 ? null : rawError;
 
   return {
     data,

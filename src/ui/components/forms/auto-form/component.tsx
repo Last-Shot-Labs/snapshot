@@ -356,6 +356,183 @@ function resolveStaticFieldOptions(
   }));
 }
 
+// ── Tag input with pill UI ────────────────────────────────────────────────
+
+function TagInputField({
+  fieldId,
+  fieldName,
+  tags,
+  disabled,
+  readOnly,
+  required,
+  hasError,
+  describedBy,
+  label,
+  placeholder,
+  onChange,
+  onBlur,
+  rootId,
+  inputSurface,
+  inputStyle,
+}: {
+  fieldId: string;
+  fieldName: string;
+  tags: string[];
+  disabled?: boolean;
+  readOnly?: boolean;
+  required: boolean;
+  hasError: boolean;
+  describedBy: string | undefined;
+  label: string | undefined;
+  placeholder: string | undefined;
+  onChange: (value: unknown) => void;
+  onBlur: () => void;
+  rootId: string;
+  inputSurface: { className: string | undefined };
+  inputStyle: React.CSSProperties;
+}) {
+  const [inputText, setInputText] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const addTag = useCallback(
+    (text: string) => {
+      const trimmed = text.trim().toLowerCase().replace(/,/g, "");
+      if (trimmed && !tags.includes(trimmed)) {
+        onChange([...tags, trimmed]);
+      }
+      setInputText("");
+    },
+    [tags, onChange],
+  );
+
+  const removeTag = useCallback(
+    (index: number) => {
+      onChange(tags.filter((_, i) => i !== index));
+    },
+    [tags, onChange],
+  );
+
+  const [focused, setFocused] = useState(false);
+
+  return (
+    <div
+      data-snapshot-id={`${rootId}-input-${fieldName}`}
+      className={inputSurface.className}
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        gap: "0.375rem",
+        cursor: disabled ? "not-allowed" : "text",
+        width: "100%",
+        minHeight: "var(--sn-input-height, 2.5rem)",
+        padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-md, 1rem)",
+        border: `var(--sn-border-thin, 1px) solid ${focused ? "var(--sn-color-primary, #2563eb)" : "var(--sn-color-border, #e5e7eb)"}`,
+        borderRadius: "var(--sn-radius-md, 0.5rem)",
+        background: "var(--sn-color-background, #ffffff)",
+        color: "var(--sn-color-foreground, #111827)",
+        fontSize: "var(--sn-font-size-sm, 0.875rem)",
+        lineHeight: "var(--sn-leading-normal, 1.5)",
+        boxShadow: focused
+          ? "0 0 0 1px var(--sn-color-primary, #2563eb)"
+          : "none",
+        transition:
+          "border-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease), box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+        boxSizing: "border-box",
+      }}
+      onClick={() => inputRef.current?.focus()}
+    >
+      {tags.map((tag, i) => (
+        <span
+          key={tag}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.25rem",
+            padding: "0.125rem 0.5rem",
+            borderRadius: "var(--sn-radius-full, 9999px)",
+            backgroundColor: "var(--sn-color-primary, #2563eb)",
+            color: "var(--sn-color-primary-foreground, #ffffff)",
+            fontSize: "var(--sn-font-size-sm, 0.875rem)",
+            lineHeight: "1.5",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {tag}
+          {!disabled && !readOnly ? (
+            <button
+              type="button"
+              aria-label={`Remove ${tag}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                removeTag(i);
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                color: "inherit",
+                cursor: "pointer",
+                padding: 0,
+                fontSize: "1rem",
+                lineHeight: 1,
+                opacity: 0.7,
+              }}
+            >
+              ×
+            </button>
+          ) : null}
+        </span>
+      ))}
+      <input
+        ref={inputRef}
+        id={fieldId}
+        type="text"
+        value={inputText}
+        disabled={disabled}
+        readOnly={readOnly}
+        required={required && tags.length === 0}
+        aria-invalid={hasError}
+        aria-describedby={describedBy}
+        aria-label={label}
+        placeholder={placeholder ?? "Type and press Enter..."}
+        onChange={(e) => setInputText(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onKeyDown={(e) => {
+          if (
+            (e.key === "Enter" || e.key === "," || e.key === " ") &&
+            inputText.trim()
+          ) {
+            e.preventDefault();
+            addTag(inputText);
+          }
+          if (e.key === "Backspace" && inputText === "" && tags.length > 0) {
+            removeTag(tags.length - 1);
+          }
+        }}
+        onBlur={() => {
+          if (inputText.trim()) addTag(inputText);
+          setFocused(false);
+          onBlur();
+        }}
+        style={{
+          flex: 1,
+          minWidth: "10rem",
+          border: "none",
+          outline: "none",
+          background: "transparent",
+          fontSize: "inherit",
+          fontFamily: "inherit",
+          color: "inherit",
+          padding: "0.25rem 0",
+          minHeight: "auto",
+          borderRadius: 0,
+          boxShadow: "none",
+        }}
+      />
+    </div>
+  );
+}
+
 // ── Field renderer ────────────────────────────────────────────────────────
 
 function FieldRenderer({
@@ -1143,35 +1320,31 @@ function FieldRenderer({
       break;
     }
 
-    case "tag-input":
+    case "tag-input": {
+      const tags: string[] = Array.isArray(value)
+        ? (value as string[]).filter(Boolean)
+        : [];
       input = (
-        <InputControl
-          inputId={fieldId}
-          name={field.name}
-          type="text"
-          value={Array.isArray(value) ? value.join(", ") : String(value ?? "")}
+        <TagInputField
+          fieldId={fieldId}
+          fieldName={field.name}
+          tags={tags}
           disabled={field.disabled}
           readOnly={field.readOnly}
           required={required}
-          ariaInvalid={hasError}
-          ariaDescribedBy={describedBy}
-          ariaLabel={label}
+          hasError={hasError}
+          describedBy={describedBy}
+          label={label}
           placeholder={placeholder}
-          onChangeText={(nextValue) =>
-            onChange(
-              nextValue
-                .split(",")
-                .map((item) => item.trim())
-                .filter(Boolean),
-            )
-          }
+          onChange={onChange}
           onBlur={onBlur}
-          surfaceId={`${rootId}-input-${field.name}`}
-          className={inputSurface.className}
-          style={inputStyle}
+          rootId={rootId}
+          inputSurface={inputSurface}
+          inputStyle={inputStyle}
         />
       );
       break;
+    }
 
     default:
       input = (
