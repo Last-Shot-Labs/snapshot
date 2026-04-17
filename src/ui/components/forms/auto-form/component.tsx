@@ -388,8 +388,8 @@ function TagInputField({
   onChange: (value: unknown) => void;
   onBlur: () => void;
   rootId: string;
-  inputSurface: { className: string | undefined };
-  inputStyle: React.CSSProperties;
+  inputSurface: { className?: string };
+  inputStyle?: React.CSSProperties;
 }) {
   const [inputText, setInputText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);

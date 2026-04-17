@@ -3,7 +3,7 @@
  */
 import { cleanup, render, screen } from "@testing-library/react";
 import React from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { AtomRegistryImpl } from "../../../../context/registry";
 import {
   AppRegistryContext,
@@ -11,6 +11,21 @@ import {
 } from "../../../../context/providers";
 import { SnapshotApiContext } from "../../../../actions/executor";
 import { ListComponent } from "../component";
+
+vi.mock("../../../../hooks/use-drag-drop", () => ({
+  SortableContext: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useDroppable: () => ({ isOver: false, setNodeRef: () => undefined }),
+  useSortable: () => ({
+    attributes: {},
+    listeners: {},
+    setNodeRef: () => undefined,
+    transform: null,
+    transition: undefined,
+    isDragging: false,
+  }),
+  verticalListSortingStrategy: {},
+  getSortableStyle: () => ({}),
+}));
 
 function createWrapper() {
   const registry = new AtomRegistryImpl();
@@ -127,6 +142,87 @@ describe("ListComponent", () => {
     );
 
     expect(screen.getByText("Nothing here")).toBeTruthy();
+  });
+
+  it("applies empty fallback and virtualization slots", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <ListComponent
+          config={{
+            type: "list",
+            id: "virtual-orders",
+            items: [
+              { id: "1", title: "Order A" },
+              { id: "2", title: "Order B" },
+              { id: "3", title: "Order C" },
+            ],
+            virtualize: true,
+            slots: {
+              list: { className: "list-slot" },
+              virtualContent: { className: "virtual-content-slot" },
+              virtualSpacer: { className: "virtual-spacer-slot" },
+            },
+          }}
+        />
+      </Wrapper>,
+    );
+
+    expect(
+      document.querySelector('[data-snapshot-id="virtual-orders-list"]')?.className,
+    ).toContain("list-slot");
+    expect(
+      document.querySelector('[data-snapshot-id="virtual-orders-virtual-content"]')?.className,
+    ).toContain("virtual-content-slot");
+    expect(
+      document.querySelector('[data-snapshot-id="virtual-orders-virtual-spacer"]')?.className,
+    ).toContain("virtual-spacer-slot");
+  });
+
+  it("applies emptyMessage, dropZone, sortableItem, and itemHandle slots", () => {
+    const { Wrapper } = createWrapper();
+    render(
+      <Wrapper>
+        <ListComponent
+          config={{
+            type: "list",
+            id: "drag-orders",
+            draggable: true,
+            items: [{ id: "1", title: "Order A" }],
+            slots: {
+              dropZone: { className: "drop-zone-slot" },
+              sortableItem: { className: "sortable-item-slot" },
+              itemHandle: { className: "item-handle-slot" },
+            },
+          }}
+        />
+        <ListComponent
+          config={{
+            type: "list",
+            id: "empty-orders",
+            items: [],
+            emptyMessage: "Nothing here",
+            slots: {
+              emptyState: { className: "empty-slot" },
+              emptyMessage: { className: "empty-message-slot" },
+            },
+          }}
+        />
+      </Wrapper>,
+    );
+
+    expect(
+      document.querySelector('[data-snapshot-id="drag-orders-drop-zone"]')?.className,
+    ).toContain("drop-zone-slot");
+    expect(
+      document.querySelector('[data-snapshot-id="1-sortable-item"]')?.className,
+    ).toContain("sortable-item-slot");
+    expect(
+      document.querySelector('[data-snapshot-id="drag-orders-item-handle-0"]')?.className,
+    ).toContain("item-handle-slot");
+    const emptyNode = screen.getByTestId("list-empty");
+    expect(emptyNode.className).toContain("empty-slot");
+    expect(emptyNode.className).toContain("empty-message-slot");
   });
 
   it("keeps the loadingState wrapper when auto skeleton loading is enabled", () => {

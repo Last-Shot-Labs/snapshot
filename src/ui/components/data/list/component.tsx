@@ -30,8 +30,42 @@ import type { ActionConfig, ActionExecuteFn } from "../../../actions/types";
 import { wsManagerAtom } from "../../../../ws/atom";
 import {
   extractSurfaceConfig,
+  mergeClassNames,
+  mergeStyles,
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
+
+function resolveListSurface(
+  rootId: string,
+  slots: ListConfig["slots"] | undefined,
+  slotName:
+    | "root"
+    | "list"
+    | "dropZone"
+    | "sortableItem"
+    | "virtualContent"
+    | "virtualSpacer"
+    | "liveBanner"
+    | "liveText"
+    | "emptyState"
+    | "emptyMessage"
+    | "loadingState"
+    | "loadingItem"
+    | "loadingIcon"
+    | "loadingBody"
+    | "loadingTitle"
+    | "loadingDescription"
+    | "errorState",
+  implementationBase?: Record<string, unknown>,
+  activeStates?: Array<"active">,
+) {
+  return resolveSurfacePresentation({
+    surfaceId: `${rootId}-${slotName}`,
+    implementationBase,
+    componentSurface: slots?.[slotName],
+    activeStates,
+  });
+}
 
 function resolveItemSurface(
   rootId: string,
@@ -41,6 +75,7 @@ function resolveItemSurface(
     | "item"
     | "itemBody"
     | "itemLink"
+    | "itemHandle"
     | "itemTitle"
     | "itemDescription"
     | "itemIcon"
@@ -258,12 +293,24 @@ function ListItem({
     itemIndex,
     "itemBody",
     {
-      style: {
-        flex: 1,
-        minWidth: 0,
-      },
+      flex: 1,
+      minWidth: 0,
     },
     slots?.itemBody,
+  );
+  const handleSurface = resolveItemSurface(
+    rootId,
+    item,
+    itemIndex,
+    "itemHandle",
+    {
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      flexShrink: 0,
+      display: "inline-flex",
+      alignItems: "center",
+      cursor: draggable ? "grab" : undefined,
+    },
+    slots?.itemHandle,
   );
   const descriptionSurface = resolveItemSurface(
     rootId,
@@ -288,15 +335,13 @@ function ListItem({
       ? {
           display: "inline-flex",
           alignItems: "center",
-          style: {
-            padding: "0 var(--sn-spacing-xs, 0.25rem)",
-            borderRadius: "var(--sn-radius-full, 9999px)",
-            fontSize: "var(--sn-font-size-xs, 0.75rem)",
-            fontWeight: "var(--sn-font-weight-semibold, 600)",
-            backgroundColor: `var(--sn-color-${item.badgeColor ?? "primary"}, #2563eb)`,
-            color: `var(--sn-color-${item.badgeColor ?? "primary"}-foreground, #ffffff)`,
-            lineHeight: "var(--sn-leading-normal, 1.5)",
-          },
+          padding: "0 var(--sn-spacing-xs, 0.25rem)",
+          borderRadius: "var(--sn-radius-full, 9999px)",
+          fontSize: "var(--sn-font-size-xs, 0.75rem)",
+          fontWeight: "var(--sn-font-weight-semibold, 600)",
+          backgroundColor: `var(--sn-color-${item.badgeColor ?? "primary"}, #2563eb)`,
+          color: `var(--sn-color-${item.badgeColor ?? "primary"}-foreground, #ffffff)`,
+          lineHeight: "var(--sn-leading-normal, 1.5)",
         }
       : undefined,
     slots?.itemBadge,
@@ -307,10 +352,8 @@ function ListItem({
     itemIndex,
     "itemLink",
     {
-      style: {
-        textDecoration: "none",
-        color: "inherit",
-      },
+      textDecoration: "none",
+      color: "inherit",
     },
     slots?.itemLink,
   );
@@ -320,10 +363,8 @@ function ListItem({
     itemIndex,
     "divider",
     {
-      style: {
-        height: "1px",
-        backgroundColor: "var(--sn-color-border, #e5e7eb)",
-      },
+      height: "1px",
+      backgroundColor: "var(--sn-color-border, #e5e7eb)",
     },
     slots?.divider,
   );
@@ -356,9 +397,9 @@ function ListItem({
       {draggable ? (
         <span
           aria-hidden="true"
-          data-snapshot-id={`${rootId}-item-icon-${itemIndex}`}
-          className={iconSurface.className}
-          style={iconSurface.style}
+          data-snapshot-id={`${rootId}-item-handle-${itemIndex}`}
+          className={handleSurface.className}
+          style={handleSurface.style}
         >
           <Icon name="grip-vertical" size={16} />
         </span>
@@ -436,6 +477,7 @@ function ListItem({
       <SurfaceStyles css={itemSurface.scopedCss} />
       <SurfaceStyles css={bodySurface.scopedCss} />
       <SurfaceStyles css={linkSurface.scopedCss} />
+      <SurfaceStyles css={handleSurface.scopedCss} />
       <SurfaceStyles css={iconSurface.scopedCss} />
       <SurfaceStyles css={titleSurface.scopedCss} />
       <SurfaceStyles css={descriptionSurface.scopedCss} />
@@ -449,10 +491,12 @@ function ListItem({
  * Sortable wrapper for list items when drag-and-drop is enabled.
  */
 function SortableListItem({
+  surface,
   id,
   containerId,
   children,
 }: {
+  surface: ReturnType<typeof resolveSurfacePresentation>;
   id: string;
   containerId: string;
   children: React.ReactNode;
@@ -475,17 +519,29 @@ function SortableListItem({
   const style = getSortableStyle(transform, transition, isDragging);
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div
+      ref={setNodeRef}
+      data-snapshot-id={`${id}-sortable-item`}
+      className={surface.className}
+      style={mergeStyles(surface.style, style)}
+      {...attributes}
+      {...listeners}
+    >
       {children}
+      <SurfaceStyles css={surface.scopedCss} />
     </div>
   );
 }
 
 function DroppableListBody({
+  rootId,
   containerId,
+  slots,
   children,
 }: {
+  rootId: string;
   containerId: string;
+  slots?: ListConfig["slots"];
   children: React.ReactNode;
 }) {
   const { isOver, setNodeRef } = useDroppable({
@@ -495,20 +551,33 @@ function DroppableListBody({
       containerId,
     },
   });
+  const surface = resolveListSurface(
+    rootId,
+    slots,
+    "dropZone",
+    {
+      borderRadius: "var(--sn-radius-md, 0.5rem)",
+      transition:
+        "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+      states: {
+        active: {
+          backgroundColor:
+            "color-mix(in oklch, var(--sn-color-primary, #2563eb) 4%, transparent)",
+        },
+      },
+    },
+    isOver ? ["active"] : undefined,
+  );
 
   return (
     <div
       ref={setNodeRef}
-      style={{
-        backgroundColor: isOver
-          ? "color-mix(in oklch, var(--sn-color-primary, #2563eb) 4%, transparent)"
-          : undefined,
-        borderRadius: "var(--sn-radius-md, 0.5rem)",
-        transition:
-          "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
-      }}
+      data-snapshot-id={`${rootId}-drop-zone`}
+      className={surface.className}
+      style={surface.style}
     >
       {children}
+      <SurfaceStyles css={surface.scopedCss} />
     </div>
   );
 }
@@ -710,107 +779,99 @@ export function ListComponent({ config }: { config: ListConfig }) {
     componentSurface: extractSurfaceConfig(config),
     itemSurface: config.slots?.root,
   });
-  const listSurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-list`,
-    componentSurface: config.slots?.list,
+  const listSurface = resolveListSurface(rootId, config.slots, "list", {
+    overflowY: virtualConfig ? "auto" : undefined,
+    maxHeight: virtualConfig
+      ? `${(virtualConfig.itemHeight ?? 48) * 8}px`
+      : undefined,
   });
-  const liveBannerSurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-live-banner`,
-    implementationBase: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: "0.75rem",
-      style: {
-        padding: "0.75rem 1rem",
-        marginBottom: "0.75rem",
-        borderRadius: "var(--sn-radius-md, 0.5rem)",
-        backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
-      },
+  const liveBannerSurface = resolveListSurface(rootId, config.slots, "liveBanner", {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "0.75rem",
+    padding: "0.75rem 1rem",
+    marginBottom: "0.75rem",
+    borderRadius: "var(--sn-radius-md, 0.5rem)",
+    backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
+  });
+  const liveTextSurface = resolveListSurface(rootId, config.slots, "liveText");
+  const loadingSurface = resolveListSurface(rootId, config.slots, "loadingState");
+  const loadingItemSurface = resolveListSurface(rootId, config.slots, "loadingItem", {
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--sn-spacing-sm, 0.5rem)",
+    padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
+  });
+  const loadingIconSurface = resolveListSurface(rootId, config.slots, "loadingIcon", {
+    width: "2rem",
+    height: "2rem",
+    borderRadius: "var(--sn-radius-sm, 0.25rem)",
+    backgroundColor: "var(--sn-color-muted, #e5e7eb)",
+  });
+  const loadingBodySurface = resolveListSurface(rootId, config.slots, "loadingBody", {
+    flex: 1,
+  });
+  const loadingTitleSurface = resolveListSurface(rootId, config.slots, "loadingTitle", {
+    height: "0.75rem",
+    width: "40%",
+    backgroundColor: "var(--sn-color-muted, #e5e7eb)",
+    borderRadius: "var(--sn-radius-sm, 0.25rem)",
+    marginBottom: "var(--sn-spacing-xs, 0.25rem)",
+  });
+  const loadingDescriptionSurface = resolveListSurface(
+    rootId,
+    config.slots,
+    "loadingDescription",
+    {
+      height: "0.625rem",
+      width: "60%",
+      backgroundColor: "var(--sn-color-muted, #e5e7eb)",
+      borderRadius: "var(--sn-radius-sm, 0.25rem)",
     },
-    componentSurface: config.slots?.liveBanner,
-  });
-  const liveTextSurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-live-text`,
-    implementationBase: {},
-    componentSurface: config.slots?.liveText,
-  });
-  const loadingSurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-loading`,
-    componentSurface: config.slots?.loadingState,
-  });
-  const loadingItemSurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-loading-item`,
-    implementationBase: {
-      display: "flex",
-      alignItems: "center",
-      gap: "var(--sn-spacing-sm, 0.5rem)",
-      style: {
-        padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
-      },
+  );
+  const errorSurface = resolveListSurface(rootId, config.slots, "errorState");
+  const emptySurface = resolveListSurface(rootId, config.slots, "emptyState");
+  const emptyMessageSurface = resolveListSurface(
+    rootId,
+    config.slots,
+    "emptyMessage",
+    {
+      padding: "var(--sn-spacing-lg, 1.5rem)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
+      fontSize: "var(--sn-font-size-sm, 0.875rem)",
+      textAlign: "center",
     },
-    componentSurface: config.slots?.loadingItem,
-  });
-  const loadingIconSurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-loading-icon`,
-    implementationBase: {
-      style: {
-        width: "2rem",
-        height: "2rem",
-        borderRadius: "var(--sn-radius-sm, 0.25rem)",
-        backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-      },
-    },
-    componentSurface: config.slots?.loadingIcon,
-  });
-  const loadingBodySurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-loading-body`,
-    implementationBase: {
-      style: {
-        flex: 1,
-      },
-    },
-    componentSurface: config.slots?.loadingBody,
-  });
-  const loadingTitleSurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-loading-title`,
-    implementationBase: {
-      style: {
-        height: "0.75rem",
-        width: "40%",
-        backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-        borderRadius: "var(--sn-radius-sm, 0.25rem)",
-        marginBottom: "var(--sn-spacing-xs, 0.25rem)",
-      },
-    },
-    componentSurface: config.slots?.loadingTitle,
-  });
-  const loadingDescriptionSurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-loading-description`,
-    implementationBase: {
-      style: {
-        height: "0.625rem",
-        width: "60%",
-        backgroundColor: "var(--sn-color-muted, #e5e7eb)",
-        borderRadius: "var(--sn-radius-sm, 0.25rem)",
-      },
-    },
-    componentSurface: config.slots?.loadingDescription,
-  });
-  const errorSurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-error`,
-    componentSurface: config.slots?.errorState,
-  });
-  const emptySurface = resolveSurfacePresentation({
-    surfaceId: `${rootId}-empty`,
-    componentSurface: config.slots?.emptyState,
-  });
+  );
   const renderedItems = virtualConfig
     ? virtualList.visibleIndices.map((index) => ({
         item: limitedItems[index]!,
         index,
       }))
     : limitedItems.map((item, index) => ({ item, index }));
+  const virtualContentSurface = resolveListSurface(
+    rootId,
+    config.slots,
+    "virtualContent",
+    {
+      paddingTop: virtualConfig ? `${virtualList.offsetTop}px` : undefined,
+    },
+  );
+  const virtualSpacerSurface = resolveListSurface(
+    rootId,
+    config.slots,
+    "virtualSpacer",
+    {
+      height: virtualConfig
+        ? `${Math.max(
+            0,
+            virtualList.totalHeight -
+              virtualList.offsetTop -
+              renderedItems.length * (virtualConfig.itemHeight ?? 48),
+          )}px`
+        : undefined,
+    },
+  );
 
   return (
     <div
@@ -901,14 +962,11 @@ export function ListComponent({ config }: { config: ListConfig }) {
           <div
             data-testid="list-empty"
             data-snapshot-id={`${rootId}-empty`}
-            className={emptySurface.className}
-            style={{
-              padding: "var(--sn-spacing-lg, 1.5rem)",
-              color: "var(--sn-color-muted-foreground, #6b7280)",
-              fontSize: "var(--sn-font-size-sm, 0.875rem)",
-              textAlign: "center",
-              ...emptySurface.style,
-            }}
+            className={mergeClassNames(
+              emptySurface.className,
+              emptyMessageSurface.className,
+            )}
+            style={mergeStyles(emptySurface.style, emptyMessageSurface.style)}
           >
             {emptyMessage}
           </div>
@@ -942,13 +1000,13 @@ export function ListComponent({ config }: { config: ListConfig }) {
             data-snapshot-id={`${rootId}-list`}
             className={listSurface.className}
             ref={virtualConfig ? virtualList.containerRef : undefined}
-            style={{
-              overflowY: virtualConfig ? "auto" : undefined,
-              maxHeight: virtualConfig ? `${(virtualConfig.itemHeight ?? 48) * 8}px` : undefined,
-              ...listSurface.style,
-            }}
+            style={listSurface.style}
           >
-            <div style={{ paddingTop: virtualConfig ? `${virtualList.offsetTop}px` : undefined }}>
+            <div
+              data-snapshot-id={`${rootId}-virtual-content`}
+              className={virtualContentSurface.className}
+              style={virtualContentSurface.style}
+            >
               {renderedItems.map(({ item, index }) => (
                 <ListItem
                   key={index}
@@ -979,14 +1037,9 @@ export function ListComponent({ config }: { config: ListConfig }) {
             {virtualConfig ? (
               <div
                 aria-hidden="true"
-                style={{
-                  height: `${Math.max(
-                    0,
-                    virtualList.totalHeight -
-                      virtualList.offsetTop -
-                      renderedItems.length * (virtualConfig.itemHeight ?? 48),
-                  )}px`,
-                }}
+                data-snapshot-id={`${rootId}-virtual-spacer`}
+                className={virtualSpacerSurface.className}
+                style={virtualSpacerSurface.style}
               />
             ) : null}
           </div>
@@ -1011,6 +1064,9 @@ export function ListComponent({ config }: { config: ListConfig }) {
       <SurfaceStyles css={loadingDescriptionSurface.scopedCss} />
       <SurfaceStyles css={errorSurface.scopedCss} />
       <SurfaceStyles css={emptySurface.scopedCss} />
+      <SurfaceStyles css={emptyMessageSurface.scopedCss} />
+      <SurfaceStyles css={virtualContentSurface.scopedCss} />
+      <SurfaceStyles css={virtualSpacerSurface.scopedCss} />
     </div>
   );
 }
@@ -1104,6 +1160,11 @@ function ManagedListItems({
   ]);
 
   const renderedItems = orderedItems.map((item, index) => {
+    const sortableItemSurface = resolveListSurface(
+      `${rootId}-sortable-item-${index}`,
+      slots,
+      "sortableItem",
+    );
     const content = (
       <ListItem
         rootId={rootId}
@@ -1137,6 +1198,7 @@ function ManagedListItems({
     return (
       <SortableListItem
         key={itemIds[index]}
+        surface={sortableItemSurface}
         id={itemIds[index]!}
         containerId={containerId}
       >
@@ -1146,7 +1208,11 @@ function ManagedListItems({
   });
 
   return (
-    <DroppableListBody containerId={containerId}>
+    <DroppableListBody
+      rootId={rootId}
+      containerId={containerId}
+      slots={slots}
+    >
       {draggable ? (
         <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
           {renderedItems}
