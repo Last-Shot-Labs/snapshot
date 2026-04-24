@@ -151,8 +151,8 @@ import { NavUserMenuBase } from "@lastshotlabs/snapshot/ui";
   showAvatar
   showName
   items={[
-    { label: "Profile", icon: "user", onClick: () => navigate("/profile") },
-    { label: "Settings", icon: "settings", onClick: () => navigate("/settings") },
+    { label: "Profile", icon: "user", onClick: () => (window.location.href = "/profile") },
+    { label: "Settings", icon: "settings", onClick: () => (window.location.href = "/settings") },
     { label: "Sign out", icon: "log-out", onClick: () => logout() },
   ]}
 />
@@ -305,6 +305,83 @@ import { CollapsibleBase } from "@lastshotlabs/snapshot/ui";
 </CollapsibleBase>
 ```
 
+## Mobile-responsive navigation
+
+For mobile, collapse the sidebar into a hamburger menu using `DrawerBase`:
+
+```tsx
+import { DrawerBase, IconButtonBase, LayoutBase, NavBase, RowBase } from "@lastshotlabs/snapshot/ui";
+import { useState, useEffect } from "react";
+
+const NAV_ITEMS = [
+  { label: "Dashboard", path: "/", icon: "home" },
+  { label: "Users", path: "/users", icon: "users" },
+  { label: "Settings", path: "/settings", icon: "settings" },
+];
+
+function ResponsiveShell({ children }: { children: React.ReactNode }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
+  if (isMobile) {
+    return (
+      <>
+        <RowBase
+          justify="between"
+          align="center"
+          style={{ padding: "0.75rem 1rem", borderBottom: "1px solid var(--sn-color-border)" }}
+        >
+          <IconButtonBase icon="menu" ariaLabel="Open menu" onClick={() => setMobileOpen(true)} />
+          <span style={{ fontWeight: 600 }}>My App</span>
+          <span style={{ width: 40 }} />
+        </RowBase>
+        <DrawerBase
+          title="Navigation"
+          side="left"
+          size="sm"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+        >
+          <NavBase
+            variant="sidebar"
+            items={NAV_ITEMS}
+            onNavigate={(path) => { window.location.href = path; setMobileOpen(false); }}
+          />
+        </DrawerBase>
+        <div style={{ padding: "1rem" }}>{children}</div>
+      </>
+    );
+  }
+
+  return (
+    <LayoutBase
+      variant="sidebar"
+      nav={<NavBase variant="sidebar" logo={{ text: "My App", path: "/" }} items={NAV_ITEMS} collapsible />}
+    >
+      {children}
+    </LayoutBase>
+  );
+}
+
+// Simple media query hook
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia(query).matches : false
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia(query);
+    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, [query]);
+
+  return matches;
+}
+```
+
+On desktop, this renders the standard sidebar. On mobile, the sidebar becomes a drawer that slides in from the left when the hamburger icon is tapped.
+
 ## Composition: full app shell
 
 ```tsx
@@ -336,7 +413,7 @@ function App() {
             userName={user?.name}
             userAvatar={user?.avatarUrl}
             items={[
-              { label: "Settings", icon: "settings", onClick: () => navigate("/settings") },
+              { label: "Settings", icon: "settings", onClick: () => (window.location.href = "/settings") },
               { label: "Sign out", icon: "log-out", onClick: () => logout() },
             ]}
           />

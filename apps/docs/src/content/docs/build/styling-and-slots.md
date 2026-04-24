@@ -142,8 +142,6 @@ The button schema currently exposes these slots:
 - `label`
 - `icon`
 - `leadingIcon`
-- `trailingIcon`
-- `spinner`
 
 Example:
 

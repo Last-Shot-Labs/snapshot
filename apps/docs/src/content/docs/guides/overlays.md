@@ -134,7 +134,7 @@ import { CommandPaletteBase } from "@lastshotlabs/snapshot/ui";
     },
   ]}
   onSelect={(item) => {
-    navigate(item.id);
+    window.location.href = `/${item.id}`;
     setIsOpen(false);
   }}
 />
@@ -239,35 +239,70 @@ import { HoverCardBase } from "@lastshotlabs/snapshot/ui";
 
 ## Composition patterns
 
-### Modal form with table row action
+### Modal form with async save
+
+The standard CRUD pattern: open a modal from a table row action, edit fields, save to the server with loading and error handling.
 
 ```tsx
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+
 function UserTable() {
-  const [editUser, setEditUser] = useState(null);
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery<{ items: User[] }>({
+    queryKey: ["/users"],
+    queryFn: () => snap.api.get("/users"),
+  });
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [draft, setDraft] = useState<User | null>(null);
+
+  const updateMutation = useMutation({
+    mutationFn: (user: User) => snap.api.patch(`/users/${user.id}`, user),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/users"] });
+      setEditUser(null);
+      setDraft(null);
+    },
+  });
+
+  // Sync draft when opening for edit
+  useEffect(() => {
+    if (editUser) setDraft({ ...editUser });
+  }, [editUser?.id]);
+
+  const active = draft ?? editUser;
 
   return (
     <>
       <DataTableBase
         columns={columns}
-        rows={users}
+        rows={data?.items ?? []}
+        isLoading={isLoading}
         rowActions={[
-          { label: "Edit", icon: "edit", onAction: (row) => setEditUser(row) },
+          { label: "Edit", icon: "edit", onAction: (row) => setEditUser(row as User) },
         ]}
       />
       <ModalBase
         title="Edit User"
         open={editUser !== null}
-        onClose={() => setEditUser(null)}
+        onClose={() => { setEditUser(null); setDraft(null); updateMutation.reset(); }}
         footer={[
-          { label: "Cancel", variant: "outline", onClick: () => setEditUser(null) },
-          { label: "Save", onClick: () => { saveUser(editUser); setEditUser(null); } },
+          { label: "Cancel", variant: "outline", onClick: () => { setEditUser(null); setDraft(null); } },
+          {
+            label: updateMutation.isPending ? "Saving..." : "Save",
+            onClick: () => { if (active) updateMutation.mutate(active); },
+            disabled: updateMutation.isPending,
+          },
         ]}
       >
-        {editUser && (
-          <>
-            <InputField label="Name" value={editUser.name} onChange={(v) => setEditUser({ ...editUser, name: v })} />
-            <InputField label="Email" value={editUser.email} onChange={(v) => setEditUser({ ...editUser, email: v })} />
-          </>
+        {active && (
+          <ColumnBase gap="md">
+            {updateMutation.error && (
+              <AlertBase severity="error">{(updateMutation.error as Error).message}</AlertBase>
+            )}
+            <InputField label="Name" value={active.name} onChange={(v) => setDraft({ ...active, name: v })} />
+            <InputField label="Email" value={active.email} onChange={(v) => setDraft({ ...active, email: v })} />
+          </ColumnBase>
         )}
       </ModalBase>
     </>
@@ -277,22 +312,85 @@ function UserTable() {
 
 ### Confirm before delete
 
+`ConfirmDialogBase` auto-closes after the confirm button is clicked. Start the mutation in `onConfirm` and let the table refresh via query invalidation:
+
 ```tsx
-function DeleteButton({ userId, onDeleted }) {
+function DeleteButton({ userId, userName, onDeleted }: {
+  userId: string;
+  userName: string;
+  onDeleted: () => void;
+}) {
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: () => snap.api.delete(`/users/${userId}`),
+    onSuccess: onDeleted,
+  });
 
   return (
     <>
       <ButtonBase label="Delete" variant="destructive" onClick={() => setShowConfirm(true)} />
       <ConfirmDialogBase
         title="Delete User"
-        description="This cannot be undone."
+        description={`Are you sure you want to delete ${userName}? This action cannot be undone.`}
         open={showConfirm}
         onClose={() => setShowConfirm(false)}
-        onConfirm={() => { deleteUser(userId).then(onDeleted); setShowConfirm(false); }}
+        onConfirm={() => deleteMutation.mutate()}
         confirmLabel="Delete"
         confirmVariant="destructive"
       />
+      {deleteMutation.error && (
+        <AlertBase severity="error">{(deleteMutation.error as Error).message}</AlertBase>
+      )}
+    </>
+  );
+}
+```
+
+### Create form in a modal
+
+```tsx
+function CreateUserFlow() {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
+  const createMutation = useMutation({
+    mutationFn: (data: { name: string; email: string }) =>
+      snap.api.post("/users", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/users"] });
+      setOpen(false);
+      setName("");
+      setEmail("");
+    },
+  });
+
+  return (
+    <>
+      <ButtonBase label="Add User" icon="plus" onClick={() => setOpen(true)} />
+      <ModalBase
+        title="Create User"
+        open={open}
+        onClose={() => { setOpen(false); createMutation.reset(); }}
+        footer={[
+          { label: "Cancel", variant: "outline", onClick: () => setOpen(false) },
+          {
+            label: createMutation.isPending ? "Creating..." : "Create",
+            onClick: () => createMutation.mutate({ name, email }),
+            disabled: createMutation.isPending || !name || !email,
+          },
+        ]}
+      >
+        <ColumnBase gap="md">
+          {createMutation.error && (
+            <AlertBase severity="error">{(createMutation.error as Error).message}</AlertBase>
+          )}
+          <InputField label="Name" value={name} onChange={setName} required />
+          <InputField label="Email" type="email" value={email} onChange={setEmail} required />
+        </ColumnBase>
+      </ModalBase>
     </>
   );
 }

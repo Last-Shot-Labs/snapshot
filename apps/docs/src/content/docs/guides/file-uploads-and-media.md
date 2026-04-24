@@ -7,7 +7,14 @@ draft: false
 ```tsx
 import { useState } from "react";
 import { FileUploaderBase, SnapshotImageBase, CardBase } from "@lastshotlabs/snapshot/ui";
-import type { UploadFileEntry } from "@lastshotlabs/snapshot/ui";
+
+interface UploadFileEntry {
+  file: File;
+  id: string;
+  status: "pending" | "uploading" | "completed" | "error";
+  progress: number;
+  errorMessage?: string;
+}
 
 function AvatarUploader() {
   const [files, setFiles] = useState<UploadFileEntry[]>([]);
@@ -94,8 +101,6 @@ Minimal inline variant:
 Use controlled `files` with `UploadFileEntry` objects to show progress, completion, and errors:
 
 ```tsx
-import type { UploadFileEntry } from "@lastshotlabs/snapshot/ui";
-
 function DocumentUploader() {
   const [files, setFiles] = useState<UploadFileEntry[]>([]);
 

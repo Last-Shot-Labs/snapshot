@@ -5,33 +5,61 @@ draft: false
 ---
 
 ```tsx
-import { InputField, SelectField, ButtonBase, CardBase } from "@lastshotlabs/snapshot/ui";
-import { useState } from "react";
+import { createSnapshot } from "@lastshotlabs/snapshot";
+import {
+  InputField, SelectField, ButtonBase, CardBase, ColumnBase, AlertBase,
+} from "@lastshotlabs/snapshot/ui";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-function CreateProjectForm({ onSubmit }) {
+const snap = createSnapshot({ apiUrl: "/api", manifest: {} });
+
+function CreateProjectForm() {
+  const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [tier, setTier] = useState("free");
 
+  const { mutate, isPending, isSuccess, error, reset } = useMutation({
+    mutationFn: (data: { name: string; tier: string }) =>
+      snap.api.post("/projects", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/projects"] });
+      setName("");
+      setTier("free");
+    },
+  });
+
   return (
     <CardBase title="New Project">
-      <form onSubmit={(e) => { e.preventDefault(); onSubmit({ name, tier }); }}>
-        <InputField label="Project name" value={name} onChange={setName} required />
-        <SelectField
-          label="Tier"
-          value={tier}
-          onChange={setTier}
-          options={[
-            { label: "Free", value: "free" },
-            { label: "Pro", value: "pro" },
-            { label: "Enterprise", value: "enterprise" },
-          ]}
-        />
-        <ButtonBase label="Create" type="submit" />
+      <form onSubmit={(e) => { e.preventDefault(); reset(); mutate({ name, tier }); }}>
+        <ColumnBase gap="md">
+          <InputField label="Project name" value={name} onChange={setName} required placeholder="My project" />
+          <SelectField
+            label="Tier"
+            value={tier}
+            onChange={setTier}
+            options={[
+              { label: "Free", value: "free" },
+              { label: "Pro", value: "pro" },
+              { label: "Enterprise", value: "enterprise" },
+            ]}
+          />
+          {isSuccess && <AlertBase severity="success">Project created</AlertBase>}
+          {error && <AlertBase severity="error">{(error as Error).message}</AlertBase>}
+          <ButtonBase
+            label={isPending ? "Creating..." : "Create project"}
+            type="submit"
+            disabled={isPending || !name}
+            fullWidth
+          />
+        </ColumnBase>
       </form>
     </CardBase>
   );
 }
 ```
+
+This pattern -- form state, mutation, loading button, error display, success feedback, and cache invalidation -- applies to every form you build with Snapshot.
 
 ## Text inputs
 
@@ -388,6 +416,104 @@ import { WizardBase } from "@lastshotlabs/snapshot/ui";
 ```
 
 WizardBase uses field configs (same shape as AutoFormBase fields) rather than custom React content per step. Each step manages its own values, validation, and touched state through the `state` prop. In manifest mode, `useWizard(config)` provides this state automatically.
+
+## Complete form patterns
+
+### Form with validation and API submission
+
+A contact form with client-side validation, server submission, and feedback:
+
+```tsx
+function ContactForm() {
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { mutate, isPending, isSuccess, error: serverError, reset } = useMutation({
+    mutationFn: (data: typeof form) => snap.api.post("/contact", data),
+    onSuccess: () => setForm({ name: "", email: "", message: "" }),
+  });
+
+  const validate = () => {
+    const next: Record<string, string> = {};
+    if (!form.name.trim()) next.name = "Name is required";
+    if (!form.email.includes("@")) next.email = "Enter a valid email";
+    if (form.message.length < 10) next.message = "Message must be at least 10 characters";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  return (
+    <CardBase title="Contact Us">
+      <form onSubmit={(e) => { e.preventDefault(); reset(); if (validate()) mutate(form); }}>
+        <ColumnBase gap="md">
+          <InputField label="Name" value={form.name}
+            onChange={(v) => setForm({ ...form, name: v })}
+            errorText={errors.name} required />
+          <InputField label="Email" type="email" value={form.email}
+            onChange={(v) => setForm({ ...form, email: v })}
+            errorText={errors.email} required />
+          <TextareaField label="Message" value={form.message}
+            onChange={(v) => setForm({ ...form, message: v })}
+            errorText={errors.message} rows={4} maxLength={500} required />
+          {isSuccess && <AlertBase severity="success">Message sent! We'll get back to you soon.</AlertBase>}
+          {serverError && <AlertBase severity="error">{(serverError as Error).message}</AlertBase>}
+          <ButtonBase label={isPending ? "Sending..." : "Send message"} type="submit" disabled={isPending} fullWidth />
+        </ColumnBase>
+      </form>
+    </CardBase>
+  );
+}
+```
+
+### Edit form with existing data
+
+Pre-fill a form with fetched data and save changes:
+
+```tsx
+function EditProjectForm({ projectId }: { projectId: string }) {
+  const { data: project, isLoading } = useQuery<{ name: string; tier: string; description: string }>({
+    queryKey: [`/projects/${projectId}`],
+    queryFn: () => snap.api.get(`/projects/${projectId}`),
+  });
+  const queryClient = useQueryClient();
+  const [draft, setDraft] = useState<typeof project | null>(null);
+
+  // Sync draft when data loads or project changes
+  useEffect(() => {
+    if (project) setDraft({ ...project });
+  }, [project?.name]);
+
+  const active = draft ?? project;
+
+  const { mutate, isPending, isSuccess, error } = useMutation({
+    mutationFn: (data: typeof project) => snap.api.patch(`/projects/${projectId}`, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [`/projects/${projectId}`] }),
+  });
+
+  if (isLoading || !active) return null;
+
+  return (
+    <CardBase title="Edit Project">
+      <form onSubmit={(e) => { e.preventDefault(); mutate(active); }}>
+        <ColumnBase gap="md">
+          <InputField label="Name" value={active.name} onChange={(v) => setDraft({ ...active, name: v })} />
+          <SelectField label="Tier" value={active.tier} onChange={(v) => setDraft({ ...active, tier: v })}
+            options={[
+              { label: "Free", value: "free" }, { label: "Pro", value: "pro" }, { label: "Enterprise", value: "enterprise" },
+            ]} />
+          <TextareaField label="Description" value={active.description} onChange={(v) => setDraft({ ...active, description: v })} rows={3} />
+          {isSuccess && <AlertBase severity="success">Saved</AlertBase>}
+          {error && <AlertBase severity="error">{(error as Error).message}</AlertBase>}
+          <RowBase justify="end" gap="sm">
+            <ButtonBase label="Reset" variant="outline" onClick={() => setDraft(project ? { ...project } : null)} />
+            <ButtonBase label={isPending ? "Saving..." : "Save"} type="submit" disabled={isPending} />
+          </RowBase>
+        </ColumnBase>
+      </form>
+    </CardBase>
+  );
+}
+```
 
 ## All form components
 

@@ -8,11 +8,15 @@ draft: false
 import { createSnapshot } from "@lastshotlabs/snapshot";
 import { DataTableBase } from "@lastshotlabs/snapshot/ui";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const snap = createSnapshot({ apiUrl: "/api", manifest: {} });
 
 function UsersTable() {
-  const { data: users, isLoading, error } = snap.api.useQuery<User[]>("/users");
+  const { data: users, isLoading, error } = useQuery<User[]>({
+    queryKey: ["/users"],
+    queryFn: () => snap.api.get("/users"),
+  });
   const [sort, setSort] = useState({ column: "name", direction: "asc" });
 
   return (
@@ -159,6 +163,115 @@ You can also provide custom content for each state:
   emptyContent={<p>No users match your filters. <button onClick={clearFilters}>Clear filters</button></p>}
 />
 ```
+
+## Server-side pagination with filtering and sorting
+
+The most common real-world pattern: a table that fetches pages from the server with search, filters, and sort state all sent as query parameters.
+
+```tsx
+import {
+  DataTableBase, FilterBarBase, ColumnBase, RowBase, ButtonBase, SpacerBase,
+} from "@lastshotlabs/snapshot/ui";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "member";
+  status: "active" | "inactive";
+  createdAt: string;
+}
+
+function UsersPage() {
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [sort, setSort] = useState({ column: "name", direction: "asc" as "asc" | "desc" });
+  const pageSize = 20;
+
+  // Build query string from all state
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+    sort: sort.column,
+    order: sort.direction,
+    ...(search && { search }),
+    ...filters,
+  });
+
+  const url = `/users?${params}`;
+  const { data, isLoading, error, refetch } = useQuery<{ items: User[]; total: number }>({
+    queryKey: ["/users", page, pageSize, sort.column, sort.direction, search, filters],
+    queryFn: () => snap.api.get(url),
+  });
+
+  return (
+    <ColumnBase gap="md">
+      <RowBase justify="between" align="center">
+        <h2>Users</h2>
+        <ButtonBase label="Refresh" icon="refresh-cw" variant="outline" onClick={() => refetch()} />
+      </RowBase>
+
+      <FilterBarBase
+        showSearch
+        searchPlaceholder="Search by name or email..."
+        filters={[
+          { key: "role", label: "Role", options: [
+            { label: "Admin", value: "admin" },
+            { label: "Member", value: "member" },
+          ]},
+          { key: "status", label: "Status", options: [
+            { label: "Active", value: "active" },
+            { label: "Inactive", value: "inactive" },
+          ]},
+        ]}
+        onChange={({ search: s, filters: f }) => {
+          setSearch(s ?? "");
+          setFilters(f ?? {});
+          setPage(1); // reset to first page on filter change
+        }}
+      />
+
+      <DataTableBase
+        columns={[
+          { field: "name", label: "Name", sortable: true },
+          { field: "email", label: "Email", sortable: true },
+          { field: "role", label: "Role", format: "badge", badgeColors: { admin: "blue", member: "gray" } },
+          { field: "status", label: "Status", format: "badge", badgeColors: { active: "green", inactive: "red" } },
+          { field: "createdAt", label: "Joined", format: "date", sortable: true },
+        ]}
+        rows={data?.items ?? []}
+        isLoading={isLoading}
+        error={error?.message}
+        emptyMessage="No users match your filters"
+        sort={sort}
+        onSortChange={(col) => setSort((prev) =>
+          prev.column === col
+            ? { column: col, direction: prev.direction === "asc" ? "desc" : "asc" }
+            : { column: col, direction: "asc" }
+        )}
+        pagination={{
+          currentPage: page,
+          totalPages: Math.ceil((data?.total ?? 0) / pageSize),
+          pageSize,
+          totalRows: data?.total ?? 0,
+        }}
+        onPageChange={setPage}
+        hoverable
+        striped
+        rowActions={[
+          { label: "Edit", icon: "edit", onAction: (row) => openEdit(row as User) },
+          { label: "Delete", icon: "trash", variant: "destructive", onAction: (row) => confirmDelete(row as User) },
+        ]}
+      />
+    </ColumnBase>
+  );
+}
+```
+
+This composes `FilterBarBase` above the table. When filters or search change, the page resets to 1 and the query re-fetches with the new parameters. Sorting and pagination are also server-driven -- the server receives the full state and returns the matching page.
 
 ## ListBase
 

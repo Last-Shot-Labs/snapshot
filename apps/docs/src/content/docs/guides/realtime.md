@@ -178,38 +178,111 @@ const snap = createSnapshot({
 });
 ```
 
-## Composition: live chat room
+## Composition: live chat room with typing expiry
+
+Typing indicators must auto-expire -- if a user closes their browser mid-type, you'll never get an `isTyping: false` event. Use a timeout to clear stale indicators:
 
 ```tsx
-function ChatRoom({ roomId }) {
-  const [messages, setMessages] = useState([]);
-  const [typingUsers, setTypingUsers] = useState([]);
-  const { send } = snap.useSocket();
+import { useState, useRef, useEffect, useCallback } from "react";
+
+function ChatRoom({ roomId }: { roomId: string }) {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [typingUsers, setTypingUsers] = useState<{ name: string; avatar?: string }[]>([]);
+  const { send, isConnected } = snap.useSocket();
+  const typingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   snap.useRoom(`chat:${roomId}`);
 
-  snap.useRoomEvent(`chat:${roomId}`, "message", (msg) => {
+  snap.useRoomEvent(`chat:${roomId}`, "message", useCallback((msg: any) => {
     setMessages((prev) => [...prev, msg]);
-  });
+  }, []));
 
-  snap.useRoomEvent(`chat:${roomId}`, "typing", ({ user, isTyping }) => {
-    setTypingUsers((prev) =>
-      isTyping ? [...prev.filter((u) => u.name !== user.name), user] : prev.filter((u) => u.name !== user.name)
-    );
-  });
+  snap.useRoomEvent(`chat:${roomId}`, "typing", useCallback(({ user, isTyping }: any) => {
+    // Clear any existing expiry timer for this user
+    const existing = typingTimers.current.get(user.name);
+    if (existing) clearTimeout(existing);
 
-  const sendMessage = (body) => {
+    if (isTyping) {
+      setTypingUsers((prev) =>
+        prev.some((u) => u.name === user.name) ? prev : [...prev, user]
+      );
+      // Auto-expire after 3 seconds
+      typingTimers.current.set(user.name, setTimeout(() => {
+        setTypingUsers((prev) => prev.filter((u) => u.name !== user.name));
+        typingTimers.current.delete(user.name);
+      }, 3000));
+    } else {
+      setTypingUsers((prev) => prev.filter((u) => u.name !== user.name));
+      typingTimers.current.delete(user.name);
+    }
+  }, []));
+
+  // Cleanup all timers on unmount
+  useEffect(() => {
+    return () => typingTimers.current.forEach((t) => clearTimeout(t));
+  }, []);
+
+  const sendMessage = (body: string) => {
     send({ type: "chat:message", room: `chat:${roomId}`, body });
   };
 
   return (
-    <ChatWindowBase
-      title={`Room: ${roomId}`}
-      threadSlot={
-        <MessageThreadBase messages={messages} contentField="body" authorNameField="name" showTimestamps />
-      }
-      typingSlot={<TypingIndicatorBase users={typingUsers} />}
-      inputSlot={<ChatInput onSend={sendMessage} />}
+    <ColumnBase>
+      {!isConnected && <AlertBase severity="warning">Reconnecting...</AlertBase>}
+      <ChatWindowBase
+        title={`Room: ${roomId}`}
+        threadSlot={
+          <MessageThreadBase messages={messages} contentField="body" authorNameField="name" showTimestamps />
+        }
+        typingSlot={typingUsers.length > 0 ? <TypingIndicatorBase users={typingUsers} maxDisplay={3} /> : null}
+        inputSlot={<ChatInput onSend={sendMessage} disabled={!isConnected} />}
+      />
+    </ColumnBase>
+  );
+}
+```
+
+## Optimistic updates with WebSocket confirmation
+
+For the best UX, show the user's action immediately and reconcile when the server confirms:
+
+```tsx
+function LiveTodoList() {
+  const [todos, setTodos] = useState<any[]>([]);
+  const { send } = snap.useSocket();
+
+  snap.useRoom("todos");
+
+  // Server confirms the create
+  snap.useRoomEvent("todos", "todo:created", useCallback((todo: any) => {
+    setTodos((prev) => {
+      // Replace optimistic entry (matched by tempId) with server version
+      const without = prev.filter((t) => t.id !== todo.tempId);
+      return [...without, todo];
+    });
+  }, []));
+
+  snap.useRoomEvent("todos", "todo:toggled", useCallback((update: any) => {
+    setTodos((prev) => prev.map((t) => t.id === update.id ? { ...t, done: update.done } : t));
+  }, []));
+
+  const addTodo = (text: string) => {
+    const tempId = crypto.randomUUID();
+    // Optimistic: show immediately
+    setTodos((prev) => [...prev, { id: tempId, text, done: false, optimistic: true }]);
+    // Send to server
+    send({ type: "todo:create", text, tempId });
+  };
+
+  return (
+    <ListBase
+      items={todos.map((t) => ({
+        id: t.id,
+        title: t.text,
+        description: t.optimistic ? "Saving..." : undefined,
+        icon: t.done ? "check-circle" : "circle",
+        onClick: () => send({ type: "todo:toggle", id: t.id }),
+      }))}
     />
   );
 }

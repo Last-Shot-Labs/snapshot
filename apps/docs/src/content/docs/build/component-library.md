@@ -119,7 +119,6 @@ function UsersTable({ users }: { users: User[] }) {
         { field: 'role', label: 'Role' },
       ]}
       rows={users}
-      sortable
       searchable
     />
   );

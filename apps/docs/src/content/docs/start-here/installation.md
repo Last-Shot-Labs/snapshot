@@ -88,7 +88,7 @@ After `createSnapshot()`, you have access to:
 
 **Account hooks** -- `useResetPassword`, `useVerifyEmail`, `useResendVerification`, `useSetPassword`, `useDeleteAccount`, `useCancelDeletion`, `useRefreshToken`, `useSessions`, `useRevokeSession`
 
-**OAuth hooks** -- `useOAuthExchange`, `getOAuthUrl`, `useOAuthProviders`, `getOAuthProviders`
+**OAuth hooks** -- `useOAuthExchange`, `getOAuthUrl`, `getLinkUrl`, `useOAuthUnlink`
 
 **WebAuthn hooks** -- `useWebAuthnRegisterOptions`, `useWebAuthnRegister`, `useWebAuthnCredentials`, `useWebAuthnRemoveCredential`, `usePasskeyLoginOptions`, `usePasskeyLogin`, `useWebAuthnCheck`
 

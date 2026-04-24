@@ -178,6 +178,72 @@ const { theme, set, toggle } = snap.useTheme();
 
 `useTheme` adds/removes the `.dark` class on `<html>`. All token CSS variables have dark-mode overrides that activate automatically.
 
+### Persisted dark mode with system preference
+
+Persist the user's choice to `localStorage` and respect the system preference on first visit:
+
+```tsx
+import { useEffect, useState } from "react";
+
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const { theme, set } = snap.useTheme();
+
+  // On mount: restore from localStorage, or fall back to system preference
+  useEffect(() => {
+    const stored = localStorage.getItem("sn-theme");
+    if (stored === "dark" || stored === "light") {
+      set(stored);
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      set("dark");
+    }
+  }, []);
+
+  // Persist changes
+  const setAndPersist = (mode: "light" | "dark") => {
+    set(mode);
+    localStorage.setItem("sn-theme", mode);
+  };
+
+  return <>{children}</>;
+}
+
+// A toggle button that persists the choice
+function ThemeToggle() {
+  const { theme, set } = snap.useTheme();
+
+  const toggle = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    set(next);
+    localStorage.setItem("sn-theme", next);
+  };
+
+  return (
+    <ButtonBase
+      label={theme === "dark" ? "Light mode" : "Dark mode"}
+      icon={theme === "dark" ? "sun" : "moon"}
+      variant="ghost"
+      onClick={toggle}
+    />
+  );
+}
+```
+
+To also listen for system preference changes (e.g. the user changes OS settings while your app is open):
+
+```tsx
+useEffect(() => {
+  const mql = window.matchMedia("(prefers-color-scheme: dark)");
+  const handler = (e: MediaQueryListEvent) => {
+    // Only auto-switch if no manual preference is stored
+    if (!localStorage.getItem("sn-theme")) {
+      set(e.matches ? "dark" : "light");
+    }
+  };
+  mql.addEventListener("change", handler);
+  return () => mql.removeEventListener("change", handler);
+}, []);
+```
+
 ### Dark-mode token overrides
 
 Colors set in `theme.colors` automatically derive dark variants using OKLCH color space. You can also set explicit dark overrides in the manifest:

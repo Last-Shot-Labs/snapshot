@@ -112,9 +112,9 @@ The smallest possible manifest app -- one route, one component.
           "type": "data-table",
           "resource": "users",
           "columns": [
-            { "field": "name", "header": "Name", "sortable": true },
-            { "field": "email", "header": "Email" },
-            { "field": "role", "header": "Role", "format": "badge" }
+            { "field": "name", "label": "Name", "sortable": true },
+            { "field": "email", "label": "Email" },
+            { "field": "role", "label": "Role", "format": "badge" }
           ],
           "actions": {
             "create": { "type": "open-overlay", "overlay": "createUser" }

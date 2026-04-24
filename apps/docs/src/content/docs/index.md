@@ -31,7 +31,7 @@ function App() {
 |--------|-------|-------------|
 | **Auth** | `useUser`, `useLogin`, `useLogout`, `useRegister`, `useForgotPassword` | Core authentication flow |
 | **MFA** | `useMfaVerify`, `useMfaSetup`, `useMfaDisable`, + 7 more | Multi-factor auth with TOTP, email OTP, recovery codes |
-| **OAuth** | `getOAuthUrl`, `useOAuthExchange`, `useOAuthProviders`, `useOAuthUnlink` | Social login providers |
+| **OAuth** | `getOAuthUrl`, `getLinkUrl`, `useOAuthExchange`, `useOAuthUnlink` | Social login providers |
 | **Passkeys** | `useWebAuthnRegister`, `usePasskeyLogin`, `useWebAuthnCredentials`, + 4 more | WebAuthn/passkey authentication |
 | **Account** | `useSetPassword`, `useSessions`, `useRevokeSession`, `useDeleteAccount`, + 5 more | Account management and sessions |
 | **WebSocket** | `useSocket`, `useRoom`, `useRoomEvent` | Real-time rooms and events |

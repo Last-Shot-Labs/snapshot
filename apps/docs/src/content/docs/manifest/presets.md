@@ -11,8 +11,8 @@ Presets are factory functions that generate full page configurations from a few 
 | Preset | Description |
 |--------|-------------|
 | `crudPage` | Data table with create/edit/delete overlays |
-| `dashboardPage` | KPI stats, chart, and activity table |
-| `settingsPage` | Tabbed settings with form sections |
+| `dashboardPage` | KPI stats, charts, and activity feed |
+| `settingsPage` | Sectioned settings with form fields |
 | `authPage` | Login, register, and forgot-password screens |
 
 ## CRUD Page
@@ -26,16 +26,27 @@ Generates a data table with create modal, edit drawer, and delete confirmation.
       "id": "users",
       "path": "/users",
       "preset": "crud",
-      "presetOptions": {
-        "resource": "users",
+      "presetConfig": {
         "title": "Users",
+        "listEndpoint": "/api/users",
+        "createEndpoint": "/api/users",
+        "updateEndpoint": "/api/users",
+        "deleteEndpoint": "/api/users",
         "columns": [
-          { "field": "name", "header": "Name", "sortable": true },
-          { "field": "email", "header": "Email" },
-          { "field": "role", "header": "Role", "format": "badge" }
+          { "key": "name", "label": "Name" },
+          { "key": "email", "label": "Email" },
+          { "key": "role", "label": "Role", "badge": true }
         ],
-        "createFields": ["name", "email", "role"],
-        "editFields": ["name", "email", "role"]
+        "createForm": {
+          "fields": [
+            { "key": "name", "type": "text", "label": "Full Name", "required": true },
+            { "key": "email", "type": "email", "label": "Email", "required": true },
+            { "key": "role", "type": "select", "label": "Role", "options": [
+              { "label": "Admin", "value": "admin" },
+              { "label": "Member", "value": "member" }
+            ]}
+          ]
+        }
       }
     }
   ]
@@ -43,14 +54,14 @@ Generates a data table with create modal, edit drawer, and delete confirmation.
 ```
 
 This generates:
-- A data table bound to the `users` resource
+- A data table bound to the `listEndpoint`
 - A "Create" button that opens a modal with an auto-form
 - Edit and Delete row actions
 - A confirm dialog for deletions
 
 ## Dashboard Page
 
-Generates a stats row, main chart, and activity table.
+Generates a stats row, charts, and an activity feed.
 
 ```json
 {
@@ -59,27 +70,25 @@ Generates a stats row, main chart, and activity table.
       "id": "dashboard",
       "path": "/",
       "preset": "dashboard",
-      "presetOptions": {
+      "presetConfig": {
         "title": "Dashboard",
         "stats": [
-          { "label": "Revenue", "resource": "stats", "field": "revenue", "format": "currency", "icon": "dollar-sign" },
-          { "label": "Users", "resource": "stats", "field": "totalUsers", "icon": "users" },
-          { "label": "Orders", "resource": "stats", "field": "totalOrders", "icon": "shopping-cart" }
+          { "label": "Revenue", "endpoint": "/api/stats/revenue", "valueKey": "value", "format": "currency", "icon": "dollar-sign" },
+          { "label": "Users", "endpoint": "/api/stats/users", "valueKey": "value", "icon": "users" },
+          { "label": "Orders", "endpoint": "/api/stats/orders", "valueKey": "value", "icon": "shopping-cart" }
         ],
-        "chart": {
-          "resource": "analytics",
-          "chartType": "area",
-          "xKey": "date",
-          "series": [{ "key": "revenue", "label": "Revenue" }]
-        },
-        "table": {
-          "resource": "recentOrders",
-          "title": "Recent Orders",
-          "columns": [
-            { "field": "customer", "header": "Customer" },
-            { "field": "amount", "header": "Amount", "format": "currency" },
-            { "field": "status", "header": "Status", "format": "badge" }
-          ]
+        "charts": [
+          {
+            "variant": "area",
+            "endpoint": "/api/analytics",
+            "title": "Revenue",
+            "series": [{ "field": "revenue", "label": "Revenue" }]
+          }
+        ],
+        "activityFeed": {
+          "endpoint": "/api/activity",
+          "title": "Recent Activity",
+          "limit": 10
         }
       }
     }
@@ -89,7 +98,7 @@ Generates a stats row, main chart, and activity table.
 
 ## Settings Page
 
-Generates a tabbed layout with form sections.
+Generates sectioned forms, each with its own submit endpoint.
 
 ```json
 {
@@ -98,24 +107,25 @@ Generates a tabbed layout with form sections.
       "id": "settings",
       "path": "/settings",
       "preset": "settings",
-      "presetOptions": {
+      "presetConfig": {
         "title": "Settings",
-        "tabs": [
+        "sections": [
           {
-            "id": "profile",
             "label": "Profile",
+            "submitEndpoint": "/api/settings/profile",
+            "dataEndpoint": "/api/settings/profile",
             "fields": [
-              { "name": "name", "label": "Full Name", "type": "text" },
-              { "name": "email", "label": "Email", "type": "email" },
-              { "name": "bio", "label": "Bio", "type": "textarea" }
+              { "key": "name", "type": "text", "label": "Full Name", "required": true },
+              { "key": "email", "type": "email", "label": "Email", "required": true },
+              { "key": "bio", "type": "textarea", "label": "Bio" }
             ]
           },
           {
-            "id": "notifications",
             "label": "Notifications",
+            "submitEndpoint": "/api/settings/notifications",
             "fields": [
-              { "name": "emailNotifs", "label": "Email notifications", "type": "switch" },
-              { "name": "pushNotifs", "label": "Push notifications", "type": "switch" }
+              { "key": "emailNotifs", "type": "toggle", "label": "Email notifications" },
+              { "key": "pushNotifs", "type": "toggle", "label": "Push notifications" }
             ]
           }
         ]
@@ -127,18 +137,26 @@ Generates a tabbed layout with form sections.
 
 ## Auth Page
 
-Generates login, register, and forgot-password screens with optional OAuth buttons.
+Generates login, register, and forgot-password screens with optional OAuth and passkey support.
 
 ```json
 {
   "auth": {
     "preset": "auth",
-    "presetOptions": {
-      "logo": { "text": "My App", "src": "/logo.svg" },
-      "providers": ["google", "github"],
-      "showPasskeys": true,
-      "showForgotPassword": true,
-      "showRegister": true
+    "presetConfig": {
+      "screen": "login",
+      "branding": {
+        "appName": "My App",
+        "logo": "/logo.svg",
+        "tagline": "Welcome back"
+      },
+      "oauthProviders": ["google", "github"],
+      "passkey": true,
+      "redirects": {
+        "afterLogin": "/",
+        "register": "/register",
+        "forgotPassword": "/forgot-password"
+      }
     }
   }
 }
@@ -153,9 +171,9 @@ import { crudPage, dashboardPage, settingsPage } from "@lastshotlabs/snapshot/ui
 
 const manifest = {
   routes: [
-    dashboardPage({ title: "Dashboard", stats: [...], chart: {...}, table: {...} }),
-    crudPage({ resource: "users", title: "Users", columns: [...] }),
-    settingsPage({ title: "Settings", tabs: [...] }),
+    dashboardPage({ title: "Dashboard", stats: [...], charts: [...] }),
+    crudPage({ title: "Users", listEndpoint: "/api/users", columns: [...] }),
+    settingsPage({ title: "Settings", sections: [...] }),
   ],
 };
 ```

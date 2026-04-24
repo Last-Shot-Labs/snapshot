@@ -4,23 +4,24 @@ description: Tabbed settings with profile, password, notifications, sessions, an
 draft: false
 ---
 
-A complete settings page with tabs for profile editing, password changes, notification preferences, session management, and account deletion.
+A complete settings page with tabs for profile editing, password changes, notification preferences, session management, and account deletion -- all wired to real API calls with loading and error feedback.
 
 ```tsx
 import { createSnapshot } from "@lastshotlabs/snapshot";
 import {
   TabsBase, CardBase, ColumnBase, RowBase, SpacerBase,
   InputField, TextareaField, SwitchField, ButtonBase,
-  DataTableBase, ConfirmDialogBase, ContainerBase,
+  DataTableBase, ConfirmDialogBase, ModalBase, ContainerBase, AlertBase,
 } from "@lastshotlabs/snapshot/ui";
 import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const snap = createSnapshot({
   apiUrl: "/api",
   manifest: { app: { auth: { loginPath: "/login", homePath: "/" } } },
 });
 
-// ── Settings Page ──────────────────────────────────────────────────────────
+// ── Settings Page ─────────────────────────────────────────────────────────
 
 export function SettingsPage() {
   return (
@@ -40,109 +41,169 @@ export function SettingsPage() {
   );
 }
 
-// ── Profile Tab ────────────────────────────────────────────────────────────
+// ── Profile Tab ───────────────────────────────────────────────────────────
 
 function ProfileTab() {
   const { user } = snap.useUser();
+  const queryClient = useQueryClient();
+
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
-  const [bio, setBio] = useState("");
-  const [saved, setSaved] = useState(false);
+  const [bio, setBio] = useState(user?.bio ?? "");
 
-  const save = () => {
-    // Call your API to update profile
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
+  const updateProfile = useMutation({
+    mutationFn: (data: { name: string; email: string; bio: string }) =>
+      snap.api.patch("/auth/profile", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/auth/me"] });
+    },
+  });
 
   return (
     <CardBase title="Profile Information" gap="md">
+      {updateProfile.isSuccess && (
+        <AlertBase severity="success">Profile saved</AlertBase>
+      )}
+      {updateProfile.error && (
+        <AlertBase severity="error">{updateProfile.error.message}</AlertBase>
+      )}
       <InputField label="Full name" value={name} onChange={setName} />
       <InputField label="Email" type="email" value={email} onChange={setEmail} />
       <TextareaField label="Bio" value={bio} onChange={setBio} maxLength={300} rows={3} />
-      <RowBase justify="end" gap="sm">
-        {saved && <span style={{ color: "var(--sn-color-success)" }}>Saved</span>}
-        <ButtonBase label="Save changes" onClick={save} />
-      </RowBase>
-    </CardBase>
-  );
-}
-
-// ── Password Tab ───────────────────────────────────────────────────────────
-
-function PasswordTab() {
-  const { mutate: setPassword, isPending, isSuccess, isError } = snap.useSetPassword();
-  const [current, setCurrent] = useState("");
-  const [newPwd, setNewPwd] = useState("");
-  const [confirm, setConfirm] = useState("");
-
-  return (
-    <CardBase title="Change Password" gap="md">
-      <InputField label="Current password" type="password" value={current} onChange={setCurrent} />
-      <InputField label="New password" type="password" value={newPwd} onChange={setNewPwd} />
-      <InputField
-        label="Confirm new password"
-        type="password"
-        value={confirm}
-        onChange={setConfirm}
-        errorText={confirm && confirm !== newPwd ? "Passwords don't match" : undefined}
-      />
-      {isSuccess && <p style={{ color: "var(--sn-color-success)" }}>Password updated</p>}
-      {isError && <p style={{ color: "var(--sn-color-error)" }}>Failed to update password</p>}
       <RowBase justify="end">
         <ButtonBase
-          label="Update password"
-          onClick={() => setPassword({ password: newPwd, currentPassword: current })}
-          disabled={isPending || !current || !newPwd || newPwd !== confirm}
+          label={updateProfile.isPending ? "Saving..." : "Save changes"}
+          onClick={() => updateProfile.mutate({ name, email, bio })}
+          disabled={updateProfile.isPending}
         />
       </RowBase>
     </CardBase>
   );
 }
 
-// ── Notifications Tab ──────────────────────────────────────────────────────
+// ── Password Tab ──────────────────────────────────────────────────────────
+
+function PasswordTab() {
+  const { mutate: setPassword, isPending, isSuccess, error, reset } = snap.useSetPassword();
+  const [current, setCurrent] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirm, setConfirm] = useState("");
+
+  const mismatch = confirm.length > 0 && confirm !== newPwd;
+  const canSubmit = current && newPwd && confirm && !mismatch && !isPending;
+
+  const handleSubmit = () => {
+    setPassword(
+      { password: newPwd, currentPassword: current },
+      {
+        onSuccess: () => {
+          setCurrent("");
+          setNewPwd("");
+          setConfirm("");
+        },
+      },
+    );
+  };
+
+  return (
+    <CardBase title="Change Password" gap="md">
+      {isSuccess && <AlertBase severity="success">Password updated</AlertBase>}
+      {error && <AlertBase severity="error">{snap.formatAuthError(error)}</AlertBase>}
+      <InputField label="Current password" type="password" value={current} onChange={(v) => { setCurrent(v); reset(); }} />
+      <InputField label="New password" type="password" value={newPwd} onChange={setNewPwd} />
+      <InputField
+        label="Confirm new password"
+        type="password"
+        value={confirm}
+        onChange={setConfirm}
+        errorText={mismatch ? "Passwords don't match" : undefined}
+      />
+      <RowBase justify="end">
+        <ButtonBase
+          label={isPending ? "Updating..." : "Update password"}
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+        />
+      </RowBase>
+    </CardBase>
+  );
+}
+
+// ── Notifications Tab ─────────────────────────────────────────────────────
+
+interface NotificationPrefs {
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  weeklyDigest: boolean;
+  mentionAlerts: boolean;
+}
 
 function NotificationsTab() {
-  const [emailNotifs, setEmailNotifs] = useState(true);
-  const [pushNotifs, setPushNotifs] = useState(false);
-  const [weeklyDigest, setWeeklyDigest] = useState(true);
-  const [mentions, setMentions] = useState(true);
+  const { data: prefs, isLoading } = useQuery<NotificationPrefs>({
+    queryKey: ["/settings/notifications"],
+    queryFn: () => snap.api.get("/settings/notifications"),
+  });
+
+  const queryClient = useQueryClient();
+
+  const update = useMutation({
+    mutationFn: (data: Partial<NotificationPrefs>) =>
+      snap.api.patch("/settings/notifications", data),
+    onSuccess: (_, vars) => {
+      queryClient.setQueryData<NotificationPrefs>(
+        ["/settings/notifications"],
+        (old) => old ? { ...old, ...vars } : old,
+      );
+    },
+  });
+
+  if (isLoading || !prefs) return null;
+
+  const toggle = (key: keyof NotificationPrefs) => {
+    update.mutate({ [key]: !prefs[key] });
+  };
 
   return (
     <CardBase title="Notification Preferences" gap="lg">
+      {update.error && (
+        <AlertBase severity="error">{update.error.message}</AlertBase>
+      )}
       <SwitchField
         label="Email notifications"
         description="Receive notifications via email"
-        checked={emailNotifs}
-        onChange={setEmailNotifs}
+        checked={prefs.emailNotifications}
+        onChange={() => toggle("emailNotifications")}
       />
       <SwitchField
         label="Push notifications"
         description="Receive browser push notifications"
-        checked={pushNotifs}
-        onChange={setPushNotifs}
+        checked={prefs.pushNotifications}
+        onChange={() => toggle("pushNotifications")}
       />
       <SwitchField
         label="Weekly digest"
         description="Receive a weekly summary email"
-        checked={weeklyDigest}
-        onChange={setWeeklyDigest}
+        checked={prefs.weeklyDigest}
+        onChange={() => toggle("weeklyDigest")}
       />
       <SwitchField
         label="Mention alerts"
         description="Get notified when someone mentions you"
-        checked={mentions}
-        onChange={setMentions}
+        checked={prefs.mentionAlerts}
+        onChange={() => toggle("mentionAlerts")}
       />
     </CardBase>
   );
 }
 
-// ── Sessions Tab ───────────────────────────────────────────────────────────
+// ── Sessions Tab ──────────────────────────────────────────────────────────
 
 function SessionsTab() {
   const { sessions, isLoading } = snap.useSessions();
-  const { mutate: revoke } = snap.useRevokeSession();
+  const { mutate: revoke, isPending: revoking } = snap.useRevokeSession();
+  const [revokeAllConfirm, setRevokeAllConfirm] = useState(false);
+
+  const otherSessions = sessions?.filter((s) => !s.current) ?? [];
 
   return (
     <CardBase title="Active Sessions" gap="md">
@@ -155,53 +216,89 @@ function SessionsTab() {
         ]}
         rows={sessions ?? []}
         isLoading={isLoading}
+        emptyMessage="No active sessions"
         rowActions={[
           {
             label: "Revoke",
             icon: "x",
             variant: "destructive",
             onAction: (row) => revoke(row.id as string),
+            hidden: (row) => row.current as boolean,
           },
         ]}
       />
-      <RowBase justify="end">
-        <ButtonBase
-          label="Revoke all other sessions"
-          variant="destructive"
-          onClick={() => {
-            sessions?.filter((s) => !s.current).forEach((s) => revoke(s.id as string));
-          }}
-        />
-      </RowBase>
+      {otherSessions.length > 0 && (
+        <RowBase justify="end">
+          <ButtonBase
+            label={revoking ? "Revoking..." : "Revoke all other sessions"}
+            variant="destructive"
+            onClick={() => setRevokeAllConfirm(true)}
+            disabled={revoking}
+          />
+        </RowBase>
+      )}
+
+      <ConfirmDialogBase
+        title="Revoke All Sessions"
+        description="This will sign you out of all other devices. You'll stay signed in here."
+        open={revokeAllConfirm}
+        onClose={() => setRevokeAllConfirm(false)}
+        onConfirm={() => {
+          otherSessions.forEach((s) => revoke(s.id as string));
+          setRevokeAllConfirm(false);
+        }}
+        confirmLabel="Revoke all"
+        confirmVariant="destructive"
+      />
     </CardBase>
   );
 }
 
-// ── Account Tab ────────────────────────────────────────────────────────────
+// ── Account Tab ───────────────────────────────────────────────────────────
 
 function AccountTab() {
-  const { mutate: deleteAccount, isPending } = snap.useDeleteAccount();
+  const { mutate: deleteAccount, isPending, error } = snap.useDeleteAccount();
   const [showConfirm, setShowConfirm] = useState(false);
   const [password, setPassword] = useState("");
 
   return (
     <CardBase title="Danger Zone" gap="md">
-      <p>Permanently delete your account and all associated data.</p>
+      <p>Permanently delete your account and all associated data. This cannot be undone.</p>
       <ButtonBase
         label="Delete account"
         variant="destructive"
         onClick={() => setShowConfirm(true)}
       />
 
-      <ConfirmDialogBase
+      <ModalBase
         title="Delete Account"
-        description="This action is permanent and cannot be undone. All your data will be deleted."
         open={showConfirm}
-        onClose={() => setShowConfirm(false)}
-        onConfirm={() => deleteAccount({ password })}
-        confirmLabel="Delete my account"
-        confirmVariant="destructive"
-      />
+        onClose={() => { setShowConfirm(false); setPassword(""); }}
+        size="sm"
+        footer={[
+          { label: "Cancel", variant: "outline", onClick: () => { setShowConfirm(false); setPassword(""); } },
+          {
+            label: isPending ? "Deleting..." : "Delete my account",
+            variant: "destructive",
+            onClick: () => deleteAccount({ password }),
+            disabled: isPending || !password,
+          },
+        ]}
+      >
+        <ColumnBase gap="md">
+          <p style={{ color: "var(--sn-color-muted-foreground)" }}>
+            This action is permanent and cannot be undone. All your data will be deleted.
+          </p>
+          {error && <AlertBase severity="error">{snap.formatAuthError(error)}</AlertBase>}
+          <InputField
+            label="Enter your password to confirm"
+            type="password"
+            value={password}
+            onChange={setPassword}
+            required
+          />
+        </ColumnBase>
+      </ModalBase>
     </CardBase>
   );
 }
@@ -209,13 +306,22 @@ function AccountTab() {
 
 ## What this includes
 
-- Tabbed navigation with 5 sections
-- Profile editing with save feedback
-- Password change with confirmation validation
-- Notification toggles with descriptions
-- Active session management with revocation
-- Account deletion with confirmation dialog
-- Uses real Snapshot auth hooks (`useSetPassword`, `useSessions`, `useRevokeSession`, `useDeleteAccount`)
+- **Profile editing** saved to `/auth/profile` with loading and success feedback
+- **Password change** with confirmation validation and `formatAuthError` error display
+- **Notification preferences** fetched from and saved to `/settings/notifications` with optimistic updates
+- **Session management** with current-session detection and bulk revocation
+- **Account deletion** with password confirmation inside the dialog
+- All mutations show loading state on the button and display errors inline
+
+## API contract
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| PATCH | `/auth/profile` | Update user profile |
+| GET | `/settings/notifications` | Fetch notification preferences |
+| PATCH | `/settings/notifications` | Update notification preferences |
+
+Session and account deletion endpoints are handled by Snapshot's built-in auth hooks.
 
 ## Related
 

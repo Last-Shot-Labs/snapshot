@@ -158,9 +158,9 @@ The same app can be expressed as a JSON manifest instead of React code. If you p
           "type": "data-table",
           "resource": "users",
           "columns": [
-            { "field": "name", "header": "Name", "sortable": true },
-            { "field": "email", "header": "Email" },
-            { "field": "role", "header": "Role" }
+            { "field": "name", "label": "Name", "sortable": true },
+            { "field": "email", "label": "Email" },
+            { "field": "role", "label": "Role" }
           ]
         }
       ]

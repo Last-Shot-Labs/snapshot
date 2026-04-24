@@ -56,7 +56,7 @@ function ChatRoom({ containerId }: { containerId: string }) {
           />
           <ButtonBase
             label="Send"
-            onClick={() => {}}
+            type="submit"
             disabled={isPending || !message.trim()}
           />
         </form>
@@ -104,7 +104,7 @@ function ForumChannel({ containerId }: { containerId: string }) {
       }}>
         <InputField label="Title" value={title} onChange={setTitle} />
         <InputField label="Body" value={body} onChange={setBody} />
-        <ButtonBase label="Post Thread" onClick={() => {}} disabled={isPending} />
+        <ButtonBase label="Post Thread" type="submit" disabled={isPending} />
       </form>
     </div>
   );
@@ -142,7 +142,7 @@ function ThreadDetail({ threadId }: { threadId: string }) {
             setBody("");
           }} style={{ display: "flex", gap: "0.5rem" }}>
             <InputField label="" value={body} onChange={setBody} placeholder="Write a reply..." />
-            <ButtonBase label="Reply" onClick={() => {}} disabled={isPending} />
+            <ButtonBase label="Reply" type="submit" disabled={isPending} />
           </form>
         }
       />
