@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import type { ApiClient } from "../api/client";
 import type { ApiError } from "../api/error";
 import type { TokenStorage } from "./storage";
@@ -15,6 +14,7 @@ import type {
   Session,
 } from "../types";
 import type { AuthContract } from "../auth/contract";
+import { navigateToPath } from "./navigation";
 
 interface AccountHooksConfig {
   loginPath?: string;
@@ -77,7 +77,6 @@ export function createAccountHooks({
 
   /** Delete the current user's account, clear all stored tokens, and navigate to the login page. */
   function useDeleteAccount() {
-    const navigate = useNavigate();
     return useMutation<void, ApiError, DeleteAccountBody | void>({
       mutationFn: (body) =>
         api.delete<void>(contract.endpoints.deleteAccount, body ?? {}),
@@ -86,7 +85,7 @@ export function createAccountHooks({
         storage.clearRefreshToken();
         qc.clear();
         onUnauthenticated?.();
-        if (config.loginPath) navigate({ to: config.loginPath });
+        navigateToPath(config.loginPath, { replace: true });
       },
     });
   }

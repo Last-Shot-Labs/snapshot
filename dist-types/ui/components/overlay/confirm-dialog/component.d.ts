@@ -1,6 +1,9 @@
 import type { ConfirmDialogConfig } from "./types";
 /**
- * Confirmation dialog alias built on top of the modal overlay runtime.
+ * Manifest-driven confirmation dialog adapter.
+ *
+ * Resolves primitive values and actions from manifest config, then delegates
+ * all rendering to `ConfirmDialogBase`.
  */
 export declare function ConfirmDialogComponent({ config, }: {
     config: ConfirmDialogConfig;

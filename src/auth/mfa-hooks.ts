@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { useAtomValue, useSetAtom } from "jotai";
 import type { WritableAtom } from "jotai";
 import type { ApiClient } from "../api/client";
 import type { ApiError } from "../api/error";
 import type { TokenStorage } from "./storage";
+import { navigateToPath } from "./navigation";
 import type {
   AuthUser,
   LoginResponse,
@@ -65,7 +65,6 @@ export function createMfaHooks({
   /** Verify an MFA code against a pending challenge, store tokens, and navigate home on success. */
   function useMfaVerify() {
     const queryClient = useQueryClient();
-    const navigate = useNavigate();
     const pendingChallenge = useAtomValue(pendingMfaChallengeAtom);
     const setMfaChallenge = useSetAtom(pendingMfaChallengeAtom);
     return useMutation<AuthUser, ApiError, Omit<MfaVerifyBody, "mfaToken">>({
@@ -90,7 +89,7 @@ export function createMfaHooks({
         setMfaChallenge(null);
         queryClient.setQueryData(AUTH_QUERY_KEY, user);
         onLoginSuccess?.();
-        if (config.homePath) navigate({ to: config.homePath });
+        navigateToPath(config.homePath);
       },
     });
   }

@@ -51,19 +51,7 @@ export declare const baseComponentConfigSchema: z.ZodObject<{
     /** String expression that controls visibility. */
     visibleWhen: z.ZodOptional<z.ZodString>;
     /** Whether the component is visible. Can be a FromRef for conditional rendering. */
-    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
-        from: z.ZodString;
-        transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
-        transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
-    }, "strict", z.ZodTypeAny, {
-        from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }, {
-        from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }>]>>;
+    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, any]>>;
     /** CSS class name(s) to apply to the component wrapper. */
     className: z.ZodOptional<z.ZodString>;
     /** Inline style overrides as a CSS property map. */
@@ -71,204 +59,54 @@ export declare const baseComponentConfigSchema: z.ZodObject<{
     /** Sticky positioning. */
     sticky: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
         top: z.ZodOptional<z.ZodString>;
-        zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
+        zIndex: any;
     }, "strict", z.ZodTypeAny, {
-        top?: string | undefined;
-        zIndex?: number | "popover" | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "toast" | undefined;
+        [x: string]: any;
+        top?: unknown;
+        zIndex?: unknown;
     }, {
-        top?: string | undefined;
-        zIndex?: number | "popover" | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "toast" | undefined;
+        [x: string]: any;
+        top?: unknown;
+        zIndex?: unknown;
     }>]>>;
     /** Explicit z-index override. */
-    zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
+    zIndex: any;
     /** Enter animation config. */
-    animation: z.ZodOptional<z.ZodObject<{
-        enter: z.ZodEnum<["fade", "fade-up", "fade-down", "slide-left", "slide-right", "scale", "bounce"]>;
-        duration: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["instant", "fast", "normal", "slow"]>, z.ZodNumber]>>;
-        delay: z.ZodOptional<z.ZodNumber>;
-        easing: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["default", "in", "out", "in-out", "spring"]>, z.ZodString]>>;
-        stagger: z.ZodOptional<z.ZodNumber>;
-    }, "strict", z.ZodTypeAny, {
-        enter: "scale" | "fade" | "fade-up" | "fade-down" | "slide-left" | "slide-right" | "bounce";
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        delay?: number | undefined;
-        easing?: string | undefined;
-        stagger?: number | undefined;
-    }, {
-        enter: "scale" | "fade" | "fade-up" | "fade-down" | "slide-left" | "slide-right" | "bounce";
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        delay?: number | undefined;
-        easing?: string | undefined;
-        stagger?: number | undefined;
-    }>>;
+    animation: any;
     /** Glass effect shorthand. */
     glass: z.ZodOptional<z.ZodBoolean>;
     /** Background fill shorthand. */
-    background: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodObject<{
-        image: z.ZodOptional<z.ZodString>;
-        overlay: z.ZodOptional<z.ZodString>;
-        gradient: z.ZodOptional<z.ZodObject<{
-            type: z.ZodDefault<z.ZodEnum<["linear", "radial", "conic"]>>;
-            direction: z.ZodOptional<z.ZodString>;
-            stops: z.ZodArray<z.ZodObject<{
-                color: z.ZodString;
-                position: z.ZodOptional<z.ZodString>;
-            }, "strict", z.ZodTypeAny, {
-                color: string;
-                position?: string | undefined;
-            }, {
-                color: string;
-                position?: string | undefined;
-            }>, "many">;
-        }, "strict", z.ZodTypeAny, {
-            type: "linear" | "radial" | "conic";
-            stops: {
-                color: string;
-                position?: string | undefined;
-            }[];
-            direction?: string | undefined;
-        }, {
-            stops: {
-                color: string;
-                position?: string | undefined;
-            }[];
-            type?: "linear" | "radial" | "conic" | undefined;
-            direction?: string | undefined;
-        }>>;
-        position: z.ZodOptional<z.ZodString>;
-        size: z.ZodOptional<z.ZodEnum<["cover", "contain", "auto"]>>;
-        fixed: z.ZodOptional<z.ZodBoolean>;
-    }, "strict", z.ZodTypeAny, {
-        size?: "auto" | "cover" | "contain" | undefined;
-        overlay?: string | undefined;
-        position?: string | undefined;
-        image?: string | undefined;
-        gradient?: {
-            type: "linear" | "radial" | "conic";
-            stops: {
-                color: string;
-                position?: string | undefined;
-            }[];
-            direction?: string | undefined;
-        } | undefined;
-        fixed?: boolean | undefined;
-    }, {
-        size?: "auto" | "cover" | "contain" | undefined;
-        overlay?: string | undefined;
-        position?: string | undefined;
-        image?: string | undefined;
-        gradient?: {
-            stops: {
-                color: string;
-                position?: string | undefined;
-            }[];
-            type?: "linear" | "radial" | "conic" | undefined;
-            direction?: string | undefined;
-        } | undefined;
-        fixed?: boolean | undefined;
-    }>]>>;
+    background: any;
     /** Transition shorthand. */
-    transition: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["all", "colors", "opacity", "shadow", "transform"]>, z.ZodObject<{
-        property: z.ZodDefault<z.ZodString>;
-        duration: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["instant", "fast", "normal", "slow"]>, z.ZodNumber]>>;
-        easing: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["default", "in", "out", "in-out", "spring"]>, z.ZodString]>>;
-    }, "strict", z.ZodTypeAny, {
-        property: string;
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        easing?: string | undefined;
-    }, {
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        easing?: string | undefined;
-        property?: string | undefined;
-    }>]>>;
+    transition: any;
 }, "strip", z.ZodTypeAny, {
-    background?: string | {
-        size?: "auto" | "cover" | "contain" | undefined;
-        overlay?: string | undefined;
-        position?: string | undefined;
-        image?: string | undefined;
-        gradient?: {
-            type: "linear" | "radial" | "conic";
-            stops: {
-                color: string;
-                position?: string | undefined;
-            }[];
-            direction?: string | undefined;
-        } | undefined;
-        fixed?: boolean | undefined;
-    } | undefined;
-    sticky?: boolean | {
-        top?: string | undefined;
-        zIndex?: number | "popover" | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "toast" | undefined;
-    } | undefined;
-    visible?: boolean | {
-        from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    } | undefined;
-    className?: string | undefined;
-    style?: Record<string, string | number> | undefined;
-    id?: string | undefined;
-    tokens?: Record<string, string> | undefined;
-    visibleWhen?: string | undefined;
-    zIndex?: number | "popover" | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "toast" | undefined;
-    animation?: {
-        enter: "scale" | "fade" | "fade-up" | "fade-down" | "slide-left" | "slide-right" | "bounce";
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        delay?: number | undefined;
-        easing?: string | undefined;
-        stagger?: number | undefined;
-    } | undefined;
-    glass?: boolean | undefined;
-    transition?: "colors" | "shadow" | "opacity" | "all" | "transform" | {
-        property: string;
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        easing?: string | undefined;
-    } | undefined;
+    [x: string]: any;
+    id?: unknown;
+    tokens?: unknown;
+    visibleWhen?: unknown;
+    visible?: unknown;
+    className?: unknown;
+    style?: unknown;
+    sticky?: unknown;
+    zIndex?: unknown;
+    animation?: unknown;
+    glass?: unknown;
+    background?: unknown;
+    transition?: unknown;
 }, {
-    background?: string | {
-        size?: "auto" | "cover" | "contain" | undefined;
-        overlay?: string | undefined;
-        position?: string | undefined;
-        image?: string | undefined;
-        gradient?: {
-            stops: {
-                color: string;
-                position?: string | undefined;
-            }[];
-            type?: "linear" | "radial" | "conic" | undefined;
-            direction?: string | undefined;
-        } | undefined;
-        fixed?: boolean | undefined;
-    } | undefined;
-    sticky?: boolean | {
-        top?: string | undefined;
-        zIndex?: number | "popover" | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "toast" | undefined;
-    } | undefined;
-    visible?: boolean | {
-        from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    } | undefined;
-    className?: string | undefined;
-    style?: Record<string, string | number> | undefined;
-    id?: string | undefined;
-    tokens?: Record<string, string> | undefined;
-    visibleWhen?: string | undefined;
-    zIndex?: number | "popover" | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "toast" | undefined;
-    animation?: {
-        enter: "scale" | "fade" | "fade-up" | "fade-down" | "slide-left" | "slide-right" | "bounce";
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        delay?: number | undefined;
-        easing?: string | undefined;
-        stagger?: number | undefined;
-    } | undefined;
-    glass?: boolean | undefined;
-    transition?: "colors" | "shadow" | "opacity" | "all" | "transform" | {
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        easing?: string | undefined;
-        property?: string | undefined;
-    } | undefined;
+    [x: string]: any;
+    id?: unknown;
+    tokens?: unknown;
+    visibleWhen?: unknown;
+    visible?: unknown;
+    className?: unknown;
+    style?: unknown;
+    sticky?: unknown;
+    zIndex?: unknown;
+    animation?: unknown;
+    glass?: unknown;
+    background?: unknown;
+    transition?: unknown;
 }>;
 /** Base config type inferred from the schema. */
 export type BaseComponentConfig = z.infer<typeof baseComponentConfigSchema>;

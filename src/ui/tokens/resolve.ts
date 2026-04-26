@@ -21,7 +21,7 @@ import {
   deriveForeground,
   deriveDarkVariant,
 } from "./color";
-import { getFlavor } from "./flavors";
+import { getFlavor, defineFlavorWithExtension } from "./flavors";
 import { getRegisteredSchemaTypes } from "../manifest/schema";
 
 // ── Known Google Font families ────────────────────────────────────────────────
@@ -714,7 +714,13 @@ function generateComponentTokenCss(components: ComponentTokens): string[] {
  * @returns Complete CSS string ready to inject or write to a file
  */
 export function resolveTokens(config: ThemeConfig = {}): string {
-  // 1. Load base flavor
+  // 1. Load base flavor — register any inline flavor definitions first
+  if (config.flavors) {
+    for (const [name, def] of Object.entries(config.flavors)) {
+      const d = def as { extends: string; displayName?: string; colors?: ThemeColors; [k: string]: unknown };
+      defineFlavorWithExtension(name, d.extends, d);
+    }
+  }
   const flavorName = config.flavor ?? "neutral";
   const baseFlavor = getFlavor(flavorName);
   if (!baseFlavor) {

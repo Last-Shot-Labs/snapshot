@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 import type { WritableAtom } from "jotai";
 import type { ApiClient } from "../api/client";
 import type { ApiError } from "../api/error";
 import type { TokenStorage } from "./storage";
+import { navigateToPath } from "./navigation";
 import type {
   AuthUser,
   LoginVars,
@@ -85,7 +85,6 @@ export function createAuthHooks({
   /** Log in with credentials, handling MFA challenges, token storage, and post-login navigation. */
   function useLogin() {
     const queryClient = useQueryClient();
-    const navigate = useNavigate();
     const setMfaChallenge = useSetAtom(pendingMfaChallengeAtom);
     return useMutation<LoginResult, ApiError, LoginVars>({
       mutationFn: async ({ redirectTo: _, ...body }) => {
@@ -116,13 +115,13 @@ export function createAuthHooks({
             mfaToken: result.mfaToken,
             mfaMethods: result.mfaMethods,
           });
-          if (config.mfaPath) navigate({ to: config.mfaPath });
+          navigateToPath(config.mfaPath);
           return;
         }
         queryClient.setQueryData(AUTH_QUERY_KEY, result);
         onLoginSuccess?.();
         const to = vars.redirectTo ?? config.homePath;
-        if (to) navigate({ to });
+        navigateToPath(to);
       },
     });
   }
@@ -130,7 +129,6 @@ export function createAuthHooks({
   /** Log out the current user, clear tokens and query cache, and navigate to the login path. */
   function useLogout() {
     const queryClient = useQueryClient();
-    const navigate = useNavigate();
     const setMfaChallenge = useSetAtom(pendingMfaChallengeAtom);
 
     function localCleanup(vars: LogoutVars | void) {
@@ -142,7 +140,7 @@ export function createAuthHooks({
       onLogoutSuccess?.(); // transport-level cleanup hook (e.g. SSE close)
       const to =
         (vars as LogoutVars | undefined)?.redirectTo ?? config.loginPath;
-      if (to) navigate({ to });
+      navigateToPath(to, { replace: true });
     }
 
     return useMutation<void, ApiError, LogoutVars | void>({
@@ -157,7 +155,6 @@ export function createAuthHooks({
   /** Register a new user, store auth tokens, fetch the created user, and navigate to the home path. */
   function useRegister() {
     const queryClient = useQueryClient();
-    const navigate = useNavigate();
     return useMutation<AuthUser, ApiError, RegisterVars>({
       mutationFn: async ({ redirectTo: _, ...body }) => {
         const res = await api.post<Record<string, unknown>>(
@@ -178,7 +175,7 @@ export function createAuthHooks({
         queryClient.setQueryData(AUTH_QUERY_KEY, user);
         onLoginSuccess?.();
         const to = vars.redirectTo ?? config.homePath;
-        if (to) navigate({ to });
+        navigateToPath(to);
       },
     });
   }

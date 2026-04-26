@@ -1,9 +1,6 @@
 import type { PresenceIndicatorConfig } from "./types";
 /**
- * PresenceIndicator — displays online/offline/away/busy/dnd status
- * with a colored dot and optional label.
- *
- * @param props - Component props containing the presence indicator configuration
+ * Manifest adapter — resolves config refs and delegates to PresenceIndicatorBase.
  */
 export declare function PresenceIndicator({ config, }: {
     config: PresenceIndicatorConfig;

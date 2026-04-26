@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import type { ApiClient } from "../api/client";
 import type { ApiError } from "../api/error";
 import type { TokenStorage } from "./storage";
@@ -10,6 +9,7 @@ import type {
   OAuthExchangeResponse,
 } from "../types";
 import type { AuthContract } from "../auth/contract";
+import { navigateToPath } from "./navigation";
 
 const AUTH_QUERY_KEY = ["auth", "me"] as const;
 
@@ -135,7 +135,6 @@ export function createOAuthHooks({
    */
   function useOAuthExchange() {
     const queryClient = useQueryClient();
-    const navigate = useNavigate();
     return useMutation<OAuthExchangeResponse, ApiError, OAuthExchangeBody>({
       mutationFn: (body) =>
         api.post<OAuthExchangeResponse>(contract.endpoints.oauthExchange, body),
@@ -149,7 +148,7 @@ export function createOAuthHooks({
         const user = await api.get<AuthUser>(contract.endpoints.me);
         queryClient.setQueryData(AUTH_QUERY_KEY, user);
         onLoginSuccess?.();
-        if (config.homePath) navigate({ to: config.homePath });
+        navigateToPath(config.homePath);
       },
     });
   }

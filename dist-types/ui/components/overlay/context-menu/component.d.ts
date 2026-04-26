@@ -1,6 +1,10 @@
 import type { ContextMenuConfig } from "./types";
 /**
- * Render a right-click context menu backed by the shared context-menu portal runtime.
+ * Manifest-driven context menu adapter.
+ *
+ * Resolves primitive values and actions from manifest config, handles
+ * visibility and state publishing, then delegates all rendering to
+ * `ContextMenuBase`.
  */
 export declare function ContextMenu({ config }: {
     config: ContextMenuConfig;

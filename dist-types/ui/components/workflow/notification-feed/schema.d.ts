@@ -1,5 +1,5 @@
 import { z } from "zod";
-export declare const notificationFeedSlotNames: readonly ["root", "header", "headerContent", "title", "unreadBadge", "markAllButton", "list", "loadingState", "loadingItem", "loadingIcon", "loadingTitle", "loadingMessage", "errorState", "item", "itemBody", "itemIcon", "itemTitle", "itemMessage", "itemTimestamp", "emptyState"];
+export declare const notificationFeedSlotNames: readonly ["root", "header", "headerContent", "title", "unreadBadge", "markAllButton", "list", "loadingState", "loadingItem", "loadingIcon", "loadingBody", "loadingTitle", "loadingMessage", "errorState", "item", "itemBody", "itemIcon", "itemIconGlyph", "itemTitle", "itemMessage", "itemTimestamp", "emptyState"];
 /**
  * Zod config schema for the NotificationFeed component.
  *

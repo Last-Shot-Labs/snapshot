@@ -1,5 +1,5 @@
 import { z } from "zod";
-export declare const stepperSlotNames: readonly ["root", "item", "marker", "label", "description", "connector", "content"];
+export declare const stepperSlotNames: readonly ["root", "track", "item", "marker", "label", "description", "textGroup", "connector", "content"];
 /**
  * Schema for a single step within the stepper.
  */

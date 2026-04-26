@@ -2,25 +2,9 @@ import type { DataTableConfig } from "./types";
 /**
  * Config-driven DataTable component.
  *
- * Renders an HTML table with sorting, pagination, filtering, selection,
- * search, row actions, and bulk actions. All behavior is driven by
- * the `DataTableConfig` schema.
- *
- * Publishes state via `usePublish` when `id` is set:
- * `{ selected, selectedRows, selectedIds, filters, sort, page, search, data }`
- *
- * @param props - Component props containing the DataTable configuration
- *
- * @example
- * ```tsx
- * <DataTable config={{
- *   type: 'data-table',
- *   data: { from: 'my-data-source' },
- *   columns: 'auto',
- *   selectable: true,
- *   searchable: true,
- * }} />
- * ```
+ * For simple tables (no drag-and-drop, virtual scroll, context menus,
+ * or expandable rows), delegates to the standalone DataTableBase.
+ * For advanced features, falls back to the full manifest-based rendering.
  */
 export declare function DataTable({ config }: {
     config: DataTableConfig;

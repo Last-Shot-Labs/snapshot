@@ -17,7 +17,6 @@ export type {
   PluginComponentEntry,
   PluginComponentGroupDefinition,
 } from "./plugin";
-export { generateManifestSchema } from "./schema-generator";
 
 export type {
   SnapshotConfig,

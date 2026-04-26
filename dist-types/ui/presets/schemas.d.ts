@@ -369,12 +369,12 @@ export declare const dashboardPresetConfigSchema: z.ZodObject<{
             color: z.ZodOptional<z.ZodString>;
         }, "strict", z.ZodTypeAny, {
             field: string;
-            color?: string | undefined;
             label?: string | undefined;
+            color?: string | undefined;
         }, {
             field: string;
-            color?: string | undefined;
             label?: string | undefined;
+            color?: string | undefined;
         }>, "many">>;
         span: z.ZodOptional<z.ZodNumber>;
     }, "strict", z.ZodTypeAny, {
@@ -384,8 +384,8 @@ export declare const dashboardPresetConfigSchema: z.ZodObject<{
         title?: string | undefined;
         series?: {
             field: string;
-            color?: string | undefined;
             label?: string | undefined;
+            color?: string | undefined;
         }[] | undefined;
     }, {
         variant: "area" | "line" | "bar" | "donut" | "pie" | "sparkline" | "funnel" | "radar" | "treemap" | "scatter";
@@ -394,8 +394,8 @@ export declare const dashboardPresetConfigSchema: z.ZodObject<{
         title?: string | undefined;
         series?: {
             field: string;
-            color?: string | undefined;
             label?: string | undefined;
+            color?: string | undefined;
         }[] | undefined;
     }>, "many">>;
     activityFeed: z.ZodOptional<z.ZodObject<{
@@ -434,8 +434,8 @@ export declare const dashboardPresetConfigSchema: z.ZodObject<{
         title?: string | undefined;
         series?: {
             field: string;
-            color?: string | undefined;
             label?: string | undefined;
+            color?: string | undefined;
         }[] | undefined;
     }[] | undefined;
     activityFeed?: {
@@ -465,8 +465,8 @@ export declare const dashboardPresetConfigSchema: z.ZodObject<{
         title?: string | undefined;
         series?: {
             field: string;
-            color?: string | undefined;
             label?: string | undefined;
+            color?: string | undefined;
         }[] | undefined;
     }[] | undefined;
     activityFeed?: {

@@ -1,6 +1,6 @@
 import type { TimelineConfig } from "./types";
 /**
- * Timeline component: grouped timeline sugar over canonical visible surfaces.
+ * Manifest adapter — resolves config refs, wires actions/publish, and delegates to TimelineBase.
  */
 export declare function Timeline({ config }: {
     config: TimelineConfig;

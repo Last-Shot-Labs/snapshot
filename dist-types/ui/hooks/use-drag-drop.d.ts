@@ -15,7 +15,7 @@ export type { DragStartEvent, DragEndEvent, DragOverEvent };
  * Pointer requires 5px distance to activate (prevents click hijacking).
  * Keyboard uses standard coordinates for arrow key navigation.
  */
-export declare function useDndSensors(): import("@dnd-kit/core").SensorDescriptor<import("@dnd-kit/core").SensorOptions>[];
+export declare function useDndSensors(): any;
 /**
  * CSS transform helper for sortable items.
  * Converts the dnd-kit transform into a CSS transform string.

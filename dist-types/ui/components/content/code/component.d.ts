@@ -1,6 +1,6 @@
 import type { CodeConfig } from "./types";
 /**
- * Inline code primitive rendered inside flowing text or compact metadata.
+ * Manifest adapter — resolves config refs and delegates to CodeBase.
  */
 export declare function Code({ config }: {
     config: CodeConfig;

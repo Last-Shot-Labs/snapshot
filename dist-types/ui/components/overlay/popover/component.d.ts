@@ -1,9 +1,7 @@
 import type { PopoverConfig } from "./types";
 /**
- * Floating panel component triggered by a button-like control.
- *
- * Uses the shared floating panel primitive, applies canonical slot styling to trigger and content
- * surfaces, and publishes `{ isOpen }` when an `id` is configured.
+ * Manifest adapter — resolves config refs, publishes state, renders manifest
+ * children, delegates layout to PopoverBase.
  */
 export declare function Popover({ config }: {
     config: PopoverConfig;

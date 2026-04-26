@@ -1,6 +1,5 @@
-import { isFromRef as isSharedFromRef } from "@lastshotlabs/frontend-contract/refs";
 import type { FromRef } from "./types";
-export declare const isFromRef: typeof isSharedFromRef;
+export declare const isFromRef: any;
 /**
  * Safely access nested values via dot-path.
  * Returns undefined if any segment along the path is null/undefined.

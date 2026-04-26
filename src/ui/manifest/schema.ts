@@ -189,16 +189,10 @@ function responsiveSchema<T extends z.ZodTypeAny>(
 
 const componentSchemaRegistry = new Map<string, z.ZodType>();
 
-/**
- * Register a component-specific manifest schema by component `type`.
- */
 export function registerComponentSchema(type: string, schema: z.ZodType): void {
   componentSchemaRegistry.set(type, schema);
 }
 
-/**
- * Return the currently registered manifest component type names.
- */
 export function getRegisteredSchemaTypes(): string[] {
   return [...componentSchemaRegistry.keys()];
 }

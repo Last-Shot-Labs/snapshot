@@ -1,9 +1,7 @@
 import type { HeadingConfig } from "./types";
 /**
- * Heading component for manifest-driven page titles and section headings.
- *
- * Resolves FromRef and template-backed text, then renders an `h1`-`h6`
- * element with Snapshot token-based typography defaults.
+ * Manifest adapter — resolves template text, locale, and route context,
+ * then delegates to HeadingBase.
  */
 export declare function Heading({ config }: {
     config: HeadingConfig;

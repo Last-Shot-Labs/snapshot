@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 import type { WritableAtom } from "jotai";
 import type { ApiClient } from "../api/client";
@@ -19,6 +18,7 @@ import type {
 } from "../types";
 import { isMfaChallenge } from "../types";
 import type { AuthContract } from "../auth/contract";
+import { navigateToPath } from "./navigation";
 
 const WEBAUTHN_CREDENTIALS_KEY = ["auth", "webauthn", "credentials"] as const;
 
@@ -146,7 +146,6 @@ export function createWebAuthnHooks({
   /** Authenticate with a passkey assertion, handling MFA challenges, token storage, and post-login navigation. */
   function usePasskeyLogin() {
     const queryClient = useQueryClient();
-    const navigate = useNavigate();
     const setMfaChallenge = useSetAtom(pendingMfaChallengeAtom);
     return useMutation<LoginResult, ApiError, PasskeyLoginVars>({
       mutationFn: async ({ redirectTo: _, ...body }) => {
@@ -174,13 +173,13 @@ export function createWebAuthnHooks({
             mfaToken: result.mfaToken,
             mfaMethods: result.mfaMethods,
           });
-          if (config.mfaPath) navigate({ to: config.mfaPath });
+          navigateToPath(config.mfaPath);
           return;
         }
         queryClient.setQueryData(["auth", "me"], result);
         onLoginSuccess?.();
         const to = vars.redirectTo ?? config.homePath;
-        if (to) navigate({ to });
+        navigateToPath(to);
       },
     });
   }

@@ -32,7 +32,7 @@ export declare function useReorderable<T>({ items, getKey, onReorder, }: UseReor
         oldIndex: number;
         newIndex: number;
         item: T;
-        items: T[];
+        items: any;
     } | null>;
     removeItem: (itemId: string) => RemoveItemResult<T> | null;
     insertItem: (item: T, options?: {
