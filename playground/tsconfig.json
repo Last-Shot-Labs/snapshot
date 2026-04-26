@@ -9,7 +9,8 @@
     "skipLibCheck": true,
     "paths": {
       "@lastshotlabs/snapshot/ui": ["../src/ui.ts"],
-      "@lastshotlabs/snapshot": ["../src/index.ts"]
+      "@lastshotlabs/snapshot": ["../src/index.ts"],
+      "@lib/snapshot": ["./src/lib/snapshot.ts"]
     }
   },
   "include": ["src"]

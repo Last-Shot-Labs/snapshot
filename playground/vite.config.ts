@@ -9,11 +9,18 @@ export default defineConfig({
     alias: {
       "@lastshotlabs/snapshot/ui": path.resolve(__dirname, "../src/ui.ts"),
       "@lastshotlabs/snapshot": path.resolve(__dirname, "../src/index.ts"),
+      "@lib/snapshot": path.resolve(__dirname, "src/lib/snapshot.ts"),
+    },
+  },
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+      },
     },
   },
   build: {
-    // The showcase intentionally pulls a broad cross-section of Snapshot surfaces
-    // into one smoke build, so the default warning threshold is too low to be useful.
     chunkSizeWarningLimit: 3500,
   },
 });

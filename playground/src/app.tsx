@@ -1,17 +1,42 @@
-import React, { useState, useEffect } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Provider as JotaiProvider, createStore } from "jotai";
 import {
   bootBuiltins,
   resolveTokens,
-  SnapshotApiContext,
   ToastContainer,
   ConfirmDialog,
+  StatCardBase,
+  DataTableBase,
+  ButtonBase,
+  TabsBase,
+  ModalBase,
+  BadgeBase,
+  EmptyStateBase,
+  SkeletonBase,
+  AlertBase,
+  CardBase,
+  InputField,
 } from "@lastshotlabs/snapshot/ui";
+import { tokenStorage, queryClient as snapshotQueryClient } from "./lib/snapshot";
+import {
+  postApiGuestSession,
+} from "./api/guest";
+import {
+  getApiLibraryByKind,
+  postApiLibraryByKind,
+} from "./api/library";
+import {
+  getApiMatches,
+  postApiMatches,
+  postApiMatchesByIdStart,
+  postApiMatchesByIdEnd,
+} from "./api/matches";
+import {
+  getApiJeopardyStatus,
+} from "./api/system";
 import { TokenEditorSidebar } from "./token-editor";
-import { ComponentShowcase } from "./showcase";
 
-// Inject initial tokens
 bootBuiltins();
 const initialCss = resolveTokens({ flavor: "neutral" });
 const style = document.createElement("style");
@@ -19,353 +44,796 @@ style.id = "snapshot-tokens";
 style.textContent = initialCss;
 document.head.appendChild(style);
 
-// Create providers once
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      staleTime: 60_000,
-    },
-  },
-});
 const jotaiStore = createStore();
 
-// Mock API client matching the interface components expect
-const mockApi = {
-  get: async (url: string) => {
-    // Simulate network delay
-    await new Promise((r) => setTimeout(r, 300));
+// ── Session management ────────────────────────────────────────────────────────
 
-    if (url.includes("/stats/revenue")) {
-      return { value: 128450, change: 12.5 };
-    }
-    if (url.includes("/stats/users")) {
-      return { value: 3842, change: -2.1 };
-    }
-    if (url.includes("/stats/orders")) {
-      return { value: 956, change: 8.3 };
-    }
-    if (url.includes("/stats/conversion")) {
-      return { value: 0.034, change: 1.2 };
-    }
-    if (url.includes("/users")) {
-      return [
-        {
-          id: 1,
-          name: "Alice Johnson",
-          email: "alice@example.com",
-          role: "Admin",
-          status: "active",
-          joined: "2025-01-15",
-        },
-        {
-          id: 2,
-          name: "Bob Smith",
-          email: "bob@example.com",
-          role: "Editor",
-          status: "active",
-          joined: "2025-02-20",
-        },
-        {
-          id: 3,
-          name: "Carol Davis",
-          email: "carol@example.com",
-          role: "Viewer",
-          status: "inactive",
-          joined: "2025-03-10",
-        },
-        {
-          id: 4,
-          name: "Dave Wilson",
-          email: "dave@example.com",
-          role: "Editor",
-          status: "active",
-          joined: "2025-04-01",
-        },
-        {
-          id: 5,
-          name: "Eve Brown",
-          email: "eve@example.com",
-          role: "Admin",
-          status: "active",
-          joined: "2025-04-05",
-        },
-      ];
-    }
-    if (url.includes("/tasks")) {
-      return [
-        {
-          id: 1,
-          title: "Design token system",
-          description: "Implement CSS custom properties",
-          status: "done",
-          assignee: "Alice",
-          priority: "high",
-        },
-        {
-          id: 2,
-          title: "Build icon renderer",
-          description: "Lucide SVG integration",
-          status: "done",
-          assignee: "Bob",
-          priority: "high",
-        },
-        {
-          id: 3,
-          title: "Responsive breakpoints",
-          description: "Media query generation",
-          status: "review",
-          assignee: "Carol",
-          priority: "medium",
-        },
-        {
-          id: 4,
-          title: "Component library",
-          description: "30+ enterprise components",
-          status: "in-progress",
-          assignee: "Dave",
-          priority: "high",
-        },
-        {
-          id: 5,
-          title: "Playground update",
-          description: "Showcase all components",
-          status: "in-progress",
-          assignee: "Eve",
-          priority: "medium",
-        },
-        {
-          id: 6,
-          title: "Documentation",
-          description: "Update docs with new APIs",
-          status: "todo",
-          priority: "low",
-        },
-        {
-          id: 7,
-          title: "Test coverage",
-          description: "Unit + integration tests",
-          status: "todo",
-          priority: "medium",
-        },
-      ];
-    }
-    if (url.includes("/audit-log")) {
-      return [
-        {
-          id: 1,
-          user: "Alice",
-          action: "updated profile settings",
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
-          details: {
-            field: "email",
-            old: "old@email.com",
-            new: "new@email.com",
-          },
-        },
-        {
-          id: 2,
-          user: "Bob",
-          action: "created new project",
-          timestamp: new Date(Date.now() - 7200000).toISOString(),
-        },
-        {
-          id: 3,
-          user: "Carol",
-          action: "deleted document report.pdf",
-          timestamp: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          id: 4,
-          user: "Dave",
-          action: "changed role from Editor to Admin",
-          timestamp: new Date(Date.now() - 172800000).toISOString(),
-          details: { role: { old: "Editor", new: "Admin" } },
-        },
-      ];
-    }
-    if (url.includes("/notifications")) {
-      return [
-        {
-          id: "n1",
-          title: "New comment on your PR",
-          message:
-            "Alice commented on PR #42: 'Looks great, just one suggestion...'",
-          timestamp: new Date(Date.now() - 600000).toISOString(),
-          read: false,
-          type: "info",
-        },
-        {
-          id: "n2",
-          title: "Build succeeded",
-          message: "Deploy #241 to production completed successfully.",
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
-          read: false,
-          type: "success",
-        },
-        {
-          id: "n3",
-          title: "Security alert",
-          message: "A new login was detected from an unfamiliar device.",
-          timestamp: new Date(Date.now() - 7200000).toISOString(),
-          read: true,
-          type: "warning",
-        },
-        {
-          id: "n4",
-          title: "Invitation accepted",
-          message: "Bob Smith accepted your team invitation.",
-          timestamp: new Date(Date.now() - 86400000).toISOString(),
-          read: true,
-          type: "info",
-        },
-        {
-          id: "n5",
-          title: "Build failed",
-          message: "Build #240 failed: TypeScript error in src/index.ts.",
-          timestamp: new Date(Date.now() - 172800000).toISOString(),
-          read: true,
-          type: "error",
-        },
-      ];
-    }
-    if (url.includes("/messages")) {
-      return [
-        {
-          id: "t1",
-          content:
-            "<p>Hey, can you review the latest changes to the token system?</p>",
-          author: { name: "Alice Johnson", avatar: null },
-          timestamp: new Date(Date.now() - 7200000).toISOString(),
-        },
-        {
-          id: "t2",
-          content:
-            "<p>Sure! I'll take a look this afternoon. Anything specific to focus on?</p>",
-          author: { name: "Bob Smith", avatar: null },
-          timestamp: new Date(Date.now() - 7000000).toISOString(),
-        },
-        {
-          id: "t3",
-          content:
-            "<p>Mainly the dark mode color derivation. I refactored how overrides merge with <code>darkColors</code>.</p>",
-          author: { name: "Alice Johnson", avatar: null },
-          timestamp: new Date(Date.now() - 6800000).toISOString(),
-        },
-        {
-          id: "t4",
-          content:
-            "<p>Got it. I'll pay extra attention to the foreground pair contrast ratios.</p>",
-          author: { name: "Bob Smith", avatar: null },
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
-        },
-      ];
-    }
-    if (url.includes("/entities") || url.includes("/team-members")) {
-      return [
-        {
-          id: "u1",
-          name: "Alice Johnson",
-          email: "alice@example.com",
-          avatar_url: null,
-        },
-        {
-          id: "u2",
-          name: "Bob Smith",
-          email: "bob@example.com",
-          avatar_url: null,
-        },
-        {
-          id: "u3",
-          name: "Carol Davis",
-          email: "carol@example.com",
-          avatar_url: null,
-        },
-        {
-          id: "u4",
-          name: "Dave Wilson",
-          email: "dave@example.com",
-          avatar_url: null,
-        },
-        {
-          id: "u5",
-          name: "Eve Brown",
-          email: "eve@example.com",
-          avatar_url: null,
-        },
-      ];
-    }
-    if (url.includes("/user/")) {
-      return {
-        id: 1,
-        name: "Alice Johnson",
-        email: "alice@example.com",
-        role: "Admin",
-        status: "active",
-        joined: "2025-01-15",
-        department: "Engineering",
-        location: "San Francisco, CA",
-        phone: "+1 (555) 123-4567",
-        verified: true,
-      };
-    }
-    return {};
-  },
-  post: async (_url: string, _body: unknown) => {
-    await new Promise((r) => setTimeout(r, 500));
-    return { success: true };
-  },
-  put: async (_url: string, _body: unknown) => {
-    await new Promise((r) => setTimeout(r, 500));
-    return { success: true };
-  },
-  patch: async (_url: string, _body: unknown) => {
-    await new Promise((r) => setTimeout(r, 500));
-    return { success: true };
-  },
-  delete: async (_url: string) => {
-    await new Promise((r) => setTimeout(r, 500));
-    return { success: true };
-  },
-};
+function useGuestSession() {
+  const [sessionState, setSessionState] = useState<{
+    userId: string | null;
+    displayName: string | null;
+    ready: boolean;
+    error: string | null;
+  }>({ userId: null, displayName: null, ready: false, error: null });
 
-export function App() {
+  useEffect(() => {
+    const existing = tokenStorage.get();
+    if (existing) {
+      try {
+        const parts = existing.split(".");
+        const payload = JSON.parse(atob(parts[1]!));
+        const exp = payload.exp as number;
+        if (exp * 1000 > Date.now()) {
+          setSessionState({
+            userId: payload.sub as string,
+            displayName: localStorage.getItem("jeopardy_display_name"),
+            ready: true,
+            error: null,
+          });
+          return;
+        }
+      } catch {}
+      tokenStorage.clear();
+    }
+
+    const name = localStorage.getItem("jeopardy_display_name") || `Player${Math.floor(Math.random() * 9000) + 1000}`;
+    postApiGuestSession({ displayName: name })
+      .then((res) => {
+        const token = (res.session as Record<string, unknown>).token as string;
+        tokenStorage.set(token);
+        localStorage.setItem("jeopardy_display_name", res.guest.displayName);
+        setSessionState({
+          userId: res.guest.userId,
+          displayName: res.guest.displayName,
+          ready: true,
+          error: null,
+        });
+      })
+      .catch((err) => {
+        setSessionState({ userId: null, displayName: null, ready: false, error: String(err) });
+      });
+  }, []);
+
+  return sessionState;
+}
+
+// ── Status bar ────────────────────────────────────────────────────────────────
+
+function StatusBadge() {
+  const { data } = useQuery({
+    queryKey: ["system", "status"],
+    queryFn: getApiJeopardyStatus,
+    refetchInterval: 30_000,
+  });
+
+  if (!data) return null;
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <BadgeBase
+        text={data.phase}
+        color="success"
+        variant="soft"
+        size="sm"
+      />
+    </div>
+  );
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+function AppHeader({ darkMode, onToggleDark, displayName }: {
+  darkMode: boolean;
+  onToggleDark: () => void;
+  displayName: string | null;
+}) {
+  return (
+    <header style={{
+      background: "var(--sn-color-card, #ffffff)",
+      borderBottom: "1px solid var(--sn-color-border, #e5e7eb)",
+      padding: "0 1.5rem",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      height: "64px",
+      position: "sticky",
+      top: 0,
+      zIndex: 10,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <div style={{
+          width: "36px",
+          height: "36px",
+          borderRadius: "8px",
+          background: "var(--sn-color-primary, #2563eb)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "20px",
+        }}>🎯</div>
+        <div>
+          <div style={{
+            fontWeight: "700",
+            fontSize: "1.125rem",
+            color: "var(--sn-color-foreground, #111827)",
+            lineHeight: 1.1,
+          }}>Jeopardy</div>
+          <div style={{
+            fontSize: "0.6875rem",
+            color: "var(--sn-color-muted-foreground, #6b7280)",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+          }}>Game Platform</div>
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        <StatusBadge />
+        {displayName && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}>
+            <div style={{
+              width: "30px",
+              height: "30px",
+              borderRadius: "50%",
+              background: "var(--sn-color-primary, #2563eb)",
+              color: "var(--sn-color-primary-foreground, #fff)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "0.75rem",
+              fontWeight: "700",
+            }}>
+              {displayName.charAt(0).toUpperCase()}
+            </div>
+            <span style={{ fontSize: "0.875rem", color: "var(--sn-color-muted-foreground, #6b7280)" }}>
+              {displayName}
+            </span>
+          </div>
+        )}
+        <ButtonBase
+          label={darkMode ? "Light" : "Dark"}
+          variant="outline"
+          size="sm"
+          icon={darkMode ? "sun" : "moon"}
+          onClick={onToggleDark}
+        />
+      </div>
+    </header>
+  );
+}
+
+// ── Home tab ──────────────────────────────────────────────────────────────────
+
+function HomeTab({ userId }: { userId: string | null }) {
+  const { data: statusData } = useQuery({
+    queryKey: ["system", "status"],
+    queryFn: getApiJeopardyStatus,
+    refetchInterval: 30_000,
+  });
+
+  const { data: matchesData, isLoading: matchesLoading } = useQuery({
+    queryKey: ["matches"],
+    queryFn: () => getApiMatches(),
+    enabled: !!userId,
+  });
+
+  const { data: cluesetsData, isLoading: cluesetsLoading } = useQuery({
+    queryKey: ["library", "clue-sets"],
+    queryFn: () => getApiLibraryByKind("clue-sets"),
+    enabled: !!userId,
+  });
+
+  const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
+    queryKey: ["library", "categories"],
+    queryFn: () => getApiLibraryByKind("categories"),
+    enabled: !!userId,
+  });
+
+  const matches = (matchesData?.items ?? []) as Record<string, unknown>[];
+  const clueSets = (cluesetsData?.items ?? []) as Record<string, unknown>[];
+  const categories = (categoriesData?.items ?? []) as Record<string, unknown>[];
+
+  const activeMatches = matches.filter(m => m.status !== "ended" && m.status !== "archived");
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      <div>
+        <h2 style={{ fontSize: "1.25rem", fontWeight: "700", margin: "0 0 0.25rem", color: "var(--sn-color-foreground)" }}>
+          Dashboard
+        </h2>
+        <p style={{ fontSize: "0.875rem", color: "var(--sn-color-muted-foreground)", margin: 0 }}>
+          {statusData ? `${statusData.gameType} · ${statusData.phase}` : "Connecting…"}
+        </p>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
+        <StatCardBase
+          label="Clue Sets"
+          value={cluesetsLoading ? null : String(clueSets.length)}
+          icon="library"
+          isLoading={cluesetsLoading}
+          trend={null}
+        />
+        <StatCardBase
+          label="Categories"
+          value={categoriesLoading ? null : String(categories.length)}
+          icon="folder"
+          isLoading={categoriesLoading}
+          trend={null}
+        />
+        <StatCardBase
+          label="Total Matches"
+          value={matchesLoading ? null : String(matches.length)}
+          icon="gamepad-2"
+          isLoading={matchesLoading}
+          trend={null}
+        />
+        <StatCardBase
+          label="Active Matches"
+          value={matchesLoading ? null : String(activeMatches.length)}
+          icon="play-circle"
+          iconColor="success"
+          isLoading={matchesLoading}
+          trend={null}
+        />
+      </div>
+
+      {matches.length > 0 && (
+        <CardBase>
+          <div style={{ padding: "1rem 1.25rem 0.5rem" }}>
+            <h3 style={{ fontSize: "1rem", fontWeight: "600", margin: "0 0 1rem", color: "var(--sn-color-foreground)" }}>
+              Recent Matches
+            </h3>
+            <DataTableBase
+              columns={[
+                { field: "title", label: "Title" },
+                { field: "status", label: "Status", format: "badge", badgeColors: { active: "success", ended: "muted", draft: "secondary", paused: "warning" } },
+                { field: "createdAt", label: "Created", format: "date" },
+              ]}
+              rows={matches.slice(0, 5).map(m => ({ ...m, title: (m.title as string) || "Untitled Match" }))}
+              hoverable
+              compact
+            />
+          </div>
+        </CardBase>
+      )}
+
+      {matches.length === 0 && !matchesLoading && (
+        <CardBase>
+          <EmptyStateBase
+            icon="gamepad-2"
+            title="No matches yet"
+            description="Create your first match to get started."
+            size="sm"
+          />
+        </CardBase>
+      )}
+    </div>
+  );
+}
+
+// ── Library tab ───────────────────────────────────────────────────────────────
+
+function CreateLibraryItemModal({ kind, open, onClose, onCreated }: {
+  kind: "clue-sets" | "categories" | "clues";
+  open: boolean;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const qc = useQueryClient();
+  const [title, setTitle] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: (data: Record<string, unknown>) => postApiLibraryByKind(kind, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["library", kind] });
+      onCreated();
+      setTitle("");
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err instanceof Error ? err.message : "Failed to create");
+    },
+  });
+
+  const kindLabel = kind === "clue-sets" ? "Clue Set" : kind === "categories" ? "Category" : "Clue";
+
+  const handleSubmit = () => {
+    if (!title.trim()) { setError("Title is required"); return; }
+    mutation.mutate({ title: title.trim() });
+  };
+
+  useEffect(() => {
+    if (!open) { setTitle(""); setError(null); }
+  }, [open]);
+
+  return (
+    <ModalBase
+      open={open}
+      onClose={onClose}
+      title={`New ${kindLabel}`}
+      size="sm"
+      footer={[
+        { label: "Cancel", variant: "outline", onClick: onClose },
+        { label: mutation.isPending ? "Creating…" : "Create", onClick: handleSubmit },
+      ]}
+    >
+      <div style={{ padding: "1rem 1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+        {error && (
+          <AlertBase variant="destructive" title="Error" description={error} />
+        )}
+        <InputField
+          label={`${kindLabel} title`}
+          placeholder={`Enter ${kindLabel.toLowerCase()} title…`}
+          value={title}
+          onChange={setTitle}
+          required
+        />
+      </div>
+    </ModalBase>
+  );
+}
+
+function LibraryKindView({ kind, label }: { kind: "clue-sets" | "categories" | "clues"; label: string }) {
+  const [createOpen, setCreateOpen] = useState(false);
+  const qc = useQueryClient();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["library", kind],
+    queryFn: () => getApiLibraryByKind(kind),
+  });
+
+  const items = ((data?.items ?? []) as Record<string, unknown>[]).map(item => ({
+    ...item,
+    title: (item.title as string) || "Untitled",
+    workflowStatus: item.workflowStatus as string,
+    visibility: item.visibility as string,
+    createdAt: item.createdAt as string,
+  }));
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h3 style={{ fontSize: "1rem", fontWeight: "600", margin: "0 0 0.25rem", color: "var(--sn-color-foreground)" }}>
+            {label}
+          </h3>
+          <p style={{ fontSize: "0.8125rem", color: "var(--sn-color-muted-foreground)", margin: 0 }}>
+            {isLoading ? "Loading…" : `${items.length} item${items.length !== 1 ? "s" : ""}`}
+          </p>
+        </div>
+        <ButtonBase
+          label={`New ${label.slice(0, -1)}`}
+          icon="plus"
+          size="sm"
+          onClick={() => setCreateOpen(true)}
+        />
+      </div>
+
+      {isLoading && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          {[1, 2, 3].map(i => <SkeletonBase key={i} height="48px" />)}
+        </div>
+      )}
+
+      {error && (
+        <AlertBase variant="destructive" title="Failed to load" description={String(error)} />
+      )}
+
+      {!isLoading && !error && items.length === 0 && (
+        <EmptyStateBase
+          icon="inbox"
+          title={`No ${label.toLowerCase()} yet`}
+          description={`Create your first ${label.slice(0, -1).toLowerCase()} to get started.`}
+          actionLabel={`New ${label.slice(0, -1)}`}
+          onAction={() => setCreateOpen(true)}
+        />
+      )}
+
+      {!isLoading && !error && items.length > 0 && (
+        <DataTableBase
+          columns={[
+            { field: "title", label: "Title" },
+            { field: "workflowStatus", label: "Status", format: "badge", badgeColors: { draft: "muted", published: "success", submitted: "info", approved: "success", rejected: "destructive", archived: "secondary" } },
+            { field: "visibility", label: "Visibility", format: "badge", badgeColors: { private: "secondary", public: "success" } },
+            { field: "createdAt", label: "Created", format: "date" },
+          ]}
+          rows={items}
+          searchable
+          searchPlaceholder={`Search ${label.toLowerCase()}…`}
+          hoverable
+          striped
+        />
+      )}
+
+      <CreateLibraryItemModal
+        kind={kind}
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={() => setCreateOpen(false)}
+      />
+    </div>
+  );
+}
+
+function LibraryTab() {
+  const [activeKind, setActiveKind] = useState(0);
+  const kinds = [
+    { kind: "clue-sets" as const, label: "Clue Sets" },
+    { kind: "categories" as const, label: "Categories" },
+    { kind: "clues" as const, label: "Clues" },
+  ];
+
+  return (
+    <div>
+      <div style={{ marginBottom: "1.5rem" }}>
+        <h2 style={{ fontSize: "1.25rem", fontWeight: "700", margin: "0 0 0.25rem", color: "var(--sn-color-foreground)" }}>
+          Library
+        </h2>
+        <p style={{ fontSize: "0.875rem", color: "var(--sn-color-muted-foreground)", margin: 0 }}>
+          Manage your clue sets, categories, and clues.
+        </p>
+      </div>
+      <TabsBase
+        variant="underline"
+        defaultTab={activeKind}
+        onTabChange={setActiveKind}
+        tabs={kinds.map(({ kind, label }) => ({
+          label,
+          content: <LibraryKindView kind={kind} label={label} />,
+        }))}
+      />
+    </div>
+  );
+}
+
+// ── Matches tab ───────────────────────────────────────────────────────────────
+
+function CreateMatchModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [title, setTitle] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<"title" | "board">("title");
+  const [matchId, setMatchId] = useState<string | null>(null);
+
+  const createMatch = useMutation({
+    mutationFn: (data: Record<string, unknown>) => postApiMatches(data),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["matches"] });
+      onClose();
+      setTitle("");
+      setError(null);
+      setStep("title");
+      setMatchId(null);
+    },
+    onError: (err) => {
+      setError(err instanceof Error ? err.message : "Failed to create match");
+    },
+  });
+
+  useEffect(() => {
+    if (!open) { setTitle(""); setError(null); setStep("title"); setMatchId(null); }
+  }, [open]);
+
+  const handleCreate = () => {
+    if (!title.trim()) { setError("Title is required"); return; }
+    createMatch.mutate({ title: title.trim() });
+  };
+
+  return (
+    <ModalBase
+      open={open}
+      onClose={onClose}
+      title="New Match"
+      size="sm"
+      footer={[
+        { label: "Cancel", variant: "outline", onClick: onClose },
+        { label: createMatch.isPending ? "Creating…" : "Create Match", onClick: handleCreate },
+      ]}
+    >
+      <div style={{ padding: "1rem 1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+        {error && (
+          <AlertBase variant="destructive" title="Error" description={error} />
+        )}
+        <InputField
+          label="Match title"
+          placeholder="e.g. Friday Night Trivia"
+          value={title}
+          onChange={setTitle}
+          required
+        />
+        <AlertBase
+          variant="info"
+          title="Note"
+          description="You can configure the board and players after creating the match."
+        />
+      </div>
+    </ModalBase>
+  );
+}
+
+function MatchesTab() {
+  const [createOpen, setCreateOpen] = useState(false);
+  const qc = useQueryClient();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["matches"],
+    queryFn: () => getApiMatches(),
+  });
+
+  const endMatch = useMutation({
+    mutationFn: (id: string) => postApiMatchesByIdEnd(id, {}),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["matches"] }),
+  });
+
+  const startMatch = useMutation({
+    mutationFn: (id: string) => postApiMatchesByIdStart(id, {}),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["matches"] }),
+  });
+
+  const matches = ((data?.items ?? []) as Record<string, unknown>[]).map(m => ({
+    ...m,
+    title: (m.title as string) || "Untitled Match",
+  }));
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h2 style={{ fontSize: "1.25rem", fontWeight: "700", margin: "0 0 0.25rem", color: "var(--sn-color-foreground)" }}>
+            Matches
+          </h2>
+          <p style={{ fontSize: "0.875rem", color: "var(--sn-color-muted-foreground)", margin: 0 }}>
+            {isLoading ? "Loading…" : `${matches.length} match${matches.length !== 1 ? "es" : ""}`}
+          </p>
+        </div>
+        <ButtonBase
+          label="New Match"
+          icon="plus"
+          onClick={() => setCreateOpen(true)}
+        />
+      </div>
+
+      {error && (
+        <AlertBase variant="destructive" title="Failed to load matches" description={String(error)} />
+      )}
+
+      {isLoading && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          {[1, 2, 3].map(i => <SkeletonBase key={i} height="56px" />)}
+        </div>
+      )}
+
+      {!isLoading && !error && matches.length === 0 && (
+        <EmptyStateBase
+          icon="gamepad-2"
+          title="No matches yet"
+          description="Create a match to start playing Jeopardy."
+          actionLabel="New Match"
+          onAction={() => setCreateOpen(true)}
+        />
+      )}
+
+      {!isLoading && !error && matches.length > 0 && (
+        <DataTableBase
+          columns={[
+            { field: "title", label: "Match" },
+            { field: "status", label: "Status", format: "badge", badgeColors: { active: "success", ended: "muted", draft: "secondary", paused: "warning", "in-progress": "info" } },
+            { field: "createdAt", label: "Created", format: "date" },
+            { field: "updatedAt", label: "Updated", format: "date" },
+          ]}
+          rows={matches}
+          searchable
+          searchPlaceholder="Search matches…"
+          hoverable
+          striped
+          rowActions={[
+            {
+              label: "Start",
+              icon: "play",
+              onAction: (row) => startMatch.mutate(row.id as string),
+            },
+            {
+              label: "End",
+              icon: "square",
+              variant: "destructive",
+              onAction: (row) => endMatch.mutate(row.id as string),
+            },
+          ]}
+        />
+      )}
+
+      <CreateMatchModal open={createOpen} onClose={() => setCreateOpen(false)} />
+    </div>
+  );
+}
+
+// ── Discovery tab ─────────────────────────────────────────────────────────────
+
+function DiscoveryTab() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["discovery"],
+    queryFn: async () => {
+      const { getApiDiscovery } = await import("./api/discovery");
+      return getApiDiscovery();
+    },
+  });
+
+  type DiscoverySection = { kind: string; items: Record<string, unknown>[] };
+  const dataObj = data as Record<string, unknown> | null | undefined;
+  const sections = (dataObj?.sections as DiscoverySection[] | undefined) ?? [];
+  const allItems = sections.flatMap(s => (s.items ?? []).map(item => ({ ...item, kind: s.kind })));
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      <div>
+        <h2 style={{ fontSize: "1.25rem", fontWeight: "700", margin: "0 0 0.25rem", color: "var(--sn-color-foreground)" }}>
+          Discovery
+        </h2>
+        <p style={{ fontSize: "0.875rem", color: "var(--sn-color-muted-foreground)", margin: 0 }}>
+          Browse publicly published content.
+        </p>
+      </div>
+
+      {isLoading && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1rem" }}>
+          {[1, 2, 3, 4].map(i => <SkeletonBase key={i} height="120px" />)}
+        </div>
+      )}
+
+      {!isLoading && allItems.length === 0 && (
+        <EmptyStateBase
+          icon="search"
+          title="Nothing published yet"
+          description="Public clue sets and categories will appear here once published."
+          size="md"
+        />
+      )}
+
+      {!isLoading && allItems.length > 0 && (
+        <DataTableBase
+          columns={[
+            { field: "title", label: "Title" },
+            { field: "kind", label: "Type", format: "badge", badgeColors: { "clue-sets": "info", categories: "success", clues: "secondary", generators: "warning" } },
+            { field: "ratingAverage", label: "Rating" },
+            { field: "createdAt", label: "Published", format: "date" },
+          ]}
+          rows={(allItems as Record<string, unknown>[]).map(i => ({ ...i, title: (i.title as string) || "Untitled" }))}
+          searchable
+          searchPlaceholder="Search content…"
+          hoverable
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Main App ──────────────────────────────────────────────────────────────────
+
+function JeopardyApp() {
+  const session = useGuestSession();
   const [darkMode, setDarkMode] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <JotaiProvider store={jotaiStore}>
-        <SnapshotApiContext.Provider value={mockApi as any}>
-          <div className="playground">
-            <TokenEditorSidebar darkMode={darkMode} />
-            <div className="playground__main">
-              <header className="playground__header">
-                <div className="playground__header-copy">
-                  <p className="playground__eyebrow">Snapshot UI audit</p>
-                  <h1>Component Playground</h1>
-                  <p>
-                    Inspect coverage, interaction states, token behavior, and
-                    responsive density across the full config-driven surface.
-                  </p>
-                </div>
-                <button
-                  className="dark-toggle"
-                  aria-pressed={darkMode}
-                  onClick={() => setDarkMode(!darkMode)}
-                >
-                  {darkMode ? "Switch to light" : "Switch to dark"}
-                </button>
-              </header>
-              <ComponentShowcase />
-            </div>
-            <ToastContainer />
-            <ConfirmDialog />
+  if (!session.ready && !session.error) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "1rem",
+        background: "var(--sn-color-background, #f9fafb)",
+      }}>
+        <div style={{
+          width: "48px",
+          height: "48px",
+          borderRadius: "12px",
+          background: "var(--sn-color-primary, #2563eb)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "28px",
+        }}>🎯</div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontWeight: "700", fontSize: "1.25rem", color: "var(--sn-color-foreground, #111827)" }}>
+            Jeopardy
           </div>
-        </SnapshotApiContext.Provider>
+          <div style={{ fontSize: "0.875rem", color: "var(--sn-color-muted-foreground, #6b7280)", marginTop: "0.25rem" }}>
+            Connecting…
+          </div>
+        </div>
+        <SkeletonBase width="200px" height="8px" />
+      </div>
+    );
+  }
+
+  if (session.error) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+        background: "var(--sn-color-background, #f9fafb)",
+      }}>
+        <AlertBase
+          variant="destructive"
+          title="Connection failed"
+          description={`Could not connect to the Jeopardy API. ${session.error}`}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "var(--sn-color-background, #f9fafb)",
+      display: "flex",
+      flexDirection: "column",
+    }}>
+      <AppHeader
+        darkMode={darkMode}
+        onToggleDark={() => setDarkMode(!darkMode)}
+        displayName={session.displayName}
+      />
+
+      <div style={{ display: "flex", flex: 1 }}>
+        <TokenEditorSidebar darkMode={darkMode} />
+
+        <main style={{ flex: 1, padding: "1.5rem 2rem", maxWidth: "1200px" }}>
+          <TabsBase
+            variant="pills"
+            defaultTab={activeTab}
+            onTabChange={setActiveTab}
+            tabs={[
+              {
+                label: "Home",
+                icon: "home",
+                content: <HomeTab userId={session.userId} />,
+              },
+              {
+                label: "Library",
+                icon: "library",
+                content: <LibraryTab />,
+              },
+              {
+                label: "Matches",
+                icon: "gamepad-2",
+                content: <MatchesTab />,
+              },
+              {
+                label: "Discovery",
+                icon: "search",
+                content: <DiscoveryTab />,
+              },
+            ]}
+          />
+        </main>
+      </div>
+
+      <ToastContainer />
+      <ConfirmDialog />
+    </div>
+  );
+}
+
+export function App() {
+  return (
+    <QueryClientProvider client={snapshotQueryClient}>
+      <JotaiProvider store={jotaiStore}>
+        <JeopardyApp />
       </JotaiProvider>
     </QueryClientProvider>
   );
