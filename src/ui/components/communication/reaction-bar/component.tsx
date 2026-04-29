@@ -26,6 +26,14 @@ export function ReactionBar({ config }: { config: ReactionBarConfig }) {
     [config.addAction, config.removeAction, execute, publish],
   );
 
+  const handleEmojiSelect = useCallback(
+    (payload: { emoji: string; name: string; isCustom: boolean }) => {
+      if (config.addAction) void execute(config.addAction, payload);
+      if (publish) publish({ emoji: payload.emoji, action: "add" });
+    },
+    [config.addAction, execute, publish],
+  );
+
   if (visible === false) return null;
 
   return (
@@ -34,6 +42,7 @@ export function ReactionBar({ config }: { config: ReactionBarConfig }) {
       reactions={config.reactions?.map((r) => ({ emoji: r.emoji, count: r.count, active: r.active })) ?? []}
       showAddButton={config.showAddButton}
       onReactionClick={handleReactionClick}
+      onEmojiSelect={handleEmojiSelect}
       EmojiPickerComponent={EmojiPicker as never}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as React.CSSProperties | undefined}

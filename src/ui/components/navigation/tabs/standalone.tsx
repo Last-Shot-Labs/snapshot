@@ -227,7 +227,8 @@ export function TabsBase({
 
   const handleTablistKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      const navKeys = new Set(["ArrowLeft", "ArrowRight", "Home", "End"]);
+      if (!navKeys.has(event.key)) return;
       event.preventDefault();
 
       const enabledIndices = tabs
@@ -236,22 +237,29 @@ export function TabsBase({
       if (enabledIndices.length === 0) return;
 
       const currentPos = enabledIndices.indexOf(activeTab);
-      const nextPos =
-        event.key === "ArrowRight"
-          ? currentPos === -1
-            ? 0
-            : (currentPos + 1) % enabledIndices.length
-          : currentPos <= 0
-            ? enabledIndices.length - 1
-            : currentPos - 1;
+      let nextPos: number;
+      if (event.key === "Home") {
+        nextPos = 0;
+      } else if (event.key === "End") {
+        nextPos = enabledIndices.length - 1;
+      } else if (event.key === "ArrowRight") {
+        nextPos =
+          currentPos === -1 ? 0 : (currentPos + 1) % enabledIndices.length;
+      } else {
+        nextPos =
+          currentPos <= 0 ? enabledIndices.length - 1 : currentPos - 1;
+      }
       const nextIndex = enabledIndices[nextPos]!;
 
       setActiveTab(nextIndex);
-      const buttons =
-        event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]');
-      buttons[nextIndex]?.focus();
+      // Find the actual rendered tab button by data-snapshot-id so disabled
+      // siblings don't throw off positional indexing.
+      const button = event.currentTarget.querySelector<HTMLButtonElement>(
+        `[role="tab"][data-snapshot-id="${rootId}-tab-${nextIndex}"]`,
+      );
+      button?.focus();
     },
-    [activeTab, setActiveTab, tabs],
+    [activeTab, rootId, setActiveTab, tabs],
   );
 
   return (
@@ -307,7 +315,8 @@ export function TabsBase({
                 disabled={tab.disabled}
                 role="tab"
                 ariaSelected={isActive}
-                ariaCurrent={isActive ? "page" : undefined}
+                ariaControls={`${rootId}-panel-${index}`}
+                id={`${rootId}-tab-${index}`}
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveTab(index)}
                 surfaceId={`${rootId}-tab-${index}`}
@@ -360,9 +369,12 @@ export function TabsBase({
         return (
           <div
             key={index}
+            id={`${rootId}-panel-${index}`}
             role="tabpanel"
             data-tab-content=""
             aria-hidden={index !== activeTab}
+            aria-labelledby={`${rootId}-tab-${index}`}
+            tabIndex={index === activeTab ? 0 : -1}
             data-snapshot-id={`${rootId}-panel-${index}`}
             className={panelSurface.className}
             style={panelSurface.style}

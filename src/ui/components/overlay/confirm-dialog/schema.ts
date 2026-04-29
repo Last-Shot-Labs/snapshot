@@ -21,6 +21,7 @@ const footerVariantSchema = z.enum([
   "default",
   "secondary",
   "destructive",
+  "outline",
   "ghost",
 ]);
 

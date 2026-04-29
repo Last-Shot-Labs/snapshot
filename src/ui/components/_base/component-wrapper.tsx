@@ -1,6 +1,6 @@
 'use client';
 
-import { Component, Suspense, useEffect, useRef, useState } from "react";
+import { Component, Suspense, useEffect, useId, useState } from "react";
 import type { CSSProperties, ErrorInfo, ReactNode } from "react";
 import { useManifestRuntime, useRouteRuntime } from "../../manifest/runtime";
 import { useSubscribe } from "../../context";
@@ -18,6 +18,8 @@ import type {
 } from "./types";
 import { mergeClassNames, resolveSurfacePresentation } from "./style-surfaces";
 import { resolveComponentBackgroundStyle } from "./background-style";
+import { RESPONSIVE_PROP_KEYS } from "./style-props";
+import { AutoSkeleton } from "./auto-skeleton";
 
 /**
  * Props for ComponentWrapper.
@@ -246,21 +248,12 @@ class ComponentErrorBoundary extends Component<
 
 /**
  * Loading skeleton shown while a component is suspending.
+ *
+ * Delegates to AutoSkeleton, which picks a shape (table/list/card/chart/stat)
+ * based on the component type so the placeholder matches what's loading.
  */
 function ComponentSkeleton({ type }: { type: string }) {
-  return (
-    <div
-      data-snapshot-component={type}
-      data-snapshot-loading
-      style={{
-        padding: "var(--sn-spacing-md, 1rem)",
-        borderRadius: "var(--sn-radius-md, 0.375rem)",
-        backgroundColor: "var(--sn-color-muted, #f1f5f9)",
-        minHeight: "4rem",
-        animation: "pulse 2s ease-in-out infinite",
-      }}
-    />
-  );
+  return <AutoSkeleton componentType={type} />;
 }
 
 /**
@@ -270,8 +263,6 @@ function ComponentSkeleton({ type }: { type: string }) {
  *
  * @param props - Wrapper props including type, className, style, and children
  */
-let idCounter = 0;
-
 export function ComponentWrapper({
   type,
   id: explicitId,
@@ -300,13 +291,13 @@ export function ComponentWrapper({
   const api = useApiClient();
   const user = useSubscribe({ from: "global.user" }) as { id?: string } | null;
 
-  // Auto-generate a stable id when interactive or responsive CSS is needed
+  // Auto-generate a stable id when interactive or responsive CSS is needed.
+  // useId() is SSR-safe and produces stable values across hydration; we
+  // sanitize it to a valid CSS attribute value.
+  const reactId = useId();
   const needsId = Boolean(hover || focus || active || hasResponsiveProps(config));
-  const autoIdRef = useRef<string | undefined>(undefined);
-  if (needsId && !explicitId && !autoIdRef.current) {
-    autoIdRef.current = `sn-auto-${++idCounter}`;
-  }
-  const id = explicitId ?? autoIdRef.current;
+  const autoId = needsId ? `sn-auto-${reactId.replace(/:/g, "")}` : undefined;
+  const id = explicitId ?? autoId;
 
   // ── Style prop resolution ─────────────────────────────────────────────
   const rootSurface = resolveSurfacePresentation({
@@ -485,25 +476,7 @@ function hasResponsiveProps(
   config: Record<string, unknown> | undefined,
 ): boolean {
   if (!config) return false;
-  const responsiveKeys = [
-    "padding",
-    "paddingX",
-    "paddingY",
-    "margin",
-    "marginX",
-    "marginY",
-    "gap",
-    "width",
-    "minWidth",
-    "maxWidth",
-    "height",
-    "minHeight",
-    "maxHeight",
-    "fontSize",
-    "display",
-    "flexDirection",
-  ];
-  for (const key of responsiveKeys) {
+  for (const key of RESPONSIVE_PROP_KEYS) {
     const val = config[key];
     if (
       val != null &&

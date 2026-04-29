@@ -8,12 +8,12 @@ export const iconButtonConfigSchema = extendComponentSchema({
   icon: z.string(),
   size: z.enum(["xs", "sm", "md", "lg"]).optional(),
   variant: z
-    .enum(["default", "secondary", "outline", "ghost", "destructive"])
+    .enum(["default", "secondary", "outline", "ghost", "destructive", "link"])
     .optional(),
   shape: z.enum(["circle", "square"]).optional(),
   ariaLabel: z.string(),
   action: actionSchema.optional(),
   disabled: z.union([z.boolean(), fromRefSchema]).optional(),
-  tooltip: z.string().optional(),
+  tooltip: z.union([z.string(), fromRefSchema]).optional(),
   slots: slotsSchema(["root", "icon"]).optional(),
 }).strict();

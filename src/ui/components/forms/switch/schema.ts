@@ -27,8 +27,12 @@ export const switchConfigSchema = extendComponentSchema({
     label: z.union([z.string(), fromRefSchema]).optional(),
     /** Helper text below the label. */
     description: z.union([z.string(), fromRefSchema]).optional(),
-    /** Initial checked state. Default: false. */
+    /** Initial checked state when used uncontrolled. Default: false. */
     defaultChecked: z.boolean().optional(),
+    /** Controlled checked state. Accepts a boolean or a FromRef. */
+    checked: z.union([z.boolean(), fromRefSchema]).optional(),
+    /** Alias for `checked`. Convenience for AutoForm-style value binding. */
+    value: z.union([z.boolean(), fromRefSchema]).optional(),
     /** Disabled state. Can be a FromRef. */
     disabled: z.union([z.boolean(), fromRefSchema]).optional(),
     /** Semantic color when checked. Default: "primary". */

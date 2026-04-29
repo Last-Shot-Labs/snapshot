@@ -62,6 +62,6 @@ export const dropdownMenuConfigSchema: z.ZodType<Record<string, any>> = extendCo
     .strict(),
   items: z.array(dropdownMenuEntrySchema),
   align: z.enum(["start", "center", "end"]).optional(),
-  side: z.enum(["top", "bottom"]).optional(),
+  side: z.enum(["top", "bottom", "left", "right"]).optional(),
   slots: slotsSchema(dropdownMenuSlotNames).optional(),
 }).strict();

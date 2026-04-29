@@ -52,6 +52,7 @@ export function ButtonControl({
   ariaSelected,
   ariaExpanded,
   ariaHasPopup,
+  ariaControls,
   role,
   tabIndex,
   title,
@@ -139,6 +140,7 @@ export function ButtonControl({
         aria-selected={ariaSelected}
         aria-expanded={ariaExpanded}
         aria-haspopup={ariaHasPopup}
+        aria-controls={ariaControls}
         aria-disabled={disabled || undefined}
         role={role}
         tabIndex={tabIndex}

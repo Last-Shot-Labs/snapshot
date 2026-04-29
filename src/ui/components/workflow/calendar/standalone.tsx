@@ -235,7 +235,7 @@ export function CalendarBase({
   });
   const headerSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-header`,
-    implementationBase: { display: "flex", alignItems: "center", justifyContent: "between", style: { marginBottom: "var(--sn-spacing-md, 12px)" } },
+    implementationBase: { display: "flex", alignItems: "center", justifyContent: "space-between", style: { marginBottom: "var(--sn-spacing-md, 12px)" } },
     componentSurface: slots?.header,
   });
   const titleSurface = resolveSurfacePresentation({

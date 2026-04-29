@@ -114,7 +114,7 @@ export function ProgressBase({
     surfaceId: `${rootId}-label-row`,
     implementationBase: {
       display: "flex",
-      justifyContent: "between",
+      justifyContent: "space-between",
       alignItems: "center",
       fontSize: "sm",
       color: "var(--sn-color-muted-foreground, #6b7280)",

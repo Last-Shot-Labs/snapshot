@@ -15,7 +15,13 @@ export const selectConfigSchema = extendComponentSchema({
   valueField: z.string().optional(),
   labelField: z.string().optional(),
   default: z.union([z.string(), fromRefSchema]).optional(),
+  value: z.union([z.string(), fromRefSchema]).optional(),
+  label: z.union([z.string(), fromRefSchema]).optional(),
   placeholder: z.union([z.string(), fromRefSchema]).optional(),
+  helperText: z.union([z.string(), fromRefSchema]).optional(),
+  errorText: z.union([z.string(), fromRefSchema]).optional(),
+  required: z.union([z.boolean(), fromRefSchema]).optional(),
+  disabled: z.union([z.boolean(), fromRefSchema]).optional(),
   on: controlEventActionsSchema.optional(),
   slots: slotsSchema(["root", "control", "label", "requiredIndicator", "helper"]).optional(),
 }).strict();

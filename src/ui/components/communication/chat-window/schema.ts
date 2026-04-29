@@ -27,8 +27,8 @@ import { dataSourceSchema, fromRefSchema } from "../../_base/types";
 export const chatWindowConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("chat-window"),
-    /** API endpoint for message data. */
-    data: dataSourceSchema,
+    /** API endpoint or inline data source for messages. Optional — omit when supplying messages by other means. */
+    data: dataSourceSchema.optional(),
     /** Field name for message content. Default: "content". */
     contentField: z.string().optional(),
     /** Field name for author display name. Default: "author.name". */
@@ -53,8 +53,14 @@ export const chatWindowConfigSchema = extendComponentSchema({
     sendAction: actionSchema.optional(),
     /** Show typing indicator area. Default: true. */
     showTypingIndicator: z.boolean().optional(),
-    /** Show reactions on messages. Default: true. */
-    showReactions: z.boolean().optional(),
+    /** List of users currently typing — string array or a FromRef. */
+    typingUsers: z
+      .union([z.array(z.string()), fromRefSchema])
+      .optional(),
+    /** Show timestamps on messages. Default: true. */
+    showTimestamps: z.boolean().optional(),
+    /** Group messages by date. Default: true. */
+    groupByDate: z.boolean().optional(),
     /** Total height of the chat window. Default: "500px". */
     height: z.string().optional(),
     slots: slotsSchema([

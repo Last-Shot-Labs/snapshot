@@ -132,7 +132,7 @@ export function CarouselBase({
   const controlsSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-controls`,
     implementationBase: {
-      position: "absolute", inset: "0", display: "flex", alignItems: "center", justifyContent: "between", padding: "sm",
+      position: "absolute", inset: "0", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "sm",
       style: { pointerEvents: "none" },
     },
     componentSurface: slots?.controls,

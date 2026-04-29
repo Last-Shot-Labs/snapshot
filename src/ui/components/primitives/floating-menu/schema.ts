@@ -45,7 +45,7 @@ export const floatingMenuConfigSchema: z.ZodType<Record<string, any>> = extendCo
   type: z.literal("floating-menu"),
   open: z.boolean().optional(),
   align: z.enum(["start", "center", "end"]).optional(),
-  side: z.enum(["top", "bottom"]).optional(),
+  side: z.enum(["top", "bottom", "left", "right"]).optional(),
   triggerLabel: primitiveTextValueSchema.optional(),
   triggerIcon: z.string().optional(),
   items: z.array(floatingMenuEntrySchema).optional(),

@@ -16,7 +16,8 @@ import type { MessageThreadConfig } from "./types";
 export function MessageThread({ config }: { config: MessageThreadConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const emptyMessage = useSubscribe(config.emptyMessage) as string | undefined;
-  const { data, isLoading, error } = useComponentData(config.data, undefined);
+  // `data` is optional now — pass an empty string when omitted; useComponentData treats falsy as "no fetch".
+  const { data, isLoading, error } = useComponentData(config.data ?? "", undefined);
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
   const surfaceConfig = extractSurfaceConfig(config, { omit: ["maxHeight"] });

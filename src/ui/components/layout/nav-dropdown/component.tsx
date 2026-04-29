@@ -62,6 +62,14 @@ export function NavDropdown({
 
   const rawUser = useSubscribe({ from: "global.user" });
   const user = rawUser as { role?: string; roles?: string[] } | null;
+
+  // Hooks must run unconditionally — keep useMemo above any early returns.
+  const inferredCurrent = useMemo(
+    () => config.items.some((item) => isNavLinkConfig(item) && matchesCurrentRoute(routeRuntime?.currentPath, item)),
+    [config.items, routeRuntime?.currentPath],
+  );
+  const isCurrent = config.current ?? inferredCurrent;
+
   if (config.authenticated === true && !user) {
     return null;
   }
@@ -74,12 +82,6 @@ export function NavDropdown({
       return null;
     }
   }
-
-  const inferredCurrent = useMemo(
-    () => config.items.some((item) => isNavLinkConfig(item) && matchesCurrentRoute(routeRuntime?.currentPath, item)),
-    [config.items, routeRuntime?.currentPath],
-  );
-  const isCurrent = config.current ?? inferredCurrent;
 
   return (
     <NavDropdownBase

@@ -227,7 +227,7 @@ export function NotificationFeedBase({
     implementationBase: {
       display: "flex",
       alignItems: "center",
-      justifyContent: "between",
+      justifyContent: "space-between",
       padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
       style: {
         borderBottom:

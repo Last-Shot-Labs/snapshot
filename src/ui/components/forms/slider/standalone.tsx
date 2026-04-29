@@ -137,7 +137,7 @@ export function SliderField({
     surfaceId: `${rootId}-header`,
     implementationBase: {
       display: "flex",
-      justifyContent: "between",
+      justifyContent: "space-between",
       alignItems: "center",
       gap: "sm",
     },
@@ -232,7 +232,7 @@ export function SliderField({
     surfaceId: `${rootId}-limits`,
     implementationBase: {
       display: "flex",
-      justifyContent: "between",
+      justifyContent: "space-between",
       fontSize: "xs",
       color: "var(--sn-color-muted-foreground, #6b7280)",
     },

@@ -80,6 +80,8 @@ export interface ButtonControlProps {
   ariaExpanded?: boolean;
   /** Popup type indicator. */
   ariaHasPopup?: boolean | "menu" | "listbox" | "tree" | "grid" | "dialog";
+  /** ID(s) of the element(s) controlled by this button (e.g. tabpanel). */
+  ariaControls?: string;
   /** ARIA role override. */
   role?: string;
   /** Tab order. */

@@ -434,7 +434,7 @@ export function EntityPickerBase({
     implementationBase: {
       display: "flex",
       alignItems: "center",
-      justifyContent: "between",
+      justifyContent: "space-between",
       gap: "sm",
       paddingY: "sm",
       paddingX: "md",

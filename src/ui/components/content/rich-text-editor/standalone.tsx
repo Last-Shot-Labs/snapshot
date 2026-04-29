@@ -125,17 +125,27 @@ export function RichTextEditorBase({
     return () => { view.destroy(); viewRef.current = null; };
   }, [currentMode, placeholderText, readonly, toolbarKeymap]); // intentional
 
+  // Sync external `content` updates into the editor at any time. Replaces
+  // the doc when the prop changes and doesn't already match the editor's
+  // current content (so user typing doesn't fight prop syncs).
   useEffect(() => {
-    if (!initializedRef.current) {
-      initializedRef.current = true;
-      if (initialContent && initialContent !== markdownContent) {
-        setMarkdownContent(initialContent);
-        if (viewRef.current) {
-          const view = viewRef.current;
-          view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: initialContent } });
+    const view = viewRef.current;
+    if (!view) {
+      // First mount path: seed initial content into local state if needed.
+      if (!initializedRef.current) {
+        initializedRef.current = true;
+        if (initialContent && initialContent !== markdownContent) {
+          setMarkdownContent(initialContent);
         }
       }
+      return;
     }
+    const currentDoc = view.state.doc.toString();
+    if (initialContent === currentDoc) return;
+    view.dispatch({
+      changes: { from: 0, to: view.state.doc.length, insert: initialContent },
+    });
+    setMarkdownContent(initialContent);
   }, [initialContent, markdownContent]);
 
   const handleToolbarAction = useCallback((item: ToolbarItem) => {

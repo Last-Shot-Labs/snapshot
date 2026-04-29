@@ -357,7 +357,7 @@ function CardContent({
     implementationBase: {
       display: "flex",
       alignItems: "center",
-      justifyContent: "between",
+      justifyContent: "space-between",
       style: {
         marginTop: "var(--sn-spacing-xs, 4px)",
       },

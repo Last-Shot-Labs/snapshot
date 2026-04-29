@@ -36,7 +36,9 @@ export const inlineEditConfigSchema = extendComponentSchema({
   /** Placeholder text when value is empty. Default: "Click to edit". */
   placeholder: z.union([z.string(), fromRefSchema]).optional(),
   /** Input type for the edit field. Default: "text". */
-  inputType: z.enum(["text", "number"]).optional(),
+  inputType: z
+    .enum(["text", "email", "password", "number", "url", "tel", "search"])
+    .optional(),
   /** Action dispatched on save (Enter or blur). Receives `{ value }` in context. */
   saveAction: actionSchema.optional(),
   /** Whether Escape cancels editing and reverts the value. Default: true. */

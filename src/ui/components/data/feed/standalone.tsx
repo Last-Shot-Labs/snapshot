@@ -305,6 +305,14 @@ function FeedItemRow({
         data-selected={isSelected ? "" : undefined}
         data-snapshot-id={itemId}
         onClick={() => onClick(item.raw)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onClick(item.raw);
+          }
+        }}
         className={itemSurface.className}
         style={itemSurface.style}
       >
@@ -533,7 +541,7 @@ export function FeedBase({
   const liveBannerSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-liveBanner`,
     implementationBase: {
-      display: "flex", alignItems: "center", justifyContent: "between", gap: "sm", paddingY: "sm", paddingX: "md",
+      display: "flex", alignItems: "center", justifyContent: "space-between", gap: "sm", paddingY: "sm", paddingX: "md",
       bg: "var(--sn-color-secondary, #f3f4f6)",
       style: { borderBottom: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)" },
     },

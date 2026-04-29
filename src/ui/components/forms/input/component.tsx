@@ -193,6 +193,12 @@ export function Input({ config }: { config: InputConfig }) {
       onFocus={handleFocus}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       className={config.className}
       style={config.style as CSSProperties}
       slots={config.slots as Record<string, Record<string, unknown>>}

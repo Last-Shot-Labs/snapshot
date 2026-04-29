@@ -48,6 +48,18 @@ export interface InputFieldProps {
   onClick?: MouseEventHandler<HTMLInputElement>;
   /** Standard keydown handler. */
   onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
+  /** Standard mouseenter handler. */
+  onMouseEnter?: MouseEventHandler<HTMLInputElement>;
+  /** Standard mouseleave handler. */
+  onMouseLeave?: MouseEventHandler<HTMLInputElement>;
+  /** Standard pointerdown handler. */
+  onPointerDown?: import("react").PointerEventHandler<HTMLInputElement>;
+  /** Standard pointerup handler. */
+  onPointerUp?: import("react").PointerEventHandler<HTMLInputElement>;
+  /** Standard touchstart handler. */
+  onTouchStart?: import("react").TouchEventHandler<HTMLInputElement>;
+  /** Standard touchend handler. */
+  onTouchEnd?: import("react").TouchEventHandler<HTMLInputElement>;
 
   // ── Style / Slot overrides ───────────────────────────────────────────────
   /** className applied to the root wrapper. */
@@ -96,6 +108,12 @@ export function InputField({
   onFocus,
   onClick,
   onKeyDown,
+  onMouseEnter,
+  onMouseLeave,
+  onPointerDown,
+  onPointerUp,
+  onTouchStart,
+  onTouchEnd,
   className,
   style,
   slots,
@@ -296,6 +314,12 @@ export function InputField({
           onFocus={onFocus}
           onClick={onClick}
           onKeyDown={onKeyDown}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
           surfaceId={`${rootId}-control`}
           surfaceConfig={slots?.control}
           activeStates={resolvedStates}

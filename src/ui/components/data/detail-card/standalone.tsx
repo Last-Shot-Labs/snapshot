@@ -474,7 +474,7 @@ export function DetailCardBase({
   const headerSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-header`,
     implementationBase: {
-      display: "flex", justifyContent: "between", alignItems: "center", gap: "sm",
+      display: "flex", justifyContent: "space-between", alignItems: "center", gap: "sm",
       style: { paddingBottom: "var(--sn-spacing-sm, 0.5rem)", borderBottom: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)" },
     },
     componentSurface: slots?.header,

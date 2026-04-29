@@ -19,6 +19,17 @@ export function IconButton({ config }: { config: IconButtonConfig }) {
       : typeof resolvedDisabled === "boolean"
         ? resolvedDisabled
         : false;
+  const resolvedTooltip = useSubscribe(
+    typeof config.tooltip === "object" && config.tooltip !== null && "from" in config.tooltip
+      ? config.tooltip
+      : undefined,
+  );
+  const tooltip =
+    typeof config.tooltip === "string"
+      ? config.tooltip
+      : typeof resolvedTooltip === "string"
+        ? resolvedTooltip
+        : undefined;
 
   return (
     <IconButtonBase
@@ -28,7 +39,7 @@ export function IconButton({ config }: { config: IconButtonConfig }) {
       variant={config.variant ?? "ghost"}
       size={config.size ?? "md"}
       shape={config.shape}
-      tooltip={config.tooltip}
+      tooltip={tooltip}
       disabled={isDisabled}
       onClick={() => {
         if (config.action) {

@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { useResponsiveValue } from "../../../hooks/use-breakpoint";
 import { SurfaceStyles } from "../../_base/surface-styles";
-import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { GridBase } from "./standalone";
 import type { GridConfig } from "./types";
 

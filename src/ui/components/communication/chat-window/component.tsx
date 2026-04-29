@@ -19,8 +19,8 @@ export function ChatWindow({ config }: { config: ChatWindowConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const primitiveOptions = usePrimitiveValueOptions();
   const resolvedConfig = useResolveFrom({ title: config.title, subtitle: config.subtitle });
-  const title = resolveOptionalPrimitiveValue(resolvedConfig.title, primitiveOptions) ?? "";
-  const subtitle = resolveOptionalPrimitiveValue(resolvedConfig.subtitle, primitiveOptions) ?? "";
+  const title = resolveOptionalPrimitiveValue(resolvedConfig.title, primitiveOptions);
+  const subtitle = resolveOptionalPrimitiveValue(resolvedConfig.subtitle, primitiveOptions);
   const surfaceConfig = extractSurfaceConfig(config);
 
   if (visible === false) return null;
@@ -32,9 +32,8 @@ export function ChatWindow({ config }: { config: ChatWindowConfig }) {
     authorNameField: config.authorNameField,
     authorAvatarField: config.authorAvatarField,
     timestampField: config.timestampField,
-    showReactions: config.showReactions,
-    showTimestamps: true,
-    groupByDate: true,
+    showTimestamps: config.showTimestamps ?? true,
+    groupByDate: config.groupByDate ?? true,
   };
 
   const inputConfig: RichInputConfig = {
@@ -48,7 +47,10 @@ export function ChatWindow({ config }: { config: ChatWindowConfig }) {
     features: (config.inputFeatures as RichInputConfig["features"]) ?? ["bold", "italic", "strike", "code", "link", "bullet-list", "ordered-list"],
   };
 
-  const typingConfig: TypingIndicatorConfig = { type: "typing-indicator", users: [] };
+  const typingConfig: TypingIndicatorConfig = {
+    type: "typing-indicator",
+    users: (config.typingUsers ?? []) as TypingIndicatorConfig["users"],
+  };
 
   return (
     <ChatWindowBase

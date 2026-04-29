@@ -56,6 +56,10 @@ export interface RichInputBaseProps {
   id?: string;
   /** Placeholder text. */
   placeholder?: string;
+  /** Initial editor content (uncontrolled). HTML or plain text. */
+  defaultValue?: string;
+  /** Controlled editor content. When set, `value` updates flow into the editor. */
+  value?: string;
   /** Whether the editor is read-only. */
   readonly?: boolean;
   /** Enabled formatting features. */
@@ -102,6 +106,8 @@ export interface RichInputBaseProps {
 export function RichInputBase({
   id,
   placeholder,
+  defaultValue,
+  value,
   readonly = false,
   features = ["bold", "italic", "underline", "strike", "code", "code-block", "link", "bullet-list", "ordered-list"],
   sendOnEnter = true,
@@ -146,6 +152,7 @@ export function RichInputBase({
   const editor = useEditor({
     extensions,
     editable: !readonly,
+    content: value ?? defaultValue ?? undefined,
     editorProps: { attributes: { style: "outline:none;min-height:100%;" } },
     onUpdate: ({ editor: instance }) => {
       const html = instance.getHTML();
@@ -158,6 +165,15 @@ export function RichInputBase({
   useEffect(() => {
     editor?.setEditable(!readonly);
   }, [editor, readonly]);
+
+  // Controlled-mode sync: when external `value` changes, replace the editor
+  // doc unless the user is mid-edit (i.e. the current HTML already matches).
+  useEffect(() => {
+    if (value === undefined || !editor) return;
+    if (editor.getHTML() === value) return;
+    editor.commands.setContent(value, { emitUpdate: false });
+    setCharCount(editor.getText().length);
+  }, [editor, value]);
 
   const handleSend = useCallback(() => {
     if (!editor) return;
@@ -242,7 +258,7 @@ export function RichInputBase({
   });
   const toolbarSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-toolbar`,
-    implementationBase: { display: "flex", alignItems: "center", justifyContent: "between", gap: "sm", paddingY: "xs", paddingX: "sm", style: { borderTop: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)" } },
+    implementationBase: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "sm", paddingY: "xs", paddingX: "sm", style: { borderTop: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)" } },
     componentSurface: slots?.toolbar,
   });
   const formattingGroupSurface = resolveSurfacePresentation({ surfaceId: `${rootId}-formattingGroup`, implementationBase: { display: "flex", alignItems: "center", gap: "2xs", flexWrap: "wrap" }, componentSurface: slots?.formattingGroup });

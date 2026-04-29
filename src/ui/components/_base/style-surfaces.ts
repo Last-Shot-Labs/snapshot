@@ -67,6 +67,16 @@ function mergeSurfaceFields(
   merged.className = mergeClassNames(base.className, override.className);
   merged.style = mergeStyles(base.style, override.style);
 
+  // Recursively merge interactive-state configs so an upper layer adding
+  // a focus ring doesn't clobber the lower layer's hover treatment.
+  for (const key of ["hover", "focus", "active"] as const) {
+    const baseState = base[key] as SurfaceConfig | undefined;
+    const overrideState = override[key] as SurfaceConfig | undefined;
+    if (baseState || overrideState) {
+      merged[key] = mergeSurfaceFields(baseState, overrideState);
+    }
+  }
+
   if (base.states || override.states) {
     const states: Partial<Record<RuntimeSurfaceState, SurfaceConfig>> = {};
     const names = new Set<RuntimeSurfaceState>([

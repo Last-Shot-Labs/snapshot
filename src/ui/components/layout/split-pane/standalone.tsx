@@ -94,6 +94,31 @@ export function SplitPaneBase({
     [direction, minSize],
   );
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      const stepSmall = e.shiftKey ? 10 : 1;
+      const decreaseKey = isHorizontal ? "ArrowLeft" : "ArrowUp";
+      const increaseKey = isHorizontal ? "ArrowRight" : "ArrowDown";
+      if (e.key === decreaseKey) {
+        e.preventDefault();
+        setSplit((s) => Math.max(0, s - stepSmall));
+      } else if (e.key === increaseKey) {
+        e.preventDefault();
+        setSplit((s) => Math.min(100, s + stepSmall));
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        setSplit(0);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        setSplit(100);
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        setSplit(50);
+      }
+    },
+    [isHorizontal],
+  );
+
   const handlePointerUp = useCallback(() => {
     draggingRef.current = false;
     setDragging(false);
@@ -186,10 +211,18 @@ export function SplitPaneBase({
 
         <div
           data-snapshot-id={`${rootId}-divider`}
+          role="separator"
+          aria-orientation={isHorizontal ? "vertical" : "horizontal"}
+          aria-valuenow={Math.round(split)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Resize panes"
+          tabIndex={0}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
+          onKeyDown={handleKeyDown}
           className={dividerSurface.className}
           style={dividerSurface.style}
         />

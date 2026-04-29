@@ -508,8 +508,13 @@ const BREAKPOINTS: Record<string, number> = {
   "2xl": 1536,
 };
 
-/** Map style prop names to CSS property names for responsive CSS generation. */
-const PROP_TO_CSS: Record<string, string | string[]> = {
+/**
+ * Map style prop names to CSS property names for responsive CSS generation.
+ *
+ * Single source of truth — also exported as `RESPONSIVE_PROP_KEYS` for
+ * `hasResponsiveProps` detection in `component-wrapper.tsx`.
+ */
+export const PROP_TO_CSS: Record<string, string | string[]> = {
   padding: "padding",
   paddingX: "padding-inline",
   paddingY: "padding-block",
@@ -524,9 +529,25 @@ const PROP_TO_CSS: Record<string, string | string[]> = {
   minHeight: "min-height",
   maxHeight: "max-height",
   fontSize: "font-size",
+  fontWeight: "font-weight",
+  lineHeight: "line-height",
+  letterSpacing: "letter-spacing",
+  textAlign: "text-align",
   display: "display",
   flexDirection: "flex-direction",
+  alignItems: "align-items",
+  justifyContent: "justify-content",
+  flex: "flex",
+  flexWrap: "flex-wrap",
+  borderRadius: "border-radius",
+  shadow: "box-shadow",
+  bg: "background",
+  color: "color",
+  opacity: "opacity",
 };
+
+/** Style prop names that may carry a responsive `{ default, sm, md, ... }` value. */
+export const RESPONSIVE_PROP_KEYS: readonly string[] = Object.keys(PROP_TO_CSS);
 
 /** Resolve a token value based on the prop name. */
 function resolveTokenValue(prop: string, value: string): string {
@@ -544,6 +565,9 @@ function resolveTokenValue(prop: string, value: string): string {
     return SPACING_MAP[value] ?? value;
   }
   if (prop === "fontSize") return FONT_SIZE_MAP[value] ?? value;
+  if (prop === "borderRadius") return RADIUS_MAP[value] ?? value;
+  if (prop === "shadow") return SHADOW_MAP[value] ?? value;
+  if (prop === "bg" || prop === "color") return COLOR_MAP[value] ?? value;
   return value;
 }
 

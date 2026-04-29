@@ -137,7 +137,7 @@ export function CodeBlockBase({
     implementationBase: {
       display: "flex",
       alignItems: "center",
-      justifyContent: "between",
+      justifyContent: "space-between",
       paddingY: "xs",
       paddingX: "md",
       bg: "var(--sn-color-secondary, #f1f5f9)",

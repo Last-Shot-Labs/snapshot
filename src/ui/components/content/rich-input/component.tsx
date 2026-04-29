@@ -17,11 +17,27 @@ export function RichInput({ config }: { config: RichInputConfig }) {
   const visible = useSubscribe(config.visible ?? true);
   const readonly = useSubscribe(config.readonly ?? false) as boolean;
   const primitiveOptions = usePrimitiveValueOptions();
-  const resolvedConfig = useResolveFrom({ placeholder: config.placeholder });
+  const resolvedConfig = useResolveFrom({
+    placeholder: config.placeholder,
+    defaultValue: config.defaultValue,
+  });
   const resolvedPlaceholder = resolveOptionalPrimitiveValue(
     resolvedConfig.placeholder,
     primitiveOptions,
   );
+  const resolvedDefaultValue = resolveOptionalPrimitiveValue(
+    resolvedConfig.defaultValue,
+    primitiveOptions,
+  );
+  const resolvedValue = useSubscribe(config.value);
+  const value =
+    config.value === undefined
+      ? undefined
+      : typeof resolvedValue === "string"
+        ? resolvedValue
+        : resolvedValue == null
+          ? ""
+          : String(resolvedValue);
   const execute = useActionExecutor();
   const publish = usePublish(config.id);
 
@@ -46,6 +62,8 @@ export function RichInput({ config }: { config: RichInputConfig }) {
     <RichInputBase
       id={config.id}
       placeholder={resolvedPlaceholder}
+      defaultValue={resolvedDefaultValue}
+      value={value}
       readonly={readonly}
       features={config.features}
       sendOnEnter={config.sendOnEnter}

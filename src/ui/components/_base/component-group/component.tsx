@@ -47,11 +47,13 @@ export function ComponentGroup({ config }: { config: ComponentGroupConfig }) {
       {groupDef.components.map((componentConfig, index) => {
         let resolved = componentConfig;
 
-        // Apply overrides by component id
+        // Apply overrides by component id with a deep merge so nested
+        // `slots`, `style`, and state maps compose with the group's
+        // base config instead of being clobbered.
         if (overrides && typeof componentConfig["id"] === "string") {
           const idOverride = overrides[componentConfig["id"]];
           if (idOverride) {
-            resolved = { ...componentConfig, ...idOverride };
+            resolved = deepMergeOverrides(componentConfig, idOverride);
           }
         }
 
@@ -64,4 +66,34 @@ export function ComponentGroup({ config }: { config: ComponentGroupConfig }) {
       })}
     </ComponentGroupBase>
   );
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.getPrototypeOf(value) === Object.prototype
+  );
+}
+
+/**
+ * Recursively merge an override config onto a base config. Plain objects are
+ * merged key-by-key so nested `slots`, `style`, `states`, and `hover/focus/active`
+ * compose. Arrays and primitives are replaced.
+ */
+function deepMergeOverrides(
+  base: Record<string, unknown>,
+  override: Record<string, unknown>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...base };
+  for (const [key, overrideValue] of Object.entries(override)) {
+    const baseValue = result[key];
+    if (isPlainObject(baseValue) && isPlainObject(overrideValue)) {
+      result[key] = deepMergeOverrides(baseValue, overrideValue);
+    } else {
+      result[key] = overrideValue;
+    }
+  }
+  return result;
 }

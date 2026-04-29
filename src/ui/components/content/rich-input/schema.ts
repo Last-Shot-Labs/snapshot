@@ -32,6 +32,10 @@ export const richInputConfigSchema = extendComponentSchema({
     type: z.literal("rich-input"),
     /** Placeholder text shown when the editor is empty. */
     placeholder: z.union([z.string(), fromRefSchema]).optional(),
+    /** Initial editor content (HTML or text). Used uncontrolled. */
+    defaultValue: z.union([z.string(), fromRefSchema]).optional(),
+    /** Controlled editor content. When set, external `value` updates flow into the editor. */
+    value: z.union([z.string(), fromRefSchema]).optional(),
     /** Enabled formatting features. Default: all enabled. */
     features: z
       .array(

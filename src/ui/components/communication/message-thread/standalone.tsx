@@ -183,7 +183,7 @@ export function MessageThreadBase({
                 const embeds = Array.isArray(rawEmbeds) ? (rawEmbeds as Record<string, unknown>[]) : [];
                 return (
                   <div key={msgId}>
-                    <div data-testid="message-item" data-snapshot-id={`${rootId}-message-${msgId}`} onClick={onMessageClick ? () => onMessageClick(msg) : undefined} className={msgS.className} style={msgS.style}>
+                    <div data-testid="message-item" data-snapshot-id={`${rootId}-message-${msgId}`} onClick={onMessageClick ? () => onMessageClick(msg) : undefined} role={onMessageClick ? "button" : undefined} tabIndex={onMessageClick ? 0 : undefined} onKeyDown={onMessageClick ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onMessageClick(msg); } } : undefined} className={msgS.className} style={msgS.style}>
                       {!isGrouped ? <MessageAvatar rootId={rootId} messageId={msgId} slots={slots} src={authorAvatar} name={authorName} /> : null}
                       <div data-snapshot-id={`${rootId}-message-${msgId}-contentColumn`} className={colS.className} style={colS.style}>
                         {!isGrouped ? (<div data-snapshot-id={`${rootId}-message-${msgId}-header`} className={hdS.className} style={hdS.style}><span data-snapshot-id={`${rootId}-message-${msgId}-author`} className={auS.className} style={auS.style}>{authorName}</span>{showTimestamps && ts ? <span data-snapshot-id={`${rootId}-message-${msgId}-timestamp`} className={tsS.className} style={tsS.style} title={ts.toLocaleString()}>{formatRelativeTime(ts)}</span> : null}</div>) : null}

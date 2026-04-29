@@ -31,6 +31,15 @@ export function Switch({ config }: { config: SwitchConfig }) {
     primitiveOptions,
   );
   const resolvedDisabled = useSubscribe(config.disabled ?? false) as boolean;
+  // Controlled checked state. `value` is a convenience alias.
+  const checkedSource = config.checked ?? config.value;
+  const resolvedChecked = useSubscribe(checkedSource);
+  const controlledChecked =
+    checkedSource === undefined
+      ? undefined
+      : typeof resolvedChecked === "boolean"
+        ? resolvedChecked
+        : Boolean(resolvedChecked);
 
   const handleChange = useCallback(
     (nextChecked: boolean) => {
@@ -53,6 +62,7 @@ export function Switch({ config }: { config: SwitchConfig }) {
       id={config.id}
       label={resolvedLabel}
       description={resolvedDescription}
+      checked={controlledChecked}
       defaultChecked={config.defaultChecked}
       disabled={resolvedDisabled}
       size={config.size ?? "md"}

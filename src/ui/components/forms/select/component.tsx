@@ -66,12 +66,20 @@ function toOptions(
 
 export function Select({ config }: { config: SelectConfig }) {
   const execute = useActionExecutor();
-  const publish = config.id ? usePublish(config.id) : null;
+  // Always invoke the hook so React's hook order is stable across renders.
+  const publishForId = usePublish(config.id ?? "");
+  const publish = config.id ? publishForId : null;
   const resolvedDefault = useSubscribe(config.default ?? "");
+  const resolvedValue = useSubscribe(config.value);
+  const resolvedRequired = useSubscribe(config.required ?? false) as boolean;
+  const resolvedDisabled = useSubscribe(config.disabled ?? false) as boolean;
   const visible = useSubscribe(config.visible ?? true);
   const primitiveOptions = usePrimitiveValueOptions();
   const resolvedConfig = useResolveFrom({
+    label: config.label,
     placeholder: config.placeholder,
+    helperText: config.helperText,
+    errorText: config.errorText,
     options: Array.isArray(config.options) ? config.options : undefined,
   });
 
@@ -103,8 +111,20 @@ export function Select({ config }: { config: SelectConfig }) {
     typeof resolvedDefault === "string"
       ? resolvedDefault
       : String(resolvedDefault ?? "");
+  const value =
+    resolvedValue == null
+      ? undefined
+      : typeof resolvedValue === "string"
+        ? resolvedValue
+        : String(resolvedValue);
+  const label =
+    resolveOptionalPrimitiveValue(resolvedConfig.label, primitiveOptions);
   const placeholder =
     resolveOptionalPrimitiveValue(resolvedConfig.placeholder, primitiveOptions) ?? "";
+  const helperText =
+    resolveOptionalPrimitiveValue(resolvedConfig.helperText, primitiveOptions);
+  const errorText =
+    resolveOptionalPrimitiveValue(resolvedConfig.errorText, primitiveOptions);
 
   const isLoading =
     !Array.isArray(config.options) &&
@@ -121,7 +141,13 @@ export function Select({ config }: { config: SelectConfig }) {
   return (
     <SelectField
       id={config.id}
+      label={label}
       placeholder={placeholder}
+      helperText={helperText}
+      errorText={errorText}
+      required={resolvedRequired}
+      disabled={resolvedDisabled}
+      value={value}
       defaultValue={defaultValue}
       options={options}
       loading={isLoading}

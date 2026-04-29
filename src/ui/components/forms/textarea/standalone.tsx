@@ -193,7 +193,7 @@ export function TextareaField({
     implementationBase: {
       display: "flex",
       alignItems: "center",
-      justifyContent: "between",
+      justifyContent: "space-between",
       gap: "var(--sn-spacing-sm, 0.5rem)",
     },
     componentSurface: slots?.meta,

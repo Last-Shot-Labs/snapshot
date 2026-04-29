@@ -14,35 +14,28 @@ import { dataSourceSchema, fromRefSchema } from "../../_base/types";
  * {
  *   "type": "message-thread",
  *   "data": "GET /api/channels/general/messages",
- *   "showReactions": true,
  *   "groupByDate": true,
  *   "maxHeight": "500px"
  * }
  * ```
  */
-export const messageThreadConfigSchema: z.ZodType<Record<string, any>> = extendComponentSchema({
+export const messageThreadConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("message-thread"),
-    /** API endpoint for message data, or static data via FromRef. */
-    data: dataSourceSchema,
+    /** API endpoint for message data, or static data via FromRef. Optional for code-first composition. */
+    data: dataSourceSchema.optional(),
     /** Field name for message HTML content. Default: "content". */
     contentField: z.string().optional(),
-    /** Field name for author object. Default: "author". */
-    authorField: z.string().optional(),
     /** Field name for author display name. Default: "author.name". */
     authorNameField: z.string().optional(),
     /** Field name for author avatar URL. Default: "author.avatar". */
     authorAvatarField: z.string().optional(),
     /** Field name for message timestamp. Default: "timestamp". */
     timestampField: z.string().optional(),
-    /** Field name for reactions array. Default: "reactions". */
-    reactionsField: z.string().optional(),
     /** Field name for embeds array on each message. Default: "embeds". */
     embedsField: z.string().optional(),
     /** Show link embeds (YouTube, Twitter, etc.) below messages. Default: true. */
     showEmbeds: z.boolean().optional(),
-    /** Show reactions on messages. Default: true. */
-    showReactions: z.boolean().optional(),
     /** Show timestamps on messages. Default: true. */
     showTimestamps: z.boolean().optional(),
     /** Group messages by date with separators. Default: true. */

@@ -33,7 +33,7 @@ export const popoverConfigSchema = extendComponentSchema({
   description: z.union([z.string(), fromRefSchema]).optional(),
   content: z.array(z.any()).optional(),
   footer: z.array(z.any()).optional(),
-  placement: z.enum(["top", "bottom"]).optional(),
+  placement: z.enum(["top", "bottom", "left", "right"]).optional(),
   width: z.string().optional(),
   slots: slotsSchema(popoverSlotNames).optional(),
 }).strict();

@@ -213,6 +213,14 @@ export interface FileUploaderBaseProps {
   onFilesAdded?: (files: File[]) => void;
   /** Called when a file is removed. */
   onFileRemoved?: (id: string) => void;
+  /** Called after each file's upload has completed successfully. */
+  onUpload?: (file: File, response?: unknown) => void;
+  /** Called when an upload's progress changes. */
+  onProgress?: (file: File, percent: number) => void;
+  /** Called when a single upload errors. */
+  onError?: (file: File, error: Error) => void;
+  /** Called once when all in-flight uploads have settled. */
+  onComplete?: (files: File[]) => void;
   /** Controlled file entries (for external upload management). */
   files?: UploadFileEntry[];
 
@@ -252,6 +260,10 @@ export function FileUploaderBase({
   accept,
   onFilesAdded,
   onFileRemoved,
+  onUpload: _onUpload,
+  onProgress: _onProgress,
+  onError: _onError,
+  onComplete: _onComplete,
   files: controlledFiles,
   className,
   style,

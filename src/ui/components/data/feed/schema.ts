@@ -64,7 +64,7 @@ export const feedSchema: z.ZodType<Record<string, any>> = extendComponentSchema(
     /** Render timestamps as relative time labels. */
     relativeTime: z.boolean().default(false),
     /** Group feed items by a time bucket. */
-    groupBy: z.enum(["date", "week", "month"]).optional(),
+    groupBy: z.enum(["day", "week", "month"]).optional(),
     /** Per-item action buttons rendered inline. */
     itemActions: z
       .array(
