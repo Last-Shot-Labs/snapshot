@@ -16,7 +16,7 @@ describe("mapEntityDashboardPage", () => {
 
   it("creates stat cards with even spans", () => {
     const result = mapEntityDashboardPage(buildDashboardResult());
-    const statRow = result.page.content[1] as {
+    const statRow = result.page.content[1] as unknown as {
       children: Array<{ span: number }>;
     };
     expect(statRow.children.map((child) => child.span)).toEqual([6, 6]);

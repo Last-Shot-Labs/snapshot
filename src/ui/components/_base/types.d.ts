@@ -51,18 +51,14 @@ export declare const baseComponentConfigSchema: z.ZodObject<{
     /** String expression that controls visibility. */
     visibleWhen: z.ZodOptional<z.ZodString>;
     /** Whether the component is visible. Can be a FromRef for conditional rendering. */
-    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
-        from: z.ZodString;
-        transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
-        transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
-    }, "strict", z.ZodTypeAny, {
+    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodType<{
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }, z.ZodTypeDef, {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     }>]>>;
     /** CSS class name(s) to apply to the component wrapper. */
     className: z.ZodOptional<z.ZodString>;
@@ -74,10 +70,10 @@ export declare const baseComponentConfigSchema: z.ZodObject<{
         zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
     }, "strict", z.ZodTypeAny, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }>]>>;
     /** Explicit z-index override. */
     zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
@@ -183,15 +179,9 @@ export declare const baseComponentConfigSchema: z.ZodObject<{
     }>]>>;
 }, "strip", z.ZodTypeAny, {
     id?: string | undefined;
-    style?: Record<string, string | number> | undefined;
-    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
-        property: string;
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        easing?: string | undefined;
-    } | undefined;
     sticky?: boolean | {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     } | undefined;
     background?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
@@ -208,15 +198,21 @@ export declare const baseComponentConfigSchema: z.ZodObject<{
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
+        property: string;
+        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
+        easing?: string | undefined;
+    } | undefined;
     visible?: boolean | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     } | undefined;
     className?: string | undefined;
     tokens?: Record<string, string> | undefined;
     visibleWhen?: string | undefined;
-    zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+    zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     animation?: {
         enter: "scale" | "fade" | "fade-up" | "fade-down" | "slide-left" | "slide-right" | "bounce";
         duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
@@ -227,15 +223,9 @@ export declare const baseComponentConfigSchema: z.ZodObject<{
     glass?: boolean | undefined;
 }, {
     id?: string | undefined;
-    style?: Record<string, string | number> | undefined;
-    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        easing?: string | undefined;
-        property?: string | undefined;
-    } | undefined;
     sticky?: boolean | {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     } | undefined;
     background?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
@@ -252,15 +242,21 @@ export declare const baseComponentConfigSchema: z.ZodObject<{
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
+        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
+        easing?: string | undefined;
+        property?: string | undefined;
+    } | undefined;
     visible?: boolean | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     } | undefined;
     className?: string | undefined;
     tokens?: Record<string, string> | undefined;
     visibleWhen?: string | undefined;
-    zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+    zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     animation?: {
         enter: "scale" | "fade" | "fade-up" | "fade-down" | "slide-left" | "slide-right" | "bounce";
         duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;

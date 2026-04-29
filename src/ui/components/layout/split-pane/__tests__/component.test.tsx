@@ -25,7 +25,7 @@ describe("SplitPane", () => {
           children: [
             { type: "text", id: "left-pane", value: "Left" },
             { type: "text", id: "right-pane", value: "Right" },
-          ],
+          ] as unknown as Array<{ type: string }>,
           slots: {
             root: { className: "split-root-slot" },
             pane: { className: "split-pane-slot" },

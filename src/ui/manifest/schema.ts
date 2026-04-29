@@ -1345,10 +1345,13 @@ function restoreComponentSchemaRegistry(
  */
 const baseFieldNames = new Set(Object.keys(baseComponentConfigSchema.shape));
 
+/** Minimum shape for any component config produced by `componentConfigSchema`. */
+export type ComponentConfigInput = { type: string; id?: string | undefined };
+
 /**
  * Union schema covering every component config Snapshot can render from a manifest.
  */
-export const componentConfigSchema: z.ZodType = z
+export const componentConfigSchema: z.ZodType<ComponentConfigInput> = z
   .object({ type: z.string() })
   .passthrough()
   .superRefine((data, ctx) => {

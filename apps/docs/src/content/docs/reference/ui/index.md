@@ -67,14 +67,14 @@ Generated from `src/ui.ts`.
 | `AuthPageOptions` | interface | `src/ui/presets/types.ts` | Options for the `authPage` preset factory. |
 | `authPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | Validate preset config for auth screens such as login, register, and password recovery. |
 | `AuthProviderConfig` | typealias | `src/ui/manifest/types.ts` | Input shape for `authProviderSchema` — defaulted fields are optional. |
-| `authProviderSchema` | variable | `src/ui/manifest/schema.ts` | Auth provider declaration schema.  Declared at `manifest.auth.providers.<name>`. |
+| `authProviderSchema` | variable | `src/ui/manifest/schema.ts` | Auth provider declaration schema. Declared at `manifest.auth.providers.<name>`. |
 | `AuthScreenConfig` | typealias | `src/ui/manifest/types.ts` | Input shape for `authScreenConfigSchema` — defaulted fields are optional. |
 | `authScreenConfigSchema` | variable | `src/ui/manifest/schema.ts` | Schema for the manifest auth screen and auth workflow configuration. |
-| `AutoForm` | function | `src/ui/components/forms/auto-form/component.tsx` | Config-driven form component with multi-column layout, conditional field visibility, and section grouping.  Supports client-side validation, submission to an API endpoint, manifest-aware resource mutation (invalidation + optimistic handling), workflow lifecycle hooks (`beforeSubmit`, `afterSubmit`, `error`), and action chaining on success/error. Publishes form state to the page context when an `id` is configured. |
+| `AutoForm` | function | `src/ui/components/forms/auto-form/component.tsx` | Config-driven form component with multi-column layout, conditional field visibility, and section grouping. Supports client-side validation, submission to an API endpoint, manifest-aware resource mutation (invalidation + optimistic handling), workflow lifecycle hooks (`beforeSubmit`, `afterSubmit`, `error`), and action chaining on success/error. Publishes form state to the page context when an `id` is configured. |
 | `AutoFormBase` | function | `src/ui/components/forms/auto-form/standalone.tsx` | Standalone AutoFormBase -- renders a config-driven form with fields, sections, validation, and submit/reset actions. No manifest context required. |
 | `AutoFormBaseProps` | interface | `src/ui/components/forms/auto-form/standalone.tsx` | No JSDoc description. |
 | `AutoFormConfig` | typealias | `src/ui/components/forms/auto-form/types.ts` | Inferred type for the AutoForm component config. |
-| `autoFormConfigSchema` | variable | `src/ui/components/forms/auto-form/schema.ts` | Zod schema for the AutoForm component config.  Defines a config-driven form that auto-generates fields from config or OpenAPI schema. Supports validation, submission, action chaining, multi-column layout, conditional field visibility, and field grouping. |
+| `autoFormConfigSchema` | variable | `src/ui/components/forms/auto-form/schema.ts` | Zod schema for the AutoForm component config. Defines a config-driven form that auto-generates fields from config or OpenAPI schema. Supports validation, submission, action chaining, multi-column layout, conditional field visibility, and field grouping. |
 | `AutoFormFieldConfig` | interface | `src/ui/components/forms/auto-form/standalone.tsx` | No JSDoc description. |
 | `AutoFormSectionConfig` | interface | `src/ui/components/forms/auto-form/standalone.tsx` | No JSDoc description. |
 | `AvatarBase` | function | `src/ui/components/data/avatar/standalone.tsx` | Standalone Avatar — image, initials, or icon fallback. No manifest context required. |
@@ -83,7 +83,7 @@ Generated from `src/ui.ts`.
 | `AvatarGroupBase` | function | `src/ui/components/data/avatar-group/standalone.tsx` | Standalone AvatarGroup — overlapping avatars with +N overflow. No manifest context required. |
 | `AvatarGroupBaseProps` | interface | `src/ui/components/data/avatar-group/standalone.tsx` | No JSDoc description. |
 | `AvatarGroupConfig` | typealias | `src/ui/components/data/avatar-group/types.ts` | Inferred config type from the AvatarGroup Zod schema. |
-| `avatarGroupConfigSchema` | variable | `src/ui/components/data/avatar-group/schema.ts` | Zod config schema for the AvatarGroup component.  Displays a row of overlapping avatars with an optional "+N" overflow count. Commonly used for showing team members, assignees, or participants. |
+| `avatarGroupConfigSchema` | variable | `src/ui/components/data/avatar-group/schema.ts` | Zod config schema for the AvatarGroup component. Displays a row of overlapping avatars with an optional "+N" overflow count. Commonly used for showing team members, assignees, or participants. |
 | `BadgeBase` | function | `src/ui/components/data/badge/standalone.tsx` | Standalone Badge — a small label with color-coded variants. No manifest context required. |
 | `BadgeBaseProps` | interface | `src/ui/components/data/badge/standalone.tsx` | No JSDoc description. |
 | `BannerBase` | function | `src/ui/components/content/banner/standalone.tsx` | Standalone Banner — a full-width hero section with background, overlay, and content alignment. No manifest context required. |
@@ -125,12 +125,12 @@ Generated from `src/ui.ts`.
 | `ChartBaseSeries` | interface | `src/ui/components/data/chart/standalone.tsx` | No JSDoc description. |
 | `ChartConfig` | typealias | `src/ui/components/data/chart/types.ts` | Inferred type for the Chart component configuration. |
 | `ChartDef` | interface | `src/ui/presets/types.ts` | Chart section definition for dashboard-style presets. |
-| `chartSchema` | variable | `src/ui/components/data/chart/schema.ts` | Zod schema for the Chart component configuration.  Renders a data visualization (bar, line, area, pie, donut) from an endpoint or from-ref. Uses Recharts under the hood. Colors default to `--sn-chart-1` through `--sn-chart-5` tokens. |
+| `chartSchema` | variable | `src/ui/components/data/chart/schema.ts` | Zod schema for the Chart component configuration. Renders a data visualization (bar, line, area, pie, donut) from an endpoint or from-ref. Uses Recharts under the hood. Colors default to `--sn-chart-1` through `--sn-chart-5` tokens. |
 | `ChatWindow` | function | `src/ui/components/communication/chat-window/component.tsx` | Manifest adapter — resolves config refs, composes manifest sub-components, delegates to ChatWindowBase. |
 | `ChatWindowBase` | function | `src/ui/components/communication/chat-window/standalone.tsx` | Standalone ChatWindow — composable chat container with header, message thread, typing indicator, and input slots. No manifest context required. |
 | `ChatWindowBaseProps` | interface | `src/ui/components/communication/chat-window/standalone.tsx` | No JSDoc description. |
 | `ChatWindowConfig` | typealias | `src/ui/components/communication/chat-window/types.ts` | Inferred config type from the ChatWindow Zod schema. |
-| `chatWindowConfigSchema` | variable | `src/ui/components/communication/chat-window/schema.ts` | Zod config schema for the ChatWindow component.  A full chat interface composing a message thread, rich input, and typing indicator into a single component. |
+| `chatWindowConfigSchema` | variable | `src/ui/components/communication/chat-window/schema.ts` | Zod config schema for the ChatWindow component. A full chat interface composing a message thread, rich input, and typing indicator into a single component. |
 | `clearPersistedState` | function | `src/ui/state/persist.ts` | Remove a persisted state value from the selected browser storage area. |
 | `CloseModalAction` | interface | `../frontend-contract/src/actions/types.ts` | No JSDoc description. |
 | `closeModalActionSchema` | variable | `../frontend-contract/src/actions/types.ts` | No JSDoc description. |
@@ -166,12 +166,12 @@ Generated from `src/ui.ts`.
 | `CommentSectionBase` | function | `src/ui/components/communication/comment-section/standalone.tsx` | Standalone CommentSection — threaded comment list with avatars, timestamps, optional delete actions, and a composable input slot. No manifest context required. |
 | `CommentSectionBaseProps` | interface | `src/ui/components/communication/comment-section/standalone.tsx` | No JSDoc description. |
 | `CommentSectionConfig` | typealias | `src/ui/components/communication/comment-section/types.ts` | Inferred config type from the CommentSection Zod schema. |
-| `commentSectionConfigSchema` | variable | `src/ui/components/communication/comment-section/schema.ts` | Zod config schema for the CommentSection component.  Renders a comment list with nested replies and an embedded rich input for posting new comments. |
+| `commentSectionConfigSchema` | variable | `src/ui/components/communication/comment-section/schema.ts` | Zod config schema for the CommentSection component. Renders a comment list with nested replies and an embedded rich input for posting new comments. |
 | `CompareView` | function | `src/ui/components/content/compare-view/component.tsx` | Manifest adapter — resolves config refs and delegates to CompareViewBase. |
 | `CompareViewBase` | function | `src/ui/components/content/compare-view/standalone.tsx` | Standalone CompareView — a side-by-side diff viewer for comparing two text blocks. No manifest context required. |
 | `CompareViewBaseProps` | interface | `src/ui/components/content/compare-view/standalone.tsx` | No JSDoc description. |
 | `CompareViewConfig` | typealias | `src/ui/components/content/compare-view/types.ts` | Inferred config type from the CompareView Zod schema. |
-| `compareViewConfigSchema` | variable | `src/ui/components/content/compare-view/schema.ts` | Zod config schema for the CompareView component.  Defines all manifest-settable fields for a side-by-side content comparison view with diff highlighting. |
+| `compareViewConfigSchema` | variable | `src/ui/components/content/compare-view/schema.ts` | Zod config schema for the CompareView component. Defines all manifest-settable fields for a side-by-side content comparison view with diff highlighting. |
 | `CompiledManifest` | interface | `src/ui/manifest/types.ts` | Runtime manifest shape produced by `compileManifest()`. |
 | `CompiledRoute` | interface | `src/ui/manifest/types.ts` | Runtime route shape produced by `compileManifest()`. |
 | `compileManifest` | function | `src/ui/manifest/compiler.ts` | Parse and compile a manifest into the runtime shape. |
@@ -191,7 +191,7 @@ Generated from `src/ui.ts`.
 | `ConfirmDialog` | function | `src/ui/actions/confirm.tsx` | Render the global confirmation dialog for requests queued through `useConfirmManager`. |
 | `ConfirmDialogBase` | function | `src/ui/components/overlay/confirm-dialog/standalone.tsx` | Standalone ConfirmDialog — a confirmation dialog built on ModalBase with plain React props. No manifest context required. |
 | `ConfirmDialogBaseProps` | interface | `src/ui/components/overlay/confirm-dialog/standalone.tsx` | No JSDoc description. |
-| `ConfirmDialogComponent` | function | `src/ui/components/overlay/confirm-dialog/component.tsx` | Manifest-driven confirmation dialog adapter.  Resolves primitive values and actions from manifest config, then delegates all rendering to `ConfirmDialogBase`. |
+| `ConfirmDialogComponent` | function | `src/ui/components/overlay/confirm-dialog/component.tsx` | Manifest-driven confirmation dialog adapter. Resolves primitive values and actions from manifest config, then delegates all rendering to `ConfirmDialogBase`. |
 | `ConfirmDialogConfig` | typealias | `src/ui/components/overlay/confirm-dialog/types.ts` | Input config type for the ConfirmDialog component. |
 | `confirmDialogConfigSchema` | variable | `src/ui/components/overlay/confirm-dialog/schema.ts` | Overlay alias schema for manifest-driven confirmation dialogs. |
 | `ConfirmManager` | interface | `src/ui/actions/confirm.tsx` | Imperative API for opening a confirmation dialog from manifest actions or custom UI. |
@@ -199,34 +199,34 @@ Generated from `src/ui.ts`.
 | `ConfirmRequest` | interface | `src/ui/actions/confirm.tsx` | Internal confirm-dialog request stored in the atom-backed manager queue. |
 | `ContainerBase` | function | `src/ui/components/layout/container/standalone.tsx` | Standalone Container -- a centered, max-width-constrained wrapper. No manifest context required. |
 | `ContainerBaseProps` | interface | `src/ui/components/layout/container/standalone.tsx` | No JSDoc description. |
-| `ContextMenu` | function | `src/ui/components/overlay/context-menu/component.tsx` | Manifest-driven context menu adapter.  Resolves primitive values and actions from manifest config, handles visibility and state publishing, then delegates all rendering to `ContextMenuBase`. |
+| `ContextMenu` | function | `src/ui/components/overlay/context-menu/component.tsx` | Manifest-driven context menu adapter. Resolves primitive values and actions from manifest config, handles visibility and state publishing, then delegates all rendering to `ContextMenuBase`. |
 | `ContextMenuBase` | function | `src/ui/components/overlay/context-menu/standalone.tsx` | Standalone ContextMenu — a right-click context menu with plain React props. No manifest context required. |
 | `ContextMenuBaseEntry` | typealias | `src/ui/components/overlay/context-menu/standalone.tsx` | No JSDoc description. |
 | `ContextMenuBaseItem` | interface | `src/ui/components/overlay/context-menu/standalone.tsx` | No JSDoc description. |
 | `ContextMenuBaseProps` | interface | `src/ui/components/overlay/context-menu/standalone.tsx` | No JSDoc description. |
 | `ContextMenuConfig` | typealias | `src/ui/components/overlay/context-menu/types.ts` | Inferred config type for the ContextMenu component. |
-| `contextMenuConfigSchema` | variable | `src/ui/components/overlay/context-menu/schema.ts` | Zod schema for the ContextMenu component.  Defines a right-click menu with styleable trigger, panel, item, label, and separator surfaces. Visibility can be driven by a boolean or a binding reference. |
+| `contextMenuConfigSchema` | variable | `src/ui/components/overlay/context-menu/schema.ts` | Zod schema for the ContextMenu component. Defines a right-click menu with styleable trigger, panel, item, label, and separator surfaces. Visibility can be driven by a boolean or a binding reference. |
 | `contrastRatio` | function | `src/ui/tokens/color.ts` | Calculate the WCAG contrast ratio between two supported color values. |
 | `CopyAction` | interface | `../frontend-contract/src/actions/types.ts` | No JSDoc description. |
 | `CopyToClipboardAction` | interface | `../frontend-contract/src/actions/types.ts` | No JSDoc description. |
 | `copyToClipboardActionSchema` | variable | `../frontend-contract/src/actions/types.ts` | No JSDoc description. |
-| `crudPage` | function | `src/ui/presets/crud-page.ts` | Builds a manifest `PageConfig` for a standard CRUD page.  Consumers drop the result into their manifest's `pages` record:  ```ts const manifest = {   pages: {     "/users": crudPage({       title: "Users",       listEndpoint: "GET /api/users",       createEndpoint: "POST /api/users",       deleteEndpoint: "DELETE /api/users/{id}",       columns: [         { key: "name", label: "Name" },         { key: "email", label: "Email" },         { key: "role", label: "Role", badge: true },       ],       createForm: {         fields: [           { key: "name", type: "text", label: "Name", required: true },           { key: "email", type: "email", label: "Email", required: true },         ],       },     }),   }, }; ``` |
+| `crudPage` | function | `src/ui/presets/crud-page.ts` | Builds a manifest `PageConfig` for a standard CRUD page. Consumers drop the result into their manifest's `pages` record: ```ts const manifest = {   pages: {     "/users": crudPage({       title: "Users",       listEndpoint: "GET /api/users",       createEndpoint: "POST /api/users",       deleteEndpoint: "DELETE /api/users/{id}",       columns: [         { key: "name", label: "Name" },         { key: "email", label: "Email" },         { key: "role", label: "Role", badge: true },       ],       createForm: {         fields: [           { key: "name", type: "text", label: "Name", required: true },           { key: "email", type: "email", label: "Email", required: true },         ],       },     }),   }, }; ``` |
 | `CrudPageOptions` | interface | `src/ui/presets/types.ts` | Options for the `crudPage` preset factory. Produces a full CRUD page with a data table, create/edit modals, and row actions. |
 | `crudPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | Validate preset config for a CRUD page assembled from list/form primitives. |
 | `CUSTOM_EMOJI_CSS` | variable | `src/ui/components/communication/emoji-picker/custom-emoji.ts` | CSS for custom emoji sizing. Custom emojis render as inline images sized to match surrounding text. |
 | `customComponentDeclarationSchema` | variable | `src/ui/manifest/schema.ts` | Schema for a custom component declaration under `components.custom`. |
 | `customComponentPropSchema` | variable | `src/ui/manifest/schema.ts` | Schema for a declared prop on a manifest custom component registration. |
 | `CustomEmoji` | interface | `src/ui/components/communication/emoji-picker/custom-emoji.ts` | Shape of a custom emoji entry. |
-| `dashboardPage` | function | `src/ui/presets/dashboard-page.ts` | Builds a manifest `PageConfig` for a dashboard page.  Consumers drop the result into their manifest's `pages` record:  ```ts const manifest = {   pages: {     "/dashboard": dashboardPage({       title: "Overview",       stats: [         { label: "Total Users", endpoint: "GET /api/stats/users", valueKey: "count" },         { label: "Revenue", endpoint: "GET /api/stats/revenue", valueKey: "total", format: "currency" },         { label: "Orders", endpoint: "GET /api/stats/orders", valueKey: "total", format: "number" },         { label: "Conversion", endpoint: "GET /api/stats/conversion", valueKey: "rate", format: "percent" },       ],       recentActivity: "GET /api/activity",     }),   }, }; ``` |
+| `dashboardPage` | function | `src/ui/presets/dashboard-page.ts` | Builds a manifest `PageConfig` for a dashboard page. Consumers drop the result into their manifest's `pages` record: ```ts const manifest = {   pages: {     "/dashboard": dashboardPage({       title: "Overview",       stats: [         { label: "Total Users", endpoint: "GET /api/stats/users", valueKey: "count" },         { label: "Revenue", endpoint: "GET /api/stats/revenue", valueKey: "total", format: "currency" },         { label: "Orders", endpoint: "GET /api/stats/orders", valueKey: "total", format: "number" },         { label: "Conversion", endpoint: "GET /api/stats/conversion", valueKey: "rate", format: "percent" },       ],       recentActivity: "GET /api/activity",     }),   }, }; ``` |
 | `DashboardPageOptions` | interface | `src/ui/presets/types.ts` | Options for the `dashboardPage` preset factory. Produces a dashboard with stat cards and an optional activity feed. |
 | `dashboardPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | Validate preset config for a dashboard page with stats, charts, and activity sections. |
 | `dataSourceSchema` | variable | `../frontend-contract/src/resources/index.ts` | No JSDoc description. |
-| `DataTable` | function | `src/ui/components/data/data-table/component.tsx` | Config-driven DataTable component.  For simple tables (no drag-and-drop, virtual scroll, context menus, or expandable rows), delegates to the standalone DataTableBase. For advanced features, falls back to the full manifest-based rendering. |
+| `DataTable` | function | `src/ui/components/data/data-table/component.tsx` | Config-driven DataTable component. For simple tables (no drag-and-drop, virtual scroll, context menus, or expandable rows), delegates to the standalone DataTableBase. For advanced features, falls back to the full manifest-based rendering. |
 | `DataTableBase` | function | `src/ui/components/data/data-table/standalone.tsx` | Standalone DataTable — feature-rich data table with sorting, pagination, selection, and search. No manifest context required. |
 | `DataTableBaseColumn` | interface | `src/ui/components/data/data-table/standalone.tsx` | No JSDoc description. |
 | `DataTableBaseProps` | interface | `src/ui/components/data/data-table/standalone.tsx` | No JSDoc description. |
 | `DataTableConfig` | typealias | `src/ui/components/data/data-table/types.ts` | Inferred DataTable configuration type from the Zod schema. |
-| `dataTableConfigSchema` | variable | `src/ui/components/data/data-table/schema.ts` | Zod schema for the DataTable component configuration.  Defines a config-driven data table with sorting, pagination, filtering, selection, search, row actions, and bulk actions. |
+| `dataTableConfigSchema` | variable | `src/ui/components/data/data-table/schema.ts` | Zod schema for the DataTable component configuration. Defines a config-driven data table with sorting, pagination, filtering, selection, search, row actions, and bulk actions. |
 | `DatePicker` | function | `src/ui/components/forms/date-picker/component.tsx` | No JSDoc description. |
 | `DatePickerConfig` | typealias | `src/ui/components/forms/date-picker/types.ts` | Config for the manifest-driven date picker component. |
 | `datePickerConfigSchema` | variable | `src/ui/components/forms/date-picker/schema.ts` | Schema for date picker components covering single, range, and multi-date selection. |
@@ -251,7 +251,7 @@ Generated from `src/ui.ts`.
 | `DetailCardBaseField` | interface | `src/ui/components/data/detail-card/standalone.tsx` | No JSDoc description. |
 | `DetailCardBaseProps` | interface | `src/ui/components/data/detail-card/standalone.tsx` | No JSDoc description. |
 | `DetailCardConfig` | typealias | `src/ui/components/data/detail-card/schema.ts` | DetailCard configuration type inferred from the schema. |
-| `detailCardConfigSchema` | variable | `src/ui/components/data/detail-card/schema.ts` | Zod schema for DetailCard component configuration.  The detail card displays a single record's fields in a key-value layout. Used in drawers, modals, and detail pages. |
+| `detailCardConfigSchema` | variable | `src/ui/components/data/detail-card/schema.ts` | Zod schema for DetailCard component configuration. The detail card displays a single record's fields in a key-value layout. Used in drawers, modals, and detail pages. |
 | `detectPlatform` | function | `src/ui/components/content/link-embed/platform.ts` | Detects the platform from a URL and extracts embed info. |
 | `DividerBase` | function | `src/ui/components/primitives/divider/standalone.tsx` | Standalone Divider — renders a horizontal or vertical separator line, optionally with a centered label. No manifest context required. |
 | `DividerBaseProps` | interface | `src/ui/components/primitives/divider/standalone.tsx` | No JSDoc description. |
@@ -283,7 +283,7 @@ Generated from `src/ui.ts`.
 | `EntityPickerBase` | function | `src/ui/components/data/entity-picker/standalone.tsx` | Standalone EntityPicker — dropdown with search, single/multi select. No manifest context required. |
 | `EntityPickerBaseProps` | interface | `src/ui/components/data/entity-picker/standalone.tsx` | No JSDoc description. |
 | `EntityPickerConfig` | typealias | `src/ui/components/data/entity-picker/types.ts` | Inferred config type from the EntityPicker Zod schema. |
-| `entityPickerConfigSchema` | variable | `src/ui/components/data/entity-picker/schema.ts` | Zod config schema for the EntityPicker component.  A searchable dropdown for selecting entities (users, documents, items) from an API endpoint. Supports single and multi-select. |
+| `entityPickerConfigSchema` | variable | `src/ui/components/data/entity-picker/schema.ts` | Zod config schema for the EntityPicker component. A searchable dropdown for selecting entities (users, documents, items) from an API endpoint. Supports single and multi-select. |
 | `EntityPickerEntity` | interface | `src/ui/components/data/entity-picker/standalone.tsx` | No JSDoc description. |
 | `expandPreset` | function | `src/ui/presets/expand.ts` | Validate a named preset config and expand it into the equivalent page config. |
 | `ExprRef` | interface | `../frontend-contract/src/refs/from.ts` | No JSDoc description. |
@@ -299,7 +299,7 @@ Generated from `src/ui.ts`.
 | `FeedBaseProps` | interface | `src/ui/components/data/feed/standalone.tsx` | No JSDoc description. |
 | `FeedConfig` | typealias | `src/ui/components/data/feed/types.ts` | Inferred type for the Feed component config (from Zod schema). |
 | `FeedItem` | interface | `src/ui/components/data/feed/types.ts` | A single resolved feed item for rendering. |
-| `feedSchema` | variable | `src/ui/components/data/feed/schema.ts` | Zod schema for the Feed component configuration.  Renders a scrollable activity/event stream from an endpoint or from-ref. Supports avatar, title, description, timestamp, badge fields, pagination, and publishes the selected item to the page context when `id` is set. |
+| `feedSchema` | variable | `src/ui/components/data/feed/schema.ts` | Zod schema for the Feed component configuration. Renders a scrollable activity/event stream from an endpoint or from-ref. Supports avatar, title, description, timestamp, badge fields, pagination, and publishes the selected item to the page context when `id` is set. |
 | `FieldConfig` | typealias | `src/ui/components/forms/auto-form/types.ts` | Inferred type for a single field configuration. |
 | `fieldConfigSchema` | variable | `src/ui/components/forms/auto-form/schema.ts` | Schema for an individual field configuration. |
 | `FieldErrors` | typealias | `src/ui/components/forms/auto-form/types.ts` | Per-field validation error. |
@@ -327,13 +327,13 @@ Generated from `src/ui.ts`.
 | `FromRef` | interface | `../frontend-contract/src/refs/from.ts` | No JSDoc description. |
 | `fromRefSchema` | variable | `../frontend-contract/src/refs/schema.ts` | No JSDoc description. |
 | `generateBreadcrumbs` | function | `src/ui/manifest/breadcrumbs.ts` | Generate breadcrumb items from the current matched route hierarchy. |
-| `generateJsonSchema` | function | `src/ui/manifest/json-schema.ts` | Generate a JSON Schema for snapshot manifests.  The schema is intentionally conservative and focuses on the public top-level manifest contract so editors can provide autocomplete and inline validation without requiring Snapshot's full runtime schema registry at generation time. |
+| `generateJsonSchema` | function | `src/ui/manifest/json-schema.ts` | Generate a JSON Schema for snapshot manifests. The schema is intentionally conservative and focuses on the public top-level manifest contract so editors can provide autocomplete and inline validation without requiring Snapshot's full runtime schema registry at generation time. |
 | `getAllFlavors` | function | `src/ui/tokens/flavors.ts` | Get all registered flavors as a record. |
 | `getFlavor` | function | `src/ui/tokens/flavors.ts` | Retrieve a registered flavor by name. |
 | `getRegisteredClient` | function | `src/api/client.ts` | Look up a previously registered custom client factory. |
 | `getRegisteredGuards` | function | `src/ui/manifest/guard-registry.ts` | List the names of all currently registered route guards. |
 | `getRegisteredLayouts` | function | `src/ui/layouts/registry.tsx` | List the names of all currently registered manifest layouts. |
-| `getRegisteredSchemaTypes` | function | `src/ui/manifest/schema.ts` | Return the currently registered manifest component type names. |
+| `getRegisteredSchemaTypes` | function | `src/ui/manifest/schema.ts` | No JSDoc description. |
 | `getRegisteredWorkflowAction` | function | `src/ui/workflows/registry.ts` | Retrieve a registered runtime handler for a custom workflow action type. |
 | `getSortableStyle` | function | `src/ui/hooks/use-drag-drop.ts` | CSS transform helper for sortable items. Converts the dnd-kit transform into a CSS transform string. |
 | `GifEntry` | interface | `src/ui/components/communication/gif-picker/types.ts` | Shape of a GIF entry. |
@@ -341,7 +341,7 @@ Generated from `src/ui.ts`.
 | `GifPickerBase` | function | `src/ui/components/communication/gif-picker/standalone.tsx` | Standalone GifPicker — searchable GIF grid with debounced search, loading states, and optional attribution. No manifest context required. |
 | `GifPickerBaseProps` | interface | `src/ui/components/communication/gif-picker/standalone.tsx` | No JSDoc description. |
 | `GifPickerConfig` | typealias | `src/ui/components/communication/gif-picker/types.ts` | Inferred config type from the GifPicker Zod schema. |
-| `gifPickerConfigSchema` | variable | `src/ui/components/communication/gif-picker/schema.ts` | Zod config schema for the GifPicker component.  Searchable GIF picker that queries a GIF API (Giphy/Tenor) and displays results in a masonry-style grid.  The component expects a backend proxy endpoint that handles the actual API key and returns GIF results. This avoids exposing API keys in the frontend. |
+| `gifPickerConfigSchema` | variable | `src/ui/components/communication/gif-picker/schema.ts` | Zod config schema for the GifPicker component. Searchable GIF picker that queries a GIF API (Giphy/Tenor) and displays results in a masonry-style grid. The component expects a backend proxy endpoint that handles the actual API key and returns GIF results. This avoids exposing API keys in the frontend. |
 | `GlobalConfig` | typealias | `src/ui/context/types.ts` | Global state definition from the manifest. This now aliases the shared state config used by the runtime. |
 | `GridBase` | function | `src/ui/components/layout/grid/standalone.tsx` | Standalone Grid -- a CSS grid container. No manifest context required. |
 | `GridBaseProps` | interface | `src/ui/components/layout/grid/standalone.tsx` | No JSDoc description. |
@@ -367,14 +367,14 @@ Generated from `src/ui.ts`.
 | `IconProps` | interface | `src/ui/icons/icon.tsx` | Props for the {@link Icon} component. |
 | `IfWorkflowNode` | interface | `../frontend-contract/src/workflows/types.ts` | No JSDoc description. |
 | `injectStyleSheet` | function | `src/ui/manifest/app.tsx` | Inject or update a stylesheet in the document head. |
-| `InlineEdit` | function | `src/ui/components/forms/inline-edit/component.tsx` | InlineEdit component — click-to-edit text field.  Toggles between a display mode and an edit mode. Enter or blur saves the value; Escape reverts to the original value when `cancelOnEscape` is enabled. |
+| `InlineEdit` | function | `src/ui/components/forms/inline-edit/component.tsx` | InlineEdit component — click-to-edit text field. Toggles between a display mode and an edit mode. Enter or blur saves the value; Escape reverts to the original value when `cancelOnEscape` is enabled. |
 | `InlineEditConfig` | typealias | `src/ui/components/forms/inline-edit/types.ts` | Inferred config type for the InlineEdit component. |
-| `inlineEditConfigSchema` | variable | `src/ui/components/forms/inline-edit/schema.ts` | Zod config schema for the InlineEdit component.  A click-to-edit text field that toggles between display and edit modes. Publishes `{ value, editing }` to the page context. |
+| `inlineEditConfigSchema` | variable | `src/ui/components/forms/inline-edit/schema.ts` | Zod config schema for the InlineEdit component. A click-to-edit text field that toggles between display and edit modes. Publishes `{ value, editing }` to the page context. |
 | `InlineEditField` | function | `src/ui/components/forms/inline-edit/standalone.tsx` | Standalone InlineEditField -- a click-to-edit text field that toggles between display and input modes. No manifest context required. |
 | `InlineEditFieldProps` | interface | `src/ui/components/forms/inline-edit/standalone.tsx` | No JSDoc description. |
 | `Input` | function | `src/ui/components/forms/input/component.tsx` | Manifest adapter — resolves config refs and actions, delegates to InputField. |
 | `InputConfig` | typealias | `src/ui/components/forms/input/types.ts` | Inferred config type from the Input Zod schema. |
-| `inputConfigSchema` | variable | `src/ui/components/forms/input/schema.ts` | Zod config schema for the Input component.  Defines a standalone text input field with label, placeholder, validation, and optional icon. |
+| `inputConfigSchema` | variable | `src/ui/components/forms/input/schema.ts` | Zod config schema for the Input component. Defines a standalone text input field with label, placeholder, validation, and optional icon. |
 | `InputField` | function | `src/ui/components/forms/input/standalone.tsx` | Standalone InputField — a complete form field (label + input + helper/error) that works with plain React props. No manifest context required. |
 | `InputFieldProps` | interface | `src/ui/components/forms/input/standalone.tsx` | No JSDoc description. |
 | `interpolate` | function | `src/ui/actions/interpolate.ts` | Replace `{key}` placeholders with values from context. Supports nested paths: `{user.name}`, `{result.id}`. Missing keys are preserved as-is: `{unknown}` stays `{unknown}`. |
@@ -400,14 +400,14 @@ Generated from `src/ui.ts`.
 | `LinkEmbedBase` | function | `src/ui/components/content/link-embed/standalone.tsx` | Standalone LinkEmbed — renders rich link previews with platform-specific embeds (YouTube, Instagram, TikTok, Twitter, GIF) or a generic card. No manifest context required. |
 | `LinkEmbedBaseProps` | interface | `src/ui/components/content/link-embed/standalone.tsx` | No JSDoc description. |
 | `LinkEmbedConfig` | typealias | `src/ui/components/content/link-embed/types.ts` | Inferred config type from the LinkEmbed Zod schema. |
-| `linkEmbedConfigSchema` | variable | `src/ui/components/content/link-embed/schema.ts` | Zod config schema for the LinkEmbed component.  Renders rich URL previews with platform-specific renderers for YouTube, Instagram, TikTok, Twitter/X, and generic Open Graph cards. Also supports inline GIF embeds. |
+| `linkEmbedConfigSchema` | variable | `src/ui/components/content/link-embed/schema.ts` | Zod config schema for the LinkEmbed component. Renders rich URL previews with platform-specific renderers for YouTube, Instagram, TikTok, Twitter/X, and generic Open Graph cards. Also supports inline GIF embeds. |
 | `LinkEmbedMeta` | interface | `src/ui/components/content/link-embed/standalone.tsx` | No JSDoc description. |
 | `ListBase` | function | `src/ui/components/data/list/standalone.tsx` | Standalone List — renders a vertical list of items with optional icons, descriptions, badges, and click actions. No manifest context required. |
 | `ListBaseItem` | interface | `src/ui/components/data/list/standalone.tsx` | No JSDoc description. |
 | `ListBaseProps` | interface | `src/ui/components/data/list/standalone.tsx` | No JSDoc description. |
 | `LocationInput` | function | `src/ui/components/forms/location-input/component.tsx` | No JSDoc description. |
 | `LocationInputConfig` | typealias | `src/ui/components/forms/location-input/types.ts` | Config for the manifest-driven location input component. |
-| `locationInputConfigSchema` | variable | `src/ui/components/forms/location-input/schema.ts` | Zod config schema for the LocationInput component.  Geocode autocomplete input that searches a backend endpoint, displays matching locations in a dropdown, and extracts coordinates on selection. Publishes `{ name, lat, lng, address }`. |
+| `locationInputConfigSchema` | variable | `src/ui/components/forms/location-input/schema.ts` | Zod config schema for the LocationInput component. Geocode autocomplete input that searches a backend endpoint, displays matching locations in a dropdown, and extracts coordinates on selection. Publishes `{ name, lat, lng, address }`. |
 | `LocationInputField` | function | `src/ui/components/forms/location-input/standalone.tsx` | Standalone LocationInputField -- a location search input with results dropdown and optional Google Maps link. No manifest context required. |
 | `LocationInputFieldProps` | interface | `src/ui/components/forms/location-input/standalone.tsx` | No JSDoc description. |
 | `LocationResult` | interface | `src/ui/components/forms/location-input/standalone.tsx` | No JSDoc description. |
@@ -424,13 +424,13 @@ Generated from `src/ui.ts`.
 | `MarkdownBase` | function | `src/ui/components/content/markdown/standalone.tsx` | Standalone Markdown — renders markdown content with syntax highlighting and Snapshot design tokens. No manifest context required. |
 | `MarkdownBaseProps` | interface | `src/ui/components/content/markdown/standalone.tsx` | No JSDoc description. |
 | `MarkdownConfig` | typealias | `src/ui/components/content/markdown/types.ts` | Inferred config type from the Markdown Zod schema. |
-| `markdownConfigSchema` | variable | `src/ui/components/content/markdown/schema.ts` | Zod config schema for the Markdown component.  Renders markdown content with full GFM support and syntax highlighting. |
+| `markdownConfigSchema` | variable | `src/ui/components/content/markdown/schema.ts` | Zod config schema for the Markdown component. Renders markdown content with full GFM support and syntax highlighting. |
 | `meetsWcagAA` | function | `src/ui/tokens/color.ts` | Check whether two colors satisfy WCAG AA contrast for normal or large text. |
 | `MessageThread` | function | `src/ui/components/communication/message-thread/component.tsx` | Manifest adapter — resolves data endpoint, wires actions/publish, delegates to MessageThreadBase. |
 | `MessageThreadBase` | function | `src/ui/components/communication/message-thread/standalone.tsx` | Standalone MessageThread — scrollable message list with avatars, date separators, auto-scroll, embed rendering, and consecutive-message grouping. No manifest context required. |
 | `MessageThreadBaseProps` | interface | `src/ui/components/communication/message-thread/standalone.tsx` | No JSDoc description. |
 | `MessageThreadConfig` | typealias | `src/ui/components/communication/message-thread/types.ts` | Inferred config type from the MessageThread Zod schema. |
-| `messageThreadConfigSchema` | variable | `src/ui/components/communication/message-thread/schema.ts` | Zod config schema for the MessageThread component.  Renders a scrollable message list with avatars, timestamps, message grouping, date separators, and optional reactions/threading. |
+| `messageThreadConfigSchema` | variable | `src/ui/components/communication/message-thread/schema.ts` | Zod config schema for the MessageThread component. Renders a scrollable message list with avatars, timestamps, message grouping, date separators, and optional reactions/threading. |
 | `ModalBase` | function | `src/ui/components/overlay/modal/standalone.tsx` | Standalone Modal — a centered overlay dialog with plain React props. No manifest context required. |
 | `ModalBaseFooterAction` | interface | `src/ui/components/overlay/modal/standalone.tsx` | No JSDoc description. |
 | `ModalBaseProps` | interface | `src/ui/components/overlay/modal/standalone.tsx` | No JSDoc description. |
@@ -440,18 +440,18 @@ Generated from `src/ui.ts`.
 | `ModalManager` | interface | `src/ui/actions/modal-manager.ts` | Return type of useModalManager. |
 | `MultiSelect` | function | `src/ui/components/forms/multi-select/component.tsx` | No JSDoc description. |
 | `MultiSelectConfig` | typealias | `src/ui/components/forms/multi-select/types.ts` | Inferred config type from the MultiSelect Zod schema. |
-| `multiSelectConfigSchema` | variable | `src/ui/components/forms/multi-select/schema.ts` | Zod config schema for the MultiSelect component.  Defines a dropdown with checkboxes for selecting multiple values, with optional search filtering and pill display. |
+| `multiSelectConfigSchema` | variable | `src/ui/components/forms/multi-select/schema.ts` | Zod config schema for the MultiSelect component. Defines a dropdown with checkboxes for selecting multiple values, with optional search filtering and pill display. |
 | `MultiSelectField` | function | `src/ui/components/forms/multi-select/standalone.tsx` | Standalone MultiSelectField -- multi-select dropdown with pill tags, inline search, and configurable max selection. No manifest context required. |
 | `MultiSelectFieldOption` | interface | `src/ui/components/forms/multi-select/standalone.tsx` | No JSDoc description. |
 | `MultiSelectFieldProps` | interface | `src/ui/components/forms/multi-select/standalone.tsx` | No JSDoc description. |
-| `Nav` | function | `src/ui/components/layout/nav/component.tsx` | Grouped navigation component for manifest app shells.  Renders either `navigation.items` or a composable nav template, resolves translated labels at render time, applies canonical slot/state styling, and optionally renders logo and user-menu surfaces. |
+| `Nav` | function | `src/ui/components/layout/nav/component.tsx` | Grouped navigation component for manifest app shells. Renders either `navigation.items` or a composable nav template, resolves translated labels at render time, applies canonical slot/state styling, and optionally renders logo and user-menu surfaces. |
 | `NavBase` | function | `src/ui/components/layout/nav/standalone.tsx` | Standalone Nav -- a navigation component with items, logo, and collapse support. No manifest context required. |
 | `NavBaseItem` | interface | `src/ui/components/layout/nav/standalone.tsx` | No JSDoc description. |
 | `NavBaseLogo` | interface | `src/ui/components/layout/nav/standalone.tsx` | No JSDoc description. |
 | `NavBaseProps` | interface | `src/ui/components/layout/nav/standalone.tsx` | No JSDoc description. |
 | `NavBaseUser` | interface | `src/ui/components/layout/nav/standalone.tsx` | No JSDoc description. |
 | `NavConfig` | typealias | `src/ui/components/layout/nav/schema.ts` | Runtime config type for the Nav component. |
-| `navConfigSchema` | variable | `src/ui/components/layout/nav/schema.ts` | Zod schema for the grouped Nav component.  Supports either `items`-driven navigation or template composition, optional logo and user menu configuration, collapsible sidebar behavior, and canonical slot-based surface styling. |
+| `navConfigSchema` | variable | `src/ui/components/layout/nav/schema.ts` | Zod schema for the grouped Nav component. Supports either `items`-driven navigation or template composition, optional logo and user menu configuration, collapsible sidebar behavior, and canonical slot-based surface styling. |
 | `NavDropdownBase` | function | `src/ui/components/layout/nav-dropdown/standalone.tsx` | Standalone NavDropdown -- a navigation dropdown with floating panel. No manifest context required. |
 | `NavDropdownBaseProps` | interface | `src/ui/components/layout/nav-dropdown/standalone.tsx` | No JSDoc description. |
 | `NavigateAction` | interface | `../frontend-contract/src/actions/types.ts` | No JSDoc description. |
@@ -476,7 +476,7 @@ Generated from `src/ui.ts`.
 | `NotificationBellBase` | function | `src/ui/components/data/notification-bell/standalone.tsx` | Standalone NotificationBell — bell icon with unread count badge. No manifest context required. |
 | `NotificationBellBaseProps` | interface | `src/ui/components/data/notification-bell/standalone.tsx` | No JSDoc description. |
 | `NotificationBellConfig` | typealias | `src/ui/components/data/notification-bell/types.ts` | Inferred config type from the NotificationBell Zod schema. |
-| `notificationBellConfigSchema` | variable | `src/ui/components/data/notification-bell/schema.ts` | Zod config schema for the NotificationBell component.  Defines all manifest-settable fields for a bell icon with an unread count badge. |
+| `notificationBellConfigSchema` | variable | `src/ui/components/data/notification-bell/schema.ts` | Zod config schema for the NotificationBell component. Defines all manifest-settable fields for a bell icon with an unread count badge. |
 | `NotificationFeedBase` | function | `src/ui/components/workflow/notification-feed/standalone.tsx` | Standalone NotificationFeedBase — renders a scrollable notification list with type icons, unread indicators, relative timestamps, and a mark-all-read action. No manifest context required. |
 | `NotificationFeedBaseProps` | interface | `src/ui/components/workflow/notification-feed/standalone.tsx` | No JSDoc description. |
 | `OAuthButtonsBase` | function | `src/ui/components/primitives/oauth-buttons/standalone.tsx` | Standalone OAuthButtons — renders OAuth provider buttons with optional heading and auto-redirect support. No manifest context required. |
@@ -514,12 +514,12 @@ Generated from `src/ui.ts`.
 | `PopoverBase` | function | `src/ui/components/overlay/popover/standalone.tsx` | Standalone Popover — a button-triggered floating panel with plain React props. No manifest context required. |
 | `PopoverBaseProps` | interface | `src/ui/components/overlay/popover/standalone.tsx` | No JSDoc description. |
 | `PopoverConfig` | typealias | `src/ui/components/overlay/popover/types.ts` | Inferred config type for the Popover component. |
-| `popoverConfigSchema` | variable | `src/ui/components/overlay/popover/schema.ts` | Zod schema for the Popover component.  Defines a trigger-driven floating panel with optional title, description, footer content, width, placement, and canonical slot-based styling for the trigger and panel sub-surfaces. |
+| `popoverConfigSchema` | variable | `src/ui/components/overlay/popover/schema.ts` | Zod schema for the Popover component. Defines a trigger-driven floating panel with optional title, description, footer content, width, placement, and canonical slot-based styling for the trigger and panel sub-surfaces. |
 | `PrefetchLink` | function | `src/ui/components/navigation/prefetch-link/component.tsx` | Manifest adapter — wires the SSR prefetch route hook into PrefetchLinkBase. |
 | `PrefetchLinkBase` | function | `src/ui/components/navigation/prefetch-link/standalone.tsx` | Standalone PrefetchLink — a plain `<a>` anchor that fires a prefetch callback based on the configured strategy. No manifest or SSR context required. |
 | `PrefetchLinkBaseProps` | interface | `src/ui/components/navigation/prefetch-link/standalone.tsx` | No JSDoc description. |
 | `PrefetchLinkConfig` | typealias | `src/ui/components/navigation/prefetch-link/schema.ts` | The output type of `prefetchLinkSchema` — all fields fully resolved with defaults applied. This is the type received by the component implementation. |
-| `prefetchLinkSchema` | variable | `src/ui/components/navigation/prefetch-link/schema.ts` | Zod schema for `<PrefetchLink>` config.  `<PrefetchLink>` is a prefetch primitive that renders a plain `<a>` tag and automatically injects `<link rel="prefetch">` tags for the route's JS chunks and CSS files when the user hovers over the link or when it enters the viewport.  It is not a router-aware component — consumers wire their own router. This avoids a peer dependency on TanStack Router. |
+| `prefetchLinkSchema` | variable | `src/ui/components/navigation/prefetch-link/schema.ts` | Zod schema for `<PrefetchLink>` config. `<PrefetchLink>` is a prefetch primitive that renders a plain `<a>` tag and automatically injects `<link rel="prefetch">` tags for the route's JS chunks and CSS files when the user hovers over the link or when it enters the viewport. It is not a router-aware component — consumers wire their own router. This avoids a peer dependency on TanStack Router. |
 | `PresenceIndicator` | function | `src/ui/components/communication/presence-indicator/component.tsx` | Manifest adapter — resolves config refs and delegates to PresenceIndicatorBase. |
 | `PresenceIndicatorBase` | function | `src/ui/components/communication/presence-indicator/standalone.tsx` | Standalone PresenceIndicator — displays online/offline/away/busy/dnd status with a colored dot and optional label. No manifest context required. |
 | `PresenceIndicatorBaseProps` | interface | `src/ui/components/communication/presence-indicator/standalone.tsx` | No JSDoc description. |
@@ -535,7 +535,7 @@ Generated from `src/ui.ts`.
 | `pushConfigSchema` | variable | `src/ui/manifest/schema.ts` | Manifest push-notification runtime configuration. |
 | `QuickAdd` | function | `src/ui/components/forms/quick-add/component.tsx` | No JSDoc description. |
 | `QuickAddConfig` | typealias | `src/ui/components/forms/quick-add/types.ts` | Inferred config type from the QuickAdd Zod schema. |
-| `quickAddConfigSchema` | variable | `src/ui/components/forms/quick-add/schema.ts` | Zod config schema for the QuickAdd component.  Defines all manifest-settable fields for an inline creation bar that allows quick item entry with a text input and submit button. |
+| `quickAddConfigSchema` | variable | `src/ui/components/forms/quick-add/schema.ts` | Zod config schema for the QuickAdd component. Defines all manifest-settable fields for an inline creation bar that allows quick item entry with a text input and submit button. |
 | `QuickAddField` | function | `src/ui/components/forms/quick-add/standalone.tsx` | Standalone QuickAddField -- a compact input with submit button for quickly adding items to a list. No manifest context required. |
 | `QuickAddFieldProps` | interface | `src/ui/components/forms/quick-add/standalone.tsx` | No JSDoc description. |
 | `RadiusScale` | typealias | `../frontend-contract/src/tokens/types.ts` | No JSDoc description. |
@@ -544,16 +544,16 @@ Generated from `src/ui.ts`.
 | `ReactionBarBase` | function | `src/ui/components/communication/reaction-bar/standalone.tsx` | Standalone ReactionBar — row of emoji reaction pills with counts and an add-reaction button that opens an inline emoji picker. No manifest context required. |
 | `ReactionBarBaseProps` | interface | `src/ui/components/communication/reaction-bar/standalone.tsx` | No JSDoc description. |
 | `ReactionBarConfig` | typealias | `src/ui/components/communication/reaction-bar/types.ts` | Inferred config type from the ReactionBar Zod schema. |
-| `reactionBarConfigSchema` | variable | `src/ui/components/communication/reaction-bar/schema.ts` | Zod config schema for the ReactionBar component.  Displays emoji reactions with counts and an add button. |
+| `reactionBarConfigSchema` | variable | `src/ui/components/communication/reaction-bar/schema.ts` | Zod config schema for the ReactionBar component. Displays emoji reactions with counts and an add button. |
 | `ReactionEntry` | interface | `src/ui/components/communication/reaction-bar/standalone.tsx` | No JSDoc description. |
 | `readPersistedState` | function | `src/ui/state/persist.ts` | Read and JSON-decode a persisted state value, returning `undefined` on failure or absence. |
 | `RefreshAction` | interface | `../frontend-contract/src/actions/types.ts` | No JSDoc description. |
 | `refreshActionSchema` | variable | `../frontend-contract/src/actions/types.ts` | No JSDoc description. |
 | `registerAnalyticsProvider` | function | `src/ui/analytics/registry.ts` | Register a custom analytics provider factory by name. |
-| `registerBuiltInComponents` | function | `src/ui/components/register.ts` | Register all built-in config-driven components with the manifest system.  The function is idempotent so boot code can call it safely without worrying about duplicate registrations. |
+| `registerBuiltInComponents` | function | `src/ui/components/register.ts` | Register all built-in config-driven components with the manifest system. The function is idempotent so boot code can call it safely without worrying about duplicate registrations. |
 | `registerClient` | function | `src/api/client.ts` | Register a named custom client factory. |
-| `registerComponent` | function | `src/ui/manifest/component-registry.tsx` | Register a React component for a manifest component type string. Used by the framework for built-in components and by consumers for custom components.  Emits a dev warning if overriding an existing registration. |
-| `registerComponentSchema` | function | `src/ui/manifest/schema.ts` | Register a component-specific manifest schema by component `type`. |
+| `registerComponent` | function | `src/ui/manifest/component-registry.tsx` | Register a React component for a manifest component type string. Used by the framework for built-in components and by consumers for custom components. Emits a dev warning if overriding an existing registration. |
+| `registerComponentSchema` | function | `src/ui/manifest/schema.ts` | No JSDoc description. |
 | `registerGuard` | function | `src/ui/manifest/guard-registry.ts` | Register a named route guard implementation for manifest resolution. |
 | `registerLayout` | function | `src/ui/layouts/registry.tsx` | Register a named layout component for manifest layout resolution. |
 | `registerWorkflowAction` | function | `src/ui/workflows/registry.ts` | Register a runtime handler for a custom workflow action type. |
@@ -564,11 +564,11 @@ Generated from `src/ui.ts`.
 | `ResolvedConfig` | typealias | `src/ui/context/types.ts` | Resolves a type where FromRef values are replaced with their resolved types. Used internally — consumers don't need to use this directly. |
 | `ResolvedNavItem` | interface | `src/ui/components/layout/nav/types.ts` | A nav item enriched with computed state: active detection, visibility based on role, and resolved badge value. |
 | `resolveEmojiRecords` | function | `src/ui/components/communication/emoji-picker/custom-emoji.ts` | Resolves emoji records from the API into CustomEmoji entries. Handles the `uploadKey` → `url` resolution using a URL prefix or field mapping. |
-| `resolveFrameworkStyles` | function | `src/ui/tokens/resolve.ts` | Returns a CSS string containing framework-level styles:  1. CSS reset (box-sizing, margin, padding, body defaults, font inherit) 2. Component polish CSS — data-attribute-driven styles for page layout,    data-table, stat-card, form, detail-card, and focus rings.  All values are parameterized via `--sn-*` token custom properties so the output adapts to whatever theme tokens are active. |
+| `resolveFrameworkStyles` | function | `src/ui/tokens/resolve.ts` | Returns a CSS string containing framework-level styles: 1. CSS reset (box-sizing, margin, padding, body defaults, font inherit) 2. Component polish CSS — data-attribute-driven styles for page layout,    data-table, stat-card, form, detail-card, and focus rings. All values are parameterized via `--sn-*` token custom properties so the output adapts to whatever theme tokens are active. |
 | `resolveGuard` | function | `src/ui/manifest/guard-registry.ts` | Resolve a previously registered route guard by name. |
 | `resolveLayout` | function | `src/ui/layouts/registry.tsx` | Resolve a previously registered layout by name. |
 | `resolveResponsiveValue` | function | `src/ui/hooks/use-breakpoint.ts` | Resolve a responsive value for a given breakpoint. Cascades down: if the active breakpoint isn't defined, falls back to the next smaller breakpoint, then `default`. For flat (non-object) values, returns the value directly. |
-| `resolveTokens` | function | `src/ui/tokens/resolve.ts` | Resolve a theme configuration into a complete CSS string.  Pipeline: 1. Load base flavor (default: neutral) 2. Deep merge overrides onto flavor defaults 3. Convert all colors to oklch 4. Auto-derive foreground colors (contrast-aware) 5. Auto-derive dark mode colors if not provided 6. Map radius/spacing/font to CSS 7. Generate component-level tokens 8. Output CSS string with :root, .dark, and component selectors |
+| `resolveTokens` | function | `src/ui/tokens/resolve.ts` | Resolve a theme configuration into a complete CSS string. Pipeline: 1. Load base flavor (default: neutral) 2. Deep merge overrides onto flavor defaults 3. Convert all colors to oklch 4. Auto-derive foreground colors (contrast-aware) 5. Auto-derive dark mode colors if not provided 6. Map radius/spacing/font to CSS 7. Generate component-level tokens 8. Output CSS string with :root, .dark, and component selectors |
 | `ResourceConfigMap` | typealias | `src/ui/manifest/types.ts` | Named manifest resource map keyed by resource id. |
 | `resourceConfigSchema` | variable | `../frontend-contract/src/resources/index.ts` | No JSDoc description. |
 | `resourceRefSchema` | variable | `../frontend-contract/src/resources/index.ts` | No JSDoc description. |
@@ -578,12 +578,12 @@ Generated from `src/ui.ts`.
 | `RichInputBase` | function | `src/ui/components/content/rich-input/standalone.tsx` | Standalone RichInput — a rich text editor with formatting toolbar, powered by tiptap. No manifest context required. |
 | `RichInputBaseProps` | interface | `src/ui/components/content/rich-input/standalone.tsx` | No JSDoc description. |
 | `RichInputConfig` | typealias | `src/ui/components/content/rich-input/types.ts` | Inferred config type from the RichInput Zod schema. |
-| `richInputConfigSchema` | variable | `src/ui/components/content/rich-input/schema.ts` | Zod config schema for the RichInput component.  A TipTap-based WYSIWYG editor for chat messages, comments, and posts. Users see formatted text as they type (bold, italic, mentions, etc.) rather than raw markdown. |
+| `richInputConfigSchema` | variable | `src/ui/components/content/rich-input/schema.ts` | Zod config schema for the RichInput component. A TipTap-based WYSIWYG editor for chat messages, comments, and posts. Users see formatted text as they type (bold, italic, mentions, etc.) rather than raw markdown. |
 | `RichTextEditor` | function | `src/ui/components/content/rich-text-editor/component.tsx` | Manifest adapter — resolves config refs, wires publish, and delegates to RichTextEditorBase. |
 | `RichTextEditorBase` | function | `src/ui/components/content/rich-text-editor/standalone.tsx` | Standalone RichTextEditor — a markdown editor with live preview, powered by CodeMirror. No manifest context required. |
 | `RichTextEditorBaseProps` | interface | `src/ui/components/content/rich-text-editor/standalone.tsx` | No JSDoc description. |
 | `RichTextEditorConfig` | typealias | `src/ui/components/content/rich-text-editor/types.ts` | Inferred config type from the RichTextEditor Zod schema. |
-| `richTextEditorConfigSchema` | variable | `src/ui/components/content/rich-text-editor/schema.ts` | Zod config schema for the RichTextEditor component.  Defines all manifest-settable fields for a CodeMirror 6-based markdown editor with toolbar, preview pane, and split view support. |
+| `richTextEditorConfigSchema` | variable | `src/ui/components/content/rich-text-editor/schema.ts` | Zod config schema for the RichTextEditor component. Defines all manifest-settable fields for a CodeMirror 6-based markdown editor with toolbar, preview pane, and split view support. |
 | `RouteConfig` | typealias | `src/ui/manifest/types.ts` | Input shape for `routeConfigSchema` — defaulted fields are optional. |
 | `routeConfigSchema` | variable | `src/ui/manifest/schema.ts` | Recursive schema for a manifest route tree node. |
 | `RouteGuard` | typealias | `src/ui/manifest/types.ts` | Input shape for `routeGuardSchema` — defaulted fields are optional. |
@@ -612,7 +612,7 @@ Generated from `src/ui.ts`.
 | `ScrollAreaBase` | function | `src/ui/components/data/scroll-area/standalone.tsx` | Standalone ScrollArea — a scrollable container with custom-styled thin scrollbars. No manifest context required. |
 | `ScrollAreaBaseProps` | interface | `src/ui/components/data/scroll-area/standalone.tsx` | No JSDoc description. |
 | `ScrollAreaConfig` | typealias | `src/ui/components/data/scroll-area/types.ts` | Inferred config type for the ScrollArea component. |
-| `scrollAreaConfigSchema` | variable | `src/ui/components/data/scroll-area/schema.ts` | Zod config schema for the ScrollArea component.  A scrollable container with custom-styled thin scrollbars that respect the design token system. |
+| `scrollAreaConfigSchema` | variable | `src/ui/components/data/scroll-area/schema.ts` | Zod config schema for the ScrollArea component. A scrollable container with custom-styled thin scrollbars that respect the design token system. |
 | `ScrollToAction` | interface | `../frontend-contract/src/actions/types.ts` | No JSDoc description. |
 | `scrollToActionSchema` | variable | `../frontend-contract/src/actions/types.ts` | No JSDoc description. |
 | `SectionBase` | function | `src/ui/components/layout/section/standalone.tsx` | Standalone Section -- a full-width vertical section with optional height and alignment. No manifest context required. |
@@ -629,7 +629,7 @@ Generated from `src/ui.ts`.
 | `separatorConfigSchema` | variable | `src/ui/components/data/separator/schema.ts` | Zod config schema for the Separator component. A simple visual divider line, either horizontal or vertical. Optionally renders a centered label between the lines. |
 | `SeriesConfig` | typealias | `src/ui/components/data/chart/types.ts` | Inferred type for a single chart series config. |
 | `seriesConfigSchema` | variable | `src/ui/components/data/chart/schema.ts` | Schema for a single data series in the chart. |
-| `settingsPage` | function | `src/ui/presets/settings-page.ts` | Builds a manifest `PageConfig` for a settings page.  Consumers drop the result into their manifest's `pages` record:  ```ts const manifest = {   pages: {     "/settings": settingsPage({       title: "Settings",       sections: [         {           label: "Profile",           submitEndpoint: "PATCH /api/me/profile",           dataEndpoint: "GET /api/me/profile",           fields: [             { key: "name", type: "text", label: "Name", required: true },             { key: "bio", type: "textarea", label: "Bio" },           ],         },         {           label: "Password",           submitEndpoint: "POST /api/me/password",           fields: [             { key: "currentPassword", type: "password", label: "Current Password", required: true },             { key: "newPassword", type: "password", label: "New Password", required: true },           ],         },       ],     }),   }, }; ``` |
+| `settingsPage` | function | `src/ui/presets/settings-page.ts` | Builds a manifest `PageConfig` for a settings page. Consumers drop the result into their manifest's `pages` record: ```ts const manifest = {   pages: {     "/settings": settingsPage({       title: "Settings",       sections: [         {           label: "Profile",           submitEndpoint: "PATCH /api/me/profile",           dataEndpoint: "GET /api/me/profile",           fields: [             { key: "name", type: "text", label: "Name", required: true },             { key: "bio", type: "textarea", label: "Bio" },           ],         },         {           label: "Password",           submitEndpoint: "POST /api/me/password",           fields: [             { key: "currentPassword", type: "password", label: "Current Password", required: true },             { key: "newPassword", type: "password", label: "New Password", required: true },           ],         },       ],     }),   }, }; ``` |
 | `SettingsPageOptions` | interface | `src/ui/presets/types.ts` | Options for the `settingsPage` preset factory. Produces a settings page with a tab per section, each containing an AutoForm. |
 | `settingsPresetConfigSchema` | variable | `src/ui/presets/schemas.ts` | Validate preset config for a settings page composed from one or more submitted sections. |
 | `SettingsSectionDef` | interface | `src/ui/presets/types.ts` | A single settings section (one tab in the settings page). |
@@ -662,7 +662,7 @@ Generated from `src/ui.ts`.
 | `StatCardBase` | function | `src/ui/components/data/stat-card/standalone.tsx` | Standalone StatCard — displays a single metric with optional trend indicator. No manifest context required. |
 | `StatCardBaseProps` | interface | `src/ui/components/data/stat-card/standalone.tsx` | No JSDoc description. |
 | `StatCardConfig` | typealias | `src/ui/components/data/stat-card/types.ts` | Inferred config type from the StatCard Zod schema. |
-| `statCardConfigSchema` | variable | `src/ui/components/data/stat-card/schema.ts` | Zod config schema for the StatCard component.  Defines all manifest-settable fields for a stat card that displays a single metric with optional trend indicator. |
+| `statCardConfigSchema` | variable | `src/ui/components/data/stat-card/schema.ts` | Zod config schema for the StatCard component. Defines all manifest-settable fields for a stat card that displays a single metric with optional trend indicator. |
 | `StatCardTrend` | interface | `src/ui/components/data/stat-card/standalone.tsx` | No JSDoc description. |
 | `StatDef` | interface | `src/ui/presets/types.ts` | A single stat card definition for the dashboard page. |
 | `StateConfig` | typealias | `src/ui/manifest/types.ts` | Named manifest state map keyed by state id. |
@@ -687,13 +687,13 @@ Generated from `src/ui.ts`.
 | `tabsConfigSchema` | variable | `src/ui/components/navigation/tabs/schema.ts` | Zod schema for tabs component config. Tabs provide in-page navigation between content panels. Each tab's content is rendered via ComponentRenderer. |
 | `TagSelector` | function | `src/ui/components/forms/tag-selector/component.tsx` | No JSDoc description. |
 | `TagSelectorConfig` | typealias | `src/ui/components/forms/tag-selector/types.ts` | Inferred config type from the TagSelector Zod schema. |
-| `tagSelectorConfigSchema` | variable | `src/ui/components/forms/tag-selector/schema.ts` | Zod config schema for the TagSelector component.  A tag input that allows selecting from predefined tags or creating new ones. Tags display as colored pills with remove buttons. |
+| `tagSelectorConfigSchema` | variable | `src/ui/components/forms/tag-selector/schema.ts` | Zod config schema for the TagSelector component. A tag input that allows selecting from predefined tags or creating new ones. Tags display as colored pills with remove buttons. |
 | `TagSelectorField` | function | `src/ui/components/forms/tag-selector/standalone.tsx` | Standalone TagSelectorField -- tag pills with dropdown selection, search filtering, and optional tag creation. No manifest context required. |
 | `TagSelectorFieldProps` | interface | `src/ui/components/forms/tag-selector/standalone.tsx` | No JSDoc description. |
 | `TagSelectorTag` | interface | `src/ui/components/forms/tag-selector/standalone.tsx` | No JSDoc description. |
 | `Textarea` | function | `src/ui/components/forms/textarea/component.tsx` | No JSDoc description. |
 | `TextareaConfig` | typealias | `src/ui/components/forms/textarea/types.ts` | Inferred config type from the Textarea Zod schema. |
-| `textareaConfigSchema` | variable | `src/ui/components/forms/textarea/schema.ts` | Zod config schema for the Textarea component.  Defines a multi-line text input with label, character count, validation, and configurable resize behavior. |
+| `textareaConfigSchema` | variable | `src/ui/components/forms/textarea/schema.ts` | Zod config schema for the Textarea component. Defines a multi-line text input with label, character count, validation, and configurable resize behavior. |
 | `TextareaField` | function | `src/ui/components/forms/textarea/standalone.tsx` | Standalone TextareaField -- a complete textarea form field with label, character counter, validation, and helper/error text. No manifest context required. |
 | `TextareaFieldProps` | interface | `src/ui/components/forms/textarea/standalone.tsx` | No JSDoc description. |
 | `TextBase` | function | `src/ui/components/primitives/text/standalone.tsx` | Standalone Text — renders a styled paragraph element with token-based typography. No manifest context required. |
@@ -715,7 +715,7 @@ Generated from `src/ui.ts`.
 | `ToastManager` | interface | `src/ui/actions/toast.tsx` | Imperative API for enqueueing and dismissing transient toast messages. |
 | `Toggle` | function | `src/ui/components/forms/toggle/component.tsx` | No JSDoc description. |
 | `ToggleConfig` | typealias | `src/ui/components/forms/toggle/types.ts` | Inferred config type from the Toggle Zod schema. |
-| `toggleConfigSchema` | variable | `src/ui/components/forms/toggle/schema.ts` | Zod config schema for the Toggle component.  Defines a pressed/unpressed toggle button that publishes its state. Can display text, an icon, or both. |
+| `toggleConfigSchema` | variable | `src/ui/components/forms/toggle/schema.ts` | Zod config schema for the Toggle component. Defines a pressed/unpressed toggle button that publishes its state. Can display text, an icon, or both. |
 | `ToggleField` | function | `src/ui/components/forms/toggle/standalone.tsx` | Standalone ToggleField -- a pressable toggle button with optional icon and label. No manifest context required. |
 | `ToggleFieldProps` | interface | `src/ui/components/forms/toggle/standalone.tsx` | No JSDoc description. |
 | `ToggleGroupBase` | function | `src/ui/components/forms/toggle-group/standalone.tsx` | Standalone ToggleGroupBase -- a group of toggle buttons supporting single or multi-select modes. No manifest context required. |
@@ -744,12 +744,12 @@ Generated from `src/ui.ts`.
 | `useActionExecutor` | function | `src/ui/actions/executor.ts` | Return the action executor bound to the active runtime, registries, overlays, workflows, and optional API client. |
 | `useApiClient` | function | `src/ui/state/api.ts` | Read the active API client from the app-scope Jotai store. |
 | `useAutoBreadcrumbs` | function | `src/ui/hooks/use-auto-breadcrumbs.ts` | Resolve auto-generated breadcrumb items for the current route match. |
-| `useAutoForm` | function | `src/ui/components/forms/auto-form/hook.ts` | Headless hook for form state management.  Tracks field values, validation errors, and touched state. Validates on blur (per-field) and on submit (all fields). |
+| `useAutoForm` | function | `src/ui/components/forms/auto-form/hook.ts` | Headless hook for form state management. Tracks field values, validation errors, and touched state. Validates on blur (per-field) and on submit (all fields). |
 | `UseAutoFormResult` | interface | `src/ui/components/forms/auto-form/types.ts` | Return type for the useAutoForm headless hook. |
 | `useBreakpoint` | function | `src/ui/hooks/use-breakpoint.ts` | Returns the currently active breakpoint based on window width. Uses `matchMedia` for efficient, event-driven updates (no resize polling). Returns `"default"` during SSR. |
-| `useComponentData` | function | `src/ui/components/_base/use-component-data.ts` | Shared data-fetching hook for config-driven components.  Parses a data config string like `"GET /api/stats/revenue"` into method + endpoint, resolves any `FromRef` values in params via `useSubscribe`, and fetches data using the app-scope API client.  When the API client is not available (e.g., in tests or before ManifestApp provides it), the hook returns a loading state without throwing. |
+| `useComponentData` | function | `src/ui/components/_base/use-component-data.ts` | Shared data-fetching hook for config-driven components. Parses a data config string like `"GET /api/stats/revenue"` into method + endpoint, resolves any `FromRef` values in params via `useSubscribe`, and fetches data using the app-scope API client. When the API client is not available (e.g., in tests or before ManifestApp provides it), the hook returns a loading state without throwing. |
 | `useConfirmManager` | function | `src/ui/actions/confirm.tsx` | Return the shared confirmation manager for the current Snapshot UI tree. |
-| `useDataTable` | function | `src/ui/components/data/data-table/hook.ts` | Headless hook for managing data table state.  Provides sorting, pagination, filtering, selection, and search functionality without any rendering. Resolves `FromRef` values in the `data` and `params` fields via `useSubscribe`. |
+| `useDataTable` | function | `src/ui/components/data/data-table/hook.ts` | Headless hook for managing data table state. Provides sorting, pagination, filtering, selection, and search functionality without any rendering. Resolves `FromRef` values in the `data` and `params` fields via `useSubscribe`. |
 | `UseDataTableResult` | interface | `src/ui/components/data/data-table/types.ts` | Return type of the `useDataTable` headless hook. Provides all state and handlers needed to render a data table. |
 | `useDetailCard` | function | `src/ui/components/data/detail-card/hook.ts` | Hook that powers the DetailCard component. Resolves FromRefs, fetches data from endpoints, formats fields, and publishes the record data for other components to subscribe to. |
 | `UseDetailCardResult` | interface | `src/ui/components/data/detail-card/types.ts` | Return type of the useDetailCard hook. |
@@ -782,7 +782,7 @@ Generated from `src/ui.ts`.
 | `useTokenEditor` | function | `src/ui/tokens/editor.ts` | React hook for runtime token editing. Provides setToken/setFlavor/resetTokens/getTokens/subscribe for live theme customization. Changes are applied instantly via inline styles on document.documentElement. |
 | `useUrlSync` | function | `src/ui/hooks/use-url-sync.ts` | Keep a slice of local state synchronized with URL query parameters. |
 | `useVirtualList` | function | `src/ui/hooks/use-virtual-list.ts` | Compute the visible slice for a fixed-height virtualized list container. |
-| `useWizard` | function | `src/ui/components/forms/wizard/hook.ts` | Headless hook that manages multi-step wizard state including step navigation, per-step validation, field tracking, and final submission.  Provides reactive state for the current step, accumulated data across steps, validation errors, and transition controls (next/prev/skip/reset). |
+| `useWizard` | function | `src/ui/components/forms/wizard/hook.ts` | Headless hook that manages multi-step wizard state including step navigation, per-step validation, field tracking, and final submission. Provides reactive state for the current step, accumulated data across steps, validation errors, and transition controls (next/prev/skip/reset). |
 | `UseWizardResult` | interface | `src/ui/components/forms/wizard/types.ts` | Return type of the useWizard headless hook. |
 | `validateContrast` | function | `src/ui/tokens/contrast-checker.ts` | Warn when manifest theme color pairs fail WCAG AA contrast. |
 | `VideoBase` | function | `src/ui/components/media/video/standalone.tsx` | Standalone Video — a styled video element that works with plain React props. No manifest context required. |
@@ -795,7 +795,7 @@ Generated from `src/ui.ts`.
 | `WizardBaseProps` | interface | `src/ui/components/forms/wizard/standalone.tsx` | No JSDoc description. |
 | `WizardConfig` | typealias | `src/ui/components/forms/wizard/types.ts` | Inferred type for the Wizard component configuration. |
 | `WizardFieldConfig` | interface | `src/ui/components/forms/wizard/standalone.tsx` | No JSDoc description. |
-| `wizardSchema` | variable | `src/ui/components/forms/wizard/schema.ts` | Zod schema for the Wizard component configuration.  A multi-step form flow. Each step collects fields independently. On the final step, all accumulated data is submitted to `submitEndpoint` (if set) and published to the page context via `id`. |
+| `wizardSchema` | variable | `src/ui/components/forms/wizard/schema.ts` | Zod schema for the Wizard component configuration. A multi-step form flow. Each step collects fields independently. On the final step, all accumulated data is submitted to `submitEndpoint` (if set) and published to the page context via `id`. |
 | `WizardState` | interface | `src/ui/components/forms/wizard/standalone.tsx` | No JSDoc description. |
 | `WizardStepConfig` | typealias | `src/ui/components/forms/wizard/types.ts` | Inferred type for a single wizard step configuration. |
 | `WizardStepDef` | interface | `src/ui/components/forms/wizard/standalone.tsx` | No JSDoc description. |
@@ -835,8 +835,8 @@ Generated from `src/ui.ts`.
 | `parseOklchString` | function | Parse an oklch string (the CSS variable format "L C H") back to values. |
 | `registerAnalyticsProvider` | function | Register a custom analytics provider factory by name. |
 | `relativeLuminance` | function | Compute relative luminance from OKLCH for WCAG contrast calculations. Uses sRGB relative luminance (rec. 709) from the linear RGB values. |
-| `resolveFrameworkStyles` | function | Returns a CSS string containing framework-level styles:  1. CSS reset (box-sizing, margin, padding, body defaults, font inherit) 2. Component polish CSS — data-attribute-driven styles for page layout,    data-table, stat-card, form, detail-card, and focus rings.  All values are parameterized via `--sn-*` token custom properties so the output adapts to whatever theme tokens are active. |
-| `resolveTokens` | function | Resolve a theme configuration into a complete CSS string.  Pipeline: 1. Load base flavor (default: neutral) 2. Deep merge overrides onto flavor defaults 3. Convert all colors to oklch 4. Auto-derive foreground colors (contrast-aware) 5. Auto-derive dark mode colors if not provided 6. Map radius/spacing/font to CSS 7. Generate component-level tokens 8. Output CSS string with :root, .dark, and component selectors |
+| `resolveFrameworkStyles` | function | Returns a CSS string containing framework-level styles: 1. CSS reset (box-sizing, margin, padding, body defaults, font inherit) 2. Component polish CSS — data-attribute-driven styles for page layout,    data-table, stat-card, form, detail-card, and focus rings. All values are parameterized via `--sn-*` token custom properties so the output adapts to whatever theme tokens are active. |
+| `resolveTokens` | function | Resolve a theme configuration into a complete CSS string. Pipeline: 1. Load base flavor (default: neutral) 2. Deep merge overrides onto flavor defaults 3. Convert all colors to oklch 4. Auto-derive foreground colors (contrast-aware) 5. Auto-derive dark mode colors if not provided 6. Map radius/spacing/font to CSS 7. Generate component-level tokens 8. Output CSS string with :root, .dark, and component selectors |
 | `useTokenEditor` | function | React hook for runtime token editing. Provides setToken/setFlavor/resetTokens/getTokens/subscribe for live theme customization. Changes are applied instantly via inline styles on document.documentElement. |
 | `validateContrast` | function | Warn when manifest theme color pairs fail WCAG AA contrast. |
 
@@ -1375,7 +1375,7 @@ Return the toast manager bound to the active manifest runtime configuration.
 | `AppConfig` | typealias | Input shape for `appConfigSchema` — defaulted fields are optional. |
 | `appConfigSchema` | variable | Schema for the top-level manifest `app` section. |
 | `AuthProviderConfig` | typealias | Input shape for `authProviderSchema` — defaulted fields are optional. |
-| `authProviderSchema` | variable | Auth provider declaration schema.  Declared at `manifest.auth.providers.<name>`. |
+| `authProviderSchema` | variable | Auth provider declaration schema. Declared at `manifest.auth.providers.<name>`. |
 | `AuthScreenConfig` | typealias | Input shape for `authScreenConfigSchema` — defaulted fields are optional. |
 | `authScreenConfigSchema` | variable | Schema for the manifest auth screen and auth workflow configuration. |
 | `BaseComponentConfig` | typealias | Input shape for `baseComponentConfigSchema` — defaulted fields are optional. |
@@ -1399,9 +1399,9 @@ Return the toast manager bound to the active manifest runtime configuration.
 | `customComponentPropSchema` | variable | Schema for a declared prop on a manifest custom component registration. |
 | `defineManifest` | function | Define a manifest without compiling it. |
 | `generateBreadcrumbs` | function | Generate breadcrumb items from the current matched route hierarchy. |
-| `generateJsonSchema` | function | Generate a JSON Schema for snapshot manifests.  The schema is intentionally conservative and focuses on the public top-level manifest contract so editors can provide autocomplete and inline validation without requiring Snapshot's full runtime schema registry at generation time. |
+| `generateJsonSchema` | function | Generate a JSON Schema for snapshot manifests. The schema is intentionally conservative and focuses on the public top-level manifest contract so editors can provide autocomplete and inline validation without requiring Snapshot's full runtime schema registry at generation time. |
 | `getRegisteredGuards` | function | List the names of all currently registered route guards. |
-| `getRegisteredSchemaTypes` | function | Return the currently registered manifest component type names. |
+| `getRegisteredSchemaTypes` | function | No JSDoc description. |
 | `HeadingConfig` | typealias | Input shape for `headingConfigSchema` — defaulted fields are optional. |
 | `headingConfigSchema` | variable | Schema for the built-in `heading` component. |
 | `injectStyleSheet` | function | Inject or update a stylesheet in the document head. |
@@ -1429,8 +1429,8 @@ Return the toast manager bound to the active manifest runtime configuration.
 | `parseManifest` | function | Parse an unknown value into a validated manifest. |
 | `PushConfig` | typealias | Input shape for `pushConfigSchema` — defaulted fields are optional. |
 | `pushConfigSchema` | variable | Manifest push-notification runtime configuration. |
-| `registerComponent` | function | Register a React component for a manifest component type string. Used by the framework for built-in components and by consumers for custom components.  Emits a dev warning if overriding an existing registration. |
-| `registerComponentSchema` | function | Register a component-specific manifest schema by component `type`. |
+| `registerComponent` | function | Register a React component for a manifest component type string. Used by the framework for built-in components and by consumers for custom components. Emits a dev warning if overriding an existing registration. |
+| `registerComponentSchema` | function | No JSDoc description. |
 | `registerGuard` | function | Register a named route guard implementation for manifest resolution. |
 | `resetBootBuiltins` | function | Reset the boot flag so tests can re-run built-in registration deterministically. |
 | `resolveGuard` | function | Resolve a previously registered route guard by name. |
@@ -1529,8 +1529,6 @@ List the names of all currently registered route guards.
 
 #### `getRegisteredSchemaTypes() => string[]`
 
-Return the currently registered manifest component type names.
-
 ---
 
 #### `injectStyleSheet(id: string, css: string) => void`
@@ -1615,8 +1613,6 @@ Emits a dev warning if overriding an existing registration.
 ---
 
 #### `registerComponentSchema(type: string, schema: ZodType<any, ZodTypeDef, any>) => void`
-
-Register a component-specific manifest schema by component `type`.
 
 ---
 
@@ -1705,7 +1701,7 @@ Access the current route runtime state.
 | `AvatarGroupBase` | function | Standalone AvatarGroup — overlapping avatars with +N overflow. No manifest context required. |
 | `AvatarGroupBaseProps` | interface | No JSDoc description. |
 | `AvatarGroupConfig` | typealias | Inferred config type from the AvatarGroup Zod schema. |
-| `avatarGroupConfigSchema` | variable | Zod config schema for the AvatarGroup component.  Displays a row of overlapping avatars with an optional "+N" overflow count. Commonly used for showing team members, assignees, or participants. |
+| `avatarGroupConfigSchema` | variable | Zod config schema for the AvatarGroup component. Displays a row of overlapping avatars with an optional "+N" overflow count. Commonly used for showing team members, assignees, or participants. |
 | `BadgeBase` | function | Standalone Badge — a small label with color-coded variants. No manifest context required. |
 | `BadgeBaseProps` | interface | No JSDoc description. |
 | `BulkAction` | typealias | Inferred bulk action type. |
@@ -1715,29 +1711,29 @@ Access the current route runtime state.
 | `ChartBaseProps` | interface | No JSDoc description. |
 | `ChartBaseSeries` | interface | No JSDoc description. |
 | `ChartConfig` | typealias | Inferred type for the Chart component configuration. |
-| `chartSchema` | variable | Zod schema for the Chart component configuration.  Renders a data visualization (bar, line, area, pie, donut) from an endpoint or from-ref. Uses Recharts under the hood. Colors default to `--sn-chart-1` through `--sn-chart-5` tokens. |
+| `chartSchema` | variable | Zod schema for the Chart component configuration. Renders a data visualization (bar, line, area, pie, donut) from an endpoint or from-ref. Uses Recharts under the hood. Colors default to `--sn-chart-1` through `--sn-chart-5` tokens. |
 | `ColumnConfig` | typealias | Inferred column configuration type. |
 | `columnConfigSchema` | variable | Schema for individual column configuration. |
-| `DataTable` | function | Config-driven DataTable component.  For simple tables (no drag-and-drop, virtual scroll, context menus, or expandable rows), delegates to the standalone DataTableBase. For advanced features, falls back to the full manifest-based rendering. |
+| `DataTable` | function | Config-driven DataTable component. For simple tables (no drag-and-drop, virtual scroll, context menus, or expandable rows), delegates to the standalone DataTableBase. For advanced features, falls back to the full manifest-based rendering. |
 | `DataTableBase` | function | Standalone DataTable — feature-rich data table with sorting, pagination, selection, and search. No manifest context required. |
 | `DataTableBaseColumn` | interface | No JSDoc description. |
 | `DataTableBaseProps` | interface | No JSDoc description. |
 | `DataTableConfig` | typealias | Inferred DataTable configuration type from the Zod schema. |
-| `dataTableConfigSchema` | variable | Zod schema for the DataTable component configuration.  Defines a config-driven data table with sorting, pagination, filtering, selection, search, row actions, and bulk actions. |
+| `dataTableConfigSchema` | variable | Zod schema for the DataTable component configuration. Defines a config-driven data table with sorting, pagination, filtering, selection, search, row actions, and bulk actions. |
 | `DetailCard` | function | No JSDoc description. |
 | `DetailCardBase` | function | Standalone DetailCard — data-driven detail view with formatted fields and header actions. No manifest context required. |
 | `DetailCardBaseAction` | interface | No JSDoc description. |
 | `DetailCardBaseField` | interface | No JSDoc description. |
 | `DetailCardBaseProps` | interface | No JSDoc description. |
 | `DetailCardConfig` | typealias | DetailCard configuration type inferred from the schema. |
-| `detailCardConfigSchema` | variable | Zod schema for DetailCard component configuration.  The detail card displays a single record's fields in a key-value layout. Used in drawers, modals, and detail pages. |
+| `detailCardConfigSchema` | variable | Zod schema for DetailCard component configuration. The detail card displays a single record's fields in a key-value layout. Used in drawers, modals, and detail pages. |
 | `EmptyStateBase` | function | Standalone EmptyState — a centered message with optional icon and action. No manifest context required. |
 | `EmptyStateBaseProps` | interface | No JSDoc description. |
 | `EntityPicker` | function | No JSDoc description. |
 | `EntityPickerBase` | function | Standalone EntityPicker — dropdown with search, single/multi select. No manifest context required. |
 | `EntityPickerBaseProps` | interface | No JSDoc description. |
 | `EntityPickerConfig` | typealias | Inferred config type from the EntityPicker Zod schema. |
-| `entityPickerConfigSchema` | variable | Zod config schema for the EntityPicker component.  A searchable dropdown for selecting entities (users, documents, items) from an API endpoint. Supports single and multi-select. |
+| `entityPickerConfigSchema` | variable | Zod config schema for the EntityPicker component. A searchable dropdown for selecting entities (users, documents, items) from an API endpoint. Supports single and multi-select. |
 | `EntityPickerEntity` | interface | No JSDoc description. |
 | `FavoriteButton` | function | No JSDoc description. |
 | `FavoriteButtonBase` | function | Standalone FavoriteButton — a toggle button with a star icon. No manifest context required. |
@@ -1751,7 +1747,7 @@ Access the current route runtime state.
 | `FeedBaseProps` | interface | No JSDoc description. |
 | `FeedConfig` | typealias | Inferred type for the Feed component config (from Zod schema). |
 | `FeedItem` | interface | A single resolved feed item for rendering. |
-| `feedSchema` | variable | Zod schema for the Feed component configuration.  Renders a scrollable activity/event stream from an endpoint or from-ref. Supports avatar, title, description, timestamp, badge fields, pagination, and publishes the selected item to the page context when `id` is set. |
+| `feedSchema` | variable | Zod schema for the Feed component configuration. Renders a scrollable activity/event stream from an endpoint or from-ref. Supports avatar, title, description, timestamp, badge fields, pagination, and publishes the selected item to the page context when `id` is set. |
 | `FilterBar` | function | No JSDoc description. |
 | `FilterBarBase` | function | Standalone FilterBar — search + filter dropdowns + active pills. No manifest context required. |
 | `FilterBarBaseProps` | interface | No JSDoc description. |
@@ -1770,7 +1766,7 @@ Access the current route runtime state.
 | `NotificationBellBase` | function | Standalone NotificationBell — bell icon with unread count badge. No manifest context required. |
 | `NotificationBellBaseProps` | interface | No JSDoc description. |
 | `NotificationBellConfig` | typealias | Inferred config type from the NotificationBell Zod schema. |
-| `notificationBellConfigSchema` | variable | Zod config schema for the NotificationBell component.  Defines all manifest-settable fields for a bell icon with an unread count badge. |
+| `notificationBellConfigSchema` | variable | Zod config schema for the NotificationBell component. Defines all manifest-settable fields for a bell icon with an unread count badge. |
 | `PaginationState` | interface | Pagination state for the data table. |
 | `ProgressBase` | function | Standalone Progress — bar or circular progress indicator. No manifest context required. |
 | `ProgressBaseProps` | interface | No JSDoc description. |
@@ -1786,7 +1782,7 @@ Access the current route runtime state.
 | `ScrollAreaBase` | function | Standalone ScrollArea — a scrollable container with custom-styled thin scrollbars. No manifest context required. |
 | `ScrollAreaBaseProps` | interface | No JSDoc description. |
 | `ScrollAreaConfig` | typealias | Inferred config type for the ScrollArea component. |
-| `scrollAreaConfigSchema` | variable | Zod config schema for the ScrollArea component.  A scrollable container with custom-styled thin scrollbars that respect the design token system. |
+| `scrollAreaConfigSchema` | variable | Zod config schema for the ScrollArea component. A scrollable container with custom-styled thin scrollbars that respect the design token system. |
 | `Separator` | function | No JSDoc description. |
 | `SeparatorBase` | function | Standalone Separator — a horizontal or vertical line with optional label. No manifest context required. |
 | `SeparatorBaseProps` | interface | No JSDoc description. |
@@ -1801,12 +1797,12 @@ Access the current route runtime state.
 | `StatCardBase` | function | Standalone StatCard — displays a single metric with optional trend indicator. No manifest context required. |
 | `StatCardBaseProps` | interface | No JSDoc description. |
 | `StatCardConfig` | typealias | Inferred config type from the StatCard Zod schema. |
-| `statCardConfigSchema` | variable | Zod config schema for the StatCard component.  Defines all manifest-settable fields for a stat card that displays a single metric with optional trend indicator. |
+| `statCardConfigSchema` | variable | Zod config schema for the StatCard component. Defines all manifest-settable fields for a stat card that displays a single metric with optional trend indicator. |
 | `StatCardTrend` | interface | No JSDoc description. |
 | `TooltipBase` | function | Standalone Tooltip — wraps child content and shows informational text on hover with configurable placement and delay. No manifest context required. |
 | `TooltipBaseProps` | interface | No JSDoc description. |
 | `trendConfigSchema` | variable | Schema for the trend indicator configuration. |
-| `useDataTable` | function | Headless hook for managing data table state.  Provides sorting, pagination, filtering, selection, and search functionality without any rendering. Resolves `FromRef` values in the `data` and `params` fields via `useSubscribe`. |
+| `useDataTable` | function | Headless hook for managing data table state. Provides sorting, pagination, filtering, selection, and search functionality without any rendering. Resolves `FromRef` values in the `data` and `params` fields via `useSubscribe`. |
 | `UseDataTableResult` | interface | Return type of the `useDataTable` headless hook. Provides all state and handlers needed to render a data table. |
 | `useDetailCard` | function | Hook that powers the DetailCard component. Resolves FromRefs, fetches data from endpoints, formats fields, and publishes the record data for other components to subscribe to. |
 | `UseDetailCardResult` | interface | Return type of the useDetailCard hook. |
@@ -1856,7 +1852,7 @@ No manifest context required.
 
 ---
 
-#### `AvatarGroup({ config }: { config: { type: "avatar-group"; data?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercas...`
+#### `AvatarGroup({ config }: { config: { type: "avatar-group"; data?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | ...`
 
 ---
 
@@ -1926,7 +1922,7 @@ No manifest context required.
 
 ---
 
-#### `Chart({ config }: { config: { data: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | "trim" | "json" | ...`
+#### `Chart({ config }: { config: { data: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lowercase" | "json" | ...`
 
 ---
 
@@ -2134,7 +2130,7 @@ from an API endpoint. Supports single and multi-select.
 
 ---
 
-#### `FavoriteButton({ config }: { config: { type: "favorite-button"; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: string | undefined; ....`
+#### `FavoriteButton({ config }: { config: { type: "favorite-button"; id?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { ...;...`
 
 ---
 
@@ -2227,7 +2223,7 @@ and publishes the selected item to the page context when `id` is set.
 
 ---
 
-#### `FilterBar({ config }: { config: { type: "filter-bar"; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: string | undefined; ... 4 ...`
+#### `FilterBar({ config }: { config: { type: "filter-bar"; id?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: s...`
 
 ---
 
@@ -2251,7 +2247,7 @@ No manifest context required.
 
 ---
 
-#### `HighlightedText({ config }: { config: { type: "highlighted-text"; text: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lower...`
+#### `HighlightedText({ config }: { config: { type: "highlighted-text"; text: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase"...`
 
 ---
 
@@ -2311,7 +2307,7 @@ descriptions, badges, and click actions. No manifest context required.
 
 ---
 
-#### `NotificationBell({ config, }: { config: { type: "notification-bell"; ariaLive: "off" | "polite" | "assertive"; count?: number | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys"...`
+#### `NotificationBell({ config, }: { config: { type: "notification-bell"; ariaLive: "off" | "polite" | "assertive"; max?: number | undefined; id?: string | undefined; color?: string | undefined; position?: "fixed" | "rela...`
 
 ---
 
@@ -2373,7 +2369,7 @@ No manifest context required.
 
 ---
 
-#### `SaveIndicator({ config }: { config: { status: "error" | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | "trim" | ... 6 ...`
+#### `SaveIndicator({ config }: { config: { status: "error" | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lowercase" | ... 6 ...`
 
 ---
 
@@ -2415,7 +2411,7 @@ that shows idle, saving, saved, or error states.
 
 ---
 
-#### `ScrollArea({ config }: { config: { type: "scroll-area"; content?: Record<string, unknown>[] | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; ... 56 m...`
+#### `ScrollArea({ config }: { config: { type: "scroll-area"; content?: Record<string, unknown>[] | undefined; id?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "stic...`
 
 ---
 
@@ -2461,7 +2457,7 @@ that respect the design token system.
 
 ---
 
-#### `Separator({ config }: { config: { type: "separator"; label?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase"...`
+#### `Separator({ config }: { config: { type: "separator"; label?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | .....`
 
 ---
 
@@ -2518,7 +2514,7 @@ No manifest context required.
 
 ---
 
-#### `StatCard({ config }: { config: { data: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | "trim" | "json" | ...`
+#### `StatCard({ config }: { config: { data: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lowercase" | "json" | ...`
 
 ---
 
@@ -2661,11 +2657,11 @@ No manifest context required.
 
 | Export | Kind | Description |
 |---|---|---|
-| `AutoForm` | function | Config-driven form component with multi-column layout, conditional field visibility, and section grouping.  Supports client-side validation, submission to an API endpoint, manifest-aware resource mutation (invalidation + optimistic handling), workflow lifecycle hooks (`beforeSubmit`, `afterSubmit`, `error`), and action chaining on success/error. Publishes form state to the page context when an `id` is configured. |
+| `AutoForm` | function | Config-driven form component with multi-column layout, conditional field visibility, and section grouping. Supports client-side validation, submission to an API endpoint, manifest-aware resource mutation (invalidation + optimistic handling), workflow lifecycle hooks (`beforeSubmit`, `afterSubmit`, `error`), and action chaining on success/error. Publishes form state to the page context when an `id` is configured. |
 | `AutoFormBase` | function | Standalone AutoFormBase -- renders a config-driven form with fields, sections, validation, and submit/reset actions. No manifest context required. |
 | `AutoFormBaseProps` | interface | No JSDoc description. |
 | `AutoFormConfig` | typealias | Inferred type for the AutoForm component config. |
-| `autoFormConfigSchema` | variable | Zod schema for the AutoForm component config.  Defines a config-driven form that auto-generates fields from config or OpenAPI schema. Supports validation, submission, action chaining, multi-column layout, conditional field visibility, and field grouping. |
+| `autoFormConfigSchema` | variable | Zod schema for the AutoForm component config. Defines a config-driven form that auto-generates fields from config or OpenAPI schema. Supports validation, submission, action chaining, multi-column layout, conditional field visibility, and field grouping. |
 | `AutoFormFieldConfig` | interface | No JSDoc description. |
 | `AutoFormSectionConfig` | interface | No JSDoc description. |
 | `Button` | function | No JSDoc description. |
@@ -2687,31 +2683,31 @@ No manifest context required.
 | `FieldErrors` | typealias | Per-field validation error. |
 | `IconButtonBase` | function | Standalone IconButtonBase -- an icon-only button with configurable shape, size, and variant. No manifest context required. |
 | `IconButtonBaseProps` | interface | No JSDoc description. |
-| `InlineEdit` | function | InlineEdit component — click-to-edit text field.  Toggles between a display mode and an edit mode. Enter or blur saves the value; Escape reverts to the original value when `cancelOnEscape` is enabled. |
+| `InlineEdit` | function | InlineEdit component — click-to-edit text field. Toggles between a display mode and an edit mode. Enter or blur saves the value; Escape reverts to the original value when `cancelOnEscape` is enabled. |
 | `InlineEditConfig` | typealias | Inferred config type for the InlineEdit component. |
-| `inlineEditConfigSchema` | variable | Zod config schema for the InlineEdit component.  A click-to-edit text field that toggles between display and edit modes. Publishes `{ value, editing }` to the page context. |
+| `inlineEditConfigSchema` | variable | Zod config schema for the InlineEdit component. A click-to-edit text field that toggles between display and edit modes. Publishes `{ value, editing }` to the page context. |
 | `InlineEditField` | function | Standalone InlineEditField -- a click-to-edit text field that toggles between display and input modes. No manifest context required. |
 | `InlineEditFieldProps` | interface | No JSDoc description. |
 | `Input` | function | Manifest adapter — resolves config refs and actions, delegates to InputField. |
 | `InputConfig` | typealias | Inferred config type from the Input Zod schema. |
-| `inputConfigSchema` | variable | Zod config schema for the Input component.  Defines a standalone text input field with label, placeholder, validation, and optional icon. |
+| `inputConfigSchema` | variable | Zod config schema for the Input component. Defines a standalone text input field with label, placeholder, validation, and optional icon. |
 | `InputField` | function | Standalone InputField — a complete form field (label + input + helper/error) that works with plain React props. No manifest context required. |
 | `InputFieldProps` | interface | No JSDoc description. |
 | `LocationInput` | function | No JSDoc description. |
 | `LocationInputConfig` | typealias | Config for the manifest-driven location input component. |
-| `locationInputConfigSchema` | variable | Zod config schema for the LocationInput component.  Geocode autocomplete input that searches a backend endpoint, displays matching locations in a dropdown, and extracts coordinates on selection. Publishes `{ name, lat, lng, address }`. |
+| `locationInputConfigSchema` | variable | Zod config schema for the LocationInput component. Geocode autocomplete input that searches a backend endpoint, displays matching locations in a dropdown, and extracts coordinates on selection. Publishes `{ name, lat, lng, address }`. |
 | `LocationInputField` | function | Standalone LocationInputField -- a location search input with results dropdown and optional Google Maps link. No manifest context required. |
 | `LocationInputFieldProps` | interface | No JSDoc description. |
 | `LocationResult` | interface | No JSDoc description. |
 | `MultiSelect` | function | No JSDoc description. |
 | `MultiSelectConfig` | typealias | Inferred config type from the MultiSelect Zod schema. |
-| `multiSelectConfigSchema` | variable | Zod config schema for the MultiSelect component.  Defines a dropdown with checkboxes for selecting multiple values, with optional search filtering and pill display. |
+| `multiSelectConfigSchema` | variable | Zod config schema for the MultiSelect component. Defines a dropdown with checkboxes for selecting multiple values, with optional search filtering and pill display. |
 | `MultiSelectField` | function | Standalone MultiSelectField -- multi-select dropdown with pill tags, inline search, and configurable max selection. No manifest context required. |
 | `MultiSelectFieldOption` | interface | No JSDoc description. |
 | `MultiSelectFieldProps` | interface | No JSDoc description. |
 | `QuickAdd` | function | No JSDoc description. |
 | `QuickAddConfig` | typealias | Inferred config type from the QuickAdd Zod schema. |
-| `quickAddConfigSchema` | variable | Zod config schema for the QuickAdd component.  Defines all manifest-settable fields for an inline creation bar that allows quick item entry with a text input and submit button. |
+| `quickAddConfigSchema` | variable | Zod config schema for the QuickAdd component. Defines all manifest-settable fields for an inline creation bar that allows quick item entry with a text input and submit button. |
 | `QuickAddField` | function | Standalone QuickAddField -- a compact input with submit button for quickly adding items to a list. No manifest context required. |
 | `QuickAddFieldProps` | interface | No JSDoc description. |
 | `Select` | function | No JSDoc description. |
@@ -2727,34 +2723,34 @@ No manifest context required.
 | `SwitchFieldProps` | interface | No JSDoc description. |
 | `TagSelector` | function | No JSDoc description. |
 | `TagSelectorConfig` | typealias | Inferred config type from the TagSelector Zod schema. |
-| `tagSelectorConfigSchema` | variable | Zod config schema for the TagSelector component.  A tag input that allows selecting from predefined tags or creating new ones. Tags display as colored pills with remove buttons. |
+| `tagSelectorConfigSchema` | variable | Zod config schema for the TagSelector component. A tag input that allows selecting from predefined tags or creating new ones. Tags display as colored pills with remove buttons. |
 | `TagSelectorField` | function | Standalone TagSelectorField -- tag pills with dropdown selection, search filtering, and optional tag creation. No manifest context required. |
 | `TagSelectorFieldProps` | interface | No JSDoc description. |
 | `TagSelectorTag` | interface | No JSDoc description. |
 | `Textarea` | function | No JSDoc description. |
 | `TextareaConfig` | typealias | Inferred config type from the Textarea Zod schema. |
-| `textareaConfigSchema` | variable | Zod config schema for the Textarea component.  Defines a multi-line text input with label, character count, validation, and configurable resize behavior. |
+| `textareaConfigSchema` | variable | Zod config schema for the Textarea component. Defines a multi-line text input with label, character count, validation, and configurable resize behavior. |
 | `TextareaField` | function | Standalone TextareaField -- a complete textarea form field with label, character counter, validation, and helper/error text. No manifest context required. |
 | `TextareaFieldProps` | interface | No JSDoc description. |
 | `Toggle` | function | No JSDoc description. |
 | `ToggleConfig` | typealias | Inferred config type from the Toggle Zod schema. |
-| `toggleConfigSchema` | variable | Zod config schema for the Toggle component.  Defines a pressed/unpressed toggle button that publishes its state. Can display text, an icon, or both. |
+| `toggleConfigSchema` | variable | Zod config schema for the Toggle component. Defines a pressed/unpressed toggle button that publishes its state. Can display text, an icon, or both. |
 | `ToggleField` | function | Standalone ToggleField -- a pressable toggle button with optional icon and label. No manifest context required. |
 | `ToggleFieldProps` | interface | No JSDoc description. |
 | `ToggleGroupBase` | function | Standalone ToggleGroupBase -- a group of toggle buttons supporting single or multi-select modes. No manifest context required. |
 | `ToggleGroupBaseProps` | interface | No JSDoc description. |
 | `ToggleGroupItem` | interface | No JSDoc description. |
 | `TouchedFields` | typealias | Tracks which fields have been interacted with. |
-| `useAutoForm` | function | Headless hook for form state management.  Tracks field values, validation errors, and touched state. Validates on blur (per-field) and on submit (all fields). |
+| `useAutoForm` | function | Headless hook for form state management. Tracks field values, validation errors, and touched state. Validates on blur (per-field) and on submit (all fields). |
 | `UseAutoFormResult` | interface | Return type for the useAutoForm headless hook. |
-| `useWizard` | function | Headless hook that manages multi-step wizard state including step navigation, per-step validation, field tracking, and final submission.  Provides reactive state for the current step, accumulated data across steps, validation errors, and transition controls (next/prev/skip/reset). |
+| `useWizard` | function | Headless hook that manages multi-step wizard state including step navigation, per-step validation, field tracking, and final submission. Provides reactive state for the current step, accumulated data across steps, validation errors, and transition controls (next/prev/skip/reset). |
 | `UseWizardResult` | interface | Return type of the useWizard headless hook. |
 | `Wizard` | function | Render a multi-step form wizard with built-in validation, step state, and slot-aware styling. |
 | `WizardBase` | function | Standalone WizardBase -- a multi-step form wizard with progress indicator, step navigation, field validation, and completion state. No manifest context required. |
 | `WizardBaseProps` | interface | No JSDoc description. |
 | `WizardConfig` | typealias | Inferred type for the Wizard component configuration. |
 | `WizardFieldConfig` | interface | No JSDoc description. |
-| `wizardSchema` | variable | Zod schema for the Wizard component configuration.  A multi-step form flow. Each step collects fields independently. On the final step, all accumulated data is submitted to `submitEndpoint` (if set) and published to the page context via `id`. |
+| `wizardSchema` | variable | Zod schema for the Wizard component configuration. A multi-step form flow. Each step collects fields independently. On the final step, all accumulated data is submitted to `submitEndpoint` (if set) and published to the page context via `id`. |
 | `WizardState` | interface | No JSDoc description. |
 | `WizardStepConfig` | typealias | Inferred type for a single wizard step configuration. |
 | `WizardStepDef` | interface | No JSDoc description. |
@@ -2860,7 +2856,7 @@ No manifest context required.
 
 ---
 
-#### `ColorPicker({ config }: { config: { type: "color-picker"; label?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowerca...`
+#### `ColorPicker({ config }: { config: { type: "color-picker"; label?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" |...`
 
 ---
 
@@ -2883,7 +2879,7 @@ and custom hex input. No manifest context required.
 
 ---
 
-#### `DatePicker({ config }: { config: { type: "date-picker"; label?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercas...`
+#### `DatePicker({ config }: { config: { type: "date-picker"; label?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | ...`
 
 ---
 
@@ -2925,7 +2921,7 @@ size, and variant. No manifest context required.
 
 ---
 
-#### `InlineEdit({ config }: { config: { type: "inline-edit"; value?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercas...`
+#### `InlineEdit({ config }: { config: { type: "inline-edit"; value?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | ...`
 
 InlineEdit component — click-to-edit text field.
 
@@ -2972,7 +2968,7 @@ display and input modes. No manifest context required.
 
 ---
 
-#### `Input({ config }: { config: { type: "input"; value?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | ....`
+#### `Input({ config }: { config: { type: "input"; value?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lower...`
 
 Manifest adapter — resolves config refs and actions, delegates to InputField.
 
@@ -3137,7 +3133,7 @@ and configurable max selection. No manifest context required.
 
 ---
 
-#### `QuickAdd({ config }: { config: { type: "quick-add"; icon?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: ...`
+#### `QuickAdd({ config }: { config: { type: "quick-add"; icon?: string | undefined; id?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; backgro...`
 
 ---
 
@@ -3179,7 +3175,7 @@ adding items to a list. No manifest context required.
 
 ---
 
-#### `Select({ config }: { config: { options: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | "trim" | ... 6 ...`
+#### `Select({ config }: { config: { options: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lowercase" | ... 6 ...`
 
 ---
 
@@ -3201,7 +3197,7 @@ helper/error text, and required indicator. No manifest context required.
 
 ---
 
-#### `Slider({ config }: { config: { type: "slider"; label?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | ...`
+#### `Slider({ config }: { config: { type: "slider"; label?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lowe...`
 
 Render a manifest-driven slider input.
 
@@ -3245,7 +3241,7 @@ configurable size and color. No manifest context required.
 
 ---
 
-#### `TagSelector({ config }: { config: { type: "tag-selector"; data?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercas...`
+#### `TagSelector({ config }: { config: { type: "tag-selector"; data?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | ...`
 
 ---
 
@@ -3295,7 +3291,7 @@ and optional tag creation. No manifest context required.
 
 ---
 
-#### `Textarea({ config }: { config: { type: "textarea"; value?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" ...`
+#### `Textarea({ config }: { config: { type: "textarea"; value?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | ......`
 
 ---
 
@@ -3341,7 +3337,7 @@ character counter, validation, and helper/error text. No manifest context requir
 
 ---
 
-#### `Toggle({ config }: { config: { type: "toggle"; label?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | ...`
+#### `Toggle({ config }: { config: { type: "toggle"; label?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lowe...`
 
 ---
 
@@ -3517,12 +3513,12 @@ step navigation, field validation, and completion state. No manifest context req
 | `ChatWindowBase` | function | Standalone ChatWindow — composable chat container with header, message thread, typing indicator, and input slots. No manifest context required. |
 | `ChatWindowBaseProps` | interface | No JSDoc description. |
 | `ChatWindowConfig` | typealias | Inferred config type from the ChatWindow Zod schema. |
-| `chatWindowConfigSchema` | variable | Zod config schema for the ChatWindow component.  A full chat interface composing a message thread, rich input, and typing indicator into a single component. |
+| `chatWindowConfigSchema` | variable | Zod config schema for the ChatWindow component. A full chat interface composing a message thread, rich input, and typing indicator into a single component. |
 | `CommentSection` | function | Manifest adapter — resolves data endpoint, wires actions, delegates to CommentSectionBase. |
 | `CommentSectionBase` | function | Standalone CommentSection — threaded comment list with avatars, timestamps, optional delete actions, and a composable input slot. No manifest context required. |
 | `CommentSectionBaseProps` | interface | No JSDoc description. |
 | `CommentSectionConfig` | typealias | Inferred config type from the CommentSection Zod schema. |
-| `commentSectionConfigSchema` | variable | Zod config schema for the CommentSection component.  Renders a comment list with nested replies and an embedded rich input for posting new comments. |
+| `commentSectionConfigSchema` | variable | Zod config schema for the CommentSection component. Renders a comment list with nested replies and an embedded rich input for posting new comments. |
 | `CUSTOM_EMOJI_CSS` | variable | CSS for custom emoji sizing. Custom emojis render as inline images sized to match surrounding text. |
 | `CustomEmoji` | interface | Shape of a custom emoji entry. |
 | `EmojiPicker` | function | Manifest adapter — resolves custom emoji data, wires actions/publish, delegates to EmojiPickerBase. |
@@ -3535,12 +3531,12 @@ step navigation, field validation, and completion state. No manifest context req
 | `GifPickerBase` | function | Standalone GifPicker — searchable GIF grid with debounced search, loading states, and optional attribution. No manifest context required. |
 | `GifPickerBaseProps` | interface | No JSDoc description. |
 | `GifPickerConfig` | typealias | Inferred config type from the GifPicker Zod schema. |
-| `gifPickerConfigSchema` | variable | Zod config schema for the GifPicker component.  Searchable GIF picker that queries a GIF API (Giphy/Tenor) and displays results in a masonry-style grid.  The component expects a backend proxy endpoint that handles the actual API key and returns GIF results. This avoids exposing API keys in the frontend. |
+| `gifPickerConfigSchema` | variable | Zod config schema for the GifPicker component. Searchable GIF picker that queries a GIF API (Giphy/Tenor) and displays results in a masonry-style grid. The component expects a backend proxy endpoint that handles the actual API key and returns GIF results. This avoids exposing API keys in the frontend. |
 | `MessageThread` | function | Manifest adapter — resolves data endpoint, wires actions/publish, delegates to MessageThreadBase. |
 | `MessageThreadBase` | function | Standalone MessageThread — scrollable message list with avatars, date separators, auto-scroll, embed rendering, and consecutive-message grouping. No manifest context required. |
 | `MessageThreadBaseProps` | interface | No JSDoc description. |
 | `MessageThreadConfig` | typealias | Inferred config type from the MessageThread Zod schema. |
-| `messageThreadConfigSchema` | variable | Zod config schema for the MessageThread component.  Renders a scrollable message list with avatars, timestamps, message grouping, date separators, and optional reactions/threading. |
+| `messageThreadConfigSchema` | variable | Zod config schema for the MessageThread component. Renders a scrollable message list with avatars, timestamps, message grouping, date separators, and optional reactions/threading. |
 | `parseShortcodes` | function | Parses shortcodes in text and replaces them with `<img>` tags. |
 | `PresenceIndicator` | function | Manifest adapter — resolves config refs and delegates to PresenceIndicatorBase. |
 | `PresenceIndicatorBase` | function | Standalone PresenceIndicator — displays online/offline/away/busy/dnd status with a colored dot and optional label. No manifest context required. |
@@ -3551,7 +3547,7 @@ step navigation, field validation, and completion state. No manifest context req
 | `ReactionBarBase` | function | Standalone ReactionBar — row of emoji reaction pills with counts and an add-reaction button that opens an inline emoji picker. No manifest context required. |
 | `ReactionBarBaseProps` | interface | No JSDoc description. |
 | `ReactionBarConfig` | typealias | Inferred config type from the ReactionBar Zod schema. |
-| `reactionBarConfigSchema` | variable | Zod config schema for the ReactionBar component.  Displays emoji reactions with counts and an add button. |
+| `reactionBarConfigSchema` | variable | Zod config schema for the ReactionBar component. Displays emoji reactions with counts and an add button. |
 | `ReactionEntry` | interface | No JSDoc description. |
 | `resolveEmojiRecords` | function | Resolves emoji records from the API into CustomEmoji entries. Handles the `uploadKey` → `url` resolution using a URL prefix or field mapping. |
 | `TypingIndicator` | function | Manifest adapter — resolves config refs and delegates to TypingIndicatorBase. |
@@ -3569,7 +3565,7 @@ Builds a shortcode lookup map from an array of custom emojis.
 
 ---
 
-#### `ChatWindow({ config }: { config: { data: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | "trim" | "json" | ...`
+#### `ChatWindow({ config }: { config: { data: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lowercase" | "json" | ...`
 
 Manifest adapter — resolves config refs, composes manifest sub-components, delegates to ChatWindowBase.
 
@@ -3665,7 +3661,7 @@ for posting new comments.
 
 ---
 
-#### `EmojiPicker({ config }: { config: { type: "emoji-picker"; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: string | undefined; ... ...`
+#### `EmojiPicker({ config }: { config: { type: "emoji-picker"; id?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?:...`
 
 Manifest adapter — resolves custom emoji data, wires actions/publish, delegates to EmojiPickerBase.
 
@@ -3706,7 +3702,7 @@ Renders a searchable grid of emojis organized by category.
 
 ---
 
-#### `GifPicker({ config }: { config: { type: "gif-picker"; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: string | undefined; ... 4 ...`
+#### `GifPicker({ config }: { config: { type: "gif-picker"; id?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: s...`
 
 Manifest adapter — resolves config refs, wires actions/publish, delegates to GifPickerBase.
 
@@ -3843,7 +3839,7 @@ parseShortcodes("Hello :wave:", emojis);
 
 ---
 
-#### `PresenceIndicator({ config, }: { config: { status: { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | "trim" | "json" | "first...`
+#### `PresenceIndicator({ config, }: { config: { status: { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lowercase" | "json" | "first...`
 
 Manifest adapter — resolves config refs and delegates to PresenceIndicatorBase.
 
@@ -3881,7 +3877,7 @@ Displays an online/offline/away/busy/dnd status dot with optional label.
 
 ---
 
-#### `ReactionBar({ config }: { config: { type: "reaction-bar"; data?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercas...`
+#### `ReactionBar({ config }: { config: { type: "reaction-bar"; data?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | ...`
 
 Manifest adapter — wires actions/publish and delegates to ReactionBarBase.
 
@@ -3943,7 +3939,7 @@ Handles the `uploadKey` → `url` resolution using a URL prefix or field mapping
 
 ---
 
-#### `TypingIndicator({ config }: { config: { type: "typing-indicator"; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: string | undefined; ...`
+#### `TypingIndicator({ config }: { config: { type: "typing-indicator"; id?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { ......`
 
 Manifest adapter — resolves config refs and delegates to TypingIndicatorBase.
 
@@ -3996,7 +3992,7 @@ Displays an animated "User is typing..." indicator with bouncing dots.
 | `CompareViewBase` | function | Standalone CompareView — a side-by-side diff viewer for comparing two text blocks. No manifest context required. |
 | `CompareViewBaseProps` | interface | No JSDoc description. |
 | `CompareViewConfig` | typealias | Inferred config type from the CompareView Zod schema. |
-| `compareViewConfigSchema` | variable | Zod config schema for the CompareView component.  Defines all manifest-settable fields for a side-by-side content comparison view with diff highlighting. |
+| `compareViewConfigSchema` | variable | Zod config schema for the CompareView component. Defines all manifest-settable fields for a side-by-side content comparison view with diff highlighting. |
 | `detectPlatform` | function | Detects the platform from a URL and extracts embed info. |
 | `FileUploaderBase` | function | Standalone FileUploader — a file upload component with dropzone, button, and compact variants. No manifest context required. |
 | `FileUploaderBaseProps` | interface | No JSDoc description. |
@@ -4007,13 +4003,13 @@ Displays an animated "User is typing..." indicator with bouncing dots.
 | `LinkEmbedBase` | function | Standalone LinkEmbed — renders rich link previews with platform-specific embeds (YouTube, Instagram, TikTok, Twitter, GIF) or a generic card. No manifest context required. |
 | `LinkEmbedBaseProps` | interface | No JSDoc description. |
 | `LinkEmbedConfig` | typealias | Inferred config type from the LinkEmbed Zod schema. |
-| `linkEmbedConfigSchema` | variable | Zod config schema for the LinkEmbed component.  Renders rich URL previews with platform-specific renderers for YouTube, Instagram, TikTok, Twitter/X, and generic Open Graph cards. Also supports inline GIF embeds. |
+| `linkEmbedConfigSchema` | variable | Zod config schema for the LinkEmbed component. Renders rich URL previews with platform-specific renderers for YouTube, Instagram, TikTok, Twitter/X, and generic Open Graph cards. Also supports inline GIF embeds. |
 | `LinkEmbedMeta` | interface | No JSDoc description. |
 | `Markdown` | function | Manifest adapter — resolves config refs and delegates to MarkdownBase. |
 | `MarkdownBase` | function | Standalone Markdown — renders markdown content with syntax highlighting and Snapshot design tokens. No manifest context required. |
 | `MarkdownBaseProps` | interface | No JSDoc description. |
 | `MarkdownConfig` | typealias | Inferred config type from the Markdown Zod schema. |
-| `markdownConfigSchema` | variable | Zod config schema for the Markdown component.  Renders markdown content with full GFM support and syntax highlighting. |
+| `markdownConfigSchema` | variable | Zod config schema for the Markdown component. Renders markdown content with full GFM support and syntax highlighting. |
 | `Platform` | typealias | Platform detection and embed URL extraction. Identifies known platforms from URLs and extracts the embed-compatible URL or ID needed to render platform-specific iframes. |
 | `PLATFORM_COLORS` | variable | Platform accent colors. |
 | `PLATFORM_NAMES` | variable | Platform display names. |
@@ -4022,12 +4018,12 @@ Displays an animated "User is typing..." indicator with bouncing dots.
 | `RichInputBase` | function | Standalone RichInput — a rich text editor with formatting toolbar, powered by tiptap. No manifest context required. |
 | `RichInputBaseProps` | interface | No JSDoc description. |
 | `RichInputConfig` | typealias | Inferred config type from the RichInput Zod schema. |
-| `richInputConfigSchema` | variable | Zod config schema for the RichInput component.  A TipTap-based WYSIWYG editor for chat messages, comments, and posts. Users see formatted text as they type (bold, italic, mentions, etc.) rather than raw markdown. |
+| `richInputConfigSchema` | variable | Zod config schema for the RichInput component. A TipTap-based WYSIWYG editor for chat messages, comments, and posts. Users see formatted text as they type (bold, italic, mentions, etc.) rather than raw markdown. |
 | `RichTextEditor` | function | Manifest adapter — resolves config refs, wires publish, and delegates to RichTextEditorBase. |
 | `RichTextEditorBase` | function | Standalone RichTextEditor — a markdown editor with live preview, powered by CodeMirror. No manifest context required. |
 | `RichTextEditorBaseProps` | interface | No JSDoc description. |
 | `RichTextEditorConfig` | typealias | Inferred config type from the RichTextEditor Zod schema. |
-| `richTextEditorConfigSchema` | variable | Zod config schema for the RichTextEditor component.  Defines all manifest-settable fields for a CodeMirror 6-based markdown editor with toolbar, preview pane, and split view support. |
+| `richTextEditorConfigSchema` | variable | Zod config schema for the RichTextEditor component. Defines all manifest-settable fields for a CodeMirror 6-based markdown editor with toolbar, preview pane, and split view support. |
 | `TimelineBase` | function | Standalone Timeline — vertical event timeline with dot markers, connectors, date labels, and default/compact/alternating layout variants. No manifest context required. |
 | `TimelineBaseProps` | interface | No JSDoc description. |
 | `TimelineItemEntry` | interface | No JSDoc description. |
@@ -4050,7 +4046,7 @@ and content alignment. No manifest context required.
 
 ---
 
-#### `Code({ config }: { config: { value: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | "trim" | "json" |...`
+#### `Code({ config }: { config: { value: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lowercase" | "json" |...`
 
 Manifest adapter — resolves config refs and delegates to CodeBase.
 
@@ -4083,7 +4079,7 @@ No manifest context required.
 
 ---
 
-#### `CompareView({ config }: { config: { type: "compare-view"; left: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase...`
+#### `CompareView({ config }: { config: { type: "compare-view"; left: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | ....`
 
 Manifest adapter — resolves config refs and delegates to CompareViewBase.
 
@@ -4156,7 +4152,7 @@ and compact variants. No manifest context required.
 
 ---
 
-#### `Heading({ config }: { config: { type: "heading"; text: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | ....`
+#### `Heading({ config }: { config: { type: "heading"; text: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lower...`
 
 Manifest adapter — resolves template text, locale, and route context,
 then delegates to HeadingBase.
@@ -4176,7 +4172,7 @@ React props. No manifest context required.
 
 ---
 
-#### `LinkEmbed({ config }: { config: { url: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | "trim" | "json" | ....`
+#### `LinkEmbed({ config }: { config: { url: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lowercase" | "json" | ....`
 
 Manifest adapter — resolves config refs and delegates to LinkEmbedBase.
 
@@ -4260,7 +4256,7 @@ Renders markdown content with full GFM support and syntax highlighting.
 
 ---
 
-#### `RichInput({ config }: { config: { type: "rich-input"; maxLength?: number | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { .....`
+#### `RichInput({ config }: { config: { type: "rich-input"; maxLength?: number | undefined; id?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; ....`
 
 Manifest adapter — resolves config refs, wires actions, and delegates to RichInputBase.
 
@@ -4311,7 +4307,7 @@ rather than raw markdown.
 
 ---
 
-#### `RichTextEditor({ config }: { config: { type: "rich-text-editor"; content?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | .....`
+#### `RichTextEditor({ config }: { config: { type: "rich-text-editor"; content?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "upperc...`
 
 Manifest adapter — resolves config refs, wires publish, and delegates to RichTextEditorBase.
 
@@ -4384,16 +4380,16 @@ date labels, and default/compact/alternating layout variants. No manifest contex
 | `commandPaletteConfigSchema` | variable | Zod config schema for the CommandPalette component. A keyboard-driven overlay that groups commands, supports search with remote endpoints, tracks recent items, and dispatches actions on selection. |
 | `ConfirmDialogBase` | function | Standalone ConfirmDialog — a confirmation dialog built on ModalBase with plain React props. No manifest context required. |
 | `ConfirmDialogBaseProps` | interface | No JSDoc description. |
-| `ConfirmDialogComponent` | function | Manifest-driven confirmation dialog adapter.  Resolves primitive values and actions from manifest config, then delegates all rendering to `ConfirmDialogBase`. |
+| `ConfirmDialogComponent` | function | Manifest-driven confirmation dialog adapter. Resolves primitive values and actions from manifest config, then delegates all rendering to `ConfirmDialogBase`. |
 | `ConfirmDialogConfig` | typealias | Input config type for the ConfirmDialog component. |
 | `confirmDialogConfigSchema` | variable | Overlay alias schema for manifest-driven confirmation dialogs. |
-| `ContextMenu` | function | Manifest-driven context menu adapter.  Resolves primitive values and actions from manifest config, handles visibility and state publishing, then delegates all rendering to `ContextMenuBase`. |
+| `ContextMenu` | function | Manifest-driven context menu adapter. Resolves primitive values and actions from manifest config, handles visibility and state publishing, then delegates all rendering to `ContextMenuBase`. |
 | `ContextMenuBase` | function | Standalone ContextMenu — a right-click context menu with plain React props. No manifest context required. |
 | `ContextMenuBaseEntry` | typealias | No JSDoc description. |
 | `ContextMenuBaseItem` | interface | No JSDoc description. |
 | `ContextMenuBaseProps` | interface | No JSDoc description. |
 | `ContextMenuConfig` | typealias | Inferred config type for the ContextMenu component. |
-| `contextMenuConfigSchema` | variable | Zod schema for the ContextMenu component.  Defines a right-click menu with styleable trigger, panel, item, label, and separator surfaces. Visibility can be driven by a boolean or a binding reference. |
+| `contextMenuConfigSchema` | variable | Zod schema for the ContextMenu component. Defines a right-click menu with styleable trigger, panel, item, label, and separator surfaces. Visibility can be driven by a boolean or a binding reference. |
 | `DrawerBase` | function | Standalone Drawer — a sliding panel overlay with plain React props. No manifest context required. |
 | `DrawerBaseFooterAction` | interface | No JSDoc description. |
 | `DrawerBaseProps` | interface | No JSDoc description. |
@@ -4417,11 +4413,11 @@ date labels, and default/compact/alternating layout variants. No manifest contex
 | `PopoverBase` | function | Standalone Popover — a button-triggered floating panel with plain React props. No manifest context required. |
 | `PopoverBaseProps` | interface | No JSDoc description. |
 | `PopoverConfig` | typealias | Inferred config type for the Popover component. |
-| `popoverConfigSchema` | variable | Zod schema for the Popover component.  Defines a trigger-driven floating panel with optional title, description, footer content, width, placement, and canonical slot-based styling for the trigger and panel sub-surfaces. |
+| `popoverConfigSchema` | variable | Zod schema for the Popover component. Defines a trigger-driven floating panel with optional title, description, footer content, width, placement, and canonical slot-based styling for the trigger and panel sub-surfaces. |
 
 ### Details
 
-#### `CommandPalette({ config }: { config: { type: "command-palette"; data?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lower...`
+#### `CommandPalette({ config }: { config: { type: "command-palette"; data?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase"...`
 
 CommandPalette — search-driven command palette that renders static groups or fetches remote results, then dispatches manifest actions for the selected command.
 
@@ -4464,7 +4460,7 @@ plain React props. No manifest context required.
 
 ---
 
-#### `ConfirmDialogComponent({ config, }: { config: { type: "confirm-dialog"; description?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" |...`
+#### `ConfirmDialogComponent({ config, }: { config: { type: "confirm-dialog"; description?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "upp...`
 
 Manifest-driven confirmation dialog adapter.
 
@@ -4525,7 +4521,7 @@ No manifest context required.
 
 ---
 
-#### `DrawerComponent({ config }: { config: { type: "drawer"; content: Record<string, unknown>[]; title?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "def...`
+#### `DrawerComponent({ config }: { config: { type: "drawer"; content: Record<string, unknown>[]; title?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "tri...`
 
 ---
 
@@ -4591,11 +4587,11 @@ No manifest context required.
 
 ---
 
-#### `ModalComponent({ config }: { config: { type: "modal"; content: Record<string, unknown>[]; title?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "defa...`
+#### `ModalComponent({ config }: { config: { type: "modal"; content: Record<string, unknown>[]; title?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim...`
 
 ---
 
-#### `Popover({ config }: { config: { type: "popover"; trigger: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" ...`
+#### `Popover({ config }: { config: { type: "popover"; trigger: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | ......`
 
 Manifest adapter — resolves config refs, publishes state, renders manifest
 children, delegates layout to PopoverBase.
@@ -4635,7 +4631,7 @@ No manifest context required.
 | `PrefetchLinkBase` | function | Standalone PrefetchLink — a plain `<a>` anchor that fires a prefetch callback based on the configured strategy. No manifest or SSR context required. |
 | `PrefetchLinkBaseProps` | interface | No JSDoc description. |
 | `PrefetchLinkConfig` | typealias | The output type of `prefetchLinkSchema` — all fields fully resolved with defaults applied. This is the type received by the component implementation. |
-| `prefetchLinkSchema` | variable | Zod schema for `<PrefetchLink>` config.  `<PrefetchLink>` is a prefetch primitive that renders a plain `<a>` tag and automatically injects `<link rel="prefetch">` tags for the route's JS chunks and CSS files when the user hovers over the link or when it enters the viewport.  It is not a router-aware component — consumers wire their own router. This avoids a peer dependency on TanStack Router. |
+| `prefetchLinkSchema` | variable | Zod schema for `<PrefetchLink>` config. `<PrefetchLink>` is a prefetch primitive that renders a plain `<a>` tag and automatically injects `<link rel="prefetch">` tags for the route's JS chunks and CSS files when the user hovers over the link or when it enters the viewport. It is not a router-aware component — consumers wire their own router. This avoids a peer dependency on TanStack Router. |
 | `StepperBase` | function | Standalone Stepper — a multi-step progress indicator with plain React props. No manifest context required. |
 | `StepperBaseProps` | interface | No JSDoc description. |
 | `StepperBaseStep` | interface | No JSDoc description. |
@@ -4690,7 +4686,7 @@ No manifest context required.
 
 ---
 
-#### `PrefetchLink(config: { to: string; target?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: string | undefined;...`
+#### `PrefetchLink(config: { to: string; target?: string | undefined; id?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { .....`
 
 Manifest adapter — wires the SSR prefetch route hook into PrefetchLinkBase.
 
@@ -4752,7 +4748,7 @@ No manifest context required.
 
 ---
 
-#### `TabsComponent({ config }: { config: { type: "tabs"; children: { label: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowe...`
+#### `TabsComponent({ config }: { config: { type: "tabs"; children: { label: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase...`
 
 Manifest adapter — resolves config refs via useTabs hook, renders manifest
 children in tab panels, delegates layout to TabsBase.
@@ -4809,14 +4805,14 @@ No manifest context required.
 | `layoutConfigSchema` | variable | Zod schema for layout component configuration. Defines the layout shell that wraps page content. |
 | `LayoutProps` | interface | Props for the Layout component. |
 | `LayoutVariant` | typealias | Layout variant type extracted from the schema. |
-| `Nav` | function | Grouped navigation component for manifest app shells.  Renders either `navigation.items` or a composable nav template, resolves translated labels at render time, applies canonical slot/state styling, and optionally renders logo and user-menu surfaces. |
+| `Nav` | function | Grouped navigation component for manifest app shells. Renders either `navigation.items` or a composable nav template, resolves translated labels at render time, applies canonical slot/state styling, and optionally renders logo and user-menu surfaces. |
 | `NavBase` | function | Standalone Nav -- a navigation component with items, logo, and collapse support. No manifest context required. |
 | `NavBaseItem` | interface | No JSDoc description. |
 | `NavBaseLogo` | interface | No JSDoc description. |
 | `NavBaseProps` | interface | No JSDoc description. |
 | `NavBaseUser` | interface | No JSDoc description. |
 | `NavConfig` | typealias | Runtime config type for the Nav component. |
-| `navConfigSchema` | variable | Zod schema for the grouped Nav component.  Supports either `items`-driven navigation or template composition, optional logo and user menu configuration, collapsible sidebar behavior, and canonical slot-based surface styling. |
+| `navConfigSchema` | variable | Zod schema for the grouped Nav component. Supports either `items`-driven navigation or template composition, optional logo and user menu configuration, collapsible sidebar behavior, and canonical slot-based surface styling. |
 | `NavDropdownBase` | function | Standalone NavDropdown -- a navigation dropdown with floating panel. No manifest context required. |
 | `NavDropdownBaseProps` | interface | No JSDoc description. |
 | `NavItemConfig` | typealias | Runtime config type for a grouped nav item, including optional child items and per-item slots. |
@@ -4861,7 +4857,7 @@ No manifest context required.
 
 ---
 
-#### `Card({ config }: { config: { type: "card"; title?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "default" | "uppercase" | "lowercase" | .....`
+#### `Card({ config }: { config: { type: "card"; title?: string | { from: string; transform?: "string" | "number" | "boolean" | "length" | "join" | "keys" | "values" | "trim" | "default" | "uppercase" | "lowerc...`
 
 Manifest adapter — resolves config refs, renders manifest children,
 delegates layout to CardBase.
@@ -4903,7 +4899,7 @@ No manifest context required.
 
 ---
 
-#### `Column({ config }: { config: { type: "column"; children: any[]; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: string | unde...`
+#### `Column({ config }: { config: { type: "column"; children: ComponentConfigInput[]; id?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; ......`
 
 ---
 
@@ -5117,7 +5113,7 @@ No manifest context required.
 
 ---
 
-#### `Outlet({ config }: { config: { type: "outlet"; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: string | undefined; position?:...`
+#### `Outlet({ config }: { config: { type: "outlet"; id?: string | undefined; color?: string | undefined; position?: "fixed" | "relative" | "absolute" | "sticky" | undefined; background?: string | { image?: strin...`
 
 Layout outlet primitive used to render nested child routes from the compiled
 manifest route tree.
@@ -5444,7 +5440,7 @@ typography. No manifest context required.
 | `ComponentDataResult` | interface | Result returned by `useComponentData`. Provides the fetched data, loading/error states, and a refetch function. |
 | `ComponentGroupBase` | function | Standalone ComponentGroup — a simple wrapper for pre-rendered group content. No manifest context required. |
 | `ComponentGroupBaseProps` | interface | No JSDoc description. |
-| `useComponentData` | function | Shared data-fetching hook for config-driven components.  Parses a data config string like `"GET /api/stats/revenue"` into method + endpoint, resolves any `FromRef` values in params via `useSubscribe`, and fetches data using the app-scope API client.  When the API client is not available (e.g., in tests or before ManifestApp provides it), the hook returns a loading state without throwing. |
+| `useComponentData` | function | Shared data-fetching hook for config-driven components. Parses a data config string like `"GET /api/stats/revenue"` into method + endpoint, resolves any `FromRef` values in params via `useSubscribe`, and fetches data using the app-scope API client. When the API client is not available (e.g., in tests or before ManifestApp provides it), the hook returns a loading state without throwing. |
 
 ### Details
 
@@ -5497,10 +5493,10 @@ the hook returns a loading state without throwing.
 | `authPresetConfigSchema` | variable | Validate preset config for auth screens such as login, register, and password recovery. |
 | `ChartDef` | interface | Chart section definition for dashboard-style presets. |
 | `ColumnDef` | interface | A single column definition for the CRUD page table. |
-| `crudPage` | function | Builds a manifest `PageConfig` for a standard CRUD page.  Consumers drop the result into their manifest's `pages` record:  ```ts const manifest = {   pages: {     "/users": crudPage({       title: "Users",       listEndpoint: "GET /api/users",       createEndpoint: "POST /api/users",       deleteEndpoint: "DELETE /api/users/{id}",       columns: [         { key: "name", label: "Name" },         { key: "email", label: "Email" },         { key: "role", label: "Role", badge: true },       ],       createForm: {         fields: [           { key: "name", type: "text", label: "Name", required: true },           { key: "email", type: "email", label: "Email", required: true },         ],       },     }),   }, }; ``` |
+| `crudPage` | function | Builds a manifest `PageConfig` for a standard CRUD page. Consumers drop the result into their manifest's `pages` record: ```ts const manifest = {   pages: {     "/users": crudPage({       title: "Users",       listEndpoint: "GET /api/users",       createEndpoint: "POST /api/users",       deleteEndpoint: "DELETE /api/users/{id}",       columns: [         { key: "name", label: "Name" },         { key: "email", label: "Email" },         { key: "role", label: "Role", badge: true },       ],       createForm: {         fields: [           { key: "name", type: "text", label: "Name", required: true },           { key: "email", type: "email", label: "Email", required: true },         ],       },     }),   }, }; ``` |
 | `CrudPageOptions` | interface | Options for the `crudPage` preset factory. Produces a full CRUD page with a data table, create/edit modals, and row actions. |
 | `crudPresetConfigSchema` | variable | Validate preset config for a CRUD page assembled from list/form primitives. |
-| `dashboardPage` | function | Builds a manifest `PageConfig` for a dashboard page.  Consumers drop the result into their manifest's `pages` record:  ```ts const manifest = {   pages: {     "/dashboard": dashboardPage({       title: "Overview",       stats: [         { label: "Total Users", endpoint: "GET /api/stats/users", valueKey: "count" },         { label: "Revenue", endpoint: "GET /api/stats/revenue", valueKey: "total", format: "currency" },         { label: "Orders", endpoint: "GET /api/stats/orders", valueKey: "total", format: "number" },         { label: "Conversion", endpoint: "GET /api/stats/conversion", valueKey: "rate", format: "percent" },       ],       recentActivity: "GET /api/activity",     }),   }, }; ``` |
+| `dashboardPage` | function | Builds a manifest `PageConfig` for a dashboard page. Consumers drop the result into their manifest's `pages` record: ```ts const manifest = {   pages: {     "/dashboard": dashboardPage({       title: "Overview",       stats: [         { label: "Total Users", endpoint: "GET /api/stats/users", valueKey: "count" },         { label: "Revenue", endpoint: "GET /api/stats/revenue", valueKey: "total", format: "currency" },         { label: "Orders", endpoint: "GET /api/stats/orders", valueKey: "total", format: "number" },         { label: "Conversion", endpoint: "GET /api/stats/conversion", valueKey: "rate", format: "percent" },       ],       recentActivity: "GET /api/activity",     }),   }, }; ``` |
 | `DashboardPageOptions` | interface | Options for the `dashboardPage` preset factory. Produces a dashboard with stat cards and an optional activity feed. |
 | `dashboardPresetConfigSchema` | variable | Validate preset config for a dashboard page with stats, charts, and activity sections. |
 | `EmptyStateDef` | interface | Empty-state content shown by preset-generated pages. |
@@ -5511,7 +5507,7 @@ the hook returns a loading state without throwing.
 | `FormFieldDef` | interface | A single form field definition. |
 | `FormFieldOption` | interface | An option entry for select/radio form fields. |
 | `PaginationDef` | interface | Pagination settings for preset-generated list surfaces. |
-| `settingsPage` | function | Builds a manifest `PageConfig` for a settings page.  Consumers drop the result into their manifest's `pages` record:  ```ts const manifest = {   pages: {     "/settings": settingsPage({       title: "Settings",       sections: [         {           label: "Profile",           submitEndpoint: "PATCH /api/me/profile",           dataEndpoint: "GET /api/me/profile",           fields: [             { key: "name", type: "text", label: "Name", required: true },             { key: "bio", type: "textarea", label: "Bio" },           ],         },         {           label: "Password",           submitEndpoint: "POST /api/me/password",           fields: [             { key: "currentPassword", type: "password", label: "Current Password", required: true },             { key: "newPassword", type: "password", label: "New Password", required: true },           ],         },       ],     }),   }, }; ``` |
+| `settingsPage` | function | Builds a manifest `PageConfig` for a settings page. Consumers drop the result into their manifest's `pages` record: ```ts const manifest = {   pages: {     "/settings": settingsPage({       title: "Settings",       sections: [         {           label: "Profile",           submitEndpoint: "PATCH /api/me/profile",           dataEndpoint: "GET /api/me/profile",           fields: [             { key: "name", type: "text", label: "Name", required: true },             { key: "bio", type: "textarea", label: "Bio" },           ],         },         {           label: "Password",           submitEndpoint: "POST /api/me/password",           fields: [             { key: "currentPassword", type: "password", label: "Current Password", required: true },             { key: "newPassword", type: "password", label: "New Password", required: true },           ],         },       ],     }),   }, }; ``` |
 | `SettingsPageOptions` | interface | Options for the `settingsPage` preset factory. Produces a settings page with a tab per section, each containing an AutoForm. |
 | `settingsPresetConfigSchema` | variable | Validate preset config for a settings page composed from one or more submitted sections. |
 | `SettingsSectionDef` | interface | A single settings section (one tab in the settings page). |
@@ -5519,13 +5515,13 @@ the hook returns a loading state without throwing.
 
 ### Details
 
-#### `authPage(options: AuthPageOptions) => { content: any[]; title?: string | undefined; roles?: string[] | undefined; breadcrumb?: string | undefined; }`
+#### `authPage(options: AuthPageOptions) => { content: { type: string; id?: string | undefined; }[]; title?: string | undefined; roles?: string[] | undefined; breadcrumb?: string | undefined; }`
 
 Build a manifest page config for a common auth screen.
 
 ---
 
-#### `crudPage(options: CrudPageOptions) => { content: any[]; title?: string | undefined; roles?: string[] | undefined; breadcrumb?: string | undefined; }`
+#### `crudPage(options: CrudPageOptions) => { content: { type: string; id?: string | undefined; }[]; title?: string | undefined; roles?: string[] | undefined; breadcrumb?: string | undefined; }`
 
 Builds a manifest `PageConfig` for a standard CRUD page.
 
@@ -5589,7 +5585,7 @@ const usersPage = crudPage({
 
 ---
 
-#### `dashboardPage(options: DashboardPageOptions) => { content: any[]; title?: string | undefined; roles?: string[] | undefined; breadcrumb?: string | undefined; }`
+#### `dashboardPage(options: DashboardPageOptions) => { content: { type: string; id?: string | undefined; }[]; title?: string | undefined; roles?: string[] | undefined; breadcrumb?: string | undefined; }`
 
 Builds a manifest `PageConfig` for a dashboard page.
 
@@ -5642,13 +5638,13 @@ const myDashboard = dashboardPage({
 
 ---
 
-#### `expandPreset(preset: string, presetConfig: unknown) => { content: any[]; title?: string | undefined; roles?: string[] | undefined; breadcrumb?: string | undefined; }`
+#### `expandPreset(preset: string, presetConfig: unknown) => { content: { type: string; id?: string | undefined; }[]; title?: string | undefined; roles?: string[] | undefined; breadcrumb?: string | undefined; }`
 
 Validate a named preset config and expand it into the equivalent page config.
 
 ---
 
-#### `settingsPage(options: SettingsPageOptions) => { content: any[]; title?: string | undefined; roles?: string[] | undefined; breadcrumb?: string | undefined; }`
+#### `settingsPage(options: SettingsPageOptions) => { content: { type: string; id?: string | undefined; }[]; title?: string | undefined; roles?: string[] | undefined; breadcrumb?: string | undefined; }`
 
 Builds a manifest `PageConfig` for a settings page.
 
@@ -5958,7 +5954,7 @@ Execute a workflow definition against the supplied runtime hooks and mutable con
 | `radiusSchema` | variable | No JSDoc description. |
 | `RefreshAction` | interface | No JSDoc description. |
 | `refreshActionSchema` | variable | No JSDoc description. |
-| `registerBuiltInComponents` | function | Register all built-in config-driven components with the manifest system.  The function is idempotent so boot code can call it safely without worrying about duplicate registrations. |
+| `registerBuiltInComponents` | function | Register all built-in config-driven components with the manifest system. The function is idempotent so boot code can call it safely without worrying about duplicate registrations. |
 | `registerLayout` | function | Register a named layout component for manifest layout resolution. |
 | `resetBuiltInComponentRegistration` | function | Reset the built-in component registration guard so tests can rebuild the registry. |
 | `resolveLayout` | function | Resolve a previously registered layout by name. |

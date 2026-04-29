@@ -129,9 +129,6 @@
 - `SseHookResult` *(interface)* — Return type of useSSE(endpoint)
 - `WebSocketManager` *(class)* — Per-instance WebSocket connection manager.
 
-### Schema Generation
-- `generateManifestSchema(options: GenerateOptions) => void` — Generate a JSON Schema for the snapshot manifest and write it to disk.
-
 ### Other
 - `DeleteAccountBody` *(interface)* — Request body for deleting the current account.
 - `RequestOptions` *(interface)* — Optional overrides for individual API client requests.
@@ -387,7 +384,7 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `generateBreadcrumbs(match: RouteMatch, config: BreadcrumbAutoConfig) => BreadcrumbItem[]` — Generate breadcrumb items from the current matched route hierarchy.
 - `generateJsonSchema() => Record<string, unknown>` — Generate a JSON Schema for snapshot manifests.
 - `getRegisteredGuards() => string[]` — List the names of all currently registered route guards.
-- `getRegisteredSchemaTypes() => string[]` — Return the currently registered manifest component type names.
+- `getRegisteredSchemaTypes() => string[]`
 - `HeadingConfig` *(typealias)* — Input shape for `headingConfigSchema` — defaulted fields are optional.
 - `headingConfigSchema` — Schema for the built-in `heading` component.
 - `injectStyleSheet(id: string, css: string) => void` — Inject or update a stylesheet in the document head.
@@ -416,7 +413,7 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `PushConfig` *(typealias)* — Input shape for `pushConfigSchema` — defaulted fields are optional.
 - `pushConfigSchema` — Manifest push-notification runtime configuration.
 - `registerComponent(type: string, component: ConfigDrivenComponent) => void` — Register a React component for a manifest component type string.
-- `registerComponentSchema(type: string, schema: ZodType<any, ZodTypeDef, any>) => void` — Register a component-specific manifest schema by component `type`.
+- `registerComponentSchema(type: string, schema: ZodType<any, ZodTypeDef, any>) => void`
 - `registerGuard(name: string, def: GuardDef) => void` — Register a named route guard implementation for manifest resolution.
 - `resetBootBuiltins() => void` — Reset the boot flag so tests can re-run built-in registration deterministically.
 - `resolveGuard(name: string) => GuardDef | undefined` — Resolve a previously registered route guard by name.
@@ -845,7 +842,7 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `CardBaseProps` *(interface)*
 - `CollapsibleBase({ id, open: controlledOpen, defaultOpen, duration: durationProp, onOpenChange, className, style, slot...` — Standalone Collapsible -- an animated expand/collapse container with an optional trigger.
 - `CollapsibleBaseProps` *(interface)*
-- `Column({ config }: { config: { type: "column"; children: any[]; background?: string | { size?: "auto" | "cover" | "co...`
+- `Column({ config }: { config: { type: "column"; children: ComponentConfigInput[]; background?: string | { size?: "auto...`
 - `ColumnBase({ id, gap: gapProp, align, justify, overflow, maxHeight, className, style, slots, children, }: ColumnBaseP...` — Standalone Column -- a vertical flex container.
 - `ColumnBaseProps` *(interface)*
 - `ContainerBase({ id, maxWidth, padding, center, className, style, slots, children, }: ContainerBaseProps) => Element` — Standalone Container -- a centered, max-width-constrained wrapper.
@@ -914,26 +911,26 @@ These are the hooks and methods available on the object returned by `createSnaps
 ### Page Presets
 - `ActivityFeedDef` *(interface)* — Feed section definition for dashboard-style presets.
 - `AuthBrandingDef` *(interface)* — Branding and background options for the auth page preset.
-- `authPage(options: AuthPageOptions) => { content: any[]; title?: string | undefined; roles?: string[] | undefined; bre...` — Build a manifest page config for a common auth screen.
+- `authPage(options: AuthPageOptions) => { content: { type: string; id?: string | undefined; }[]; title?: string | undef...` — Build a manifest page config for a common auth screen.
 - `AuthPageOptions` *(interface)* — Options for the `authPage` preset factory.
 - `authPresetConfigSchema` — Validate preset config for auth screens such as login, register, and password recovery.
 - `ChartDef` *(interface)* — Chart section definition for dashboard-style presets.
 - `ColumnDef` *(interface)* — A single column definition for the CRUD page table.
-- `crudPage(options: CrudPageOptions) => { content: any[]; title?: string | undefined; roles?: string[] | undefined; bre...` — Builds a manifest `PageConfig` for a standard CRUD page.
+- `crudPage(options: CrudPageOptions) => { content: { type: string; id?: string | undefined; }[]; title?: string | undef...` — Builds a manifest `PageConfig` for a standard CRUD page.
 - `CrudPageOptions` *(interface)* — Options for the `crudPage` preset factory.
 - `crudPresetConfigSchema` — Validate preset config for a CRUD page assembled from list/form primitives.
-- `dashboardPage(options: DashboardPageOptions) => { content: any[]; title?: string | undefined; roles?: string[] | unde...` — Builds a manifest `PageConfig` for a dashboard page.
+- `dashboardPage(options: DashboardPageOptions) => { content: { type: string; id?: string | undefined; }[]; title?: stri...` — Builds a manifest `PageConfig` for a dashboard page.
 - `DashboardPageOptions` *(interface)* — Options for the `dashboardPage` preset factory.
 - `dashboardPresetConfigSchema` — Validate preset config for a dashboard page with stats, charts, and activity sections.
 - `EmptyStateDef` *(interface)* — Empty-state content shown by preset-generated pages.
-- `expandPreset(preset: string, presetConfig: unknown) => { content: any[]; title?: string | undefined; roles?: string[]...` — Validate a named preset config and expand it into the equivalent page config.
+- `expandPreset(preset: string, presetConfig: unknown) => { content: { type: string; id?: string | undefined; }[]; title...` — Validate a named preset config and expand it into the equivalent page config.
 - `FilterDef` *(interface)* — A filter definition for the CRUD page toolbar.
 - `FilterOption` *(interface)* — A filter option entry.
 - `FormDef` *(interface)* — A form definition used in CRUD create/update modals and settings tabs.
 - `FormFieldDef` *(interface)* — A single form field definition.
 - `FormFieldOption` *(interface)* — An option entry for select/radio form fields.
 - `PaginationDef` *(interface)* — Pagination settings for preset-generated list surfaces.
-- `settingsPage(options: SettingsPageOptions) => { content: any[]; title?: string | undefined; roles?: string[] | undefi...` — Builds a manifest `PageConfig` for a settings page.
+- `settingsPage(options: SettingsPageOptions) => { content: { type: string; id?: string | undefined; }[]; title?: string...` — Builds a manifest `PageConfig` for a settings page.
 - `SettingsPageOptions` *(interface)* — Options for the `settingsPage` preset factory.
 - `settingsPresetConfigSchema` — Validate preset config for a settings page composed from one or more submitted sections.
 - `SettingsSectionDef` *(interface)* — A single settings section (one tab in the settings page).

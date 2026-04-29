@@ -46,7 +46,7 @@ describe("Outlet", () => {
           slots: {
             root: { className: "slot-root" },
           },
-          fallback: [{ type: "text", value: "Empty state" }],
+          fallback: [{ type: "text", value: "Empty state" }] as unknown as Array<{ type: string }>,
         }}
       />,
     );

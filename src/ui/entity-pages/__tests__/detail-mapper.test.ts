@@ -16,7 +16,7 @@ describe("mapEntityDetailPage", () => {
 
   it("builds heading actions for back, edit, and delete", () => {
     const result = mapEntityDetailPage(buildDetailResult());
-    const header = result.page.content[0] as {
+    const header = result.page.content[0] as unknown as {
       children: Array<{ type: string; children?: Array<{ label: string }> }>;
     };
     const buttonRow = header.children[1];

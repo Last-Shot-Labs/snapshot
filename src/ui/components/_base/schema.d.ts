@@ -18,19 +18,19 @@ export declare const styleableElementFields: {
         xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
     }, "strict", z.ZodTypeAny, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }>]>>;
     readonly flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
         default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -522,19 +522,19 @@ export declare const styleableElementSchema: z.ZodObject<{
         xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
     }, "strict", z.ZodTypeAny, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }>]>>;
     readonly flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
         default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -1009,22 +1009,14 @@ export declare const styleableElementSchema: z.ZodObject<{
         bg?: string | undefined;
     }>>;
 }, "strict", z.ZodTypeAny, {
+    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    cursor?: string | undefined;
     active?: {
         transform?: string | undefined;
         scale?: number | undefined;
         color?: string | undefined;
         bg?: string | undefined;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -1040,6 +1032,14 @@ export declare const styleableElementSchema: z.ZodObject<{
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
     flex?: string | number | undefined;
     className?: string | undefined;
     backgroundColor?: string | undefined;
@@ -1047,13 +1047,13 @@ export declare const styleableElementSchema: z.ZodObject<{
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -1173,7 +1173,7 @@ export declare const styleableElementSchema: z.ZodObject<{
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -1200,22 +1200,14 @@ export declare const styleableElementSchema: z.ZodObject<{
         borderRadius?: string | number | undefined;
     } | undefined;
 }, {
+    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    cursor?: string | undefined;
     active?: {
         transform?: string | undefined;
         scale?: number | undefined;
         color?: string | undefined;
         bg?: string | undefined;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -1231,6 +1223,14 @@ export declare const styleableElementSchema: z.ZodObject<{
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
     flex?: string | number | undefined;
     className?: string | undefined;
     backgroundColor?: string | undefined;
@@ -1238,13 +1238,13 @@ export declare const styleableElementSchema: z.ZodObject<{
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -1364,7 +1364,7 @@ export declare const styleableElementSchema: z.ZodObject<{
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -1408,19 +1408,19 @@ export declare const statefulElementSchema: z.ZodObject<{
         xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
     }, "strict", z.ZodTypeAny, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }>]>>;
     readonly flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
         default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -1912,19 +1912,19 @@ export declare const statefulElementSchema: z.ZodObject<{
             xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         }, "strict", z.ZodTypeAny, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }>]>>>;
         readonly flexDirection: z.ZodOptional<z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
             default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -2399,22 +2399,14 @@ export declare const statefulElementSchema: z.ZodObject<{
             bg?: string | undefined;
         }>>>;
     }, "strict", z.ZodTypeAny, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -2430,6 +2422,14 @@ export declare const statefulElementSchema: z.ZodObject<{
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -2437,13 +2437,13 @@ export declare const statefulElementSchema: z.ZodObject<{
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -2563,7 +2563,7 @@ export declare const statefulElementSchema: z.ZodObject<{
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -2590,22 +2590,14 @@ export declare const statefulElementSchema: z.ZodObject<{
             borderRadius?: string | number | undefined;
         } | undefined;
     }, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -2621,6 +2613,14 @@ export declare const statefulElementSchema: z.ZodObject<{
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -2628,13 +2628,13 @@ export declare const statefulElementSchema: z.ZodObject<{
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -2754,7 +2754,7 @@ export declare const statefulElementSchema: z.ZodObject<{
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -2782,22 +2782,14 @@ export declare const statefulElementSchema: z.ZodObject<{
         } | undefined;
     }>>>;
 }, "strict", z.ZodTypeAny, {
+    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    cursor?: string | undefined;
     active?: {
         transform?: string | undefined;
         scale?: number | undefined;
         color?: string | undefined;
         bg?: string | undefined;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -2813,6 +2805,14 @@ export declare const statefulElementSchema: z.ZodObject<{
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
     flex?: string | number | undefined;
     className?: string | undefined;
     backgroundColor?: string | undefined;
@@ -2820,13 +2820,13 @@ export declare const statefulElementSchema: z.ZodObject<{
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -2946,7 +2946,7 @@ export declare const statefulElementSchema: z.ZodObject<{
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -2972,23 +2972,15 @@ export declare const statefulElementSchema: z.ZodObject<{
         bg?: string | undefined;
         borderRadius?: string | number | undefined;
     } | undefined;
-    states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+    states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -3004,6 +2996,14 @@ export declare const statefulElementSchema: z.ZodObject<{
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -3011,13 +3011,13 @@ export declare const statefulElementSchema: z.ZodObject<{
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -3137,7 +3137,7 @@ export declare const statefulElementSchema: z.ZodObject<{
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -3165,22 +3165,14 @@ export declare const statefulElementSchema: z.ZodObject<{
         } | undefined;
     }>> | undefined;
 }, {
+    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    cursor?: string | undefined;
     active?: {
         transform?: string | undefined;
         scale?: number | undefined;
         color?: string | undefined;
         bg?: string | undefined;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -3196,6 +3188,14 @@ export declare const statefulElementSchema: z.ZodObject<{
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
     flex?: string | number | undefined;
     className?: string | undefined;
     backgroundColor?: string | undefined;
@@ -3203,13 +3203,13 @@ export declare const statefulElementSchema: z.ZodObject<{
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -3329,7 +3329,7 @@ export declare const statefulElementSchema: z.ZodObject<{
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -3355,23 +3355,15 @@ export declare const statefulElementSchema: z.ZodObject<{
         bg?: string | undefined;
         borderRadius?: string | number | undefined;
     } | undefined;
-    states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+    states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -3387,6 +3379,14 @@ export declare const statefulElementSchema: z.ZodObject<{
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -3394,13 +3394,13 @@ export declare const statefulElementSchema: z.ZodObject<{
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -3520,7 +3520,7 @@ export declare const statefulElementSchema: z.ZodObject<{
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -3565,19 +3565,19 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
     }, "strict", z.ZodTypeAny, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }>]>>;
     readonly flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
         default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -4069,19 +4069,19 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         }, "strict", z.ZodTypeAny, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }>]>>>;
         readonly flexDirection: z.ZodOptional<z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
             default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -4556,22 +4556,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             bg?: string | undefined;
         }>>>;
     }, "strict", z.ZodTypeAny, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -4587,6 +4579,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -4594,13 +4594,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -4720,7 +4720,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -4747,22 +4747,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             borderRadius?: string | number | undefined;
         } | undefined;
     }, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -4778,6 +4770,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -4785,13 +4785,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -4911,7 +4911,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -4939,22 +4939,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
     }>>>;
 }, "strict", z.ZodTypeAny, {
+    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    cursor?: string | undefined;
     active?: {
         transform?: string | undefined;
         scale?: number | undefined;
         color?: string | undefined;
         bg?: string | undefined;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -4970,6 +4962,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
     flex?: string | number | undefined;
     className?: string | undefined;
     backgroundColor?: string | undefined;
@@ -4977,13 +4977,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -5103,7 +5103,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -5129,23 +5129,15 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         bg?: string | undefined;
         borderRadius?: string | number | undefined;
     } | undefined;
-    states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+    states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -5161,6 +5153,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -5168,13 +5168,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -5294,7 +5294,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -5322,22 +5322,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
     }>> | undefined;
 }, {
+    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    cursor?: string | undefined;
     active?: {
         transform?: string | undefined;
         scale?: number | undefined;
         color?: string | undefined;
         bg?: string | undefined;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -5353,6 +5345,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
     flex?: string | number | undefined;
     className?: string | undefined;
     backgroundColor?: string | undefined;
@@ -5360,13 +5360,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -5486,7 +5486,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -5512,23 +5512,15 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         bg?: string | undefined;
         borderRadius?: string | number | undefined;
     } | undefined;
-    states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+    states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -5544,6 +5536,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -5551,13 +5551,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -5677,7 +5677,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -5721,19 +5721,19 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
     }, "strict", z.ZodTypeAny, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }>]>>;
     readonly flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
         default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -6225,19 +6225,19 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         }, "strict", z.ZodTypeAny, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }>]>>>;
         readonly flexDirection: z.ZodOptional<z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
             default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -6712,22 +6712,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             bg?: string | undefined;
         }>>>;
     }, "strict", z.ZodTypeAny, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -6743,6 +6735,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -6750,13 +6750,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -6876,7 +6876,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -6903,22 +6903,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             borderRadius?: string | number | undefined;
         } | undefined;
     }, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -6934,6 +6926,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -6941,13 +6941,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -7067,7 +7067,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -7095,22 +7095,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
     }>>>;
 }, "strict", z.ZodTypeAny, {
+    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    cursor?: string | undefined;
     active?: {
         transform?: string | undefined;
         scale?: number | undefined;
         color?: string | undefined;
         bg?: string | undefined;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -7126,6 +7118,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
     flex?: string | number | undefined;
     className?: string | undefined;
     backgroundColor?: string | undefined;
@@ -7133,13 +7133,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -7259,7 +7259,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -7285,23 +7285,15 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         bg?: string | undefined;
         borderRadius?: string | number | undefined;
     } | undefined;
-    states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+    states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -7317,6 +7309,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -7324,13 +7324,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -7450,7 +7450,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -7478,22 +7478,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
     }>> | undefined;
 }, {
+    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    cursor?: string | undefined;
     active?: {
         transform?: string | undefined;
         scale?: number | undefined;
         color?: string | undefined;
         bg?: string | undefined;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -7509,6 +7501,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
     flex?: string | number | undefined;
     className?: string | undefined;
     backgroundColor?: string | undefined;
@@ -7516,13 +7516,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -7642,7 +7642,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -7668,23 +7668,15 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         bg?: string | undefined;
         borderRadius?: string | number | undefined;
     } | undefined;
-    states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+    states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -7700,6 +7692,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -7707,13 +7707,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -7833,7 +7833,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -7877,19 +7877,19 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
     }, "strict", z.ZodTypeAny, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }>]>>;
     readonly flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
         default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -8381,19 +8381,19 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         }, "strict", z.ZodTypeAny, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }>]>>>;
         readonly flexDirection: z.ZodOptional<z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
             default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -8868,22 +8868,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             bg?: string | undefined;
         }>>>;
     }, "strict", z.ZodTypeAny, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -8899,6 +8891,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -8906,13 +8906,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -9032,7 +9032,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -9059,22 +9059,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             borderRadius?: string | number | undefined;
         } | undefined;
     }, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -9090,6 +9082,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -9097,13 +9097,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -9223,7 +9223,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -9251,22 +9251,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
     }>>>;
 }, "strict", z.ZodTypeAny, {
+    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    cursor?: string | undefined;
     active?: {
         transform?: string | undefined;
         scale?: number | undefined;
         color?: string | undefined;
         bg?: string | undefined;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -9282,6 +9274,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
     flex?: string | number | undefined;
     className?: string | undefined;
     backgroundColor?: string | undefined;
@@ -9289,13 +9289,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -9415,7 +9415,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -9441,23 +9441,15 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         bg?: string | undefined;
         borderRadius?: string | number | undefined;
     } | undefined;
-    states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+    states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -9473,6 +9465,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -9480,13 +9480,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -9606,7 +9606,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -9634,22 +9634,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
     }>> | undefined;
 }, {
+    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    cursor?: string | undefined;
     active?: {
         transform?: string | undefined;
         scale?: number | undefined;
         color?: string | undefined;
         bg?: string | undefined;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -9665,6 +9657,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
     flex?: string | number | undefined;
     className?: string | undefined;
     backgroundColor?: string | undefined;
@@ -9672,13 +9672,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -9798,7 +9798,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -9824,23 +9824,15 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         bg?: string | undefined;
         borderRadius?: string | number | undefined;
     } | undefined;
-    states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+    states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -9856,6 +9848,14 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -9863,13 +9863,13 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -9989,7 +9989,7 @@ export declare function slotsSchema<const T extends readonly [string, ...string[
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -10034,19 +10034,19 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
         xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
     }, "strict", z.ZodTypeAny, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }>]>>;
     flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
         default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -10523,23 +10523,17 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
     id: z.ZodOptional<z.ZodString>;
     tokens: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
     visibleWhen: z.ZodOptional<z.ZodString>;
-    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
-        from: z.ZodString;
-        transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
-        transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
-    }, "strict", z.ZodTypeAny, {
+    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodType<{
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }, z.ZodTypeDef, {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }>, z.ZodObject<{
-        expr: z.ZodString;
-    }, "strict", z.ZodTypeAny, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }>, z.ZodType<{
         expr: string;
-    }, {
+    }, z.ZodTypeDef, {
         expr: string;
     }>]>>;
     sticky: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
@@ -10547,10 +10541,10 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
         zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
     }, "strict", z.ZodTypeAny, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }>]>>;
     zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
     animation: z.ZodOptional<z.ZodObject<{
@@ -10698,19 +10692,19 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         }, "strict", z.ZodTypeAny, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }>]>>;
         readonly flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
             default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -11202,19 +11196,19 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
                 "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             }, "strict", z.ZodTypeAny, {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             }, {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             }>]>>>;
             readonly flexDirection: z.ZodOptional<z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
                 default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -11689,22 +11683,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 bg?: string | undefined;
             }>>>;
         }, "strict", z.ZodTypeAny, {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -11720,6 +11706,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -11727,13 +11721,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -11853,7 +11847,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -11880,22 +11874,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 borderRadius?: string | number | undefined;
             } | undefined;
         }, {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -11911,6 +11897,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -11918,13 +11912,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -12044,7 +12038,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -12072,22 +12066,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             } | undefined;
         }>>>;
     }, "strict", z.ZodTypeAny, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -12103,6 +12089,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -12110,13 +12104,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -12236,7 +12230,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -12262,23 +12256,15 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             bg?: string | undefined;
             borderRadius?: string | number | undefined;
         } | undefined;
-        states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+        states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -12294,6 +12280,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -12301,13 +12295,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -12427,7 +12421,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -12455,22 +12449,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             } | undefined;
         }>> | undefined;
     }, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -12486,6 +12472,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -12493,13 +12487,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -12619,7 +12613,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -12645,23 +12639,15 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             bg?: string | undefined;
             borderRadius?: string | number | undefined;
         } | undefined;
-        states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+        states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -12677,6 +12663,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -12684,13 +12678,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -12810,7 +12804,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -12839,22 +12833,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
         }>> | undefined;
     }>>>, "strict", z.ZodTypeAny, {
         root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -12870,6 +12856,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -12877,13 +12871,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -13003,7 +12997,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -13029,23 +13023,15 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -13061,6 +13047,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -13068,13 +13062,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -13194,7 +13188,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -13224,22 +13218,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
         } | undefined;
     }, {
         root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -13255,6 +13241,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -13262,13 +13256,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -13388,7 +13382,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -13414,23 +13408,15 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -13446,6 +13432,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -13453,13 +13447,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -13579,7 +13573,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -13610,31 +13604,12 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
     }>>;
 }, "strip", z.ZodTypeAny, {
     id?: string | undefined;
-    active?: {
-        transform?: string | undefined;
-        scale?: number | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
-        property: string;
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        easing?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
     position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     sticky?: boolean | {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     } | undefined;
+    cursor?: string | undefined;
     background?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -13649,6 +13624,12 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             direction?: string | undefined;
         } | undefined;
         fixed?: boolean | undefined;
+    } | undefined;
+    active?: {
+        transform?: string | undefined;
+        scale?: number | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
     } | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
@@ -13665,10 +13646,23 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
+    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
+        property: string;
+        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
+        easing?: string | undefined;
+    } | undefined;
     visible?: boolean | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     } | {
         expr: string;
     } | undefined;
@@ -13679,13 +13673,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -13805,7 +13799,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -13833,7 +13827,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
     } | undefined;
     tokens?: Record<string, string> | undefined;
     visibleWhen?: string | undefined;
-    zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+    zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     animation?: {
         enter: "scale" | "fade" | "fade-up" | "fade-down" | "slide-left" | "slide-right" | "bounce";
         duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
@@ -13856,22 +13850,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
     } | undefined;
     slots?: {
         root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -13887,6 +13873,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -13894,13 +13888,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -14020,7 +14014,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -14046,23 +14040,15 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -14078,6 +14064,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -14085,13 +14079,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -14211,7 +14205,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -14242,31 +14236,12 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
     } | undefined;
 }, {
     id?: string | undefined;
-    active?: {
-        transform?: string | undefined;
-        scale?: number | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        easing?: string | undefined;
-        property?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
     position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
     sticky?: boolean | {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     } | undefined;
+    cursor?: string | undefined;
     background?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -14281,6 +14256,12 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             direction?: string | undefined;
         } | undefined;
         fixed?: boolean | undefined;
+    } | undefined;
+    active?: {
+        transform?: string | undefined;
+        scale?: number | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
     } | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
@@ -14297,10 +14278,23 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
+    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
+        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
+        easing?: string | undefined;
+        property?: string | undefined;
+    } | undefined;
     visible?: boolean | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     } | {
         expr: string;
     } | undefined;
@@ -14311,13 +14305,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -14437,7 +14431,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -14465,7 +14459,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
     } | undefined;
     tokens?: Record<string, string> | undefined;
     visibleWhen?: string | undefined;
-    zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+    zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     animation?: {
         enter: "scale" | "fade" | "fade-up" | "fade-down" | "slide-left" | "slide-right" | "bounce";
         duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
@@ -14488,22 +14482,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
     } | undefined;
     slots?: {
         root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -14519,6 +14505,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -14526,13 +14520,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -14652,7 +14646,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -14678,23 +14672,15 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -14710,6 +14696,14 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -14717,13 +14711,13 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -14843,7 +14837,7 @@ export declare const extendedBaseComponentSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -14890,19 +14884,19 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
     }, "strict", z.ZodTypeAny, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }>]>>;
     flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
         default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -15379,23 +15373,17 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
     id: z.ZodOptional<z.ZodString>;
     tokens: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
     visibleWhen: z.ZodOptional<z.ZodString>;
-    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
-        from: z.ZodString;
-        transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
-        transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
-    }, "strict", z.ZodTypeAny, {
+    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodType<{
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }, z.ZodTypeDef, {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }>, z.ZodObject<{
-        expr: z.ZodString;
-    }, "strict", z.ZodTypeAny, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }>, z.ZodType<{
         expr: string;
-    }, {
+    }, z.ZodTypeDef, {
         expr: string;
     }>]>>;
     sticky: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
@@ -15403,10 +15391,10 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
     }, "strict", z.ZodTypeAny, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }>]>>;
     zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
     animation: z.ZodOptional<z.ZodObject<{
@@ -15554,19 +15542,19 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         }, "strict", z.ZodTypeAny, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }>]>>;
         readonly flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
             default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -16058,19 +16046,19 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
                 "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             }, "strict", z.ZodTypeAny, {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             }, {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             }>]>>>;
             readonly flexDirection: z.ZodOptional<z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
                 default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -16545,22 +16533,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 bg?: string | undefined;
             }>>>;
         }, "strict", z.ZodTypeAny, {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -16576,6 +16556,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -16583,13 +16571,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -16709,7 +16697,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -16736,22 +16724,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 borderRadius?: string | number | undefined;
             } | undefined;
         }, {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -16767,6 +16747,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -16774,13 +16762,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -16900,7 +16888,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -16928,22 +16916,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
         }>>>;
     }, "strict", z.ZodTypeAny, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -16959,6 +16939,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -16966,13 +16954,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -17092,7 +17080,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -17118,23 +17106,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             bg?: string | undefined;
             borderRadius?: string | number | undefined;
         } | undefined;
-        states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+        states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -17150,6 +17130,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -17157,13 +17145,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -17283,7 +17271,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -17311,22 +17299,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
         }>> | undefined;
     }, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -17342,6 +17322,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -17349,13 +17337,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -17475,7 +17463,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -17501,23 +17489,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             bg?: string | undefined;
             borderRadius?: string | number | undefined;
         } | undefined;
-        states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+        states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -17533,6 +17513,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -17540,13 +17528,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -17666,7 +17654,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -17695,22 +17683,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         }>> | undefined;
     }>>>, "strict", z.ZodTypeAny, {
         root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -17726,6 +17706,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -17733,13 +17721,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -17859,7 +17847,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -17885,23 +17873,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -17917,6 +17897,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -17924,13 +17912,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -18050,7 +18038,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -18080,22 +18068,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         } | undefined;
     }, {
         root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -18111,6 +18091,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -18118,13 +18106,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -18244,7 +18232,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -18270,23 +18258,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -18302,6 +18282,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -18309,13 +18297,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -18435,7 +18423,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -18481,19 +18469,19 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
     }, "strict", z.ZodTypeAny, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }>]>>;
     flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
         default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -18970,23 +18958,17 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
     id: z.ZodOptional<z.ZodString>;
     tokens: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
     visibleWhen: z.ZodOptional<z.ZodString>;
-    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
-        from: z.ZodString;
-        transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
-        transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
-    }, "strict", z.ZodTypeAny, {
+    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodType<{
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }, z.ZodTypeDef, {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }>, z.ZodObject<{
-        expr: z.ZodString;
-    }, "strict", z.ZodTypeAny, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }>, z.ZodType<{
         expr: string;
-    }, {
+    }, z.ZodTypeDef, {
         expr: string;
     }>]>>;
     sticky: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
@@ -18994,10 +18976,10 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
     }, "strict", z.ZodTypeAny, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }>]>>;
     zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
     animation: z.ZodOptional<z.ZodObject<{
@@ -19145,19 +19127,19 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         }, "strict", z.ZodTypeAny, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }>]>>;
         readonly flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
             default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -19649,19 +19631,19 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
                 "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             }, "strict", z.ZodTypeAny, {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             }, {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             }>]>>>;
             readonly flexDirection: z.ZodOptional<z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
                 default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -20136,22 +20118,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 bg?: string | undefined;
             }>>>;
         }, "strict", z.ZodTypeAny, {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -20167,6 +20141,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -20174,13 +20156,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -20300,7 +20282,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -20327,22 +20309,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 borderRadius?: string | number | undefined;
             } | undefined;
         }, {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -20358,6 +20332,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -20365,13 +20347,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -20491,7 +20473,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -20519,22 +20501,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
         }>>>;
     }, "strict", z.ZodTypeAny, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -20550,6 +20524,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -20557,13 +20539,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -20683,7 +20665,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -20709,23 +20691,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             bg?: string | undefined;
             borderRadius?: string | number | undefined;
         } | undefined;
-        states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+        states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -20741,6 +20715,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -20748,13 +20730,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -20874,7 +20856,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -20902,22 +20884,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
         }>> | undefined;
     }, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -20933,6 +20907,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -20940,13 +20922,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -21066,7 +21048,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -21092,23 +21074,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             bg?: string | undefined;
             borderRadius?: string | number | undefined;
         } | undefined;
-        states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+        states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -21124,6 +21098,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -21131,13 +21113,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -21257,7 +21239,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -21286,22 +21268,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         }>> | undefined;
     }>>>, "strict", z.ZodTypeAny, {
         root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -21317,6 +21291,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -21324,13 +21306,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -21450,7 +21432,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -21476,23 +21458,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -21508,6 +21482,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -21515,13 +21497,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -21641,7 +21623,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -21671,22 +21653,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         } | undefined;
     }, {
         root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -21702,6 +21676,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -21709,13 +21691,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -21835,7 +21817,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -21861,23 +21843,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -21893,6 +21867,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -21900,13 +21882,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -22026,7 +22008,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -22072,19 +22054,19 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
     }, "strict", z.ZodTypeAny, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }>]>>;
     flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
         default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -22561,23 +22543,17 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
     id: z.ZodOptional<z.ZodString>;
     tokens: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
     visibleWhen: z.ZodOptional<z.ZodString>;
-    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
-        from: z.ZodString;
-        transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
-        transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
-    }, "strict", z.ZodTypeAny, {
+    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodType<{
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }, z.ZodTypeDef, {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }>, z.ZodObject<{
-        expr: z.ZodString;
-    }, "strict", z.ZodTypeAny, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }>, z.ZodType<{
         expr: string;
-    }, {
+    }, z.ZodTypeDef, {
         expr: string;
     }>]>>;
     sticky: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
@@ -22585,10 +22561,10 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
     }, "strict", z.ZodTypeAny, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }>]>>;
     zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
     animation: z.ZodOptional<z.ZodObject<{
@@ -22736,19 +22712,19 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         }, "strict", z.ZodTypeAny, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }>]>>;
         readonly flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
             default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -23240,19 +23216,19 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
                 "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             }, "strict", z.ZodTypeAny, {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             }, {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             }>]>>>;
             readonly flexDirection: z.ZodOptional<z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
                 default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -23727,22 +23703,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 bg?: string | undefined;
             }>>>;
         }, "strict", z.ZodTypeAny, {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -23758,6 +23726,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -23765,13 +23741,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -23891,7 +23867,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -23918,22 +23894,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 borderRadius?: string | number | undefined;
             } | undefined;
         }, {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -23949,6 +23917,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -23956,13 +23932,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -24082,7 +24058,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -24110,22 +24086,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
         }>>>;
     }, "strict", z.ZodTypeAny, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -24141,6 +24109,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -24148,13 +24124,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -24274,7 +24250,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -24300,23 +24276,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             bg?: string | undefined;
             borderRadius?: string | number | undefined;
         } | undefined;
-        states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+        states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -24332,6 +24300,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -24339,13 +24315,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -24465,7 +24441,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -24493,22 +24469,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
         }>> | undefined;
     }, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -24524,6 +24492,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -24531,13 +24507,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -24657,7 +24633,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -24683,23 +24659,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             bg?: string | undefined;
             borderRadius?: string | number | undefined;
         } | undefined;
-        states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+        states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -24715,6 +24683,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -24722,13 +24698,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -24848,7 +24824,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -24877,22 +24853,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         }>> | undefined;
     }>>>, "strict", z.ZodTypeAny, {
         root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -24908,6 +24876,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -24915,13 +24891,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -25041,7 +25017,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -25067,23 +25043,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -25099,6 +25067,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -25106,13 +25082,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -25232,7 +25208,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -25262,22 +25238,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
         } | undefined;
     }, {
         root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -25293,6 +25261,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -25300,13 +25276,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -25426,7 +25402,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -25452,23 +25428,15 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -25484,6 +25452,14 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -25491,13 +25467,13 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -25617,7 +25593,7 @@ export declare function extendComponentSchema<T extends z.ZodRawShape>(shape: T)
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;

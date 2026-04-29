@@ -147,7 +147,7 @@ describe("PageRenderer", () => {
       content: [
         { type: "heading", text: "Page Title", level: 1 },
         { type: "heading", text: "Subtitle", level: 2 },
-      ],
+      ] as ComponentConfig[],
     };
 
     render(<PageRenderer page={page} />);
@@ -158,7 +158,7 @@ describe("PageRenderer", () => {
   it("wraps content in a data-snapshot-page div", () => {
     const page: PageConfig = {
       title: "Test Page",
-      content: [{ type: "heading", text: "Hello" }],
+      content: [{ type: "heading", text: "Hello" }] as ComponentConfig[],
     };
 
     const { container } = render(<PageRenderer page={page} />);
@@ -172,7 +172,7 @@ describe("PageRenderer", () => {
         { type: "heading", text: "First" },
         { type: "heading", text: "Second" },
         { type: "heading", text: "Third" },
-      ],
+      ] as ComponentConfig[],
     };
 
     const { container } = render(<PageRenderer page={page} />);

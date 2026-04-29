@@ -24,7 +24,7 @@ describe("Stack", () => {
           gap: "md",
           align: "stretch",
           justify: "start",
-          children: [{ type: "text", id: "child-a", value: "Hello" }],
+          children: [{ type: "text", id: "child-a", value: "Hello" }] as unknown as Array<{ type: string }>,
           slots: {
             root: { className: "stack-root-slot" },
             item: { className: "stack-item-slot" },

@@ -118,7 +118,9 @@ Total components: **114** across 13 domains.
 
 ### `nav`
 
-Zod schema for the grouped Nav component.Supports either `items`-driven navigation or template composition, optional logo and user menuconfiguration, collapsible sidebar behavior, and canonical slot-based surface styling.
+Zod schema for the grouped Nav component.
+Supports either `items`-driven navigation or template composition, optional logo and user menu
+configuration, collapsible sidebar behavior, and canonical slot-based surface styling.
 
 | Field | Type | Default | Required |
 |-------|------|---------|----------|
@@ -398,7 +400,19 @@ Zod schema for the grouped Nav component.Supports either `items`-driven navigat
 
 ### `inline-edit`
 
-Zod config schema for the InlineEdit component.A click-to-edit text field that toggles between display and edit modes.Publishes `{ value, editing }` to the page context.```json{  "type": "inline-edit",  "id": "title-edit",  "value": "My Title",  "placeholder": "Enter title",  "saveAction": { "type": "api", "method": "PUT", "endpoint": "/api/title", "body": { "from": "title-edit" } }}```
+Zod config schema for the InlineEdit component.
+A click-to-edit text field that toggles between display and edit modes.
+Publishes `{ value, editing }` to the page context.
+
+```json
+{
+  "type": "inline-edit",
+  "id": "title-edit",
+  "value": "My Title",
+  "placeholder": "Enter title",
+  "saveAction": { "type": "api", "method": "PUT", "endpoint": "/api/title", "body": { "from": "title-edit" } }
+}
+```
 
 **Manifest type:** `inline-edit`
 
@@ -416,7 +430,21 @@ Zod config schema for the InlineEdit component.A click-to-edit text field that 
 
 ### `input`
 
-Zod config schema for the Input component.Defines a standalone text input field with label, placeholder,validation, and optional icon.```json{  "type": "input",  "id": "email-field",  "label": "Email",  "inputType": "email",  "placeholder": "you  "required": true,  "helperText": "We'll never share your email"}```
+Zod config schema for the Input component.
+Defines a standalone text input field with label, placeholder,
+validation, and optional icon.
+
+```json
+{
+  "type": "input",
+  "id": "email-field",
+  "label": "Email",
+  "inputType": "email",
+  "placeholder": "you
+  "required": true,
+  "helperText": "We'll never share your email"
+}
+```
 
 **Manifest type:** `input`
 
@@ -440,7 +468,36 @@ Zod config schema for the Input component.Defines a standalone text input field
 
 ### `location-input`
 
-Zod config schema for the LocationInput component.Geocode autocomplete input that searches a backend endpoint,displays matching locations in a dropdown, and extractscoordinates on selection. Publishes `{ name, lat, lng, address }`.```json{  "type": "location-input",  "id": "venue-location",  "label": "Venue",  "placeholder": "Search for a location...",  "searchEndpoint": "GET /api/geocode",  "changeAction": {    "type": "set-value",    "target": "map",    "value": { "from": "venue-location" }  }}```Expected API response format:```json[  {    "name": "Central Park",    "address": "New York, NY, USA",    "lat": 40.7829,    "lng": -73.9654  }]```
+Zod config schema for the LocationInput component.
+Geocode autocomplete input that searches a backend endpoint,
+displays matching locations in a dropdown, and extracts
+coordinates on selection. Publishes `{ name, lat, lng, address }`.
+
+```json
+{
+  "type": "location-input",
+  "id": "venue-location",
+  "label": "Venue",
+  "placeholder": "Search for a location...",
+  "searchEndpoint": "GET /api/geocode",
+  "changeAction": {
+    "type": "set-value",
+    "target": "map",
+    "value": { "from": "venue-location" }
+  }
+}
+```
+Expected API response format:
+```json
+[
+  {
+    "name": "Central Park",
+    "address": "New York, NY, USA",
+    "lat": 40.7829,
+    "lng": -73.9654
+  }
+]
+```
 
 **Manifest type:** `location-input`
 
@@ -467,7 +524,25 @@ Zod config schema for the LocationInput component.Geocode autocomplete input th
 
 ### `multi-select`
 
-Zod config schema for the MultiSelect component.Defines a dropdown with checkboxes for selecting multiple values,with optional search filtering and pill display.```json{  "type": "multi-select",  "id": "tags",  "label": "Tags",  "placeholder": "Select tags...",  "options": [    { "label": "Bug", "value": "bug", "icon": "bug" },    { "label": "Feature", "value": "feature", "icon": "star" },    { "label": "Docs", "value": "docs", "icon": "file-text" }  ],  "maxSelected": 5,  "searchable": true}```
+Zod config schema for the MultiSelect component.
+Defines a dropdown with checkboxes for selecting multiple values,
+with optional search filtering and pill display.
+
+```json
+{
+  "type": "multi-select",
+  "id": "tags",
+  "label": "Tags",
+  "placeholder": "Select tags...",
+  "options": [
+    { "label": "Bug", "value": "bug", "icon": "bug" },
+    { "label": "Feature", "value": "feature", "icon": "star" },
+    { "label": "Docs", "value": "docs", "icon": "file-text" }
+  ],
+  "maxSelected": 5,
+  "searchable": true
+}
+```
 
 **Manifest type:** `multi-select`
 
@@ -489,7 +564,18 @@ Zod config schema for the MultiSelect component.Defines a dropdown with checkbo
 
 ### `quick-add`
 
-Zod config schema for the QuickAdd component.Defines all manifest-settable fields for an inline creation barthat allows quick item entry with a text input and submit button.```json{  "type": "quick-add",  "placeholder": "Add a task...",  "submitAction": { "type": "api", "method": "POST", "endpoint": "/api/tasks" },  "clearOnSubmit": true}```
+Zod config schema for the QuickAdd component.
+Defines all manifest-settable fields for an inline creation bar
+that allows quick item entry with a text input and submit button.
+
+```json
+{
+  "type": "quick-add",
+  "placeholder": "Add a task...",
+  "submitAction": { "type": "api", "method": "POST", "endpoint": "/api/tasks" },
+  "clearOnSubmit": true
+}
+```
 
 **Manifest type:** `quick-add`
 
@@ -542,7 +628,19 @@ Zod config schema for the QuickAdd component.Defines all manifest-settable fiel
 
 ### `switch`
 
-Zod config schema for the Switch component.Defines all manifest-settable fields for a toggle switchthat controls a boolean value.```json{  "type": "switch",  "label": "Enable notifications",  "description": "Receive email alerts for new activity",  "defaultChecked": false,  "color": "success"}```
+Zod config schema for the Switch component.
+Defines all manifest-settable fields for a toggle switch
+that controls a boolean value.
+
+```json
+{
+  "type": "switch",
+  "label": "Enable notifications",
+  "description": "Receive email alerts for new activity",
+  "defaultChecked": false,
+  "color": "success"
+}
+```
 
 **Manifest type:** `switch`
 
@@ -559,7 +657,23 @@ Zod config schema for the Switch component.Defines all manifest-settable fields
 
 ### `tag-selector`
 
-Zod config schema for the TagSelector component.A tag input that allows selecting from predefined tags or creating new ones.Tags display as colored pills with remove buttons.```json{  "type": "tag-selector",  "id": "topic-tags",  "label": "Topics",  "tags": [    { "label": "React", "value": "react", "color": "#61dafb" },    { "label": "TypeScript", "value": "ts", "color": "#3178c6" }  ],  "allowCreate": true,  "maxTags": 5}```
+Zod config schema for the TagSelector component.
+A tag input that allows selecting from predefined tags or creating new ones.
+Tags display as colored pills with remove buttons.
+
+```json
+{
+  "type": "tag-selector",
+  "id": "topic-tags",
+  "label": "Topics",
+  "tags": [
+    { "label": "React", "value": "react", "color": "#61dafb" },
+    { "label": "TypeScript", "value": "ts", "color": "#3178c6" }
+  ],
+  "allowCreate": true,
+  "maxTags": 5
+}
+```
 
 **Manifest type:** `tag-selector`
 
@@ -581,7 +695,21 @@ Zod config schema for the TagSelector component.A tag input that allows selecti
 
 ### `textarea`
 
-Zod config schema for the Textarea component.Defines a multi-line text input with label, character count,validation, and configurable resize behavior.```json{  "type": "textarea",  "id": "bio-field",  "label": "Bio",  "placeholder": "Tell us about yourself...",  "rows": 5,  "maxLength": 500,  "resize": "vertical"}```
+Zod config schema for the Textarea component.
+Defines a multi-line text input with label, character count,
+validation, and configurable resize behavior.
+
+```json
+{
+  "type": "textarea",
+  "id": "bio-field",
+  "label": "Bio",
+  "placeholder": "Tell us about yourself...",
+  "rows": 5,
+  "maxLength": 500,
+  "resize": "vertical"
+}
+```
 
 **Manifest type:** `textarea`
 
@@ -604,7 +732,20 @@ Zod config schema for the Textarea component.Defines a multi-line text input wi
 
 ### `toggle`
 
-Zod config schema for the Toggle component.Defines a pressed/unpressed toggle button that publishes its state.Can display text, an icon, or both.```json{  "type": "toggle",  "id": "bold-toggle",  "icon": "bold",  "label": "Bold",  "variant": "outline",  "size": "sm"}```
+Zod config schema for the Toggle component.
+Defines a pressed/unpressed toggle button that publishes its state.
+Can display text, an icon, or both.
+
+```json
+{
+  "type": "toggle",
+  "id": "bold-toggle",
+  "icon": "bold",
+  "label": "Bold",
+  "variant": "outline",
+  "size": "sm"
+}
+```
 
 **Manifest type:** `toggle`
 
@@ -659,7 +800,19 @@ Zod config schema for the Toggle component.Defines a pressed/unpressed toggle b
 
 ### `alert`
 
-Zod config schema for the Alert component.Defines all manifest-settable fields for a notification banner/alertwith icon, title, description, and optional action button.```json{  "type": "alert",  "title": "Success",  "description": "Your changes have been saved.",  "variant": "success",  "dismissible": true}```
+Zod config schema for the Alert component.
+Defines all manifest-settable fields for a notification banner/alert
+with icon, title, description, and optional action button.
+
+```json
+{
+  "type": "alert",
+  "title": "Success",
+  "description": "Your changes have been saved.",
+  "variant": "success",
+  "dismissible": true
+}
+```
 
 **Manifest type:** `alert`
 
@@ -707,7 +860,24 @@ with image, initials, or icon fallback and optional status dot.
 
 ### `avatar-group`
 
-Zod config schema for the AvatarGroup component.Displays a row of overlapping avatars with an optional "+N" overflowcount. Commonly used for showing team members, assignees, or participants.```json{  "type": "avatar-group",  "avatars": [    { "name": "Alice", "src": "/avatars/alice.jpg" },    { "name": "Bob" },    { "name": "Charlie", "src": "/avatars/charlie.jpg" },    { "name": "Diana" },    { "name": "Eve" }  ],  "max": 3,  "size": "md"}```
+Zod config schema for the AvatarGroup component.
+Displays a row of overlapping avatars with an optional "+N" overflow
+count. Commonly used for showing team members, assignees, or participants.
+
+```json
+{
+  "type": "avatar-group",
+  "avatars": [
+    { "name": "Alice", "src": "/avatars/alice.jpg" },
+    { "name": "Bob" },
+    { "name": "Charlie", "src": "/avatars/charlie.jpg" },
+    { "name": "Diana" },
+    { "name": "Eve" }
+  ],
+  "max": 3,
+  "size": "md"
+}
+```
 
 **Manifest type:** `avatar-group`
 
@@ -838,7 +1008,20 @@ used for labels, statuses, and counts.
 
 ### `empty-state`
 
-Zod config schema for the EmptyState component.Defines all manifest-settable fields for a placeholder shownwhen there is no data to display.```json{  "type": "empty-state",  "title": "No results found",  "description": "Try adjusting your search or filters.",  "icon": "search",  "actionLabel": "Clear filters",  "action": { "type": "set-value", "target": "filters", "value": {} }}```
+Zod config schema for the EmptyState component.
+Defines all manifest-settable fields for a placeholder shown
+when there is no data to display.
+
+```json
+{
+  "type": "empty-state",
+  "title": "No results found",
+  "description": "Try adjusting your search or filters.",
+  "icon": "search",
+  "actionLabel": "Clear filters",
+  "action": { "type": "set-value", "target": "filters", "value": {} }
+}
+```
 
 **Manifest type:** `empty-state`
 
@@ -856,7 +1039,23 @@ Zod config schema for the EmptyState component.Defines all manifest-settable fi
 
 ### `entity-picker`
 
-Zod config schema for the EntityPicker component.A searchable dropdown for selecting entities (users, documents, items)from an API endpoint. Supports single and multi-select.```json{  "type": "entity-picker",  "id": "user-picker",  "label": "Assign to...",  "data": "GET /api/users",  "labelField": "name",  "valueField": "id",  "descriptionField": "email",  "avatarField": "avatar_url",  "multiple": true}```
+Zod config schema for the EntityPicker component.
+A searchable dropdown for selecting entities (users, documents, items)
+from an API endpoint. Supports single and multi-select.
+
+```json
+{
+  "type": "entity-picker",
+  "id": "user-picker",
+  "label": "Assign to...",
+  "data": "GET /api/users",
+  "labelField": "name",
+  "valueField": "id",
+  "descriptionField": "email",
+  "avatarField": "avatar_url",
+  "multiple": true
+}
+```
 
 **Manifest type:** `entity-picker`
 
@@ -903,7 +1102,25 @@ used to mark items as favorites.
 
 ### `feed`
 
-Zod schema for the Feed component configuration.Renders a scrollable activity/event stream from an endpoint or from-ref.Supports avatar, title, description, timestamp, badge fields, pagination,and publishes the selected item to the page context when `id` is set.```json{  "type": "feed",  "id": "activity-feed",  "data": "GET /api/activity",  "itemKey": "id",  "title": "message",  "description": "detail",  "timestamp": "createdAt",  "avatar": "avatarUrl",  "badge": { "field": "type", "colorMap": { "error": "destructive", "info": "info" } },  "pageSize": 10}```
+Zod schema for the Feed component configuration.
+Renders a scrollable activity/event stream from an endpoint or from-ref.
+Supports avatar, title, description, timestamp, badge fields, pagination,
+and publishes the selected item to the page context when `id` is set.
+
+```json
+{
+  "type": "feed",
+  "id": "activity-feed",
+  "data": "GET /api/activity",
+  "itemKey": "id",
+  "title": "message",
+  "description": "detail",
+  "timestamp": "createdAt",
+  "avatar": "avatarUrl",
+  "badge": { "field": "type", "colorMap": { "error": "destructive", "info": "info" } },
+  "pageSize": 10
+}
+```
 
 **Manifest type:** `feed`
 
@@ -1005,7 +1222,18 @@ wrapped in `<mark>` elements with a configurable highlight color.
 
 ### `notification-bell`
 
-Zod config schema for the NotificationBell component.Defines all manifest-settable fields for a bell icon withan unread count badge.```json{  "type": "notification-bell",  "count": 5,  "max": 99,  "clickAction": { "type": "navigate", "to": "/notifications" }}```
+Zod config schema for the NotificationBell component.
+Defines all manifest-settable fields for a bell icon with
+an unread count badge.
+
+```json
+{
+  "type": "notification-bell",
+  "count": 5,
+  "max": 99,
+  "clickAction": { "type": "navigate", "to": "/notifications" }
+}
+```
 
 **Manifest type:** `notification-bell`
 
@@ -1020,7 +1248,19 @@ Zod config schema for the NotificationBell component.Defines all manifest-setta
 
 ### `progress`
 
-Zod config schema for the Progress component.Defines all manifest-settable fields for a progress bar/ringthat displays determinate or indeterminate progress.```json{  "type": "progress",  "value": 65,  "label": "Upload progress",  "showValue": true,  "color": "primary"}```
+Zod config schema for the Progress component.
+Defines all manifest-settable fields for a progress bar/ring
+that displays determinate or indeterminate progress.
+
+```json
+{
+  "type": "progress",
+  "value": 65,
+  "label": "Upload progress",
+  "showValue": true,
+  "color": "primary"
+}
+```
 
 **Manifest type:** `progress`
 
@@ -1065,7 +1305,21 @@ that shows idle, saving, saved, or error states.
 
 ### `scroll-area`
 
-Zod config schema for the ScrollArea component.A scrollable container with custom-styled thin scrollbarsthat respect the design token system.```json{  "type": "scroll-area",  "maxHeight": "300px",  "orientation": "vertical",  "showScrollbar": "hover",  "content": [    { "type": "heading", "text": "Long list..." }  ]}```
+Zod config schema for the ScrollArea component.
+A scrollable container with custom-styled thin scrollbars
+that respect the design token system.
+
+```json
+{
+  "type": "scroll-area",
+  "maxHeight": "300px",
+  "orientation": "vertical",
+  "showScrollbar": "hover",
+  "content": [
+    { "type": "heading", "text": "Long list..." }
+  ]
+}
+```
 
 **Manifest type:** `scroll-area`
 
@@ -1127,7 +1381,20 @@ that can substitute any content shape.
 
 ### `stat-card`
 
-Zod config schema for the StatCard component.Defines all manifest-settable fields for a stat card that displaysa single metric with optional trend indicator.```json{  "type": "stat-card",  "data": "GET /api/stats/revenue",  "field": "total",  "label": "Revenue",  "format": "currency",  "trend": { "field": "previousTotal", "sentiment": "up-is-good" }}```
+Zod config schema for the StatCard component.
+Defines all manifest-settable fields for a stat card that displays
+a single metric with optional trend indicator.
+
+```json
+{
+  "type": "stat-card",
+  "data": "GET /api/stats/revenue",
+  "field": "total",
+  "label": "Revenue",
+  "format": "currency",
+  "trend": { "field": "previousTotal", "sentiment": "up-is-good" }
+}
+```
 
 **Manifest type:** `stat-card`
 
@@ -1223,7 +1490,19 @@ Inline code primitive schema for manifest-rendered code snippets.
 
 ### `code-block`
 
-Zod config schema for the CodeBlock component.Defines all manifest-settable fields for a code display blockwith optional copy button and line numbers.```json{  "type": "code-block",  "code": "const x = 42;",  "language": "typescript",  "showLineNumbers": true,  "title": "example.ts"}```
+Zod config schema for the CodeBlock component.
+Defines all manifest-settable fields for a code display block
+with optional copy button and line numbers.
+
+```json
+{
+  "type": "code-block",
+  "code": "const x = 42;",
+  "language": "typescript",
+  "showLineNumbers": true,
+  "title": "example.ts"
+}
+```
 
 **Manifest type:** `code-block`
 
@@ -1241,7 +1520,19 @@ Zod config schema for the CodeBlock component.Defines all manifest-settable fie
 
 ### `compare-view`
 
-Zod config schema for the CompareView component.Defines all manifest-settable fields for a side-by-side contentcomparison view with diff highlighting.```json{  "type": "compare-view",  "left": "Original text content",  "right": "Modified text content",  "leftLabel": "Before",  "rightLabel": "After"}```
+Zod config schema for the CompareView component.
+Defines all manifest-settable fields for a side-by-side content
+comparison view with diff highlighting.
+
+```json
+{
+  "type": "compare-view",
+  "left": "Original text content",
+  "right": "Modified text content",
+  "leftLabel": "Before",
+  "rightLabel": "After"
+}
+```
 
 **Manifest type:** `compare-view`
 
@@ -1257,7 +1548,21 @@ Zod config schema for the CompareView component.Defines all manifest-settable f
 
 ### `file-uploader`
 
-Zod config schema for the FileUploader component.Renders a drag-and-drop file upload zone with file list,progress tracking, and optional endpoint upload.```json{  "type": "file-uploader",  "accept": "image/*,.pdf",  "maxSize": 5242880,  "maxFiles": 5,  "label": "Upload documents",  "description": "PDF or images up to 5MB each",  "uploadEndpoint": "POST /api/uploads"}```
+Zod config schema for the FileUploader component.
+Renders a drag-and-drop file upload zone with file list,
+progress tracking, and optional endpoint upload.
+
+```json
+{
+  "type": "file-uploader",
+  "accept": "image/*,.pdf",
+  "maxSize": 5242880,
+  "maxFiles": 5,
+  "label": "Upload documents",
+  "description": "PDF or images up to 5MB each",
+  "uploadEndpoint": "POST /api/uploads"
+}
+```
 
 **Manifest type:** `file-uploader`
 
@@ -1289,7 +1594,31 @@ Zod config schema for the FileUploader component.Renders a drag-and-drop file u
 
 ### `link-embed`
 
-Zod config schema for the LinkEmbed component.Renders rich URL previews with platform-specific renderers forYouTube, Instagram, TikTok, Twitter/X, and generic Open Graph cards.Also supports inline GIF embeds.```json{  "type": "link-embed",  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}``````json{  "type": "link-embed",  "url": "https://twitter.com/user/status/123",  "meta": {    "title": "Tweet by     "description": "Hello world!",    "image": "https://pbs.twimg.com/...",    "siteName": "Twitter",    "favicon": "https://abs.twimg.com/favicons/twitter.3.ico"  }}```
+Zod config schema for the LinkEmbed component.
+Renders rich URL previews with platform-specific renderers for
+YouTube, Instagram, TikTok, Twitter/X, and generic Open Graph cards.
+Also supports inline GIF embeds.
+
+```json
+{
+  "type": "link-embed",
+  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+}
+```
+
+```json
+{
+  "type": "link-embed",
+  "url": "https://twitter.com/user/status/123",
+  "meta": {
+    "title": "Tweet by 
+    "description": "Hello world!",
+    "image": "https://pbs.twimg.com/...",
+    "siteName": "Twitter",
+    "favicon": "https://abs.twimg.com/favicons/twitter.3.ico"
+  }
+}
+```
 
 **Manifest type:** `link-embed`
 
@@ -1304,7 +1633,15 @@ Zod config schema for the LinkEmbed component.Renders rich URL previews with pl
 
 ### `markdown`
 
-Zod config schema for the Markdown component.Renders markdown content with full GFM support and syntax highlighting.```json{  "type": "markdown",  "content": "# Hello\n\nSome **bold** text and a [link](https://example.com)."}```
+Zod config schema for the Markdown component.
+Renders markdown content with full GFM support and syntax highlighting.
+
+```json
+{
+  "type": "markdown",
+  "content": "# Hello\n\nSome **bold** text and a [link](https://example.com)."
+}
+```
 
 **Manifest type:** `markdown`
 
@@ -1316,7 +1653,26 @@ Zod config schema for the Markdown component.Renders markdown content with full
 
 ### `rich-input`
 
-Zod config schema for the RichInput component.A TipTap-based WYSIWYG editor for chat messages, comments, and posts.Users see formatted text as they type (bold, italic, mentions, etc.)rather than raw markdown.```json{  "type": "rich-input",  "id": "chat-input",  "placeholder": "Type a message...",  "sendOnEnter": true,  "features": ["bold", "italic", "mention", "emoji", "code"],  "sendAction": {    "type": "api",    "method": "POST",    "endpoint": "/api/channels/general/messages",    "body": { "from": "chat-input" }  }}```
+Zod config schema for the RichInput component.
+A TipTap-based WYSIWYG editor for chat messages, comments, and posts.
+Users see formatted text as they type (bold, italic, mentions, etc.)
+rather than raw markdown.
+
+```json
+{
+  "type": "rich-input",
+  "id": "chat-input",
+  "placeholder": "Type a message...",
+  "sendOnEnter": true,
+  "features": ["bold", "italic", "mention", "emoji", "code"],
+  "sendAction": {
+    "type": "api",
+    "method": "POST",
+    "endpoint": "/api/channels/general/messages",
+    "body": { "from": "chat-input" }
+  }
+}
+```
 
 **Manifest type:** `rich-input`
 
@@ -1336,7 +1692,19 @@ Zod config schema for the RichInput component.A TipTap-based WYSIWYG editor for
 
 ### `rich-text-editor`
 
-Zod config schema for the RichTextEditor component.Defines all manifest-settable fields for a CodeMirror 6-based markdown editorwith toolbar, preview pane, and split view support.```json{  "type": "rich-text-editor",  "id": "content-editor",  "content": "# Hello\n\nStart writing...",  "mode": "split",  "toolbar": ["bold", "italic", "h1", "h2", "separator", "code", "link"]}```
+Zod config schema for the RichTextEditor component.
+Defines all manifest-settable fields for a CodeMirror 6-based markdown editor
+with toolbar, preview pane, and split view support.
+
+```json
+{
+  "type": "rich-text-editor",
+  "id": "content-editor",
+  "content": "# Hello\n\nStart writing...",
+  "mode": "split",
+  "toolbar": ["bold", "italic", "h1", "h2", "separator", "code", "link"]
+}
+```
 
 **Manifest type:** `rich-text-editor`
 
@@ -1407,7 +1775,12 @@ Zod config schema for the RichTextEditor component.Defines all manifest-settabl
 
 ### `prefetch-link`
 
-Zod schema for `<PrefetchLink>` config.`<PrefetchLink>` is a prefetch primitive that renders a plain `<a>` tag andautomatically injects `<link rel="prefetch">` tags for the route's JS chunksand CSS files when the user hovers over the link or when it enters the viewport.It is not a router-aware component — consumers wire their own router.This avoids a peer dependency on TanStack Router.
+Zod schema for `<PrefetchLink>` config.
+`<PrefetchLink>` is a prefetch primitive that renders a plain `<a>` tag and
+automatically injects `<link rel="prefetch">` tags for the route's JS chunks
+and CSS files when the user hovers over the link or when it enters the viewport.
+It is not a router-aware component — consumers wire their own router.
+This avoids a peer dependency on TanStack Router.
 
 | Field | Type | Default | Required |
 |-------|------|---------|----------|
@@ -1522,7 +1895,9 @@ Overlay alias schema for manifest-driven confirmation dialogs.
 
 ### `context-menu`
 
-Zod schema for the ContextMenu component.Defines a right-click menu with styleable trigger, panel, item, label, and separator surfaces.Visibility can be driven by a boolean or a binding reference.
+Zod schema for the ContextMenu component.
+Defines a right-click menu with styleable trigger, panel, item, label, and separator surfaces.
+Visibility can be driven by a boolean or a binding reference.
 
 **Manifest type:** `context-menu`
 
@@ -1537,7 +1912,9 @@ Zod schema for the ContextMenu component.Defines a right-click menu with stylea
 
 ### `drawer`
 
-Zod schema for drawer component config.Drawers are slide-in panels from the left or right edge of the screen.Like modals, they are opened/closed via the modal manager.
+Zod schema for drawer component config.
+Drawers are slide-in panels from the left or right edge of the screen.
+Like modals, they are opened/closed via the modal manager.
 
 **Manifest type:** `drawer`
 
@@ -1594,7 +1971,9 @@ Zod schema for drawer component config.Drawers are slide-in panels from the lef
 
 ### `modal`
 
-Zod schema for modal component config.Modals are overlay dialogs that display child components.They are opened/closed via the modal manager (open-modal/close-modal actions).
+Zod schema for modal component config.
+Modals are overlay dialogs that display child components.
+They are opened/closed via the modal manager (open-modal/close-modal actions).
 
 **Manifest type:** `modal`
 
@@ -1618,7 +1997,9 @@ Zod schema for modal component config.Modals are overlay dialogs that display c
 
 ### `popover`
 
-Zod schema for the Popover component.Defines a trigger-driven floating panel with optional title, description, footer content, width,placement, and canonical slot-based styling for the trigger and panel sub-surfaces.
+Zod schema for the Popover component.
+Defines a trigger-driven floating panel with optional title, description, footer content, width,
+placement, and canonical slot-based styling for the trigger and panel sub-surfaces.
 
 **Manifest type:** `popover`
 
@@ -1704,7 +2085,23 @@ Zod schema for the Popover component.Defines a trigger-driven floating panel wi
 
 ### `chat-window`
 
-Zod config schema for the ChatWindow component.A full chat interface composing a message thread, rich input,and typing indicator into a single component.```json{  "type": "chat-window",  "title": "#general",  "data": "GET /api/channels/general/messages",  "sendAction": {    "type": "api",    "method": "POST",    "endpoint": "/api/channels/general/messages"  },  "height": "600px"}```
+Zod config schema for the ChatWindow component.
+A full chat interface composing a message thread, rich input,
+and typing indicator into a single component.
+
+```json
+{
+  "type": "chat-window",
+  "title": "#general",
+  "data": "GET /api/channels/general/messages",
+  "sendAction": {
+    "type": "api",
+    "method": "POST",
+    "endpoint": "/api/channels/general/messages"
+  },
+  "height": "600px"
+}
+```
 
 **Manifest type:** `chat-window`
 
@@ -1729,7 +2126,22 @@ Zod config schema for the ChatWindow component.A full chat interface composing 
 
 ### `comment-section`
 
-Zod config schema for the CommentSection component.Renders a comment list with nested replies and an embedded rich inputfor posting new comments.```json{  "type": "comment-section",  "data": "GET /api/posts/123/comments",  "inputPlaceholder": "Write a comment...",  "submitAction": {    "type": "api",    "method": "POST",    "endpoint": "/api/posts/123/comments"  }}```
+Zod config schema for the CommentSection component.
+Renders a comment list with nested replies and an embedded rich input
+for posting new comments.
+
+```json
+{
+  "type": "comment-section",
+  "data": "GET /api/posts/123/comments",
+  "inputPlaceholder": "Write a comment...",
+  "submitAction": {
+    "type": "api",
+    "method": "POST",
+    "endpoint": "/api/posts/123/comments"
+  }
+}
+```
 
 **Manifest type:** `comment-section`
 
@@ -1779,7 +2191,39 @@ Renders a searchable grid of emojis organized by category.
 
 ### `gif-picker`
 
-Zod config schema for the GifPicker component.Searchable GIF picker that queries a GIF API (Giphy/Tenor) anddisplays results in a masonry-style grid.The component expects a backend proxy endpoint that handles theactual API key and returns GIF results. This avoids exposingAPI keys in the frontend.```json{  "type": "gif-picker",  "searchEndpoint": "GET /api/gifs/search",  "trendingEndpoint": "GET /api/gifs/trending",  "selectAction": {    "type": "toast",    "message": "GIF selected!"  }}```Expected API response format:```json{  "results": [    {      "id": "abc123",      "url": "https://media.giphy.com/media/abc123/giphy.gif",      "preview": "https://media.giphy.com/media/abc123/200w.gif",      "width": 480,      "height": 270,      "title": "Funny cat"    }  ]}```
+Zod config schema for the GifPicker component.
+Searchable GIF picker that queries a GIF API (Giphy/Tenor) and
+displays results in a masonry-style grid.
+The component expects a backend proxy endpoint that handles the
+actual API key and returns GIF results. This avoids exposing
+API keys in the frontend.
+
+```json
+{
+  "type": "gif-picker",
+  "searchEndpoint": "GET /api/gifs/search",
+  "trendingEndpoint": "GET /api/gifs/trending",
+  "selectAction": {
+    "type": "toast",
+    "message": "GIF selected!"
+  }
+}
+```
+Expected API response format:
+```json
+{
+  "results": [
+    {
+      "id": "abc123",
+      "url": "https://media.giphy.com/media/abc123/giphy.gif",
+      "preview": "https://media.giphy.com/media/abc123/200w.gif",
+      "width": 480,
+      "height": 270,
+      "title": "Funny cat"
+    }
+  ]
+}
+```
 
 **Manifest type:** `gif-picker`
 
@@ -1800,7 +2244,19 @@ Zod config schema for the GifPicker component.Searchable GIF picker that querie
 
 ### `message-thread`
 
-Zod config schema for the MessageThread component.Renders a scrollable message list with avatars, timestamps,message grouping, date separators, and optional reactions/threading.```json{  "type": "message-thread",  "data": "GET /api/channels/general/messages",  "showReactions": true,  "groupByDate": true,  "maxHeight": "500px"}```
+Zod config schema for the MessageThread component.
+Renders a scrollable message list with avatars, timestamps,
+message grouping, date separators, and optional reactions/threading.
+
+```json
+{
+  "type": "message-thread",
+  "data": "GET /api/channels/general/messages",
+  "showReactions": true,
+  "groupByDate": true,
+  "maxHeight": "500px"
+}
+```
 
 **Manifest type:** `message-thread`
 
@@ -1851,7 +2307,19 @@ Displays an online/offline/away/busy/dnd status dot with optional label.
 
 ### `reaction-bar`
 
-Zod config schema for the ReactionBar component.Displays emoji reactions with counts and an add button.```json{  "type": "reaction-bar",  "reactions": [    { "emoji": "\ud83d\udc4d", "count": 5, "active": true },    { "emoji": "\u2764\ufe0f", "count": 3 },    { "emoji": "\ud83d\ude02", "count": 2 }  ]}```
+Zod config schema for the ReactionBar component.
+Displays emoji reactions with counts and an add button.
+
+```json
+{
+  "type": "reaction-bar",
+  "reactions": [
+    { "emoji": "\ud83d\udc4d", "count": 5, "active": true },
+    { "emoji": "\u2764\ufe0f", "count": 3 },
+    { "emoji": "\ud83d\ude02", "count": 2 }
+  ]
+}
+```
 
 **Manifest type:** `reaction-bar`
 
@@ -1948,7 +2416,9 @@ Displays an animated "User is typing..." indicator with bouncing dots.
 
 ### `notification-feed`
 
-Zod config schema for the NotificationFeed component.Renders a scrollable list of notifications with read/unread states,type-based icons, relative timestamps, and mark-as-read actions.
+Zod config schema for the NotificationFeed component.
+Renders a scrollable list of notifications with read/unread states,
+type-based icons, relative timestamps, and mark-as-read actions.
 
 **Manifest type:** `notification-feed`
 
@@ -1973,7 +2443,8 @@ Zod config schema for the NotificationFeed component.Renders a scrollable list 
 
 ### `pricing-table`
 
-Zod schema for a single feature in a pricing tier./
+Zod schema for a single feature in a pricing tier.
+/
 const pricingFeatureSchema = z
   .object({
     /** Feature description text. */
@@ -1983,7 +2454,9 @@ const pricingFeatureSchema = z
   })
   .strict();
 
-/**Zod schema for a single pricing tier (plan)./
+/**
+Zod schema for a single pricing tier (plan).
+/
 const pricingTierSchema = z
   .object({
     /** Tier display name (e.g., "Starter", "Pro", "Enterprise"). */
@@ -2007,7 +2480,41 @@ const pricingTierSchema = z
   })
   .strict();
 
-/**Zod config schema for the PricingTable component.Renders a comparison table of pricing tiers with features,highlights, badges, and CTA buttons.```json{  "type": "pricing-table",  "currency": "$",  "variant": "cards",  "tiers": [    {      "name": "Starter",      "price": 9,      "period": "/month",      "features": [        { "text": "5 projects", "included": true },        { "text": "API access", "included": false }      ],      "actionLabel": "Start Free"    },    {      "name": "Pro",      "price": 29,      "period": "/month",      "highlighted": true,      "badge": "Most Popular",      "features": [        { "text": "Unlimited projects", "included": true },        { "text": "API access", "included": true }      ]    }  ]}```
+/**
+Zod config schema for the PricingTable component.
+Renders a comparison table of pricing tiers with features,
+highlights, badges, and CTA buttons.
+
+```json
+{
+  "type": "pricing-table",
+  "currency": "$",
+  "variant": "cards",
+  "tiers": [
+    {
+      "name": "Starter",
+      "price": 9,
+      "period": "/month",
+      "features": [
+        { "text": "5 projects", "included": true },
+        { "text": "API access", "included": false }
+      ],
+      "actionLabel": "Start Free"
+    },
+    {
+      "name": "Pro",
+      "price": 29,
+      "period": "/month",
+      "highlighted": true,
+      "badge": "Most Popular",
+      "features": [
+        { "text": "Unlimited projects", "included": true },
+        { "text": "API access", "included": true }
+      ]
+    }
+  ]
+}
+```
 
 **Manifest type:** `pricing-table`
 

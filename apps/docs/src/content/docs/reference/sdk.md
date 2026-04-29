@@ -16,7 +16,6 @@ Generated from `src/index.ts`.
 - [Plugins](#plugins) (5)
 - [Push Notifications](#push-notifications) (4)
 - [Realtime](#realtime) (7)
-- [Schema Generation](#schema-generation) (1)
 - [Core Types](#core-types) (4)
 
 <details>
@@ -44,7 +43,7 @@ Generated from `src/index.ts`.
 | `createAuthErrorFormatter` | function | `src/auth/error-format.ts` | Create a reusable auth error formatter with shared formatting rules. |
 | `CreateContainerBody` | interface | `src/community/types.ts` | Request body for creating a community container. |
 | `CreateReplyBody` | interface | `src/community/types.ts` | Request body for creating a reply. |
-| `createSnapshot` | function | `src/create-snapshot.tsx` | Create a per-instance snapshot runtime from bootstrap config and a manifest.  Resolves manifest env refs, builds per-instance runtime managers, and wires manifest-driven auth/realtime workflow dispatch events. |
+| `createSnapshot` | function | `src/create-snapshot.tsx` | Create a per-instance snapshot runtime from bootstrap config and a manifest. Resolves manifest env refs, builds per-instance runtime managers, and wires manifest-driven auth/realtime workflow dispatch events. |
 | `CreateThreadBody` | interface | `src/community/types.ts` | Request body for creating a thread in a container. |
 | `CreateWebhookEndpointBody` | interface | `src/webhooks/types.ts` | Request body for creating a webhook endpoint. |
 | `defaultContract` | function | `src/auth/contract.ts` | Create the built-in auth contract for a given API base URL. |
@@ -52,7 +51,6 @@ Generated from `src/index.ts`.
 | `DeleteAccountBody` | interface | `src/types.ts` | Request body for deleting the current account. |
 | `ForgotPasswordBody` | interface | `src/types.ts` | Request body for the forgot-password endpoint. |
 | `formatAuthError` | function | `src/auth/error-format.ts` | Format a raw auth `ApiError` into the message shown to application code. |
-| `generateManifestSchema` | function | `src/schema-generator.ts` | Generate a JSON Schema for the snapshot manifest and write it to disk.  When called without plugins, produces the built-in schema. Consumer apps call this with their plugins to get a schema that includes custom types. |
 | `getRegisteredClient` | function | `src/api/client.ts` | Look up a previously registered custom client factory. |
 | `isMfaChallenge` | function | `src/types.ts` | Narrow a login result to the MFA challenge branch. |
 | `ListParams` | interface | `src/community/types.ts` | Shared page-based pagination parameters. |
@@ -146,7 +144,7 @@ Generated from `src/index.ts`.
 
 | Export | Kind | Description |
 |---|---|---|
-| `createSnapshot` | function | Create a per-instance snapshot runtime from bootstrap config and a manifest.  Resolves manifest env refs, builds per-instance runtime managers, and wires manifest-driven auth/realtime workflow dispatch events. |
+| `createSnapshot` | function | Create a per-instance snapshot runtime from bootstrap config and a manifest. Resolves manifest env refs, builds per-instance runtime managers, and wires manifest-driven auth/realtime workflow dispatch events. |
 
 ### Details
 
@@ -466,43 +464,6 @@ const { state, subscribe, unsubscribe } = usePushNotifications({
 | `SseEventHookResult` | interface | Return type of useSseEvent<T>(endpoint, event) |
 | `SseHookResult` | interface | Return type of useSSE(endpoint) |
 | `WebSocketManager` | class | Per-instance WebSocket connection manager. |
-
-## Schema Generation
-
-| Export | Kind | Description |
-|---|---|---|
-| `generateManifestSchema` | function | Generate a JSON Schema for the snapshot manifest and write it to disk.  When called without plugins, produces the built-in schema. Consumer apps call this with their plugins to get a schema that includes custom types. |
-
-### Details
-
-#### `generateManifestSchema(options: GenerateOptions) => void`
-
-Generate a JSON Schema for the snapshot manifest and write it to disk.
-
-When called without plugins, produces the built-in schema. Consumer apps
-call this with their plugins to get a schema that includes custom types.
-
-**Parameters:**
-
-| Name | Description |
-|------|-------------|
-| `options` | Generation options |
-
-**Example:**
-
-```ts
-// Generate the built-in schema only
-generateManifestSchema({ outPath: './manifest.schema.json' });
-
-// Include custom plugin types in the schema
-generateManifestSchema({
-  plugins: [myPlugin],
-  outPath: './manifest.schema.json',
-  iconNames: ['home', 'settings', 'user'],
-});
-```
-
----
 
 ## Core Types
 

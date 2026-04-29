@@ -19,19 +19,19 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
         xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
     }, "strict", z.ZodTypeAny, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }, {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     }>]>>;
     flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
         default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -508,23 +508,17 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     id: z.ZodOptional<z.ZodString>;
     tokens: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
     visibleWhen: z.ZodOptional<z.ZodString>;
-    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
-        from: z.ZodString;
-        transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
-        transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
-    }, "strict", z.ZodTypeAny, {
+    visible: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodType<{
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }, z.ZodTypeDef, {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }>, z.ZodObject<{
-        expr: z.ZodString;
-    }, "strict", z.ZodTypeAny, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }>, z.ZodType<{
         expr: string;
-    }, {
+    }, z.ZodTypeDef, {
         expr: string;
     }>]>>;
     sticky: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodObject<{
@@ -532,10 +526,10 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
         zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
     }, "strict", z.ZodTypeAny, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }, {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     }>]>>;
     zIndex: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["base", "dropdown", "sticky", "overlay", "modal", "popover", "toast"]>, z.ZodNumber]>>;
     animation: z.ZodOptional<z.ZodObject<{
@@ -668,58 +662,42 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     }>]>>;
 } & {
     type: z.ZodLiteral<"confirm-dialog">;
-    title: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodObject<{
-        from: z.ZodString;
-        transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
-        transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
-    }, "strict", z.ZodTypeAny, {
+    title: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodType<{
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }, z.ZodTypeDef, {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     }>]>>;
-    description: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodObject<{
-        from: z.ZodString;
-        transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
-        transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
-    }, "strict", z.ZodTypeAny, {
+    description: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodType<{
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }, z.ZodTypeDef, {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     }>]>>;
     size: z.ZodOptional<z.ZodEnum<["sm", "md", "lg", "xl", "full"]>>;
-    confirmLabel: z.ZodDefault<z.ZodUnion<[z.ZodString, z.ZodObject<{
-        from: z.ZodString;
-        transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
-        transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
-    }, "strict", z.ZodTypeAny, {
+    confirmLabel: z.ZodDefault<z.ZodUnion<[z.ZodString, z.ZodType<{
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }, z.ZodTypeDef, {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     }>]>>;
-    cancelLabel: z.ZodDefault<z.ZodUnion<[z.ZodString, z.ZodObject<{
-        from: z.ZodString;
-        transform: z.ZodOptional<z.ZodEnum<["uppercase", "lowercase", "trim", "length", "number", "boolean", "string", "json", "keys", "values", "first", "last", "count", "sum", "join", "split", "default"]>>;
-        transformArg: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodNumber]>>;
-    }, "strict", z.ZodTypeAny, {
+    cancelLabel: z.ZodDefault<z.ZodUnion<[z.ZodString, z.ZodType<{
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    }, {
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    }, z.ZodTypeDef, {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     }>]>>;
     confirmVariant: z.ZodDefault<z.ZodEnum<["default", "secondary", "destructive", "ghost"]>>;
     cancelVariant: z.ZodDefault<z.ZodEnum<["default", "secondary", "destructive", "ghost"]>>;
@@ -733,7 +711,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     trapFocus: z.ZodDefault<z.ZodBoolean>;
     initialFocus: z.ZodOptional<z.ZodString>;
     returnFocus: z.ZodDefault<z.ZodBoolean>;
-    slots: z.ZodOptional<z.ZodObject<Record<"title" | "body" | "header" | "root" | "overlay" | "panel" | "closeButton" | "footer" | "footerAction", z.ZodOptional<z.ZodObject<{
+    slots: z.ZodOptional<z.ZodObject<Record<"title" | "header" | "body" | "overlay" | "root" | "panel" | "closeButton" | "footer" | "footerAction", z.ZodOptional<z.ZodObject<{
         readonly className: z.ZodOptional<z.ZodString>;
         readonly style: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnion<[z.ZodString, z.ZodNumber]>>>;
         readonly cursor: z.ZodOptional<z.ZodString>;
@@ -750,19 +728,19 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
         }, "strict", z.ZodTypeAny, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }, {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         }>]>>;
         readonly flexDirection: z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
             default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -1254,19 +1232,19 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 xl: z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
                 "2xl": z.ZodOptional<z.ZodEnum<["flex", "grid", "block", "inline", "inline-flex", "inline-grid", "none"]>>;
             }, "strict", z.ZodTypeAny, {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             }, {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             }>]>>>;
             readonly flexDirection: z.ZodOptional<z.ZodOptional<z.ZodUnion<[z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>, z.ZodObject<{
                 default: z.ZodEnum<["row", "column", "row-reverse", "column-reverse"]>;
@@ -1741,22 +1719,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
             }>>>;
         }, "strict", z.ZodTypeAny, {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -1772,6 +1742,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -1779,13 +1757,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -1905,7 +1883,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -1932,22 +1910,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 borderRadius?: string | number | undefined;
             } | undefined;
         }, {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -1963,6 +1933,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -1970,13 +1948,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -2096,7 +2074,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -2124,22 +2102,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             } | undefined;
         }>>>;
     }, "strict", z.ZodTypeAny, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -2155,6 +2125,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -2162,13 +2140,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -2288,7 +2266,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -2314,23 +2292,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             bg?: string | undefined;
             borderRadius?: string | number | undefined;
         } | undefined;
-        states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+        states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -2346,6 +2316,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -2353,13 +2331,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -2479,7 +2457,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -2507,22 +2485,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             } | undefined;
         }>> | undefined;
     }, {
+        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+        cursor?: string | undefined;
         active?: {
             transform?: string | undefined;
             scale?: number | undefined;
             color?: string | undefined;
             bg?: string | undefined;
         } | undefined;
-        style?: Record<string, string | number> | undefined;
-        focus?: {
-            ring?: string | boolean | undefined;
-            shadow?: string | undefined;
-            outline?: string | undefined;
-            color?: string | undefined;
-            bg?: string | undefined;
-        } | undefined;
-        cursor?: string | undefined;
-        position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
         bg?: string | {
             size?: "auto" | "cover" | "contain" | undefined;
             overlay?: string | undefined;
@@ -2538,6 +2508,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             } | undefined;
             fixed?: boolean | undefined;
         } | undefined;
+        style?: Record<string, string | number> | undefined;
+        focus?: {
+            ring?: string | boolean | undefined;
+            shadow?: string | undefined;
+            outline?: string | undefined;
+            color?: string | undefined;
+            bg?: string | undefined;
+        } | undefined;
         flex?: string | number | undefined;
         className?: string | undefined;
         backgroundColor?: string | undefined;
@@ -2545,13 +2523,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
         gridTemplateRows?: string | undefined;
         gridColumn?: string | undefined;
         gridRow?: string | undefined;
-        display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-            default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-            sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+        display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+            default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+            sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
         } | undefined;
         flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
             default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -2671,7 +2649,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
         border?: string | undefined;
         shadow?: string | undefined;
         opacity?: number | undefined;
-        overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+        overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
         alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
         justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
         flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -2697,23 +2675,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             bg?: string | undefined;
             borderRadius?: string | number | undefined;
         } | undefined;
-        states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+        states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -2729,6 +2699,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -2736,13 +2714,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -2862,7 +2840,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -2891,22 +2869,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
         }>> | undefined;
     }>>>, "strict", z.ZodTypeAny, {
         title?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -2922,6 +2892,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -2929,13 +2907,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -3055,7 +3033,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -3081,23 +3059,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -3113,6 +3083,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -3120,13 +3098,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -3246,391 +3224,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
-                alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
-                justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
-                flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
-                textAlign?: "center" | "left" | "right" | "justify" | undefined;
-                fontSize?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                fontWeight?: string | number | undefined;
-                lineHeight?: string | number | undefined;
-                letterSpacing?: string | number | undefined;
-                hover?: {
-                    transform?: string | undefined;
-                    border?: string | undefined;
-                    scale?: number | undefined;
-                    shadow?: string | undefined;
-                    opacity?: number | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                    borderRadius?: string | number | undefined;
-                } | undefined;
-            }>> | undefined;
-        } | undefined;
-        body?: {
-            active?: {
-                transform?: string | undefined;
-                scale?: number | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
-            bg?: string | {
-                size?: "auto" | "cover" | "contain" | undefined;
-                overlay?: string | undefined;
-                position?: string | undefined;
-                image?: string | undefined;
-                gradient?: {
-                    type: "linear" | "radial" | "conic";
-                    stops: {
-                        color: string;
-                        position?: string | undefined;
-                    }[];
-                    direction?: string | undefined;
-                } | undefined;
-                fixed?: boolean | undefined;
-            } | undefined;
-            flex?: string | number | undefined;
-            className?: string | undefined;
-            backgroundColor?: string | undefined;
-            gridTemplateColumns?: string | undefined;
-            gridTemplateRows?: string | undefined;
-            gridColumn?: string | undefined;
-            gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            } | undefined;
-            flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
-                default: "row" | "column" | "row-reverse" | "column-reverse";
-                sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-            } | undefined;
-            inset?: string | number | undefined;
-            padding?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            paddingX?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            paddingY?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            margin?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            marginX?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            marginY?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            gap?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            width?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            minWidth?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            maxWidth?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            height?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            minHeight?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            maxHeight?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            color?: string | undefined;
-            borderRadius?: string | number | undefined;
-            border?: string | undefined;
-            shadow?: string | undefined;
-            opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
-            alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
-            justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
-            flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
-            textAlign?: "center" | "left" | "right" | "justify" | undefined;
-            fontSize?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            fontWeight?: string | number | undefined;
-            lineHeight?: string | number | undefined;
-            letterSpacing?: string | number | undefined;
-            hover?: {
-                transform?: string | undefined;
-                border?: string | undefined;
-                scale?: number | undefined;
-                shadow?: string | undefined;
-                opacity?: number | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-                borderRadius?: string | number | undefined;
-            } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
-                active?: {
-                    transform?: string | undefined;
-                    scale?: number | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
-                bg?: string | {
-                    size?: "auto" | "cover" | "contain" | undefined;
-                    overlay?: string | undefined;
-                    position?: string | undefined;
-                    image?: string | undefined;
-                    gradient?: {
-                        type: "linear" | "radial" | "conic";
-                        stops: {
-                            color: string;
-                            position?: string | undefined;
-                        }[];
-                        direction?: string | undefined;
-                    } | undefined;
-                    fixed?: boolean | undefined;
-                } | undefined;
-                flex?: string | number | undefined;
-                className?: string | undefined;
-                backgroundColor?: string | undefined;
-                gridTemplateColumns?: string | undefined;
-                gridTemplateRows?: string | undefined;
-                gridColumn?: string | undefined;
-                gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                } | undefined;
-                flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
-                    default: "row" | "column" | "row-reverse" | "column-reverse";
-                    sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                } | undefined;
-                inset?: string | number | undefined;
-                padding?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                paddingX?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                paddingY?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                margin?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                marginX?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                marginY?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                gap?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                width?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                minWidth?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                maxWidth?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                height?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                minHeight?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                maxHeight?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                color?: string | undefined;
-                borderRadius?: string | number | undefined;
-                border?: string | undefined;
-                shadow?: string | undefined;
-                opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -3659,22 +3253,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         header?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -3690,6 +3276,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -3697,13 +3291,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -3823,7 +3417,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -3849,23 +3443,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -3881,6 +3467,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -3888,13 +3482,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -4014,7 +3608,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -4042,23 +3636,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
             }>> | undefined;
         } | undefined;
-        root?: {
+        body?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -4074,6 +3660,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -4081,13 +3675,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -4207,7 +3801,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -4233,23 +3827,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -4265,6 +3851,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -4272,13 +3866,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -4398,7 +3992,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -4427,22 +4021,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         overlay?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -4458,6 +4044,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -4465,13 +4059,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -4591,7 +4185,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -4617,23 +4211,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -4649,6 +4235,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -4656,13 +4250,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -4782,7 +4376,391 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
+                alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
+                justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
+                flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
+                textAlign?: "center" | "left" | "right" | "justify" | undefined;
+                fontSize?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                fontWeight?: string | number | undefined;
+                lineHeight?: string | number | undefined;
+                letterSpacing?: string | number | undefined;
+                hover?: {
+                    transform?: string | undefined;
+                    border?: string | undefined;
+                    scale?: number | undefined;
+                    shadow?: string | undefined;
+                    opacity?: number | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                    borderRadius?: string | number | undefined;
+                } | undefined;
+            }>> | undefined;
+        } | undefined;
+        root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
+            active?: {
+                transform?: string | undefined;
+                scale?: number | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
+            bg?: string | {
+                size?: "auto" | "cover" | "contain" | undefined;
+                overlay?: string | undefined;
+                position?: string | undefined;
+                image?: string | undefined;
+                gradient?: {
+                    type: "linear" | "radial" | "conic";
+                    stops: {
+                        color: string;
+                        position?: string | undefined;
+                    }[];
+                    direction?: string | undefined;
+                } | undefined;
+                fixed?: boolean | undefined;
+            } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
+            flex?: string | number | undefined;
+            className?: string | undefined;
+            backgroundColor?: string | undefined;
+            gridTemplateColumns?: string | undefined;
+            gridTemplateRows?: string | undefined;
+            gridColumn?: string | undefined;
+            gridRow?: string | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            } | undefined;
+            flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
+                default: "row" | "column" | "row-reverse" | "column-reverse";
+                sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+            } | undefined;
+            inset?: string | number | undefined;
+            padding?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            paddingX?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            paddingY?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            margin?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            marginX?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            marginY?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            gap?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            width?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            minWidth?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            maxWidth?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            height?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            minHeight?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            maxHeight?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            color?: string | undefined;
+            borderRadius?: string | number | undefined;
+            border?: string | undefined;
+            shadow?: string | undefined;
+            opacity?: number | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
+            alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
+            justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
+            flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
+            textAlign?: "center" | "left" | "right" | "justify" | undefined;
+            fontSize?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            fontWeight?: string | number | undefined;
+            lineHeight?: string | number | undefined;
+            letterSpacing?: string | number | undefined;
+            hover?: {
+                transform?: string | undefined;
+                border?: string | undefined;
+                scale?: number | undefined;
+                shadow?: string | undefined;
+                opacity?: number | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+                borderRadius?: string | number | undefined;
+            } | undefined;
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
+                active?: {
+                    transform?: string | undefined;
+                    scale?: number | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
+                bg?: string | {
+                    size?: "auto" | "cover" | "contain" | undefined;
+                    overlay?: string | undefined;
+                    position?: string | undefined;
+                    image?: string | undefined;
+                    gradient?: {
+                        type: "linear" | "radial" | "conic";
+                        stops: {
+                            color: string;
+                            position?: string | undefined;
+                        }[];
+                        direction?: string | undefined;
+                    } | undefined;
+                    fixed?: boolean | undefined;
+                } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
+                flex?: string | number | undefined;
+                className?: string | undefined;
+                backgroundColor?: string | undefined;
+                gridTemplateColumns?: string | undefined;
+                gridTemplateRows?: string | undefined;
+                gridColumn?: string | undefined;
+                gridRow?: string | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                } | undefined;
+                flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
+                    default: "row" | "column" | "row-reverse" | "column-reverse";
+                    sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                } | undefined;
+                inset?: string | number | undefined;
+                padding?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                paddingX?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                paddingY?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                margin?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                marginX?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                marginY?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                gap?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                width?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                minWidth?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                maxWidth?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                height?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                minHeight?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                maxHeight?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                color?: string | undefined;
+                borderRadius?: string | number | undefined;
+                border?: string | undefined;
+                shadow?: string | undefined;
+                opacity?: number | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -4811,22 +4789,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         panel?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -4842,6 +4812,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -4849,13 +4827,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -4975,7 +4953,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -5001,23 +4979,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -5033,6 +5003,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -5040,13 +5018,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -5166,7 +5144,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -5195,22 +5173,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         closeButton?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -5226,6 +5196,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -5233,13 +5211,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -5359,7 +5337,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -5385,23 +5363,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -5417,6 +5387,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -5424,13 +5402,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -5550,7 +5528,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -5579,22 +5557,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         footer?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -5610,6 +5580,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -5617,13 +5595,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -5743,7 +5721,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -5769,23 +5747,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -5801,6 +5771,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -5808,13 +5786,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -5934,7 +5912,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -5963,22 +5941,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         footerAction?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -5994,6 +5964,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -6001,13 +5979,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -6127,7 +6105,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -6153,23 +6131,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -6185,6 +6155,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -6192,13 +6170,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -6318,7 +6296,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -6348,22 +6326,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
         } | undefined;
     }, {
         title?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -6379,6 +6349,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -6386,13 +6364,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -6512,7 +6490,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -6538,23 +6516,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -6570,6 +6540,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -6577,13 +6555,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -6703,391 +6681,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
-                alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
-                justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
-                flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
-                textAlign?: "center" | "left" | "right" | "justify" | undefined;
-                fontSize?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                fontWeight?: string | number | undefined;
-                lineHeight?: string | number | undefined;
-                letterSpacing?: string | number | undefined;
-                hover?: {
-                    transform?: string | undefined;
-                    border?: string | undefined;
-                    scale?: number | undefined;
-                    shadow?: string | undefined;
-                    opacity?: number | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                    borderRadius?: string | number | undefined;
-                } | undefined;
-            }>> | undefined;
-        } | undefined;
-        body?: {
-            active?: {
-                transform?: string | undefined;
-                scale?: number | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
-            bg?: string | {
-                size?: "auto" | "cover" | "contain" | undefined;
-                overlay?: string | undefined;
-                position?: string | undefined;
-                image?: string | undefined;
-                gradient?: {
-                    stops: {
-                        color: string;
-                        position?: string | undefined;
-                    }[];
-                    type?: "linear" | "radial" | "conic" | undefined;
-                    direction?: string | undefined;
-                } | undefined;
-                fixed?: boolean | undefined;
-            } | undefined;
-            flex?: string | number | undefined;
-            className?: string | undefined;
-            backgroundColor?: string | undefined;
-            gridTemplateColumns?: string | undefined;
-            gridTemplateRows?: string | undefined;
-            gridColumn?: string | undefined;
-            gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            } | undefined;
-            flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
-                default: "row" | "column" | "row-reverse" | "column-reverse";
-                sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-            } | undefined;
-            inset?: string | number | undefined;
-            padding?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            paddingX?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            paddingY?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            margin?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            marginX?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            marginY?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            gap?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            width?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            minWidth?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            maxWidth?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            height?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            minHeight?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            maxHeight?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            color?: string | undefined;
-            borderRadius?: string | number | undefined;
-            border?: string | undefined;
-            shadow?: string | undefined;
-            opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
-            alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
-            justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
-            flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
-            textAlign?: "center" | "left" | "right" | "justify" | undefined;
-            fontSize?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            fontWeight?: string | number | undefined;
-            lineHeight?: string | number | undefined;
-            letterSpacing?: string | number | undefined;
-            hover?: {
-                transform?: string | undefined;
-                border?: string | undefined;
-                scale?: number | undefined;
-                shadow?: string | undefined;
-                opacity?: number | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-                borderRadius?: string | number | undefined;
-            } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
-                active?: {
-                    transform?: string | undefined;
-                    scale?: number | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
-                bg?: string | {
-                    size?: "auto" | "cover" | "contain" | undefined;
-                    overlay?: string | undefined;
-                    position?: string | undefined;
-                    image?: string | undefined;
-                    gradient?: {
-                        stops: {
-                            color: string;
-                            position?: string | undefined;
-                        }[];
-                        type?: "linear" | "radial" | "conic" | undefined;
-                        direction?: string | undefined;
-                    } | undefined;
-                    fixed?: boolean | undefined;
-                } | undefined;
-                flex?: string | number | undefined;
-                className?: string | undefined;
-                backgroundColor?: string | undefined;
-                gridTemplateColumns?: string | undefined;
-                gridTemplateRows?: string | undefined;
-                gridColumn?: string | undefined;
-                gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                } | undefined;
-                flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
-                    default: "row" | "column" | "row-reverse" | "column-reverse";
-                    sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                } | undefined;
-                inset?: string | number | undefined;
-                padding?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                paddingX?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                paddingY?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                margin?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                marginX?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                marginY?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                gap?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                width?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                minWidth?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                maxWidth?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                height?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                minHeight?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                maxHeight?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                color?: string | undefined;
-                borderRadius?: string | number | undefined;
-                border?: string | undefined;
-                shadow?: string | undefined;
-                opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -7116,22 +6710,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         header?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -7147,6 +6733,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -7154,13 +6748,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -7280,7 +6874,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -7306,23 +6900,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -7338,6 +6924,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -7345,13 +6939,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -7471,7 +7065,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -7499,23 +7093,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
             }>> | undefined;
         } | undefined;
-        root?: {
+        body?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -7531,6 +7117,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -7538,13 +7132,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -7664,7 +7258,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -7690,23 +7284,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -7722,6 +7308,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -7729,13 +7323,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -7855,7 +7449,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -7884,22 +7478,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         overlay?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -7915,6 +7501,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -7922,13 +7516,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -8048,7 +7642,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -8074,23 +7668,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -8106,6 +7692,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -8113,13 +7707,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -8239,7 +7833,391 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
+                alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
+                justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
+                flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
+                textAlign?: "center" | "left" | "right" | "justify" | undefined;
+                fontSize?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                fontWeight?: string | number | undefined;
+                lineHeight?: string | number | undefined;
+                letterSpacing?: string | number | undefined;
+                hover?: {
+                    transform?: string | undefined;
+                    border?: string | undefined;
+                    scale?: number | undefined;
+                    shadow?: string | undefined;
+                    opacity?: number | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                    borderRadius?: string | number | undefined;
+                } | undefined;
+            }>> | undefined;
+        } | undefined;
+        root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
+            active?: {
+                transform?: string | undefined;
+                scale?: number | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
+            bg?: string | {
+                size?: "auto" | "cover" | "contain" | undefined;
+                overlay?: string | undefined;
+                position?: string | undefined;
+                image?: string | undefined;
+                gradient?: {
+                    stops: {
+                        color: string;
+                        position?: string | undefined;
+                    }[];
+                    type?: "linear" | "radial" | "conic" | undefined;
+                    direction?: string | undefined;
+                } | undefined;
+                fixed?: boolean | undefined;
+            } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
+            flex?: string | number | undefined;
+            className?: string | undefined;
+            backgroundColor?: string | undefined;
+            gridTemplateColumns?: string | undefined;
+            gridTemplateRows?: string | undefined;
+            gridColumn?: string | undefined;
+            gridRow?: string | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            } | undefined;
+            flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
+                default: "row" | "column" | "row-reverse" | "column-reverse";
+                sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+            } | undefined;
+            inset?: string | number | undefined;
+            padding?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            paddingX?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            paddingY?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            margin?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            marginX?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            marginY?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            gap?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            width?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            minWidth?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            maxWidth?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            height?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            minHeight?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            maxHeight?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            color?: string | undefined;
+            borderRadius?: string | number | undefined;
+            border?: string | undefined;
+            shadow?: string | undefined;
+            opacity?: number | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
+            alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
+            justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
+            flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
+            textAlign?: "center" | "left" | "right" | "justify" | undefined;
+            fontSize?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            fontWeight?: string | number | undefined;
+            lineHeight?: string | number | undefined;
+            letterSpacing?: string | number | undefined;
+            hover?: {
+                transform?: string | undefined;
+                border?: string | undefined;
+                scale?: number | undefined;
+                shadow?: string | undefined;
+                opacity?: number | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+                borderRadius?: string | number | undefined;
+            } | undefined;
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
+                active?: {
+                    transform?: string | undefined;
+                    scale?: number | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
+                bg?: string | {
+                    size?: "auto" | "cover" | "contain" | undefined;
+                    overlay?: string | undefined;
+                    position?: string | undefined;
+                    image?: string | undefined;
+                    gradient?: {
+                        stops: {
+                            color: string;
+                            position?: string | undefined;
+                        }[];
+                        type?: "linear" | "radial" | "conic" | undefined;
+                        direction?: string | undefined;
+                    } | undefined;
+                    fixed?: boolean | undefined;
+                } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
+                flex?: string | number | undefined;
+                className?: string | undefined;
+                backgroundColor?: string | undefined;
+                gridTemplateColumns?: string | undefined;
+                gridTemplateRows?: string | undefined;
+                gridColumn?: string | undefined;
+                gridRow?: string | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                } | undefined;
+                flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
+                    default: "row" | "column" | "row-reverse" | "column-reverse";
+                    sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                } | undefined;
+                inset?: string | number | undefined;
+                padding?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                paddingX?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                paddingY?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                margin?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                marginX?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                marginY?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                gap?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                width?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                minWidth?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                maxWidth?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                height?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                minHeight?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                maxHeight?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                color?: string | undefined;
+                borderRadius?: string | number | undefined;
+                border?: string | undefined;
+                shadow?: string | undefined;
+                opacity?: number | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -8268,22 +8246,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         panel?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -8299,6 +8269,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -8306,13 +8284,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -8432,7 +8410,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -8458,23 +8436,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -8490,6 +8460,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -8497,13 +8475,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -8623,7 +8601,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -8652,22 +8630,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         closeButton?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -8683,6 +8653,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -8690,13 +8668,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -8816,7 +8794,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -8842,23 +8820,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -8874,6 +8844,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -8881,13 +8859,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -9007,7 +8985,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -9036,22 +9014,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         footer?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -9067,6 +9037,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -9074,13 +9052,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -9200,7 +9178,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -9226,23 +9204,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -9258,6 +9228,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -9265,13 +9243,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -9391,7 +9369,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -9420,22 +9398,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         footerAction?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -9451,6 +9421,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -9458,13 +9436,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -9584,7 +9562,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -9610,23 +9588,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -9642,6 +9612,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -9649,13 +9627,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -9775,7 +9753,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -9808,57 +9786,33 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     type: "confirm-dialog";
     confirmLabel: string | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     };
     cancelLabel: string | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     };
-    confirmVariant: "default" | "ghost" | "secondary" | "destructive";
-    cancelVariant: "default" | "ghost" | "secondary" | "destructive";
+    confirmVariant: "secondary" | "default" | "destructive" | "ghost";
+    cancelVariant: "secondary" | "default" | "destructive" | "ghost";
     dismissOnConfirm: boolean;
     dismissOnCancel: boolean;
     trapFocus: boolean;
     returnFocus: boolean;
-    id?: string | undefined;
-    title?: string | {
-        from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    } | undefined;
-    active?: {
-        transform?: string | undefined;
-        scale?: number | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
     description?: string | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
-        property: string;
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        easing?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    size?: "sm" | "md" | "lg" | "xl" | "full" | undefined;
+    id?: string | undefined;
     position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    size?: "sm" | "md" | "lg" | "xl" | "full" | undefined;
     sticky?: boolean | {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     } | undefined;
+    cursor?: string | undefined;
     background?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -9873,6 +9827,17 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             direction?: string | undefined;
         } | undefined;
         fixed?: boolean | undefined;
+    } | undefined;
+    title?: string | {
+        from: string;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    } | undefined;
+    active?: {
+        transform?: string | undefined;
+        scale?: number | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
     } | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
@@ -9889,10 +9854,23 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
+    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
+        property: string;
+        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
+        easing?: string | undefined;
+    } | undefined;
     visible?: boolean | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     } | {
         expr: string;
     } | undefined;
@@ -9903,13 +9881,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -10029,7 +10007,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -10057,7 +10035,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     } | undefined;
     tokens?: Record<string, string> | undefined;
     visibleWhen?: string | undefined;
-    zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+    zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     animation?: {
         enter: "scale" | "fade" | "fade-up" | "fade-down" | "slide-left" | "slide-right" | "bounce";
         duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
@@ -10080,22 +10058,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     } | undefined;
     slots?: {
         title?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -10111,6 +10081,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -10118,13 +10096,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -10244,7 +10222,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -10270,23 +10248,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -10302,6 +10272,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -10309,13 +10287,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -10435,391 +10413,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
-                alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
-                justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
-                flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
-                textAlign?: "center" | "left" | "right" | "justify" | undefined;
-                fontSize?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                fontWeight?: string | number | undefined;
-                lineHeight?: string | number | undefined;
-                letterSpacing?: string | number | undefined;
-                hover?: {
-                    transform?: string | undefined;
-                    border?: string | undefined;
-                    scale?: number | undefined;
-                    shadow?: string | undefined;
-                    opacity?: number | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                    borderRadius?: string | number | undefined;
-                } | undefined;
-            }>> | undefined;
-        } | undefined;
-        body?: {
-            active?: {
-                transform?: string | undefined;
-                scale?: number | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
-            bg?: string | {
-                size?: "auto" | "cover" | "contain" | undefined;
-                overlay?: string | undefined;
-                position?: string | undefined;
-                image?: string | undefined;
-                gradient?: {
-                    type: "linear" | "radial" | "conic";
-                    stops: {
-                        color: string;
-                        position?: string | undefined;
-                    }[];
-                    direction?: string | undefined;
-                } | undefined;
-                fixed?: boolean | undefined;
-            } | undefined;
-            flex?: string | number | undefined;
-            className?: string | undefined;
-            backgroundColor?: string | undefined;
-            gridTemplateColumns?: string | undefined;
-            gridTemplateRows?: string | undefined;
-            gridColumn?: string | undefined;
-            gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            } | undefined;
-            flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
-                default: "row" | "column" | "row-reverse" | "column-reverse";
-                sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-            } | undefined;
-            inset?: string | number | undefined;
-            padding?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            paddingX?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            paddingY?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            margin?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            marginX?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            marginY?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            gap?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            width?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            minWidth?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            maxWidth?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            height?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            minHeight?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            maxHeight?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            color?: string | undefined;
-            borderRadius?: string | number | undefined;
-            border?: string | undefined;
-            shadow?: string | undefined;
-            opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
-            alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
-            justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
-            flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
-            textAlign?: "center" | "left" | "right" | "justify" | undefined;
-            fontSize?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            fontWeight?: string | number | undefined;
-            lineHeight?: string | number | undefined;
-            letterSpacing?: string | number | undefined;
-            hover?: {
-                transform?: string | undefined;
-                border?: string | undefined;
-                scale?: number | undefined;
-                shadow?: string | undefined;
-                opacity?: number | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-                borderRadius?: string | number | undefined;
-            } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
-                active?: {
-                    transform?: string | undefined;
-                    scale?: number | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
-                bg?: string | {
-                    size?: "auto" | "cover" | "contain" | undefined;
-                    overlay?: string | undefined;
-                    position?: string | undefined;
-                    image?: string | undefined;
-                    gradient?: {
-                        type: "linear" | "radial" | "conic";
-                        stops: {
-                            color: string;
-                            position?: string | undefined;
-                        }[];
-                        direction?: string | undefined;
-                    } | undefined;
-                    fixed?: boolean | undefined;
-                } | undefined;
-                flex?: string | number | undefined;
-                className?: string | undefined;
-                backgroundColor?: string | undefined;
-                gridTemplateColumns?: string | undefined;
-                gridTemplateRows?: string | undefined;
-                gridColumn?: string | undefined;
-                gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                } | undefined;
-                flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
-                    default: "row" | "column" | "row-reverse" | "column-reverse";
-                    sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                } | undefined;
-                inset?: string | number | undefined;
-                padding?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                paddingX?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                paddingY?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                margin?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                marginX?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                marginY?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                gap?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                width?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                minWidth?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                maxWidth?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                height?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                minHeight?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                maxHeight?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                color?: string | undefined;
-                borderRadius?: string | number | undefined;
-                border?: string | undefined;
-                shadow?: string | undefined;
-                opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -10848,22 +10442,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         header?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -10879,6 +10465,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -10886,13 +10480,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -11012,7 +10606,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -11038,23 +10632,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -11070,6 +10656,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -11077,13 +10671,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -11203,7 +10797,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -11231,23 +10825,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
             }>> | undefined;
         } | undefined;
-        root?: {
+        body?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -11263,6 +10849,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -11270,13 +10864,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -11396,7 +10990,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -11422,23 +11016,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -11454,6 +11040,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -11461,13 +11055,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -11587,7 +11181,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -11616,22 +11210,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         overlay?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -11647,6 +11233,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -11654,13 +11248,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -11780,7 +11374,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -11806,23 +11400,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -11838,6 +11424,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -11845,13 +11439,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -11971,7 +11565,391 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
+                alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
+                justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
+                flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
+                textAlign?: "center" | "left" | "right" | "justify" | undefined;
+                fontSize?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                fontWeight?: string | number | undefined;
+                lineHeight?: string | number | undefined;
+                letterSpacing?: string | number | undefined;
+                hover?: {
+                    transform?: string | undefined;
+                    border?: string | undefined;
+                    scale?: number | undefined;
+                    shadow?: string | undefined;
+                    opacity?: number | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                    borderRadius?: string | number | undefined;
+                } | undefined;
+            }>> | undefined;
+        } | undefined;
+        root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
+            active?: {
+                transform?: string | undefined;
+                scale?: number | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
+            bg?: string | {
+                size?: "auto" | "cover" | "contain" | undefined;
+                overlay?: string | undefined;
+                position?: string | undefined;
+                image?: string | undefined;
+                gradient?: {
+                    type: "linear" | "radial" | "conic";
+                    stops: {
+                        color: string;
+                        position?: string | undefined;
+                    }[];
+                    direction?: string | undefined;
+                } | undefined;
+                fixed?: boolean | undefined;
+            } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
+            flex?: string | number | undefined;
+            className?: string | undefined;
+            backgroundColor?: string | undefined;
+            gridTemplateColumns?: string | undefined;
+            gridTemplateRows?: string | undefined;
+            gridColumn?: string | undefined;
+            gridRow?: string | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            } | undefined;
+            flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
+                default: "row" | "column" | "row-reverse" | "column-reverse";
+                sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+            } | undefined;
+            inset?: string | number | undefined;
+            padding?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            paddingX?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            paddingY?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            margin?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            marginX?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            marginY?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            gap?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            width?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            minWidth?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            maxWidth?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            height?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            minHeight?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            maxHeight?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            color?: string | undefined;
+            borderRadius?: string | number | undefined;
+            border?: string | undefined;
+            shadow?: string | undefined;
+            opacity?: number | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
+            alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
+            justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
+            flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
+            textAlign?: "center" | "left" | "right" | "justify" | undefined;
+            fontSize?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            fontWeight?: string | number | undefined;
+            lineHeight?: string | number | undefined;
+            letterSpacing?: string | number | undefined;
+            hover?: {
+                transform?: string | undefined;
+                border?: string | undefined;
+                scale?: number | undefined;
+                shadow?: string | undefined;
+                opacity?: number | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+                borderRadius?: string | number | undefined;
+            } | undefined;
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
+                active?: {
+                    transform?: string | undefined;
+                    scale?: number | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
+                bg?: string | {
+                    size?: "auto" | "cover" | "contain" | undefined;
+                    overlay?: string | undefined;
+                    position?: string | undefined;
+                    image?: string | undefined;
+                    gradient?: {
+                        type: "linear" | "radial" | "conic";
+                        stops: {
+                            color: string;
+                            position?: string | undefined;
+                        }[];
+                        direction?: string | undefined;
+                    } | undefined;
+                    fixed?: boolean | undefined;
+                } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
+                flex?: string | number | undefined;
+                className?: string | undefined;
+                backgroundColor?: string | undefined;
+                gridTemplateColumns?: string | undefined;
+                gridTemplateRows?: string | undefined;
+                gridColumn?: string | undefined;
+                gridRow?: string | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                } | undefined;
+                flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
+                    default: "row" | "column" | "row-reverse" | "column-reverse";
+                    sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                } | undefined;
+                inset?: string | number | undefined;
+                padding?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                paddingX?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                paddingY?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                margin?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                marginX?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                marginY?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                gap?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                width?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                minWidth?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                maxWidth?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                height?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                minHeight?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                maxHeight?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                color?: string | undefined;
+                borderRadius?: string | number | undefined;
+                border?: string | undefined;
+                shadow?: string | undefined;
+                opacity?: number | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -12000,22 +11978,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         panel?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -12031,6 +12001,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -12038,13 +12016,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -12164,7 +12142,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -12190,23 +12168,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -12222,6 +12192,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -12229,13 +12207,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -12355,7 +12333,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -12384,22 +12362,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         closeButton?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -12415,6 +12385,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -12422,13 +12400,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -12548,7 +12526,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -12574,23 +12552,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -12606,6 +12576,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -12613,13 +12591,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -12739,7 +12717,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -12768,22 +12746,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         footer?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -12799,6 +12769,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -12806,13 +12784,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -12932,7 +12910,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -12958,23 +12936,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -12990,6 +12960,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -12997,13 +12975,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -13123,7 +13101,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -13152,22 +13130,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         footerAction?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -13183,6 +13153,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -13190,13 +13168,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -13316,7 +13294,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -13342,23 +13320,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -13374,6 +13344,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -13381,13 +13359,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -13507,7 +13485,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -13544,43 +13522,19 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     initialFocus?: string | undefined;
 }, {
     type: "confirm-dialog";
-    id?: string | undefined;
-    title?: string | {
-        from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
-    } | undefined;
-    active?: {
-        transform?: string | undefined;
-        scale?: number | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
     description?: string | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     } | undefined;
-    style?: Record<string, string | number> | undefined;
-    focus?: {
-        ring?: string | boolean | undefined;
-        shadow?: string | undefined;
-        outline?: string | undefined;
-        color?: string | undefined;
-        bg?: string | undefined;
-    } | undefined;
-    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
-        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
-        easing?: string | undefined;
-        property?: string | undefined;
-    } | undefined;
-    cursor?: string | undefined;
-    size?: "sm" | "md" | "lg" | "xl" | "full" | undefined;
+    id?: string | undefined;
     position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+    size?: "sm" | "md" | "lg" | "xl" | "full" | undefined;
     sticky?: boolean | {
         top?: string | undefined;
-        zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+        zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     } | undefined;
+    cursor?: string | undefined;
     background?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
         overlay?: string | undefined;
@@ -13595,6 +13549,17 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             direction?: string | undefined;
         } | undefined;
         fixed?: boolean | undefined;
+    } | undefined;
+    title?: string | {
+        from: string;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
+    } | undefined;
+    active?: {
+        transform?: string | undefined;
+        scale?: number | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
     } | undefined;
     bg?: string | {
         size?: "auto" | "cover" | "contain" | undefined;
@@ -13611,10 +13576,23 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
         } | undefined;
         fixed?: boolean | undefined;
     } | undefined;
+    style?: Record<string, string | number> | undefined;
+    focus?: {
+        ring?: string | boolean | undefined;
+        shadow?: string | undefined;
+        outline?: string | undefined;
+        color?: string | undefined;
+        bg?: string | undefined;
+    } | undefined;
+    transition?: "transform" | "all" | "shadow" | "opacity" | "colors" | {
+        duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
+        easing?: string | undefined;
+        property?: string | undefined;
+    } | undefined;
     visible?: boolean | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     } | {
         expr: string;
     } | undefined;
@@ -13625,13 +13603,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     gridTemplateRows?: string | undefined;
     gridColumn?: string | undefined;
     gridRow?: string | undefined;
-    display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-        default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-        sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-        "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+    display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+        default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+        sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+        "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
     } | undefined;
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
         default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -13751,7 +13729,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     border?: string | undefined;
     shadow?: string | undefined;
     opacity?: number | undefined;
-    overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+    overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
     alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
     justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -13779,7 +13757,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     } | undefined;
     tokens?: Record<string, string> | undefined;
     visibleWhen?: string | undefined;
-    zIndex?: number | "base" | "sticky" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
+    zIndex?: number | "sticky" | "base" | "dropdown" | "overlay" | "modal" | "popover" | "toast" | undefined;
     animation?: {
         enter: "scale" | "fade" | "fade-up" | "fade-down" | "slide-left" | "slide-right" | "bounce";
         duration?: number | "instant" | "fast" | "normal" | "slow" | undefined;
@@ -13802,22 +13780,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     } | undefined;
     slots?: {
         title?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -13833,6 +13803,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -13840,13 +13818,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -13966,7 +13944,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -13992,23 +13970,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -14024,6 +13994,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -14031,13 +14009,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -14157,391 +14135,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
-                alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
-                justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
-                flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
-                textAlign?: "center" | "left" | "right" | "justify" | undefined;
-                fontSize?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                fontWeight?: string | number | undefined;
-                lineHeight?: string | number | undefined;
-                letterSpacing?: string | number | undefined;
-                hover?: {
-                    transform?: string | undefined;
-                    border?: string | undefined;
-                    scale?: number | undefined;
-                    shadow?: string | undefined;
-                    opacity?: number | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                    borderRadius?: string | number | undefined;
-                } | undefined;
-            }>> | undefined;
-        } | undefined;
-        body?: {
-            active?: {
-                transform?: string | undefined;
-                scale?: number | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
-            bg?: string | {
-                size?: "auto" | "cover" | "contain" | undefined;
-                overlay?: string | undefined;
-                position?: string | undefined;
-                image?: string | undefined;
-                gradient?: {
-                    stops: {
-                        color: string;
-                        position?: string | undefined;
-                    }[];
-                    type?: "linear" | "radial" | "conic" | undefined;
-                    direction?: string | undefined;
-                } | undefined;
-                fixed?: boolean | undefined;
-            } | undefined;
-            flex?: string | number | undefined;
-            className?: string | undefined;
-            backgroundColor?: string | undefined;
-            gridTemplateColumns?: string | undefined;
-            gridTemplateRows?: string | undefined;
-            gridColumn?: string | undefined;
-            gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-            } | undefined;
-            flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
-                default: "row" | "column" | "row-reverse" | "column-reverse";
-                sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-            } | undefined;
-            inset?: string | number | undefined;
-            padding?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            paddingX?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            paddingY?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            margin?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            marginX?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            marginY?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            gap?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            width?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            minWidth?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            maxWidth?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            height?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            minHeight?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            maxHeight?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            color?: string | undefined;
-            borderRadius?: string | number | undefined;
-            border?: string | undefined;
-            shadow?: string | undefined;
-            opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
-            alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
-            justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
-            flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
-            textAlign?: "center" | "left" | "right" | "justify" | undefined;
-            fontSize?: string | number | {
-                default: string | number;
-                sm?: string | number | undefined;
-                md?: string | number | undefined;
-                lg?: string | number | undefined;
-                xl?: string | number | undefined;
-                "2xl"?: string | number | undefined;
-            } | undefined;
-            fontWeight?: string | number | undefined;
-            lineHeight?: string | number | undefined;
-            letterSpacing?: string | number | undefined;
-            hover?: {
-                transform?: string | undefined;
-                border?: string | undefined;
-                scale?: number | undefined;
-                shadow?: string | undefined;
-                opacity?: number | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-                borderRadius?: string | number | undefined;
-            } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
-                active?: {
-                    transform?: string | undefined;
-                    scale?: number | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
-                bg?: string | {
-                    size?: "auto" | "cover" | "contain" | undefined;
-                    overlay?: string | undefined;
-                    position?: string | undefined;
-                    image?: string | undefined;
-                    gradient?: {
-                        stops: {
-                            color: string;
-                            position?: string | undefined;
-                        }[];
-                        type?: "linear" | "radial" | "conic" | undefined;
-                        direction?: string | undefined;
-                    } | undefined;
-                    fixed?: boolean | undefined;
-                } | undefined;
-                flex?: string | number | undefined;
-                className?: string | undefined;
-                backgroundColor?: string | undefined;
-                gridTemplateColumns?: string | undefined;
-                gridTemplateRows?: string | undefined;
-                gridColumn?: string | undefined;
-                gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                } | undefined;
-                flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
-                    default: "row" | "column" | "row-reverse" | "column-reverse";
-                    sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                    "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
-                } | undefined;
-                inset?: string | number | undefined;
-                padding?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                paddingX?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                paddingY?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                margin?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                marginX?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                marginY?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                gap?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                width?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                minWidth?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                maxWidth?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                height?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                minHeight?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                maxHeight?: string | number | {
-                    default: string | number;
-                    sm?: string | number | undefined;
-                    md?: string | number | undefined;
-                    lg?: string | number | undefined;
-                    xl?: string | number | undefined;
-                    "2xl"?: string | number | undefined;
-                } | undefined;
-                color?: string | undefined;
-                borderRadius?: string | number | undefined;
-                border?: string | undefined;
-                shadow?: string | undefined;
-                opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -14570,22 +14164,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         header?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -14601,6 +14187,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -14608,13 +14202,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -14734,7 +14328,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -14760,23 +14354,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -14792,6 +14378,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -14799,13 +14393,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -14925,7 +14519,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -14953,23 +14547,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
             }>> | undefined;
         } | undefined;
-        root?: {
+        body?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -14985,6 +14571,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -14992,13 +14586,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -15118,7 +14712,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -15144,23 +14738,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -15176,6 +14762,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -15183,13 +14777,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -15309,7 +14903,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -15338,22 +14932,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         overlay?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -15369,6 +14955,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -15376,13 +14970,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -15502,7 +15096,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -15528,23 +15122,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -15560,6 +15146,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -15567,13 +15161,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -15693,7 +15287,391 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
+                alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
+                justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
+                flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
+                textAlign?: "center" | "left" | "right" | "justify" | undefined;
+                fontSize?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                fontWeight?: string | number | undefined;
+                lineHeight?: string | number | undefined;
+                letterSpacing?: string | number | undefined;
+                hover?: {
+                    transform?: string | undefined;
+                    border?: string | undefined;
+                    scale?: number | undefined;
+                    shadow?: string | undefined;
+                    opacity?: number | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                    borderRadius?: string | number | undefined;
+                } | undefined;
+            }>> | undefined;
+        } | undefined;
+        root?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
+            active?: {
+                transform?: string | undefined;
+                scale?: number | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
+            bg?: string | {
+                size?: "auto" | "cover" | "contain" | undefined;
+                overlay?: string | undefined;
+                position?: string | undefined;
+                image?: string | undefined;
+                gradient?: {
+                    stops: {
+                        color: string;
+                        position?: string | undefined;
+                    }[];
+                    type?: "linear" | "radial" | "conic" | undefined;
+                    direction?: string | undefined;
+                } | undefined;
+                fixed?: boolean | undefined;
+            } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
+            flex?: string | number | undefined;
+            className?: string | undefined;
+            backgroundColor?: string | undefined;
+            gridTemplateColumns?: string | undefined;
+            gridTemplateRows?: string | undefined;
+            gridColumn?: string | undefined;
+            gridRow?: string | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+            } | undefined;
+            flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
+                default: "row" | "column" | "row-reverse" | "column-reverse";
+                sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+            } | undefined;
+            inset?: string | number | undefined;
+            padding?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            paddingX?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            paddingY?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            margin?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            marginX?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            marginY?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            gap?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            width?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            minWidth?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            maxWidth?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            height?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            minHeight?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            maxHeight?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            color?: string | undefined;
+            borderRadius?: string | number | undefined;
+            border?: string | undefined;
+            shadow?: string | undefined;
+            opacity?: number | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
+            alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
+            justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
+            flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
+            textAlign?: "center" | "left" | "right" | "justify" | undefined;
+            fontSize?: string | number | {
+                default: string | number;
+                sm?: string | number | undefined;
+                md?: string | number | undefined;
+                lg?: string | number | undefined;
+                xl?: string | number | undefined;
+                "2xl"?: string | number | undefined;
+            } | undefined;
+            fontWeight?: string | number | undefined;
+            lineHeight?: string | number | undefined;
+            letterSpacing?: string | number | undefined;
+            hover?: {
+                transform?: string | undefined;
+                border?: string | undefined;
+                scale?: number | undefined;
+                shadow?: string | undefined;
+                opacity?: number | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+                borderRadius?: string | number | undefined;
+            } | undefined;
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
+                active?: {
+                    transform?: string | undefined;
+                    scale?: number | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
+                bg?: string | {
+                    size?: "auto" | "cover" | "contain" | undefined;
+                    overlay?: string | undefined;
+                    position?: string | undefined;
+                    image?: string | undefined;
+                    gradient?: {
+                        stops: {
+                            color: string;
+                            position?: string | undefined;
+                        }[];
+                        type?: "linear" | "radial" | "conic" | undefined;
+                        direction?: string | undefined;
+                    } | undefined;
+                    fixed?: boolean | undefined;
+                } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
+                flex?: string | number | undefined;
+                className?: string | undefined;
+                backgroundColor?: string | undefined;
+                gridTemplateColumns?: string | undefined;
+                gridTemplateRows?: string | undefined;
+                gridColumn?: string | undefined;
+                gridRow?: string | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                } | undefined;
+                flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
+                    default: "row" | "column" | "row-reverse" | "column-reverse";
+                    sm?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    md?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    lg?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    xl?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                    "2xl"?: "row" | "column" | "row-reverse" | "column-reverse" | undefined;
+                } | undefined;
+                inset?: string | number | undefined;
+                padding?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                paddingX?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                paddingY?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                margin?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                marginX?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                marginY?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                gap?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                width?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                minWidth?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                maxWidth?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                height?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                minHeight?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                maxHeight?: string | number | {
+                    default: string | number;
+                    sm?: string | number | undefined;
+                    md?: string | number | undefined;
+                    lg?: string | number | undefined;
+                    xl?: string | number | undefined;
+                    "2xl"?: string | number | undefined;
+                } | undefined;
+                color?: string | undefined;
+                borderRadius?: string | number | undefined;
+                border?: string | undefined;
+                shadow?: string | undefined;
+                opacity?: number | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -15722,22 +15700,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         panel?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -15753,6 +15723,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -15760,13 +15738,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -15886,7 +15864,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -15912,23 +15890,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -15944,6 +15914,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -15951,13 +15929,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -16077,7 +16055,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -16106,22 +16084,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         closeButton?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -16137,6 +16107,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -16144,13 +16122,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -16270,7 +16248,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -16296,23 +16274,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -16328,6 +16298,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -16335,13 +16313,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -16461,7 +16439,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -16490,22 +16468,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         footer?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -16521,6 +16491,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -16528,13 +16506,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -16654,7 +16632,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -16680,23 +16658,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -16712,6 +16682,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -16719,13 +16697,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -16845,7 +16823,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -16874,22 +16852,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             }>> | undefined;
         } | undefined;
         footerAction?: {
+            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+            cursor?: string | undefined;
             active?: {
                 transform?: string | undefined;
                 scale?: number | undefined;
                 color?: string | undefined;
                 bg?: string | undefined;
             } | undefined;
-            style?: Record<string, string | number> | undefined;
-            focus?: {
-                ring?: string | boolean | undefined;
-                shadow?: string | undefined;
-                outline?: string | undefined;
-                color?: string | undefined;
-                bg?: string | undefined;
-            } | undefined;
-            cursor?: string | undefined;
-            position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
             bg?: string | {
                 size?: "auto" | "cover" | "contain" | undefined;
                 overlay?: string | undefined;
@@ -16905,6 +16875,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 } | undefined;
                 fixed?: boolean | undefined;
             } | undefined;
+            style?: Record<string, string | number> | undefined;
+            focus?: {
+                ring?: string | boolean | undefined;
+                shadow?: string | undefined;
+                outline?: string | undefined;
+                color?: string | undefined;
+                bg?: string | undefined;
+            } | undefined;
             flex?: string | number | undefined;
             className?: string | undefined;
             backgroundColor?: string | undefined;
@@ -16912,13 +16890,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             gridTemplateRows?: string | undefined;
             gridColumn?: string | undefined;
             gridRow?: string | undefined;
-            display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+            display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
             } | undefined;
             flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                 default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -17038,7 +17016,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
             border?: string | undefined;
             shadow?: string | undefined;
             opacity?: number | undefined;
-            overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+            overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
             alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
             justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
             flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -17064,23 +17042,15 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 bg?: string | undefined;
                 borderRadius?: string | number | undefined;
             } | undefined;
-            states?: Partial<Record<"active" | "open" | "focus" | "invalid" | "completed" | "selected" | "hover" | "current" | "disabled", {
+            states?: Partial<Record<"completed" | "active" | "invalid" | "selected" | "focus" | "open" | "hover" | "current" | "disabled", {
+                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
+                cursor?: string | undefined;
                 active?: {
                     transform?: string | undefined;
                     scale?: number | undefined;
                     color?: string | undefined;
                     bg?: string | undefined;
                 } | undefined;
-                style?: Record<string, string | number> | undefined;
-                focus?: {
-                    ring?: string | boolean | undefined;
-                    shadow?: string | undefined;
-                    outline?: string | undefined;
-                    color?: string | undefined;
-                    bg?: string | undefined;
-                } | undefined;
-                cursor?: string | undefined;
-                position?: "fixed" | "sticky" | "relative" | "absolute" | undefined;
                 bg?: string | {
                     size?: "auto" | "cover" | "contain" | undefined;
                     overlay?: string | undefined;
@@ -17096,6 +17066,14 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                     } | undefined;
                     fixed?: boolean | undefined;
                 } | undefined;
+                style?: Record<string, string | number> | undefined;
+                focus?: {
+                    ring?: string | boolean | undefined;
+                    shadow?: string | undefined;
+                    outline?: string | undefined;
+                    color?: string | undefined;
+                    bg?: string | undefined;
+                } | undefined;
                 flex?: string | number | undefined;
                 className?: string | undefined;
                 backgroundColor?: string | undefined;
@@ -17103,13 +17081,13 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 gridTemplateRows?: string | undefined;
                 gridColumn?: string | undefined;
                 gridRow?: string | undefined;
-                display?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | {
-                    default: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid";
-                    sm?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    md?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    lg?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    xl?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
-                    "2xl"?: "none" | "grid" | "inline" | "block" | "flex" | "inline-flex" | "inline-grid" | undefined;
+                display?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | {
+                    default: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid";
+                    sm?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    md?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    lg?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    xl?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
+                    "2xl"?: "none" | "block" | "flex" | "grid" | "inline" | "inline-flex" | "inline-grid" | undefined;
                 } | undefined;
                 flexDirection?: "row" | "column" | "row-reverse" | "column-reverse" | {
                     default: "row" | "column" | "row-reverse" | "column-reverse";
@@ -17229,7 +17207,7 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
                 border?: string | undefined;
                 shadow?: string | undefined;
                 opacity?: number | undefined;
-                overflow?: "scroll" | "auto" | "hidden" | "visible" | undefined;
+                overflow?: "auto" | "hidden" | "scroll" | "visible" | undefined;
                 alignItems?: "end" | "start" | "center" | "stretch" | "baseline" | undefined;
                 justifyContent?: "end" | "start" | "center" | "between" | "around" | "evenly" | undefined;
                 flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
@@ -17260,16 +17238,16 @@ export declare const confirmDialogConfigSchema: z.ZodObject<{
     } | undefined;
     confirmLabel?: string | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     } | undefined;
     cancelLabel?: string | {
         from: string;
-        transform?: "string" | "number" | "boolean" | "uppercase" | "lowercase" | "trim" | "length" | "json" | "keys" | "values" | "first" | "last" | "count" | "sum" | "join" | "split" | "default" | undefined;
-        transformArg?: string | number | undefined;
+        transform?: import("@lastshotlabs/frontend-contract/refs").FromRefTransform;
+        transformArg?: string | number;
     } | undefined;
-    confirmVariant?: "default" | "ghost" | "secondary" | "destructive" | undefined;
-    cancelVariant?: "default" | "ghost" | "secondary" | "destructive" | undefined;
+    confirmVariant?: "secondary" | "default" | "destructive" | "ghost" | undefined;
+    cancelVariant?: "secondary" | "default" | "destructive" | "ghost" | undefined;
     confirmAction?: import("@lastshotlabs/frontend-contract/actions").ActionConfig | import("@lastshotlabs/frontend-contract/actions").ActionConfig[] | undefined;
     cancelAction?: import("@lastshotlabs/frontend-contract/actions").ActionConfig | import("@lastshotlabs/frontend-contract/actions").ActionConfig[] | undefined;
     dismissOnConfirm?: boolean | undefined;
