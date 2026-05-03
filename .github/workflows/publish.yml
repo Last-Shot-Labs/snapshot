@@ -39,7 +39,7 @@ jobs:
 
       - name: Verify tag matches package version
         run: |
-          node -e "const pkg = require('./package.json'); const expected = `v${pkg.version}`; const actual = process.env.GITHUB_REF_NAME; if (actual !== expected) { console.error(`Tag ${actual} does not match package version ${expected}`); process.exit(1); }"
+          node -e 'const pkg = require("./package.json"); const expected = "v" + pkg.version; const actual = process.env.GITHUB_REF_NAME; if (actual !== expected) { console.error("Tag " + actual + " does not match package version " + expected); process.exit(1); }'
 
       - name: Check snapshot release
         run: npm run release:check
