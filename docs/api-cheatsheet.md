@@ -308,7 +308,7 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `AppContextProvider({ globals, resources, api, children, }: AppContextProviderProps) => Element` — Provides persistent global state that survives route changes.
 - `AppContextProviderProps` *(interface)* — Props for AppContextProvider.
 - `GlobalConfig` *(typealias)* — Global state definition from the manifest.
-- `isFromRef(value: unknown) => value is FromRef`
+- `isFromRef(value: unknown) => value is FromRef` — Type guard for Snapshot binding references resolved from page, app, or resource state.
 - `PageContextProvider({ state, resources, api, children, }: PageContextProviderProps) => Element` — Provides per-page state that is destroyed on route change.
 - `PageContextProviderProps` *(interface)* — Props for PageContextProvider.
 - `ResolvedConfig` *(typealias)* — Resolves a type where FromRef values are replaced with their resolved types.
@@ -384,7 +384,7 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `generateBreadcrumbs(match: RouteMatch, config: BreadcrumbAutoConfig) => BreadcrumbItem[]` — Generate breadcrumb items from the current matched route hierarchy.
 - `generateJsonSchema() => Record<string, unknown>` — Generate a JSON Schema for snapshot manifests.
 - `getRegisteredGuards() => string[]` — List the names of all currently registered route guards.
-- `getRegisteredSchemaTypes() => string[]`
+- `getRegisteredSchemaTypes() => string[]` — Return every manifest component type with a registered config schema.
 - `HeadingConfig` *(typealias)* — Input shape for `headingConfigSchema` — defaulted fields are optional.
 - `headingConfigSchema` — Schema for the built-in `heading` component.
 - `injectStyleSheet(id: string, css: string) => void` — Inject or update a stylesheet in the document head.
@@ -392,9 +392,9 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `ManifestAppProps` *(interface)* — Props accepted by the `ManifestApp` component.
 - `ManifestConfig` *(typealias)* — Raw manifest input shape accepted by `parseManifest()` before defaults are applied during compilation.
 - `manifestConfigSchema` — Top-level schema for `snapshot.manifest.json`.
-- `ManifestResourceLoader` *(typealias)*
-- `ManifestResourceLoaderContext` *(interface)*
-- `ManifestRuntimeExtensions` *(interface)*
+- `ManifestResourceLoader` *(typealias)* — Function used to override loading for a manifest resource.
+- `ManifestResourceLoaderContext` *(interface)* — Context passed to a custom manifest resource loader.
+- `ManifestRuntimeExtensions` *(interface)* — Runtime-only extension hooks attached to a manifest before compilation.
 - `ManifestRuntimeProvider({ manifest, api, clients, children, }: { manifest: CompiledManifest; api?: ApiClientLike | un...` — Provides manifest runtime state, resource cache state, and mutation helpers.
 - `NavigationConfig` *(typealias)* — Input shape for `navigationConfigSchema` — defaulted fields are optional.
 - `navigationConfigSchema` — Schema for the top-level manifest navigation configuration.
@@ -413,7 +413,7 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `PushConfig` *(typealias)* — Input shape for `pushConfigSchema` — defaulted fields are optional.
 - `pushConfigSchema` — Manifest push-notification runtime configuration.
 - `registerComponent(type: string, component: ConfigDrivenComponent) => void` — Register a React component for a manifest component type string.
-- `registerComponentSchema(type: string, schema: ZodType<any, ZodTypeDef, any>) => void`
+- `registerComponentSchema(type: string, schema: ZodType<any, ZodTypeDef, any>) => void` — Register a Zod schema for a manifest component type.
 - `registerGuard(name: string, def: GuardDef) => void` — Register a named route guard implementation for manifest resolution.
 - `resetBootBuiltins() => void` — Reset the boot flag so tests can re-run built-in registration deterministically.
 - `resolveGuard(name: string) => GuardDef | undefined` — Resolve a previously registered route guard by name.

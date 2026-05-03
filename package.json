@@ -1,6 +1,6 @@
 {
   "name": "@lastshotlabs/snapshot",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "React frontend framework for bunshot-powered backends",
   "type": "module",
   "repository": {
@@ -76,7 +76,7 @@
     "storybook:build": "bun run storybook:generate && storybook build",
     "examples:smoke": "node --experimental-strip-types scripts/docs/examples-smoke.ts",
     "docs:ci": "bun run docs:generate && bun run docs:typecheck && bun run docs:impact && bun run docs:coverage && bun run components:coverage && bun run examples:smoke && bun run docs:build",
-    "release:check": "npm run typecheck && npm run build && npm test && npm pack --dry-run",
+    "release:check": "npm run typecheck && npm run build && npm test && npm run docs:ci && npm pack --dry-run",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -119,6 +119,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@unhead/react": "^2.0.0",
+    "@vitejs/plugin-react": "^6.0.1",
     "astro": "^5.0.0",
     "happy-dom": "^20.8.9",
     "jotai": "^2.0.0",
@@ -147,7 +148,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@lastshotlabs/frontend-contract": "file:../frontend-contract",
+    "@lastshotlabs/frontend-contract": "file:vendor/lastshotlabs-frontend-contract-0.1.0.tgz",
     "@oclif/core": "^4.10.2",
     "@tiptap/extension-link": "^3.22.2",
     "@tiptap/extension-mention": "^3.22.2",

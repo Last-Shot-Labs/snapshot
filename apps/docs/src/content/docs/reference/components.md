@@ -1485,11 +1485,7 @@ configurable placement and delay.
 
 ### `code`
 
-Inline code snippet for use within flowing text. Renders a `<code>` element
-with monospace font and a subtle background, similar to backtick-delimited
-code in Markdown. Use `code` when you need to highlight a variable name,
-command, or short expression inside a sentence. For multi-line source
-listings with syntax highlighting, use [`code-block`](#code-block) instead.
+Inline code primitive schema for manifest-rendered code snippets.
 
 **Manifest type:** `code`
 
@@ -1502,16 +1498,9 @@ listings with syntax highlighting, use [`code-block`](#code-block) instead.
 
 ### `code-block`
 
-Multi-line code display block with syntax highlighting, optional line
-numbers, title bar, and a copy-to-clipboard button. Use `code-block` for
-source listings, configuration examples, terminal output, and any code that
-benefits from language-aware highlighting. For inline code within prose, use
-[`code`](#code) instead.
-
-The copy button is enabled by default (`showCopy: true`) and appears as a
-ghost icon button positioned at the top-right corner of the code area. It
-uses `navigator.clipboard.writeText()` and shows a checkmark with "Copied!"
-feedback for 2 seconds after a successful copy.
+Zod config schema for the CodeBlock component.
+Defines all manifest-settable fields for a code display block
+with optional copy button and line numbers.
 
 ```json
 {
@@ -1529,11 +1518,11 @@ feedback for 2 seconds after a successful copy.
 |-------|------|---------|----------|
 | `code` | `string \| FromRef` | — | **Yes** |
 | `language` | `string` | — | No |
-| `highlight` | `boolean` | `true` | No |
-| `showLineNumbers` | `boolean` | `false` | No |
-| `showCopy` | `boolean` | `true` | No |
+| `highlight` | `boolean` | — | No |
+| `showLineNumbers` | `boolean` | — | No |
+| `showCopy` | `boolean` | — | No |
 | `title` | `string \| FromRef` | — | No |
-| `wrap` | `boolean` | `false` | No |
+| `wrap` | `boolean` | — | No |
 
 ---
 
@@ -2368,7 +2357,7 @@ Displays an animated "User is typing..." indicator with bouncing dots.
 
 | Field | Type | Default | Required |
 |-------|------|---------|----------|
-| `users` | `{ name: string, avatar: string }[] \| FromRef` | — | No |
+| `users` | `string \| { name: string, avatar: string }[] \| FromRef` | — | No |
 | `maxDisplay` | `number` | — | No |
 
 ---

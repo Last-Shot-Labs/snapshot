@@ -1,6 +1,7 @@
 import { isFromRef as isSharedFromRef } from "@lastshotlabs/frontend-contract/refs";
 import type { FromRef } from "./types";
 
+/** Type guard for Snapshot binding references resolved from page, app, or resource state. */
 export const isFromRef = isSharedFromRef;
 
 /**

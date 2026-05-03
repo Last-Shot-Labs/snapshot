@@ -111,11 +111,15 @@ export type StateConfig = StateConfigMap;
 /** @internal Parsed app config with all defaults applied. */
 export type ParsedAppConfig = Resolved<z.infer<typeof appConfigSchema>>;
 /** @internal Parsed auth config with all defaults applied. */
-export type ParsedAuthScreenConfig = Resolved<z.infer<typeof authScreenConfigSchema>>;
+export type ParsedAuthScreenConfig = Resolved<
+  z.infer<typeof authScreenConfigSchema>
+>;
 /** @internal Parsed route config with all defaults applied. */
 export type ParsedRouteConfig = Resolved<z.infer<typeof routeConfigSchema>>;
 /** @internal Parsed route transition config with all defaults applied. */
-export type ParsedRouteTransitionConfig = Resolved<z.infer<typeof routeTransitionSchema>>;
+export type ParsedRouteTransitionConfig = Resolved<
+  z.infer<typeof routeTransitionSchema>
+>;
 /** @internal Parsed page config with all defaults applied. */
 export type ParsedPageConfig = Resolved<z.infer<typeof pageConfigSchema>>;
 /** @internal Parsed route guard with all defaults applied. */
@@ -123,9 +127,13 @@ export type ParsedRouteGuard = Resolved<z.infer<typeof routeGuardSchema>>;
 /** @internal Parsed toast config with all defaults applied. */
 export type ParsedToastConfig = z.infer<typeof toastConfigSchema>;
 /** @internal Parsed analytics config with all defaults applied. */
-export type ParsedAnalyticsConfig = Resolved<z.infer<typeof analyticsConfigSchema>>;
+export type ParsedAnalyticsConfig = Resolved<
+  z.infer<typeof analyticsConfigSchema>
+>;
 /** @internal Parsed observability config with all defaults applied. */
-export type ParsedObservabilityConfig = Resolved<z.infer<typeof observabilityConfigSchema>>;
+export type ParsedObservabilityConfig = Resolved<
+  z.infer<typeof observabilityConfigSchema>
+>;
 /** @internal Parsed push config with all defaults applied. */
 export type ParsedPushConfig = Resolved<z.infer<typeof pushConfigSchema>>;
 /** @internal Parsed overlay config with all defaults applied. */
@@ -133,9 +141,12 @@ export type ParsedOverlayConfig = Resolved<z.infer<typeof overlayConfigSchema>>;
 /** @internal Parsed navigation config with all defaults applied. */
 export type ParsedNavigationConfig = z.infer<typeof navigationConfigSchema>;
 /** @internal Parsed realtime config with all defaults applied. */
-export type ParsedRealtimeConfig = Resolved<z.infer<typeof realtimeConfigSchema>>;
+export type ParsedRealtimeConfig = Resolved<
+  z.infer<typeof realtimeConfigSchema>
+>;
 /** Named manifest resource map keyed by resource id. */
 export type ResourceConfigMap = ResourceMap;
+/** Context passed to a custom manifest resource loader. */
 export interface ManifestResourceLoaderContext {
   manifest: CompiledManifest;
   resourceName: string;
@@ -150,9 +161,11 @@ export interface ManifestResourceLoaderContext {
     options?: { signal?: AbortSignal },
   ) => Promise<unknown>;
 }
+/** Function used to override loading for a manifest resource. */
 export type ManifestResourceLoader = (
   context: ManifestResourceLoaderContext,
 ) => Promise<unknown>;
+/** Runtime-only extension hooks attached to a manifest before compilation. */
 export interface ManifestRuntimeExtensions {
   resources?: Record<
     string,

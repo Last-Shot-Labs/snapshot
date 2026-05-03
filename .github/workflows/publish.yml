@@ -1,7 +1,6 @@
 name: Publish to npm
 
 on:
-  workflow_dispatch:
   push:
     tags:
       - "v*.*.*"
@@ -17,53 +16,33 @@ jobs:
     steps:
       - name: Checkout snapshot
         uses: actions/checkout@v4
-        with:
-          path: snapshot
-
-      - name: Checkout frontend contract
-        uses: actions/checkout@v4
-        with:
-          repository: lastshotlabs/frontend-contract
-          path: frontend-contract
-          token: ${{ secrets.FRONTEND_CONTRACT_TOKEN || github.token }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org
           scope: "@lastshotlabs"
           cache: npm
-          cache-dependency-path: |
-            snapshot/package-lock.json
-            frontend-contract/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.11
 
-      - name: Install frontend contract dependencies
-        working-directory: frontend-contract
-        run: npm ci
-
-      - name: Check frontend contract
-        working-directory: frontend-contract
-        run: |
-          npm run typecheck
-          npm run build
-          npm test
+      - name: Use npm with trusted publishing support
+        run: npm install -g npm@^11.10.0
 
       - name: Install snapshot dependencies
-        working-directory: snapshot
         run: npm ci
 
+      - name: Verify tag matches package version
+        run: |
+          node -e "const pkg = require('./package.json'); const expected = `v${pkg.version}`; const actual = process.env.GITHUB_REF_NAME; if (actual !== expected) { console.error(`Tag ${actual} does not match package version ${expected}`); process.exit(1); }"
+
       - name: Check snapshot release
-        working-directory: snapshot
         run: npm run release:check
 
       - name: Publish snapshot to npm
-        working-directory: snapshot
-        run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public

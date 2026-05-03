@@ -30,13 +30,36 @@ function walk(dir: string, results: string[] = []): string[] {
 }
 
 function extractDescription(source: string): string {
-  const match = source.match(/static override description = "([^"]+)"/);
-  return match?.[1] ?? "No description found.";
+  const staticDescription = source.match(
+    /static\s+override\s+description\s*=\s*(["'`])([\s\S]*?)\1/s,
+  );
+  if (staticDescription?.[2]) {
+    return staticDescription[2].trim();
+  }
+
+  const classDoc = source.match(
+    /\/\*\*([\s\S]*?)\*\/\s*export\s+default\s+class/,
+  );
+  if (classDoc?.[1]) {
+    return classDoc[1]
+      .split("\n")
+      .map((line) => line.replace(/^\s*\*\s?/, "").trim())
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return "No description found.";
 }
 
 function toCommandName(sourcePath: string): string {
-  const relative = path.relative(repoPath("src", "cli", "commands"), sourcePath);
-  return relative.replace(/\\/g, " ").replace(/\.ts$/, "").replace(/ index$/, "");
+  const relative = path.relative(
+    repoPath("src", "cli", "commands"),
+    sourcePath,
+  );
+  return relative
+    .replace(/\\/g, " ")
+    .replace(/\.ts$/, "")
+    .replace(/ index$/, "");
 }
 
 export function generateCliReference(): void {

@@ -333,7 +333,7 @@ Generated from `src/ui.ts`.
 | `getRegisteredClient` | function | `src/api/client.ts` | Look up a previously registered custom client factory. |
 | `getRegisteredGuards` | function | `src/ui/manifest/guard-registry.ts` | List the names of all currently registered route guards. |
 | `getRegisteredLayouts` | function | `src/ui/layouts/registry.tsx` | List the names of all currently registered manifest layouts. |
-| `getRegisteredSchemaTypes` | function | `src/ui/manifest/schema.ts` | Function exported by the Snapshot UI runtime. |
+| `getRegisteredSchemaTypes` | function | `src/ui/manifest/schema.ts` | Return every manifest component type with a registered config schema. |
 | `getRegisteredWorkflowAction` | function | `src/ui/workflows/registry.ts` | Retrieve a registered runtime handler for a custom workflow action type. |
 | `getSortableStyle` | function | `src/ui/hooks/use-drag-drop.ts` | CSS transform helper for sortable items. Converts the dnd-kit transform into a CSS transform string. |
 | `GifEntry` | interface | `src/ui/components/communication/gif-picker/types.ts` | Shape of a GIF entry. |
@@ -378,7 +378,7 @@ Generated from `src/ui.ts`.
 | `InputField` | function | `src/ui/components/forms/input/standalone.tsx` | Standalone InputField — a complete form field (label + input + helper/error) that works with plain React props. No manifest context required. |
 | `InputFieldProps` | interface | `src/ui/components/forms/input/standalone.tsx` | Props accepted by the InputField component. |
 | `interpolate` | function | `src/ui/actions/interpolate.ts` | Replace `{key}` placeholders with values from context. Supports nested paths: `{user.name}`, `{result.id}`. Missing keys are preserved as-is: `{unknown}` stays `{unknown}`. |
-| `isFromRef` | variable | `src/ui/context/utils.ts` | Exported variable from the Snapshot UI runtime. |
+| `isFromRef` | variable | `src/ui/context/utils.ts` | Type guard for Snapshot binding references resolved from page, app, or resource state. |
 | `isResourceRef` | function | `../frontend-contract/src/resources/index.ts` | Function exported by the Snapshot UI runtime. |
 | `KanbanBase` | function | `src/ui/components/workflow/kanban/standalone.tsx` | Standalone KanbanBase — renders a multi-column board with cards, WIP limits, assignee avatars, priority indicators, and optional drag-and-drop reordering. No manifest context required. |
 | `KanbanBaseProps` | interface | `src/ui/components/workflow/kanban/standalone.tsx` | Props accepted by the KanbanBase standalone component. |
@@ -416,9 +416,9 @@ Generated from `src/ui.ts`.
 | `ManifestAppProps` | interface | `src/ui/manifest/types.ts` | Props accepted by the `ManifestApp` component. |
 | `ManifestConfig` | typealias | `src/ui/manifest/types.ts` | Raw manifest input shape accepted by `parseManifest()` before defaults are applied during compilation. |
 | `manifestConfigSchema` | variable | `src/ui/manifest/schema.ts` | Top-level schema for `snapshot.manifest.json`. |
-| `ManifestResourceLoader` | typealias | `src/ui/manifest/types.ts` | Type definition exported by the Snapshot UI runtime. |
-| `ManifestResourceLoaderContext` | interface | `src/ui/manifest/types.ts` | Type definition exported by the Snapshot UI runtime. |
-| `ManifestRuntimeExtensions` | interface | `src/ui/manifest/types.ts` | Type definition exported by the Snapshot UI runtime. |
+| `ManifestResourceLoader` | typealias | `src/ui/manifest/types.ts` | Function used to override loading for a manifest resource. |
+| `ManifestResourceLoaderContext` | interface | `src/ui/manifest/types.ts` | Context passed to a custom manifest resource loader. |
+| `ManifestRuntimeExtensions` | interface | `src/ui/manifest/types.ts` | Runtime-only extension hooks attached to a manifest before compilation. |
 | `ManifestRuntimeProvider` | function | `src/ui/manifest/runtime.tsx` | Provides manifest runtime state, resource cache state, and mutation helpers. |
 | `Markdown` | function | `src/ui/components/content/markdown/component.tsx` | Manifest adapter — resolves config refs and delegates to MarkdownBase. |
 | `MarkdownBase` | function | `src/ui/components/content/markdown/standalone.tsx` | Standalone Markdown — renders markdown content with syntax highlighting and Snapshot design tokens. No manifest context required. |
@@ -553,7 +553,7 @@ Generated from `src/ui.ts`.
 | `registerBuiltInComponents` | function | `src/ui/components/register.ts` | Register all built-in config-driven components with the manifest system. The function is idempotent so boot code can call it safely without worrying about duplicate registrations. |
 | `registerClient` | function | `src/api/client.ts` | Register a named custom client factory. |
 | `registerComponent` | function | `src/ui/manifest/component-registry.tsx` | Register a React component for a manifest component type string. Used by the framework for built-in components and by consumers for custom components. Emits a dev warning if overriding an existing registration. |
-| `registerComponentSchema` | function | `src/ui/manifest/schema.ts` | Zod schema for validating register component schema. |
+| `registerComponentSchema` | function | `src/ui/manifest/schema.ts` | Register a Zod schema for a manifest component type. |
 | `registerGuard` | function | `src/ui/manifest/guard-registry.ts` | Register a named route guard implementation for manifest resolution. |
 | `registerLayout` | function | `src/ui/layouts/registry.tsx` | Register a named layout component for manifest layout resolution. |
 | `registerWorkflowAction` | function | `src/ui/workflows/registry.ts` | Register a runtime handler for a custom workflow action type. |
@@ -1136,7 +1136,7 @@ Register a named custom client factory.
 | `AppContextProvider` | function | Provides persistent global state that survives route changes. Initializes globals from the manifest config. |
 | `AppContextProviderProps` | interface | Props for AppContextProvider. Wraps the entire app to provide persistent global state. |
 | `GlobalConfig` | typealias | Global state definition from the manifest. This now aliases the shared state config used by the runtime. |
-| `isFromRef` | variable | Exported variable from the Snapshot UI runtime. |
+| `isFromRef` | variable | Type guard for Snapshot binding references resolved from page, app, or resource state. |
 | `PageContextProvider` | function | Provides per-page state that is destroyed on route change. |
 | `PageContextProviderProps` | interface | Props for PageContextProvider. Wraps each page/route to provide per-page component state. |
 | `ResolvedConfig` | typealias | Resolves a type where FromRef values are replaced with their resolved types. Used internally — consumers don't need to use this directly. |
@@ -1401,7 +1401,7 @@ Return the toast manager bound to the active manifest runtime configuration.
 | `generateBreadcrumbs` | function | Generate breadcrumb items from the current matched route hierarchy. |
 | `generateJsonSchema` | function | Generate a JSON Schema for snapshot manifests. The schema is intentionally conservative and focuses on the public top-level manifest contract so editors can provide autocomplete and inline validation without requiring Snapshot's full runtime schema registry at generation time. |
 | `getRegisteredGuards` | function | List the names of all currently registered route guards. |
-| `getRegisteredSchemaTypes` | function | Function exported by the Snapshot UI runtime. |
+| `getRegisteredSchemaTypes` | function | Return every manifest component type with a registered config schema. |
 | `HeadingConfig` | typealias | Input shape for `headingConfigSchema` — defaulted fields are optional. |
 | `headingConfigSchema` | variable | Schema for the built-in `heading` component. |
 | `injectStyleSheet` | function | Inject or update a stylesheet in the document head. |
@@ -1409,9 +1409,9 @@ Return the toast manager bound to the active manifest runtime configuration.
 | `ManifestAppProps` | interface | Props accepted by the `ManifestApp` component. |
 | `ManifestConfig` | typealias | Raw manifest input shape accepted by `parseManifest()` before defaults are applied during compilation. |
 | `manifestConfigSchema` | variable | Top-level schema for `snapshot.manifest.json`. |
-| `ManifestResourceLoader` | typealias | Type definition exported by the Snapshot UI runtime. |
-| `ManifestResourceLoaderContext` | interface | Type definition exported by the Snapshot UI runtime. |
-| `ManifestRuntimeExtensions` | interface | Type definition exported by the Snapshot UI runtime. |
+| `ManifestResourceLoader` | typealias | Function used to override loading for a manifest resource. |
+| `ManifestResourceLoaderContext` | interface | Context passed to a custom manifest resource loader. |
+| `ManifestRuntimeExtensions` | interface | Runtime-only extension hooks attached to a manifest before compilation. |
 | `ManifestRuntimeProvider` | function | Provides manifest runtime state, resource cache state, and mutation helpers. |
 | `NavigationConfig` | typealias | Input shape for `navigationConfigSchema` — defaulted fields are optional. |
 | `navigationConfigSchema` | variable | Schema for the top-level manifest navigation configuration. |
@@ -1430,7 +1430,7 @@ Return the toast manager bound to the active manifest runtime configuration.
 | `PushConfig` | typealias | Input shape for `pushConfigSchema` — defaulted fields are optional. |
 | `pushConfigSchema` | variable | Manifest push-notification runtime configuration. |
 | `registerComponent` | function | Register a React component for a manifest component type string. Used by the framework for built-in components and by consumers for custom components. Emits a dev warning if overriding an existing registration. |
-| `registerComponentSchema` | function | Zod schema for validating register component schema. |
+| `registerComponentSchema` | function | Register a Zod schema for a manifest component type. |
 | `registerGuard` | function | Register a named route guard implementation for manifest resolution. |
 | `resetBootBuiltins` | function | Reset the boot flag so tests can re-run built-in registration deterministically. |
 | `resolveGuard` | function | Resolve a previously registered route guard by name. |
@@ -1529,7 +1529,7 @@ List the names of all currently registered route guards.
 
 #### `getRegisteredSchemaTypes() => string[]`
 
-Function exported by the Snapshot UI runtime.
+Return every manifest component type with a registered config schema.
 
 ---
 
@@ -1616,7 +1616,7 @@ Emits a dev warning if overriding an existing registration.
 
 #### `registerComponentSchema(type: string, schema: ZodType<any, ZodTypeDef, any>) => void`
 
-Zod schema for validating register component schema.
+Register a Zod schema for a manifest component type.
 
 ---
 

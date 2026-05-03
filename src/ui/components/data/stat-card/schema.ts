@@ -10,7 +10,11 @@ import {
   slotsSchema,
   type ComponentConfigSchema,
 } from "../../_base/schema";
-import { dataSourceSchema, fromRefSchema, pollConfigSchema } from "../../_base/types";
+import {
+  dataSourceSchema,
+  fromRefSchema,
+  pollConfigSchema,
+} from "../../_base/types";
 
 /** Schema for the trend indicator configuration. */
 export const trendConfigSchema = z
@@ -27,6 +31,64 @@ const statCardActionSchema = actionSchema as z.ZodTypeAny;
 const statCardEmptyStateSchema = emptyStateConfigSchema as z.ZodTypeAny;
 const statCardErrorStateSchema = errorStateConfigSchema as z.ZodTypeAny;
 const statCardLiveSchema = liveConfigSchema as z.ZodTypeAny;
+
+const statCardConfigShape = {
+  /** Component type discriminator. */
+  type: z.literal("stat-card"),
+  /** API endpoint to fetch data. Supports FromRef for dependent data. */
+  data: dataSourceSchema,
+  /** Query parameters. Values can be FromRef for filtered stats. */
+  params: z.record(z.union([z.unknown(), fromRefSchema])).optional(),
+  /** Response field to display. Default: auto-detect first numeric field. */
+  field: z.string().optional(),
+  /** Display label. Default: humanized field name. */
+  label: z.union([z.string(), fromRefSchema]).optional(),
+  /** Number format. */
+  format: z
+    .enum(["number", "currency", "percent", "compact", "decimal"])
+    .optional(),
+  /** Currency code (for format: 'currency'). Default: 'USD'. */
+  currency: z.string().optional(),
+  /** Decimal places. Default: auto. */
+  decimals: z.number().int().min(0).optional(),
+  /** Prefix text (e.g., "$"). */
+  prefix: z.string().optional(),
+  /** Suffix text (e.g., "%"). */
+  suffix: z.string().optional(),
+  /** Divide value by this before formatting (e.g. 100 for cents → dollars). */
+  divisor: z.number().positive().optional(),
+  /** Lucide icon name. */
+  icon: z.string().optional(),
+  /** Icon color (semantic token name). */
+  iconColor: z.string().optional(),
+  /** Trend indicator configuration. */
+  trend: trendConfigSchema.optional(),
+  /** Click action. */
+  action: statCardActionSchema.optional(),
+  /** Loading skeleton variant. Default: 'skeleton'. */
+  loading: z.enum(["skeleton", "pulse", "spinner"]).optional(),
+  /** Error state config. */
+  error: statCardErrorStateSchema.optional(),
+  /** Polling behavior for endpoint-backed stat cards. */
+  poll: pollConfigSchema.optional(),
+  /** Rich empty state config. */
+  empty: statCardEmptyStateSchema.optional(),
+  /** Live refresh configuration driven by realtime events. */
+  live: statCardLiveSchema.optional(),
+  /** Live region politeness for dynamic metric updates. */
+  ariaLive: z.enum(["off", "polite", "assertive"]).default("polite"),
+  slots: slotsSchema([
+    "root",
+    "loading",
+    "error",
+    "label",
+    "valueRow",
+    "value",
+    "icon",
+    "trend",
+    "empty",
+  ]).optional(),
+} satisfies z.ZodRawShape;
 
 /**
  * Zod config schema for the StatCard component.
@@ -46,64 +108,6 @@ const statCardLiveSchema = liveConfigSchema as z.ZodTypeAny;
  * }
  * ```
  */
-const statCardConfigShape = {
-    /** Component type discriminator. */
-    type: z.literal("stat-card"),
-    /** API endpoint to fetch data. Supports FromRef for dependent data. */
-    data: dataSourceSchema,
-    /** Query parameters. Values can be FromRef for filtered stats. */
-    params: z.record(z.union([z.unknown(), fromRefSchema])).optional(),
-    /** Response field to display. Default: auto-detect first numeric field. */
-    field: z.string().optional(),
-    /** Display label. Default: humanized field name. */
-    label: z.union([z.string(), fromRefSchema]).optional(),
-    /** Number format. */
-    format: z
-      .enum(["number", "currency", "percent", "compact", "decimal"])
-      .optional(),
-    /** Currency code (for format: 'currency'). Default: 'USD'. */
-    currency: z.string().optional(),
-    /** Decimal places. Default: auto. */
-    decimals: z.number().int().min(0).optional(),
-    /** Prefix text (e.g., "$"). */
-    prefix: z.string().optional(),
-    /** Suffix text (e.g., "%"). */
-    suffix: z.string().optional(),
-    /** Divide value by this before formatting (e.g. 100 for cents → dollars). */
-    divisor: z.number().positive().optional(),
-    /** Lucide icon name. */
-    icon: z.string().optional(),
-    /** Icon color (semantic token name). */
-    iconColor: z.string().optional(),
-    /** Trend indicator configuration. */
-    trend: trendConfigSchema.optional(),
-    /** Click action. */
-    action: statCardActionSchema.optional(),
-    /** Loading skeleton variant. Default: 'skeleton'. */
-    loading: z.enum(["skeleton", "pulse", "spinner"]).optional(),
-    /** Error state config. */
-    error: statCardErrorStateSchema.optional(),
-    /** Polling behavior for endpoint-backed stat cards. */
-    poll: pollConfigSchema.optional(),
-    /** Rich empty state config. */
-    empty: statCardEmptyStateSchema.optional(),
-    /** Live refresh configuration driven by realtime events. */
-    live: statCardLiveSchema.optional(),
-    /** Live region politeness for dynamic metric updates. */
-    ariaLive: z.enum(["off", "polite", "assertive"]).default("polite"),
-    slots: slotsSchema([
-      "root",
-      "loading",
-      "error",
-      "label",
-      "valueRow",
-      "value",
-      "icon",
-      "trend",
-      "empty",
-    ]).optional(),
-  } satisfies z.ZodRawShape;
-
 export const statCardConfigSchema: ComponentConfigSchema<
   typeof statCardConfigShape
 > = extendComponentSchema(statCardConfigShape).strict();
