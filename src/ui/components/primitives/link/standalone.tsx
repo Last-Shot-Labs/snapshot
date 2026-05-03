@@ -1,9 +1,12 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
+import { useSnapshotId } from "../../_base/use-snapshot-id";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { getButtonStyle, BUTTON_INTERACTIVE_CSS } from "../../_base/button-styles";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -13,18 +16,15 @@ function isClientNavigableHref(to: string): boolean {
 
 function getVariantSurfaceBase(
   variant: "default" | "muted" | "button" | "navigation",
+  disabled?: boolean,
 ): Record<string, unknown> {
   if (variant === "button") {
     return {
+      ...getButtonStyle("default", "md", disabled),
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
-      gap: "var(--sn-spacing-xs, 0.25rem)",
-      padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)",
-      borderRadius: "var(--sn-radius-md, 0.375rem)",
-      border: "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
-      bg: "var(--sn-color-primary)",
-      color: "var(--sn-color-primary-foreground)",
+      gap: "var(--sn-spacing-xs, 0.5rem)",
       style: {
         textDecoration: "none",
       },
@@ -36,7 +36,7 @@ function getVariantSurfaceBase(
       display: "flex",
       alignItems: "center",
       justifyContent: "var(--sn-nav-link-justify, flex-start)",
-      gap: "var(--sn-nav-link-gap, var(--sn-spacing-xs, 0.5rem))",
+      gap: "var(--sn-nav-link-gap, var(--sn-spacing-sm, 0.5rem))",
       minHeight: "2.25rem",
       padding: "var(--sn-nav-link-padding, 0.25rem 0.75rem)",
       borderRadius: "var(--sn-radius-md, 0.375rem)",
@@ -46,6 +46,8 @@ function getVariantSurfaceBase(
       style: {
         textDecoration: "none",
         boxSizing: "border-box",
+        transition:
+          "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease), color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease), transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
       },
     };
   }
@@ -60,6 +62,9 @@ function getVariantSurfaceBase(
         : "var(--sn-color-primary)",
     style: {
       textDecoration: "none",
+      textUnderlineOffset: "0.18em",
+      transition:
+        "color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease), opacity var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease), text-decoration-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease), transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
     },
   };
 }
@@ -96,7 +101,7 @@ export interface LinkBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, label, icon, badge). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -126,28 +131,45 @@ export function LinkBase({
   style,
   slots,
 }: LinkBaseProps) {
-  const rootId = id ?? "link";
+  const rootId = useSnapshotId(id, "link");
   const isDisabled = disabled;
   const isCurrent = current;
+  const isButtonVariant = variant === "button";
+  const hoverSurface = isDisabled
+    ? undefined
+    : isButtonVariant
+      ? undefined
+      : variant === "navigation"
+        ? {
+            bg: "var(--sn-color-accent, #f3f4f6)",
+            color: "var(--sn-color-foreground, #111827)",
+          }
+        : {
+            color:
+              variant === "muted"
+                ? "var(--sn-color-foreground, #111827)"
+                : "color-mix(in oklch, var(--sn-color-primary, #2563eb) 82%, var(--sn-color-foreground, #111827))",
+            textDecoration: "underline",
+            textDecorationColor: "currentColor",
+            textDecorationThickness: "0.09em",
+          };
+  const activeSurface = isDisabled
+    ? undefined
+    : isButtonVariant
+      ? undefined
+      : { transform: "translateY(1px)" };
 
   const rootSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-root`,
     implementationBase: {
-      ...getVariantSurfaceBase(variant),
+      ...getVariantSurfaceBase(variant, isDisabled),
       cursor: isDisabled ? "not-allowed" : "pointer",
       textAlign: align,
-      hover:
-        variant === "navigation"
-          ? {
-              bg: "var(--sn-color-accent, #f3f4f6)",
-              color: "var(--sn-color-foreground, #111827)",
-            }
-          : {
-              opacity: 0.84,
-            },
+      hover: hoverSurface,
       focus: {
         ring: true,
       },
+      active: activeSurface,
       states: {
         current:
           variant === "navigation"
@@ -190,7 +212,7 @@ export function LinkBase({
       padding: "0 var(--sn-spacing-xs, 0.25rem)",
       borderRadius: "var(--sn-radius-full, 9999px)",
       bg: "var(--sn-color-secondary, #f1f5f9)",
-      color: "var(--sn-color-secondary-foreground, #0f172a)",
+      color: "var(--sn-color-secondary-foreground, #111827)",
       fontSize: "var(--sn-font-size-xs, 0.75rem)",
     },
     componentSurface: slots?.badge,
@@ -231,6 +253,8 @@ export function LinkBase({
       <a
         data-snapshot-component="link"
         data-snapshot-id={`${rootId}-root`}
+        data-sn-button={isButtonVariant ? "" : undefined}
+        data-variant={isButtonVariant ? "default" : undefined}
         data-current={isCurrent ? "true" : undefined}
         data-disabled={isDisabled ? "true" : undefined}
         href={to}
@@ -274,6 +298,7 @@ export function LinkBase({
       <SurfaceStyles css={labelSurface.scopedCss} />
       <SurfaceStyles css={iconSurface.scopedCss} />
       <SurfaceStyles css={badgeSurface.scopedCss} />
+      {isButtonVariant ? <SurfaceStyles css={BUTTON_INTERACTIVE_CSS} /> : null}
     </>
   );
 }

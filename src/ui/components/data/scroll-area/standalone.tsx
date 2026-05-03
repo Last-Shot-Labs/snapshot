@@ -1,6 +1,7 @@
 'use client';
 
 import { useId, useMemo, type ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import {
@@ -30,7 +31,7 @@ export interface ScrollAreaBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, viewport). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useActionExecutor } from "../../../actions/executor";
 import { useSubscribe } from "../../../context/hooks";
 import { ButtonBase } from "./standalone";
@@ -48,7 +49,7 @@ export function Button({ config }: { config: ButtonConfig }) {
       }}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

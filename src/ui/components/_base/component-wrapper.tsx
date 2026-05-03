@@ -18,7 +18,7 @@ import type {
 } from "./types";
 import { mergeClassNames, resolveSurfacePresentation } from "./style-surfaces";
 import { resolveComponentBackgroundStyle } from "./background-style";
-import { RESPONSIVE_PROP_KEYS } from "./style-props";
+import { RESPONSIVE_PROP_KEYS, DURATION_MAP, DURATION_MS_MAP, EASING_MAP } from "./style-props";
 import { AutoSkeleton } from "./auto-skeleton";
 
 /**
@@ -77,21 +77,6 @@ const Z_INDEX_MAP: Record<string, string> = {
   modal: "var(--sn-z-index-modal, 40)",
   popover: "var(--sn-z-index-popover, 50)",
   toast: "var(--sn-z-index-toast, 60)",
-};
-
-const DURATION_MAP: Record<string, string> = {
-  instant: "var(--sn-duration-instant, 0ms)",
-  fast: "var(--sn-duration-fast, 150ms)",
-  normal: "var(--sn-duration-normal, 300ms)",
-  slow: "var(--sn-duration-slow, 500ms)",
-};
-
-const EASING_MAP: Record<string, string> = {
-  default: "var(--sn-ease-default, ease)",
-  in: "var(--sn-ease-in, ease-in)",
-  out: "var(--sn-ease-out, ease-out)",
-  "in-out": "var(--sn-ease-in-out, ease-in-out)",
-  spring: "var(--sn-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1))",
 };
 
 const TRANSITION_PROPERTY_MAP: Record<string, string> = {
@@ -345,14 +330,21 @@ export function ComponentWrapper({
   useEffect(() => {
     if (!resolvedVisible && shouldRender) {
       if (exitAnimation) {
-        setIsAnimatingOut(true);
-        const dur =
-          DURATION_MS_MAP[exitAnimation.duration ?? "fast"] ?? 150;
-        const timer = setTimeout(() => {
+        const reducedMotion =
+          typeof window !== "undefined" &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reducedMotion) {
           setShouldRender(false);
-          setIsAnimatingOut(false);
-        }, dur);
-        return () => clearTimeout(timer);
+        } else {
+          setIsAnimatingOut(true);
+          const dur =
+            DURATION_MS_MAP[exitAnimation.duration ?? "fast"] ?? 150;
+          const timer = setTimeout(() => {
+            setShouldRender(false);
+            setIsAnimatingOut(false);
+          }, dur);
+          return () => clearTimeout(timer);
+        }
       } else {
         setShouldRender(false);
       }
@@ -451,13 +443,6 @@ export function ComponentWrapper({
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-const DURATION_MS_MAP: Record<string, number> = {
-  instant: 0,
-  fast: 150,
-  normal: 300,
-  slow: 500,
-};
-
 function resolveExitAnimationStyle(
   exit: ExitAnimationConfig | undefined,
 ): CSSProperties | undefined {
@@ -467,8 +452,12 @@ function resolveExitAnimationStyle(
     typeof exit.duration === "string"
       ? (DURATION_MAP[exit.duration] ?? DURATION_MAP.fast)
       : DURATION_MAP.fast;
+  const easing =
+    typeof exit.easing === "string"
+      ? (EASING_MAP[exit.easing] ?? exit.easing)
+      : "var(--sn-ease-default, ease)";
   return {
-    animation: `sn-${preset} ${duration} var(--sn-ease-default, ease) reverse forwards`,
+    animation: `sn-${preset} ${duration} ${easing} reverse forwards`,
   };
 }
 

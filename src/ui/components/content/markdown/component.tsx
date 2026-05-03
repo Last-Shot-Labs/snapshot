@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { usePublish, useSubscribe } from "../../../context/hooks";
 import { MarkdownBase } from "./standalone";
 import type { MarkdownConfig } from "./types";
@@ -31,7 +32,7 @@ export function Markdown({ config }: { config: MarkdownConfig }) {
       maxHeight={config.maxHeight}
       className={config.className}
       style={config.style}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

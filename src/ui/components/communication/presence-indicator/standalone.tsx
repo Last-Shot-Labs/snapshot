@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 
@@ -8,11 +9,11 @@ import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 
 /** Status to dot color mapping. */
 const STATUS_COLORS: Record<string, string> = {
-  online: "var(--sn-color-success, #22c55e)",
+  online: "var(--sn-color-success, #16a34a)",
   offline: "var(--sn-color-muted-foreground, #6b7280)",
   away: "var(--sn-color-warning, #f59e0b)",
-  busy: "var(--sn-color-destructive, #ef4444)",
-  dnd: "var(--sn-color-destructive, #ef4444)",
+  busy: "var(--sn-color-destructive, #dc2626)",
+  dnd: "var(--sn-color-destructive, #dc2626)",
 };
 
 /** Status to display label mapping. */
@@ -24,11 +25,11 @@ const STATUS_LABELS: Record<string, string> = {
   dnd: "Do Not Disturb",
 };
 
-/** Size to dot diameter in px. */
-const DOT_SIZES: Record<string, number> = {
-  sm: 6,
-  md: 8,
-  lg: 10,
+/** Size to dot diameter. */
+const DOT_SIZES: Record<string, string> = {
+  sm: "0.375rem",
+  md: "0.5rem",
+  lg: "0.625rem",
 };
 
 /** Size to font size token. */
@@ -60,7 +61,7 @@ export interface PresenceIndicatorBaseProps {
   /** Inline style applied to the root element. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, dot, label). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -85,7 +86,7 @@ export function PresenceIndicatorBase({
   style,
   slots,
 }: PresenceIndicatorBaseProps) {
-  const dotSize = DOT_SIZES[size] ?? 8;
+  const dotSize = DOT_SIZES[size] ?? "0.5rem";
   const dotColor = STATUS_COLORS[status] ?? STATUS_COLORS.offline!;
   const displayLabel = label || STATUS_LABELS[status] || status;
   const rootId = id ?? "presence-indicator";

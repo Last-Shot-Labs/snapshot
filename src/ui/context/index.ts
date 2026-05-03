@@ -2,7 +2,12 @@ import { atom } from "jotai";
 
 export { AtomRegistryImpl } from "./registry";
 export { AppContextProvider, PageContextProvider } from "./providers";
-export { usePublish, useSubscribe, useResolveFrom } from "./hooks";
+export {
+  usePublish,
+  useSubscribe,
+  useResolveFrom,
+  useResolveFromMany,
+} from "./hooks";
 export {
   getNestedValue,
   isFromRef,

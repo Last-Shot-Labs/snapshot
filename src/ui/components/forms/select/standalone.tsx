@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
+import { useSnapshotId } from "../../_base/use-snapshot-id";
 import type { CSSProperties, FocusEventHandler, KeyboardEventHandler, MouseEventHandler } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -50,7 +52,7 @@ export interface SelectFieldProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -107,7 +109,7 @@ export function SelectField({
     [onChange],
   );
 
-  const rootId = id ?? "select";
+  const rootId = useSnapshotId(id, "select");
   const fieldId = id ? `sn-select-${id}` : undefined;
   const errorMessage = errorText;
   const helperId = fieldId
@@ -236,3 +238,7 @@ export function SelectField({
     </div>
   );
 }
+
+// Backwards-compat alias — canonical name is SelectBase.
+export const SelectBase = SelectField;
+export type SelectBaseProps = SelectFieldProps;

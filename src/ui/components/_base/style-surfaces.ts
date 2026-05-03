@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { styleableElementFields } from "./schema";
 import {
   resolveInteractiveCSS,
   resolveResponsiveCSS,
@@ -103,56 +104,14 @@ function stripStateMap(config: SurfaceConfig | undefined): SurfaceConfig | undef
   return rest;
 }
 
-const SURFACE_CONFIG_KEYS = new Set([
-  "className",
-  "style",
+// Derived from styleableElementFields + the per-state keys (hover/focus/active/states)
+// so that adding a new style field in schema.ts automatically expands this set.
+const SURFACE_CONFIG_KEYS: Set<string> = new Set([
+  ...Object.keys(styleableElementFields),
   "states",
   "hover",
   "focus",
   "active",
-  "background",
-  "backgroundColor",
-  "padding",
-  "paddingX",
-  "paddingY",
-  "margin",
-  "marginX",
-  "marginY",
-  "gap",
-  "width",
-  "minWidth",
-  "maxWidth",
-  "height",
-  "minHeight",
-  "maxHeight",
-  "bg",
-  "color",
-  "borderRadius",
-  "border",
-  "shadow",
-  "opacity",
-  "overflow",
-  "cursor",
-  "position",
-  "inset",
-  "display",
-  "flexDirection",
-  "alignItems",
-  "justifyContent",
-  "flexWrap",
-  "flex",
-  "gridTemplateColumns",
-  "gridTemplateRows",
-  "gridColumn",
-  "gridRow",
-  "textAlign",
-  "fontSize",
-  "fontWeight",
-  "lineHeight",
-  "letterSpacing",
-  "transform",
-  "transition",
-  "whiteSpace",
 ]);
 
 export function extractSurfaceConfig(

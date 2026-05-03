@@ -10,7 +10,7 @@ import { resolveComponentBackgroundStyle } from "./background-style";
 
 // ── Token Maps ────────────────────────────��─────────────────────────────────
 
-const SPACING_MAP: Record<string, string> = {
+export const SPACING_MAP: Record<string, string> = {
   none: "0",
   "2xs": "var(--sn-spacing-2xs, 0.125rem)",
   xs: "var(--sn-spacing-xs, 0.25rem)",
@@ -20,6 +20,23 @@ const SPACING_MAP: Record<string, string> = {
   xl: "var(--sn-spacing-xl, 1.5rem)",
   "2xl": "var(--sn-spacing-2xl, 2rem)",
   "3xl": "var(--sn-spacing-3xl, 3rem)",
+};
+
+/**
+ * Gap token map for layout components (column, row, grid, card, stack).
+ *
+ * Uses wider spacing than `SPACING_MAP` at md and above to give structural
+ * layout gaps more breathing room.
+ */
+export const GAP_MAP: Record<string, string> = {
+  none: "0",
+  "2xs": "var(--sn-spacing-2xs, 0.125rem)",
+  xs: "var(--sn-spacing-xs, 0.25rem)",
+  sm: "var(--sn-spacing-sm, 0.5rem)",
+  md: "var(--sn-spacing-md, 1rem)",
+  lg: "var(--sn-spacing-lg, 1.5rem)",
+  xl: "var(--sn-spacing-xl, 2rem)",
+  "2xl": "var(--sn-spacing-2xl, 2.5rem)",
 };
 
 const RADIUS_MAP: Record<string, string> = {
@@ -100,6 +117,28 @@ const LETTER_SPACING_MAP: Record<string, string> = {
   tight: "-0.025em",
   normal: "0",
   wide: "0.025em",
+};
+
+export const DURATION_MAP: Record<string, string> = {
+  instant: "var(--sn-duration-instant, 0ms)",
+  fast: "var(--sn-duration-fast, 150ms)",
+  normal: "var(--sn-duration-normal, 300ms)",
+  slow: "var(--sn-duration-slow, 500ms)",
+};
+
+export const DURATION_MS_MAP: Record<string, number> = {
+  instant: 0,
+  fast: 150,
+  normal: 300,
+  slow: 500,
+};
+
+export const EASING_MAP: Record<string, string> = {
+  default: "var(--sn-ease-default, ease)",
+  in: "var(--sn-ease-in, ease-in)",
+  out: "var(--sn-ease-out, ease-out)",
+  "in-out": "var(--sn-ease-in-out, ease-in-out)",
+  spring: "var(--sn-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1))",
 };
 
 const JUSTIFY_MAP: Record<string, string> = {
@@ -402,6 +441,9 @@ export interface HoverConfig {
   opacity?: number;
   transform?: string;
   scale?: number;
+  textDecoration?: string;
+  textDecorationColor?: string;
+  textDecorationThickness?: string;
 }
 
 /** Focus state config shape. */
@@ -453,6 +495,12 @@ export function resolveInteractiveCSS(
     if (hover.border) props.push(important(`border: ${hover.border}`));
     if (hover.borderRadius)
       props.push(important(`border-radius: ${resolveRadius(hover.borderRadius)}`));
+    if (hover.textDecoration)
+      props.push(important(`text-decoration: ${hover.textDecoration}`));
+    if (hover.textDecorationColor)
+      props.push(important(`text-decoration-color: ${hover.textDecorationColor}`));
+    if (hover.textDecorationThickness)
+      props.push(important(`text-decoration-thickness: ${hover.textDecorationThickness}`));
     if (props.length)
       rules.push(
         `${sel}:hover { ${props.join("; ")}; transition: all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease); }`,

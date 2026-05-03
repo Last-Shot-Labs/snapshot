@@ -664,7 +664,7 @@ These are the hooks and methods available on the object returned by `createSnaps
 
 ### Communication Components
 - `buildEmojiMap(emojis: CustomEmoji[]) => Map<string, CustomEmoji>` — Builds a shortcode lookup map from an array of custom emojis.
-- `ChatWindow({ config }: { config: { data: string | { resource: string; params?: Record<string, unknown> | undefined; }...` — Manifest adapter — resolves config refs, composes manifest sub-components, delegates to ChatWindowBase.
+- `ChatWindow({ config }: { config: { type: "chat-window"; data?: string | { resource: string; params?: Record<string, u...` — Manifest adapter — resolves config refs, composes manifest sub-components, delegates to ChatWindowBase.
 - `ChatWindowBase({ id, title, subtitle, showHeader, height, threadSlot, typingSlot, inputSlot, showTypingIndicator, cla...` — Standalone ChatWindow — composable chat container with header, message thread, typing indicator, and input slots.
 - `ChatWindowBaseProps` *(interface)*
 - `ChatWindowConfig` *(typealias)* — Inferred config type from the ChatWindow Zod schema.
@@ -687,7 +687,7 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `GifPickerBaseProps` *(interface)*
 - `GifPickerConfig` *(typealias)* — Inferred config type from the GifPicker Zod schema.
 - `gifPickerConfigSchema` — Zod config schema for the GifPicker component.
-- `MessageThread({ config }: { config: Record<string, any>; }) => Element | null` — Manifest adapter — resolves data endpoint, wires actions/publish, delegates to MessageThreadBase.
+- `MessageThread({ config }: { config: { type: "message-thread"; data?: string | { resource: string; params?: Record<str...` — Manifest adapter — resolves data endpoint, wires actions/publish, delegates to MessageThreadBase.
 - `MessageThreadBase({ id, messages, loading, error, emptyText, contentField, authorNameField, authorAvatarField, timest...` — Standalone MessageThread — scrollable message list with avatars, date separators, auto-scroll, embed rendering, and consecutive-message grouping.
 - `MessageThreadBaseProps` *(interface)*
 - `MessageThreadConfig` *(typealias)* — Inferred config type from the MessageThread Zod schema.
@@ -728,7 +728,7 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `CompareViewConfig` *(typealias)* — Inferred config type from the CompareView Zod schema.
 - `compareViewConfigSchema` — Zod config schema for the CompareView component.
 - `detectPlatform(url: string, options?: { darkMode?: boolean | undefined; } | undefined) => PlatformInfo | null` — Detects the platform from a URL and extracts embed info.
-- `FileUploaderBase({ id, variant, label, description, maxFiles, maxSize, accept, onFilesAdded, onFileRemoved, files: co...` — Standalone FileUploader — a file upload component with dropzone, button, and compact variants.
+- `FileUploaderBase({ id, variant, label, description, maxFiles, maxSize, accept, onFilesAdded, onFileRemoved, onUpload:...` — Standalone FileUploader — a file upload component with dropzone, button, and compact variants.
 - `FileUploaderBaseProps` *(interface)*
 - `Heading({ config }: { config: { type: "heading"; text: string | { from: string; transform?: "string" | "number" | "bo...` — Manifest adapter — resolves template text, locale, and route context, then delegates to HeadingBase.
 - `HeadingBase({ id, text, level, align, className, style, slots, }: HeadingBaseProps) => Element` — Standalone Heading — a styled heading element (h1-h6) that works with plain React props.
@@ -749,7 +749,7 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `PLATFORM_NAMES` — Platform display names.
 - `PlatformInfo` *(interface)* — Resolved platform metadata used to render a platform-specific embedded preview.
 - `RichInput({ config }: { config: { type: "rich-input"; background?: string | { size?: "auto" | "cover" | "contain" | u...` — Manifest adapter — resolves config refs, wires actions, and delegates to RichInputBase.
-- `RichInputBase({ id, placeholder, readonly, features, sendOnEnter, maxLength, minHeight, maxHeight, showSendButton, on...` — Standalone RichInput — a rich text editor with formatting toolbar, powered by tiptap.
+- `RichInputBase({ id, placeholder, defaultValue, value, readonly, features, sendOnEnter, maxLength, minHeight, maxHeigh...` — Standalone RichInput — a rich text editor with formatting toolbar, powered by tiptap.
 - `RichInputBaseProps` *(interface)*
 - `RichInputConfig` *(typealias)* — Inferred config type from the RichInput Zod schema.
 - `richInputConfigSchema` — Zod config schema for the RichInput component.
@@ -860,8 +860,8 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `layoutConfigSchema` — Zod schema for layout component configuration.
 - `LayoutProps` *(interface)* — Props for the Layout component.
 - `LayoutVariant` *(typealias)* — Layout variant type extracted from the schema.
-- `Nav({ config, pathname, onNavigate, variant, }: NavComponentProps) => Element` — Grouped navigation component for manifest app shells.
-- `NavBase({ id, variant, items, logo, collapsible, pathname, onNavigate, className, style, slots, children, }: NavBaseP...` — Standalone Nav -- a navigation component with items, logo, and collapse support.
+- `Nav({ config, pathname, onNavigate, variant, }: NavComponentProps) => Element` — Manifest adapter — resolves config refs, i18n, useNav state, and delegates rendering to `NavBase` while injecting manifest-aware sub-components (NavLink, NavDropdown, NavLogo, NavUserMenu) through render callbacks.
+- `NavBase({ id, variant, items, logo, collapsible, pathname, onNavigate, className, style, slots, children, renderItem,...` — Standalone Nav -- a navigation component with items, logo, and collapse support.
 - `NavBaseItem` *(interface)*
 - `NavBaseLogo` *(interface)*
 - `NavBaseProps` *(interface)*
@@ -978,7 +978,7 @@ These are the hooks and methods available on the object returned by `createSnaps
 - `AuditLogBaseProps` *(interface)*
 - `AuditLogFilterEntry` *(interface)*
 - `buildRequestUrl(endpoint: string, params?: Record<string, unknown>, pathParams?: Record<string, unknown>) => string`
-- `CalendarBase({ id, view, events, loading, error, todayLabel, showWeekNumbers, onDateClick, onEventClick, className, s...` — Standalone CalendarBase — renders a month or week calendar grid with event pills, navigation controls, and optional week numbers.
+- `CalendarBase({ id, view, events, initialDate, loading, error, todayLabel, showWeekNumbers, onDateClick, onEventClick,...` — Standalone CalendarBase — renders a month or week calendar grid with event pills, navigation controls, and optional week numbers.
 - `CalendarBaseProps` *(interface)*
 - `CalendarEventEntry` *(interface)*
 - `CaptureWorkflowNode` *(interface)*

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, ReactNode } from "react";
 import { detectPlatform } from "./platform";
 import type { PlatformInfo } from "./platform";
@@ -37,7 +38,7 @@ function MediaFrame({
   rootId: string;
   frameBase?: Record<string, unknown>;
   children: ReactNode;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const mediaSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-media`,
@@ -67,7 +68,7 @@ function EmbedFrame({
   frameBase?: Record<string, unknown>;
   allow?: string;
   allowFullScreen?: boolean;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const frameSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-embed-frame`,
@@ -82,7 +83,7 @@ function EmbedFrame({
   );
 }
 
-function YouTubeEmbed({ rootId, info, aspectRatio, slots }: { rootId: string; info: PlatformInfo; aspectRatio: string; slots?: Record<string, Record<string, unknown>> }) {
+function YouTubeEmbed({ rootId, info, aspectRatio, slots }: { rootId: string; info: PlatformInfo; aspectRatio: string; slots?: SlotOverrides }) {
   return (
     <MediaFrame rootId={rootId} frameBase={{ position: "relative", width: "100%", aspectRatio, bg: "var(--sn-color-foreground, #000)" }} slots={slots}>
       <EmbedFrame rootId={rootId} title="YouTube video" src={info.embedUrl} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen frameBase={{ position: "absolute", inset: 0, width: "100%", height: "100%", style: { border: "none" } }} slots={slots} />
@@ -90,7 +91,7 @@ function YouTubeEmbed({ rootId, info, aspectRatio, slots }: { rootId: string; in
   );
 }
 
-function InstagramEmbed({ rootId, info, slots }: { rootId: string; info: PlatformInfo; slots?: Record<string, Record<string, unknown>> }) {
+function InstagramEmbed({ rootId, info, slots }: { rootId: string; info: PlatformInfo; slots?: SlotOverrides }) {
   return (
     <MediaFrame rootId={rootId} frameBase={{ maxWidth: "min(540px, 100%)" }} slots={slots}>
       <EmbedFrame rootId={rootId} title="Instagram post" src={info.embedUrl} allowFullScreen frameBase={{ width: "100%", minHeight: "500px", bg: "var(--sn-color-card, #ffffff)", style: { border: "none" } }} slots={slots} />
@@ -98,7 +99,7 @@ function InstagramEmbed({ rootId, info, slots }: { rootId: string; info: Platfor
   );
 }
 
-function TikTokEmbed({ rootId, info, slots }: { rootId: string; info: PlatformInfo; slots?: Record<string, Record<string, unknown>> }) {
+function TikTokEmbed({ rootId, info, slots }: { rootId: string; info: PlatformInfo; slots?: SlotOverrides }) {
   return (
     <MediaFrame rootId={rootId} frameBase={{ maxWidth: "min(325px, 100%)" }} slots={slots}>
       <EmbedFrame rootId={rootId} title="TikTok video" src={info.embedUrl} allowFullScreen frameBase={{ width: "100%", height: "min(750px, 80vh)", bg: "var(--sn-color-card, #ffffff)", style: { border: "none" } }} slots={slots} />
@@ -106,7 +107,7 @@ function TikTokEmbed({ rootId, info, slots }: { rootId: string; info: PlatformIn
   );
 }
 
-function TwitterEmbed({ rootId, info, slots }: { rootId: string; info: PlatformInfo; slots?: Record<string, Record<string, unknown>> }) {
+function TwitterEmbed({ rootId, info, slots }: { rootId: string; info: PlatformInfo; slots?: SlotOverrides }) {
   return (
     <MediaFrame rootId={rootId} frameBase={{ maxWidth: "min(550px, 100%)" }} slots={slots}>
       <EmbedFrame rootId={rootId} title="Tweet" src={info.embedUrl} frameBase={{ width: "100%", minHeight: "250px", bg: "var(--sn-color-card, #ffffff)", style: { border: "none" } }} slots={slots} />
@@ -114,7 +115,7 @@ function TwitterEmbed({ rootId, info, slots }: { rootId: string; info: PlatformI
   );
 }
 
-function GifEmbed({ rootId, url, slots }: { rootId: string; url: string; slots?: Record<string, Record<string, unknown>> }) {
+function GifEmbed({ rootId, url, slots }: { rootId: string; url: string; slots?: SlotOverrides }) {
   const imageSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-gif-image`,
     implementationBase: { width: "100%", height: "auto", display: "block" },
@@ -134,7 +135,7 @@ function sanitizeOEmbed(html: string) {
     .replace(/\son\w+="[^"]*"/g, "");
 }
 
-function GenericCard({ rootId, url, meta, slots }: { rootId: string; url: string; meta?: LinkEmbedMeta; slots?: Record<string, Record<string, unknown>> }) {
+function GenericCard({ rootId, url, meta, slots }: { rootId: string; url: string; meta?: LinkEmbedMeta; slots?: SlotOverrides }) {
   const siteName = meta?.siteName;
   const title = meta?.title;
   const description = meta?.description;
@@ -225,7 +226,7 @@ export interface LinkEmbedBaseProps {
   /** Inline style applied to the root element. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────

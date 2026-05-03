@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -32,7 +33,7 @@ export interface ColorPickerFieldProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -113,10 +114,6 @@ export function ColorPickerField({
     () => formatColorValue(color, format, showAlpha ? alpha : 1),
     [alpha, color, format, showAlpha],
   );
-
-  useEffect(() => {
-    onChange?.(displayValue);
-  }, [displayValue, onChange]);
 
   const triggerChange = (nextColor: string, nextAlpha: number) => {
     const value = formatColorValue(nextColor, format, showAlpha ? nextAlpha : 1);
@@ -233,3 +230,7 @@ export function ColorPickerField({
     </>
   );
 }
+
+// Backwards-compat alias — canonical name is ColorPickerBase.
+export const ColorPickerBase = ColorPickerField;
+export type ColorPickerBaseProps = ColorPickerFieldProps;

@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useResolveFrom } from "../../../context/hooks";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { ComponentWrapper } from "../../_base/component-wrapper";
@@ -50,7 +51,7 @@ export function Card({ config }: { config: CardConfig }) {
         background={config.background as CardBaseProps["background"]}
         className={config.className}
         style={config.style as CSSProperties}
-        slots={config.slots as Record<string, Record<string, unknown>>}
+        slots={config.slots as SlotOverrides}
       >
         {(config.children ?? []).map((child, index) => (
           <div

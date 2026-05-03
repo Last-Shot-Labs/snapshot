@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
@@ -57,7 +58,7 @@ export interface MarkdownBaseProps {
   /** Inline style applied to the root element. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, heading1-6, paragraph, link, unorderedList, orderedList, listItem, blockquote, pre, inlineCode, blockCode, table, tableHead, tableHeader, tableCell, rule, image). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -103,7 +104,7 @@ export function MarkdownBase({
     itemSurface: slots?.root,
   });
 
-  const surfaces = {
+  const surfaces = useMemo(() => ({
     heading1: slotSurface("heading1", {
       fontSize: "4xl",
       fontWeight: "bold",
@@ -298,7 +299,7 @@ export function MarkdownBase({
         borderRadius: "var(--sn-radius-md, 0.5rem)",
       },
     }),
-  };
+  }), [rootId, slots]);
 
   const markdownComponents = useMemo<Components>(
     () => ({

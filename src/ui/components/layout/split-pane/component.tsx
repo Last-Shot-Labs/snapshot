@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { ComponentWrapper } from "../../_base/component-wrapper";
 import { SplitPaneBase } from "./standalone";
@@ -18,7 +19,7 @@ export function SplitPane({ config }: { config: SplitPaneConfig }) {
         minSize={config.minSize}
         className={config.className}
         style={config.style as CSSProperties}
-        slots={config.slots as Record<string, Record<string, unknown>>}
+        slots={config.slots as SlotOverrides}
         first={children[0] != null ? <ComponentRenderer config={children[0]} /> : null}
         second={children[1] != null ? <ComponentRenderer config={children[1]} /> : null}
       />

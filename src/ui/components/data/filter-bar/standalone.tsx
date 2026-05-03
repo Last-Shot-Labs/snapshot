@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -49,7 +50,7 @@ export interface FilterBarBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, toolbar, search, dropdown, pill, filterButton). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────

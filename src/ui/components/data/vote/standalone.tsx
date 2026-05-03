@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -24,7 +25,7 @@ export interface VoteBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, upvote, value, downvote). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -52,6 +53,16 @@ export function VoteBase({
   slots,
 }: VoteBaseProps) {
   const [voted, setVoted] = useState<"up" | "down" | null>(null);
+  const localChangeRef = useRef(false);
+
+  useEffect(() => {
+    if (localChangeRef.current) {
+      localChangeRef.current = false;
+      return;
+    }
+    setVoted(null);
+  }, [value]);
+
   const displayValue = value + (voted === "up" ? 1 : voted === "down" ? -1 : 0);
   const rootId = id ?? "vote";
 
@@ -82,8 +93,8 @@ export function VoteBase({
         background: "none",
         border: "none",
         cursor: "pointer",
-        padding: "var(--sn-spacing-2xs, 2px)",
-        fontSize: "1.25rem",
+        padding: "var(--sn-spacing-2xs, 0.125rem)",
+        fontSize: "var(--sn-font-size-lg, 1.125rem)",
         lineHeight: 1,
       },
     },
@@ -119,8 +130,8 @@ export function VoteBase({
         background: "none",
         border: "none",
         cursor: "pointer",
-        padding: "var(--sn-spacing-2xs, 2px)",
-        fontSize: "1.25rem",
+        padding: "var(--sn-spacing-2xs, 0.125rem)",
+        fontSize: "var(--sn-font-size-lg, 1.125rem)",
         lineHeight: 1,
       },
     },
@@ -138,6 +149,7 @@ export function VoteBase({
       <ButtonControl
         type="button"
         onClick={() => {
+          localChangeRef.current = true;
           setVoted(voted === "up" ? null : "up");
           onUpvote?.();
         }}
@@ -160,6 +172,7 @@ export function VoteBase({
       <ButtonControl
         type="button"
         onClick={() => {
+          localChangeRef.current = true;
           setVoted(voted === "down" ? null : "down");
           onDownvote?.();
         }}

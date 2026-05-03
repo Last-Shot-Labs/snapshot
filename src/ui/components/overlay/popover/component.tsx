@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, ReactNode } from "react";
 import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { ComponentRenderer } from "../../../manifest/renderer";
@@ -65,7 +66,7 @@ export function Popover({ config }: { config: PopoverConfig }) {
       footer={footerContent}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     >
       {config.content?.map((child, index) => (
         <ComponentRenderer

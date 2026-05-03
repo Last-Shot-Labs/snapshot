@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { Icon } from "../../../icons/icon";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -36,7 +37,7 @@ export interface ReactionBarBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -106,7 +107,7 @@ export function ReactionBarBase({
           const countSurface = resolveSurfacePresentation({ surfaceId: `${reactionId}-count`, implementationBase: { fontSize: "xs", color: reaction.active ? "var(--sn-color-primary, #2563eb)" : "var(--sn-color-muted-foreground, #6b7280)", fontWeight: "medium" }, componentSurface: slots?.count, activeStates: reaction.active ? ["active"] : [] });
           return (
             <div key={`${reaction.emoji}-${idx}`}>
-              <ButtonControl type="button" testId="reaction-button" ariaLabel={`React with ${reaction.emoji}`} surfaceId={reactionId} onClick={() => handleReactionClick(reaction.emoji, reaction.active ?? false)} variant="ghost" size="sm" surfaceConfig={reactionSurface.resolvedConfigForWrapper} activeStates={reaction.active ? ["active"] : []}>
+              <ButtonControl type="button" testId="reaction-button" ariaLabel={`React with ${reaction.emoji}`} ariaPressed={reaction.active ?? false} surfaceId={reactionId} onClick={() => handleReactionClick(reaction.emoji, reaction.active ?? false)} variant="ghost" size="sm" surfaceConfig={reactionSurface.resolvedConfigForWrapper} activeStates={reaction.active ? ["active"] : []}>
                 <span data-snapshot-id={`${reactionId}-emoji`} className={emojiSurface.className} style={emojiSurface.style}>{reaction.emoji}</span>
                 <span data-snapshot-id={`${reactionId}-count`} className={countSurface.className} style={countSurface.style}>{reaction.count}</span>
               </ButtonControl>

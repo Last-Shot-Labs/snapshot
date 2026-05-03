@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
@@ -29,7 +30,7 @@ export interface PasskeyButtonBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, label). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────

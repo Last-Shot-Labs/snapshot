@@ -57,13 +57,12 @@ describe("manifest validation logic", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects manifest without routes", () => {
+  it("accepts manifest without routes by applying default routes", () => {
     const manifest = { theme: { flavor: "neutral" } };
     const result = manifestConfigSchema.safeParse(manifest);
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      const paths = result.error.issues.map((i) => i.path.join("."));
-      expect(paths).toContain("routes");
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.routes.length).toBeGreaterThan(0);
     }
   });
 

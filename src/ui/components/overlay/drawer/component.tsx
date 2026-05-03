@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { ComponentRenderer } from "../../../manifest/renderer";
@@ -50,6 +51,10 @@ function DrawerSurface({
   const payload = useSubscribe({ from: "overlay.payload" });
   const result = useSubscribe({ from: "overlay.result" });
   const previousOpenRef = useRef<boolean | undefined>(undefined);
+  const payloadRef = useRef(payload);
+  payloadRef.current = payload;
+  const resultRef = useRef(result);
+  resultRef.current = result;
   const footer = (resolvedConfig.footer ?? config.footer) as DrawerConfig["footer"];
 
   // Lifecycle action callbacks
@@ -59,8 +64,8 @@ function DrawerSurface({
 
     const lifecycleContext = {
       overlay: {
-        payload,
-        result,
+        payload: payloadRef.current,
+        result: resultRef.current,
       },
     };
 
@@ -85,7 +90,7 @@ function DrawerSurface({
         void execute(config.onClose as never, lifecycleContext);
       }
     }
-  }, [config.onClose, config.onOpen, execute, isOpen, payload, result]);
+  }, [config.onClose, config.onOpen, execute, isOpen]);
 
   // Convert footer button actions to onClick callbacks
   const footerActions: DrawerBaseFooterAction[] | undefined =
@@ -134,7 +139,7 @@ function DrawerSurface({
       onOpen={handleOpen}
       className={config.className}
       style={config.style as React.CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     >
       {children}
     </DrawerBase>

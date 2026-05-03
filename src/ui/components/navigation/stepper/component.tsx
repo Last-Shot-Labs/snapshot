@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { ComponentRenderer } from "../../../manifest/renderer";
@@ -58,7 +59,7 @@ export function Stepper({ config }: { config: StepperConfig }) {
             ))}
           </>
         ) : undefined,
-        slots: step.slots as Record<string, Record<string, unknown>>,
+        slots: step.slots as SlotOverrides,
       })),
     [config.steps, primitiveOptions, resolvedConfig.steps],
   );
@@ -95,7 +96,7 @@ export function Stepper({ config }: { config: StepperConfig }) {
       onStepChange={handleStepChange}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

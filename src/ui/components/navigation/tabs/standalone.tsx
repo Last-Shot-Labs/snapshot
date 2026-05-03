@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, ReactNode } from "react";
 import { Icon } from "../../../icons/icon";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -19,7 +20,7 @@ export interface TabsBaseTab {
   /** Whether this tab is disabled. */
   disabled?: boolean;
   /** Per-tab slot overrides. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface TabsBaseProps {
@@ -40,7 +41,7 @@ export interface TabsBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Variant styles ──────────────────────────────────────────────────────────
@@ -199,7 +200,10 @@ export function TabsBase({
 }: TabsBaseProps) {
   const [activeTab, setActiveTabRaw] = useState(defaultTab);
   const mountedRef = useRef<Set<number>>(new Set([defaultTab]));
-  mountedRef.current.add(activeTab);
+
+  useEffect(() => {
+    mountedRef.current.add(activeTab);
+  }, [activeTab]);
 
   const resolvedStyles = VARIANT_STYLES[variant] ?? VARIANT_STYLES["default"]!;
   const rootId = id ?? "tabs";
@@ -352,7 +356,10 @@ export function TabsBase({
       </div>
 
       {tabs.map((tab, index) => {
-        if (!mountedRef.current.has(index)) return null;
+        // Always include the active tab — `mountedRef.current.add(activeTab)`
+        // runs in an effect so on the render where activeTab changes the new
+        // panel hasn't been registered yet and would be filtered out.
+        if (!mountedRef.current.has(index) && index !== activeTab) return null;
 
         const panelSurface = resolveSurfacePresentation({
           surfaceId: `${rootId}-panel-${index}`,

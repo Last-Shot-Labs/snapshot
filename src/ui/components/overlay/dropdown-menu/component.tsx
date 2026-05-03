@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom } from "../../../context/hooks";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
@@ -52,7 +53,7 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
         icon: entry.icon,
         disabled: entry.disabled,
         destructive: entry.destructive,
-        slots: entry.slots as Record<string, Record<string, unknown>>,
+        slots: entry.slots as SlotOverrides,
       };
     }
 
@@ -60,13 +61,13 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
       return {
         type: "label",
         text: resolveOptionalPrimitiveValue(entry.text, primitiveOptions) ?? "",
-        slots: entry.slots as Record<string, Record<string, unknown>>,
+        slots: entry.slots as SlotOverrides,
       };
     }
 
     return {
       type: "separator",
-      slots: entry.slots as Record<string, Record<string, unknown>>,
+      slots: entry.slots as SlotOverrides,
     };
   });
 
@@ -94,7 +95,7 @@ export function DropdownMenu({ config }: { config: DropdownMenuConfig }) {
       side={config.side}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

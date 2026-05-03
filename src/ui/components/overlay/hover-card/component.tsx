@@ -1,6 +1,7 @@
 "use client";
 
 import { ComponentRenderer } from "../../../manifest/renderer";
+import type { SlotOverrides } from "../../_base/types";
 import { HoverCardBase } from "./standalone";
 import type { HoverCardConfig } from "./types";
 
@@ -19,7 +20,7 @@ export function HoverCard({ config }: { config: HoverCardConfig }) {
       width={config.width}
       className={config.className}
       style={config.style as import("react").CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     >
       {config.content.map((child, index) => (
         <ComponentRenderer

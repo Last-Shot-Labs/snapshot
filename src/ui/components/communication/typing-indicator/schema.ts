@@ -18,14 +18,17 @@ import { fromRefSchema } from "../../_base/types";
 export const typingIndicatorConfigSchema = extendComponentSchema({
     /** Component type discriminator. */
     type: z.literal("typing-indicator"),
-    /** Users currently typing. Can be a FromRef. */
+    /** Users currently typing. Can be string names, user objects, or a FromRef. */
     users: z
       .union([
         z.array(
-          z.object({
-            name: z.string(),
-            avatar: z.string().optional(),
-          }),
+          z.union([
+            z.string(),
+            z.object({
+              name: z.string(),
+              avatar: z.string().optional(),
+            }),
+          ]),
         ),
         fromRefSchema,
       ])

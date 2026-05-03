@@ -1,6 +1,8 @@
 'use client';
 
 import type { CSSProperties, MouseEventHandler } from "react";
+import type { SlotOverrides } from "../../_base/types";
+import { useSnapshotId } from "../../_base/use-snapshot-id";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -34,14 +36,14 @@ export interface IconButtonBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 const SIZE_MAP = {
-  xs: { size: "sm" as const, dim: "1.5rem", iconSize: 12 },
-  sm: { size: "sm" as const, dim: "2rem", iconSize: 14 },
-  md: { size: "md" as const, dim: "2.5rem", iconSize: 16 },
-  lg: { size: "lg" as const, dim: "3rem", iconSize: 20 },
+  xs: { dim: "var(--sn-icon-btn-xs, 1.5rem)", iconSize: 12 },
+  sm: { dim: "var(--sn-icon-btn-sm, 2rem)", iconSize: 14 },
+  md: { dim: "var(--sn-icon-btn-md, 2.5rem)", iconSize: 16 },
+  lg: { dim: "var(--sn-icon-btn-lg, 3rem)", iconSize: 20 },
 } as const;
 
 /**
@@ -75,7 +77,7 @@ export function IconButtonBase({
 }: IconButtonBaseProps) {
   const size = SIZE_MAP[sizeProp];
   const states = disabled ? (["disabled"] as const) : [];
-  const rootId = id ?? ariaLabel;
+  const rootId = useSnapshotId(id, "icon-button");
   const iconSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-icon`,
     implementationBase: {
@@ -92,7 +94,7 @@ export function IconButtonBase({
       <ButtonControl
         type="button"
         variant={variant}
-        size={size.size}
+        size="icon"
         disabled={disabled}
         onClick={onClick}
         surfaceId={rootId}

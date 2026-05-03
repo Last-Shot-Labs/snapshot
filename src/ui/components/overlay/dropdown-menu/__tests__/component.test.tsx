@@ -197,13 +197,13 @@ describe("DropdownMenu", () => {
     const wrapper = createTestWrapper();
     const config: DropdownMenuConfig = {
       ...baseConfig,
-      trigger: { icon: "⋮", label: "Menu" },
+      trigger: { icon: "more-vertical", label: "Menu" },
     };
 
     render(<DropdownMenu config={config} />, { wrapper });
 
     const trigger = screen.getByTestId("dropdown-menu-trigger");
-    expect(trigger.textContent).toContain("⋮");
+    expect(trigger.querySelector("svg")).not.toBeNull();
     expect(trigger.textContent).toContain("Menu");
   });
 

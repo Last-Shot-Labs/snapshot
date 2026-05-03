@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, type CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -50,7 +51,7 @@ export interface OAuthButtonsBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, heading, providerGroup, provider, providerIcon, providerLabel, providerDescription). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -81,6 +82,7 @@ export function OAuthButtonsBase({
   slots,
 }: OAuthButtonsBaseProps) {
   const autoRedirectedRef = useRef(false);
+  const autoRedirectFormRef = useRef<HTMLFormElement | null>(null);
   const rootId = id ?? "oauth-buttons";
   const hasProviders = providers.length > 0;
   const componentSurface = className || style ? { className, style } : undefined;
@@ -117,9 +119,17 @@ export function OAuthButtonsBase({
       const form = document.createElement("form");
       form.method = "POST";
       form.action = provider.url;
+      autoRedirectFormRef.current = form;
       document.body.appendChild(form);
       form.submit();
     }
+
+    return () => {
+      if (autoRedirectFormRef.current && autoRedirectFormRef.current.parentNode) {
+        autoRedirectFormRef.current.parentNode.removeChild(autoRedirectFormRef.current);
+        autoRedirectFormRef.current = null;
+      }
+    };
   }, [hasProviders, providerMode, providers, onProviderClick]);
 
   if (!hasProviders) {

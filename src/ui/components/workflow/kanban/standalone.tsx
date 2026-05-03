@@ -39,7 +39,7 @@ export interface KanbanColumnEntry {
   /** WIP limit; column header turns destructive when exceeded. */
   limit?: number;
   /** Slot overrides scoped to this column. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface KanbanBaseProps {
@@ -78,13 +78,13 @@ export interface KanbanBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const colorVar = (color: string): string =>
-  `var(--sn-color-${color}, currentColor)`;
+  `var(--sn-color-${color}, #2563eb)`;
 
 const priorityColorMap: Record<string, string> = {
   high: "var(--sn-color-destructive, #ef4444)",
@@ -128,8 +128,8 @@ function SkeletonCard() {
     <div
       data-kanban-skeleton
       style={{
-        padding: "var(--sn-spacing-sm, 8px)",
-        borderRadius: "var(--sn-radius-sm, 4px)",
+        padding: "var(--sn-spacing-sm, 0.5rem)",
+        borderRadius: "var(--sn-radius-sm, 0.25rem)",
         backgroundColor: "var(--sn-color-muted, #e5e7eb)",
         opacity: "var(--sn-opacity-muted, 0.5)",
       }}
@@ -138,18 +138,18 @@ function SkeletonCard() {
         style={{
           height: "1em",
           width: "70%",
-          borderRadius: "var(--sn-radius-xs, 2px)",
-          backgroundColor: "var(--sn-color-muted-foreground, #94a3b8)",
+          borderRadius: "var(--sn-radius-xs, 0.125rem)",
+          backgroundColor: "var(--sn-color-muted-foreground, #6b7280)",
           opacity: "var(--sn-opacity-disabled, 0.3)",
-          marginBottom: "var(--sn-spacing-xs, 4px)",
+          marginBottom: "var(--sn-spacing-xs, 0.25rem)",
         }}
       />
       <div
         style={{
           height: "0.75em",
           width: "90%",
-          borderRadius: "var(--sn-radius-xs, 2px)",
-          backgroundColor: "var(--sn-color-muted-foreground, #94a3b8)",
+          borderRadius: "var(--sn-radius-xs, 0.125rem)",
+          backgroundColor: "var(--sn-color-muted-foreground, #6b7280)",
           opacity: "var(--sn-opacity-disabled, 0.2)",
         }}
       />
@@ -180,7 +180,7 @@ function SortableCard({
   priorityField?: string;
   sortable: boolean;
   onCardClick?: (item: Record<string, unknown>) => void;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const {
     attributes,
@@ -271,7 +271,7 @@ function CardContent({
   priorityField?: string;
   sortable: boolean;
   onCardClick?: (item: Record<string, unknown>) => void;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const title = String(item[titleField] ?? "");
   const description = descriptionField
@@ -328,9 +328,9 @@ function CardContent({
     implementationBase: {
       fontWeight: "semibold",
       fontSize: "sm",
-      color: "var(--sn-color-foreground, #0f172a)",
+      color: "var(--sn-color-foreground, #111827)",
       style: {
-        marginBottom: description ? "var(--sn-spacing-xs, 4px)" : undefined,
+        marginBottom: description ? "var(--sn-spacing-xs, 0.25rem)" : undefined,
       },
     },
     componentSurface: slots?.cardTitle,
@@ -340,13 +340,13 @@ function CardContent({
     surfaceId: descriptionSurfaceId,
     implementationBase: {
       fontSize: "xs",
-      color: "var(--sn-color-muted-foreground, #64748b)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
       overflow: "hidden",
       style: {
         display: "-webkit-box",
         WebkitLineClamp: 2,
         WebkitBoxOrient: "vertical",
-        marginBottom: "var(--sn-spacing-xs, 4px)",
+        marginBottom: "var(--sn-spacing-xs, 0.25rem)",
       } as CSSProperties,
     },
     componentSurface: slots?.cardDescription,
@@ -359,7 +359,7 @@ function CardContent({
       alignItems: "center",
       justifyContent: "space-between",
       style: {
-        marginTop: "var(--sn-spacing-xs, 4px)",
+        marginTop: "var(--sn-spacing-xs, 0.25rem)",
       },
     },
     componentSurface: slots?.cardMeta,
@@ -657,7 +657,7 @@ export function KanbanBase({
       overflow: "auto",
       style: {
         overflowX: "auto",
-        padding: "var(--sn-spacing-sm, 8px) 0",
+        padding: "var(--sn-spacing-sm, 0.5rem) 0",
       },
     },
     componentSurface: className || style ? { className, style } : undefined,
@@ -703,7 +703,7 @@ export function KanbanBase({
         },
         style: {
           borderTop: `3px solid ${colorVar(accentColor)}`,
-          padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
+          padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
         },
       },
       componentSurface: slots?.columnHeader,
@@ -716,7 +716,7 @@ export function KanbanBase({
         fontSize: "sm",
         color: isOverLimit
           ? "var(--sn-color-destructive, #ef4444)"
-          : "var(--sn-color-foreground, #0f172a)",
+          : "var(--sn-color-foreground, #111827)",
       },
       componentSurface: slots?.columnTitle,
       itemSurface: col.slots?.columnTitle,
@@ -734,8 +734,8 @@ export function KanbanBase({
             : "var(--sn-color-muted, #e5e7eb)",
           color: isOverLimit
             ? "var(--sn-color-destructive-foreground, #fff)"
-            : "var(--sn-color-muted-foreground, #64748b)",
-          padding: "0 var(--sn-spacing-xs, 4px)",
+            : "var(--sn-color-muted-foreground, #6b7280)",
+          padding: "0 var(--sn-spacing-xs, 0.25rem)",
           minWidth: "1.5em",
         },
       },
@@ -753,7 +753,7 @@ export function KanbanBase({
           overflowY: "auto",
           minHeight: sortable ? "80px" : "60px",
           padding:
-            "var(--sn-spacing-xs, 4px) var(--sn-spacing-sm, 8px) var(--sn-spacing-sm, 8px)",
+            "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-sm, 0.5rem)",
         },
       },
       componentSurface: slots?.columnBody,
@@ -763,7 +763,7 @@ export function KanbanBase({
       surfaceId: emptyStateSurfaceId,
       implementationBase: {
         fontSize: "xs",
-        color: "var(--sn-color-muted-foreground, #94a3b8)",
+        color: "var(--sn-color-muted-foreground, #6b7280)",
         textAlign: "center",
         padding: "md",
       },
@@ -826,7 +826,7 @@ export function KanbanBase({
                   fontSize: "var(--sn-font-size-xs, 0.75rem)",
                   color: "var(--sn-color-destructive, #ef4444)",
                   textAlign: "center",
-                  padding: "var(--sn-spacing-sm, 8px)",
+                  padding: "var(--sn-spacing-sm, 0.5rem)",
                 }}
               >
                 Error loading data
@@ -889,7 +889,7 @@ export function KanbanBase({
                   fontSize: "var(--sn-font-size-xs, 0.75rem)",
                   color: "var(--sn-color-destructive, #ef4444)",
                   textAlign: "center",
-                  padding: "var(--sn-spacing-sm, 8px)",
+                  padding: "var(--sn-spacing-sm, 0.5rem)",
                 }}
               >
                 Error loading data
@@ -983,3 +983,4 @@ export function KanbanBase({
 
   return board;
 }
+import type { SlotOverrides } from "../../_base/types";

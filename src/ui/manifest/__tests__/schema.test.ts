@@ -31,6 +31,24 @@ import {
 import { safeParseManifest } from "../compiler";
 
 describe("manifestConfigSchema", () => {
+  it("accepts an empty manifest for code-first apps", () => {
+    const result = manifestConfigSchema.safeParse({});
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.routes).toEqual([{ id: "home", path: "/" }]);
+    }
+  });
+
+  it("accepts a placeholder route without manifest content", () => {
+    const result = manifestConfigSchema.safeParse({
+      app: { home: "/" },
+      routes: [{ id: "home", path: "/" }],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it("validates a full valid manifest", () => {
     const manifest = {
       app: {
@@ -286,11 +304,14 @@ describe("manifestConfigSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects manifest missing routes", () => {
+  it("defaults missing routes for code-first manifests", () => {
     const result = manifestConfigSchema.safeParse({
       theme: { flavor: "neutral" },
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.routes).toEqual([{ id: "home", path: "/" }]);
+    }
   });
 
   it("accepts minimal manifest with only routes", () => {

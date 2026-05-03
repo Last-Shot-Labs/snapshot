@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import type { ComponentConfig } from "../../../manifest/types";
@@ -35,7 +36,7 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
             ))}
           </>
         ),
-        slots: tab.slots as Record<string, Record<string, unknown>>,
+        slots: tab.slots as SlotOverrides,
       })),
     [tabs],
   );
@@ -49,7 +50,7 @@ export function TabsComponent({ config }: { config: TabsConfig }) {
       onTabChange={setActiveTab}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useActionExecutor } from "../../../actions/executor";
 import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import {
@@ -75,7 +76,7 @@ export function RichInput({ config }: { config: RichInputConfig }) {
       onChange={handleChange}
       className={config.className}
       style={config.style}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

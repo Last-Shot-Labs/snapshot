@@ -13,6 +13,8 @@ import {
   resolveSurfacePresentation,
 } from "../../_base/style-surfaces";
 import { SurfaceStyles } from "../../_base/surface-styles";
+import { useFocusTrap } from "../../_base/use-focus-trap";
+import { useOverlayAnimation } from "../../_base/use-overlay-animation";
 
 // ── Standalone Props ──────────────────────────────────────────────────────────
 
@@ -64,7 +66,7 @@ export interface CommandPaletteBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -135,11 +137,15 @@ export function CommandPaletteBase({
     [isControlled, onQueryChange],
   );
   const [activeIndex, setActiveIndex] = useState(0);
-  const [mounted, setMounted] = useState(false);
-  const [animating, setAnimating] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const rootId = id ?? "command-palette";
+
+  const { mounted, animating } = useOverlayAnimation({
+    open,
+    duration: ANIMATION_DURATION,
+  });
 
   const filteredGroups = useMemo(() => {
     if (!query.trim()) {
@@ -224,23 +230,31 @@ export function CommandPaletteBase({
 
   useEffect(() => {
     if (open) {
-      setMounted(true);
       if (!isControlled) {
         setInternalQuery("");
       }
-      const enterTimer = setTimeout(() => {
-        setAnimating(true);
-        inputRef.current?.focus();
-      }, 10);
-      return () => clearTimeout(enterTimer);
     }
+  }, [isControlled, open]);
 
-    if (mounted) {
-      setAnimating(false);
-      const exitTimer = setTimeout(() => setMounted(false), ANIMATION_DURATION);
-      return () => clearTimeout(exitTimer);
+  useEffect(() => {
+    if (open && animating) {
+      inputRef.current?.focus();
     }
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [animating, open]);
+
+  useFocusTrap(open && animating, panelRef, {
+    initialFocus: "input",
+    returnFocus: true,
+  });
+
+  const handleOverlayClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (event.target === event.currentTarget) {
+        onClose();
+      }
+    },
+    [onClose],
+  );
 
   if (!mounted) {
     return null;
@@ -255,15 +269,40 @@ export function CommandPaletteBase({
   const rootSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-root`,
     implementationBase: {
-      display: "block",
-      style: animationStyle,
+      position: "fixed",
+      inset: 0,
+      zIndex: "var(--sn-z-index-modal, 40)",
+      display: "flex",
+      alignItems: "flex-start",
+      justifyContent: "center",
+      style: {
+        paddingTop: "var(--sn-spacing-2xl, 15vh)",
+      },
     },
     componentSurface: className || style ? { className, style } : undefined,
     itemSurface: slots?.root,
   });
+  const overlaySurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-overlay`,
+    implementationBase: {
+      position: "fixed",
+      inset: 0,
+      backgroundColor:
+        "var(--sn-modal-overlay, color-mix(in oklch, var(--sn-color-foreground, #111827) 40%, transparent))",
+      style: {
+        opacity: animating ? 1 : 0,
+        transition: `opacity var(--sn-duration-fast, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease)`,
+        zIndex: -1,
+      },
+    },
+    componentSurface: slots?.overlay,
+  });
   const panelSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-panel`,
     implementationBase: {
+      position: "relative",
+      width: "100%",
+      maxWidth: "var(--sn-command-palette-max-width, 32rem)",
       display: "flex",
       flexDirection: "column",
       color:
@@ -271,10 +310,12 @@ export function CommandPaletteBase({
       bg: "var(--sn-color-popover, var(--sn-color-card, #ffffff))",
       borderRadius: "lg",
       shadow: "lg",
+      outline: "none",
       style: {
         border:
           "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
         overflow: "hidden",
+        ...animationStyle,
       },
     },
     componentSurface: slots?.panel,
@@ -353,11 +394,24 @@ export function CommandPaletteBase({
     <div
       data-snapshot-component="command-palette"
       data-snapshot-id={`${rootId}-root`}
-      className={rootSurface.className}
+      role="dialog"
+      aria-modal="true"
+      aria-label={placeholder}
       onKeyDown={handleKeyDown}
+      className={rootSurface.className}
       style={rootSurface.style}
     >
       <div
+        data-command-palette-overlay=""
+        data-testid="command-palette-overlay"
+        data-snapshot-id={`${rootId}-overlay`}
+        onClick={handleOverlayClick}
+        className={overlaySurface.className}
+        style={overlaySurface.style}
+      />
+      <div
+        ref={panelRef}
+        tabIndex={-1}
         data-snapshot-id={`${rootId}-panel`}
         className={panelSurface.className}
         style={panelSurface.style}
@@ -567,6 +621,7 @@ export function CommandPaletteBase({
         </div>
       </div>
       <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={overlaySurface.scopedCss} />
       <SurfaceStyles css={panelSurface.scopedCss} />
       <SurfaceStyles css={searchSurface.scopedCss} />
       <SurfaceStyles css={searchInputSurface.scopedCss} />
@@ -576,3 +631,4 @@ export function CommandPaletteBase({
     </div>
   );
 }
+import type { SlotOverrides } from "../../_base/types";

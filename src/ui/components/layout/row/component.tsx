@@ -1,24 +1,15 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { useResponsiveValue } from "../../../hooks/use-breakpoint";
 import { ComponentWrapper } from "../../_base/component-wrapper";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { extractSurfaceConfig, resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { GAP_MAP } from "../../_base/style-props";
 import { RowBase } from "./standalone";
 import type { RowConfig } from "./types";
-
-const GAP_MAP: Record<string, string> = {
-  none: "0",
-  "2xs": "var(--sn-spacing-2xs, 0.125rem)",
-  xs: "var(--sn-spacing-xs, 0.25rem)",
-  sm: "var(--sn-spacing-sm, 0.5rem)",
-  md: "var(--sn-spacing-md, 1rem)",
-  lg: "var(--sn-spacing-lg, 1.5rem)",
-  xl: "var(--sn-spacing-xl, 2rem)",
-  "2xl": "var(--sn-spacing-2xl, 2.5rem)",
-};
 
 const ALIGN_MAP: Record<string, string> = {
   start: "flex-start",
@@ -97,7 +88,7 @@ export function Row({ config }: { config: RowConfig }) {
         maxHeight={config.maxHeight}
         className={config.className}
         style={config.style as CSSProperties}
-        slots={config.slots as Record<string, Record<string, unknown>>}
+        slots={config.slots as SlotOverrides}
       >
         {config.children.map((child, index) => {
           const itemStyle =

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { useComponentData } from "../../_base/use-component-data";
@@ -535,7 +536,7 @@ function useResolvedFieldConfig(
       inlineActionLabel && inlineActionTarget
         ? { label: inlineActionLabel, to: inlineActionTarget }
         : undefined,
-    slots: resolvedField.slots as Record<string, Record<string, unknown>> | undefined,
+    slots: resolvedField.slots as SlotOverrides | undefined,
     autoComplete: resolvedField.autoComplete,
     span: resolvedField.span,
     labelField: resolvedField.labelField,
@@ -1048,7 +1049,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
             divisor: field.divisor,
             autoComplete: field.autoComplete,
             span: field.span,
-            slots: field.slots as Record<string, Record<string, unknown>> | undefined,
+            slots: field.slots as SlotOverrides | undefined,
           } satisfies AutoFormFieldConfig;
         }
         return resolved;
@@ -1076,13 +1077,13 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
               readOnly: field.readOnly,
               hidden: false,
               span: field.span,
-              slots: field.slots as Record<string, Record<string, unknown>> | undefined,
+              slots: field.slots as SlotOverrides | undefined,
             } satisfies AutoFormFieldConfig;
           }
           return resolved;
         })
         .filter((f: AutoFormFieldConfig | null): f is AutoFormFieldConfig => f !== null),
-      slots: section.slots as Record<string, Record<string, unknown>> | undefined,
+      slots: section.slots as SlotOverrides | undefined,
       collapsible: section.collapsible,
       defaultCollapsed: section.defaultCollapsed,
     }));
@@ -1139,7 +1140,7 @@ export function AutoForm({ config }: { config: AutoFormConfig }) {
         dataTestId="form"
         className={config.className as string | undefined}
         style={config.style as React.CSSProperties | undefined}
-        slots={config.slots as Record<string, Record<string, unknown>> | undefined}
+        slots={config.slots as SlotOverrides | undefined}
       />
     </>
   );

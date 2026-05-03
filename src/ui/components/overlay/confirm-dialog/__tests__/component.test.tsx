@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ConfirmDialogComponent } from "../component";
 
 const refValues: Record<string, unknown> = {
@@ -76,6 +76,10 @@ vi.mock("../../../../actions/modal-manager", () => ({
 }));
 
 describe("ConfirmDialogComponent", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("renders confirm dialog with title, description, and button labels", () => {
     render(
       <ConfirmDialogComponent

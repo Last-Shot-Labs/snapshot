@@ -332,9 +332,9 @@ describe("compiler", () => {
     expect(compiled.realtime?.ws?.reconnectOnLogin).toBe(false);
     expect(compiled.realtime?.ws?.url).toBe("wss://example.com/ws");
     expect(compiled.realtime?.ws?.on?.connected).toBe("ws-connected");
-    expect(compiled.realtime?.sse?.endpoints["/__sse/updates"]?.withCredentials).toBe(
-      true,
-    );
+    expect(
+      compiled.realtime?.sse?.endpoints["/__sse/updates"]?.withCredentials,
+    ).toBe(true);
     expect(
       compiled.realtime?.sse?.endpoints["/__sse/updates"]?.on?.closed,
     ).toBe("sse-closed");
@@ -453,6 +453,24 @@ describe("compiler", () => {
     });
 
     expect(compiled.app.home).toBe("/");
+  });
+
+  it("defaults empty code-first manifests to a placeholder home route", () => {
+    const compiled = compileManifest({});
+
+    expect(compiled.app.home).toBe("/");
+    expect(compiled.firstRoute?.id).toBe("home");
+    expect(compiled.firstRoute?.path).toBe("/");
+  });
+
+  it("compiles code-first placeholder routes without manifest content", () => {
+    const compiled = compileManifest({
+      app: { home: "/" },
+      routes: [{ id: "home", path: "/" }],
+    });
+
+    expect(compiled.app.home).toBe("/");
+    expect(compiled.firstRoute?.page.content).toEqual([{ type: "spacer" }]);
   });
 
   it("defaults app.cache to the current QueryClient settings", () => {

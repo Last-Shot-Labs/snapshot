@@ -1,24 +1,13 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useResponsiveValue } from "../../../hooks/use-breakpoint";
 import { resolveComponentBackgroundStyle } from "../../_base/background-style";
 import type { ComponentBackgroundValue } from "../../_base/background-style";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
-
-// ── Gap tokens (shared with manifest variant) ─────────────────────────────────
-
-const GAP_MAP: Record<string, string> = {
-  none: "0",
-  "2xs": "var(--sn-spacing-2xs, 0.125rem)",
-  xs: "var(--sn-spacing-xs, 0.25rem)",
-  sm: "var(--sn-spacing-sm, 0.5rem)",
-  md: "var(--sn-spacing-md, 1rem)",
-  lg: "var(--sn-spacing-lg, 1.5rem)",
-  xl: "var(--sn-spacing-xl, 2rem)",
-  "2xl": "var(--sn-spacing-2xl, 2.5rem)",
-};
+import { GAP_MAP } from "../../_base/style-props";
 
 // ── Standalone Props ──────────────────────────────────────────────────────────
 
@@ -42,7 +31,7 @@ export interface CardBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, header, title, subtitle, content, item). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 
   /** React children — rendered as the card body. */
   children?: ReactNode;
@@ -95,6 +84,8 @@ export function CardBase({
         boxShadow:
           "var(--sn-card-shadow, var(--sn-shadow-sm, 0 1px 3px rgba(0,0,0,0.1)))",
         padding: "var(--sn-card-padding, var(--sn-spacing-lg, 1.5rem))",
+        transition:
+          "box-shadow var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease), border-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
         ...(backgroundStyle ?? {}),
       },
     },

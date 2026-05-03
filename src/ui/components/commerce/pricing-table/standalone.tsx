@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, type CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
@@ -51,12 +52,12 @@ export interface PricingTableBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── TierCard ──────────────────────────────────────────────────────────────────
 
-function TierCard({ rootId, index, tier, currency, slots }: { rootId: string; index: number; tier: PricingTierEntry; currency: string; slots?: Record<string, Record<string, unknown>> }) {
+function TierCard({ rootId, index, tier, currency, slots }: { rootId: string; index: number; tier: PricingTierEntry; currency: string; slots?: SlotOverrides }) {
   const isHighlighted = tier.highlighted === true;
   const priceDisplay = typeof tier.price === "number" ? `${currency}${tier.price}` : tier.price;
   const ctaLabel = tier.actionLabel ?? "Get Started";
@@ -70,7 +71,7 @@ function TierCard({ rootId, index, tier, currency, slots }: { rootId: string; in
   const periodS = resolveSurfacePresentation({ surfaceId: `${cardId}-period`, implementationBase: { fontSize: "sm", color: "var(--sn-color-muted-foreground, #6b7280)" }, componentSurface: slots?.period });
   const descS = resolveSurfacePresentation({ surfaceId: `${cardId}-description`, implementationBase: { fontSize: "sm", color: "var(--sn-color-muted-foreground, #6b7280)" }, componentSurface: slots?.description });
   const listS = resolveSurfacePresentation({ surfaceId: `${cardId}-featureList`, implementationBase: { display: "flex", flexDirection: "column", gap: "xs", flex: "1", style: { listStyle: "none", margin: 0, padding: 0 } }, componentSurface: slots?.featureList });
-  const ctaS = resolveSurfacePresentation({ surfaceId: `${cardId}-cta`, implementationBase: { width: "100%", paddingY: "xs", paddingX: "md", borderRadius: "md", fontSize: "sm", fontWeight: "semibold", cursor: tier.onAction ? "pointer" : "not-allowed", color: isHighlighted ? "var(--sn-color-primary-foreground, #fff)" : "var(--sn-color-secondary-foreground, #0f172a)", bg: isHighlighted ? "var(--sn-color-primary, #2563eb)" : "var(--sn-color-secondary, #f1f5f9)", hover: tier.onAction ? { opacity: 0.85 } : undefined, focus: { ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))" }, style: { border: "var(--sn-border-default, 1px) solid transparent", fontFamily: "inherit", opacity: tier.onAction ? 1 : 0.6 } }, componentSurface: slots?.cta });
+  const ctaS = resolveSurfacePresentation({ surfaceId: `${cardId}-cta`, implementationBase: { width: "100%", paddingY: "xs", paddingX: "md", borderRadius: "md", fontSize: "sm", fontWeight: "semibold", cursor: tier.onAction ? "pointer" : "not-allowed", color: isHighlighted ? "var(--sn-color-primary-foreground, #fff)" : "var(--sn-color-secondary-foreground, #111827)", bg: isHighlighted ? "var(--sn-color-primary, #2563eb)" : "var(--sn-color-secondary, #f1f5f9)", hover: tier.onAction ? { opacity: 0.85 } : undefined, focus: { ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))" }, style: { border: "var(--sn-border-default, 1px) solid transparent", fontFamily: "inherit", opacity: tier.onAction ? 1 : 0.6 } }, componentSurface: slots?.cta });
 
   return (
     <>

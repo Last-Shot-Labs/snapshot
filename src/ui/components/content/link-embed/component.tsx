@@ -1,6 +1,7 @@
 'use client';
 
 import { useResolveFrom, useSubscribe } from "../../../context/hooks";
+import type { SlotOverrides } from "../../_base/types";
 import { LinkEmbedBase } from "./standalone";
 import type { LinkEmbedMeta } from "./standalone";
 import type { LinkEmbedConfig } from "./types";
@@ -29,7 +30,7 @@ export function LinkEmbed({ config }: { config: LinkEmbedConfig }) {
       maxWidth={config.maxWidth}
       className={config.className}
       style={config.style}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

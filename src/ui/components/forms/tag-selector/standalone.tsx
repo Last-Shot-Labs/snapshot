@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -43,19 +44,19 @@ export interface TagSelectorFieldProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 function contrastText(color: string): string {
   if (!color.startsWith("#") || color.length < 7) {
-    return "#ffffff";
+    return "var(--sn-color-primary-foreground, #ffffff)";
   }
 
   const r = parseInt(color.slice(1, 3), 16);
   const g = parseInt(color.slice(3, 5), 16);
   const b = parseInt(color.slice(5, 7), 16);
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5 ? "#000000" : "#ffffff";
+  return luminance > 0.5 ? "var(--sn-color-foreground, #000000)" : "var(--sn-color-primary-foreground, #ffffff)";
 }
 
 function StandaloneTagPill({
@@ -67,7 +68,7 @@ function StandaloneTagPill({
   rootId: string;
   tag: TagSelectorTag;
   onRemove: (value: string) => void;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const pillId = `${rootId}-pill-${tag.value}`;
   const backgroundColor = tag.color ?? "var(--sn-color-primary, #2563eb)";
@@ -170,7 +171,7 @@ function StandaloneTagOption({
   rootId: string;
   tag: TagSelectorTag;
   onSelect: (value: string) => void;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const optionId = `${rootId}-option-${tag.value}`;
   const optionSurface = resolveSurfacePresentation({
@@ -613,3 +614,7 @@ export function TagSelectorField({
     </>
   );
 }
+
+// Backwards-compat alias — canonical name is TagSelectorBase.
+export const TagSelectorBase = TagSelectorField;
+export type TagSelectorBaseProps = TagSelectorFieldProps;

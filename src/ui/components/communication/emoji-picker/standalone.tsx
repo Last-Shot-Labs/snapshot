@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, type CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { Icon } from "../../../icons/icon";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -44,7 +45,7 @@ export interface EmojiPickerBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ───────────���─────────────────────────────────────────────────────
@@ -134,7 +135,7 @@ export function EmojiPickerBase({
 
   return (
     <>
-      <div data-snapshot-component="emoji-picker" data-testid="emoji-picker" data-snapshot-id={rootId} className={rootSurface.className} style={rootSurface.style}>
+      <div data-snapshot-component="emoji-picker" data-testid="emoji-picker" data-snapshot-id={rootId} role="dialog" aria-label="Emoji picker" className={rootSurface.className} style={rootSurface.style}>
         <div data-snapshot-id={`${rootId}-searchSection`} className={searchSectionSurface.className} style={searchSectionSurface.style}>
           <div data-snapshot-id={`${rootId}-searchShell`} className={searchShellSurface.className} style={searchShellSurface.style}>
             <span aria-hidden="true" data-snapshot-id={`${rootId}-searchIcon`} className={searchIconSurface.className} style={searchIconSurface.style}><Icon name="search" size={14} /></span>
@@ -142,7 +143,7 @@ export function EmojiPickerBase({
           </div>
         </div>
 
-        <div data-snapshot-id={`${rootId}-categoryTabs`} className={categoryTabsSurface.className} style={categoryTabsSurface.style}>
+        <div role="tablist" data-snapshot-id={`${rootId}-categoryTabs`} className={categoryTabsSurface.className} style={categoryTabsSurface.style}>
           {categoryKeys.map((key) => {
             const tabSurface = resolveSurfacePresentation({
               surfaceId: `${rootId}-categoryTab-${key}`,
@@ -152,7 +153,7 @@ export function EmojiPickerBase({
             });
             return (
               <div key={key}>
-                <ButtonControl type="button" title={CATEGORY_LABELS[key] ?? key} ariaLabel={CATEGORY_LABELS[key] ?? key} onClick={() => setActiveCategory(activeCategory === key ? null : key)} surfaceId={`${rootId}-categoryTab-${key}`} surfaceConfig={tabSurface.resolvedConfigForWrapper} variant="ghost" size="icon" activeStates={activeCategory === key ? ["active"] : []}>
+                <ButtonControl role="tab" ariaSelected={activeCategory === key} ariaControls={`${rootId}-tabpanel`} type="button" title={CATEGORY_LABELS[key] ?? key} ariaLabel={CATEGORY_LABELS[key] ?? key} onClick={() => setActiveCategory(activeCategory === key ? null : key)} surfaceId={`${rootId}-categoryTab-${key}`} surfaceConfig={tabSurface.resolvedConfigForWrapper} variant="ghost" size="icon" activeStates={activeCategory === key ? ["active"] : []}>
                   <Icon name={CATEGORY_ICONS[key] ?? "hash"} size={14} />
                 </ButtonControl>
                 <SurfaceStyles css={tabSurface.scopedCss} />
@@ -161,7 +162,7 @@ export function EmojiPickerBase({
           })}
         </div>
 
-        <div data-snapshot-id={`${rootId}-gridScroll`} className={gridScrollSurface.className} style={gridScrollSurface.style}>
+        <div id={`${rootId}-tabpanel`} role="tabpanel" data-snapshot-id={`${rootId}-gridScroll`} className={gridScrollSurface.className} style={gridScrollSurface.style}>
           {filteredCategories.filter((c) => !activeCategory || c.category === activeCategory).map((category) => {
             const catId = `${rootId}-category-${category.category}`;
             const sectionSurface = resolveSurfacePresentation({ surfaceId: catId, implementationBase: { style: { marginBottom: "var(--sn-spacing-xs, 0.25rem)" } }, componentSurface: slots?.categorySection });
@@ -170,7 +171,7 @@ export function EmojiPickerBase({
             return (
               <div key={category.category} data-snapshot-id={catId} className={sectionSurface.className} style={sectionSurface.style}>
                 <div data-snapshot-id={`${catId}-label`} className={labelSurface.className} style={labelSurface.style}>{CATEGORY_LABELS[category.category] ?? category.category}</div>
-                <div data-snapshot-id={`${catId}-grid`} className={gridSurface.className} style={gridSurface.style}>
+                <div role="grid" data-snapshot-id={`${catId}-grid`} className={gridSurface.className} style={gridSurface.style}>
                   {category.emojis.map((emoji) => {
                     const custom = ((emoji as unknown) as Record<string, unknown>)._custom as CustomEmoji | undefined;
                     const btnSurface = resolveSurfacePresentation({ surfaceId: `${catId}-emoji-${emoji.name}`, implementationBase: { display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "sm", cursor: "pointer", fontSize: "lg", hover: { bg: "var(--sn-color-accent, #f3f4f6)", scale: 1.15 }, focus: { ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))" }, style: { width: "2rem", height: "2rem", padding: 0, border: "none", background: "transparent", transition: "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)" } }, componentSurface: slots?.emojiButton });

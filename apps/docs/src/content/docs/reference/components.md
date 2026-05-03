@@ -390,11 +390,11 @@ configuration, collapsible sidebar behavior, and canonical slot-based surface st
 |-------|------|---------|----------|
 | `icon` | `string` | — | **Yes** |
 | `size` | `"xs" \| "sm" \| "md" \| "lg"` | — | No |
-| `variant` | `"default" \| "secondary" \| "outline" \| "ghost" \| "destructive"` | — | No |
+| `variant` | `"default" \| "secondary" \| "outline" \| "ghost" \| "destructive" \| "link"` | — | No |
 | `shape` | `"circle" \| "square"` | — | No |
 | `action` | `object` | — | No |
 | `disabled` | `boolean \| FromRef` | — | No |
-| `tooltip` | `string` | — | No |
+| `tooltip` | `string \| FromRef` | — | No |
 
 ---
 
@@ -420,7 +420,7 @@ Publishes `{ value, editing }` to the page context.
 |-------|------|---------|----------|
 | `value` | `string \| FromRef` | — | No |
 | `placeholder` | `string \| FromRef` | — | No |
-| `inputType` | `"text" \| "number"` | — | No |
+| `inputType` | `"text" \| "email" \| "password" \| "number" \| "url" \| "tel" \| "search"` | — | No |
 | `saveAction` | `object` | — | No |
 | `cancelOnEscape` | `boolean` | — | No |
 
@@ -601,7 +601,13 @@ that allows quick item entry with a text input and submit button.
 | `valueField` | `string` | — | No |
 | `labelField` | `string` | — | No |
 | `default` | `string \| FromRef` | — | No |
+| `value` | `string \| FromRef` | — | No |
+| `label` | `string \| FromRef` | — | No |
 | `placeholder` | `string \| FromRef` | — | No |
+| `helperText` | `string \| FromRef` | — | No |
+| `errorText` | `string \| FromRef` | — | No |
+| `required` | `boolean \| FromRef` | — | No |
+| `disabled` | `boolean \| FromRef` | — | No |
 | `on` | `object` | — | No |
 
 ---
@@ -649,6 +655,8 @@ that controls a boolean value.
 | `label` | `string \| FromRef` | — | No |
 | `description` | `string \| FromRef` | — | No |
 | `defaultChecked` | `boolean` | — | No |
+| `checked` | `boolean \| FromRef` | — | No |
+| `value` | `boolean \| FromRef` | — | No |
 | `disabled` | `boolean \| FromRef` | — | No |
 | `size` | `"sm" \| "md" \| "lg"` | — | No |
 | `on` | `object` | — | No |
@@ -1137,7 +1145,7 @@ and publishes the selected item to the page context when `id` is set.
 | `pageSize` | `number` | `20` | No |
 | `infinite` | `boolean` | — | No |
 | `relativeTime` | `boolean` | `false` | No |
-| `groupBy` | `"date" \| "week" \| "month"` | — | No |
+| `groupBy` | `"day" \| "week" \| "month"` | — | No |
 | `itemActions` | `object[]` | — | No |
 | `loading` | `object` | — | No |
 | `empty` | `object` | — | No |
@@ -1477,7 +1485,11 @@ configurable placement and delay.
 
 ### `code`
 
-Inline code primitive schema for manifest-rendered code snippets.
+Inline code snippet for use within flowing text. Renders a `<code>` element
+with monospace font and a subtle background, similar to backtick-delimited
+code in Markdown. Use `code` when you need to highlight a variable name,
+command, or short expression inside a sentence. For multi-line source
+listings with syntax highlighting, use [`code-block`](#code-block) instead.
 
 **Manifest type:** `code`
 
@@ -1490,9 +1502,16 @@ Inline code primitive schema for manifest-rendered code snippets.
 
 ### `code-block`
 
-Zod config schema for the CodeBlock component.
-Defines all manifest-settable fields for a code display block
-with optional copy button and line numbers.
+Multi-line code display block with syntax highlighting, optional line
+numbers, title bar, and a copy-to-clipboard button. Use `code-block` for
+source listings, configuration examples, terminal output, and any code that
+benefits from language-aware highlighting. For inline code within prose, use
+[`code`](#code) instead.
+
+The copy button is enabled by default (`showCopy: true`) and appears as a
+ghost icon button positioned at the top-right corner of the code area. It
+uses `navigator.clipboard.writeText()` and shows a checkmark with "Copied!"
+feedback for 2 seconds after a successful copy.
 
 ```json
 {
@@ -1510,11 +1529,11 @@ with optional copy button and line numbers.
 |-------|------|---------|----------|
 | `code` | `string \| FromRef` | — | **Yes** |
 | `language` | `string` | — | No |
-| `highlight` | `boolean` | — | No |
-| `showLineNumbers` | `boolean` | — | No |
-| `showCopy` | `boolean` | — | No |
+| `highlight` | `boolean` | `true` | No |
+| `showLineNumbers` | `boolean` | `false` | No |
+| `showCopy` | `boolean` | `true` | No |
 | `title` | `string \| FromRef` | — | No |
-| `wrap` | `boolean` | — | No |
+| `wrap` | `boolean` | `false` | No |
 
 ---
 
@@ -1679,6 +1698,8 @@ rather than raw markdown.
 | Field | Type | Default | Required |
 |-------|------|---------|----------|
 | `placeholder` | `string \| FromRef` | — | No |
+| `defaultValue` | `string \| FromRef` | — | No |
+| `value` | `string \| FromRef` | — | No |
 | `features` | `"bold" \| "italic" \| "underline" \| "strike" \| "code" \| "code-block" \| "link" \| "bullet-list" \| "or...` | — | No |
 | `mentionData` | `DataSource` | — | No |
 | `mentionDisplayField` | `string` | — | No |
@@ -1878,8 +1899,8 @@ Overlay alias schema for manifest-driven confirmation dialogs.
 | `size` | `"sm" \| "md" \| "lg" \| "xl" \| "full"` | — | No |
 | `confirmLabel` | `string \| FromRef` | `"Confirm"` | No |
 | `cancelLabel` | `string \| FromRef` | `"Cancel"` | No |
-| `confirmVariant` | `"default" \| "secondary" \| "destructive" \| "ghost"` | `"default"` | No |
-| `cancelVariant` | `"default" \| "secondary" \| "destructive" \| "ghost"` | `"secondary"` | No |
+| `confirmVariant` | `"default" \| "secondary" \| "destructive" \| "outline" \| "ghost"` | `"default"` | No |
+| `cancelVariant` | `"default" \| "secondary" \| "destructive" \| "outline" \| "ghost"` | `"secondary"` | No |
 | `confirmAction` | `object \| ... \| object \| ...[]` | — | No |
 | `cancelAction` | `object \| ... \| object \| ...[]` | — | No |
 | `dismissOnConfirm` | `boolean` | `true` | No |
@@ -1946,7 +1967,7 @@ Like modals, they are opened/closed via the modal manager.
 | `trigger` | `{ label: string \| FromRef, icon: string, variant: "default" \| "secondary" \| "outline" \| "ghost" \|...` | — | **Yes** |
 | `items` | `object \| { type: "separator", slots: { separator: SlotStyle } } \| { type: "label", text: string \|...` | — | **Yes** |
 | `align` | `"start" \| "center" \| "end"` | — | No |
-| `side` | `"top" \| "bottom"` | — | No |
+| `side` | `"top" \| "bottom" \| "left" \| "right"` | — | No |
 
 **Slots:** `root`, `trigger`, `triggerLabel`, `triggerIcon`, `panel`, `item`, `itemLabel`, `itemIcon`, `separator`, `label`
 
@@ -2012,7 +2033,7 @@ placement, and canonical slot-based styling for the trigger and panel sub-surfac
 | `description` | `string \| FromRef` | — | No |
 | `content` | `unknown[]` | — | No |
 | `footer` | `unknown[]` | — | No |
-| `placement` | `"top" \| "bottom"` | — | No |
+| `placement` | `"top" \| "bottom" \| "left" \| "right"` | — | No |
 
 **Slots:** `root`, `trigger`, `triggerLabel`, `triggerIcon`, `panel`, `content`, `header`, `title`, `description`, `footer`, `closeButton`
 
@@ -2107,7 +2128,7 @@ and typing indicator into a single component.
 
 | Field | Type | Default | Required |
 |-------|------|---------|----------|
-| `data` | `DataSource` | — | **Yes** |
+| `data` | `DataSource` | — | No |
 | `contentField` | `string` | — | No |
 | `authorNameField` | `string` | — | No |
 | `authorAvatarField` | `string` | — | No |
@@ -2120,7 +2141,9 @@ and typing indicator into a single component.
 | `mentionData` | `DataSource` | — | No |
 | `sendAction` | `object` | — | No |
 | `showTypingIndicator` | `boolean` | — | No |
-| `showReactions` | `boolean` | — | No |
+| `typingUsers` | `string[] \| FromRef` | — | No |
+| `showTimestamps` | `boolean` | — | No |
+| `groupByDate` | `boolean` | — | No |
 
 ---
 
@@ -2252,7 +2275,6 @@ message grouping, date separators, and optional reactions/threading.
 {
   "type": "message-thread",
   "data": "GET /api/channels/general/messages",
-  "showReactions": true,
   "groupByDate": true,
   "maxHeight": "500px"
 }
@@ -2262,16 +2284,13 @@ message grouping, date separators, and optional reactions/threading.
 
 | Field | Type | Default | Required |
 |-------|------|---------|----------|
-| `data` | `DataSource` | — | **Yes** |
+| `data` | `DataSource` | — | No |
 | `contentField` | `string` | — | No |
-| `authorField` | `string` | — | No |
 | `authorNameField` | `string` | — | No |
 | `authorAvatarField` | `string` | — | No |
 | `timestampField` | `string` | — | No |
-| `reactionsField` | `string` | — | No |
 | `embedsField` | `string` | — | No |
 | `showEmbeds` | `boolean` | — | No |
-| `showReactions` | `boolean` | — | No |
 | `showTimestamps` | `boolean` | — | No |
 | `groupByDate` | `boolean` | — | No |
 | `messageAction` | `object` | — | No |
@@ -2599,7 +2618,7 @@ highlights, badges, and CTA buttons.
 |-------|------|---------|----------|
 | `open` | `boolean` | — | No |
 | `align` | `"start" \| "center" \| "end"` | — | No |
-| `side` | `"top" \| "bottom"` | — | No |
+| `side` | `"top" \| "bottom" \| "left" \| "right"` | — | No |
 | `triggerLabel` | `string \| FromRef \| EnvRef \| { expr: string } \| TRef` | — | No |
 | `triggerIcon` | `string` | — | No |
 | `items` | `object \| { type: "separator", slots: { separator: SlotStyle } } \| { type: "label", text: string \|...` | — | No |

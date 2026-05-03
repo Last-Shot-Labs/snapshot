@@ -1,8 +1,10 @@
 'use client';
 
 import { useCallback, useMemo } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom, useSubscribe } from "../../../context/hooks";
+import { useT } from "../../../i18n/hook";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
 import { CalendarBase } from "./standalone";
@@ -16,7 +18,11 @@ export function Calendar({ config }: { config: CalendarConfig }) {
   const { data, isLoading, error } = useComponentData(config.data ?? "", undefined);
   const execute = useActionExecutor();
   const visible = useSubscribe(config.visible ?? true);
-  const todayLabel = useSubscribe(config.todayLabel) as string | undefined;
+  const rawTodayLabel = useSubscribe(config.todayLabel) as string | undefined;
+  const i18nToday = useT("workflow.calendar.today");
+  const todayLabel =
+    rawTodayLabel ??
+    (i18nToday !== "workflow.calendar.today" ? i18nToday : undefined);
   const resolvedConfig = useResolveFrom({ events: config.events });
   const surfaceConfig = extractSurfaceConfig(config);
 
@@ -77,6 +83,7 @@ export function Calendar({ config }: { config: CalendarConfig }) {
       id={config.id}
       view={config.view}
       events={events}
+      initialDate={events[0]?.date}
       loading={isLoading}
       error={error}
       todayLabel={todayLabel}
@@ -85,7 +92,7 @@ export function Calendar({ config }: { config: CalendarConfig }) {
       onEventClick={config.eventAction ? handleEventClick : undefined}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as React.CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

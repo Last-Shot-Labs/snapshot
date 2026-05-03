@@ -1,6 +1,7 @@
 'use client';
 
 import { useSubscribe } from "../../../context/hooks";
+import type { SlotOverrides } from "../../_base/types";
 import { CompareViewBase } from "./standalone";
 import type { CompareViewConfig } from "./types";
 
@@ -29,7 +30,7 @@ export function CompareView({ config }: { config: CompareViewConfig }) {
       showLineNumbers={config.showLineNumbers}
       className={config.className}
       style={config.style}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

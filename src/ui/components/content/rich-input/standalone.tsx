@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { Extension } from "@tiptap/core";
 import Link from "@tiptap/extension-link";
@@ -85,7 +86,7 @@ export interface RichInputBaseProps {
   /** Inline style applied to the root element. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -125,8 +126,15 @@ export function RichInputBase({
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const linkInputRef = useRef<HTMLInputElement>(null);
+  const linkFocusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sendRef = useRef<() => void>(() => {});
   const rootId = id ?? "rich-input";
+
+  useEffect(() => {
+    return () => {
+      if (linkFocusTimerRef.current) clearTimeout(linkFocusTimerRef.current);
+    };
+  }, []);
 
   const featuresSet = useMemo(() => new Set<string>(features), [features]);
 
@@ -199,7 +207,7 @@ export function RichInputBase({
       } else {
         setLinkUrl("");
         setShowLinkInput(true);
-        setTimeout(() => linkInputRef.current?.focus(), 10);
+        linkFocusTimerRef.current = setTimeout(() => linkInputRef.current?.focus(), 10);
       }
       return;
     }
@@ -307,7 +315,7 @@ export function RichInputBase({
         ) : null}
 
         {(toolbarItems.length > 0 || showSendButton) ? (
-          <div data-testid="rich-input-toolbar" data-snapshot-id={`${rootId}-toolbar`} className={toolbarSurface.className} style={toolbarSurface.style}>
+          <div role="toolbar" data-testid="rich-input-toolbar" data-snapshot-id={`${rootId}-toolbar`} className={toolbarSurface.className} style={toolbarSurface.style}>
             <div data-snapshot-id={`${rootId}-formattingGroup`} className={formattingGroupSurface.className} style={formattingGroupSurface.style}>
               {toolbarItems.map((item, index) => {
                 const active = editor?.isActive(item.name === "bullet-list" ? "bulletList" : item.name === "ordered-list" ? "orderedList" : item.name === "code-block" ? "codeBlock" : item.name) ?? false;

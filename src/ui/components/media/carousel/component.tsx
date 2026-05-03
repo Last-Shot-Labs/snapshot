@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
 import { CarouselBase } from "./standalone";
@@ -26,7 +27,7 @@ export function Carousel({ config }: { config: CarouselConfig }) {
       showDots={config.showDots}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as React.CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     >
       {slides}
     </CarouselBase>

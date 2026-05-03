@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SnapshotImageBase } from "./standalone";
 import type { SnapshotImageConfig } from "./types";
 
@@ -24,7 +25,7 @@ export function SnapshotImage({ config }: { config: SnapshotImageConfig }) {
       aspectRatio={config.aspectRatio}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

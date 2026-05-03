@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
@@ -39,7 +40,7 @@ export function Divider({ config }: { config: DividerConfig }) {
       id={config.id}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

@@ -1,6 +1,13 @@
 'use client';
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  Fragment,
+  useEffect,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -66,9 +73,27 @@ export interface NavBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   /** React children rendered inside the nav (for template mode). */
   children?: ReactNode;
+  /**
+   * Custom item renderer. When provided, called for each item instead of the
+   * built-in `<NavEntryBase>`. Receives the item, its index, and a sensible
+   * default rendering you can fall back to.
+   */
+  renderItem?: (
+    item: NavBaseItem,
+    index: number,
+    defaultNode: ReactNode,
+  ) => ReactNode;
+  /** Custom logo renderer; replaces the built-in logo block when provided. */
+  renderLogo?: (logo: NavBaseLogo | undefined) => ReactNode;
+  /** Optional content rendered after the items list (e.g., user menu). */
+  footer?: ReactNode;
+  /** Whether the nav is currently collapsed (controlled). */
+  collapsed?: boolean;
+  /** Called when collapse state should change. */
+  onToggleCollapse?: () => void;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -77,6 +102,83 @@ function matchesPath(currentPath: string, itemPath: string): boolean {
   return currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
 }
 
+// ── Shared Logo Block ────────────────────────────────────────────────────────
+
+function NavLogoBlock({
+  logo,
+  onNavigate,
+  collapsed,
+}: {
+  logo?: NavBaseLogo;
+  onNavigate?: (path: string) => void;
+  collapsed?: boolean;
+}) {
+  if (!logo) return null;
+
+  const content = (
+    <>
+      {logo.src && (
+        <img
+          src={logo.src}
+          alt={logo.text ?? "Logo"}
+          style={{
+            height: "var(--sn-nav-logo-height, 1.5rem)",
+            width: "auto",
+            flexShrink: 0,
+          }}
+        />
+      )}
+      {logo.text && (
+        <span
+          data-nav-label=""
+          style={{
+            fontSize: "var(--sn-font-size-lg, 1.125rem)",
+            fontWeight: "var(--sn-font-weight-semibold, 600)" as any,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            ...(collapsed ? { opacity: 0, width: 0 } : {}),
+          }}
+        >
+          {logo.text}
+        </span>
+      )}
+    </>
+  );
+
+  const sharedStyle: CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--sn-spacing-sm, 0.5rem)",
+    textDecoration: "none",
+    color: "inherit",
+    flexShrink: 0,
+  };
+
+  if (logo.path) {
+    return (
+      <a
+        data-snapshot-component="nav-logo"
+        href={logo.path}
+        onClick={(e) => {
+          e.preventDefault();
+          onNavigate?.(logo.path!);
+        }}
+        style={{ ...sharedStyle, cursor: "pointer" }}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <div data-snapshot-component="nav-logo" style={sharedStyle}>
+      {content}
+    </div>
+  );
+}
+
+// ── Nav Entry ────────────────────────────────────────────────────────────────
+
 function NavEntryBase({
   item,
   rootId,
@@ -84,13 +186,17 @@ function NavEntryBase({
   currentPath,
   onNavigate,
   slots,
+  collapsed,
+  depth = 0,
 }: {
   item: NavBaseItem;
   rootId: string;
   isTopNav: boolean;
   currentPath: string;
   onNavigate?: (path: string) => void;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
+  collapsed?: boolean;
+  depth?: number;
 }) {
   const isVisible = item.visible !== false;
   if (!isVisible) return null;
@@ -106,6 +212,8 @@ function NavEntryBase({
       overflow: "hidden",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
+      transition: "opacity var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+      ...(collapsed ? { opacity: 0, width: 0, overflow: "hidden" } : {}),
     },
     componentSurface: slots?.itemLabel,
   });
@@ -115,6 +223,13 @@ function NavEntryBase({
       display: "inline-flex",
       alignItems: "center",
       flexShrink: 0,
+      width: "1.25rem",
+      height: "1.25rem",
+      justifyContent: "center",
+      color: isActive
+        ? "var(--sn-color-primary, #2563eb)"
+        : "var(--sn-color-muted-foreground, #6b7280)",
+      transition: "color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
     },
     componentSurface: slots?.itemIcon,
   });
@@ -126,9 +241,14 @@ function NavEntryBase({
       justifyContent: "center",
       minWidth: "1.25rem",
       height: "1.25rem",
+      padding: "0 var(--sn-spacing-xs, 0.25rem)",
       borderRadius: "var(--sn-radius-full, 9999px)",
-      background: "var(--sn-color-primary)",
-      color: "var(--sn-color-primary-foreground)",
+      background: "color-mix(in oklch, var(--sn-color-primary, #2563eb) 14%, var(--sn-color-card, #ffffff))",
+      color: "var(--sn-color-primary, #2563eb)",
+      fontSize: "var(--sn-font-size-xs, 0.75rem)",
+      fontWeight: "var(--sn-font-weight-semibold, 600)" as any,
+      lineHeight: 1,
+      ...(collapsed ? { display: "none" } : {}),
     },
     componentSurface: slots?.itemBadge,
   });
@@ -146,6 +266,7 @@ function NavEntryBase({
         surfaceId={`${itemId}-button`}
         surfaceConfig={slots?.item}
         activeStates={isActive ? ["current"] : []}
+        style={depth > 0 ? { paddingLeft: `calc(var(--sn-spacing-sm, 0.5rem) + ${depth} * var(--sn-spacing-md, 0.75rem))` } : undefined}
       >
         {item.icon ? (
           <span
@@ -153,11 +274,12 @@ function NavEntryBase({
             className={iconSurface.className}
             style={iconSurface.style}
           >
-            {renderIcon(item.icon, 16)}
+            {renderIcon(item.icon, 18)}
           </span>
         ) : null}
         <span
           data-snapshot-id={`${itemId}-label`}
+          data-nav-label=""
           className={labelSurface.className}
           style={labelSurface.style}
         >
@@ -172,14 +294,25 @@ function NavEntryBase({
             {item.badge}
           </span>
         ) : null}
-        {hasChildren ? <span aria-hidden="true">v</span> : null}
+        {hasChildren && !collapsed ? (
+          <span
+            aria-hidden="true"
+            style={{
+              display: "inline-flex",
+              color: "var(--sn-color-muted-foreground, #6b7280)",
+              transition: "transform var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+            }}
+          >
+            {renderIcon("chevron-down", 14)}
+          </span>
+        ) : null}
       </ButtonControl>
       <SurfaceStyles css={labelSurface.scopedCss} />
       <SurfaceStyles css={iconSurface.scopedCss} />
       <SurfaceStyles css={badgeSurface.scopedCss} />
 
-      {!isTopNav && hasChildren ? (
-        <ul style={{ listStyle: "none", margin: 0, paddingLeft: "0.75rem" }}>
+      {!isTopNav && hasChildren && !collapsed ? (
+        <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {item.children?.map((child, index) => (
             <NavEntryBase
               key={child.path ?? `${itemId}-child-${index}`}
@@ -189,6 +322,8 @@ function NavEntryBase({
               currentPath={currentPath}
               onNavigate={onNavigate}
               slots={slots}
+              collapsed={collapsed}
+              depth={depth + 1}
             />
           ))}
         </ul>
@@ -228,10 +363,24 @@ export function NavBase({
   style,
   slots,
   children,
+  renderItem,
+  renderLogo,
+  footer,
+  collapsed,
+  onToggleCollapse,
 }: NavBaseProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
+  const isCollapsed = collapsed ?? internalCollapsed;
+  const setIsCollapsed = (next: boolean | ((prev: boolean) => boolean)) => {
+    if (onToggleCollapse) {
+      onToggleCollapse();
+      return;
+    }
+    setInternalCollapsed(next);
+  };
   const [currentPath, setCurrentPath] = useState(pathname ?? "/");
   const isTopNav = variant === "top-nav";
+  const isSidebar = !isTopNav;
   const rootId = id ?? "nav";
 
   useEffect(() => {
@@ -254,11 +403,13 @@ export function NavBase({
       listStyle: "none",
       margin: 0,
       padding: 0,
-      display: isTopNav ? "flex" : "block",
-      gap: isTopNav ? "0.25rem" : undefined,
+      display: "flex",
+      flexDirection: isTopNav ? "row" : "column",
+      gap: "var(--sn-spacing-2xs, 0.125rem)",
       alignItems: isTopNav ? "center" : undefined,
       flexWrap: isTopNav ? "nowrap" : undefined,
-      overflow: "visible",
+      flex: isSidebar ? 1 : undefined,
+      overflow: isSidebar ? "auto" : "visible",
     },
     componentSurface: slots?.list,
   });
@@ -269,7 +420,6 @@ export function NavBase({
     activeStates: isCollapsed ? ["active"] : [],
   });
 
-  // Template mode: render children directly
   if (children) {
     return (
       <nav
@@ -283,212 +433,142 @@ export function NavBase({
     );
   }
 
+  const rootSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-root`,
+    implementationBase: isSidebar
+      ? {
+          display: "flex",
+          flexDirection: "column",
+          style: {
+            height: "100%",
+            width: isCollapsed
+              ? "var(--sn-nav-collapsed-width, 3.5rem)"
+              : "var(--sn-nav-expanded-width, 14rem)",
+            padding: "var(--sn-spacing-sm, 0.5rem)",
+            gap: "var(--sn-spacing-xs, 0.25rem)",
+            transition:
+              "width var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
+            overflow: "hidden",
+          },
+        }
+      : {
+          display: "flex",
+          alignItems: "center",
+          style: {
+            gap: "var(--sn-spacing-xs, 0.25rem)",
+            padding:
+              "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
+          },
+        },
+    componentSurface:
+      className || style ? { className, style: style as Record<string, string | number> } : undefined,
+    itemSurface: slots?.root,
+  });
+  const headerSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-header`,
+    implementationBase: {
+      display: "flex",
+      alignItems: "center",
+      style: {
+        justifyContent: isCollapsed ? "center" : "space-between",
+        padding: isSidebar
+          ? "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-2xs, 0.125rem)"
+          : undefined,
+        marginBottom: isSidebar
+          ? "var(--sn-spacing-xs, 0.25rem)"
+          : undefined,
+        flexShrink: 0,
+      },
+    },
+    componentSurface: slots?.header,
+  });
+
+  const itemList = items.filter((item) => item.visible !== false);
+
   return (
     <nav
       data-snapshot-component="nav"
       aria-label="Main navigation"
       data-variant={variant}
       data-collapsed={isCollapsed ? "true" : undefined}
-      style={!isTopNav ? {
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-        padding: "var(--sn-spacing-sm, 0.5rem)",
-        gap: "var(--sn-spacing-xs, 0.25rem)",
-      } : {
-        display: "flex",
-        alignItems: "center",
-        gap: "var(--sn-spacing-xs, 0.25rem)",
-      }}
+      data-snapshot-id={`${rootId}-root`}
+      className={rootSurface.className}
+      style={rootSurface.style}
     >
-      {!isTopNav ? (
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "var(--sn-nav-header-justify, space-between)",
-          marginBottom: "var(--sn-spacing-xs, 0.25rem)",
-        }}>
-          {logo ? (
-            logo.path ? (
-              <a
-                data-snapshot-component="nav-logo"
-                href={logo.path}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onNavigate?.(logo.path!);
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--sn-spacing-sm, 0.5rem)",
-                  cursor: "pointer",
-                  textDecoration: "none",
-                  color: "inherit",
-                  flexShrink: 0,
-                }}
-              >
-                {logo.src && (
-                  <img
-                    src={logo.src}
-                    alt={logo.text ?? "Logo"}
-                    style={{
-                      height: "var(--sn-spacing-lg, 1.5rem)",
-                      width: "auto",
-                    }}
-                  />
-                )}
-                {logo.text && (
-                  <span style={{
-                    fontSize: "var(--sn-font-size-lg, 1.125rem)",
-                    fontWeight: 600,
-                    whiteSpace: "nowrap",
-                  }}>
-                    {logo.text}
-                  </span>
-                )}
-              </a>
-            ) : (
-              <div
-                data-snapshot-component="nav-logo"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--sn-spacing-sm, 0.5rem)",
-                  textDecoration: "none",
-                  flexShrink: 0,
-                }}
-              >
-                {logo.src && (
-                  <img
-                    src={logo.src}
-                    alt={logo.text ?? "Logo"}
-                    style={{
-                      height: "var(--sn-spacing-lg, 1.5rem)",
-                      width: "auto",
-                    }}
-                  />
-                )}
-                {logo.text && (
-                  <span style={{
-                    fontSize: "var(--sn-font-size-lg, 1.125rem)",
-                    fontWeight: 600,
-                    whiteSpace: "nowrap",
-                  }}>
-                    {logo.text}
-                  </span>
-                )}
-              </div>
-            )
-          ) : null}
-          {collapsible ? (
-            <ButtonControl
-              variant="ghost"
-              onClick={() => setIsCollapsed((prev) => !prev)}
-              surfaceId={`${rootId}-toggle`}
-              surfaceConfig={toggleSurface.resolvedConfigForWrapper}
-              activeStates={isCollapsed ? ["active"] : []}
-              ariaLabel={isCollapsed ? "Expand navigation" : "Collapse navigation"}
-            >
-              {renderIcon(isCollapsed ? "panel-right" : "panel-left", 16)}
-            </ButtonControl>
-          ) : null}
-        </div>
-      ) : (
-        <>
-          {logo ? (
-            logo.path ? (
-              <a
-                data-snapshot-component="nav-logo"
-                href={logo.path}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onNavigate?.(logo.path!);
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--sn-spacing-sm, 0.5rem)",
-                  cursor: "pointer",
-                  textDecoration: "none",
-                  color: "inherit",
-                  flexShrink: 0,
-                }}
-              >
-                {logo.src && (
-                  <img
-                    src={logo.src}
-                    alt={logo.text ?? "Logo"}
-                    style={{
-                      height: "var(--sn-spacing-lg, 1.5rem)",
-                      width: "auto",
-                    }}
-                  />
-                )}
-                {logo.text && (
-                  <span style={{
-                    fontSize: "var(--sn-font-size-lg, 1.125rem)",
-                    fontWeight: 600,
-                    whiteSpace: "nowrap",
-                  }}>
-                    {logo.text}
-                  </span>
-                )}
-              </a>
-            ) : (
-              <div
-                data-snapshot-component="nav-logo"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--sn-spacing-sm, 0.5rem)",
-                  textDecoration: "none",
-                  flexShrink: 0,
-                }}
-              >
-                {logo.src && (
-                  <img
-                    src={logo.src}
-                    alt={logo.text ?? "Logo"}
-                    style={{
-                      height: "var(--sn-spacing-lg, 1.5rem)",
-                      width: "auto",
-                    }}
-                  />
-                )}
-                {logo.text && (
-                  <span style={{
-                    fontSize: "var(--sn-font-size-lg, 1.125rem)",
-                    fontWeight: 600,
-                    whiteSpace: "nowrap",
-                  }}>
-                    {logo.text}
-                  </span>
-                )}
-              </div>
-            )
-          ) : null}
-        </>
-      )}
+      {/* Header: logo + collapse toggle */}
+      <div
+        data-snapshot-id={`${rootId}-header`}
+        className={headerSurface.className}
+        style={headerSurface.style}
+      >
+        {renderLogo
+          ? renderLogo(logo)
+          : <NavLogoBlock logo={logo} onNavigate={onNavigate} collapsed={isCollapsed} />
+        }
+        {isSidebar && collapsible ? (
+          <ButtonControl
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsCollapsed((prev) => !prev)}
+            surfaceId={`${rootId}-toggle`}
+            surfaceConfig={toggleSurface.resolvedConfigForWrapper}
+            activeStates={isCollapsed ? ["active"] : []}
+            ariaLabel={isCollapsed ? "Expand navigation" : "Collapse navigation"}
+            style={{
+              width: "var(--sn-nav-toggle-size, 1.75rem)",
+              height: "var(--sn-nav-toggle-size, 1.75rem)",
+              minHeight: "var(--sn-nav-toggle-size, 1.75rem)",
+              flexShrink: 0,
+            }}
+          >
+            {renderIcon(isCollapsed ? "panel-right" : "panel-left", 16)}
+          </ButtonControl>
+        ) : null}
+      </div>
 
+      {/* Item list */}
       <ul
         data-snapshot-id={`${rootId}-list`}
         className={listSurface.className}
         style={listSurface.style}
       >
-        {items.filter((item) => item.visible !== false).map((item, index) => (
-          <NavEntryBase
-            key={item.path ?? `${rootId}-item-${index}`}
-            item={item}
-            rootId={`${rootId}-item-${index}`}
-            isTopNav={isTopNav}
-            currentPath={currentPath}
-            onNavigate={onNavigate}
-            slots={slots}
-          />
-        ))}
+        {itemList.map((item, index) => {
+          const defaultNode = (
+            <NavEntryBase
+              key={item.path ?? `${rootId}-item-${index}`}
+              item={item}
+              rootId={`${rootId}-item-${index}`}
+              isTopNav={isTopNav}
+              currentPath={currentPath}
+              onNavigate={onNavigate}
+              slots={slots}
+              collapsed={isCollapsed}
+            />
+          );
+          if (renderItem) {
+            return (
+              <Fragment key={item.path ?? `${rootId}-item-${index}`}>
+                {renderItem(item, index, defaultNode)}
+              </Fragment>
+            );
+          }
+          return defaultNode;
+        })}
       </ul>
 
+      {/* Footer */}
+      {footer ? (
+        <div
+          data-snapshot-id={`${rootId}-footer`}
+          style={{ flexShrink: 0, marginTop: "auto" }}
+        >
+          {footer}
+        </div>
+      ) : null}
+
       <FloatingMenuStyles />
+      <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={headerSurface.scopedCss} />
       <SurfaceStyles css={toggleSurface.scopedCss} />
       <SurfaceStyles css={listSurface.scopedCss} />
     </nav>

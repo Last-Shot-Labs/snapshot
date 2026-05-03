@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, type CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { formatRelativeTime, getInitials } from "../../_base/utils";
@@ -44,7 +45,7 @@ export interface AuditLogBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── SkeletonEntry ─────────────────────────────────────────────────────────────
@@ -56,7 +57,7 @@ function SkeletonEntry({
 }: {
   rootId: string;
   index: number;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const itemId = `${rootId}-loading-${index}`;
   const itemSurface = resolveSurfacePresentation({
@@ -91,7 +92,7 @@ function SkeletonEntry({
       style: {
         height: "1em",
         width: "60%",
-        marginBottom: "var(--sn-spacing-xs, 4px)",
+        marginBottom: "var(--sn-spacing-xs, 0.25rem)",
       },
     },
     componentSurface: slots?.loadingTitle,
@@ -154,7 +155,7 @@ function DetailsSection({
   rootId: string;
   entryId: string;
   details: Record<string, unknown>;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const detailsSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-entry-${entryId}-details`,
@@ -164,7 +165,7 @@ function DetailsSection({
       bg: "var(--sn-color-muted, #f1f5f9)",
       fontSize: "xs",
       style: {
-        marginTop: "var(--sn-spacing-xs, 4px)",
+        marginTop: "var(--sn-spacing-xs, 0.25rem)",
       },
     },
     componentSurface: slots?.details,
@@ -173,7 +174,7 @@ function DetailsSection({
     surfaceId: `${rootId}-entry-${entryId}-detailsRow`,
     implementationBase: {
       style: {
-        marginBottom: "var(--sn-spacing-2xs, 2px)",
+        marginBottom: "var(--sn-spacing-2xs, 0.125rem)",
       },
     },
     componentSurface: slots?.detailsRow,
@@ -181,14 +182,14 @@ function DetailsSection({
   const keySurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-entry-${entryId}-detailsKey`,
     implementationBase: {
-      color: "var(--sn-color-muted-foreground, #64748b)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
     },
     componentSurface: slots?.detailsKey,
   });
   const valueSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-entry-${entryId}-detailsValue`,
     implementationBase: {
-      color: "var(--sn-color-foreground, #0f172a)",
+      color: "var(--sn-color-foreground, #111827)",
     },
     componentSurface: slots?.detailsValue,
   });
@@ -364,7 +365,7 @@ export function AuditLogBase({
       gap: "sm",
       flexWrap: "wrap",
       style: {
-        marginBottom: "var(--sn-spacing-md, 12px)",
+        marginBottom: "var(--sn-spacing-md, 0.75rem)",
       },
     },
     componentSurface: slots?.filters,
@@ -385,7 +386,7 @@ export function AuditLogBase({
       padding: "lg",
       textAlign: "center",
       fontSize: "sm",
-      color: "var(--sn-color-muted-foreground, #94a3b8)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
     },
     componentSurface: slots?.emptyState,
   });
@@ -410,7 +411,7 @@ export function AuditLogBase({
       borderRadius: "md",
       border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
       bg: "var(--sn-color-card, #fff)",
-      color: "var(--sn-color-foreground, #0f172a)",
+      color: "var(--sn-color-foreground, #111827)",
       cursor: "pointer",
       fontSize: "sm",
       hover: {
@@ -446,14 +447,14 @@ export function AuditLogBase({
                   border:
                     "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
                   bg: "var(--sn-color-card, #fff)",
-                  color: "var(--sn-color-foreground, #0f172a)",
+                  color: "var(--sn-color-foreground, #111827)",
                   fontSize: "sm",
                   focus: {
                     ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
                   },
                   style: {
                     padding:
-                      "var(--sn-spacing-xs, 4px) var(--sn-spacing-sm, 8px)",
+                      "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
                   },
                 },
                 componentSurface: slots?.filterSelect,
@@ -543,7 +544,7 @@ export function AuditLogBase({
                   paddingY: "md",
                   style: {
                     borderBottom:
-                      "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)",
+                      "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                     transition:
                       "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)",
                   },
@@ -583,7 +584,7 @@ export function AuditLogBase({
                 surfaceId: `${rootId}-entry-${entryId}-actionText`,
                 implementationBase: {
                   fontSize: "sm",
-                  color: "var(--sn-color-foreground, #0f172a)",
+                  color: "var(--sn-color-foreground, #111827)",
                 },
                 componentSurface: slots?.actionText,
               });
@@ -598,9 +599,9 @@ export function AuditLogBase({
                 surfaceId: `${rootId}-entry-${entryId}-timestamp`,
                 implementationBase: {
                   fontSize: "xs",
-                  color: "var(--sn-color-muted-foreground, #64748b)",
+                  color: "var(--sn-color-muted-foreground, #6b7280)",
                   style: {
-                    marginTop: "var(--sn-spacing-2xs, 2px)",
+                    marginTop: "var(--sn-spacing-2xs, 0.125rem)",
                   },
                 },
                 componentSurface: slots?.timestamp,
@@ -621,7 +622,7 @@ export function AuditLogBase({
                     background: "none",
                     border: "none",
                     padding: 0,
-                    marginTop: "var(--sn-spacing-xs, 4px)",
+                    marginTop: "var(--sn-spacing-xs, 0.25rem)",
                   },
                 },
                 componentSurface: slots?.toggleButton,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type CSSProperties, type ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 
@@ -20,7 +21,7 @@ export interface NavSectionBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, header, headerLabel, content). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   /** React children rendered as the section content. */
   children?: ReactNode;
 }
@@ -101,11 +102,11 @@ export function NavSectionBase({
             display: "flex",
             alignItems: "center",
             width: "100%",
-            padding: "0.375rem 0.5rem",
+            padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
             fontSize: "var(--sn-font-size-xs, 0.75rem)",
-            fontWeight: 600,
+            fontWeight: "var(--sn-font-weight-semibold, 600)" as any,
             textTransform: "uppercase" as const,
-            letterSpacing: "0.05em",
+            letterSpacing: "var(--sn-tracking-wide, 0.025em)",
             color: "var(--sn-color-muted-foreground, #6b7280)",
             cursor: collapsible ? "pointer" : undefined,
             border: "none",

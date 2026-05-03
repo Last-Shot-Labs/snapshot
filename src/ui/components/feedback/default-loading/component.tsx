@@ -1,7 +1,9 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useResolveFrom } from "../../../context/hooks";
+import { useT } from "../../../i18n/hook";
 import {
   resolveOptionalPrimitiveValue,
   usePrimitiveValueOptions,
@@ -16,15 +18,17 @@ export function DefaultLoading({ config }: { config: SpinnerConfig }) {
     resolvedConfig.label,
     primitiveOptions,
   );
+  const i18nLabel = useT("feedback.loading.label");
+  const labelHasTranslation = i18nLabel !== "feedback.loading.label";
 
   return (
     <DefaultLoadingBase
-      label={resolvedLabel}
+      label={resolvedLabel ?? (labelHasTranslation ? i18nLabel : undefined)}
       size={config.size}
       id={config.id}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

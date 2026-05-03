@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useId, useMemo, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useAtomValue } from "jotai/react";
 import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom, useSubscribe } from "../../../context/hooks";
@@ -288,7 +289,7 @@ export function ListComponent({ config }: { config: ListConfig }) {
         onAction: item.action
           ? () => void execute(item.action as ActionConfig)
           : undefined,
-        slots: item.slots as Record<string, Record<string, unknown>> | undefined,
+        slots: item.slots as SlotOverrides | undefined,
       })),
     [limitedItems, execute],
   );

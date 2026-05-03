@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
+import { BUTTON_INTERACTIVE_CSS, getButtonStyle } from "../../_base/button-styles";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 
@@ -31,7 +33,7 @@ export interface CollapsibleBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, trigger, content). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   /** Trigger element rendered before the collapsible content. */
   trigger?: ReactNode;
   /** React children rendered inside the collapsible content. */
@@ -88,7 +90,8 @@ export function CollapsibleBase({
     }
 
     setHeight(`${element.scrollHeight}px`);
-    requestAnimationFrame(() => setHeight("0px"));
+    const rafId = requestAnimationFrame(() => setHeight("0px"));
+    return () => cancelAnimationFrame(rafId);
   }, [duration, isOpen]);
 
   const rootSurface = resolveSurfacePresentation({
@@ -103,6 +106,30 @@ export function CollapsibleBase({
       transition: `height ${duration}ms var(--sn-ease-default, ease)`,
     },
     componentSurface: slots?.content,
+    activeStates: isOpen ? ["open"] : [],
+  });
+  const triggerSurface = resolveSurfacePresentation({
+    surfaceId: `${rootId}-trigger`,
+    implementationBase: {
+      ...getButtonStyle("ghost", "sm", false),
+      display: "block",
+      width: "100%",
+      minHeight: "auto",
+      padding: 0,
+      backgroundColor: "transparent",
+      backgroundImage: "none",
+      borderWidth: 0,
+      borderStyle: "solid",
+      borderColor: "transparent",
+      borderRadius: "inherit",
+      textAlign: "inherit",
+      color: "inherit",
+      cursor: "pointer",
+      style: {
+        font: "inherit",
+      },
+    },
+    componentSurface: slots?.trigger,
     activeStates: isOpen ? ["open"] : [],
   });
 
@@ -124,9 +151,14 @@ export function CollapsibleBase({
       style={rootSurface.style}
     >
       {trigger ? (
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           data-sn-button=""
+          data-variant="ghost"
+          data-size="sm"
+          data-open={isOpen ? "true" : undefined}
+          data-snapshot-id={`${rootId}-trigger`}
           onClick={toggle}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
@@ -135,20 +167,11 @@ export function CollapsibleBase({
             }
           }}
           aria-expanded={isOpen}
-          style={{
-            background: "none",
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
-            display: "block",
-            width: "100%",
-            textAlign: "inherit",
-            font: "inherit",
-            color: "inherit",
-          }}
+          className={triggerSurface.className}
+          style={triggerSurface.style}
         >
           {trigger}
-        </button>
+        </div>
       ) : null}
       <div
         ref={contentRef}
@@ -164,7 +187,9 @@ export function CollapsibleBase({
         {children}
       </div>
       <SurfaceStyles css={rootSurface.scopedCss} />
+      <SurfaceStyles css={triggerSurface.scopedCss} />
       <SurfaceStyles css={contentSurface.scopedCss} />
+      <SurfaceStyles css={BUTTON_INTERACTIVE_CSS} />
     </div>
   );
 }

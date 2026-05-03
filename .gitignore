@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-types/
+storybook-static/
 *.log
 .env
 .env.*

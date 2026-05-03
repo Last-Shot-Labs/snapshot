@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { useSubscribe } from "../../context/hooks";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useResolveFromMany, useSubscribe } from "../../context/hooks";
 import type { FromRef } from "../../context/types";
 import {
   buildRequestUrl,
@@ -85,28 +85,18 @@ export function useComponentData(
   const runtime = useManifestRuntime();
   const resourceCache = useManifestResourceCache();
 
-  // Resolve params that may be FromRef — use useResolveFrom to handle
-  // all FromRef params in one stable hook call instead of a loop.
-  const resolvedParams: Record<string, unknown> = {};
+  // Resolve params that may be FromRef in a single hook call regardless of
+  // how many params are present.
   const stableParams = params ?? {};
-  // Collect resolved values. We subscribe to each param value individually
-  // but use a stable key set. Callers must not change the set of param keys
-  // between renders (which matches config-driven usage where params come from schema).
-  const paramKeys = Object.keys(stableParams);
-  const paramValues = paramKeys.map((k) => stableParams[k]);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const resolved0 = useSubscribe(paramValues[0] ?? null);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const resolved1 = useSubscribe(paramValues[1] ?? null);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const resolved2 = useSubscribe(paramValues[2] ?? null);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const resolved3 = useSubscribe(paramValues[3] ?? null);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const resolved4 = useSubscribe(paramValues[4] ?? null);
-  const resolvedArr = [resolved0, resolved1, resolved2, resolved3, resolved4];
-  for (let i = 0; i < paramKeys.length && i < 5; i++) {
-    resolvedParams[paramKeys[i]!] = resolvedArr[i];
+  const paramKeys = useMemo(() => Object.keys(stableParams), [stableParams]);
+  const paramValues = useMemo(
+    () => paramKeys.map((k) => stableParams[k]),
+    [paramKeys, stableParams],
+  );
+  const resolvedValues = useResolveFromMany(paramValues);
+  const resolvedParams: Record<string, unknown> = {};
+  for (let i = 0; i < paramKeys.length; i++) {
+    resolvedParams[paramKeys[i]!] = resolvedValues[i];
   }
 
   const dataString =

@@ -1,6 +1,14 @@
 'use client';
 
-import { useCallback, useMemo, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
@@ -29,6 +37,8 @@ export interface CalendarBaseProps {
   view?: "month" | "week";
   /** Events to display. */
   events?: CalendarEventEntry[];
+  /** Initial visible date. Defaults to today. */
+  initialDate?: Date;
   /** Whether data is loading. */
   loading?: boolean;
   /** Error object, if any. */
@@ -46,7 +56,7 @@ export interface CalendarBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -111,7 +121,7 @@ function EventPill({
   event: CalendarEventEntry;
   clickable: boolean;
   onClick?: () => void;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const surface = resolveSurfacePresentation({
     surfaceId: id,
@@ -188,6 +198,7 @@ export function CalendarBase({
   id,
   view = "month",
   events = [],
+  initialDate,
   loading = false,
   error,
   todayLabel,
@@ -198,8 +209,17 @@ export function CalendarBase({
   style,
   slots,
 }: CalendarBaseProps) {
-  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [currentDate, setCurrentDate] = useState(() => initialDate ?? new Date());
+  const userNavigatedRef = useRef(false);
   const rootId = id ?? "calendar";
+  const initialDateTime = initialDate?.getTime();
+
+  useEffect(() => {
+    if (!initialDateTime || userNavigatedRef.current) {
+      return;
+    }
+    setCurrentDate(new Date(initialDateTime));
+  }, [initialDateTime]);
 
   const forDate = useCallback((date: Date) => events.filter((event) => sameDay(event.date, date)), [events]);
   const dateClick = useCallback((date: Date) => {
@@ -209,12 +229,17 @@ export function CalendarBase({
     onEventClick?.(event);
   }, [onEventClick]);
   const goPrev = useCallback(() => {
+    userNavigatedRef.current = true;
     setCurrentDate((d) => view === "month" ? new Date(d.getFullYear(), d.getMonth() - 1, 1) : new Date(d.getFullYear(), d.getMonth(), d.getDate() - 7));
   }, [view]);
   const goNext = useCallback(() => {
+    userNavigatedRef.current = true;
     setCurrentDate((d) => view === "month" ? new Date(d.getFullYear(), d.getMonth() + 1, 1) : new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7));
   }, [view]);
-  const goToday = useCallback(() => setCurrentDate(new Date()), []);
+  const goToday = useCallback(() => {
+    userNavigatedRef.current = true;
+    setCurrentDate(new Date());
+  }, []);
 
   const title = useMemo(() => {
     if (view === "month") return monthYear(currentDate.getFullYear(), currentDate.getMonth());
@@ -235,12 +260,12 @@ export function CalendarBase({
   });
   const headerSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-header`,
-    implementationBase: { display: "flex", alignItems: "center", justifyContent: "space-between", style: { marginBottom: "var(--sn-spacing-md, 12px)" } },
+    implementationBase: { display: "flex", alignItems: "center", justifyContent: "space-between", style: { marginBottom: "var(--sn-spacing-md, 0.75rem)" } },
     componentSurface: slots?.header,
   });
   const titleSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-title`,
-    implementationBase: { fontSize: "lg", fontWeight: "semibold", color: "var(--sn-color-foreground, #0f172a)", style: { margin: 0 } },
+    implementationBase: { fontSize: "lg", fontWeight: "semibold", color: "var(--sn-color-foreground, #111827)", style: { margin: 0 } },
     componentSurface: slots?.title,
   });
   const navGroupSurface = resolveSurfacePresentation({
@@ -250,7 +275,7 @@ export function CalendarBase({
   });
   const loadingSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-loadingState`,
-    implementationBase: { padding: "lg", textAlign: "center", fontSize: "sm", color: "var(--sn-color-muted-foreground, #64748b)" },
+    implementationBase: { padding: "lg", textAlign: "center", fontSize: "sm", color: "var(--sn-color-muted-foreground, #6b7280)" },
     componentSurface: slots?.loadingState,
   });
   const errorSurface = resolveSurfacePresentation({
@@ -260,7 +285,7 @@ export function CalendarBase({
   });
   const frameSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-frame`,
-    implementationBase: { overflow: "hidden", borderRadius: "md", border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)" },
+    implementationBase: { overflow: "hidden", borderRadius: "md", border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)" },
     componentSurface: slots?.frame,
   });
   const scrollerSurface = resolveSurfacePresentation({
@@ -323,7 +348,7 @@ export function CalendarBase({
     });
     const numSurface = resolveSurfacePresentation({
       surfaceId: `${cellId}-num`,
-      implementationBase: { fontSize: monthIndex == null ? "lg" : "sm", color: current ? "var(--sn-color-foreground, #0f172a)" : "var(--sn-color-muted-foreground, #94a3b8)" },
+      implementationBase: { fontSize: monthIndex == null ? "lg" : "sm", color: current ? "var(--sn-color-foreground, #111827)" : "var(--sn-color-muted-foreground, #6b7280)" },
       componentSurface: isCurrent ? slots?.currentDateNumber : slots?.dateNumber,
     });
     const eventsSurface = resolveSurfacePresentation({
@@ -331,21 +356,38 @@ export function CalendarBase({
       implementationBase: { display: "flex", flexDirection: "column", gap: monthIndex == null ? "xs" : "2xs" },
       componentSurface: slots?.events,
     });
+    const handleCellKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (!onDateClick) return;
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        dateClick(date);
+      }
+    };
     return (
-      <div data-calendar-cell data-snapshot-id={cellId} onClick={() => dateClick(date)} className={cellSurface.className} style={cellSurface.style}>
-        <div style={monthIndex == null ? { textAlign: "center", marginBottom: "var(--sn-spacing-sm, 8px)" } : { display: "flex", justifyContent: "flex-end", marginBottom: "var(--sn-spacing-xs, 2px)" }}>
+      <div
+        data-calendar-cell
+        data-snapshot-id={cellId}
+        role={onDateClick ? "button" : undefined}
+        tabIndex={onDateClick ? 0 : undefined}
+        aria-label={onDateClick ? `Select ${date.toLocaleDateString()}` : undefined}
+        onClick={() => dateClick(date)}
+        onKeyDown={handleCellKeyDown}
+        className={cellSurface.className}
+        style={cellSurface.style}
+      >
+        <div style={monthIndex == null ? { textAlign: "center", marginBottom: "var(--sn-spacing-sm, 0.5rem)" } : { display: "flex", justifyContent: "flex-end", marginBottom: "var(--sn-spacing-xs, 0.25rem)" }}>
           {monthIndex == null ? (
             <>
               <div
                 data-snapshot-id={`${cellId}-day`}
                 className={resolveSurfacePresentation({
                   surfaceId: `${cellId}-day`,
-                  implementationBase: { fontSize: "xs", fontWeight: "semibold", color: "var(--sn-color-muted-foreground, #64748b)" },
+                  implementationBase: { fontSize: "xs", fontWeight: "semibold", color: "var(--sn-color-muted-foreground, #6b7280)" },
                   componentSurface: slots?.dayHeader,
                 }).className}
                 style={resolveSurfacePresentation({
                   surfaceId: `${cellId}-day`,
-                  implementationBase: { fontSize: "xs", fontWeight: "semibold", color: "var(--sn-color-muted-foreground, #64748b)" },
+                  implementationBase: { fontSize: "xs", fontWeight: "semibold", color: "var(--sn-color-muted-foreground, #6b7280)" },
                   componentSurface: slots?.dayHeader,
                 }).style}
               >
@@ -378,12 +420,12 @@ export function CalendarBase({
               data-snapshot-id={`${cellId}-more`}
               className={resolveSurfacePresentation({
                 surfaceId: `${cellId}-more`,
-                implementationBase: { paddingX: "xs", fontSize: "xs", color: "var(--sn-color-muted-foreground, #64748b)", style: { cursor: "pointer" } },
+                implementationBase: { paddingX: "xs", fontSize: "xs", color: "var(--sn-color-muted-foreground, #6b7280)", style: { cursor: "pointer" } },
                 componentSurface: slots?.overflowMore,
               }).className}
               style={resolveSurfacePresentation({
                 surfaceId: `${cellId}-more`,
-                implementationBase: { paddingX: "xs", fontSize: "xs", color: "var(--sn-color-muted-foreground, #64748b)", style: { cursor: "pointer" } },
+                implementationBase: { paddingX: "xs", fontSize: "xs", color: "var(--sn-color-muted-foreground, #6b7280)", style: { cursor: "pointer" } },
                 componentSurface: slots?.overflowMore,
               }).style}
             >
@@ -415,7 +457,7 @@ export function CalendarBase({
           {DAY_NAMES.map((name) => {
             const surface = resolveSurfacePresentation({
               surfaceId: `${rootId}-dayHeader-${name}`,
-              implementationBase: { padding: "xs", textAlign: "center", fontSize: "xs", fontWeight: "semibold", color: "var(--sn-color-muted-foreground, #64748b)" },
+              implementationBase: { padding: "xs", textAlign: "center", fontSize: "xs", fontWeight: "semibold", color: "var(--sn-color-muted-foreground, #6b7280)" },
               componentSurface: slots?.dayHeader,
             });
             return <div key={name} data-snapshot-id={`${rootId}-dayHeader-${name}`} className={surface.className} style={surface.style}>{name}<SurfaceStyles css={surface.scopedCss} /></div>;
@@ -425,7 +467,7 @@ export function CalendarBase({
         {weeks.map((week, wi) => {
           const weekSurface = resolveSurfacePresentation({
             surfaceId: `${rootId}-weekRow-${wi}`,
-            implementationBase: { display: "grid", gap: "2xs", style: { gridTemplateColumns: showWeekNumbers ? "40px repeat(7, 1fr)" : "repeat(7, 1fr)", borderBottom: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)" } },
+            implementationBase: { display: "grid", gap: "2xs", style: { gridTemplateColumns: showWeekNumbers ? "40px repeat(7, 1fr)" : "repeat(7, 1fr)", borderBottom: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)" } },
             componentSurface: slots?.weekRow,
           });
           return (
@@ -435,12 +477,12 @@ export function CalendarBase({
                   data-snapshot-id={`${rootId}-weekNumber-${wi}`}
                   className={resolveSurfacePresentation({
                     surfaceId: `${rootId}-weekNumber-${wi}`,
-                    implementationBase: { padding: "xs", display: "flex", alignItems: "start", justifyContent: "center", fontSize: "xs", color: "var(--sn-color-muted-foreground, #94a3b8)" },
+                    implementationBase: { padding: "xs", display: "flex", alignItems: "start", justifyContent: "center", fontSize: "xs", color: "var(--sn-color-muted-foreground, #6b7280)" },
                     componentSurface: slots?.weekNumber,
                   }).className}
                   style={resolveSurfacePresentation({
                     surfaceId: `${rootId}-weekNumber-${wi}`,
-                    implementationBase: { padding: "xs", display: "flex", alignItems: "start", justifyContent: "center", fontSize: "xs", color: "var(--sn-color-muted-foreground, #94a3b8)" },
+                    implementationBase: { padding: "xs", display: "flex", alignItems: "start", justifyContent: "center", fontSize: "xs", color: "var(--sn-color-muted-foreground, #6b7280)" },
                     componentSurface: slots?.weekNumber,
                   }).style}
                 >

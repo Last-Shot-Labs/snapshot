@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, ReactNode } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -19,7 +20,7 @@ export interface StepperBaseStep {
   /** Content rendered when this step is active. */
   content?: ReactNode;
   /** Per-step slot overrides. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface StepperBaseProps {
@@ -44,7 +45,7 @@ export interface StepperBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

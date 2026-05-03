@@ -1,8 +1,8 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { ComponentRenderer } from "../../../manifest/renderer";
-import { ComponentWrapper } from "../../_base/component-wrapper";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { BoxBase } from "./standalone";
@@ -19,13 +19,13 @@ export function Box({ config }: { config: BoxConfig }) {
   });
 
   return (
-    <ComponentWrapper type="box" id={config.id} config={config}>
+    <>
       <BoxBase
         id={config.id}
         as={config.as}
         className={config.className}
         style={config.style as CSSProperties}
-        slots={config.slots as Record<string, Record<string, unknown>>}
+        slots={config.slots as SlotOverrides}
       >
         {config.children?.map((child, index) => (
           <div
@@ -39,6 +39,6 @@ export function Box({ config }: { config: BoxConfig }) {
         ))}
       </BoxBase>
       <SurfaceStyles css={itemSurface.scopedCss} />
-    </ComponentWrapper>
+    </>
   );
 }

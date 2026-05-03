@@ -1,6 +1,7 @@
 'use client';
 
 import { useSubscribe } from "../../../context";
+import type { SlotOverrides } from "../../_base/types";
 import { CodeBase } from "./standalone";
 import type { CodeConfig } from "./types";
 
@@ -17,7 +18,7 @@ export function Code({ config }: { config: CodeConfig }) {
       fallback={config.fallback}
       className={config.className}
       style={config.style}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

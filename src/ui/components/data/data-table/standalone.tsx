@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useMemo, useState, type ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { Icon } from "../../../icons/icon";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -163,7 +164,7 @@ export interface DataTableBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, headerCell, pagination). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Formatting helpers ──────────────────────────────────────────────────────
@@ -172,15 +173,15 @@ const BADGE_COLOR_MAP: Record<string, { bg: string; fg: string }> = {
   blue: { bg: "var(--sn-color-info, #3b82f6)", fg: "var(--sn-color-info-foreground, #fff)" },
   green: { bg: "var(--sn-color-success, #22c55e)", fg: "var(--sn-color-success-foreground, #fff)" },
   red: { bg: "var(--sn-color-destructive, #dc2626)", fg: "var(--sn-color-destructive-foreground, #fff)" },
-  gray: { bg: "var(--sn-color-muted, #e5e7eb)", fg: "var(--sn-color-muted-foreground, #64748b)" },
+  gray: { bg: "var(--sn-color-muted, #e5e7eb)", fg: "var(--sn-color-muted-foreground, #6b7280)" },
   yellow: { bg: "var(--sn-color-warning, #d97706)", fg: "var(--sn-color-warning-foreground, #fff)" },
   success: { bg: "var(--sn-color-success, #22c55e)", fg: "var(--sn-color-success-foreground, #fff)" },
   warning: { bg: "var(--sn-color-warning, #d97706)", fg: "var(--sn-color-warning-foreground, #fff)" },
   info: { bg: "var(--sn-color-info, #3b82f6)", fg: "var(--sn-color-info-foreground, #fff)" },
   destructive: { bg: "var(--sn-color-destructive, #dc2626)", fg: "var(--sn-color-destructive-foreground, #fff)" },
-  muted: { bg: "var(--sn-color-muted, #e5e7eb)", fg: "var(--sn-color-muted-foreground, #64748b)" },
-  primary: { bg: "var(--sn-color-primary, #111827)", fg: "var(--sn-color-primary-foreground, #fff)" },
-  secondary: { bg: "var(--sn-color-secondary, #f3f4f6)", fg: "var(--sn-color-secondary-foreground, #0f172a)" },
+  muted: { bg: "var(--sn-color-muted, #e5e7eb)", fg: "var(--sn-color-muted-foreground, #6b7280)" },
+  primary: { bg: "var(--sn-color-primary, #2563eb)", fg: "var(--sn-color-primary-foreground, #fff)" },
+  secondary: { bg: "var(--sn-color-secondary, #f3f4f6)", fg: "var(--sn-color-secondary-foreground, #111827)" },
 };
 
 function getFieldValue(row: Record<string, unknown>, path: string): unknown {
@@ -232,7 +233,7 @@ function formatCellValue(
           data-color={colorName}
           style={{
             display: "inline-block",
-            padding: "var(--sn-spacing-xs, 2px) var(--sn-spacing-sm, 8px)",
+            padding: "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-sm, 0.5rem)",
             borderRadius: "var(--sn-radius-full, 9999px)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
             backgroundColor: colors.bg,
@@ -278,7 +279,7 @@ function formatCellValue(
       return (
         <div style={{ display: "flex", alignItems: "center", gap: "var(--sn-spacing-sm, 0.5rem)" }}>
           <div style={{
-            flex: 1, height: "var(--sn-spacing-2xs, 6px)", backgroundColor: "var(--sn-color-muted, #e5e7eb)",
+            flex: 1, height: "var(--sn-spacing-2xs, 0.375rem)", backgroundColor: "var(--sn-color-muted, #e5e7eb)",
             borderRadius: "var(--sn-radius-full, 9999px)", overflow: "hidden",
           }}>
             <div style={{
@@ -315,7 +316,7 @@ function formatCellValue(
       return (
         <code style={{
           fontFamily: "var(--sn-font-mono, monospace)", fontSize: "var(--sn-font-size-xs, 0.75rem)",
-          backgroundColor: "var(--sn-color-secondary, #f3f4f6)", padding: "var(--sn-spacing-2xs, 1px) var(--sn-spacing-xs, 0.25rem)",
+          backgroundColor: "var(--sn-color-secondary, #f3f4f6)", padding: "var(--sn-spacing-2xs, 0.0625rem) var(--sn-spacing-xs, 0.25rem)",
           borderRadius: "var(--sn-radius-sm, 0.25rem)",
         }}>
           {String(value)}
@@ -383,6 +384,7 @@ export function DataTableBase({
   style,
   slots,
 }: DataTableBaseProps) {
+  const [hoveredRowIndex, setHoveredRowIndex] = useState<number | null>(null);
   const rootId = id ?? "data-table";
   const cellPadding = compact
     ? "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)"
@@ -638,33 +640,15 @@ export function DataTableBase({
                       cursor: onRowClick ? "pointer" : undefined,
                       backgroundColor: isSelected
                         ? "color-mix(in oklch, var(--sn-color-primary, #2563eb) 5%, var(--sn-color-card, #fff))"
-                        : striped && rowIndex % 2 === 1
-                          ? "var(--sn-color-muted, #f9fafb)"
-                          : undefined,
+                        : hoverable && hoveredRowIndex === rowIndex && !isSelected
+                          ? "var(--sn-color-accent, #f3f4f6)"
+                          : striped && rowIndex % 2 === 1
+                            ? "var(--sn-color-muted, #f9fafb)"
+                            : undefined,
                       transition: hoverable ? "background-color var(--sn-duration-fast, 150ms)" : undefined,
                     }}
-                    onMouseEnter={
-                      hoverable
-                        ? (e) => {
-                            if (!isSelected) {
-                              (e.currentTarget as HTMLElement).style.backgroundColor =
-                                "var(--sn-color-accent, #f3f4f6)";
-                            }
-                          }
-                        : undefined
-                    }
-                    onMouseLeave={
-                      hoverable
-                        ? (e) => {
-                            if (!isSelected) {
-                              (e.currentTarget as HTMLElement).style.backgroundColor =
-                                striped && rowIndex % 2 === 1
-                                  ? "var(--sn-color-muted, #f9fafb)"
-                                  : "";
-                            }
-                          }
-                        : undefined
-                    }
+                    onMouseEnter={hoverable ? () => setHoveredRowIndex(rowIndex) : undefined}
+                    onMouseLeave={hoverable ? () => setHoveredRowIndex(null) : undefined}
                   >
                     {selectable && (
                       <td style={{ padding: cellPadding, textAlign: "center" }}>

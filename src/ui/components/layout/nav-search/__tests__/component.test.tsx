@@ -96,6 +96,6 @@ describe("NavSearch", () => {
     fireEvent.submit(form!);
 
     expect(publishSpy).toHaveBeenCalledWith("icons");
-    expect(executeSpy).toHaveBeenCalledWith({ type: "search" });
+    expect(executeSpy).toHaveBeenCalledWith({ type: "search" }, { value: "icons" });
   });
 });

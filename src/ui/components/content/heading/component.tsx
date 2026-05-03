@@ -1,6 +1,7 @@
 'use client';
 
 import { useSubscribe } from "../../../context";
+import type { SlotOverrides } from "../../_base/types";
 import { resolveTemplate } from "../../../expressions/template";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
@@ -61,7 +62,7 @@ export function Heading({ config }: { config: HeadingConfig }) {
       align={config.align}
       className={config.className}
       style={config.style}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

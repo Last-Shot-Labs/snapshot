@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -31,7 +32,7 @@ export interface InlineEditFieldProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 /**
@@ -164,7 +165,7 @@ export function InlineEditField({
     surfaceId: `${rootId}-display-text`,
     implementationBase: {
       color: displayValue
-        ? "var(--sn-color-foreground, #111)"
+        ? "var(--sn-color-foreground, #111827)"
         : "var(--sn-color-muted-foreground, #6b7280)",
       fontSize,
       style: {
@@ -203,8 +204,8 @@ export function InlineEditField({
   const inputSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-input`,
     implementationBase: {
-      color: "var(--sn-color-foreground, #111)",
-      bg: "var(--sn-color-input, #fff)",
+      color: "var(--sn-color-foreground, #111827)",
+      bg: "var(--sn-color-input, #ffffff)",
       borderRadius: "sm",
       focus: {
         ring: true,
@@ -284,3 +285,7 @@ export function InlineEditField({
     </>
   );
 }
+
+// Backwards-compat alias — canonical name is InlineEditBase.
+export const InlineEditBase = InlineEditField;
+export type InlineEditBaseProps = InlineEditFieldProps;

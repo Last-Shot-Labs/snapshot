@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { ComponentRenderer } from "../../../manifest/renderer";
@@ -113,7 +114,7 @@ export function Timeline({ config }: { config: TimelineConfig }) {
     date: item.date,
     icon: item.icon,
     color: item.color,
-    slots: item.slots as Record<string, Record<string, unknown>> | undefined,
+    slots: item.slots as SlotOverrides | undefined,
     children: Array.isArray(item.content) && item.content.length > 0
       ? React.createElement(
           React.Fragment,
@@ -139,7 +140,7 @@ export function Timeline({ config }: { config: TimelineConfig }) {
       onItemClick={handleItemClick}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as React.CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

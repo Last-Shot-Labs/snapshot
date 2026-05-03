@@ -93,7 +93,7 @@ function formatCellValue(
         },
         gray: {
           bg: "var(--sn-color-muted, oklch(0.97 0 0))",
-          fg: "var(--sn-color-muted-foreground, #64748b)",
+          fg: "var(--sn-color-muted-foreground, #6b7280)",
         },
         yellow: {
           bg: "var(--sn-color-warning, oklch(0.681 0.162 75.834))",
@@ -117,7 +117,7 @@ function formatCellValue(
         },
         muted: {
           bg: "var(--sn-color-muted, oklch(0.97 0 0))",
-          fg: "var(--sn-color-muted-foreground, #64748b)",
+          fg: "var(--sn-color-muted-foreground, #6b7280)",
         },
         primary: {
           bg: "var(--sn-color-primary, oklch(0.205 0 0))",
@@ -125,11 +125,11 @@ function formatCellValue(
         },
         secondary: {
           bg: "var(--sn-color-secondary, oklch(0.97 0 0))",
-          fg: "var(--sn-color-secondary-foreground, #0f172a)",
+          fg: "var(--sn-color-secondary-foreground, #111827)",
         },
         accent: {
           bg: "var(--sn-color-accent, oklch(0.97 0 0))",
-          fg: "var(--sn-color-accent-foreground, #0f172a)",
+          fg: "var(--sn-color-accent-foreground, #111827)",
         },
       };
       const colors = badgeColorMap[colorName] ?? badgeColorMap.muted!;
@@ -139,7 +139,7 @@ function formatCellValue(
           data-color={colorName}
           style={{
             display: "inline-block",
-            padding: "var(--sn-spacing-xs, 2px) var(--sn-spacing-sm, 8px)",
+            padding: "var(--sn-spacing-xs, 0.125rem) var(--sn-spacing-sm, 0.5rem)",
             borderRadius: "var(--sn-radius-full, 9999px)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
             backgroundColor: colors.bg,
@@ -224,7 +224,7 @@ function formatCellValue(
           <div
             style={{
               flex: 1,
-              height: "var(--sn-spacing-2xs, 6px)",
+              height: "var(--sn-spacing-2xs, 0.375rem)",
               backgroundColor: "var(--sn-color-muted, #e5e7eb)",
               borderRadius: "var(--sn-radius-full, 9999px)",
               overflow: "hidden",
@@ -288,7 +288,7 @@ function formatCellValue(
             fontFamily: "var(--sn-font-mono, monospace)",
             fontSize: "var(--sn-font-size-xs, 0.75rem)",
             backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
-            padding: "var(--sn-spacing-2xs, 1px) var(--sn-spacing-xs, 0.25rem)",
+            padding: "var(--sn-spacing-2xs, 0.0625rem) var(--sn-spacing-xs, 0.25rem)",
             borderRadius: "var(--sn-radius-sm, 0.25rem)",
           }}
         >
@@ -337,11 +337,11 @@ function getDensityPadding(
 ): string {
   switch (density) {
     case "compact":
-      return "var(--sn-spacing-xs, 4px) var(--sn-spacing-sm, 8px)";
+      return "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)";
     case "comfortable":
-      return "var(--sn-spacing-md, 12px) var(--sn-spacing-lg, 16px)";
+      return "var(--sn-spacing-md, 0.75rem) var(--sn-spacing-lg, 1rem)";
     default:
-      return "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)";
+      return "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)";
   }
 }
 
@@ -475,7 +475,7 @@ function SkeletonRows({
       {Array.from({ length: rowCount }, (_, i) => (
         <tr key={i} data-skeleton>
           {Array.from({ length: columnCount }, (_, j) => (
-            <td key={j} style={{ padding: "var(--sn-spacing-sm, 8px)" }}>
+            <td key={j} style={{ padding: "var(--sn-spacing-sm, 0.5rem)" }}>
               <div
                 style={{
                   height: "1em",
@@ -991,7 +991,7 @@ export function AdvancedDataTable({ config }: { config: DataTableConfig }) {
             <div
               style={{
                 display: "flex",
-                gap: "var(--sn-spacing-xs, 4px)",
+                gap: "var(--sn-spacing-xs, 0.25rem)",
                 justifyContent: "flex-end",
               }}
             >
@@ -1169,7 +1169,7 @@ export function AdvancedDataTable({ config }: { config: DataTableConfig }) {
             alignItems: "center",
             justifyContent: runtimeConfig.searchable ? "space-between" : "flex-end",
             gap: "var(--sn-spacing-sm, 0.5rem)",
-            marginBottom: "var(--sn-spacing-md, 12px)",
+            marginBottom: "var(--sn-spacing-md, 0.75rem)",
             ...toolbarSurface.style,
           }}
         >
@@ -1183,7 +1183,7 @@ export function AdvancedDataTable({ config }: { config: DataTableConfig }) {
               surfaceId={`${rootId}-search`}
               surfaceConfig={{
                 style: {
-                  padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
+                  padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
                   borderRadius: "var(--sn-radius-md, 6px)",
                   border:
                     "var(--sn-border-default, 1px) solid var(--sn-color-border, #d1d5db)",
@@ -1214,9 +1214,9 @@ export function AdvancedDataTable({ config }: { config: DataTableConfig }) {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "var(--sn-spacing-sm, 8px)",
-            padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
-            marginBottom: "var(--sn-spacing-sm, 8px)",
+            gap: "var(--sn-spacing-sm, 0.5rem)",
+            padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+            marginBottom: "var(--sn-spacing-sm, 0.5rem)",
             backgroundColor: "var(--sn-color-muted, #f3f4f6)",
             borderRadius: "var(--sn-radius-md, 6px)",
             ...bulkActionsSurface.style,
@@ -1564,15 +1564,15 @@ export function AdvancedDataTable({ config }: { config: DataTableConfig }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "var(--sn-spacing-sm, 8px) 0",
-            marginTop: "var(--sn-spacing-sm, 8px)",
+            padding: "var(--sn-spacing-sm, 0.5rem) 0",
+            marginTop: "var(--sn-spacing-sm, 0.5rem)",
             ...paginationSurface.style,
           }}
         >
           <span>
             Page {table.pagination.currentPage} of {table.pagination.totalPages}
           </span>
-          <div style={{ display: "flex", gap: "var(--sn-spacing-xs, 4px)" }}>
+          <div style={{ display: "flex", gap: "var(--sn-spacing-xs, 0.25rem)" }}>
             <ButtonControl
               variant="ghost"
               onClick={() => table.prevPage()}

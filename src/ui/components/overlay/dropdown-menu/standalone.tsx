@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -28,14 +29,14 @@ export interface DropdownMenuBaseItem {
   /** Whether this is a destructive action. */
   destructive?: boolean;
   /** Per-item slot overrides. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface DropdownMenuBaseSeparator {
   /** Entry type discriminant. */
   type: "separator";
   /** Per-separator slot overrides. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface DropdownMenuBaseLabel {
@@ -44,7 +45,7 @@ export interface DropdownMenuBaseLabel {
   /** Label text. */
   text: string;
   /** Per-label slot overrides. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export type DropdownMenuBaseEntry =
@@ -81,7 +82,7 @@ export interface DropdownMenuBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────

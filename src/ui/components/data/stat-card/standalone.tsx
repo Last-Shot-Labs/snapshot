@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -50,7 +51,7 @@ export interface StatCardBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, label, value, valueRow, icon, trend, loading, error, empty). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -225,7 +226,7 @@ export function StatCardBase({
       onKeyDown={
         onClick
           ? (e) => {
-              if (e.key === "Enter" || e.key === " ") onClick();
+              if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); }
             }
           : undefined
       }

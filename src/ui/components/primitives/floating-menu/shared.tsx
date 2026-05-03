@@ -393,7 +393,7 @@ export function MenuItem({
       gap: "var(--sn-spacing-sm, 0.5rem)",
       width: "100%",
       minHeight: "2.25rem",
-      padding: "var(--sn-spacing-xs, 0.5rem) var(--sn-spacing-sm, 0.75rem)",
+      padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
       border: "none",
       background: "transparent",
       textAlign: "left",
@@ -575,7 +575,7 @@ export function MenuLabel({
   const labelSurface = resolveSlotSurface({
     surfaceId,
     implementationBase: {
-      padding: "var(--sn-spacing-xs, 0.5rem) var(--sn-spacing-sm, 0.75rem)",
+      padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
       fontSize: "var(--sn-font-size-xs, 0.75rem)",
       fontWeight: 600,
       color: "var(--sn-color-muted-foreground, #6b7280)",

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, ReactNode } from "react";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -23,7 +24,7 @@ export interface DetailCardBaseField {
   /** Divisor for currency formatting (e.g. 100 for cents-to-dollars). */
   divisor?: number;
   /** Slot overrides for this field's sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface DetailCardBaseAction {
@@ -34,7 +35,7 @@ export interface DetailCardBaseAction {
   /** Callback when the action button is clicked. */
   onAction: () => void;
   /** Slot overrides for this action's sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Standalone Props ────���─────────────────────────────────────────────────────
@@ -65,7 +66,7 @@ export interface DetailCardBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (panel, header, title, actions, fields, field, fieldLabel, fieldValue). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ─────��─────────────────────────────────────────────────────────────
@@ -85,20 +86,20 @@ function FormattedFieldValue({
   rootId: string;
   field: DetailCardBaseField;
   fieldIndex: number;
-  componentSlots?: Record<string, Record<string, unknown>>;
+  componentSlots?: SlotOverrides;
 }) {
   const { value, format } = field;
   const fieldSlots = field.slots;
   const emptyValueSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-field-empty-value-${fieldIndex}`,
-    implementationBase: { color: "var(--sn-color-muted-foreground, #64748b)" },
+    implementationBase: { color: "var(--sn-color-muted-foreground, #6b7280)" },
     componentSurface: componentSlots?.emptyValue,
     itemSurface: fieldSlots?.emptyValue,
   });
   const booleanValueSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-field-boolean-value-${fieldIndex}`,
     implementationBase: {
-      color: "var(--sn-color-muted-foreground, #94a3b8)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
       states: { active: { color: "var(--sn-color-success, #22c55e)" } },
     },
     componentSurface: componentSlots?.booleanValue,
@@ -112,7 +113,7 @@ function FormattedFieldValue({
       padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-sm, 0.5rem)",
       borderRadius: "var(--sn-radius-full, 9999px)",
       bg: "var(--sn-color-secondary, #f1f5f9)",
-      color: "var(--sn-color-secondary-foreground, #0f172a)",
+      color: "var(--sn-color-secondary-foreground, #111827)",
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
       fontWeight: "var(--sn-font-weight-medium, 500)",
     },
@@ -266,7 +267,7 @@ function FieldRow({
   rootId: string;
   field: DetailCardBaseField;
   fieldIndex: number;
-  componentSlots?: Record<string, Record<string, unknown>>;
+  componentSlots?: SlotOverrides;
 }) {
   const fieldSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-field-${fieldIndex}`,
@@ -282,7 +283,7 @@ function FieldRow({
   const labelSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-field-label-${fieldIndex}`,
     implementationBase: {
-      color: "var(--sn-color-muted-foreground, #64748b)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
       fontWeight: 500,
       style: { margin: 0 },
@@ -293,7 +294,7 @@ function FieldRow({
   const valueSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-field-value-${fieldIndex}`,
     implementationBase: {
-      color: "var(--sn-color-foreground, #0f172a)",
+      color: "var(--sn-color-foreground, #111827)",
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
       display: "flex",
       alignItems: "center",
@@ -363,12 +364,12 @@ function DetailCardSkeleton({
   componentSlots,
 }: {
   rootId: string;
-  componentSlots?: Record<string, Record<string, unknown>>;
+  componentSlots?: SlotOverrides;
 }) {
   const skeletonSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-skeleton`,
     implementationBase: {
-      border: "var(--sn-card-border, 1px solid #e2e8f0)",
+      border: "var(--sn-card-border, 1px solid #e5e7eb)",
       borderRadius: "lg",
       padding: "var(--sn-card-padding, var(--sn-spacing-lg, 1.5rem))",
       bg: "var(--sn-color-surface, #ffffff)",
@@ -382,12 +383,12 @@ function DetailCardSkeleton({
   });
   const skeletonLabelSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-skeleton-label`,
-    implementationBase: { width: "6rem", height: "1rem", borderRadius: "sm", bg: "var(--sn-color-muted, #e2e8f0)" },
+    implementationBase: { width: "6rem", height: "1rem", borderRadius: "sm", bg: "var(--sn-color-muted, #e5e7eb)" },
     componentSurface: componentSlots?.skeletonLabel,
   });
   const skeletonValueSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-skeleton-value`,
-    implementationBase: { flex: "1", height: "1rem", borderRadius: "sm", bg: "var(--sn-color-muted, #e2e8f0)" },
+    implementationBase: { flex: "1", height: "1rem", borderRadius: "sm", bg: "var(--sn-color-muted, #e5e7eb)" },
     componentSurface: componentSlots?.skeletonValue,
   });
 
@@ -465,7 +466,7 @@ export function DetailCardBase({
     surfaceId: `${rootId}-panel`,
     implementationBase: {
       display: "flex", flexDirection: "column", gap: "md",
-      border: "var(--sn-card-border, 1px solid #e2e8f0)", borderRadius: "lg",
+      border: "var(--sn-card-border, 1px solid #e5e7eb)", borderRadius: "lg",
       padding: "var(--sn-card-padding, var(--sn-spacing-lg, 1.5rem))",
       style: { boxShadow: "var(--sn-card-shadow, 0 1px 3px rgba(0,0,0,0.1))", backgroundColor: "var(--sn-color-surface, #ffffff)" },
     },
@@ -475,14 +476,14 @@ export function DetailCardBase({
     surfaceId: `${rootId}-header`,
     implementationBase: {
       display: "flex", justifyContent: "space-between", alignItems: "center", gap: "sm",
-      style: { paddingBottom: "var(--sn-spacing-sm, 0.5rem)", borderBottom: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)" },
+      style: { paddingBottom: "var(--sn-spacing-sm, 0.5rem)", borderBottom: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)" },
     },
     componentSurface: slots?.header,
   });
   const titleSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-title`,
     implementationBase: {
-      color: "var(--sn-color-foreground, #0f172a)", fontSize: "var(--sn-font-size-lg, 1.125rem)", fontWeight: 600,
+      color: "var(--sn-color-foreground, #111827)", fontSize: "var(--sn-font-size-lg, 1.125rem)", fontWeight: 600,
       style: { margin: 0 },
     },
     componentSurface: slots?.title,

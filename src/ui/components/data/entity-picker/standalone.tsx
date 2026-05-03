@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -53,7 +54,7 @@ export interface EntityPickerBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, trigger, dropdown, item, searchContainer, list). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Item sub-component ────────────────────────────────────────────────────────
@@ -71,7 +72,7 @@ function EntityPickerItem({
   isSelected: boolean;
   onToggle: (value: string) => void;
   rootId: string;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const itemBaseId = `${rootId}-item-${entity.value}`;
   const itemSurface = resolveSurfacePresentation({

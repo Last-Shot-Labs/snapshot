@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { useSubscribe } from "../../../context/index";
+import { useResolveFromMany } from "../../../context/hooks";
 import type { NavConfig, NavItemConfig } from "./schema";
 import type { AuthUser, ResolvedNavItem, UseNavResult } from "./types";
 
@@ -132,103 +133,36 @@ export function useNav(config: NavConfig, pathname: string): UseNavResult {
     return roles;
   }, [user]);
 
-  // Subscribe to badge FromRefs using a fixed number of useSubscribe calls (max 10)
-  // to avoid hooks-in-loop violations. Items beyond 10 won't get live badge updates.
+  // Subscribe to per-item FromRefs in stable, dynamic-length hook calls.
   const navItems = config.items ?? [];
-  const badgeRef = (index: number) => {
-    const item = navItems[index];
-    if (
-      item &&
-      typeof item.badge === "object" &&
-      item.badge !== null &&
-      "from" in item.badge
-    ) {
-      return item.badge;
-    }
-    return undefined;
-  };
-  const b0 = useSubscribe(badgeRef(0));
-  const b1 = useSubscribe(badgeRef(1));
-  const b2 = useSubscribe(badgeRef(2));
-  const b3 = useSubscribe(badgeRef(3));
-  const b4 = useSubscribe(badgeRef(4));
-  const b5 = useSubscribe(badgeRef(5));
-  const b6 = useSubscribe(badgeRef(6));
-  const b7 = useSubscribe(badgeRef(7));
-  const b8 = useSubscribe(badgeRef(8));
-  const b9 = useSubscribe(badgeRef(9));
-  const badgeValues: unknown[] = [b0, b1, b2, b3, b4, b5, b6, b7, b8, b9].slice(
-    0,
-    navItems.length,
+  const refForKey = (
+    key: "badge" | "visible" | "disabled",
+  ): unknown[] =>
+    navItems.map((item: NavItemConfig) => {
+      const value = item[key];
+      if (typeof value === "object" && value !== null && "from" in value) {
+        return value;
+      }
+      return undefined;
+    });
+  const badgeRefs = useMemo(
+    () => refForKey("badge"),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [navItems],
   );
-  const visibilityRef = (index: number) => {
-    const item = navItems[index];
-    if (
-      item &&
-      typeof item.visible === "object" &&
-      item.visible !== null &&
-      "from" in item.visible
-    ) {
-      return item.visible;
-    }
-    return undefined;
-  };
-  const v0 = useSubscribe(visibilityRef(0));
-  const v1 = useSubscribe(visibilityRef(1));
-  const v2 = useSubscribe(visibilityRef(2));
-  const v3 = useSubscribe(visibilityRef(3));
-  const v4 = useSubscribe(visibilityRef(4));
-  const v5 = useSubscribe(visibilityRef(5));
-  const v6 = useSubscribe(visibilityRef(6));
-  const v7 = useSubscribe(visibilityRef(7));
-  const v8 = useSubscribe(visibilityRef(8));
-  const v9 = useSubscribe(visibilityRef(9));
-  const visibilityValues: unknown[] = [
-    v0,
-    v1,
-    v2,
-    v3,
-    v4,
-    v5,
-    v6,
-    v7,
-    v8,
-    v9,
-  ].slice(0, navItems.length);
-  const disabledRef = (index: number) => {
-    const item = navItems[index];
-    if (
-      item &&
-      typeof item.disabled === "object" &&
-      item.disabled !== null &&
-      "from" in item.disabled
-    ) {
-      return item.disabled;
-    }
-    return undefined;
-  };
-  const d0 = useSubscribe(disabledRef(0));
-  const d1 = useSubscribe(disabledRef(1));
-  const d2 = useSubscribe(disabledRef(2));
-  const d3 = useSubscribe(disabledRef(3));
-  const d4 = useSubscribe(disabledRef(4));
-  const d5 = useSubscribe(disabledRef(5));
-  const d6 = useSubscribe(disabledRef(6));
-  const d7 = useSubscribe(disabledRef(7));
-  const d8 = useSubscribe(disabledRef(8));
-  const d9 = useSubscribe(disabledRef(9));
-  const disabledValues: unknown[] = [
-    d0,
-    d1,
-    d2,
-    d3,
-    d4,
-    d5,
-    d6,
-    d7,
-    d8,
-    d9,
-  ].slice(0, navItems.length);
+  const visibilityRefs = useMemo(
+    () => refForKey("visible"),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [navItems],
+  );
+  const disabledRefs = useMemo(
+    () => refForKey("disabled"),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [navItems],
+  );
+  const badgeValues = useResolveFromMany(badgeRefs);
+  const visibilityValues = useResolveFromMany(visibilityRefs);
+  const disabledValues = useResolveFromMany(disabledRefs);
 
   const items = useMemo(() => {
     return navItems.map((item: NavItemConfig, index: number) =>
@@ -242,16 +176,14 @@ export function useNav(config: NavConfig, pathname: string): UseNavResult {
         disabledValues[index],
       ),
     );
-    // badgeValues is intentionally spread to avoid array reference instability
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     navItems,
     pathname,
     user,
     userRoles,
-    ...badgeValues,
-    ...visibilityValues,
-    ...disabledValues,
+    badgeValues,
+    visibilityValues,
+    disabledValues,
   ]);
 
   const activeItem = useMemo(() => findActiveItem(items), [items]);

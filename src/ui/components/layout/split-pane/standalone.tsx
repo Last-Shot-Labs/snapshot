@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import {
   mergeClassNames,
@@ -24,7 +25,7 @@ export interface SplitPaneBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, pane, firstPane, secondPane, divider). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   /** Content for the first pane. */
   first?: ReactNode;
   /** Content for the second pane. */

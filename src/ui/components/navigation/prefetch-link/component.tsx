@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { usePrefetchRoute } from "../../../../ssr/prefetch";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
 import { PrefetchLinkBase } from "./standalone";
@@ -23,7 +24,7 @@ export function PrefetchLink(config: PrefetchLinkProps) {
       onPrefetch={prefetchRoute}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     >
       {config.children}
     </PrefetchLinkBase>

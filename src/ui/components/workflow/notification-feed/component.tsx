@@ -1,9 +1,11 @@
 'use client';
 
 import { useMemo, useCallback } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useComponentData } from "../../_base/use-component-data";
 import { useActionExecutor } from "../../../actions/executor";
 import { useSubscribe } from "../../../context/hooks";
+import { useT } from "../../../i18n/hook";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
 import { NotificationFeedBase } from "./standalone";
 import type { NotificationFeedConfig } from "./types";
@@ -19,7 +21,13 @@ export function NotificationFeed({
   const { data, isLoading, error } = useComponentData(config.data, undefined);
   const execute = useActionExecutor();
   const visible = useSubscribe(config.visible ?? true);
-  const emptyMessage = useSubscribe(config.emptyMessage) as string | undefined;
+  const rawEmptyMessage = useSubscribe(config.emptyMessage) as
+    | string
+    | undefined;
+  const i18nEmpty = useT("workflow.notifications.empty");
+  const emptyMessage =
+    rawEmptyMessage ??
+    (i18nEmpty !== "workflow.notifications.empty" ? i18nEmpty : undefined);
   const surfaceConfig = extractSurfaceConfig(config, { omit: ["maxHeight"] });
 
   const readField = config.readField ?? "read";
@@ -76,7 +84,7 @@ export function NotificationFeed({
       onMarkAllRead={config.markReadAction ? handleMarkAllRead : undefined}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as React.CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

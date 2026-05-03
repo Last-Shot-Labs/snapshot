@@ -1,6 +1,7 @@
 'use client';
 
 import React from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, MouseEventHandler } from "react";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -16,7 +17,7 @@ export interface BreadcrumbBaseItem {
   /** Icon name rendered before the label. */
   icon?: string;
   /** Per-item slot overrides. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface BreadcrumbBaseProps {
@@ -37,7 +38,7 @@ export interface BreadcrumbBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useActionExecutor } from "../../../actions/executor";
 import type { ActionConfig } from "../../../actions/types";
 import { useResolveFrom, useSubscribe } from "../../../context/hooks";
@@ -54,7 +55,7 @@ export function DetailCard({ config }: { config: DetailCardConfig }) {
         format: field.format,
         copyable: field.copyable,
         divisor: field.divisor,
-        slots: field.slots as Record<string, Record<string, unknown>> | undefined,
+        slots: field.slots as SlotOverrides | undefined,
       })),
     [fields, lookupMaps],
   );

@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
+import { useSnapshotId } from "../../_base/use-snapshot-id";
 import type { CSSProperties, FocusEventHandler, KeyboardEventHandler, MouseEventHandler, ReactNode } from "react";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -67,7 +69,7 @@ export interface InputFieldProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, label, field, control, icon, helper, requiredIndicator). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -168,7 +170,7 @@ export function InputField({
     [onBlur, validate, value],
   );
 
-  const rootId = id ?? "input";
+  const rootId = useSnapshotId(id, "input");
   const fieldId = id ? `sn-input-${id}` : undefined;
   const errorMessage = errorText ?? (touched ? validationError : undefined);
   const helperId = fieldId
@@ -353,3 +355,7 @@ export function InputField({
     </div>
   );
 }
+
+// Backwards-compat alias — canonical name is InputBase.
+export const InputBase = InputField;
+export type InputBaseProps = InputFieldProps;

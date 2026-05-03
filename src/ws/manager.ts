@@ -258,7 +258,7 @@ export class WebSocketManager<
   }
 
   send(type: string, payload: unknown) {
-    this.sendMessage({ type, payload });
+    this.sendMessage({ action: "event", event: type, payload });
   }
 
   on<K extends keyof TEvents | "*">(

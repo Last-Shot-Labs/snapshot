@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, ReactNode } from "react";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -56,7 +57,7 @@ export interface ContextMenuBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -204,6 +205,25 @@ export function ContextMenuBase({
             ...clampPosition(menuState.x, menuState.y),
           }}
           onPointerDown={(event) => event.stopPropagation()}
+          onKeyDown={(event) => {
+            if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+              event.preventDefault();
+              const menuItems = Array.from(
+                event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+              );
+              if (menuItems.length === 0) return;
+              const currentIndex = menuItems.indexOf(
+                document.activeElement as HTMLElement,
+              );
+              let nextIndex: number;
+              if (event.key === "ArrowDown") {
+                nextIndex = currentIndex < menuItems.length - 1 ? currentIndex + 1 : 0;
+              } else {
+                nextIndex = currentIndex > 0 ? currentIndex - 1 : menuItems.length - 1;
+              }
+              menuItems[nextIndex]?.focus();
+            }
+          }}
         >
           {items.map((entry, index) => {
             if (entry.type === "separator") {
@@ -290,6 +310,7 @@ export function ContextMenuBase({
               <React.Fragment key={`item-${index}`}>
                 <div
                   role="menuitem"
+                  tabIndex={-1}
                   data-snapshot-id={`${rootId}-item-${index}`}
                   className={itemSurface.className}
                   style={itemSurface.style}

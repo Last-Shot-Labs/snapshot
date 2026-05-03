@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, ReactNode } from "react";
 import { EditorState } from "@codemirror/state";
 import { markdown } from "@codemirror/lang-markdown";
@@ -51,7 +52,7 @@ export interface RichTextEditorBaseProps {
   /** Inline style applied to the root element. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -85,6 +86,8 @@ export function RichTextEditorBase({
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const initializedRef = useRef(false);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
   const rootId = id ?? "rich-text-editor";
 
   const toolbarItems = useMemo(() => resolveToolbar(toolbar), [toolbar]);
@@ -106,7 +109,7 @@ export function RichTextEditorBase({
       if (update.docChanged) {
         const next = update.state.doc.toString();
         setMarkdownContent(next);
-        onChange?.(next);
+        onChangeRef.current?.(next);
       }
     });
     const extensions = [

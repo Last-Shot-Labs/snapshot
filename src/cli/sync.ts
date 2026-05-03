@@ -480,24 +480,108 @@ function toCamelCase(str: string): string {
   return str.replace(/[-_]([a-zA-Z0-9])/g, (_, c: string) => c.toUpperCase());
 }
 
+function identifierParts(str: string): string[] {
+  return str.match(/[a-zA-Z0-9_$]+/g) ?? [];
+}
+
+function toPascalIdentifierPart(str: string, fallback: string): string {
+  const parts = identifierParts(str);
+  if (parts.length === 0) return fallback;
+  return parts
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
+}
+
+function toSafeCamelIdentifier(str: string, fallback: string): string {
+  const normalized = str
+    .replace(/\{([^}]+)\}/g, (_, n: string) => ` by ${n} `)
+    .replace(/:([a-zA-Z_$][a-zA-Z0-9_$]*)\??/g, (_, n: string) => ` by ${n} `);
+  const parts = identifierParts(normalized);
+  if (parts.length === 0) return fallback;
+  const [first, ...rest] = parts;
+  const joined = [
+    first!.charAt(0).toLowerCase() + first!.slice(1),
+    ...rest.map((part) => part.charAt(0).toUpperCase() + part.slice(1)),
+  ].join("");
+  return /^[a-zA-Z_$]/.test(joined) ? joined : `_${joined}`;
+}
+
+function pathParamNameFromSegment(seg: string): string | null {
+  if (seg.startsWith("{") && seg.endsWith("}")) {
+    return seg.slice(1, -1);
+  }
+  const colonMatch = seg.match(/^:([a-zA-Z_$][a-zA-Z0-9_$]*)\??$/);
+  return colonMatch?.[1] ?? null;
+}
+
+function pathSegments(pathStr: string): string[] {
+  return pathStr.split("/").filter(Boolean);
+}
+
+function extractPathParamNames(pathStr: string): string[] {
+  const names: string[] = [];
+  const seen = new Set<string>();
+  for (const seg of pathSegments(pathStr)) {
+    const name = pathParamNameFromSegment(seg);
+    if (!name || seen.has(name)) continue;
+    names.push(name);
+    seen.add(name);
+  }
+  return names;
+}
+
+function withInferredPathParams(
+  pathStr: string,
+  params: Parameter[],
+): Parameter[] {
+  const existingPathParamNames = new Set(
+    params.filter((p) => p.in === "path").map((p) => p.name),
+  );
+  const inferred = extractPathParamNames(pathStr)
+    .filter((name) => !existingPathParamNames.has(name))
+    .map(
+      (name): Parameter => ({
+        name,
+        in: "path",
+        required: true,
+        schema: { type: "string" },
+      }),
+    );
+  return inferred.length > 0 ? [...params, ...inferred] : params;
+}
+
+function pathToTemplate(pathStr: string): string {
+  return pathStr
+    .replace(/\{([^}]+)\}/g, (_, n: string) => `\${${n}}`)
+    .replace(
+      /(^|\/):([a-zA-Z_$][a-zA-Z0-9_$]*)\??(?=\/|$)/g,
+      (_, prefix: string, n: string) => `${prefix}\${${n}}`,
+    );
+}
+
+function queryKeyPathParts(pathStr: string, paramPrefix = ""): string[] {
+  return pathSegments(pathStr).map((seg) => {
+    const paramName = pathParamNameFromSegment(seg);
+    return paramName ? `${paramPrefix}${paramName}` : `'${seg}'`;
+  });
+}
+
 /** Derives the name for the plain async function export. operationId sanitized to camelCase when present. */
 function plainFnName(
   method: string,
   pathStr: string,
   operationId?: string,
 ): string {
-  if (operationId) return toCamelCase(operationId);
-  const segs = pathStr
-    .split("/")
-    .filter(Boolean)
-    .map((seg) => {
-      if (seg.startsWith("{") && seg.endsWith("}")) {
-        const n = seg.slice(1, -1);
-        return "By" + n.charAt(0).toUpperCase() + n.slice(1);
-      }
-      const camel = toCamelCase(seg);
-      return camel.charAt(0).toUpperCase() + camel.slice(1);
-    });
+  if (operationId) {
+    return toSafeCamelIdentifier(toCamelCase(operationId), "operation");
+  }
+  const segs = pathSegments(pathStr).map((seg) => {
+    const paramName = pathParamNameFromSegment(seg);
+    if (paramName) {
+      return "By" + toPascalIdentifierPart(paramName, "Param");
+    }
+    return toPascalIdentifierPart(toCamelCase(seg), "Path");
+  });
   return method + segs.join("");
 }
 
@@ -535,7 +619,7 @@ function nonJsonBodyContentType(rb?: RequestBody): string | null {
 /** Template for plain async fns — bare arg names, no `params.` prefix */
 function rawPathTemplate(pathStr: string, pathParams: Parameter[]): string {
   if (pathParams.length === 0) return `'${pathStr}'`;
-  const tpl = pathStr.replace(/\{([^}]+)\}/g, (_, n) => `\${${n}}`);
+  const tpl = pathToTemplate(pathStr);
   return `\`${tpl}\``;
 }
 
@@ -547,19 +631,12 @@ function paginatedUrlTemplate(
   if (pathParams.length === 0) {
     return `\`${pathStr}?page=\${page}&perPage=\${perPage}\``;
   }
-  const tpl = pathStr.replace(/\{([^}]+)\}/g, (_, n) => `\${${n}}`);
+  const tpl = pathToTemplate(pathStr);
   return `\`${tpl}?page=\${page}&perPage=\${perPage}\``;
 }
 
 function queryKey(pathStr: string, queryParams: Parameter[] = []): string {
-  const parts = pathStr
-    .split("/")
-    .filter(Boolean)
-    .map((seg) =>
-      seg.startsWith("{") && seg.endsWith("}")
-        ? `params.${seg.slice(1, -1)}`
-        : `'${seg}'`,
-    );
+  const parts = queryKeyPathParts(pathStr, "params.");
   for (const p of queryParams) {
     parts.push(`params.${p.name}`);
   }
@@ -606,13 +683,13 @@ function generateOperation(
 ): GeneratedOperation {
   const isQuery = method === "get";
 
-  const allParams = [
+  const allParams = withInferredPathParams(pathStr, [
     ...pathLevelParams,
     ...(op.parameters ?? []).filter(
       (p) =>
         !pathLevelParams.find((pp) => pp.name === p.name && pp.in === p.in),
     ),
-  ];
+  ]);
   const pathParams = allParams.filter((p) => p.in === "path");
   const queryParams = allParams.filter((p) => p.in === "query");
   const hasPathParams = pathParams.length > 0;
@@ -663,14 +740,7 @@ function generateOperation(
       `${jsdoc}export const ${fnName} = (${pathArgsWithComma}page = 1, perPage = 20): Promise<${respType}> =>\n` +
       `  api.get<${respType}>(${paginatedUrl})`;
 
-    const pathKeyParts = pathStr
-      .split("/")
-      .filter(Boolean)
-      .map((seg) =>
-        seg.startsWith("{") && seg.endsWith("}")
-          ? `params.${seg.slice(1, -1)}`
-          : `'${seg}'`,
-      );
+    const pathKeyParts = queryKeyPathParts(pathStr, "params.");
     const paginatedQueryKey = `[${[...pathKeyParts, "params.page ?? 1", "params.perPage ?? 20"].join(", ")}]`;
 
     const paramsType = hasPathParams
@@ -718,7 +788,7 @@ function generateOperation(
 
   let plainFn: string;
   if (hasQueryParams) {
-    const pathTpl = pathStr.replace(/\{([^}]+)\}/g, (_, n) => `\${${n}}`);
+    const pathTpl = pathToTemplate(pathStr);
     const qSetLines = queryParams.map((p) =>
       p.required
         ? `  _q.set('${p.name}', String(${p.name}))`
@@ -1230,13 +1300,13 @@ async function generatePrefetchFiles(
     for (const { method, pathStr, operation, pathLevelParams } of ops) {
       if (method !== "get") continue;
 
-      const allParams = [
+      const allParams = withInferredPathParams(pathStr, [
         ...pathLevelParams,
         ...(operation.parameters ?? []).filter(
           (p) =>
             !pathLevelParams.find((pp) => pp.name === p.name && pp.in === p.in),
         ),
-      ];
+      ]);
       const pathParams = allParams.filter((p) => p.in === "path");
       const queryParams = allParams.filter((p) => p.in === "query");
 
@@ -1273,14 +1343,7 @@ async function generatePrefetchFiles(
         ...queryParams.map((p) => p.name),
       ].join(", ");
 
-      const qkParts = pathStr
-        .split("/")
-        .filter(Boolean)
-        .map((seg) =>
-          seg.startsWith("{") && seg.endsWith("}")
-            ? seg.slice(1, -1)
-            : `'${seg}'`,
-        );
+      const qkParts = queryKeyPathParts(pathStr);
       for (const p of queryParams) qkParts.push(p.name);
       const queryKeyComment = `[${qkParts.join(", ")}]`;
 

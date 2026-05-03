@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 
@@ -29,7 +30,7 @@ export interface BannerBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, overlay, content). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 
   /** React children rendered as banner content. */
   children?: ReactNode;

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
@@ -31,7 +32,8 @@ export function Switch({ config }: { config: SwitchConfig }) {
     primitiveOptions,
   );
   const resolvedDisabled = useSubscribe(config.disabled ?? false) as boolean;
-  // Controlled checked state. `value` is a convenience alias.
+  // Controlled checked state. `value` is a deprecated legacy alias for
+  // `checked`. When both are provided, `checked` takes priority (via ??).
   const checkedSource = config.checked ?? config.value;
   const resolvedChecked = useSubscribe(checkedSource);
   const controlledChecked =
@@ -70,7 +72,7 @@ export function Switch({ config }: { config: SwitchConfig }) {
       onChange={handleChange}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useActionExecutor } from "../../../actions/executor";
 import { usePublish, useSubscribe } from "../../../context/hooks";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
@@ -46,7 +47,7 @@ export function ReactionBar({ config }: { config: ReactionBarConfig }) {
       EmojiPickerComponent={EmojiPicker as never}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as React.CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

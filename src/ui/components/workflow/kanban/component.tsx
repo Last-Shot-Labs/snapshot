@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useMemo, useCallback } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useComponentData } from "../../_base/use-component-data";
 import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
+import { useT } from "../../../i18n/hook";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
 import { KanbanBase } from "./standalone";
 import type { KanbanColumnEntry } from "./standalone";
@@ -20,7 +22,13 @@ export function Kanban({ config }: { config: KanbanConfig }) {
   const execute = useActionExecutor();
   const visible = useSubscribe(config.visible ?? true);
   const publish = usePublish(config.id);
-  const emptyMessage = useSubscribe(config.emptyMessage) as string | undefined;
+  const rawEmptyMessage = useSubscribe(config.emptyMessage) as
+    | string
+    | undefined;
+  const i18nEmpty = useT("workflow.kanban.empty");
+  const emptyMessage =
+    rawEmptyMessage ??
+    (i18nEmpty !== "workflow.kanban.empty" ? i18nEmpty : undefined);
   const resolvedConfig = useResolveFrom({ columns: config.columns });
   const surfaceConfig = extractSurfaceConfig(config);
 
@@ -33,7 +41,7 @@ export function Kanban({ config }: { config: KanbanConfig }) {
       title: col.title,
       color: col.color,
       limit: col.limit,
-      slots: col.slots as Record<string, Record<string, unknown>> | undefined,
+      slots: col.slots as SlotOverrides | undefined,
     }));
   }, [config.columns, resolvedConfig.columns]);
 
@@ -103,7 +111,7 @@ export function Kanban({ config }: { config: KanbanConfig }) {
       onDndChange={config.id ? handleDndChange : undefined}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as React.CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

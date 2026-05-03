@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, ReactNode } from "react";
 import { renderIcon } from "../../../icons/render";
+import { Icon } from "../../../icons/icon";
 import { ButtonControl } from "../../forms/button";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { FloatingPanel } from "../../primitives/floating-menu";
@@ -38,7 +40,7 @@ export interface PopoverBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 
   /** React children — rendered as the popover content. */
   children?: ReactNode;
@@ -122,7 +124,7 @@ export function PopoverBase({
     surfaceId: `${rootId}-content`,
     implementationBase: {
       display: "grid",
-      gap: "0.75rem",
+      gap: "var(--sn-spacing-md, 0.75rem)",
     },
     componentSurface: slots?.content,
   });
@@ -132,14 +134,14 @@ export function PopoverBase({
       display: "flex",
       alignItems: "flex-start",
       justifyContent: "space-between",
-      gap: "0.75rem",
+      gap: "var(--sn-spacing-md, 0.75rem)",
     },
     componentSurface: slots?.header,
   });
   const titleSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-title`,
     implementationBase: {
-      fontWeight: 600,
+      fontWeight: "var(--sn-font-weight-semibold, 600)" as any,
     },
     componentSurface: slots?.title,
   });
@@ -154,7 +156,7 @@ export function PopoverBase({
     surfaceId: `${rootId}-footer`,
     implementationBase: {
       display: "grid",
-      gap: "0.5rem",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
     },
     componentSurface: slots?.footer,
   });
@@ -222,7 +224,7 @@ export function PopoverBase({
               className={headerSurface.className}
               style={headerSurface.style}
             >
-              <div style={{ display: "grid", gap: "0.5rem", flex: 1 }}>
+              <div style={{ display: "grid", gap: "var(--sn-spacing-sm, 0.5rem)", flex: 1 }}>
                 {title ? (
                   <div
                     data-snapshot-id={`${rootId}-title`}
@@ -250,7 +252,7 @@ export function PopoverBase({
                 itemSurfaceConfig={closeButtonSurface.resolvedConfigForWrapper}
                 ariaLabel="Close popover"
               >
-                x
+                <Icon name="x" size={14} />
               </ButtonControl>
             </div>
           ) : null}

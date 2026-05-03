@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
@@ -28,7 +29,7 @@ function normalizeTreeItems(
     label: resolveOptionalPrimitiveValue(item.label, primitiveOptions) ?? "",
     badge: resolveOptionalPrimitiveValue(item.badge, primitiveOptions),
     children: normalizeTreeItems(item.children, primitiveOptions),
-    slots: item.slots as Record<string, Record<string, unknown>>,
+    slots: item.slots as SlotOverrides,
   }));
 }
 
@@ -109,7 +110,7 @@ export function TreeView({ config }: { config: TreeViewConfig }) {
       onRetry={config.error?.retry !== undefined ? refetch : undefined}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

@@ -83,6 +83,7 @@ describe("useLogout", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    window.history.replaceState(null, "", "/");
     storage = makeStorage();
     api = makeApi();
     config = {
@@ -119,7 +120,7 @@ describe("useLogout", () => {
     expect(storage.clear).toHaveBeenCalled();
     expect(storage.clearRefreshToken).toHaveBeenCalled();
     expect(mockState.mockClear).toHaveBeenCalled();
-    expect(mockState.mockNavigate).toHaveBeenCalledWith({ to: "/login" });
+    expect(window.location.pathname).toBe("/login");
   });
 
   it("failed logout does NOT clear any state", async () => {

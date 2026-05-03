@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 
@@ -22,7 +23,7 @@ export interface NavSearchBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, input, shortcut). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -52,11 +53,18 @@ export function NavSearchBase({
 }: NavSearchBaseProps) {
   const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const onValueChangeRef = useRef(onValueChange);
+  onValueChangeRef.current = onValueChange;
+  const mountedRef = useRef(false);
 
-  // Notify parent of value changes
+  // Notify parent of value changes (skip initial mount)
   useEffect(() => {
-    onValueChange?.(value);
-  }, [value, onValueChange]);
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    onValueChangeRef.current?.(value);
+  }, [value]);
 
   // Keyboard shortcut to focus
   useEffect(() => {

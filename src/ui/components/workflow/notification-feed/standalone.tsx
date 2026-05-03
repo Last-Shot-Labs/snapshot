@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useCallback, type CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
@@ -44,7 +45,7 @@ export interface NotificationFeedBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -228,10 +229,10 @@ export function NotificationFeedBase({
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
+      padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
       style: {
         borderBottom:
-          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)",
+          "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
       },
     },
     componentSurface: slots?.header,
@@ -241,7 +242,7 @@ export function NotificationFeedBase({
     implementationBase: {
       display: "flex",
       alignItems: "center",
-      gap: "var(--sn-spacing-sm, 8px)",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
     },
     componentSurface: slots?.headerContent,
   });
@@ -250,7 +251,7 @@ export function NotificationFeedBase({
     implementationBase: {
       fontSize: "md",
       fontWeight: "semibold",
-      color: "var(--sn-color-foreground, #0f172a)",
+      color: "var(--sn-color-foreground, #111827)",
     },
     componentSurface: slots?.title,
   });
@@ -264,7 +265,7 @@ export function NotificationFeedBase({
       textAlign: "center",
       display: "inline-block",
       style: {
-        padding: "0 var(--sn-spacing-xs, 4px)",
+        padding: "0 var(--sn-spacing-xs, 0.25rem)",
         minWidth: "1.5em",
       },
     },
@@ -305,8 +306,8 @@ export function NotificationFeedBase({
     surfaceId: `${rootId}-loading-item`,
     implementationBase: {
       display: "flex",
-      gap: "var(--sn-spacing-sm, 8px)",
-      padding: "var(--sn-spacing-md, 12px)",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
+      padding: "var(--sn-spacing-md, 0.75rem)",
     },
     componentSurface: slots?.loadingItem,
   });
@@ -341,7 +342,7 @@ export function NotificationFeedBase({
       bg: "var(--sn-color-muted, #e5e7eb)",
       opacity: 0.5,
       style: {
-        marginBottom: "var(--sn-spacing-xs, 4px)",
+        marginBottom: "var(--sn-spacing-xs, 0.25rem)",
       },
     },
     componentSurface: slots?.loadingTitle,
@@ -360,7 +361,7 @@ export function NotificationFeedBase({
   const errorStateSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-error-state`,
     implementationBase: {
-      padding: "var(--sn-spacing-md, 12px)",
+      padding: "var(--sn-spacing-md, 0.75rem)",
       color: "var(--sn-color-destructive, #ef4444)",
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
       textAlign: "center",
@@ -371,7 +372,7 @@ export function NotificationFeedBase({
     surfaceId: `${rootId}-empty`,
     implementationBase: {
       padding: "xl",
-      color: "var(--sn-color-muted-foreground, #94a3b8)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
       fontSize: "sm",
       textAlign: "center",
     },
@@ -529,11 +530,11 @@ export function NotificationFeedBase({
                   : undefined,
                 style: {
                   display: "flex",
-                  gap: "var(--sn-spacing-sm, 8px)",
+                  gap: "var(--sn-spacing-sm, 0.5rem)",
                   padding:
-                    "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
+                    "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
                   borderBottom:
-                    "var(--sn-border-default, 1px) solid var(--sn-color-border, #e2e8f0)",
+                    "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
                   borderLeft: isRead
                     ? "var(--sn-border-thick, 3px) solid transparent"
                     : "var(--sn-border-thick, 3px) solid var(--sn-color-primary, #2563eb)",
@@ -551,7 +552,7 @@ export function NotificationFeedBase({
               implementationBase: {
                 color: typeColorMap[notifType] ?? typeColorMap.info!,
                 style: {
-                  paddingTop: "var(--sn-spacing-2xs, 2px)",
+                  paddingTop: "var(--sn-spacing-2xs, 0.125rem)",
                 } as CSSProperties,
               },
               componentSurface: slots?.itemIcon,
@@ -568,7 +569,7 @@ export function NotificationFeedBase({
               implementationBase: {
                 fontSize: "sm",
                 fontWeight: isRead ? "normal" : "semibold",
-                color: "var(--sn-color-foreground, #0f172a)",
+                color: "var(--sn-color-foreground, #111827)",
               },
               componentSurface: slots?.itemTitle,
               itemSurface: asSurfaceConfig(itemSlots?.itemTitle),
@@ -588,13 +589,13 @@ export function NotificationFeedBase({
               surfaceId: `${rootId}-item-${itemKey}-message`,
               implementationBase: {
                 fontSize: "sm",
-                color: "var(--sn-color-muted-foreground, #64748b)",
+                color: "var(--sn-color-muted-foreground, #6b7280)",
                 style: {
                   display: "-webkit-box",
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
-                  marginTop: "var(--sn-spacing-2xs, 2px)",
+                  marginTop: "var(--sn-spacing-2xs, 0.125rem)",
                 } as CSSProperties,
               },
               componentSurface: slots?.itemMessage,
@@ -604,9 +605,9 @@ export function NotificationFeedBase({
               surfaceId: `${rootId}-item-${itemKey}-timestamp`,
               implementationBase: {
                 fontSize: "xs",
-                color: "var(--sn-color-muted-foreground, #94a3b8)",
+                color: "var(--sn-color-muted-foreground, #6b7280)",
                 style: {
-                  marginTop: "var(--sn-spacing-xs, 4px)",
+                  marginTop: "var(--sn-spacing-xs, 0.25rem)",
                 } as CSSProperties,
               },
               componentSurface: slots?.itemTimestamp,

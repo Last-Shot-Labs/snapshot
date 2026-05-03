@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, ReactNode } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { useFocusTrap } from "../../_base/use-focus-trap";
+import { useOverlayAnimation } from "../../_base/use-overlay-animation";
+import { Icon } from "../../../icons/icon";
 import { ButtonControl } from "../../forms/button";
 
 // ── Standalone Props ──────────────────────────────────────────────────────────
@@ -48,7 +51,7 @@ export interface ModalBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 
   /** React children — rendered as the modal body. */
   children?: ReactNode;
@@ -111,23 +114,14 @@ export function ModalBase({
   children,
 }: ModalBaseProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
-  const [animating, setAnimating] = useState(false);
-  const previousOpenRef = useRef<boolean | undefined>(undefined);
   const rootId = id ?? "modal";
   const maxWidth: string = SIZE_MAP[size] ?? SIZE_MAP.md!;
 
-  useEffect(() => {
-    if (open) {
-      setMounted(true);
-      const enterTimer = setTimeout(() => setAnimating(true), 10);
-      return () => clearTimeout(enterTimer);
-    } else if (mounted) {
-      setAnimating(false);
-      const exitTimer = setTimeout(() => setMounted(false), ANIMATION_DURATION);
-      return () => clearTimeout(exitTimer);
-    }
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  const { mounted, animating } = useOverlayAnimation({
+    open,
+    duration: ANIMATION_DURATION,
+    onOpen,
+  });
 
   useEffect(() => {
     if (open && animating && dialogRef.current) {
@@ -135,14 +129,17 @@ export function ModalBase({
     }
   }, [animating, open]);
 
+  // ── Body scroll lock ──────────────────────────────────────────────────────
   useEffect(() => {
-    const previousOpen = previousOpenRef.current;
-    previousOpenRef.current = open;
-
-    if (open && previousOpen !== true) {
-      onOpen?.();
-    }
-  }, [open, onOpen]);
+    if (!open) return;
+    const doc = typeof document !== "undefined" ? document : undefined;
+    if (!doc) return;
+    const prev = doc.body.style.overflow;
+    doc.body.style.overflow = "hidden";
+    return () => {
+      doc.body.style.overflow = prev;
+    };
+  }, [open]);
 
   useFocusTrap(
     open && animating && trapFocus,
@@ -192,10 +189,12 @@ export function ModalBase({
     implementationBase: {
       position: "fixed",
       inset: 0,
-      backgroundColor: "var(--sn-modal-overlay, rgba(0, 0, 0, 0.5))",
+      backgroundColor: "var(--sn-modal-overlay, color-mix(in oklch, var(--sn-color-foreground, #111827) 40%, transparent))",
       style: {
         opacity: animating ? 1 : 0,
         transition: `opacity var(--sn-duration-normal, ${ANIMATION_DURATION}ms) var(--sn-ease-default, ease)`,
+        backdropFilter: "var(--sn-modal-backdrop-filter, blur(4px))",
+        WebkitBackdropFilter: "var(--sn-modal-backdrop-filter, blur(4px))",
         zIndex: -1,
       },
     },
@@ -214,9 +213,10 @@ export function ModalBase({
       overflow: "hidden",
       outline: "none",
       backgroundColor: "var(--sn-color-surface, #fff)",
-      borderRadius: size === "full" ? "0" : "var(--sn-radius-lg, 0.5rem)",
+      borderRadius: size === "full" ? "0" : "var(--sn-radius-xl, 1rem)",
+      border: "var(--sn-border-thin, 1px) solid var(--sn-color-border, #e5e7eb)",
       boxShadow:
-        "var(--sn-shadow-lg, 0 25px 50px -12px rgba(0, 0, 0, 0.25))",
+        "0 24px 48px -12px color-mix(in oklch, var(--sn-color-foreground, #111827) 18%, transparent), 0 0 0 1px color-mix(in oklch, var(--sn-color-border, #e5e7eb) 50%, transparent)",
       style: {
         opacity: animating ? 1 : 0,
         transform: animating ? "scale(1)" : "scale(0.95)",
@@ -245,7 +245,7 @@ export function ModalBase({
       margin: 0,
       fontSize: "var(--sn-font-size-lg, 1.125rem)",
       fontWeight: "var(--sn-font-weight-semibold, 600)",
-      color: "var(--sn-color-foreground, #111)",
+      color: "var(--sn-color-foreground, #111827)",
     },
     componentSurface: slots?.title,
   });
@@ -322,7 +322,7 @@ export function ModalBase({
               testId="modal-close"
               ariaLabel="Close"
             >
-              x
+              <Icon name="x" size={16} />
             </ButtonControl>
           </div>
         ) : null}

@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useMemo } from "react";
 import { useResolveFrom } from "../../../context/hooks";
 import { ComponentRenderer } from "../../../manifest/renderer";
@@ -42,7 +43,7 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
             ))}
           </>
         ),
-        slots: item.slots as Record<string, Record<string, unknown>>,
+        slots: item.slots as SlotOverrides,
       })),
     [config.items, primitiveOptions, resolvedConfig.items],
   );
@@ -57,7 +58,7 @@ export function AccordionComponent({ config }: { config: AccordionConfig }) {
       defaultOpen={config.defaultOpen}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

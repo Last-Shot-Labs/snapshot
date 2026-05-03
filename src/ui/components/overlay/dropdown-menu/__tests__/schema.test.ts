@@ -168,7 +168,7 @@ describe("dropdownMenuConfigSchema", () => {
   it("rejects invalid side value", () => {
     const result = dropdownMenuConfigSchema.safeParse({
       ...baseConfig,
-      side: "left",
+      side: "inside",
     });
     expect(result.success).toBe(false);
   });

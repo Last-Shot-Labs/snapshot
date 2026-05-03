@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useEffect, useRef, useCallback, type CSSProperties, type ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { formatDateSeparator, formatRelativeTime, getInitials, getNestedField } from "../../_base/utils";
@@ -46,12 +47,12 @@ export interface MessageThreadBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function MessageAvatar({ rootId, messageId, slots, src, name }: { rootId: string; messageId: string; slots?: Record<string, Record<string, unknown>>; src?: string | null; name: string }) {
+function MessageAvatar({ rootId, messageId, slots, src, name }: { rootId: string; messageId: string; slots?: SlotOverrides; src?: string | null; name: string }) {
   const initials = getInitials(name) || "?";
   if (src) {
     const s = resolveSurfacePresentation({ surfaceId: `${rootId}-message-${messageId}-avatarImage`, implementationBase: { style: { width: 32, height: 32, borderRadius: "var(--sn-radius-full, 9999px)", objectFit: "cover", flexShrink: 0 } }, componentSurface: slots?.avatarImage });
@@ -61,7 +62,7 @@ function MessageAvatar({ rootId, messageId, slots, src, name }: { rootId: string
   return (<><div data-snapshot-id={`${rootId}-message-${messageId}-avatarFallback`} className={s.className} style={s.style}>{initials}</div><SurfaceStyles css={s.scopedCss} /></>);
 }
 
-function MessageSkeleton({ rootId, index, slots }: { rootId: string; index: number; slots?: Record<string, Record<string, unknown>> }) {
+function MessageSkeleton({ rootId, index, slots }: { rootId: string; index: number; slots?: SlotOverrides }) {
   const rowId = `${rootId}-loading-${index}`;
   const row = resolveSurfacePresentation({ surfaceId: rowId, implementationBase: { display: "flex", gap: "sm", paddingY: "sm", paddingX: "md" }, componentSurface: slots?.loadingItem });
   const av = resolveSurfacePresentation({ surfaceId: `${rowId}-avatar`, implementationBase: { bg: "var(--sn-color-muted, #e5e7eb)", opacity: 0.5, style: { width: 32, height: 32, borderRadius: "var(--sn-radius-full, 9999px)", flexShrink: 0 } }, componentSurface: slots?.loadingAvatar });
@@ -171,9 +172,9 @@ export function MessageThreadBase({
                 const prevTs = prev ? getNestedField(prev, timestampField) : null;
                 const prevTime = prevTs ? new Date(String(prevTs)) : null;
                 const isGrouped = prevAuthor === authorName && prevTime != null && ts != null && ts.getTime() - prevTime.getTime() < 5 * 60 * 1000;
-                const msgS = resolveSurfacePresentation({ surfaceId: `${rootId}-message-${msgId}`, implementationBase: { display: "flex", gap: "sm", cursor: onMessageClick ? "pointer" : "default", hover: { bg: "color-mix(in oklch, var(--sn-color-muted, #f3f4f6) 50%, transparent)" }, style: { padding: isGrouped ? "var(--sn-spacing-2xs, 2px) var(--sn-spacing-md, 1rem) var(--sn-spacing-2xs, 2px) calc(32px + var(--sn-spacing-sm, 0.5rem) + var(--sn-spacing-md, 1rem))" : "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)", transition: "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)" } }, componentSurface: slots?.messageItem });
+                const msgS = resolveSurfacePresentation({ surfaceId: `${rootId}-message-${msgId}`, implementationBase: { display: "flex", gap: "sm", cursor: onMessageClick ? "pointer" : "default", hover: { bg: "color-mix(in oklch, var(--sn-color-muted, #f3f4f6) 50%, transparent)" }, style: { padding: isGrouped ? "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-md, 1rem) var(--sn-spacing-2xs, 0.125rem) calc(32px + var(--sn-spacing-sm, 0.5rem) + var(--sn-spacing-md, 1rem))" : "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 1rem)", transition: "background-color var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)" } }, componentSurface: slots?.messageItem });
                 const colS = resolveSurfacePresentation({ surfaceId: `${rootId}-message-${msgId}-contentColumn`, implementationBase: { flex: "1", style: { minWidth: 0 } }, componentSurface: slots?.contentColumn });
-                const hdS = resolveSurfacePresentation({ surfaceId: `${rootId}-message-${msgId}-header`, implementationBase: { display: "flex", alignItems: "baseline", gap: "sm", style: { marginBottom: "var(--sn-spacing-2xs, 2px)" } }, componentSurface: slots?.header });
+                const hdS = resolveSurfacePresentation({ surfaceId: `${rootId}-message-${msgId}-header`, implementationBase: { display: "flex", alignItems: "baseline", gap: "sm", style: { marginBottom: "var(--sn-spacing-2xs, 0.125rem)" } }, componentSurface: slots?.header });
                 const auS = resolveSurfacePresentation({ surfaceId: `${rootId}-message-${msgId}-author`, implementationBase: { fontSize: "sm", fontWeight: "semibold", color: "var(--sn-color-foreground, #111827)" }, componentSurface: slots?.authorName });
                 const tsS = resolveSurfacePresentation({ surfaceId: `${rootId}-message-${msgId}-timestamp`, implementationBase: { fontSize: "xs", color: "var(--sn-color-muted-foreground, #6b7280)" }, componentSurface: slots?.timestamp });
                 const bdS = resolveSurfacePresentation({ surfaceId: `${rootId}-message-${msgId}-body`, implementationBase: { fontSize: "sm", color: "var(--sn-color-foreground, #111827)", lineHeight: "normal", style: { wordBreak: "break-word" } }, componentSurface: slots?.body });

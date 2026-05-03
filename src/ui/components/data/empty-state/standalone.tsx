@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -39,7 +40,7 @@ export interface EmptyStateBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, icon, title, description, action). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -100,6 +101,13 @@ export function EmptyStateBase({
         : "var(--sn-color-muted-foreground, #6b7280)",
       style: {
         lineHeight: "var(--sn-leading-none, 1)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: `${iconSize * 2}px`,
+        height: `${iconSize * 2}px`,
+        borderRadius: "var(--sn-radius-full, 9999px)",
+        background: "color-mix(in oklch, var(--sn-color-muted, #f3f4f6) 60%, transparent)",
       },
     },
     componentSurface: slots?.icon,

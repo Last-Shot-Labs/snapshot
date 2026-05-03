@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -20,7 +21,7 @@ export interface ToggleFieldProps {
   variant?: "outline" | "default";
   /** Size of the toggle button. */
   size?: "sm" | "md" | "lg";
-  /** Controlled pressed state. */
+  /** Controlled pressed state. Maps to `aria-pressed` on the rendered button. */
   pressed?: boolean;
   /** Initial pressed state (uncontrolled). */
   defaultPressed?: boolean;
@@ -34,7 +35,7 @@ export interface ToggleFieldProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 const SIZE_MAP = {
@@ -169,3 +170,7 @@ export function ToggleField({
     </div>
   );
 }
+
+// Backwards-compat alias — canonical name is ToggleBase.
+export const ToggleBase = ToggleField;
+export type ToggleBaseProps = ToggleFieldProps;

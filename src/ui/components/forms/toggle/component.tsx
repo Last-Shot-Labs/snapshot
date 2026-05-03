@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { useResolveFrom, useSubscribe, usePublish } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
@@ -64,7 +65,7 @@ export function Toggle({ config }: { config: ToggleConfig }) {
       onChange={handleChange}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

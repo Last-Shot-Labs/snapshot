@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useSubscribe, usePublish } from "../../../context/index";
 import { useEvaluateExpression } from "../../../expressions/use-expression";
 import { ComponentRenderer } from "../../../manifest/renderer";
@@ -55,7 +56,7 @@ export function Collapsible({ config }: { config: CollapsibleConfig }) {
       onOpenChange={handleOpenChange}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
       trigger={
         config.trigger ? (
           <ComponentRenderer config={config.trigger} />

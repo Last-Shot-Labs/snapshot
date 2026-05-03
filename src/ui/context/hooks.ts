@@ -1,4 +1,10 @@
-import { useCallback, useContext, useEffect, useRef } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import { atom } from "jotai";
 import { useAtomValue } from "jotai/react";
 import type { PrimitiveAtom } from "jotai";
@@ -179,6 +185,125 @@ export function useSubscribe(ref: FromRef | unknown): unknown {
     (ref as FromRef).transform,
     (ref as FromRef).transformArg,
   );
+}
+
+/**
+ * Resolves an array of values that may contain `FromRef`s. Stable across
+ * renders regardless of array length — use this when the number of items
+ * is dynamic (e.g., a list of nav items, params object) and a per-item
+ * `useSubscribe` would violate the rules of hooks.
+ *
+ * Internally uses a single subscription to the page registry store and
+ * re-evaluates when any subscribed atom changes.
+ */
+export function useResolveFromMany(values: readonly unknown[]): unknown[] {
+  const pageRegistry = useContext(PageRegistryContext);
+  const appRegistry = useContext(AppRegistryContext);
+  const overlayRuntime = useOverlayRuntime();
+  const routeRuntime = useRouteRuntime();
+
+  // Track all subscribed atoms across all values. Subscribing through
+  // useSyncExternalStore once means we get re-renders for any change to
+  // any tracked atom without violating rules of hooks.
+  const subscribe = useCallback(
+    (notify: () => void) => {
+      const unsubs: Array<() => void> = [];
+      const seen = new Set<unknown>();
+      for (const value of values) {
+        if (!isFromRef(value)) continue;
+        const refPath = value.from;
+        if (
+          refPath.startsWith("params.") ||
+          refPath.startsWith("route.") ||
+          refPath.startsWith("overlay.")
+        ) {
+          continue;
+        }
+        const { registry, cleanPath } = resolveSubscriptionTarget(
+          refPath,
+          pageRegistry,
+          appRegistry,
+        );
+        const dot = cleanPath.indexOf(".");
+        const componentId = dot === -1 ? cleanPath : cleanPath.slice(0, dot);
+        const sourceAtom = registry?.get(componentId);
+        if (!sourceAtom || !registry || seen.has(sourceAtom)) continue;
+        seen.add(sourceAtom);
+        unsubs.push(registry.store.sub(sourceAtom, notify));
+      }
+      return () => {
+        for (const u of unsubs) u();
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pageRegistry, appRegistry, values],
+  );
+
+  const getSnapshot = useCallback((): unknown[] => {
+    return values.map((value) => {
+      if (!isFromRef(value)) return value;
+      const refPath = value.from;
+
+      if (refPath.startsWith("params.")) {
+        const resolved = getNestedValue(routeRuntime?.params, refPath.slice(7));
+        return applyTransform(resolved, value.transform, value.transformArg);
+      }
+      if (refPath.startsWith("route.")) {
+        const routeValue = {
+          id: routeRuntime?.currentRoute?.id,
+          path: routeRuntime?.currentPath,
+          pattern: routeRuntime?.currentRoute?.path,
+          params: routeRuntime?.params,
+          query: routeRuntime?.query,
+        };
+        const resolved = getNestedValue(routeValue, refPath.slice(6));
+        return applyTransform(resolved, value.transform, value.transformArg);
+      }
+      if (refPath.startsWith("overlay.")) {
+        const overlayValue = {
+          id: overlayRuntime?.id,
+          kind: overlayRuntime?.kind,
+          payload: overlayRuntime?.payload,
+          result: overlayRuntime?.result,
+        };
+        const resolved = getNestedValue(overlayValue, refPath.slice(8));
+        return applyTransform(resolved, value.transform, value.transformArg);
+      }
+
+      const { registry, cleanPath } = resolveSubscriptionTarget(
+        refPath,
+        pageRegistry,
+        appRegistry,
+      );
+      const dot = cleanPath.indexOf(".");
+      const componentId = dot === -1 ? cleanPath : cleanPath.slice(0, dot);
+      const subPath = dot === -1 ? "" : cleanPath.slice(dot + 1);
+      const sourceAtom = registry?.get(componentId);
+      if (!sourceAtom || !registry) return undefined;
+      const atomValue = registry.store.get(sourceAtom);
+      const resolved = subPath ? getNestedValue(atomValue, subPath) : atomValue;
+      return applyTransform(resolved, value.transform, value.transformArg);
+    });
+  }, [values, pageRegistry, appRegistry, overlayRuntime, routeRuntime]);
+
+  // Cache snapshot to maintain referential stability across renders when
+  // values haven't changed (useSyncExternalStore requires this).
+  const lastSnapshotRef = useRef<unknown[] | null>(null);
+  const stableSnapshot = useCallback(() => {
+    const next = getSnapshot();
+    const last = lastSnapshotRef.current;
+    if (
+      last &&
+      last.length === next.length &&
+      last.every((v, i) => Object.is(v, next[i]))
+    ) {
+      return last;
+    }
+    lastSnapshotRef.current = next;
+    return next;
+  }, [getSnapshot]);
+
+  return useSyncExternalStore(subscribe, stableSnapshot, stableSnapshot);
 }
 
 /**

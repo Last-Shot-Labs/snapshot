@@ -82,6 +82,7 @@ describe("usePasskeyLogin", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    window.history.replaceState(null, "", "/");
     mockState.capturedMutationConfig = {};
     storage = makeStorage();
     api = makeApi();
@@ -128,11 +129,11 @@ describe("usePasskeyLogin", () => {
     expect(mockState.mockInvalidateQueries).not.toHaveBeenCalled();
   });
 
-  it("uses router navigate, not window.location.href", async () => {
+  it("navigates with browser history", async () => {
     setup();
     const onSuccess = mockState.capturedMutationConfig.onSuccess as Function;
     await onSuccess(mockUser, { passkeyToken: "pt", assertionResponse: {} });
-    expect(mockState.mockNavigate).toHaveBeenCalledWith({ to: "/home" });
+    expect(window.location.pathname).toBe("/home");
   });
 
   it("redirectTo override works", async () => {
@@ -143,7 +144,7 @@ describe("usePasskeyLogin", () => {
       assertionResponse: {},
       redirectTo: "/dashboard",
     });
-    expect(mockState.mockNavigate).toHaveBeenCalledWith({ to: "/dashboard" });
+    expect(window.location.pathname).toBe("/dashboard");
   });
 
   it("MFA challenge path matches useLogin", async () => {
@@ -167,7 +168,7 @@ describe("usePasskeyLogin", () => {
       mfaToken: "mfa-tok",
       mfaMethods: ["totp"],
     });
-    expect(mockState.mockNavigate).toHaveBeenCalledWith({ to: "/auth/mfa" });
+    expect(window.location.pathname).toBe("/auth/mfa");
   });
 
   it("redirectTo is stripped from request body", async () => {

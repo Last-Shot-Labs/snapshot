@@ -58,6 +58,10 @@ type EnvResolvedManifest = Omit<
   routes: ParsedRouteConfig[];
 };
 
+function placeholderRouteContent(): PageConfig["content"] {
+  return [{ type: "spacer" }];
+}
+
 const BUILTIN_WORKFLOW_NODE_TYPES = new Set<string>([
   ...ACTION_TYPES,
   "if",
@@ -70,15 +74,9 @@ const BUILTIN_WORKFLOW_NODE_TYPES = new Set<string>([
 ]);
 
 function toPageConfig(route: RouteConfig): PageConfig {
-  if (!route.content) {
-    throw new Error(
-      `Route "${route.id}" is missing content after compilation. Routes using presets must expand to a valid page config.`,
-    );
-  }
-
   return {
     title: route.title,
-    content: route.content,
+    content: route.content ?? placeholderRouteContent(),
     roles: route.roles,
     breadcrumb: route.breadcrumb,
   };
@@ -529,7 +527,10 @@ function validatePolicyRefs(manifest: EnvResolvedManifest): void {
     }
   }
 
-  for (const candidate of walkRoutes(manifest.routes, (routeValue) => routeValue)) {
+  for (const candidate of walkRoutes(
+    manifest.routes,
+    (routeValue) => routeValue,
+  )) {
     for (const ref of collectPolicyRefNames(candidate)) {
       referencedPolicies.add(ref);
     }
@@ -624,7 +625,10 @@ function validateResourceClients(manifest: EnvResolvedManifest): void {
 }
 
 function validateRegisteredGuards(manifest: EnvResolvedManifest): void {
-  for (const candidate of walkRoutes(manifest.routes, (routeValue) => routeValue)) {
+  for (const candidate of walkRoutes(
+    manifest.routes,
+    (routeValue) => routeValue,
+  )) {
     const guardName =
       typeof candidate.guard === "string"
         ? candidate.guard
@@ -683,7 +687,7 @@ function buildCompiledManifest(
 
   const customActionDeclarations =
     (
-    runtimeManifest.workflows as
+      runtimeManifest.workflows as
         | {
             actions?: { custom?: CustomWorkflowActionDeclarationMap };
           }
@@ -966,7 +970,9 @@ export function safeCompileManifest(manifest: unknown):
           code: "custom",
           path: [],
           message:
-            error instanceof Error ? error.message : "Manifest compilation failed",
+            error instanceof Error
+              ? error.message
+              : "Manifest compilation failed",
         },
       ]),
     };

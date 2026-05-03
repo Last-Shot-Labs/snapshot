@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { ModalBase } from "../modal/standalone";
 
 // ── Standalone Props ──────────────────────────────────────────────────────────
@@ -37,7 +38,7 @@ export interface ConfirmDialogBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────

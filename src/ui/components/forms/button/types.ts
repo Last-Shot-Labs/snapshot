@@ -66,6 +66,8 @@ export interface ButtonControlProps {
   ariaLabel?: string;
   /** ID of the element that describes this element. */
   ariaDescribedBy?: string;
+  /** Invalid state for controls with validation. */
+  ariaInvalid?: boolean | "grammar" | "spelling";
   /** Live region politeness level. */
   ariaLive?: "off" | "polite" | "assertive";
   /** Toggle button pressed state. */

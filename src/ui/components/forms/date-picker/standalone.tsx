@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -52,7 +53,7 @@ export interface DatePickerFieldProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 function toOutputValue(
@@ -164,10 +165,6 @@ export function DatePickerField({
     if (mode === "multiple") return toOutputValue(multipleValue, valueFormat);
     return singleValue ? toOutputValue(singleValue, valueFormat) : null;
   }, [mode, rangeValue, multipleValue, singleValue, valueFormat]);
-
-  useEffect(() => {
-    onChange?.(currentOutput);
-  }, [currentOutput, onChange]);
 
   const triggerChange = (value: unknown) => {
     onChange?.(value);
@@ -550,3 +547,7 @@ export function DatePickerField({
     </>
   );
 }
+
+// Backwards-compat alias — canonical name is DatePickerBase.
+export const DatePickerBase = DatePickerField;
+export type DatePickerBaseProps = DatePickerFieldProps;

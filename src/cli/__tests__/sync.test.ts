@@ -83,4 +83,135 @@ describe("runSync integration", () => {
       await fs.rm(tmpDir, { recursive: true, force: true });
     }
   });
+
+  it("generates valid identifiers and URLs for colon-style path params", async () => {
+    const tmpDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "snapshot-sync-colon-test-"),
+    );
+    const schemaPath = path.join(tmpDir, "openapi.json");
+
+    const schema = {
+      openapi: "3.0.0",
+      info: {
+        title: "Colon Params API",
+        version: "1.0.0",
+      },
+      paths: {
+        "/api/summary/:month": {
+          get: {
+            tags: ["cashflow"],
+            summary: "Get monthly summary",
+            parameters: [
+              {
+                name: "month",
+                in: "path",
+                required: true,
+                schema: { type: "string" },
+              },
+            ],
+            responses: {
+              "200": {
+                description: "Monthly summary",
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      required: ["month"],
+                      properties: {
+                        month: { type: "string" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "/api/ledger-entries/:id": {
+          get: {
+            tags: ["cashflow"],
+            summary: "Get ledger entry",
+            responses: {
+              "200": {
+                description: "Ledger entry",
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      required: ["id"],
+                      properties: {
+                        id: { type: "string" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    try {
+      await fs.writeFile(schemaPath, JSON.stringify(schema), "utf8");
+      await fs.writeFile(
+        path.join(tmpDir, "snapshot.config.json"),
+        JSON.stringify({ prefetchDir: "src/server/prefetch" }),
+        "utf8",
+      );
+
+      await runSync({
+        filePath: schemaPath,
+        cwd: tmpDir,
+        logger: {
+          info: () => {},
+          success: () => {},
+          warn: () => {},
+          error: () => {},
+        },
+      });
+
+      const apiContent = await fs.readFile(
+        path.join(tmpDir, "src/api/cashflow.ts"),
+        "utf8",
+      );
+      const hooksContent = await fs.readFile(
+        path.join(tmpDir, "src/hooks/api/cashflow.ts"),
+        "utf8",
+      );
+      const prefetchContent = await fs.readFile(
+        path.join(
+          tmpDir,
+          "src/server/prefetch/prefetchGetApiSummaryByMonth.ts",
+        ),
+        "utf8",
+      );
+
+      expect(apiContent).toContain(
+        "export const getApiSummaryByMonth = (month: string)",
+      );
+      expect(apiContent).toContain("`/api/summary/${month}`");
+      expect(apiContent).toContain(
+        "export const getApiLedgerEntriesById = (id: string)",
+      );
+      expect(apiContent).toContain("`/api/ledger-entries/${id}`");
+      expect(apiContent).not.toContain("getApiSummary:month");
+
+      expect(hooksContent).toContain(
+        "queryKey: ['api', 'summary', params.month]",
+      );
+      expect(hooksContent).toContain(
+        "queryKey: ['api', 'ledger-entries', params.id]",
+      );
+
+      expect(prefetchContent).toContain(
+        "export const prefetchGetApiSummaryByMonth = cache(async (month: string)",
+      );
+      expect(prefetchContent).toContain(
+        "Query key matches `useGetApiSummaryByMonthQuery`: `['api', 'summary', month]`",
+      );
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
 });

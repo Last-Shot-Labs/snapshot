@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, ReactNode } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { FloatingPanel } from "../../primitives/floating-menu";
+
+function canCommitAsyncState() {
+  return typeof window !== "undefined";
+}
 
 // ── Standalone Props ──────────────────────────────────────────────────────────
 
@@ -32,7 +37,7 @@ export interface HoverCardBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -68,6 +73,7 @@ export function HoverCardBase({
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const mountedRef = useRef(false);
   const rootId = id ?? "hover-card";
 
   const rootSurface = resolveSurfacePresentation({
@@ -102,21 +108,29 @@ export function HoverCardBase({
   const handleEnter = () => {
     clearTimers();
     openTimerRef.current = setTimeout(() => {
-      setIsOpen(true);
       openTimerRef.current = null;
+      if (mountedRef.current && canCommitAsyncState()) {
+        setIsOpen(true);
+      }
     }, openDelay);
   };
 
   const handleLeave = () => {
     clearTimers();
     closeTimerRef.current = setTimeout(() => {
-      setIsOpen(false);
       closeTimerRef.current = null;
+      if (mountedRef.current && canCommitAsyncState()) {
+        setIsOpen(false);
+      }
     }, closeDelay);
   };
 
   useEffect(() => {
-    return () => clearTimers();
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      clearTimers();
+    };
   }, []);
 
   return (
@@ -126,6 +140,8 @@ export function HoverCardBase({
       data-snapshot-id={`${rootId}-root`}
       onPointerEnter={handleEnter}
       onPointerLeave={handleLeave}
+      onFocus={handleEnter}
+      onBlur={handleLeave}
       className={rootSurface.className}
       style={rootSurface.style}
     >

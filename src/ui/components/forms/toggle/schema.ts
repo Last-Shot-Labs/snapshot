@@ -28,7 +28,7 @@ export const toggleConfigSchema = extendComponentSchema({
     label: z.union([z.string(), fromRefSchema]).optional(),
     /** Icon name displayed in the button. */
     icon: z.string().optional(),
-    /** Initial pressed state. Can be a FromRef. Default: false. */
+    /** Initial pressed state. Maps to `aria-pressed` on the rendered button. Can be a FromRef. Default: false. */
     pressed: z.union([z.boolean(), fromRefSchema]).optional(),
     /** Visual variant. Default: "default". */
     variant: z.enum(["default", "outline"]).optional(),

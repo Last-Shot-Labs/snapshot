@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState, type ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -31,7 +32,7 @@ export interface ListBaseItem {
   /** Click handler for the item. */
   onAction?: () => void;
   /** Slot overrides for this item's sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Standalone Props ──────────────────────────────────────────────────────────
@@ -72,7 +73,7 @@ export interface ListBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, list, item, itemIcon, itemTitle, itemDescription, itemBadge, divider). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -140,7 +141,7 @@ function ListItem({
   selectable: boolean;
   showDivider: boolean;
   isCard: boolean;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const isClickable = selectable && (item.onAction != null || item.href != null);
   const itemSurface = resolveSurfacePresentation({
@@ -251,7 +252,7 @@ function ListItem({
       onClick={isClickable ? handleClick : undefined}
       onKeyDown={
         isClickable
-          ? (e) => { if (e.key === "Enter" || e.key === " ") handleClick(); }
+          ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } }
           : undefined
       }
       role={isClickable ? "button" : undefined}

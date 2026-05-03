@@ -1,6 +1,8 @@
 'use client';
 
 import type { CSSProperties, MouseEventHandler, ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
+import { useSnapshotId } from "../../_base/use-snapshot-id";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation, extractSurfaceConfig } from "../../_base/style-surfaces";
@@ -38,7 +40,7 @@ export interface ButtonBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, label, icon). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -73,7 +75,7 @@ export function ButtonBase({
   style,
   slots,
 }: ButtonBaseProps) {
-  const rootId = id ?? "button-root";
+  const rootId = useSnapshotId(id, "button");
   const isIconOnly = icon != null && !label && !children;
   const resolvedAriaLabel = ariaLabel ?? (isIconOnly ? icon : undefined);
 
@@ -122,13 +124,15 @@ export function ButtonBase({
                 {renderIcon(icon, 16)}
               </span>
             ) : null}
-            <span
-              data-snapshot-id={`${rootId}-label`}
-              className={labelSurface.className}
-              style={labelSurface.style}
-            >
-              {label}
-            </span>
+            {label ? (
+              <span
+                data-snapshot-id={`${rootId}-label`}
+                className={labelSurface.className}
+                style={labelSurface.style}
+              >
+                {label}
+              </span>
+            ) : null}
           </>
         )}
       </ButtonControl>

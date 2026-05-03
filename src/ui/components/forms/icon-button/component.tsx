@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useSubscribe } from "../../../context/index";
 import { useActionExecutor } from "../../../actions/executor";
 import { IconButtonBase } from "./standalone";
@@ -48,7 +49,7 @@ export function IconButton({ config }: { config: IconButtonConfig }) {
       }}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

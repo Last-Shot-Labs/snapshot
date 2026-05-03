@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -78,13 +79,13 @@ export interface FeedBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, item, title, description, timestamp, badge, actions). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const BADGE_COLOR_MAP: Record<string, { bg: string; fg: string }> = {
-  primary: { bg: "var(--sn-color-primary, #111827)", fg: "var(--sn-color-primary-foreground, #ffffff)" },
+  primary: { bg: "var(--sn-color-primary, #2563eb)", fg: "var(--sn-color-primary-foreground, #ffffff)" },
   secondary: { bg: "var(--sn-color-secondary, #f3f4f6)", fg: "var(--sn-color-secondary-foreground, #111827)" },
   success: { bg: "var(--sn-color-success, #16a34a)", fg: "var(--sn-color-success-foreground, #ffffff)" },
   warning: { bg: "var(--sn-color-warning, #d97706)", fg: "var(--sn-color-warning-foreground, #ffffff)" },
@@ -161,7 +162,7 @@ function FeedBadge({
   itemKey: string | number;
   value: string;
   color: string;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const colors = BADGE_COLOR_MAP[color] ?? BADGE_COLOR_MAP.muted!;
   const badgeSurface = resolveSurfacePresentation({
@@ -212,7 +213,7 @@ function FeedItemRow({
   isSelected: boolean;
   itemActions?: FeedBaseItemAction[];
   relativeTime: boolean;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const itemId = `${rootId}-item-${item.key}`;
 
@@ -279,7 +280,7 @@ function FeedItemRow({
     implementationBase: {
       fontSize: "sm",
       color: "var(--sn-color-muted-foreground, #6b7280)",
-      style: { marginTop: "var(--sn-spacing-2xs, 2px)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+      style: { marginTop: "var(--sn-spacing-2xs, 0.125rem)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
     },
     componentSurface: slots?.description,
   });
@@ -288,7 +289,7 @@ function FeedItemRow({
     implementationBase: {
       fontSize: "xs",
       color: "var(--sn-color-muted-foreground, #6b7280)",
-      style: { flexShrink: 0, alignSelf: "flex-start", paddingTop: "var(--sn-spacing-2xs, 2px)" },
+      style: { flexShrink: 0, alignSelf: "flex-start", paddingTop: "var(--sn-spacing-2xs, 0.125rem)" },
     },
     componentSurface: slots?.timestamp,
   });
@@ -418,7 +419,7 @@ function FeedItemRow({
                       itemAction.variant === "destructive"
                         ? "color-mix(in oklch, var(--sn-color-destructive, #dc2626) 8%, transparent)"
                         : "transparent",
-                    padding: "var(--sn-spacing-2xs, 2px) var(--sn-spacing-xs, 4px)",
+                    padding: "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-xs, 0.25rem)",
                   },
                 },
                 componentSurface: slots?.itemAction,

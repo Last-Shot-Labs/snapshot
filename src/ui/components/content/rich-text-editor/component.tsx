@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import {
   resolveOptionalPrimitiveValue,
@@ -23,6 +24,10 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
   const resolvedReadonly = useSubscribe(config.readonly ?? false) as boolean;
   const visible = useSubscribe(config.visible ?? true);
   const publish = usePublish(config.id);
+  const publishRef = useRef(publish);
+  publishRef.current = publish;
+  const resolvedContentRef = useRef(resolvedContent);
+  resolvedContentRef.current = resolvedContent;
   const publishTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => {
@@ -38,9 +43,13 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
     [publish],
   );
 
+  // Mount-only: publish the initial resolved content once.
+  // Uses refs to avoid stale closures without adding reactive deps.
   useEffect(() => {
-    if (publish && resolvedContent) publish(resolvedContent);
-  }, []); // initial publish only
+    if (publishRef.current && resolvedContentRef.current) {
+      publishRef.current(resolvedContentRef.current);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- intentional mount-only effect
 
   if (visible === false) return null;
 
@@ -57,7 +66,7 @@ export function RichTextEditor({ config }: { config: RichTextEditorConfig }) {
       onChange={handleChange}
       className={config.className}
       style={config.style}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

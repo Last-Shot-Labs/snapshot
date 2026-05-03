@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useCallback, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
+import { SPACING_MAP } from "../../_base/style-props";
 import { ButtonControl } from "../button";
 import { InputControl } from "../input";
 import { SelectControl } from "../select";
@@ -76,7 +78,7 @@ export interface AutoFormFieldConfig {
   /** Inline action link rendered beside the label (e.g. "Forgot password?"). */
   inlineAction?: { label?: string; to?: string };
   /** Slot overrides for sub-elements (field, label, input, helper, error). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   /** HTML autocomplete attribute for the input. */
   autoComplete?: string;
   /** Number of grid columns this field should span. */
@@ -95,7 +97,7 @@ export interface AutoFormSectionConfig {
   /** Field configurations rendered inside this section. */
   fields: AutoFormFieldConfig[];
   /** Slot overrides for sub-elements (section, sectionHeader, sectionTitle). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   /** Whether the section can be collapsed. */
   collapsible?: boolean;
   /** Whether the section starts collapsed. */
@@ -165,17 +167,8 @@ export interface AutoFormBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
-
-// ── Gap map ───────────────────────────────────────────────────────────────
-
-const GAP_MAP: Record<string, string> = {
-  xs: "var(--sn-spacing-xs, 0.25rem)",
-  sm: "var(--sn-spacing-sm, 0.5rem)",
-  md: "var(--sn-spacing-md, 1rem)",
-  lg: "var(--sn-spacing-lg, 1.5rem)",
-};
 
 // ── Tag input sub-component ──────────────────────────────────────────────
 
@@ -240,13 +233,13 @@ function StandaloneTagInput({
         display: "flex",
         flexWrap: "wrap",
         alignItems: "center",
-        gap: "0.375rem",
+        gap: "var(--sn-spacing-xs, 0.25rem)",
         cursor: disabled ? "not-allowed" : "text",
         width: "100%",
         minHeight: "var(--sn-input-height, 2.5rem)",
         padding: "var(--sn-spacing-xs, 0.25rem) var(--sn-spacing-md, 1rem)",
         border: `var(--sn-border-thin, 1px) solid ${focused ? "var(--sn-color-primary, #2563eb)" : "var(--sn-color-border, #e5e7eb)"}`,
-        borderRadius: "var(--sn-radius-md, 0.5rem)",
+        borderRadius: "var(--sn-radius-md, 0.375rem)",
         background: "var(--sn-color-background, #ffffff)",
         color: "var(--sn-color-foreground, #111827)",
         fontSize: "var(--sn-font-size-sm, 0.875rem)",
@@ -266,38 +259,45 @@ function StandaloneTagInput({
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "0.25rem",
-            padding: "0.125rem 0.5rem",
+            gap: "var(--sn-spacing-2xs, 0.125rem)",
+            padding: "var(--sn-spacing-2xs, 0.125rem) var(--sn-spacing-sm, 0.5rem)",
             borderRadius: "var(--sn-radius-full, 9999px)",
             backgroundColor: "var(--sn-color-primary, #2563eb)",
             color: "var(--sn-color-primary-foreground, #ffffff)",
             fontSize: "var(--sn-font-size-sm, 0.875rem)",
-            lineHeight: "1.5",
+            lineHeight: "var(--sn-leading-normal, 1.5)",
             whiteSpace: "nowrap",
           }}
         >
           {tag}
           {!disabled && !readOnly ? (
-            <button
+            <ButtonControl
               type="button"
-              aria-label={`Remove ${tag}`}
+              ariaLabel={`Remove ${tag}`}
+              surfaceId={`${rootId}-tag-${i}-remove`}
+              variant="ghost"
+              size="icon"
               onClick={(e) => {
                 e.stopPropagation();
                 removeTag(i);
               }}
               style={{
-                background: "none",
-                border: "none",
-                color: "inherit",
-                cursor: "pointer",
+                width: "var(--sn-icon-sm, 1rem)",
+                minWidth: "var(--sn-icon-sm, 1rem)",
+                height: "var(--sn-icon-sm, 1rem)",
+                minHeight: "var(--sn-icon-sm, 1rem)",
                 padding: 0,
+                background: "transparent",
+                border: "0",
+                borderRadius: "var(--sn-radius-full, 9999px)",
+                color: "inherit",
                 fontSize: "1rem",
                 lineHeight: 1,
                 opacity: 0.7,
               }}
             >
               {"\u00d7"}
-            </button>
+            </ButtonControl>
           ) : null}
         </span>
       ))}
@@ -334,14 +334,14 @@ function StandaloneTagInput({
         }}
         style={{
           flex: 1,
-          minWidth: "10rem",
+          minWidth: "var(--sn-tag-input-min-width, 10rem)",
           border: "none",
           outline: "none",
           background: "transparent",
           fontSize: "inherit",
           fontFamily: "inherit",
           color: "inherit",
-          padding: "0.25rem 0",
+          padding: "var(--sn-spacing-xs, 0.25rem) 0",
           minHeight: "auto",
           borderRadius: 0,
           boxShadow: "none",
@@ -371,7 +371,7 @@ function StandaloneFieldRenderer({
   showError: boolean;
   onChange: (value: unknown) => void;
   onBlur: () => void;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   onInlineAction?: (fieldName: string, to: string) => void;
 }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -420,7 +420,7 @@ function StandaloneFieldRenderer({
     implementationBase: {
       color: "var(--sn-color-destructive, #ef4444)",
       style: {
-        marginLeft: "var(--sn-spacing-2xs, 2px)",
+        marginLeft: "var(--sn-spacing-2xs, 0.125rem)",
       },
     } as Record<string, unknown>,
     componentSurface: slots?.requiredIndicator,
@@ -707,8 +707,8 @@ function StandaloneFieldRenderer({
           surfaceId={`${rootId}-input-${field.name}`}
           className={inputSurface.className}
           style={{
-            width: "16px",
-            height: "16px",
+            width: "var(--sn-checkbox-size, 16px)",
+            height: "var(--sn-checkbox-size, 16px)",
             accentColor: "var(--sn-color-primary, #2563eb)",
             ...(inputStyle ?? {}),
           }}
@@ -760,7 +760,7 @@ function StandaloneFieldRenderer({
           alignItems: "center",
           width: `${switchTrackW}px`,
           height: `${switchTrackH}px`,
-          borderRadius: "9999px",
+          borderRadius: "var(--sn-radius-full, 9999px)",
           bg: "var(--sn-color-secondary, #e5e7eb)",
           style: {
             flexShrink: 0,
@@ -783,7 +783,7 @@ function StandaloneFieldRenderer({
           position: "absolute",
           width: `${switchThumb}px`,
           height: `${switchThumb}px`,
-          borderRadius: "9999px",
+          borderRadius: "var(--sn-radius-full, 9999px)",
           bg: "var(--sn-color-card, #ffffff)",
           transform: "translateX(0px)",
           style: {
@@ -806,20 +806,29 @@ function StandaloneFieldRenderer({
 
       input = (
         <>
-          <button
+          <ButtonControl
             type="button"
             id={fieldId}
             role="switch"
-            aria-checked={switchChecked}
-            aria-invalid={hasError}
-            aria-describedby={describedBy}
-            aria-label={label}
+            ariaChecked={switchChecked}
+            ariaInvalid={hasError}
+            ariaDescribedBy={describedBy}
+            ariaLabel={label}
             disabled={field.disabled}
             onClick={() => onChange(!switchChecked)}
             onBlur={onBlur}
-            data-snapshot-id={`${rootId}-input-${field.name}`}
-            className={switchButtonSurface.className}
-            style={switchButtonSurface.style}
+            surfaceId={`${rootId}-input-${field.name}`}
+            surfaceConfig={switchButtonSurface.resolvedConfigForWrapper}
+            variant="ghost"
+            size="sm"
+            activeStates={switchStates}
+            style={{
+              minHeight: "auto",
+              padding: 0,
+              background: "transparent",
+              border: "0",
+              borderRadius: "var(--sn-radius-full, 9999px)",
+            }}
           >
             <span
               data-snapshot-id={`${rootId}-switch-track-${field.name}`}
@@ -832,8 +841,7 @@ function StandaloneFieldRenderer({
                 style={switchThumbSurface.style}
               />
             </span>
-          </button>
-          <SurfaceStyles css={switchButtonSurface.scopedCss} />
+          </ButtonControl>
           <SurfaceStyles css={switchTrackSurface.scopedCss} />
           <SurfaceStyles css={switchThumbSurface.scopedCss} />
         </>
@@ -978,8 +986,8 @@ function StandaloneFieldRenderer({
                   surfaceId={`${rootId}-input-${field.name}-${opt.value}`}
                   className={inputSurface.className}
                   style={{
-                    width: "16px",
-                    height: "16px",
+                    width: "var(--sn-checkbox-size, 16px)",
+                    height: "var(--sn-checkbox-size, 16px)",
                     accentColor: "var(--sn-color-primary, #2563eb)",
                     ...(inputStyle ?? {}),
                   }}
@@ -1217,6 +1225,33 @@ function StandaloneFieldRenderer({
     );
   }
 
+  const inlineAction =
+    inlineActionLabel && inlineActionTarget ? (
+      onInlineAction ? (
+        <ButtonControl
+          type="button"
+          onClick={() => {
+            onInlineAction(field.name, inlineActionTarget);
+          }}
+          variant="ghost"
+          size="sm"
+          surfaceId={`${rootId}-inline-action-${field.name}`}
+          surfaceConfig={inlineActionSurface.resolvedConfigForWrapper}
+        >
+          {inlineActionLabel}
+        </ButtonControl>
+      ) : (
+        <a
+          href={inlineActionTarget}
+          data-snapshot-id={`${rootId}-inline-action-${field.name}`}
+          className={inlineActionSurface.className}
+          style={inlineActionSurface.style}
+        >
+          {inlineActionLabel}
+        </a>
+      )
+    ) : null;
+
   return (
     <div
       data-sn-field={field.name}
@@ -1224,52 +1259,35 @@ function StandaloneFieldRenderer({
       className={fieldSurface.className}
       style={fieldSurface.style}
     >
-      <label
-        htmlFor={fieldId}
-        data-snapshot-id={`${rootId}-label-${field.name}`}
-        className={labelSurface.className}
-        style={labelSurface.style}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "var(--sn-spacing-sm, 0.5rem)",
+        }}
       >
-        <span>
-          {label}
-          {required && (
-            <span
-              data-snapshot-id={`${rootId}-required-${field.name}`}
-              className={requiredIndicatorSurface.className}
-              style={requiredIndicatorSurface.style}
-            >
-              *
-            </span>
-          )}
-        </span>
-        {inlineActionLabel && inlineActionTarget ? (
-          onInlineAction ? (
-            <ButtonControl
-              type="button"
-              onClick={() => {
-                onInlineAction(field.name, inlineActionTarget);
-              }}
-              variant="ghost"
-              size="sm"
-              surfaceId={`${rootId}-inline-action-${field.name}`}
-              surfaceConfig={inlineActionSurface.resolvedConfigForWrapper}
-            >
-              {inlineActionLabel}
-            </ButtonControl>
-          ) : (
-            <a
-              href={inlineActionTarget}
-              style={{
-                fontSize: "var(--sn-font-size-xs, 0.75rem)",
-                color: "var(--sn-color-primary, #2563eb)",
-                textDecoration: "none",
-              }}
-            >
-              {inlineActionLabel}
-            </a>
-          )
-        ) : null}
-      </label>
+        <label
+          htmlFor={fieldId}
+          data-snapshot-id={`${rootId}-label-${field.name}`}
+          className={labelSurface.className}
+          style={labelSurface.style}
+        >
+          <span>
+            {label}
+            {required && (
+              <span
+                data-snapshot-id={`${rootId}-required-${field.name}`}
+                className={requiredIndicatorSurface.className}
+                style={requiredIndicatorSurface.style}
+              >
+                *
+              </span>
+            )}
+          </span>
+        </label>
+        {inlineAction}
+      </div>
       <div
         data-snapshot-id={`${rootId}-inputWrapper-${field.name}`}
         className={inputWrapperSurface.className}
@@ -1317,6 +1335,7 @@ function StandaloneFieldRenderer({
       <SurfaceStyles css={helperSurface.scopedCss} />
       <SurfaceStyles css={errorSurface.scopedCss} />
       <SurfaceStyles css={requiredIndicatorSurface.scopedCss} />
+      <SurfaceStyles css={inlineActionSurface.scopedCss} />
     </div>
   );
 }
@@ -1347,7 +1366,7 @@ function StandaloneSectionRenderer({
   touched: Record<string, boolean>;
   columns: number;
   gap: string;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   onFieldChange: (name: string, value: unknown) => void;
   onFieldBlur: (name: string) => void;
   onInlineAction?: (fieldName: string, to: string) => void;
@@ -1509,7 +1528,7 @@ function StandaloneFieldGrid({
   touched: Record<string, boolean>;
   columns: number;
   gap: string;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   onFieldChange: (name: string, value: unknown) => void;
   onFieldBlur: (name: string) => void;
   onInlineAction?: (fieldName: string, to: string) => void;
@@ -1627,7 +1646,7 @@ export function AutoFormBase({
   const submitLabel = submitLabelProp ?? "Submit";
   const submitLoadingLabel = submitLoadingLabelProp ?? "Submitting...";
   const resetLabel = resetLabelProp ?? "Reset";
-  const resolvedGap = GAP_MAP[gap] ?? GAP_MAP["md"]!;
+  const resolvedGap = SPACING_MAP[gap] ?? SPACING_MAP["md"]!;
 
   // If columns is explicitly set, use grid layout; otherwise fall back to layout prop
   const useGridLayout = columnsProp != null && columnsProp > 0;

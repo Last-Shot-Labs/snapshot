@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom } from "../../../context/hooks";
@@ -55,7 +56,7 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
       label: resolveOptionalPrimitiveValue(item.label, primitiveOptions) ?? "",
       path: resolveOptionalPrimitiveValue(item.path, primitiveOptions),
       icon: item.icon,
-      slots: item.slots as Record<string, Record<string, unknown>>,
+      slots: item.slots as SlotOverrides,
     }));
   }, [autoItems, config.items, primitiveOptions, resolvedConfig.items]);
 
@@ -81,7 +82,7 @@ export function BreadcrumbComponent({ config }: { config: BreadcrumbConfig }) {
       onNavigate={handleNavigate}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

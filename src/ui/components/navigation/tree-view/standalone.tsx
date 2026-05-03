@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties, ReactNode } from "react";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -25,7 +26,7 @@ export interface TreeViewBaseItem {
   /** Child nodes. */
   children?: TreeViewBaseItem[];
   /** Per-item slot overrides. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface TreeViewBaseProps {
@@ -58,7 +59,7 @@ export interface TreeViewBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -111,7 +112,7 @@ interface TreeNodeProps {
   showIcon: boolean;
   showConnectors: boolean;
   pathKey: string;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 function TreeNode({
@@ -160,7 +161,7 @@ function TreeNode({
         ? "var(--sn-color-accent, #f1f5f9)"
         : "transparent",
       color: isSelected
-        ? "var(--sn-color-accent-foreground, #0f172a)"
+        ? "var(--sn-color-accent-foreground, #111827)"
         : "var(--sn-color-foreground, #111827)",
       borderRadius: "var(--sn-radius-sm, 0.25rem)",
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
@@ -173,11 +174,11 @@ function TreeNode({
       states: {
         selected: {
           bg: "var(--sn-color-accent, #f1f5f9)",
-          color: "var(--sn-color-accent-foreground, #0f172a)",
+          color: "var(--sn-color-accent-foreground, #111827)",
         },
         current: {
           bg: "var(--sn-color-accent, #f1f5f9)",
-          color: "var(--sn-color-accent-foreground, #0f172a)",
+          color: "var(--sn-color-accent-foreground, #111827)",
         },
         disabled: {
           opacity: "var(--sn-opacity-disabled, 0.5)",
@@ -294,6 +295,76 @@ function TreeNode({
     }
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (isDisabled) return;
+    const key = event.key;
+    const focusSibling = (direction: 1 | -1) => {
+      const root = (event.currentTarget.closest('[role="tree"]') ?? document) as
+        | HTMLElement
+        | Document;
+      const buttons = Array.from(
+        root.querySelectorAll<HTMLButtonElement>('[data-testid="tree-node-row"]'),
+      ).filter((b) => !b.disabled);
+      const ordinal = buttons.indexOf(event.currentTarget);
+      if (ordinal === -1) return;
+      const target = buttons[ordinal + direction];
+      if (target) {
+        event.preventDefault();
+        target.focus();
+      }
+    };
+    if (key === "ArrowDown") {
+      focusSibling(1);
+      return;
+    }
+    if (key === "ArrowUp") {
+      focusSibling(-1);
+      return;
+    }
+    if (key === "ArrowRight") {
+      if (hasChildren && !isExpanded) {
+        event.preventDefault();
+        onToggle(nodeKey);
+      } else if (hasChildren && isExpanded) {
+        focusSibling(1);
+      }
+      return;
+    }
+    if (key === "ArrowLeft") {
+      if (hasChildren && isExpanded) {
+        event.preventDefault();
+        onToggle(nodeKey);
+      }
+      return;
+    }
+    if (key === "Home") {
+      const root = (event.currentTarget.closest('[role="tree"]') ?? document) as
+        | HTMLElement
+        | Document;
+      const first = root.querySelector<HTMLButtonElement>(
+        '[data-testid="tree-node-row"]:not([disabled])',
+      );
+      if (first) {
+        event.preventDefault();
+        first.focus();
+      }
+      return;
+    }
+    if (key === "End") {
+      const root = (event.currentTarget.closest('[role="tree"]') ?? document) as
+        | HTMLElement
+        | Document;
+      const all = root.querySelectorAll<HTMLButtonElement>(
+        '[data-testid="tree-node-row"]:not([disabled])',
+      );
+      const last = all[all.length - 1];
+      if (last) {
+        event.preventDefault();
+        last.focus();
+      }
+    }
+  };
+
   return (
     <div
       data-testid="tree-node"
@@ -307,6 +378,7 @@ function TreeNode({
         disabled={isDisabled}
         testId="tree-node-row"
         onClick={handleClick}
+        onKeyDown={handleKeyDown}
         role="treeitem"
         tabIndex={isDisabled ? -1 : isSelected ? 0 : -1}
         ariaExpanded={hasChildren ? isExpanded : undefined}

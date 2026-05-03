@@ -2,20 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useSubscribe } from "../../../context";
-import { renderIcon } from "../../../icons/render";
 import { resolveRuntimeLocale, resolveTRef } from "../../../i18n/resolve";
 import { isTRef, type I18nConfig, type TRef } from "../../../i18n/schema";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import type { ComponentConfig } from "../../../manifest/types";
 import { ComponentWrapper } from "../../_base/component-wrapper";
-import { SurfaceStyles } from "../../_base/surface-styles";
-import {
-  extractSurfaceConfig,
-  resolveSurfacePresentation,
-} from "../../_base/style-surfaces";
-import { ButtonControl } from "../../forms/button";
-import { FloatingMenuStyles } from "../../primitives/floating-menu";
+import { extractSurfaceConfig } from "../../_base/style-surfaces";
 import { NavDropdown } from "../nav-dropdown";
 import { NavLink } from "../nav-link";
 import { NavLogo } from "../nav-logo";
@@ -23,24 +16,16 @@ import { NavUserMenu } from "../nav-user-menu";
 import { useNav } from "./hook";
 import type { NavConfig } from "./schema";
 import type { ResolvedNavItem } from "./types";
+import { NavBase, type NavBaseItem, type NavBaseLogo } from "./standalone";
 
 function resolveNavText(
   value: string | TRef | undefined,
   locale: string | undefined,
   i18n: I18nConfig | undefined,
 ): string {
-  if (!value) {
-    return "";
-  }
-
-  if (typeof value === "string") {
-    return value;
-  }
-
-  if (isTRef(value)) {
-    return resolveTRef(value, locale, i18n);
-  }
-
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  if (isTRef(value)) return resolveTRef(value, locale, i18n);
   return "";
 }
 
@@ -50,7 +35,7 @@ function resolvePositiveBadge(item: ResolvedNavItem): number | undefined {
     : undefined;
 }
 
-function buildGroupedNavLinkConfig(
+function buildNavLinkConfig(
   item: ResolvedNavItem,
   id: string,
   slots: NavConfig["slots"],
@@ -74,7 +59,7 @@ function buildGroupedNavLinkConfig(
   };
 }
 
-function buildGroupedDropdownLinkConfig(
+function buildDropdownLinkConfig(
   item: ResolvedNavItem,
   id: string,
   slots: NavConfig["slots"],
@@ -98,193 +83,6 @@ function buildGroupedDropdownLinkConfig(
   };
 }
 
-function NavEntry({
-  item,
-  rootId,
-  slots,
-  onNavigate,
-  isTopNav,
-  locale,
-  i18n,
-}: {
-  item: ResolvedNavItem;
-  rootId: string;
-  slots: NavConfig["slots"];
-  onNavigate?: (path: string) => void;
-  isTopNav: boolean;
-  locale: string | undefined;
-  i18n: I18nConfig | undefined;
-}) {
-  const hasChildren = Boolean(item.children?.length);
-  const itemId = item.path ? `${rootId}-${item.path}` : rootId;
-  const label = resolveNavText(item.label, locale, i18n);
-  const buttonSlot = slots?.item;
-  const labelSlot = slots?.itemLabel;
-  const iconSlot = slots?.itemIcon;
-  const badgeSlot = slots?.itemBadge;
-
-  const labelSurface = resolveSurfacePresentation({
-    surfaceId: `${itemId}-label`,
-    implementationBase: {
-      flex: 1,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
-    },
-    componentSurface: labelSlot,
-    itemSurface: item.slots?.itemLabel,
-  });
-  const iconSurface = resolveSurfacePresentation({
-    surfaceId: `${itemId}-icon`,
-    implementationBase: {
-      display: "inline-flex",
-      alignItems: "center",
-      flexShrink: 0,
-    },
-    componentSurface: iconSlot,
-    itemSurface: item.slots?.itemIcon,
-  });
-  const badgeSurface = resolveSurfacePresentation({
-    surfaceId: `${itemId}-badge`,
-    implementationBase: {
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      minWidth: "1.25rem",
-      height: "1.25rem",
-      borderRadius: "var(--sn-radius-full, 9999px)",
-      background: "var(--sn-color-primary)",
-      color: "var(--sn-color-primary-foreground)",
-    },
-    componentSurface: badgeSlot,
-    itemSurface: item.slots?.itemBadge,
-  });
-
-  if (!item.isVisible) {
-    return null;
-  }
-
-  if (!hasChildren && item.path) {
-    return (
-      <li style={isTopNav ? { position: "relative" } : undefined}>
-        <NavLink
-          config={buildGroupedNavLinkConfig(item, itemId, slots)}
-          onNavigate={onNavigate}
-        />
-      </li>
-    );
-  }
-
-  if (isTopNav && hasChildren) {
-    return (
-      <li style={{ position: "relative" }}>
-        <NavDropdown
-          config={{
-            type: "nav-dropdown",
-            id: itemId,
-            label,
-            icon: item.icon,
-            current: item.isActive,
-            disabled: item.isDisabled,
-            align: "start",
-            trigger: "click",
-            slots: {
-              trigger: slots?.item ?? item.slots?.item,
-              triggerLabel: slots?.itemLabel ?? item.slots?.itemLabel,
-              triggerIcon: slots?.itemIcon ?? item.slots?.itemIcon,
-              panel: slots?.dropdown,
-              item: slots?.dropdownItem,
-              itemLabel: slots?.dropdownItemLabel,
-              itemIcon: slots?.dropdownItemIcon,
-            },
-            items:
-              item.children
-                ?.filter((child) => child.isVisible)
-                .map((child, index) =>
-                  buildGroupedDropdownLinkConfig(
-                    child,
-                    `${itemId}-dropdown-item-${index}`,
-                    slots,
-                  ),
-                ) ?? [],
-          }}
-          onNavigate={onNavigate}
-        />
-      </li>
-    );
-  }
-
-  return (
-    <li style={isTopNav ? { position: "relative" } : undefined}>
-      <ButtonControl
-        variant="ghost"
-        disabled={item.isDisabled}
-        ariaCurrent={item.isActive && item.path ? "page" : undefined}
-        onClick={() => {
-          if (item.isDisabled) {
-            return;
-          }
-
-          if (item.path) {
-            onNavigate?.(item.path);
-          }
-        }}
-        surfaceId={`${itemId}-button`}
-        surfaceConfig={buttonSlot}
-        itemSurfaceConfig={item.slots?.item}
-        activeStates={item.isActive ? ["current"] : []}
-      >
-        {item.icon ? (
-          <span
-            data-snapshot-id={`${itemId}-icon`}
-            className={iconSurface.className}
-            style={iconSurface.style}
-          >
-            {renderIcon(item.icon, 16)}
-          </span>
-        ) : null}
-        <span
-          data-snapshot-id={`${itemId}-label`}
-          className={labelSurface.className}
-          style={labelSurface.style}
-        >
-          {label}
-        </span>
-        {resolvePositiveBadge(item) ? (
-          <span
-            data-snapshot-id={`${itemId}-badge`}
-            className={badgeSurface.className}
-            style={badgeSurface.style}
-          >
-            {item.resolvedBadge}
-          </span>
-        ) : null}
-        {hasChildren ? <span aria-hidden="true">v</span> : null}
-      </ButtonControl>
-      <SurfaceStyles css={labelSurface.scopedCss} />
-      <SurfaceStyles css={iconSurface.scopedCss} />
-      <SurfaceStyles css={badgeSurface.scopedCss} />
-
-      {!isTopNav && hasChildren ? (
-        <ul style={{ listStyle: "none", margin: 0, paddingLeft: "0.75rem" }}>
-          {item.children?.map((child, index) => (
-            <NavEntry
-              key={child.path ?? `${itemId}-child-${index}`}
-              item={child}
-              rootId={`${itemId}-child-${index}`}
-              slots={slots}
-              onNavigate={onNavigate}
-              isTopNav={false}
-              locale={locale}
-              i18n={i18n}
-            />
-          ))}
-        </ul>
-      ) : null}
-    </li>
-  );
-}
-
 interface NavComponentProps {
   config: NavConfig;
   pathname?: string;
@@ -293,11 +91,9 @@ interface NavComponentProps {
 }
 
 /**
- * Grouped navigation component for manifest app shells.
- *
- * Renders either `navigation.items` or a composable nav template, resolves translated labels at
- * render time, applies canonical slot/state styling, and optionally renders logo and user-menu
- * surfaces.
+ * Manifest adapter — resolves config refs, i18n, useNav state, and delegates
+ * rendering to `NavBase` while injecting manifest-aware sub-components
+ * (NavLink, NavDropdown, NavLogo, NavUserMenu) through render callbacks.
  */
 export function Nav({
   config,
@@ -313,10 +109,7 @@ export function Nav({
   const effectiveLogo =
     config.logo ??
     (manifest?.app?.title
-      ? {
-          text: manifest.app.title,
-          path: manifest.app.home ?? "/",
-        }
+      ? { text: manifest.app.title, path: manifest.app.home ?? "/" }
       : undefined);
 
   useEffect(() => {
@@ -324,7 +117,6 @@ export function Nav({
       setCurrentPath(pathname);
       return;
     }
-
     setCurrentPath(window.location.pathname);
     const handler = () => setCurrentPath(window.location.pathname);
     window.addEventListener("popstate", handler);
@@ -332,42 +124,20 @@ export function Nav({
   }, [pathname]);
 
   const isTopNav = variant === "top-nav";
-  const hasTemplate = Array.isArray((config as Record<string, unknown>).template);
+  const rootId = config.id ?? "nav";
+  const hasTemplate = Array.isArray(
+    (config as Record<string, unknown>).template,
+  );
   const extractedRootConfig = extractSurfaceConfig(config);
   const rootConfig = {
     ...(config.visible !== undefined ? { visible: config.visible } : {}),
     ...(extractedRootConfig ?? {}),
-    ...(config.slots?.root
-      ? {
-          slots: {
-            root: config.slots.root,
-          },
-        }
-      : {}),
+    ...(config.slots?.root ? { slots: { root: config.slots.root } } : {}),
   };
-  const listSurface = resolveSurfacePresentation({
-    surfaceId: `${config.id ?? "nav"}-list`,
-    implementationBase: {
-      listStyle: "none",
-      margin: 0,
-      padding: 0,
-      display: isTopNav ? "flex" : "block",
-      gap: isTopNav ? "0.25rem" : undefined,
-      alignItems: isTopNav ? "center" : undefined,
-      flexWrap: isTopNav ? "nowrap" : undefined,
-      overflow: "visible",
-    },
-    componentSurface: config.slots?.list,
-  });
-  const toggleSurface = resolveSurfacePresentation({
-    surfaceId: `${config.id ?? "nav"}-toggle`,
-    implementationBase: {},
-    componentSurface: config.slots?.toggle,
-    activeStates: isCollapsed ? ["active"] : [],
-  });
 
   if (hasTemplate) {
-    const templateItems = (config as Record<string, unknown>).template as ComponentConfig[];
+    const templateItems = (config as Record<string, unknown>)
+      .template as ComponentConfig[];
     return (
       <ComponentWrapper type="nav" config={rootConfig}>
         <nav aria-label="Main navigation">
@@ -382,180 +152,226 @@ export function Nav({
     );
   }
 
+  // Adapt resolved manifest items to NavBase's simpler shape. We render real
+  // labels here (post i18n resolution) and pass them into the base — the base
+  // never sees TRefs.
+  const baseItems: NavBaseItem[] = items
+    .filter((item) => item.isVisible)
+    .map((item) => ({
+      label: resolveNavText(item.label, activeLocale, manifest?.raw.i18n),
+      path: item.path,
+      icon: item.icon,
+      badge: resolvePositiveBadge(item),
+      disabled: item.isDisabled,
+      active: item.isActive,
+      visible: item.isVisible,
+      children: item.children
+        ?.filter((c) => c.isVisible)
+        .map((c) => ({
+          label: resolveNavText(c.label, activeLocale, manifest?.raw.i18n),
+          path: c.path,
+          icon: c.icon,
+          badge: resolvePositiveBadge(c),
+          disabled: c.isDisabled,
+          active: c.isActive,
+          visible: c.isVisible,
+        })),
+    }));
+
+  const baseLogo: NavBaseLogo | undefined = effectiveLogo
+    ? {
+        text: resolveNavText(
+          effectiveLogo.text,
+          activeLocale,
+          manifest?.raw.i18n,
+        ),
+        src: effectiveLogo.src,
+        path: effectiveLogo.path,
+      }
+    : undefined;
+
+  // Map resolved items by index so renderItem can look up the original
+  // ResolvedNavItem (with raw slots, children references) when emitting
+  // manifest-aware sub-components.
+  const visibleResolved = items.filter((item) => item.isVisible);
+
   return (
     <ComponentWrapper type="nav" config={rootConfig}>
-      <nav
-        aria-label="Main navigation"
-        data-variant={variant}
-        data-collapsed={isCollapsed ? "true" : undefined}
-        style={!isTopNav ? {
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-          padding: "var(--sn-spacing-sm, 0.5rem)",
-          gap: "var(--sn-spacing-xs, 0.25rem)",
-        } : {
-          display: "flex",
-          alignItems: "center",
-          gap: "var(--sn-spacing-xs, 0.25rem)",
-        }}
-      >
-        {!isTopNav ? (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "var(--sn-nav-header-justify, space-between)",
-            marginBottom: "var(--sn-spacing-xs, 0.25rem)",
-          }}>
-            {effectiveLogo ? (
-              <NavLogo
-                config={{
-                  type: "nav-logo",
-                  id: `${config.id ?? "nav"}-brand`,
-                  src: effectiveLogo.src,
-                  text: resolveNavText(
-                    effectiveLogo.text,
-                    activeLocale,
-                    manifest?.raw.i18n,
-                  ),
-                  path: effectiveLogo.path,
-                  slots: {
-                    root: config.slots?.brand,
-                    icon: config.slots?.brandIcon,
-                    label: config.slots?.brandLabel,
-                  },
-                }}
-                onNavigate={onNavigate}
-              />
-            ) : null}
-            {config.collapsible !== false ? (
-              <ButtonControl
-                variant="ghost"
-                onClick={toggle}
-                surfaceId={`${config.id ?? "nav"}-toggle`}
-                surfaceConfig={toggleSurface.resolvedConfigForWrapper}
-                activeStates={isCollapsed ? ["active"] : []}
-                ariaLabel={isCollapsed ? "Expand navigation" : "Collapse navigation"}
-              >
-                {renderIcon(isCollapsed ? "panel-right" : "panel-left", 16)}
-              </ButtonControl>
-            ) : null}
-          </div>
-        ) : (
-          <>
-            {effectiveLogo ? (
-              <NavLogo
-                config={{
-                  type: "nav-logo",
-                  id: `${config.id ?? "nav"}-brand`,
-                  src: effectiveLogo.src,
-                  text: resolveNavText(
-                    effectiveLogo.text,
-                    activeLocale,
-                    manifest?.raw.i18n,
-                  ),
-                  path: effectiveLogo.path,
-                  slots: {
-                    root: config.slots?.brand,
-                    icon: config.slots?.brandIcon,
-                    label: config.slots?.brandLabel,
-                  },
-                }}
-                onNavigate={onNavigate}
-              />
-            ) : null}
-          </>
-        )}
-
-        <ul
-          data-snapshot-id={`${config.id ?? "nav"}-list`}
-          className={listSurface.className}
-          style={listSurface.style}
-        >
-          {items.filter((item) => item.isVisible).map((item, index) => (
-            <NavEntry
-              key={item.path ?? `${config.id ?? "nav"}-item-${index}`}
-              item={item}
-              rootId={`${config.id ?? "nav"}-item-${index}`}
-              slots={config.slots}
+      <NavBase
+        id={rootId}
+        variant={variant}
+        items={baseItems}
+        logo={baseLogo}
+        collapsible={config.collapsible !== false}
+        pathname={currentPath}
+        onNavigate={onNavigate}
+        slots={config.slots as Record<string, Record<string, unknown>> | undefined}
+        collapsed={isCollapsed}
+        onToggleCollapse={toggle}
+        renderLogo={(logoArg) =>
+          logoArg ? (
+            <NavLogo
+              config={{
+                type: "nav-logo",
+                id: `${rootId}-brand`,
+                src: logoArg.src,
+                text: logoArg.text,
+                path: logoArg.path,
+                slots: {
+                  root: config.slots?.brand,
+                  icon: config.slots?.brandIcon,
+                  label: config.slots?.brandLabel,
+                },
+              }}
               onNavigate={onNavigate}
-              isTopNav={isTopNav}
-              locale={activeLocale}
-              i18n={manifest?.raw.i18n}
             />
-          ))}
-        </ul>
+          ) : null
+        }
+        renderItem={(_baseItem, index, defaultNode) => {
+          const item = visibleResolved[index];
+          if (!item) return null;
+          const itemId = item.path
+            ? `${rootId}-item-${index}-${item.path}`
+            : `${rootId}-item-${index}`;
+          const hasChildren = Boolean(item.children?.length);
 
-        {user && config.userMenu ? (
-          isTopNav ? (
-            <div style={{ marginLeft: "auto" }}>
-              <NavUserMenu
-                config={{
-                  type: "nav-user-menu",
-                  id: `${config.id ?? "nav"}-user-menu`,
-                  mode: "compact",
-                  showAvatar:
-                    typeof config.userMenu === "object"
-                      ? config.userMenu.showAvatar
-                      : undefined,
-                  showEmail:
-                    typeof config.userMenu === "object"
-                      ? config.userMenu.showEmail
-                      : undefined,
-                  showName: false,
-                  items:
-                    typeof config.userMenu === "object"
-                      ? config.userMenu.items
-                      : undefined,
-                  slots: {
-                    trigger: config.slots?.userMenuTrigger,
-                    avatar: config.slots?.userAvatar,
-                    panel: config.slots?.userMenu,
-                    item: config.slots?.userMenuItem,
-                  },
-                }}
-              />
-            </div>
-          ) : (
-            <div data-sn-nav-user="" style={{
-              marginTop: "auto",
-              borderTop: "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
-              paddingTop: "var(--sn-spacing-sm, 0.5rem)",
-            }}>
-              <NavUserMenu
-                config={{
-                  type: "nav-user-menu",
-                  id: `${config.id ?? "nav"}-user-menu`,
-                  mode: "full",
-                  showAvatar:
-                    typeof config.userMenu === "object"
-                      ? config.userMenu.showAvatar
-                      : undefined,
-                  showEmail:
-                    typeof config.userMenu === "object"
-                      ? config.userMenu.showEmail
-                      : undefined,
-                  showName: true,
-                  items:
-                    typeof config.userMenu === "object"
-                      ? config.userMenu.items
-                      : undefined,
-                  slots: {
-                    trigger: config.slots?.userMenuTrigger,
-                    avatar: config.slots?.userAvatar,
-                    panel: config.slots?.userMenu,
-                    item: config.slots?.userMenuItem,
-                  },
-                }}
-              />
-            </div>
-          )
-        ) : null}
+          if (!hasChildren && item.path) {
+            return (
+              <li
+                key={item.path ?? `${rootId}-item-${index}`}
+                style={isTopNav ? { position: "relative" } : undefined}
+              >
+                <NavLink
+                  config={buildNavLinkConfig(item, itemId, config.slots)}
+                  onNavigate={onNavigate}
+                />
+              </li>
+            );
+          }
 
-        <FloatingMenuStyles />
-        <SurfaceStyles css={toggleSurface.scopedCss} />
-        <SurfaceStyles css={listSurface.scopedCss} />
-      </nav>
+          if (isTopNav && hasChildren) {
+            return (
+              <li
+                key={item.path ?? `${rootId}-item-${index}`}
+                style={{ position: "relative" }}
+              >
+                <NavDropdown
+                  config={{
+                    type: "nav-dropdown",
+                    id: itemId,
+                    label: resolveNavText(
+                      item.label,
+                      activeLocale,
+                      manifest?.raw.i18n,
+                    ),
+                    icon: item.icon,
+                    current: item.isActive,
+                    disabled: item.isDisabled,
+                    align: "start",
+                    trigger: "click",
+                    slots: {
+                      trigger: config.slots?.item ?? item.slots?.item,
+                      triggerLabel:
+                        config.slots?.itemLabel ?? item.slots?.itemLabel,
+                      triggerIcon:
+                        config.slots?.itemIcon ?? item.slots?.itemIcon,
+                      panel: config.slots?.dropdown,
+                      item: config.slots?.dropdownItem,
+                      itemLabel: config.slots?.dropdownItemLabel,
+                      itemIcon: config.slots?.dropdownItemIcon,
+                    },
+                    items:
+                      item.children
+                        ?.filter((child) => child.isVisible)
+                        .map((child, ci) =>
+                          buildDropdownLinkConfig(
+                            child,
+                            `${itemId}-dropdown-item-${ci}`,
+                            config.slots,
+                          ),
+                        ) ?? [],
+                  }}
+                  onNavigate={onNavigate}
+                />
+              </li>
+            );
+          }
+
+          // Fallback: nested sidebar with children — keep default rendering.
+          return defaultNode;
+        }}
+        footer={
+          user && config.userMenu ? (
+            isTopNav ? (
+              <div style={{ marginLeft: "auto" }}>
+                <NavUserMenu
+                  config={{
+                    type: "nav-user-menu",
+                    id: `${rootId}-user-menu`,
+                    mode: "compact",
+                    showAvatar:
+                      typeof config.userMenu === "object"
+                        ? config.userMenu.showAvatar
+                        : undefined,
+                    showEmail:
+                      typeof config.userMenu === "object"
+                        ? config.userMenu.showEmail
+                        : undefined,
+                    showName: false,
+                    items:
+                      typeof config.userMenu === "object"
+                        ? config.userMenu.items
+                        : undefined,
+                    slots: {
+                      trigger: config.slots?.userMenuTrigger,
+                      avatar: config.slots?.userAvatar,
+                      panel: config.slots?.userMenu,
+                      item: config.slots?.userMenuItem,
+                    },
+                  }}
+                />
+              </div>
+            ) : (
+              <div
+                data-sn-nav-user=""
+                style={{
+                  marginTop: "auto",
+                  borderTop:
+                    "var(--sn-border-thin, 1px) solid var(--sn-color-border)",
+                  paddingTop: "var(--sn-spacing-sm, 0.5rem)",
+                }}
+              >
+                <NavUserMenu
+                  config={{
+                    type: "nav-user-menu",
+                    id: `${rootId}-user-menu`,
+                    mode: "full",
+                    showAvatar:
+                      typeof config.userMenu === "object"
+                        ? config.userMenu.showAvatar
+                        : undefined,
+                    showEmail:
+                      typeof config.userMenu === "object"
+                        ? config.userMenu.showEmail
+                        : undefined,
+                    showName: true,
+                    items:
+                      typeof config.userMenu === "object"
+                        ? config.userMenu.items
+                        : undefined,
+                    slots: {
+                      trigger: config.slots?.userMenuTrigger,
+                      avatar: config.slots?.userAvatar,
+                      panel: config.slots?.userMenu,
+                      item: config.slots?.userMenuItem,
+                    },
+                  }}
+                />
+              </div>
+            )
+          ) : null
+        }
+      />
     </ComponentWrapper>
   );
 }

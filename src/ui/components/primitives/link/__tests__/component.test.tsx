@@ -59,6 +59,26 @@ describe("Link", () => {
     expect(navigate).toHaveBeenCalledWith("/dashboard");
   });
 
+  it("emits visible hover, focus, and active styles for default links", () => {
+    const { container } = render(
+      <Link
+        config={{
+          type: "link",
+          id: "docs-link",
+          text: "Docs",
+          to: "/docs",
+          variant: "default",
+        }}
+      />,
+    );
+
+    const css = container.innerHTML;
+    expect(css).toContain('[data-snapshot-id="docs-link-root"]:hover');
+    expect(css).toContain("text-decoration: underline");
+    expect(css).toContain('[data-snapshot-id="docs-link-root"]:active');
+    expect(css).toContain('[data-snapshot-id="docs-link-root"]:focus-visible');
+  });
+
   it("applies canonical current-state styling for the root surface", () => {
     render(
       <Link

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import hljs from "highlight.js/lib/core";
 import typescript from "highlight.js/lib/languages/typescript";
@@ -17,6 +18,7 @@ import java from "highlight.js/lib/languages/java";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
+import { Icon } from "../../../icons/icon";
 import "./hljs-theme.css";
 
 // Register languages once at module level
@@ -61,7 +63,7 @@ export interface CodeBlockBaseProps {
   /** Inline style applied to the root element. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, titleBar, titleMeta, title, language, copyButton, body, pre, lineNumbers, code). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -91,7 +93,14 @@ export function CodeBlockBase({
   slots,
 }: CodeBlockBaseProps) {
   const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rootId = id ?? "code-block";
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   // Compute highlighted HTML
   const highlightedHtml = useMemo(() => {
@@ -112,13 +121,14 @@ export function CodeBlockBase({
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     } catch {
       // Fallback: silent fail
     }
   }
 
-  const hasTitleBar = title || language || showCopy;
+  const hasTitleBar = title || language;
   const copyLabel = copied ? "Copied!" : "Copy";
 
   const rootSurface = resolveSurfacePresentation({
@@ -192,22 +202,23 @@ export function CodeBlockBase({
     surfaceId: `${rootId}-copyButton`,
     implementationBase: {
       fontSize: "xs",
-      paddingY: "xs",
-      paddingX: "sm",
       borderRadius: "sm",
-      border: "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-      bg: "var(--sn-color-card, #ffffff)",
-      color: "var(--sn-color-foreground, #111827)",
+      bg: "transparent",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
       cursor: "pointer",
       transition: "colors",
       hover: {
         bg: "var(--sn-color-accent, var(--sn-color-muted, #f3f4f6))",
+        color: "var(--sn-color-foreground, #111827)",
       },
       focus: {
         ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
       },
       style: {
-        whiteSpace: "nowrap",
+        position: "absolute",
+        top: "var(--sn-spacing-sm, 0.5rem)",
+        right: "var(--sn-spacing-sm, 0.5rem)",
+        zIndex: 1,
         flexShrink: 0,
       },
     },
@@ -218,6 +229,7 @@ export function CodeBlockBase({
     implementationBase: {
       overflow: "auto",
       style: {
+        position: "relative",
         maxHeight,
       },
     },
@@ -310,19 +322,6 @@ export function CodeBlockBase({
             )}
           </div>
 
-          {showCopy && (
-            <ButtonControl
-              type="button"
-              onClick={() => void handleCopy()}
-              testId="code-block-copy"
-              variant="ghost"
-              size="sm"
-              surfaceId={`${rootId}-copyButton`}
-              surfaceConfig={copyButtonSurface.resolvedConfigForWrapper}
-            >
-              {copyLabel}
-            </ButtonControl>
-          )}
         </div>
       )}
 
@@ -332,6 +331,21 @@ export function CodeBlockBase({
         className={bodySurface.className}
         style={bodySurface.style}
       >
+        {showCopy && (
+          <ButtonControl
+            type="button"
+            onClick={() => void handleCopy()}
+            testId="code-block-copy"
+            variant="ghost"
+            size="icon"
+            surfaceId={`${rootId}-copyButton`}
+            surfaceConfig={copyButtonSurface.resolvedConfigForWrapper}
+            ariaLabel={copyLabel}
+            title={copyLabel}
+          >
+            <Icon name={copied ? "check" : "copy"} size={14} />
+          </ButtonControl>
+        )}
         <pre
           data-snapshot-id={`${rootId}-pre`}
           className={preSurface.className}

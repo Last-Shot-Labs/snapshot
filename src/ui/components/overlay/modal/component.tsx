@@ -58,6 +58,10 @@ function ModalSurface({
     primitiveOptions,
   );
   const previousOpenRef = useRef<boolean | undefined>(undefined);
+  const payloadRef = useRef(payload);
+  payloadRef.current = payload;
+  const resultRef = useRef(result);
+  resultRef.current = result;
   const footer = (resolvedConfig.footer ?? config.footer) as ModalConfig["footer"];
 
   useEffect(() => {
@@ -66,8 +70,8 @@ function ModalSurface({
 
     const lifecycleContext = {
       overlay: {
-        payload,
-        result,
+        payload: payloadRef.current,
+        result: resultRef.current,
       },
     };
 
@@ -92,7 +96,7 @@ function ModalSurface({
         void execute(config.onClose as never, lifecycleContext);
       }
     }
-  }, [config.onClose, config.onOpen, execute, isOpen, payload, result]);
+  }, [config.onClose, config.onOpen, execute, isOpen]);
 
   const footerActions: ModalBaseFooterAction[] | undefined =
     footer?.actions && footer.actions.length > 0

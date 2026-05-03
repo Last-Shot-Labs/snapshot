@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -34,7 +35,7 @@ export interface NavDropdownBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, trigger, triggerLabel, triggerIcon, panel, item, itemLabel, itemIcon). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   /** React children rendered as dropdown panel content. */
   children?: ReactNode;
 }

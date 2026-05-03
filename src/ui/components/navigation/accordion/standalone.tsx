@@ -1,6 +1,14 @@
 'use client';
 
-import { useCallback, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  useCallback,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import {
@@ -21,7 +29,7 @@ export interface AccordionBaseItem {
   /** Content rendered inside the expanded panel. */
   content: ReactNode;
   /** Per-item slot overrides. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface AccordionBaseProps {
@@ -44,7 +52,7 @@ export interface AccordionBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -62,16 +70,16 @@ function Chevron({ open }: { open: boolean }) {
     <span
       aria-hidden="true"
       style={{
-        display: "inline-block",
+        display: "inline-flex",
+        alignItems: "center",
         transition:
           "transform var(--sn-duration-normal, 250ms) var(--sn-ease-out, ease-out)",
         transform: open ? "rotate(180deg)" : "rotate(0deg)",
-        fontSize: "var(--sn-font-size-sm, 0.875rem)",
         color: "var(--sn-color-muted-foreground, #6b7280)",
         flexShrink: 0,
       }}
     >
-      {"\u25be"}
+      {renderIcon("chevron-down", 16)}
     </span>
   );
 }
@@ -105,6 +113,48 @@ export function AccordionBase({
 }: AccordionBaseProps) {
   const [openIndices, setOpenIndices] = useState<Set<number>>(() =>
     resolveDefaultOpen(defaultOpen),
+  );
+
+  const triggerRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const focusTrigger = useCallback((targetIndex: number) => {
+    const enabled = triggerRefs.current
+      .map((el, i) => ({ el, i }))
+      .filter((entry) => entry.el && !entry.el.disabled);
+    if (enabled.length === 0) return;
+    const total = enabled.length;
+    const wrapped = ((targetIndex % total) + total) % total;
+    enabled[wrapped]?.el?.focus();
+  }, []);
+
+  const handleHeaderKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+      const enabledIndexes = triggerRefs.current
+        .map((el, i) => ({ el, i }))
+        .filter((entry) => entry.el && !entry.el.disabled)
+        .map((entry) => entry.i);
+      const ordinal = enabledIndexes.indexOf(index);
+      if (ordinal === -1) return;
+      switch (event.key) {
+        case "ArrowDown":
+          event.preventDefault();
+          focusTrigger(ordinal + 1);
+          break;
+        case "ArrowUp":
+          event.preventDefault();
+          focusTrigger(ordinal - 1);
+          break;
+        case "Home":
+          event.preventDefault();
+          focusTrigger(0);
+          break;
+        case "End":
+          event.preventDefault();
+          focusTrigger(enabledIndexes.length - 1);
+          break;
+      }
+    },
+    [focusTrigger],
   );
 
   const toggle = useCallback(
@@ -282,8 +332,13 @@ export function AccordionBase({
               id={`${rootId}-header-${index}`}
               data-testid={`accordion-header-${index}`}
               onClick={() => !isDisabled && toggle(index)}
+              onKeyDown={(e) => handleHeaderKeyDown(e, index)}
               disabled={isDisabled}
               ariaExpanded={isOpen}
+              ariaControls={`${rootId}-content-${index}`}
+              buttonRef={(el) => {
+                triggerRefs.current[index] = el;
+              }}
               surfaceId={`${rootId}-trigger-${index}`}
               surfaceConfig={triggerSurface.resolvedConfigForWrapper}
               activeStates={[

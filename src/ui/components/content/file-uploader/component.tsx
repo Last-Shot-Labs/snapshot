@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useActionExecutor } from "../../../actions/executor";
 import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import {
@@ -30,8 +31,15 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
     description: config.description,
   });
   const fileIdCounterRef = useRef(0);
+  const activeXhrRef = useRef<XMLHttpRequest | null>(null);
   const [files, setFiles] = useState<UploadFileEntry[]>([]);
   const rootId = config.id ?? "file-uploader";
+
+  useEffect(() => {
+    return () => {
+      activeXhrRef.current?.abort();
+    };
+  }, []);
 
   const label = resolveOptionalPrimitiveValue(
     resolvedConfig.label,
@@ -78,6 +86,7 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
         const formData = new FormData();
         formData.append("file", entry.file);
         const xhr = new XMLHttpRequest();
+        activeXhrRef.current = xhr;
 
         await new Promise<void>((resolve, reject) => {
           xhr.upload.addEventListener("progress", (event) => {
@@ -101,6 +110,8 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
           xhr.open(request.method, endpoint);
           xhr.send(formData);
         });
+
+        activeXhrRef.current = null;
 
         setFiles((prev) =>
           prev.map((file) =>
@@ -178,7 +189,7 @@ export function FileUploader({ config }: { config: FileUploaderConfig }) {
       files={files}
       className={config.className}
       style={config.style}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

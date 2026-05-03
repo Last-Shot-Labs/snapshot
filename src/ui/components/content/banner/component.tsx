@@ -1,6 +1,7 @@
 'use client';
 
 import { ComponentRenderer } from "../../../manifest/renderer";
+import type { SlotOverrides } from "../../_base/types";
 import type { ComponentConfig } from "../../../manifest/types";
 import { BannerBase } from "./standalone";
 import type { BannerConfig } from "./types";
@@ -23,7 +24,7 @@ export function Banner({ config }: { config: BannerConfig }) {
       background={config.background}
       className={config.className}
       style={config.style}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     >
       {config.children?.map((child, index) => (
         <ComponentRenderer

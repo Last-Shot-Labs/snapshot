@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -31,7 +32,7 @@ export interface NavLinkBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, label, icon, badge). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -154,6 +155,7 @@ export function NavLinkBase({
         className={rootSurface.className}
         style={rootSurface.style}
         aria-current={active ? "page" : undefined}
+        tabIndex={disabled ? -1 : undefined}
         aria-disabled={disabled || undefined}
       >
         {icon ? (

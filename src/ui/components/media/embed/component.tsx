@@ -1,6 +1,7 @@
 'use client';
 
 import { useResolveFrom } from "../../../context/hooks";
+import type { SlotOverrides } from "../../_base/types";
 import {
   resolveOptionalPrimitiveValue,
   usePrimitiveValueOptions,
@@ -38,7 +39,7 @@ export function Embed({ config }: { config: EmbedSchemaConfig }) {
       title={title}
       className={config.className}
       style={config.style}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

@@ -77,21 +77,19 @@ export type ExitAnimationConfig = z.infer<typeof exitAnimationSchema>;
 /**
  * Base config fields shared by all config-driven components.
  * Every component schema should extend this via `.merge()` or `.extend()`.
+ *
+ * Mirrors the surface fields from `_base/schema.ts/extendedBaseComponentSchema`
+ * and `manifest/schema.ts/baseComponentConfigSchema`. Keep these three in sync
+ * when adding a new universally-applicable field.
  */
 export const baseComponentConfigSchema = z.object({
-  /** Unique identifier for this component instance. Used for from-ref publishing. */
   id: z.string().optional(),
-  /** Optional token overrides applied to the wrapper. */
   tokens: z.record(z.string()).optional(),
-  /** String expression that controls visibility. */
   visibleWhen: z.string().optional(),
-  /** Whether the component is visible. Can be a FromRef for conditional rendering. */
   visible: orFromRef(z.boolean()).optional(),
-  /** CSS class name(s) to apply to the component wrapper. */
   className: z.string().optional(),
-  /** Inline style overrides as a CSS property map. */
   style: z.record(z.union([z.string(), z.number()])).optional(),
-  /** Sticky positioning. */
+  span: z.union([z.number().int().min(1).max(12), z.record(z.number())]).optional(),
   sticky: z
     .union([
       z.boolean(),
@@ -103,17 +101,36 @@ export const baseComponentConfigSchema = z.object({
         .strict(),
     ])
     .optional(),
-  /** Explicit z-index override. */
   zIndex: componentZIndexSchema.optional(),
-  /** Enter animation config. */
   animation: componentAnimationSchema.optional(),
-  /** Glass effect shorthand. */
   glass: z.boolean().optional(),
-  /** Background fill shorthand. */
   background: componentBackgroundSchema.optional(),
-  /** Transition shorthand. */
   transition: componentTransitionSchema.optional(),
+  /** Slot overrides for sub-elements. Components extend this with named slots. */
+  slots: z.record(z.record(z.unknown())).optional(),
+  /** Hover state styling overrides. */
+  hover: hoverConfigSchema.optional(),
+  /** Focus state styling overrides. */
+  focus: focusConfigSchema.optional(),
+  /** Active state styling overrides. */
+  active: activeConfigSchema.optional(),
+  /** Exit animation when the component is removed. */
+  exitAnimation: exitAnimationSchema.optional(),
 });
 
 /** Base config type inferred from the schema. */
 export type BaseComponentConfig = z.infer<typeof baseComponentConfigSchema>;
+
+/**
+ * Typed slot override map. Use the slot-name union as the type parameter for
+ * each component to constrain accepted slot names; defaults to free-form
+ * `string` keys for callers who haven't migrated yet.
+ *
+ * @example
+ * ```ts
+ * type ButtonSlots = SlotOverrides<"root" | "label" | "icon">;
+ * ```
+ */
+export type SlotOverrides<TSlot extends string = string> = Partial<
+  Record<TSlot, Record<string, unknown>>
+>;

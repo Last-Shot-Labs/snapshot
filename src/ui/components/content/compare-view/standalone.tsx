@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties, RefObject } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useCallback, useMemo, useRef } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -110,7 +111,7 @@ export interface CompareViewBaseProps {
   /** Inline style applied to the root element. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Internal ComparePane ─────────────────────────────────────────────────────
@@ -132,7 +133,7 @@ function ComparePane({
   showLineNumbers: boolean;
   paneRef: RefObject<HTMLDivElement | null>;
   onScroll: (side: "left" | "right") => void;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const paneId = `${rootId}-${side}`;
   const paneSurface = resolveSurfacePresentation({

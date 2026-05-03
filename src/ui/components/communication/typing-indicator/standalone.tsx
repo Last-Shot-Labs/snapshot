@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 
@@ -8,7 +9,7 @@ import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 const BOUNCE_KEYFRAMES = `
 @keyframes sn-typing-bounce {
   0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-4px); }
+  30% { transform: translateY(-0.25rem); }
 }
 `;
 
@@ -36,7 +37,7 @@ export interface TypingIndicatorBaseProps {
   /** Inline style applied to the root element. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, dots, dot, text). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -100,7 +101,7 @@ export function TypingIndicatorBase({
     implementationBase: {
       display: "inline-flex",
       alignItems: "center",
-      gap: "var(--sn-spacing-2xs, 2px)",
+      gap: "var(--sn-spacing-2xs, 0.125rem)",
     },
     componentSurface: slots?.dots,
   });
@@ -109,8 +110,8 @@ export function TypingIndicatorBase({
     implementationBase: {
       display: "inline-block",
       style: {
-        width: 5,
-        height: 5,
+        width: "0.3125rem",
+        height: "0.3125rem",
         borderRadius: "var(--sn-radius-full, 9999px)",
         backgroundColor: "var(--sn-color-muted-foreground, #6b7280)",
       },
@@ -150,8 +151,6 @@ export function TypingIndicatorBase({
             data-snapshot-id={`${rootId}-dot`}
             className={dotSurface.className}
             style={{
-              width: 5,
-              height: 5,
               ...(dotSurface.style ?? {}),
               animation: "sn-typing-bounce 1.2s infinite",
               animationDelay: `${i * 0.15}s`,

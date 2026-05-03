@@ -8,6 +8,7 @@ import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { renderIcon } from "../../../icons/render";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { ButtonControl } from "../../forms/button";
@@ -30,14 +31,14 @@ export interface FloatingMenuBaseItem {
   /** Callback fired when item is selected. */
   onAction?: () => void;
   /** Slot overrides for this item. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface FloatingMenuBaseSeparator {
   /** Entry type discriminator. */
   type: "separator";
   /** Slot overrides for this separator. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface FloatingMenuBaseLabel {
@@ -46,7 +47,7 @@ export interface FloatingMenuBaseLabel {
   /** Pre-resolved label text. */
   text: string;
   /** Slot overrides for this label. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export type FloatingMenuBaseEntry =
@@ -78,7 +79,7 @@ export interface FloatingMenuBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, trigger, panel, item, separator, label, itemLabel, itemIcon). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────

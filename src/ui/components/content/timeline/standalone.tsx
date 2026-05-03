@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { Icon } from "../../../icons/icon";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -19,7 +20,7 @@ export interface TimelineItemEntry {
   /** Color token name for the dot marker (e.g. "primary", "success"). */
   color?: string;
   /** Slot overrides scoped to this individual timeline item. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   /** Custom ReactNode content rendered below description. Hidden in compact variant. */
   children?: ReactNode;
 }
@@ -46,7 +47,7 @@ export interface TimelineBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { TypingIndicator } from "../component";
 
 vi.mock("../../../../context/hooks", () => ({
@@ -9,6 +9,10 @@ vi.mock("../../../../context/hooks", () => ({
 }));
 
 describe("TypingIndicator", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("renders typing text for multiple users", () => {
     render(
       <TypingIndicator
@@ -29,5 +33,21 @@ describe("TypingIndicator", () => {
     expect(screen.getByTestId("typing-text").textContent).toContain(
       "Ada and Lin are typing",
     );
+  });
+
+  it("normalizes string users and filters invalid entries", () => {
+    render(
+      <TypingIndicator
+        config={{
+          type: "typing-indicator",
+          users: [" Ada ", "", { name: "Grace" }, { label: "Ignored" }] as never,
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId("typing-text").textContent).toBe(
+      "Ada and Grace are typing",
+    );
+    expect(screen.queryByText(/undefined/)).toBeNull();
   });
 });

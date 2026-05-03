@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect, type CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { Icon } from "../../../icons/icon";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -34,7 +35,7 @@ export interface GifPickerBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -94,7 +95,7 @@ export function GifPickerBase({
 
   return (
     <>
-      <div data-snapshot-component="gif-picker" data-testid="gif-picker" data-snapshot-id={rootId} className={rootSurface.className} style={rootSurface.style}>
+      <div data-snapshot-component="gif-picker" data-testid="gif-picker" data-snapshot-id={rootId} aria-label="GIF picker" className={rootSurface.className} style={rootSurface.style}>
         <div data-snapshot-id={`${rootId}-searchSection`} className={searchSectionSurface.className} style={searchSectionSurface.style}>
           <div data-snapshot-id={`${rootId}-searchShell`} className={searchShellSurface.className} style={searchShellSurface.style}>
             <span aria-hidden="true" data-snapshot-id={`${rootId}-searchIcon`} className={searchIconSurface.className} style={searchIconSurface.style}><Icon name="search" size={14} /></span>

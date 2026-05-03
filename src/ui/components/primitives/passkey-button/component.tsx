@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState, type CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom, useSubscribe } from "../../../context";
 import { useManifestRuntime, useRouteRuntime } from "../../../manifest/runtime";
@@ -30,7 +31,7 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
       manifest?.auth?.screenOptions &&
       typeof manifest.auth.screenOptions === "object"
         ? (
-            manifest.auth.screenOptions as Record<string, Record<string, unknown>>
+            manifest.auth.screenOptions as SlotOverrides
           )[routeId]
         : undefined,
     [manifest?.auth?.screenOptions, routeId],
@@ -124,7 +125,7 @@ export function PasskeyButton({ config }: { config: PasskeyButtonConfig }) {
       id={config.id}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

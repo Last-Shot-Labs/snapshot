@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
 import { useComponentData } from "../../_base/use-component-data";
@@ -65,7 +66,7 @@ export function AuditLog({ config }: { config: AuditLogConfig }) {
       pagination={pageSize}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as React.CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

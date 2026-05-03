@@ -29,7 +29,7 @@ export interface AutoEmptyStateConfig extends Record<string, unknown> {
     label?: string;
     action: ActionConfig | ActionConfig[];
     icon?: string;
-    variant?: "default" | "primary" | "outline";
+    variant?: "default" | "outline";
   };
   slots?: {
     root?: Record<string, unknown>;
@@ -171,11 +171,7 @@ export function AutoEmptyState({
             type="button"
             surfaceId={`${rootId}-action`}
             surfaceConfig={actionSurface.resolvedConfigForWrapper}
-            variant={
-              config.action.variant === "primary"
-                ? "default"
-                : config.action.variant ?? "outline"
-            }
+            variant={config.action.variant ?? "outline"}
             size="sm"
             onClick={() => void execute(config.action!.action)}
           >

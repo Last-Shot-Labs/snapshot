@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -8,7 +9,7 @@ import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 const SIZE_MAP = {
   xs: {
     fontSize: "var(--sn-font-size-xs, 0.625rem)",
-    padding: "var(--sn-spacing-2xs, 1px) var(--sn-spacing-xs, 0.25rem)",
+    padding: "var(--sn-spacing-2xs, 0.0625rem) var(--sn-spacing-xs, 0.25rem)",
   },
   sm: {
     fontSize: "var(--sn-font-size-xs, 0.75rem)",
@@ -92,7 +93,7 @@ export interface BadgeBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, dot, icon, label). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────

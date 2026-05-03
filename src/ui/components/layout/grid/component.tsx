@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { useResponsiveValue } from "../../../hooks/use-breakpoint";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -99,7 +100,7 @@ export function Grid({ config }: { config: GridConfig }) {
       rows={config.rows}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     >
       {config.children.map((child, index) => {
         return (

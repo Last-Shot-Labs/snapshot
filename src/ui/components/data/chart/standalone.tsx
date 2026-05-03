@@ -1,6 +1,7 @@
 'use client';
 
 import { cloneElement, useMemo, type ReactElement, type ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import {
   Area,
@@ -101,7 +102,7 @@ export interface ChartBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, legend, legendItem, tooltip, axis, grid). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -120,6 +121,18 @@ const USD_FORMATTER = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
+const USD_COMPACT_FORMATTER = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+const NUMBER_COMPACT_FORMATTER = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 function getSeriesColor(color: string | undefined, index: number): string {
   return color ?? DEFAULT_COLORS[index % DEFAULT_COLORS.length]!;
 }
@@ -132,10 +145,30 @@ function formatNumericValue(
   value: number,
   options?: { divisor?: number },
 ): string | number {
-  if (shouldFormatAsCurrency(options?.divisor)) {
-    return USD_FORMATTER.format(value);
+  const divisor = options?.divisor;
+  const v = divisor && divisor > 0 ? value / divisor : value;
+  if (shouldFormatAsCurrency(divisor)) {
+    return USD_FORMATTER.format(v);
   }
-  return Number.isInteger(value) ? value : Number(value.toFixed(2));
+  return Number.isInteger(v) ? v : Number(v.toFixed(2));
+}
+
+/**
+ * Compact format for axis ticks — `$12K` / `$1.2M` / `1.2K`. Keeps tooltips
+ * verbose (`$12,019.04`) but prevents the Y-axis labels from being clipped
+ * by the fixed axis width.
+ */
+function formatCompactValue(
+  value: number,
+  options?: { divisor?: number },
+): string {
+  const divisor = options?.divisor;
+  const v = divisor && divisor > 0 ? value / divisor : value;
+  if (shouldFormatAsCurrency(divisor)) {
+    return USD_COMPACT_FORMATTER.format(v);
+  }
+  if (Math.abs(v) >= 1000) return NUMBER_COMPACT_FORMATTER.format(v);
+  return Number.isInteger(v) ? String(v) : v.toFixed(2);
 }
 
 function formatChartValue(
@@ -252,10 +285,10 @@ export function ChartBase({
     surfaceId: `${rootId}-root`,
     implementationBase: {
       backgroundColor: "var(--sn-color-card, #ffffff)",
-      borderRadius: "var(--sn-radius-md, 6px)",
+      borderRadius: "var(--sn-radius-md, 0.375rem)",
       border:
         "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-      padding: "var(--sn-spacing-md, 12px)",
+      padding: "var(--sn-spacing-md, 0.75rem)",
     } as Record<string, unknown>,
     componentSurface: className || style ? { className, style } : undefined,
     itemSurface: slots?.root,
@@ -279,7 +312,7 @@ export function ChartBase({
       backgroundColor: "var(--sn-color-card, #ffffff)",
       border:
         "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-      borderRadius: "var(--sn-radius-md, 6px)",
+      borderRadius: "var(--sn-radius-md, 0.375rem)",
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
       padding: "var(--sn-spacing-sm, 0.5rem)",
     } as Record<string, unknown>,
@@ -343,23 +376,24 @@ export function ChartBase({
         style={tooltipSurface.style}
       >
         {label !== undefined ? <div>{String(label)}</div> : null}
-        {payload.map((entry, index) => (
-          <div key={`${entry.name ?? "series"}-${index}`}>
-            <span style={{ color: entry.color }}>
-              {entry.name ?? "Series"}:
-            </span>{" "}
-            <span>
-              {String(
-                formatChartValue(
-                  entry.value,
-                  typeof entry.dataKey === "string"
-                    ? { divisor: seriesConfigByKey.get(entry.dataKey)?.divisor }
-                    : undefined,
-                ),
-              )}
-            </span>
-          </div>
-        ))}
+        {payload.map((entry, index) => {
+          // Pie/donut data is reshaped to use a synthetic "value" dataKey, so a
+          // direct seriesConfigByKey lookup misses. Fall back to the first
+          // series' divisor (pie/donut only ever has one series).
+          const seriesKey =
+            typeof entry.dataKey === "string" ? entry.dataKey : undefined;
+          const divisor =
+            (seriesKey ? seriesConfigByKey.get(seriesKey)?.divisor : undefined) ??
+            series[0]?.divisor;
+          return (
+            <div key={`${entry.name ?? "series"}-${index}`}>
+              <span style={{ color: entry.color }}>
+                {entry.name ?? "Series"}:
+              </span>{" "}
+              <span>{String(formatChartValue(entry.value, { divisor }))}</span>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -394,7 +428,7 @@ export function ChartBase({
               style={{
                 width: "0.75rem",
                 height: "0.75rem",
-                borderRadius: "9999px",
+                borderRadius: "var(--sn-radius-full, 9999px)",
                 backgroundColor: entry.color,
               }}
             />
@@ -426,11 +460,15 @@ export function ChartBase({
 
   function renderChart() {
     if (chartType === "pie" || chartType === "donut") {
+      // `_color` on a row overrides the series-level palette for that slice —
+      // useful when each datum has its own brand color (e.g. categories).
       const pieData = rows.map((row, index) => ({
         ...row,
         name: String(row[xKey] ?? `Item ${index + 1}`),
         value: Number(row[series[0]?.key ?? "value"] ?? 0),
-        fill: getSeriesColor(series[0]?.color, index),
+        fill:
+          (typeof row._color === "string" ? row._color : undefined) ??
+          getSeriesColor(series[0]?.color, index),
       }));
 
       return (
@@ -446,6 +484,7 @@ export function ChartBase({
                 dataKey="value"
                 nameKey="name"
                 paddingAngle={chartType === "donut" ? 3 : 0}
+                isAnimationActive={false}
                 onClick={(entry) =>
                   chartClick(entry as unknown as Record<string, unknown>)
                 }
@@ -518,7 +557,9 @@ export function ChartBase({
                 tickLine={false}
                 width={40}
                 tickFormatter={(value) =>
-                  String(formatChartValue(value, { divisor: yAxisDivisor }))
+                  typeof value === "number" && Number.isFinite(value)
+                    ? formatCompactValue(value, { divisor: yAxisDivisor })
+                    : String(formatChartValue(value, { divisor: yAxisDivisor }))
                 }
               />
               {series[1]?.key ? (
@@ -637,15 +678,22 @@ export function ChartBase({
                   tick={axisStyle}
                   axisLine={false}
                   tickLine={false}
-                  width={40}
+                  width={64}
                   tickFormatter={(value) =>
-                    String(formatChartValue(value, { divisor: yAxisDivisor }))
+                    typeof value === "number" && Number.isFinite(value)
+                      ? formatCompactValue(value, { divisor: yAxisDivisor })
+                      : String(formatChartValue(value, { divisor: yAxisDivisor }))
                   }
                 />
               </>
             ) : null}
             <Tooltip
               content={tooltipContent}
+              cursor={
+                chartType === "bar"
+                  ? { fill: "var(--sn-color-muted, #f3f4f6)", opacity: 0.35 }
+                  : { stroke: "var(--sn-color-border, #e5e7eb)", strokeDasharray: "4 4" }
+              }
               formatter={(value, _name, item) =>
                 formatChartValue(value, {
                   divisor:
@@ -661,6 +709,11 @@ export function ChartBase({
             {series.map((s, index) => {
               const color = getSeriesColor(s.color, index);
               if (chartType === "bar") {
+                // Per-row `_color` overrides the series fill — useful for
+                // sign-coded bars (positive green, negative red, etc.).
+                const hasRowColors = rows.some(
+                  (r) => typeof r._color === "string",
+                );
                 return (
                   <Bar
                     key={s.key}
@@ -668,13 +721,25 @@ export function ChartBase({
                     name={getSeriesLabel(s.label)}
                     fill={color}
                     radius={4}
+                    isAnimationActive={false}
                     onClick={(entry) =>
                       chartClick(
                         entry as unknown as Record<string, unknown>,
                         s.key,
                       )
                     }
-                  />
+                  >
+                    {hasRowColors
+                      ? rows.map((row, i) => (
+                          <Cell
+                            key={`cell-${i}`}
+                            fill={
+                              typeof row._color === "string" ? row._color : color
+                            }
+                          />
+                        ))
+                      : null}
+                  </Bar>
                 );
               }
               if (chartType === "area") {
@@ -735,10 +800,10 @@ export function ChartBase({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            gap: "var(--sn-spacing-sm, 8px)",
-            marginBottom: "var(--sn-spacing-sm, 8px)",
-            padding: "var(--sn-spacing-sm, 8px) var(--sn-spacing-md, 12px)",
-            borderRadius: "var(--sn-radius-md, 6px)",
+            gap: "var(--sn-spacing-sm, 0.5rem)",
+            marginBottom: "var(--sn-spacing-sm, 0.5rem)",
+            padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+            borderRadius: "var(--sn-radius-md, 0.375rem)",
             backgroundColor: "var(--sn-color-secondary, #f3f4f6)",
           }}
         >

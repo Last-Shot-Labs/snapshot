@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useManifestRuntime } from "../../../manifest/runtime";
 import { ComponentRenderer } from "../../../manifest/renderer";
 import { ComponentGroupBase } from "./standalone";
@@ -42,7 +43,7 @@ export function ComponentGroup({ config }: { config: ComponentGroupConfig }) {
       id={config.id}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     >
       {groupDef.components.map((componentConfig, index) => {
         let resolved = componentConfig;

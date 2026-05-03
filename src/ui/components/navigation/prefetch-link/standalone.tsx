@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useEffect, useRef } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -36,7 +37,7 @@ export interface PrefetchLinkBaseProps {
   /** Inline style applied to the root anchor. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -68,10 +69,12 @@ export function PrefetchLinkBase({
   slots,
 }: PrefetchLinkBaseProps) {
   const ref = useRef<HTMLAnchorElement>(null);
+  const onPrefetchRef = useRef(onPrefetch);
+  onPrefetchRef.current = onPrefetch;
   const rootId = id ?? "prefetch-link";
 
   const doPrefetch = () => {
-    onPrefetch?.(to);
+    onPrefetchRef.current?.(to);
   };
 
   // Viewport prefetch via IntersectionObserver.

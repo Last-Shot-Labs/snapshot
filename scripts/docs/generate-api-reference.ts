@@ -186,8 +186,59 @@ function getDocString(symbol: ts.Symbol, checker: ts.TypeChecker): string {
   const target = resolveSymbol(symbol, checker);
   return (
     ts.displayPartsToString(target.getDocumentationComment(checker)).trim() ||
-    "No JSDoc description."
+    getFallbackDocString(target, checker)
   );
+}
+
+function splitIdentifier(name: string): string {
+  return name
+    .replace(/ConfigSchema$/, " config schema")
+    .replace(/Schema$/, " schema")
+    .replace(/BaseProps$/, " base props")
+    .replace(/Props$/, " props")
+    .replace(/Config$/, " config")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[-_]/g, " ")
+    .toLowerCase();
+}
+
+function getFallbackDocString(
+  symbol: ts.Symbol,
+  checker: ts.TypeChecker,
+): string {
+  const name = symbol.getName();
+  const readableName = splitIdentifier(name);
+  const kind = getDeclarationKind(symbol, checker);
+
+  if (/BaseProps$/.test(name)) {
+    return `Props accepted by the ${name.replace(/BaseProps$/, "Base")} standalone component.`;
+  }
+
+  if (/Props$/.test(name)) {
+    return `Props accepted by the ${name.replace(/Props$/, "")} component.`;
+  }
+
+  if (/ConfigSchema$|Schema$/.test(name)) {
+    return `Zod schema for validating ${readableName}.`;
+  }
+
+  if (/Config$/.test(name)) {
+    return `Manifest configuration type for ${readableName}.`;
+  }
+
+  if (/^use[A-Z]/.test(name)) {
+    return `React hook exported by the Snapshot UI runtime.`;
+  }
+
+  if (kind === "function") {
+    return `Function exported by the Snapshot UI runtime.`;
+  }
+
+  if (kind === "interface" || kind === "typealias") {
+    return `Type definition exported by the Snapshot UI runtime.`;
+  }
+
+  return `Exported ${kind} from the Snapshot UI runtime.`;
 }
 
 function getSourcePath(symbol: ts.Symbol, checker: ts.TypeChecker): string {

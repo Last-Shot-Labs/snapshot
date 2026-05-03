@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useResolveFrom } from "../../../context/hooks";
 import { useWizard } from "./hook";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
@@ -55,7 +56,7 @@ function resolveSteps(
       options: resolveStaticFieldOptions(field as { options?: unknown[] }, primitiveOptions) as Array<{ label: string; value: string }> | undefined,
       validate: field.validate as WizardFieldConfig["validate"],
       validation: field.validation as WizardFieldConfig["validation"],
-      slots: field.slots as Record<string, Record<string, unknown>> | undefined,
+      slots: field.slots as SlotOverrides | undefined,
     })),
     slots: step.slots,
   }));

@@ -1,6 +1,7 @@
 "use client";
 
 import type { MouseEvent as ReactMouseEvent } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Icon } from "../../../icons/index";
@@ -55,7 +56,7 @@ export interface MultiSelectFieldProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 function StandaloneSelectedPill({
@@ -67,7 +68,7 @@ function StandaloneSelectedPill({
   rootId: string;
   item: { value: string; label: string };
   onRemove: (value: string, event: ReactMouseEvent<HTMLButtonElement>) => void;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const pillId = `${rootId}-pill-${item.value}`;
   const pillSurface = resolveSurfacePresentation({
@@ -87,7 +88,7 @@ function StandaloneSelectedPill({
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
-        maxWidth: "120px",
+        maxWidth: "var(--sn-pill-max-width, 120px)",
       },
     },
     componentSurface: slots?.pill,
@@ -165,7 +166,7 @@ function StandaloneMultiSelectOptionRow({
   isChecked: boolean;
   isDisabled: boolean;
   onToggle: (value: string) => void;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const optionId = `${rootId}-option-${option.value}`;
   const optionSurface = resolveSurfacePresentation({
@@ -203,8 +204,8 @@ function StandaloneMultiSelectOptionRow({
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        width: 16,
-        height: 16,
+        width: "var(--sn-checkbox-size, 16px)",
+        height: "var(--sn-checkbox-size, 16px)",
         borderRadius: "var(--sn-radius-xs, 0.125rem)",
         border: `var(--sn-border-default, 1px) solid ${
           isChecked
@@ -452,7 +453,7 @@ export function MultiSelectField({
         ring: "var(--sn-ring-color, var(--sn-color-primary, #2563eb))",
       },
       style: {
-        minHeight: 38,
+        minHeight: "var(--sn-input-height, 38px)",
         boxSizing: "border-box",
       },
     },
@@ -503,7 +504,7 @@ export function MultiSelectField({
         left: 0,
         right: 0,
         marginTop: "var(--sn-spacing-2xs, 0.125rem)",
-        maxHeight: 240,
+        maxHeight: "var(--sn-dropdown-max-height, 240px)",
       },
     },
     componentSurface: slots?.dropdown,
@@ -788,3 +789,7 @@ export function MultiSelectField({
     </>
   );
 }
+
+// Backwards-compat alias — canonical name is MultiSelectBase.
+export const MultiSelectBase = MultiSelectField;
+export type MultiSelectBaseProps = MultiSelectFieldProps;

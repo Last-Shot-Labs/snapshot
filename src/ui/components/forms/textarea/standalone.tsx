@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
+import { useSnapshotId } from "../../_base/use-snapshot-id";
 import type { CSSProperties, FocusEventHandler, KeyboardEventHandler, MouseEventHandler } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -50,7 +52,7 @@ export interface TextareaFieldProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 /**
@@ -132,7 +134,7 @@ export function TextareaField({
     [onBlur, validate, value],
   );
 
-  const rootId = id ?? "textarea";
+  const rootId = useSnapshotId(id, "textarea");
   const fieldId = id ? `sn-textarea-${id}` : undefined;
   const errorMessage = errorText ?? (touched ? validationError : undefined);
   const helperId = fieldId
@@ -309,3 +311,7 @@ export function TextareaField({
     </div>
   );
 }
+
+// Backwards-compat alias — canonical name is TextareaBase.
+export const TextareaBase = TextareaField;
+export type TextareaBaseProps = TextareaFieldProps;

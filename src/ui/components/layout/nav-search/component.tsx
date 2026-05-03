@@ -22,7 +22,7 @@ export function NavSearch({ config }: { config: NavSearchConfig }) {
 
   const handleSearch = (value: string) => {
     if (config.onSearch) {
-      void execute(config.onSearch as Parameters<typeof execute>[0]);
+      void execute(config.onSearch as Parameters<typeof execute>[0], { value });
     }
   };
 

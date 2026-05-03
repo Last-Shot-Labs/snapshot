@@ -2,11 +2,21 @@ import React from "react";
 import { ICON_PATHS } from "./paths";
 
 const ICON_ALIASES: Record<string, string> = {
+  "bar-chart-3": "bar-chart-2",
+  blocks: "layout-grid",
+  "book-open": "file-text",
+  "file-down": "download",
+  "flask-conical": "activity",
   pencil: "edit",
+  "search-x": "search",
   trash: "trash-2",
   "table-properties": "layout-list",
   "gantt-chart": "bar-chart",
 };
+
+const FALLBACK_ICON_PATH =
+  ICON_PATHS.info ??
+  '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>';
 
 /** Props for the {@link Icon} component. */
 export interface IconProps {
@@ -27,9 +37,9 @@ export interface IconProps {
  * Renders a Lucide icon by name using inline SVG.
  *
  * Icons are resolved from a static lookup table ({@link ICON_PATHS}) that
- * ships ~100 commonly used Lucide icons. If the requested name is not found
- * the component renders the raw `name` string as a text fallback so the UI
- * never silently swallows a missing icon.
+ * ships ~100 commonly used Lucide icons. If the requested name is not found,
+ * the component renders a neutral fallback icon so icon-only controls never
+ * leak raw registry names into the UI.
  *
  * All icons use a 24x24 viewBox with stroke-based rendering
  * (`fill="none"`, `stroke="currentColor"`, `strokeWidth={2}`).
@@ -60,20 +70,7 @@ export function Icon({
   className,
   label,
 }: IconProps): React.JSX.Element {
-  const svgContent = ICON_PATHS[normalizeIconName(name)];
-
-  if (!svgContent) {
-    return (
-      <span
-        className={className}
-        style={{ fontSize: size, color, lineHeight: 1 }}
-        aria-hidden={!label}
-        aria-label={label}
-      >
-        {name}
-      </span>
-    );
-  }
+  const svgContent = ICON_PATHS[normalizeIconName(name)] ?? FALLBACK_ICON_PATH;
 
   return (
     <svg

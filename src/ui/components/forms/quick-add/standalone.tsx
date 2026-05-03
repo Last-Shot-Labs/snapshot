@@ -1,6 +1,7 @@
 "use client";
 
 import type { KeyboardEvent } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useCallback, useState } from "react";
 import type { CSSProperties } from "react";
 import { Icon } from "../../../icons/index";
@@ -34,7 +35,7 @@ export interface QuickAddFieldProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 /**
@@ -235,3 +236,7 @@ export function QuickAddField({
     </>
   );
 }
+
+// Backwards-compat alias — canonical name is QuickAddBase.
+export const QuickAddBase = QuickAddField;
+export type QuickAddBaseProps = QuickAddFieldProps;

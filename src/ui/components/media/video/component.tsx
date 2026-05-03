@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { VideoBase } from "./standalone";
 import type { VideoSchemaConfig } from "./types";
 
@@ -19,7 +20,7 @@ export function Video({ config }: { config: VideoSchemaConfig }) {
       muted={config.muted ?? config.autoPlay}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

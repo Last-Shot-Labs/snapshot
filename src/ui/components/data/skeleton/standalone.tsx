@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 
@@ -39,7 +40,7 @@ export interface SkeletonBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, shape, line, title, body). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -144,6 +145,8 @@ export function SkeletonBase({
       <div
         data-snapshot-component="skeleton"
         data-testid="skeleton"
+        role="status"
+        aria-label="Loading"
         className={rootSurface.className}
         style={rootSurface.style}
       >
@@ -173,6 +176,8 @@ export function SkeletonBase({
       <div
         data-snapshot-component="skeleton"
         data-testid="skeleton"
+        role="status"
+        aria-label="Loading"
         className={rootSurface.className}
         style={rootSurface.style}
       >
@@ -198,6 +203,8 @@ export function SkeletonBase({
       <div
         data-snapshot-component="skeleton"
         data-testid="skeleton"
+        role="status"
+        aria-label="Loading"
         className={rootSurface.className}
         style={rootSurface.style}
       >

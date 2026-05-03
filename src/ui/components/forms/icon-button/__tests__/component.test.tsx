@@ -41,6 +41,9 @@ describe("IconButton", () => {
     const button = screen.getByRole("button", { name: "Search" });
     expect(button.className).toContain("icon-button-root-class");
     expect(button.className).toContain("icon-button-root-slot");
+    expect(button.getAttribute("data-size")).toBe("icon");
+    expect(button.getAttribute("style")).toContain("padding: 0");
+    expect(button.getAttribute("style")).toContain("width: var(--sn-icon-btn-md, 2.5rem)");
     fireEvent.click(button);
 
     expect(screen.getByTestId("icon-button-icon").textContent).toBe("search");

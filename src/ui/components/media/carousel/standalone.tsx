@@ -9,6 +9,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 import { ButtonControl } from "../../forms/button";
@@ -33,7 +34,7 @@ export interface CarouselBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -218,9 +219,17 @@ export function CarouselBase({
     <div
       data-snapshot-component="carousel"
       data-snapshot-id={`${rootId}-root`}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={id ? `${id} carousel` : "Carousel"}
+      tabIndex={0}
       className={rootSurface.className}
       onPointerEnter={stopAutoPlay}
       onPointerLeave={startAutoPlay}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+        if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+      }}
       style={rootSurface.style as CSSProperties | undefined}
     >
       <div data-snapshot-id={`${rootId}-viewport`} className={viewportSurface.className} style={viewportSurface.style}>
@@ -228,6 +237,9 @@ export function CarouselBase({
           {children.map((child, index) => (
             <div
               key={`slide-${index}`}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`Slide ${index + 1} of ${count}`}
               data-snapshot-id={`${rootId}-slide-${index}`}
               className={slideSurfaces[index]?.className}
               style={slideSurfaces[index]?.style}

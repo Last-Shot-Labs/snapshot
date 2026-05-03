@@ -85,7 +85,7 @@ The root of `snapshot.manifest.json`. Only `routes` is required.
 | `subApps` | `Record<string, { mountPath: string, manifest: string \| ..., inherit: object }>` | — | No |
 | `shortcuts` | `Record<string, { label: string, action: ... \| ...[], disabled: boolean \| PolicyExpr }>` | — | No |
 | `componentGroups` | `Record<string, { description: string, components: { type: string }[] }>` | — | No |
-| `routes` | `object[]` | — | **Yes** |
+| `routes` | `object[]` | `[{"id":"home","path":"/"}]` | No |
 
 ---
 
@@ -1781,8 +1781,8 @@ Each overlay is one of three types:
 | `size` | `"sm" \| "md" \| "lg" \| "xl" \| "full"` | — | No |
 | `confirmLabel` | `string \| FromRef` | `"Confirm"` | No |
 | `cancelLabel` | `string \| FromRef` | `"Cancel"` | No |
-| `confirmVariant` | `"default" \| "secondary" \| "destructive" \| "ghost"` | `"default"` | No |
-| `cancelVariant` | `"default" \| "secondary" \| "destructive" \| "ghost"` | `"secondary"` | No |
+| `confirmVariant` | `"default" \| "secondary" \| "destructive" \| "outline" \| "ghost"` | `"default"` | No |
+| `cancelVariant` | `"default" \| "secondary" \| "destructive" \| "outline" \| "ghost"` | `"secondary"` | No |
 | `confirmAction` | `object \| ... \| object \| ...[]` | — | No |
 | `cancelAction` | `object \| ... \| object \| ...[]` | — | No |
 | `dismissOnConfirm` | `boolean` | `true` | No |

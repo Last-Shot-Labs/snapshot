@@ -24,6 +24,7 @@ import {
 } from "./api/guest";
 import {
   getApiLibraryByKind,
+  getApiLibraryByKindById,
   postApiLibraryByKind,
 } from "./api/library";
 import {
@@ -378,8 +379,157 @@ function CreateLibraryItemModal({ kind, open, onClose, onCreated }: {
   );
 }
 
+function LibraryItemPreviewModal({
+  kind,
+  itemId,
+  open,
+  onClose,
+}: {
+  kind: "clue-sets" | "categories" | "clues";
+  itemId: string | null;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const { data, isLoading, error } = useQuery({
+    enabled: open && Boolean(itemId),
+    queryKey: ["library", kind, itemId],
+    queryFn: () => getApiLibraryByKindById(kind, itemId!),
+  });
+
+  const record = (data ?? null) as Record<string, unknown> | null;
+  const title = (record?.title as string) || "Preview";
+  const kindLabel =
+    kind === "clue-sets" ? "Clue Set" : kind === "categories" ? "Category" : "Clue";
+
+  // Pull common clue fields if present.
+  const prompt =
+    (record?.prompt as string | undefined) ??
+    (record?.question as string | undefined) ??
+    (record?.body as string | undefined);
+  const answer =
+    (record?.answer as string | undefined) ??
+    (record?.solution as string | undefined);
+  const workflowStatus = record?.workflowStatus as string | undefined;
+  const visibility = record?.visibility as string | undefined;
+
+  return (
+    <ModalBase
+      open={open}
+      onClose={onClose}
+      title={`${kindLabel}: ${title}`}
+      size="md"
+      footer={[{ label: "Close", variant: "outline", onClick: onClose }]}
+    >
+      <div
+        style={{
+          padding: "1rem 1.25rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+        }}
+      >
+        {isLoading && <SkeletonBase height="120px" />}
+        {error && (
+          <AlertBase
+            variant="destructive"
+            title="Failed to load"
+            description={String(error)}
+          />
+        )}
+        {!isLoading && !error && record && (
+          <>
+            {(workflowStatus || visibility) && (
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                {workflowStatus && (
+                  <BadgeBase
+                    label={workflowStatus}
+                    variant={
+                      workflowStatus === "published" || workflowStatus === "approved"
+                        ? "success"
+                        : workflowStatus === "rejected"
+                          ? "destructive"
+                          : "secondary"
+                    }
+                  />
+                )}
+                {visibility && (
+                  <BadgeBase
+                    label={visibility}
+                    variant={visibility === "public" ? "success" : "secondary"}
+                  />
+                )}
+              </div>
+            )}
+            {prompt && (
+              <div>
+                <div
+                  style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                    color: "var(--sn-color-muted-foreground)",
+                    marginBottom: "0.25rem",
+                  }}
+                >
+                  Prompt
+                </div>
+                <div
+                  style={{
+                    fontSize: "1rem",
+                    lineHeight: 1.6,
+                    color: "var(--sn-color-foreground)",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {prompt}
+                </div>
+              </div>
+            )}
+            {answer && (
+              <div>
+                <div
+                  style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                    color: "var(--sn-color-muted-foreground)",
+                    marginBottom: "0.25rem",
+                  }}
+                >
+                  Answer
+                </div>
+                <div
+                  style={{
+                    fontSize: "1rem",
+                    lineHeight: 1.6,
+                    color: "var(--sn-color-foreground)",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {answer}
+                </div>
+              </div>
+            )}
+            {!prompt && !answer && (
+              <EmptyStateBase
+                icon="file-question"
+                title="No preview content"
+                description="This record has no prompt or answer fields to preview."
+                size="sm"
+              />
+            )}
+          </>
+        )}
+      </div>
+    </ModalBase>
+  );
+}
+
 function LibraryKindView({ kind, label }: { kind: "clue-sets" | "categories" | "clues"; label: string }) {
   const [createOpen, setCreateOpen] = useState(false);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const qc = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
@@ -447,6 +597,10 @@ function LibraryKindView({ kind, label }: { kind: "clue-sets" | "categories" | "
           searchPlaceholder={`Search ${label.toLowerCase()}…`}
           hoverable
           striped
+          onRowClick={(row) => {
+            const id = row.id as string | undefined;
+            if (id) setPreviewId(id);
+          }}
         />
       )}
 
@@ -455,6 +609,13 @@ function LibraryKindView({ kind, label }: { kind: "clue-sets" | "categories" | "
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onCreated={() => setCreateOpen(false)}
+      />
+
+      <LibraryItemPreviewModal
+        kind={kind}
+        itemId={previewId}
+        open={previewId !== null}
+        onClose={() => setPreviewId(null)}
       />
     </div>
   );

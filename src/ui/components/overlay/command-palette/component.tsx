@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { usePublish, useResolveFrom, useSubscribe } from "../../../context/hooks";
 import { useActionExecutor } from "../../../actions/executor";
 import { useComponentData } from "../../_base/use-component-data";
@@ -393,7 +394,7 @@ export function CommandPalette({ config }: { config: CommandPaletteConfig }) {
       shortcutHint={shortcut}
       className={config.className}
       style={config.style as React.CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

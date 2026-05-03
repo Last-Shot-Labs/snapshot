@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom } from "../../../context/hooks";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
@@ -98,7 +99,7 @@ export function ConfirmDialogComponent({
       size={config.size ?? "sm"}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

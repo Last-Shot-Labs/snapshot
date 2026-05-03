@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useCallback, type CSSProperties, type ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { Icon } from "../../../icons/icon";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -42,12 +43,12 @@ export interface CommentSectionBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function CommentSkeleton({ rootId, index, slots }: { rootId: string; index: number; slots?: Record<string, Record<string, unknown>> }) {
+function CommentSkeleton({ rootId, index, slots }: { rootId: string; index: number; slots?: SlotOverrides }) {
   const itemId = `${rootId}-loading-${index}`;
   const itemS = resolveSurfacePresentation({ surfaceId: itemId, implementationBase: { display: "flex", gap: "sm", paddingY: "sm" }, componentSurface: slots?.loadingItem });
   const avS = resolveSurfacePresentation({ surfaceId: `${itemId}-avatar`, implementationBase: { bg: "var(--sn-color-muted, #e5e7eb)", opacity: 0.5, style: { width: 28, height: 28, borderRadius: "var(--sn-radius-full, 9999px)", flexShrink: 0 } }, componentSurface: slots?.loadingAvatar });
@@ -56,7 +57,7 @@ function CommentSkeleton({ rootId, index, slots }: { rootId: string; index: numb
   return (<><div data-snapshot-id={itemId} className={itemS.className} style={itemS.style}><div data-snapshot-id={`${itemId}-avatar`} className={avS.className} style={avS.style} /><div style={{ flex: 1 }}><div data-snapshot-id={`${itemId}-title`} className={tiS.className} style={tiS.style} /><div data-snapshot-id={`${itemId}-body`} className={boS.className} style={boS.style} /></div></div><SurfaceStyles css={itemS.scopedCss} /><SurfaceStyles css={avS.scopedCss} /><SurfaceStyles css={tiS.scopedCss} /><SurfaceStyles css={boS.scopedCss} /></>);
 }
 
-function CommentItem({ rootId, index, comment, authorNameField, authorAvatarField, contentField, timestampField, showDelete, onDelete, slots }: { rootId: string; index: number; comment: Record<string, unknown>; authorNameField: string; authorAvatarField: string; contentField: string; timestampField: string; showDelete: boolean; onDelete?: (c: Record<string, unknown>) => void; slots?: Record<string, Record<string, unknown>> }) {
+function CommentItem({ rootId, index, comment, authorNameField, authorAvatarField, contentField, timestampField, showDelete, onDelete, slots }: { rootId: string; index: number; comment: Record<string, unknown>; authorNameField: string; authorAvatarField: string; contentField: string; timestampField: string; showDelete: boolean; onDelete?: (c: Record<string, unknown>) => void; slots?: SlotOverrides }) {
   const authorName = String(getNestedField(comment, authorNameField) ?? "Unknown");
   const authorAvatar = getNestedField(comment, authorAvatarField) as string | null;
   const content = String(getNestedField(comment, contentField) ?? "");
@@ -69,7 +70,7 @@ function CommentItem({ rootId, index, comment, authorNameField, authorAvatarFiel
   const avImgS = resolveSurfacePresentation({ surfaceId: `${itemId}-avatarImage`, implementationBase: { style: { width: 32, height: 32, borderRadius: "var(--sn-radius-full, 9999px)", objectFit: "cover", flexShrink: 0 } }, componentSurface: slots?.avatarImage });
   const avFbS = resolveSurfacePresentation({ surfaceId: `${itemId}-avatarFallback`, implementationBase: { display: "flex", alignItems: "center", justifyContent: "center", fontSize: "xs", fontWeight: "semibold", color: "var(--sn-color-primary-foreground, #ffffff)", bg: "var(--sn-color-primary, #2563eb)", style: { width: 32, height: 32, borderRadius: "var(--sn-radius-full, 9999px)", flexShrink: 0 } }, componentSurface: slots?.avatarFallback });
   const colS = resolveSurfacePresentation({ surfaceId: `${itemId}-contentColumn`, implementationBase: { flex: "1", style: { minWidth: 0 } }, componentSurface: slots?.contentColumn });
-  const hdS = resolveSurfacePresentation({ surfaceId: `${itemId}-header`, implementationBase: { display: "flex", alignItems: "baseline", gap: "sm", style: { marginBottom: "var(--sn-spacing-2xs, 2px)" } }, componentSurface: slots?.commentHeader });
+  const hdS = resolveSurfacePresentation({ surfaceId: `${itemId}-header`, implementationBase: { display: "flex", alignItems: "baseline", gap: "sm", style: { marginBottom: "var(--sn-spacing-2xs, 0.125rem)" } }, componentSurface: slots?.commentHeader });
   const auS = resolveSurfacePresentation({ surfaceId: `${itemId}-author`, implementationBase: { fontSize: "sm", fontWeight: "semibold", color: "var(--sn-color-foreground, #111827)" }, componentSurface: slots?.authorName });
   const tsS = resolveSurfacePresentation({ surfaceId: `${itemId}-timestamp`, implementationBase: { fontSize: "xs", color: "var(--sn-color-muted-foreground, #6b7280)" }, componentSurface: slots?.timestamp });
   const delS = resolveSurfacePresentation({ surfaceId: `${itemId}-deleteButton`, implementationBase: { display: "flex", alignItems: "center", color: "var(--sn-color-muted-foreground, #9ca3af)", borderRadius: "sm", cursor: "pointer", hover: { bg: "color-mix(in oklch, var(--sn-color-destructive, #ef4444) 10%, transparent)", color: "var(--sn-color-destructive, #ef4444)" }, focus: { ring: "var(--sn-ring-color, var(--sn-color-destructive, #ef4444))" }, style: { marginLeft: "auto", background: "none", border: "none", padding: "var(--sn-spacing-xs, 0.25rem)", transition: "all var(--sn-duration-fast, 150ms) var(--sn-ease-default, ease)" } }, componentSurface: slots?.deleteButton });

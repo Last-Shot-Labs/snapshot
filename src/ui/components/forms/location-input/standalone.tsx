@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { Icon } from "../../../icons/index";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -54,7 +55,7 @@ export interface LocationInputFieldProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 function StandaloneLocationResultRow({
@@ -70,7 +71,7 @@ function StandaloneLocationResultRow({
   rootId: string;
   onSelect: (location: LocationResult) => void;
   hasBorder: boolean;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const resultId = `${rootId}-result-${index}`;
   const resultSurface = resolveSurfacePresentation({
@@ -571,3 +572,7 @@ export function LocationInputField({
     </>
   );
 }
+
+// Backwards-compat alias — canonical name is LocationInputBase.
+export const LocationInputBase = LocationInputField;
+export type LocationInputBaseProps = LocationInputFieldProps;

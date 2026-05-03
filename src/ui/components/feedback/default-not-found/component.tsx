@@ -1,7 +1,9 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useResolveFrom } from "../../../context/hooks";
+import { useT } from "../../../i18n/hook";
 import {
   resolveOptionalPrimitiveValue,
   usePrimitiveValueOptions,
@@ -23,15 +25,23 @@ export function DefaultNotFound({ config }: { config: NotFoundConfig }) {
     resolvedConfig.description,
     primitiveOptions,
   );
+  const i18nTitle = useT("feedback.notFound.title");
+  const i18nDescription = useT("feedback.notFound.description");
+  const titleTranslated = i18nTitle !== "feedback.notFound.title";
+  const descriptionTranslated =
+    i18nDescription !== "feedback.notFound.description";
 
   return (
     <DefaultNotFoundBase
-      title={resolvedTitle}
-      description={resolvedDescription}
+      title={resolvedTitle ?? (titleTranslated ? i18nTitle : undefined)}
+      description={
+        resolvedDescription ??
+        (descriptionTranslated ? i18nDescription : undefined)
+      }
       id={config.id}
       className={config.className}
       style={config.style as CSSProperties}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

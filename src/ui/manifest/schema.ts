@@ -7,7 +7,10 @@
  */
 
 import { z } from "zod";
-import { exprRefSchema, fromRefSchema } from "@lastshotlabs/frontend-contract/refs";
+import {
+  exprRefSchema,
+  fromRefSchema,
+} from "@lastshotlabs/frontend-contract/refs";
 import { stateValueConfigSchema } from "@lastshotlabs/frontend-contract/state";
 import { themeConfigSchema } from "../tokens/schema";
 import { workflowConditionSchema } from "../workflows/schema";
@@ -539,10 +542,7 @@ export const errorStateConfigSchema = z
      * `{ label: "..." }` to customise it.
      */
     retry: z
-      .union([
-        z.boolean(),
-        z.object({ label: textWithFromRefSchema }).strict(),
-      ])
+      .union([z.boolean(), z.object({ label: textWithFromRefSchema }).strict()])
       .optional(),
     /** Icon name. Default: "circle-alert". */
     icon: z.string().optional(),
@@ -745,7 +745,9 @@ export const gridConfigSchema = baseComponentConfigSchema
       .optional(),
     template: z.string().optional(),
     rows: z.string().optional(),
-    areas: z.union([z.array(z.string()), responsiveSchema(z.array(z.string()))]).optional(),
+    areas: z
+      .union([z.array(z.string()), responsiveSchema(z.array(z.string()))])
+      .optional(),
     gap: z.union([z.string(), responsiveSchema(z.string())]).optional(),
     children: z.array(z.lazy(() => componentConfigSchema)).default([]),
     background: backgroundConfigSchema.optional(),
@@ -758,10 +760,7 @@ export const spacerConfigSchema = baseComponentConfigSchema
   .extend({
     type: z.literal("spacer"),
     size: z
-      .union([
-        z.enum(["xs", "sm", "md", "lg", "xl", "2xl", "3xl"]),
-        z.string(),
-      ])
+      .union([z.enum(["xs", "sm", "md", "lg", "xl", "2xl", "3xl"]), z.string()])
       .optional(),
     axis: z.enum(["horizontal", "vertical"]).optional(),
     flex: z.boolean().optional(),
@@ -1893,13 +1892,10 @@ export const routeConfigSchema: z.ZodType = z.lazy(() =>
     .strict()
     .refine(
       (data) => {
-        if (data.preset && data.content) {
-          return false;
-        }
-        return Boolean(data.preset || data.content);
+        return !(data.preset && data.content);
       },
       {
-        message: "Route must define either content or preset, but not both.",
+        message: "Route must not define both content and preset.",
       },
     ),
 );
@@ -2089,6 +2085,10 @@ function flattenDeclaredRoutes(
   return flattened;
 }
 
+function defaultManifestRoutes(): z.infer<typeof routeConfigSchema>[] {
+  return [{ id: "home", path: "/" }];
+}
+
 const lazyManifestConfigSchema: z.ZodType = z.lazy(() => manifestConfigSchema);
 
 /**
@@ -2156,7 +2156,12 @@ export const manifestConfigSchema: z.ZodType<Record<string, any>> = z
           .strict(),
       )
       .optional(),
-    routes: z.array(routeConfigSchema).min(1),
+    routes: z
+      .array(routeConfigSchema)
+      .default(defaultManifestRoutes)
+      .transform((routes) =>
+        routes.length > 0 ? routes : defaultManifestRoutes(),
+      ),
   })
   .strict()
   .superRefine((data, ctx) => {

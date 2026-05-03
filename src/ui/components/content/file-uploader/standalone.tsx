@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties, DragEvent, KeyboardEvent } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useCallback, useRef, useState } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -29,7 +30,7 @@ function FileRow({
   index: number;
   rootId: string;
   onRemove: (id: string) => void;
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const itemId = `${rootId}-file-${index}`;
   const statusColor =
@@ -230,7 +231,7 @@ export interface FileUploaderBaseProps {
   /** Inline style applied to the root element. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────���────────────────────────────���──────────────────────

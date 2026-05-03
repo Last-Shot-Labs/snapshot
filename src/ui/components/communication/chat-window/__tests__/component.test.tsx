@@ -13,6 +13,9 @@ const refValues: Record<string, unknown> = {
 const richInputCapture = vi.hoisted(
   () => ({ config: null as Record<string, unknown> | null }),
 );
+const typingIndicatorCapture = vi.hoisted(
+  () => ({ config: null as Record<string, unknown> | null }),
+);
 
 function resolveRefs<T>(value: T): T {
   if (Array.isArray(value)) {
@@ -80,12 +83,16 @@ vi.mock("../../../content/rich-input/component", () => ({
 }));
 
 vi.mock("../../typing-indicator/component", () => ({
-  TypingIndicator: () => <div data-testid="mock-typing-indicator">Typing</div>,
+  TypingIndicator: ({ config }: { config: Record<string, unknown> }) => {
+    typingIndicatorCapture.config = config;
+    return <div data-testid="mock-typing-indicator">Typing</div>;
+  },
 }));
 
 afterEach(() => {
   cleanup();
   richInputCapture.config = null;
+  typingIndicatorCapture.config = null;
 });
 
 describe("ChatWindow", () => {
@@ -140,5 +147,23 @@ describe("ChatWindow", () => {
     expect(richInputCapture.config?.placeholder).toEqual({
       from: "state.chat.placeholder",
     });
+  });
+
+  it("normalizes chat typing user strings before composing the typing indicator", () => {
+    render(
+      <ChatWindow
+        config={{
+          type: "chat-window",
+          data: "GET /api/messages",
+          title: "#general",
+          typingUsers: ["Ada", " Grace ", ""],
+        }}
+      />,
+    );
+
+    expect(typingIndicatorCapture.config?.users).toEqual([
+      { name: "Ada" },
+      { name: "Grace" },
+    ]);
   });
 });

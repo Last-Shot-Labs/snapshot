@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { ButtonControl } from "../button";
 import { InputControl } from "../input";
@@ -65,7 +66,7 @@ export interface WizardFieldConfig {
     message?: string;
   };
   /** Slot overrides for sub-elements (field, label, input, helper, error). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface WizardStepDef {
@@ -80,7 +81,7 @@ export interface WizardStepDef {
   /** Field configurations rendered inside this step. */
   fields: WizardFieldConfig[];
   /** Slot overrides for sub-elements (panel, header, title, stepMarker). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface WizardState {
@@ -137,7 +138,7 @@ export interface WizardBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 const ANIMATION_DURATION_VAR = "var(--sn-duration-normal, 200ms)";
@@ -451,7 +452,7 @@ function StandaloneWizardFieldRenderer({
             className={requiredIndicatorSurface.className}
             style={{
               color: "var(--sn-color-destructive, #ef4444)",
-              marginLeft: "var(--sn-spacing-2xs, 2px)",
+              marginLeft: "var(--sn-spacing-2xs, 0.125rem)",
               ...(requiredIndicatorSurface.style as React.CSSProperties),
             }}
           >
@@ -528,7 +529,7 @@ function StandaloneWizardProgress({
   currentStep: number;
   totalSteps: number;
   steps: WizardStepDef[];
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }) {
   const stepsSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-steps`,
@@ -745,7 +746,7 @@ export function WizardBase({
   const rootSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-root`,
     implementationBase: {
-      borderRadius: "var(--sn-radius-md, 6px)",
+      borderRadius: "var(--sn-radius-md, 0.375rem)",
       border:
         "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
       backgroundColor: "var(--sn-color-card, #fff)",
@@ -757,7 +758,7 @@ export function WizardBase({
   const panelSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-panel`,
     implementationBase: {
-      padding: "var(--sn-spacing-lg, 16px)",
+      padding: "var(--sn-spacing-lg, 1rem)",
       opacity: wizard.isAnimating ? 0 : 1,
       transform: wizard.isAnimating ? "translateX(8px)" : "translateX(0)",
       transition: `opacity ${ANIMATION_DURATION_VAR} ${ANIMATION_EASE_VAR}, transform ${ANIMATION_DURATION_VAR} ${ANIMATION_EASE_VAR}`,
@@ -769,7 +770,7 @@ export function WizardBase({
   const progressSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-progress`,
     implementationBase: {
-      padding: "var(--sn-spacing-md, 12px) var(--sn-spacing-lg, 16px)",
+      padding: "var(--sn-spacing-md, 0.75rem) var(--sn-spacing-lg, 1rem)",
       borderBottom:
         "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
     } as Record<string, unknown>,
@@ -780,8 +781,8 @@ export function WizardBase({
     implementationBase: {
       display: "flex",
       flexDirection: "column",
-      gap: "var(--sn-spacing-xs, 4px)",
-      marginBottom: "var(--sn-spacing-md, 12px)",
+      gap: "var(--sn-spacing-xs, 0.25rem)",
+      marginBottom: "var(--sn-spacing-md, 0.75rem)",
     } as Record<string, unknown>,
     componentSurface: slots?.header,
     itemSurface: currentStep?.slots?.header,
@@ -820,7 +821,7 @@ export function WizardBase({
       fontSize: "var(--sn-font-size-lg, 1.125rem)",
       fontWeight: "var(--sn-font-weight-semibold, 600)",
       color: "var(--sn-color-success, #16a34a)",
-      marginBottom: "var(--sn-spacing-sm, 8px)",
+      marginBottom: "var(--sn-spacing-sm, 0.5rem)",
     } as Record<string, unknown>,
     componentSurface: slots?.completionTitle,
   });
@@ -829,16 +830,16 @@ export function WizardBase({
     implementationBase: {
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
       color: "var(--sn-color-muted-foreground, #6b7280)",
-      marginBottom: "var(--sn-spacing-md, 12px)",
+      marginBottom: "var(--sn-spacing-md, 0.75rem)",
     } as Record<string, unknown>,
     componentSurface: slots?.completionDescription,
   });
   const submitErrorSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-submitError`,
     implementationBase: {
-      padding: "var(--sn-spacing-sm, 8px)",
-      marginTop: "var(--sn-spacing-md, 12px)",
-      borderRadius: "var(--sn-radius-md, 6px)",
+      padding: "var(--sn-spacing-sm, 0.5rem)",
+      marginTop: "var(--sn-spacing-md, 0.75rem)",
+      borderRadius: "var(--sn-radius-md, 0.375rem)",
       backgroundColor: "var(--sn-color-destructive, #ef4444)",
       color: "var(--sn-color-destructive-foreground, #fff)",
       fontSize: "var(--sn-font-size-sm, 0.875rem)",
@@ -853,10 +854,10 @@ export function WizardBase({
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      padding: "var(--sn-spacing-md, 12px) var(--sn-spacing-lg, 16px)",
+      padding: "var(--sn-spacing-md, 0.75rem) var(--sn-spacing-lg, 1rem)",
       borderTop:
         "var(--sn-border-default, 1px) solid var(--sn-color-border, #e5e7eb)",
-      gap: "var(--sn-spacing-sm, 8px)",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
     } as Record<string, unknown>,
     componentSurface: slots?.actions,
   });
@@ -864,7 +865,7 @@ export function WizardBase({
     surfaceId: `${rootId}-actionGroup`,
     implementationBase: {
       display: "flex",
-      gap: "var(--sn-spacing-sm, 8px)",
+      gap: "var(--sn-spacing-sm, 0.5rem)",
     } as Record<string, unknown>,
     componentSurface: slots?.actionGroup,
   });

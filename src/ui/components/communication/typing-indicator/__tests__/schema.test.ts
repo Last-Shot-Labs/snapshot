@@ -11,4 +11,13 @@ describe("typingIndicatorConfigSchema", () => {
 
     expect(result.success).toBe(true);
   });
+
+  it("accepts string user names for lightweight typing state", () => {
+    const result = typingIndicatorConfigSchema.safeParse({
+      type: "typing-indicator",
+      users: ["Ada", "Lin"],
+    });
+
+    expect(result.success).toBe(true);
+  });
 });

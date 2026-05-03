@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 
@@ -20,7 +21,7 @@ export interface DefaultLoadingBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, spinner, label). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -51,7 +52,7 @@ export function DefaultLoadingBase({
     implementationBase: {
       display: "grid",
       gap: "var(--sn-spacing-sm, 0.5rem)",
-      color: "var(--sn-color-muted-foreground, #64748b)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
       style: {
         placeItems: "center",
         padding: "var(--sn-spacing-lg, 1.5rem)",
@@ -68,8 +69,8 @@ export function DefaultLoadingBase({
       style: {
         width: diameter,
         height: diameter,
-        border: "2px solid var(--sn-color-border, #cbd5e1)",
-        borderTopColor: "var(--sn-color-primary, #0f172a)",
+        border: "2px solid var(--sn-color-border, #e5e7eb)",
+        borderTopColor: "var(--sn-color-primary, #2563eb)",
         animation: "sn-spin 0.8s linear infinite",
       },
     },

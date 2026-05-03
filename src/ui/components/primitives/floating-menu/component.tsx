@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { useActionExecutor } from "../../../actions/executor";
 import { useResolveFrom, useSubscribe } from "../../../context";
 import { resolveRuntimeLocale } from "../../../i18n/resolve";
@@ -66,7 +67,7 @@ export function FloatingMenu({ config }: { config: FloatingMenuConfig }) {
       if (entry.type === "separator") {
         return {
           type: "separator",
-          slots: entry.slots as Record<string, Record<string, unknown>>,
+          slots: entry.slots as SlotOverrides,
         };
       }
 
@@ -74,7 +75,7 @@ export function FloatingMenu({ config }: { config: FloatingMenuConfig }) {
         return {
           type: "label",
           text: resolvePrimitiveValue(entry.text, templateOptions),
-          slots: entry.slots as Record<string, Record<string, unknown>>,
+          slots: entry.slots as SlotOverrides,
         };
       }
 
@@ -93,7 +94,7 @@ export function FloatingMenu({ config }: { config: FloatingMenuConfig }) {
               );
             }
           : undefined,
-        slots: entry.slots as Record<string, Record<string, unknown>>,
+        slots: entry.slots as SlotOverrides,
       };
     },
   );
@@ -111,7 +112,7 @@ export function FloatingMenu({ config }: { config: FloatingMenuConfig }) {
       side={config.side}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

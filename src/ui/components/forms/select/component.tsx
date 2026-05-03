@@ -161,28 +161,28 @@ export function Select({ config }: { config: SelectConfig }) {
         void executeEventAction(
           execute,
           config.on?.blur,
-          focusEventPayload(event, { id: config.id, value: "" }),
+          focusEventPayload(event, { id: config.id, value: value ?? defaultValue }),
         );
       }}
       onFocus={(event) => {
         void executeEventAction(
           execute,
           config.on?.focus,
-          focusEventPayload(event, { id: config.id, value: "" }),
+          focusEventPayload(event, { id: config.id, value: value ?? defaultValue }),
         );
       }}
       onClick={(event) => {
         void executeEventAction(
           execute,
           config.on?.click,
-          mouseEventPayload(event, { id: config.id, value: "" }),
+          mouseEventPayload(event, { id: config.id, value: value ?? defaultValue }),
         );
       }}
       onKeyDown={(event) => {
         void executeEventAction(
           execute,
           config.on?.keyDown,
-          keyEventPayload(event, { id: config.id, value: "" }),
+          keyEventPayload(event, { id: config.id, value: value ?? defaultValue }),
         );
       }}
       className={surfaceConfig?.className as string | undefined}

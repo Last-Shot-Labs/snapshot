@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { renderIcon } from "../../../icons/render";
 import { ButtonControl } from "../button";
@@ -19,7 +20,7 @@ export interface ToggleGroupItem {
   /** Whether this individual item is disabled. */
   disabled?: boolean;
   /** Slot overrides for this item's sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 export interface ToggleGroupBaseProps {
@@ -45,7 +46,7 @@ export interface ToggleGroupBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements. */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 const SIZE_MAP: Record<
@@ -53,19 +54,19 @@ const SIZE_MAP: Record<
   { height: string; fontSize: string; padding: string; iconSize: number }
 > = {
   sm: {
-    height: "2rem",
+    height: "var(--sn-toggle-height-sm, 2rem)",
     fontSize: "var(--sn-font-size-xs, 0.75rem)",
     padding: "0 var(--sn-spacing-sm, 0.5rem)",
     iconSize: 14,
   },
   md: {
-    height: "2.5rem",
+    height: "var(--sn-toggle-height-md, 2.5rem)",
     fontSize: "var(--sn-font-size-sm, 0.875rem)",
     padding: "0 var(--sn-spacing-md, 0.75rem)",
     iconSize: 16,
   },
   lg: {
-    height: "3rem",
+    height: "var(--sn-toggle-height-lg, 3rem)",
     fontSize: "var(--sn-font-size-base, 1rem)",
     padding: "0 var(--sn-spacing-lg, 1rem)",
     iconSize: 18,
@@ -91,7 +92,7 @@ function StandaloneToggleItem({
   sizeConfig: (typeof SIZE_MAP)[string];
   isLast: boolean;
   onToggle: () => void;
-  rootSlot?: Record<string, Record<string, unknown>>;
+  rootSlot?: SlotOverrides;
 }) {
   const itemDisabled = item.disabled ?? false;
 

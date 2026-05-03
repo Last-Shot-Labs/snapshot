@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
@@ -32,6 +33,10 @@ function buildImageUrl(params: {
   }
 
   return `${IMAGE_ROUTE}?${searchParams.toString()}`;
+}
+
+function shouldBypassImageOptimizer(src: string): boolean {
+  return /^(data|blob):/i.test(src);
 }
 
 function scaleHeight(
@@ -109,7 +114,7 @@ export interface SnapshotImageBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, placeholder, image). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -147,8 +152,13 @@ export function SnapshotImageBase({
   }, [placeholder, src]);
 
   const rootId = id ?? "image";
-  const imgSrc = buildImageUrl({ src, width, height, format, quality });
-  const srcSet = resolveSrcSet({ src, width, height, format, quality });
+  const bypassOptimizer = shouldBypassImageOptimizer(src);
+  const imgSrc = bypassOptimizer
+    ? src
+    : buildImageUrl({ src, width, height, format, quality });
+  const srcSet = bypassOptimizer
+    ? undefined
+    : resolveSrcSet({ src, width, height, format, quality });
   const loading = loadingProp ?? (priority ? "eager" : "lazy");
 
   const rootSurface = resolveSurfacePresentation({
@@ -221,7 +231,9 @@ export function SnapshotImageBase({
     link.rel = "preload";
     link.as = "image";
     link.href = imgSrc;
-    link.setAttribute("imagesrcset", srcSet);
+    if (srcSet) {
+      link.setAttribute("imagesrcset", srcSet);
+    }
 
     if (sizes) {
       link.setAttribute("imagesizes", sizes);

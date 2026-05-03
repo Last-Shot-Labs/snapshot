@@ -1,6 +1,7 @@
 'use client';
 
 import { useResolveFrom, useSubscribe } from "../../../context/hooks";
+import type { SlotOverrides } from "../../_base/types";
 import {
   resolveOptionalPrimitiveValue,
   usePrimitiveValueOptions,
@@ -37,7 +38,7 @@ export function CodeBlock({ config }: { config: CodeBlockConfig }) {
       maxHeight={config.maxHeight}
       className={config.className}
       style={config.style}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }

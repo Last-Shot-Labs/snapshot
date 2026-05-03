@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../surface-styles";
 import { resolveSurfacePresentation } from "../style-surfaces";
 
@@ -14,7 +15,7 @@ export interface ComponentGroupBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
   /** React children — pre-rendered group content. */
   children?: ReactNode;
 }

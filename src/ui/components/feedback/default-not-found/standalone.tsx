@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import { resolveSurfacePresentation } from "../../_base/style-surfaces";
 
@@ -20,7 +21,7 @@ export interface DefaultNotFoundBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, eyebrow, title, description). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -57,7 +58,7 @@ export function DefaultNotFoundBase({
         placeItems: "center",
         padding: "var(--sn-spacing-2xl, 3rem)",
         background: "var(--sn-color-background, #f8fafc)",
-        color: "var(--sn-color-foreground, #0f172a)",
+        color: "var(--sn-color-foreground, #111827)",
       },
     },
     componentSurface,
@@ -66,7 +67,7 @@ export function DefaultNotFoundBase({
   const eyebrowSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-eyebrow`,
     implementationBase: {
-      color: "var(--sn-color-muted-foreground, #64748b)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
       fontSize: "xs",
       style: {
         margin: 0,
@@ -88,7 +89,7 @@ export function DefaultNotFoundBase({
   const descriptionSurface = resolveSurfacePresentation({
     surfaceId: `${rootId}-description`,
     implementationBase: {
-      color: "var(--sn-color-muted-foreground, #64748b)",
+      color: "var(--sn-color-muted-foreground, #6b7280)",
       style: { margin: 0 },
     },
     componentSurface: slots?.description,

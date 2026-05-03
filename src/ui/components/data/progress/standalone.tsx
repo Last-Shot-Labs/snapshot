@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useId } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import type { CSSProperties } from "react";
 import { SurfaceStyles } from "../../_base/surface-styles";
 import {
@@ -40,7 +41,7 @@ export interface ProgressBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, track, fill, label, value, labelRow, segment). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -83,7 +84,7 @@ export function ProgressBase({
   const isIndeterminate = percentage === undefined;
   const rootId = id ?? "progress";
   const states = isIndeterminate ? (["active"] as const) : [];
-  const fillColor = `var(--sn-color-${color}, currentColor)`;
+  const fillColor = `var(--sn-color-${color}, #2563eb)`;
   const trackColor = "var(--sn-color-secondary, #e5e7eb)";
 
   const circularSpinCss = `
@@ -290,7 +291,7 @@ export function ProgressBase({
     implementationBase: {
       width: "100%",
       overflow: "hidden",
-      height: `${barHeight}px`,
+      height: `${barHeight / 16}rem`,
       bg: trackColor,
       borderRadius: "var(--sn-radius-full, 9999px)",
       position: "relative",
@@ -315,7 +316,7 @@ export function ProgressBase({
     implementationBase: {
       display: "flex",
       height: "100%",
-      gap: "var(--sn-spacing-2xs, 2px)",
+      gap: "var(--sn-spacing-2xs, 0.125rem)",
     },
     componentSurface: slots?.segmentsRow,
     activeStates: [...states],

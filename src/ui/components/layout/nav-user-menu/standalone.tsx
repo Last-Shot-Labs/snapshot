@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, type CSSProperties } from "react";
+import type { SlotOverrides } from "../../_base/types";
 import { renderIcon } from "../../../icons/render";
 import { ButtonControl } from "../../forms/button";
 import { SurfaceStyles } from "../../_base/surface-styles";
@@ -46,7 +47,7 @@ export interface NavUserMenuBaseProps {
   /** Inline style applied to the root wrapper. */
   style?: CSSProperties;
   /** Slot overrides for sub-elements (root, trigger, triggerLabel, avatar, avatarImage, panel, item, itemLabel, itemIcon, email). */
-  slots?: Record<string, Record<string, unknown>>;
+  slots?: SlotOverrides;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -137,8 +138,8 @@ export function NavUserMenuBase({
     surfaceId: `${rootId}-email`,
     implementationBase: {
       style: {
-        padding: "0.5rem 0.75rem",
-        fontSize: "0.75rem",
+        padding: "var(--sn-spacing-sm, 0.5rem) var(--sn-spacing-md, 0.75rem)",
+        fontSize: "var(--sn-font-size-xs, 0.75rem)",
       },
     },
     componentSurface: slots?.email,
@@ -159,6 +160,8 @@ export function NavUserMenuBase({
         surfaceId={`${rootId}-trigger`}
         surfaceConfig={slots?.trigger}
         activeStates={isOpen ? ["open"] : []}
+        ariaExpanded={isOpen}
+        ariaHasPopup="menu"
       >
         {showAvatar ? (
           <span

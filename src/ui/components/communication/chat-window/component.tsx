@@ -1,6 +1,7 @@
 'use client';
 
 import { useResolveFrom, useSubscribe } from "../../../context/hooks";
+import type { SlotOverrides } from "../../_base/types";
 import { extractSurfaceConfig } from "../../_base/style-surfaces";
 import { resolveOptionalPrimitiveValue, usePrimitiveValueOptions } from "../../primitives/resolve-value";
 import { RichInput } from "../../content/rich-input/component";
@@ -11,6 +12,19 @@ import { TypingIndicator } from "../typing-indicator/component";
 import type { TypingIndicatorConfig } from "../typing-indicator/types";
 import { ChatWindowBase } from "./standalone";
 import type { ChatWindowConfig } from "./types";
+
+function normalizeTypingUsers(
+  users: ChatWindowConfig["typingUsers"],
+): TypingIndicatorConfig["users"] {
+  if (!Array.isArray(users)) {
+    return users as TypingIndicatorConfig["users"];
+  }
+
+  return users.flatMap((name) => {
+    const value = typeof name === "string" ? name.trim() : "";
+    return value ? [{ name: value }] : [];
+  });
+}
 
 /**
  * Manifest adapter — resolves config refs, composes manifest sub-components, delegates to ChatWindowBase.
@@ -49,7 +63,7 @@ export function ChatWindow({ config }: { config: ChatWindowConfig }) {
 
   const typingConfig: TypingIndicatorConfig = {
     type: "typing-indicator",
-    users: (config.typingUsers ?? []) as TypingIndicatorConfig["users"],
+    users: normalizeTypingUsers(config.typingUsers ?? []),
   };
 
   return (
@@ -65,7 +79,7 @@ export function ChatWindow({ config }: { config: ChatWindowConfig }) {
       inputSlot={<RichInput config={inputConfig} />}
       className={surfaceConfig?.className as string | undefined}
       style={surfaceConfig?.style as React.CSSProperties | undefined}
-      slots={config.slots as Record<string, Record<string, unknown>>}
+      slots={config.slots as SlotOverrides}
     />
   );
 }
