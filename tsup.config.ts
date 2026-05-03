@@ -147,6 +147,7 @@ export default defineConfig([
     bundle: true,
     noExternal: ["@clack/prompts"],
     external: [
+      "@tailwindcss/vite",
       "vite",
       "node:fs",
       "node:fs/promises",

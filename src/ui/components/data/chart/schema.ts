@@ -7,7 +7,11 @@ import {
 } from "../../../manifest/schema";
 import { dataSourceSchema } from "../../../manifest/resources";
 import { fromRefSchema, pollConfigSchema } from "../../_base/types";
-import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import {
+  extendComponentSchema,
+  slotsSchema,
+  type ComponentConfigSchema,
+} from "../../_base/schema";
 
 export const chartSlotNames = [
   "root",
@@ -42,6 +46,10 @@ const lookupConfigSchema = z
     labelField: z.string().optional(),
   })
   .strict();
+const chartActionSchema = actionSchema as z.ZodTypeAny;
+const chartEmptyStateSchema = emptyStateConfigSchema as z.ZodTypeAny;
+const chartLoadingSchema = loadingConfigSchema as z.ZodTypeAny;
+const chartLiveSchema = liveConfigSchema as z.ZodTypeAny;
 
 /**
  * Zod schema for the Chart component configuration.
@@ -50,7 +58,7 @@ const lookupConfigSchema = z
  * or from-ref. Uses Recharts under the hood. Colors default to
  * `--sn-chart-1` through `--sn-chart-5` tokens.
  */
-export const chartSchema = extendComponentSchema({
+const chartConfigShape = {
     /** Component type discriminator. */
     type: z.literal("chart"),
     /** Data source: endpoint string (e.g. "GET /api/data") or a FromRef. */
@@ -87,17 +95,19 @@ export const chartSchema = extendComponentSchema({
     /** Message shown when there is no data. */
     emptyMessage: z.union([z.string(), fromRefSchema]).default("No data"),
     /** Rich empty state config. */
-    empty: emptyStateConfigSchema.optional(),
+    empty: chartEmptyStateSchema.optional(),
     /** Hide the entire component (including its container) when there is no data. */
     hideWhenEmpty: z.boolean().default(false),
     /** Automatic loading placeholder config. */
-    loading: loadingConfigSchema.optional(),
+    loading: chartLoadingSchema.optional(),
     /** Live refresh configuration driven by realtime events. */
-    live: liveConfigSchema.optional(),
+    live: chartLiveSchema.optional(),
     /** Action executed when a chart element is clicked. */
-    onClick: z.union([actionSchema, z.array(actionSchema)]).optional(),
+    onClick: z.union([chartActionSchema, z.array(chartActionSchema)]).optional(),
     /** Polling behavior for endpoint-backed charts. */
     poll: pollConfigSchema.optional(),
     slots: slotsSchema(chartSlotNames).optional(),
-})
-  .strict();
+} satisfies z.ZodRawShape;
+
+export const chartSchema: ComponentConfigSchema<typeof chartConfigShape> =
+  extendComponentSchema(chartConfigShape).strict();

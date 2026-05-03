@@ -1,0 +1,69 @@
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout snapshot
+        uses: actions/checkout@v4
+        with:
+          path: snapshot
+
+      - name: Checkout frontend contract
+        uses: actions/checkout@v4
+        with:
+          repository: lastshotlabs/frontend-contract
+          path: frontend-contract
+          token: ${{ secrets.FRONTEND_CONTRACT_TOKEN || github.token }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          scope: "@lastshotlabs"
+          cache: npm
+          cache-dependency-path: |
+            snapshot/package-lock.json
+            frontend-contract/package-lock.json
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+
+      - name: Install frontend contract dependencies
+        working-directory: frontend-contract
+        run: npm ci
+
+      - name: Check frontend contract
+        working-directory: frontend-contract
+        run: |
+          npm run typecheck
+          npm run build
+          npm test
+
+      - name: Install snapshot dependencies
+        working-directory: snapshot
+        run: npm ci
+
+      - name: Check snapshot release
+        working-directory: snapshot
+        run: npm run release:check
+
+      - name: Publish snapshot to npm
+        working-directory: snapshot
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

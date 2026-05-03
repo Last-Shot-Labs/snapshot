@@ -329,6 +329,7 @@ describe("FileUploader", () => {
 
       open = open;
       send = send;
+      abort = vi.fn();
     }
 
     vi.stubGlobal("XMLHttpRequest", MockXMLHttpRequest);

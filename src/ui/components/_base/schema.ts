@@ -116,6 +116,11 @@ export const extendedBaseComponentSchema = z.object({
   ...styleableElementFields,
 });
 
+export type ComponentConfigSchema<T extends z.ZodRawShape> = z.ZodObject<
+  Omit<typeof extendedBaseComponentSchema.shape, keyof T> & T,
+  "strict"
+>;
+
 export function extendComponentSchema<T extends z.ZodRawShape>(shape: T) {
   return extendedBaseComponentSchema.extend(shape);
 }

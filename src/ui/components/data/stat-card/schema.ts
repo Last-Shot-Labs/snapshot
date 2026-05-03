@@ -5,7 +5,11 @@ import {
   errorStateConfigSchema,
   liveConfigSchema,
 } from "../../../manifest/schema";
-import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import {
+  extendComponentSchema,
+  slotsSchema,
+  type ComponentConfigSchema,
+} from "../../_base/schema";
 import { dataSourceSchema, fromRefSchema, pollConfigSchema } from "../../_base/types";
 
 /** Schema for the trend indicator configuration. */
@@ -19,6 +23,10 @@ export const trendConfigSchema = z
     format: z.enum(["percent", "absolute"]).optional(),
   })
   .strict();
+const statCardActionSchema = actionSchema as z.ZodTypeAny;
+const statCardEmptyStateSchema = emptyStateConfigSchema as z.ZodTypeAny;
+const statCardErrorStateSchema = errorStateConfigSchema as z.ZodTypeAny;
+const statCardLiveSchema = liveConfigSchema as z.ZodTypeAny;
 
 /**
  * Zod config schema for the StatCard component.
@@ -38,7 +46,7 @@ export const trendConfigSchema = z
  * }
  * ```
  */
-export const statCardConfigSchema = extendComponentSchema({
+const statCardConfigShape = {
     /** Component type discriminator. */
     type: z.literal("stat-card"),
     /** API endpoint to fetch data. Supports FromRef for dependent data. */
@@ -70,17 +78,17 @@ export const statCardConfigSchema = extendComponentSchema({
     /** Trend indicator configuration. */
     trend: trendConfigSchema.optional(),
     /** Click action. */
-    action: actionSchema.optional(),
+    action: statCardActionSchema.optional(),
     /** Loading skeleton variant. Default: 'skeleton'. */
     loading: z.enum(["skeleton", "pulse", "spinner"]).optional(),
     /** Error state config. */
-    error: errorStateConfigSchema.optional(),
+    error: statCardErrorStateSchema.optional(),
     /** Polling behavior for endpoint-backed stat cards. */
     poll: pollConfigSchema.optional(),
     /** Rich empty state config. */
-    empty: emptyStateConfigSchema.optional(),
+    empty: statCardEmptyStateSchema.optional(),
     /** Live refresh configuration driven by realtime events. */
-    live: liveConfigSchema.optional(),
+    live: statCardLiveSchema.optional(),
     /** Live region politeness for dynamic metric updates. */
     ariaLive: z.enum(["off", "polite", "assertive"]).default("polite"),
     slots: slotsSchema([
@@ -94,4 +102,8 @@ export const statCardConfigSchema = extendComponentSchema({
       "trend",
       "empty",
     ]).optional(),
-  }).strict();
+  } satisfies z.ZodRawShape;
+
+export const statCardConfigSchema: ComponentConfigSchema<
+  typeof statCardConfigShape
+> = extendComponentSchema(statCardConfigShape).strict();

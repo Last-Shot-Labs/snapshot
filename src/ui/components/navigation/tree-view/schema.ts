@@ -2,7 +2,11 @@ import { z } from "zod";
 import { errorStateConfigSchema } from "../../../manifest/schema";
 import { dataSourceSchema, fromRefSchema } from "../../_base/types";
 import { actionSchema } from "../../../actions/types";
-import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import {
+  extendComponentSchema,
+  slotsSchema,
+  type ComponentConfigSchema,
+} from "../../_base/schema";
 
 export const treeViewSlotNames = [
   "root",
@@ -97,7 +101,7 @@ export interface TreeItemInput {
  * }
  * ```
  */
-export const treeViewConfigSchema = extendComponentSchema({
+const treeViewConfigShape = {
     /** Component type discriminator. */
     type: z.literal("tree-view"),
     /** API endpoint to fetch tree data. */
@@ -117,4 +121,8 @@ export const treeViewConfigSchema = extendComponentSchema({
     /** Error state config. */
     error: errorStateConfigSchema.optional(),
     slots: slotsSchema(treeViewSlotNames).optional(),
-  }).strict();
+  } satisfies z.ZodRawShape;
+
+export const treeViewConfigSchema: ComponentConfigSchema<
+  typeof treeViewConfigShape
+> = extendComponentSchema(treeViewConfigShape).strict();

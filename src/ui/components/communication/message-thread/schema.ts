@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { actionSchema } from "../../../actions/types";
-import { extendComponentSchema, slotsSchema } from "../../_base/schema";
+import {
+  extendComponentSchema,
+  slotsSchema,
+  type ComponentConfigSchema,
+} from "../../_base/schema";
 import { dataSourceSchema, fromRefSchema } from "../../_base/types";
 
 /**
@@ -19,7 +23,7 @@ import { dataSourceSchema, fromRefSchema } from "../../_base/types";
  * }
  * ```
  */
-export const messageThreadConfigSchema = extendComponentSchema({
+const messageThreadConfigShape = {
     /** Component type discriminator. */
     type: z.literal("message-thread"),
     /** API endpoint for message data, or static data via FromRef. Optional for code-first composition. */
@@ -68,5 +72,8 @@ export const messageThreadConfigSchema = extendComponentSchema({
       "body",
       "embeds",
     ]).optional(),
-  })
-  .strict();
+  } satisfies z.ZodRawShape;
+
+export const messageThreadConfigSchema: ComponentConfigSchema<
+  typeof messageThreadConfigShape
+> = extendComponentSchema(messageThreadConfigShape).strict();
