@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   publish:
@@ -31,7 +30,7 @@ jobs:
         with:
           bun-version: 1.3.11
 
-      - name: Use npm with trusted publishing support
+      - name: Use npm 11
         run: npm install -g npm@^11.10.0
 
       - name: Install snapshot dependencies
@@ -46,3 +45,5 @@ jobs:
 
       - name: Publish snapshot to npm
         run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
