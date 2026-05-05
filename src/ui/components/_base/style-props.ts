@@ -321,6 +321,26 @@ export function resolveStyleProps(
     s.border = config.border as string;
   }
 
+  if (config.borderWidth != null) {
+    s.borderWidth = config.borderWidth as string;
+  }
+
+  if (config.borderStyle != null) {
+    s.borderStyle = config.borderStyle as CSSProperties["borderStyle"];
+  }
+
+  if (config.borderColor != null) {
+    s.borderColor = config.borderColor as string;
+  }
+
+  if (config.boxShadow != null) {
+    s.boxShadow = config.boxShadow as string;
+  }
+
+  if (config.backgroundImage != null) {
+    s.backgroundImage = config.backgroundImage as string;
+  }
+
   if (config.shadow != null) {
     s.boxShadow = resolve(config.shadow, SHADOW_MAP);
   }
