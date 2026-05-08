@@ -415,6 +415,20 @@ export interface SnapshotConfig {
     manifest: ManifestConfig;
     /** Optional plugins to register custom components, groups, and setup hooks. */
     plugins?: import("./plugin").SnapshotPlugin[];
+    /**
+     * Path the `protectedBeforeLoad` guard redirects to when the user is
+     * unauthenticated. Use this when your app does not configure auth screens
+     * through the manifest. When both this and `manifest.auth.redirects.unauthenticated`
+     * are set, the manifest entry wins.
+     */
+    loginPath?: string;
+    /**
+     * Path the `guestBeforeLoad` guard redirects to when an authenticated user
+     * lands on a guest-only screen. Use this when your app does not configure
+     * auth screens through the manifest. When both this and the manifest's
+     * `auth.redirects.authenticated` are set, the manifest entry wins.
+     */
+    homePath?: string;
 }
 /**
  * Runtime surface returned by `createSnapshot()`.
@@ -683,18 +697,47 @@ export interface SnapshotInstance<TWSEvents extends Record<string, unknown> = Re
     queryClient: QueryClient;
     /** Access the WebSocket connection manager. Returns null when WebSocket is not configured. */
     useWebSocketManager: () => WebSocketManager<TWSEvents> | null;
-    /** Route guard that redirects unauthenticated users to the login page. Use as a `beforeLoad` handler. */
+    /**
+     * Low-level route guard that redirects unauthenticated users to the login
+     * page. Prefer `protect()` — it returns a typed `{ beforeLoad }` fragment
+     * that slots into `createFileRoute(...)({...})` without a caller cast.
+     */
     protectedBeforeLoad: (ctx: {
         context: {
             queryClient: QueryClient;
         };
     }) => Promise<void>;
-    /** Route guard that redirects authenticated users away from guest-only pages. Use as a `beforeLoad` handler. */
+    /**
+     * Low-level route guard that redirects authenticated users away from
+     * guest-only pages. Prefer `guest()` — it returns a typed `{ beforeLoad }`
+     * fragment that slots into `createFileRoute(...)({...})` without a caller cast.
+     */
     guestBeforeLoad: (ctx: {
         context: {
             queryClient: QueryClient;
         };
     }) => Promise<void>;
+    /**
+     * Route fragment factory for protected (auth-required) routes. Spread into
+     * a `createFileRoute(...)({...})` definition.
+     */
+    protect: () => {
+        beforeLoad: never;
+    };
+    /** Route fragment factory for guest-only (logged-out) routes. Mirror of `protect()`. */
+    guest: () => {
+        beforeLoad: never;
+    };
+    /**
+     * Register a router-aware navigator. Auth hooks (`useLogout`,
+     * `useDeleteAccount`, OAuth/MFA flows) call this for post-mutation
+     * redirects so the router actually transitions instead of falling through
+     * to `pushState + popstate` (which TanStack Router ignores). Pass `null`
+     * to clear.
+     */
+    setNavigator: (nav: ((to: string, opts: {
+        replace?: boolean;
+    }) => void) | null) => void;
     /** React provider that wraps children with the TanStack QueryClientProvider for this instance. */
     QueryProvider: React.FC<{
         children: React.ReactNode;

@@ -11,6 +11,12 @@ export { registerClient, getRegisteredClient } from "./api/client";
 export { isMfaChallenge } from "./types";
 export { formatAuthError, createAuthErrorFormatter } from "./auth/error-format";
 export { definePlugin } from "./plugin";
+/**
+ * Stable query key under which `useUser()` and the route guards cache the
+ * authenticated user. Apps can use this to invalidate, seed, or read the
+ * cache directly (e.g. after a profile update or external auth state change).
+ */
+export { AUTH_QUERY_KEY } from "./routing/loaders";
 export type {
   SnapshotPlugin,
   PluginSetupContext,

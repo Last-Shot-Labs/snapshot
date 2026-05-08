@@ -5,17 +5,42 @@ import { warnOnce } from "../auth/warnings";
 import type { AuthUser } from "../types";
 import type { AuthContract } from "../auth/contract";
 
+/**
+ * Stable query key under which `useUser()` and the route guards cache the
+ * authenticated user. Exported so apps can invalidate, seed, or read the
+ * cache directly (e.g. after a profile update or server-side state change
+ * that should force a refresh).
+ */
+export const AUTH_QUERY_KEY = ["auth", "me"] as const;
+
 interface RouterContext {
   context: { queryClient: QueryClient };
 }
-
-const AUTH_QUERY_KEY = ["auth", "me"] as const;
 
 interface LoaderConfig {
   loginPath?: string;
   homePath?: string;
   onUnauthenticated?: () => void;
   staleTime?: number;
+}
+
+/**
+ * Shape returned by `protect()` / `guest()`. Spread into a route definition:
+ *
+ * ```ts
+ * export const Route = createFileRoute('/_app/settings')({
+ *   ...snapshot.protect(),
+ *   component: SettingsLayout,
+ * });
+ * ```
+ *
+ * `beforeLoad` is typed as `never` here so it satisfies TanStack Router's
+ * strict per-route `beforeLoad` signature regardless of which route id is
+ * being registered. The runtime function still receives the standard
+ * `{ context: { queryClient } }` payload from the router.
+ */
+export interface RouteGuardFragment {
+  beforeLoad: never;
 }
 
 /**
@@ -66,7 +91,7 @@ export function createLoaders(
       if (!config.loginPath) {
         warnOnce(
           "protectedBeforeLoad:no-loginPath",
-          "[snapshot] protectedBeforeLoad: no login route configured. Add an auth screen route with id \"login\" or a manifest auth redirect.",
+          "[snapshot] protectedBeforeLoad: no login route configured. Pass `loginPath` to createSnapshot or set `manifest.auth.redirects.unauthenticated`.",
         );
         return;
       }
@@ -82,7 +107,7 @@ export function createLoaders(
       if (!config.homePath) {
         warnOnce(
           "guestBeforeLoad:no-homePath",
-          "[snapshot] guestBeforeLoad: no home route configured. Set manifest.app.home or add a fallback route.",
+          "[snapshot] guestBeforeLoad: no home route configured. Pass `homePath` to createSnapshot or set `manifest.app.home`.",
         );
         return;
       }
@@ -91,5 +116,28 @@ export function createLoaders(
     }
   }
 
-  return { protectedBeforeLoad, guestBeforeLoad };
+  /**
+   * Typed factory for protected routes. Returns a fragment that slots into
+   * `createFileRoute(...)({...})` without caller casts:
+   *
+   * ```ts
+   * export const Route = createFileRoute('/_app/settings')({
+   *   ...protect(),
+   *   component: SettingsLayout,
+   * });
+   * ```
+   */
+  function protect(): RouteGuardFragment {
+    // The cast lives here so consumers never have to write it. TanStack
+    // Router's per-route `beforeLoad` signature is highly generic; `never` is
+    // assignable to any specific signature, so the spread satisfies all routes.
+    return { beforeLoad: protectedBeforeLoad as never };
+  }
+
+  /** Typed factory for guest-only routes. Mirror of `protect()`. */
+  function guest(): RouteGuardFragment {
+    return { beforeLoad: guestBeforeLoad as never };
+  }
+
+  return { protectedBeforeLoad, guestBeforeLoad, protect, guest };
 }

@@ -73,6 +73,17 @@ export interface ServerRouteMatchShape {
    * URL paths for pre-rendering. Not called at request time.
    */
   readonly generateStaticParams?: ((ctx: unknown) => Promise<Record<string, string>[]> | Record<string, string>[]) | undefined;
+  /**
+   * Optional module loader supplied by the route source (e.g. the
+   * slingshot-ssr-tanstack adapter pairs `<route>.tsx` with
+   * `<route>.server.ts` and stitches them into the canonical
+   * `{ load, default }` shape).
+   *
+   * When present, renderers should call this instead of `import(filePath)` —
+   * the file at `filePath` may not export the canonical shape on its own.
+   * `undefined` for sources that leave the renderer to do a direct import.
+   */
+  readonly loadModule?: () => Promise<unknown>;
 }
 
 /**

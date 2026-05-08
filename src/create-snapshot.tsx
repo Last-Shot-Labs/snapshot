@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import type { ReactNode } from "react";
 import { ApiClient } from "./api/client";
 import { createTokenStorage } from "./auth/storage";
+import { setRuntimeNavigator } from "./auth/navigation";
+import type { Navigator } from "./auth/navigation";
 import { createAuthHooks } from "./auth/hooks";
 import { createMfaHooks } from "./auth/mfa-hooks";
 import { createAccountHooks } from "./auth/account-hooks";
@@ -299,16 +301,23 @@ export function createSnapshot<
         ),
       }
     : undefined;
-  const loginScreenPath = compiledManifest.auth
+  const manifestLoginPath = compiledManifest.auth
     ? getAuthScreenPath(compiledManifest, "login")
     : undefined;
   const mfaScreenPath = compiledManifest.auth
     ? getAuthScreenPath(compiledManifest, "mfa")
     : undefined;
+  // Resolution precedence: explicit `SnapshotConfig.loginPath` / `homePath`
+  // win, then the manifest-driven paths, then the manifest's redirect overrides.
+  // Apps configure routing in code and treat the manifest as fallback / override
+  // for when an auth manifest is also wired up.
+  const loginScreenPath = config.loginPath ?? manifestLoginPath;
   const homeScreenPath =
-    compiledManifest.app.home ?? compiledManifest.firstRoute?.path;
+    config.homePath ?? compiledManifest.app.home ?? compiledManifest.firstRoute?.path;
   const loaderLoginPath =
-    compiledManifest.auth?.redirects?.unauthenticated ?? loginScreenPath;
+    config.loginPath ??
+    compiledManifest.auth?.redirects?.unauthenticated ??
+    manifestLoginPath;
 
   function createManifestAuthCallback(
     kind: ManifestAuthWorkflowKind,
@@ -732,7 +741,7 @@ export function createSnapshot<
   });
 
   // ── Routing ─────────────────────────────────────────────────────────────────
-  const { protectedBeforeLoad, guestBeforeLoad } = createLoaders(
+  const { protectedBeforeLoad, guestBeforeLoad, protect, guest } = createLoaders(
     {
       loginPath: loaderLoginPath,
       homePath: homeScreenPath,
@@ -826,6 +835,17 @@ export function createSnapshot<
     // Routing
     protectedBeforeLoad,
     guestBeforeLoad,
+    protect,
+    guest,
+    /**
+     * Register a router-aware navigator. Auth hooks (`useLogout`,
+     * `useDeleteAccount`, OAuth/MFA flows) call this for post-mutation
+     * redirects so the router actually transitions instead of falling through
+     * to `pushState + popstate` (which TanStack Router ignores).
+     *
+     * Pass `null` to clear the navigator (e.g. on app teardown).
+     */
+    setNavigator: (nav: Navigator | null) => setRuntimeNavigator(nav),
 
     // Components
     QueryProvider,

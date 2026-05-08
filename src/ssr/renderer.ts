@@ -139,6 +139,27 @@ async function importConventionComponent(
 }
 
 /**
+ * Load a route module in the canonical slingshot shape ({@code { load, meta?, default }}).
+ *
+ * When the resolver attached a {@code loadModule} hook to the match (e.g. the
+ * TanStack route source pairs a `<route>.tsx` with a `<route>.server.ts`),
+ * we delegate to it so the source can adapt non-canonical files.
+ *
+ * Otherwise we fall back to a plain dynamic import of {@code match.filePath} —
+ * preserving the historical file-based behavior.
+ *
+ * @internal
+ */
+async function loadRouteModuleViaSource(
+  match: { filePath: string; loadModule?: () => Promise<unknown> },
+): Promise<Record<string, unknown>> {
+  if (typeof match.loadModule === "function") {
+    return (await match.loadModule()) as Record<string, unknown>;
+  }
+  return (await import(match.filePath)) as Record<string, unknown>;
+}
+
+/**
  * Wrap an element in a Suspense boundary when a loading component is available.
  *
  * @internal
@@ -515,10 +536,12 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
         shell._after,
       );
 
-      // 1. Dynamic import the route module
+      // 1. Load the route module — through the source's `loadModule` hook
+      // when present (e.g. TanStack source adapts `<route>.tsx` + `.server.ts`
+      // companion to slingshot's canonical shape), else by direct import.
       let routeModule: Record<string, unknown>;
       try {
-        routeModule = (await import(match.filePath)) as Record<string, unknown>;
+        routeModule = await loadRouteModuleViaSource(match);
       } catch (err) {
         throw new Error(
           `[snapshot-ssr] Failed to import route module ${match.filePath}: ${String(err)}`,
@@ -783,12 +806,13 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
         shell._after,
       );
 
-      // 1. Import all route modules in parallel (layouts + page)
+      // 1. Load all route modules in parallel (layouts + page) — through the
+      // source's `loadModule` hook when present, else by direct import.
       const [layoutModules, pageModule] = await Promise.all([
         Promise.all(
           chain.layouts.map(async (layout) => {
             try {
-              return (await import(layout.filePath)) as Record<string, unknown>;
+              return await loadRouteModuleViaSource(layout);
             } catch (err) {
               throw new Error(
                 `[snapshot-ssr] Failed to import layout module ${layout.filePath}: ${String(err)}`,
@@ -798,10 +822,7 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
         ),
         (async () => {
           try {
-            return (await import(chain.page.filePath)) as Record<
-              string,
-              unknown
-            >;
+            return await loadRouteModuleViaSource(chain.page);
           } catch (err) {
             throw new Error(
               `[snapshot-ssr] Failed to import page module ${chain.page.filePath}: ${String(err)}`,
@@ -1122,10 +1143,7 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
               return;
             }
             try {
-              const slotMod = (await import(slot.match.filePath)) as Record<
-                string,
-                unknown
-              >;
+              const slotMod = await loadRouteModuleViaSource(slot.match);
               const slotLoadFn = slotMod["load"] as
                 | ((ctx: unknown) => Promise<unknown>)
                 | undefined;
