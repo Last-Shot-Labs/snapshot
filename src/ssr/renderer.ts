@@ -2,11 +2,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import type { QueryKey } from "@tanstack/react-query";
 import React from "react";
-import {
-  isCustomPage,
-  type CustomPageDeclaration,
-  type PageLoaderResult,
-} from "../ui/entity-pages";
 import { buildHeadTags } from "./head";
 import { renderPage } from "./render";
 import type {
@@ -16,6 +11,32 @@ import type {
   SsrRequestContext,
   SsrShellShape,
 } from "./types";
+
+interface CustomPageDeclaration {
+  type: "custom";
+  path: string;
+  handler: { handler: string };
+}
+
+interface PageLoaderResult {
+  declaration: {
+    declaration: CustomPageDeclaration | Record<string, unknown>;
+  };
+  data?: unknown;
+  meta?: Record<string, unknown>;
+}
+
+function isCustomPage(
+  declaration: CustomPageDeclaration | Record<string, unknown>,
+): declaration is CustomPageDeclaration {
+  return (
+    declaration.type === "custom" &&
+    typeof declaration.path === "string" &&
+    typeof declaration.handler === "object" &&
+    declaration.handler !== null &&
+    typeof (declaration.handler as { handler?: unknown }).handler === "string"
+  );
+}
 
 // ─── Route chain shape (structural — avoids cross-repo import) ─────────────────
 
@@ -1226,8 +1247,7 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
      *
      * Custom handler-ref pages are delegated back to the standard route render
      * path using the handler module path as the route file. Config-driven
-     * entity pages previously rendered through Snapshot's manifest component
-     * system; that legacy path is intentionally removed.
+     * entity pages were removed with the app builder path.
      */
     async renderPage(
       result: PageLoaderResult,
@@ -1246,7 +1266,7 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
       }
 
       throw new Error(
-        "[snapshot-ssr] Config-driven entity page rendering was removed with the manifest app builder. Use a custom page handler instead.",
+        "[snapshot-ssr] Config-driven entity page rendering was removed. Use a custom page handler instead.",
       );
     },
   };

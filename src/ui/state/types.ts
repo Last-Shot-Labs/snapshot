@@ -7,7 +7,7 @@ import type {
 } from "@lastshotlabs/frontend-contract/state";
 export type { StateScope } from "@lastshotlabs/frontend-contract/state";
 import type { ApiClient } from "../../api/client";
-import type { ResourceMap } from "../manifest/resources";
+import type { ResourceMap } from "../resources";
 
 /** The Jotai store type, derived from the createStore return type. */
 export type JotaiStore = ReturnType<typeof createStore>;

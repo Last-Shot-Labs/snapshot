@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { ApiClient } from "../../api/client";
 import type { ExprRef, FromRef } from "@lastshotlabs/frontend-contract/refs";
 import type { StateConfigMap, StateValueConfig } from "@lastshotlabs/frontend-contract/state";
-import type { ResourceMap } from "../manifest/resources";
+import type { ResourceMap } from "../resources";
 import type { AtomRegistry, JotaiStore } from "../state/types";
 /** Backwards-compatible alias for the shared state registry interface. */
 export type { AtomRegistry, JotaiStore };

@@ -1,11 +1,8 @@
 import { fileURLToPath } from "node:url";
 import React from "react";
-import "../../ui/components/register";
 import { describe, expect, it } from "vitest";
 import { createReactRenderer } from "../renderer";
 import type { SsrShellShape } from "../types";
-import type { PageLoaderResult } from "../../ui/entity-pages";
-import { buildListResult } from "../../ui/entity-pages/__tests__/fixtures";
 
 const emptyShell: SsrShellShape = {
   headTags: "",
@@ -22,7 +19,14 @@ describe("entity page SSR rendering", () => {
     });
 
     await expect(
-      renderer.renderPage(buildListResult(), emptyShell, {}),
+      renderer.renderPage({
+        declaration: {
+          declaration: {
+            type: "list",
+            path: "/posts",
+          },
+        },
+      }, emptyShell, {}),
     ).rejects.toThrow(
       "Config-driven entity page rendering was removed",
     );
@@ -32,7 +36,7 @@ describe("entity page SSR rendering", () => {
     const fixturePath = fileURLToPath(
       new URL("./fixtures/custom-page-route.ts", import.meta.url),
     );
-    const customResult: PageLoaderResult = {
+    const customResult = {
       declaration: {
         key: "custom-page",
         declaration: {
