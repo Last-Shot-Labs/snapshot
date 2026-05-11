@@ -40,7 +40,7 @@ export type FocusConfig = z.infer<typeof focusConfigSchema>;
 export type ActiveConfig = z.infer<typeof activeConfigSchema>;
 export type ExitAnimationConfig = z.infer<typeof exitAnimationSchema>;
 /**
- * Base config fields shared by all config-driven components.
+ * Base config fields shared by Snapshot UI components.
  * Every component schema should extend this via `.merge()` or `.extend()`.
  */
 export declare const baseComponentConfigSchema: z.ZodObject<{

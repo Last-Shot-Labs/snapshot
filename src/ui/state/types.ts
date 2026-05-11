@@ -27,16 +27,16 @@ export interface AtomRegistry {
 }
 
 /**
- * Named state definition from the manifest.
+ * Named state definition.
  * App-scope state persists for the app lifetime.
  * Route-scope state is recreated whenever the active route changes.
  */
 export type StateConfig = StateValueConfig;
 
-/** Map of named state definitions declared by the manifest runtime. */
+/** Map of named state definitions. */
 export type StateConfigMap = SharedStateConfigMap;
 
-/** Props accepted by the provider layer that wires manifest state into a React tree. */
+/** Props accepted by the provider layer that wires named state into a React tree. */
 export interface StateProviderProps {
   state?: StateConfigMap;
   resources?: ResourceMap;

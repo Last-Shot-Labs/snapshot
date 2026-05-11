@@ -1,3 +1,3 @@
 
-/** Config for the manifest-driven location input component. */
+/** Props/config shape for the location input component. */
 export type LocationInputConfig = Record<string, unknown>;

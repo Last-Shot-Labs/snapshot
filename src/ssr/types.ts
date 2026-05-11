@@ -12,7 +12,7 @@ import type { SnapshotInstance } from "../types";
  * TypeScript structural typing ensures compatibility at the consumer's compile time.
  */
 export interface ServerRouteMatchShape {
-  /** Absolute file path to the server route, or `manifest:<routeId>` for manifest routes. */
+  /** Absolute file path to the server route, or a virtual route identifier. */
   readonly filePath: string;
   /** Absolute path to a separate `meta.ts` file (directory form), or `null`. */
   readonly metaFilePath: string | null;
@@ -217,7 +217,7 @@ export interface SnapshotSsrConfig {
   renderTimeoutMs?: number;
 
   /**
-   * Optional React Server Components manifest configuration.
+   * Optional React Server Components options.
    *
    * When provided, every render executed by `createReactRenderer()` uses the
    * RSC two-pass render path instead of standard single-pass SSR.

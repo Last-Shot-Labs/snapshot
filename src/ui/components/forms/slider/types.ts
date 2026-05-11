@@ -1,3 +1,3 @@
 
-/** Config for the manifest-driven slider component. */
+/** Props/config shape for the slider component. */
 export type SliderConfig = Record<string, unknown>;

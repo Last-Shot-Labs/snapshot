@@ -50,8 +50,8 @@ function resolveWebSocketUrl(apiUrl: string): string {
 /**
  * Create a per-instance Snapshot runtime from code-first bootstrap config.
  *
- * Builds per-instance API, auth, realtime, community, and webhook hooks without
- * compiling or booting a JSON manifest.
+ * Builds per-instance API, auth, realtime, community, and webhook hooks from
+ * explicit TypeScript config.
  *
  * @param config - Code-first Snapshot runtime config
  * @returns A fully initialized snapshot instance

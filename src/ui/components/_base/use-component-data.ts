@@ -55,7 +55,7 @@ function getInitialInlineData(
 }
 
 /**
- * Shared data-fetching hook for config-driven components.
+ * Shared data-fetching hook for Snapshot UI components.
  *
  * Parses a data config string like `"GET /api/stats/revenue"` into method + endpoint,
  * resolves any `FromRef` values in params via `useSubscribe`, and fetches data

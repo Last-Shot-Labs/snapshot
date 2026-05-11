@@ -34,15 +34,14 @@ export function generateCapabilityMap(): void {
       "src/ui/components/primitives/passkey-button/index.ts",
       "src/ui/components/primitives/oauth-buttons/index.ts",
     ]),
-    detectCapability("Manifest-driven UI", [
+    detectCapability("Standalone UI components", [
       "src/ui.ts",
-      "src/ui/manifest/schema.ts",
-      "src/ui/manifest/app.tsx",
+      "src/ui/components/forms/button/standalone.tsx",
+      "src/ui/components/layout/nav/standalone.tsx",
     ]),
-    detectCapability("Manifest routing, layouts, navigation, and guards", [
-      "src/ui/manifest/router.ts",
+    detectCapability("Code-first routing, layouts, navigation, and guards", [
+      "src/routing/loaders.ts",
       "src/ui/layouts/registry.tsx",
-      "src/ui/manifest/guard-registry.ts",
       "src/ui/components/layout/nav/index.ts",
       "src/ui/components/layout/nav-user-menu/index.ts",
     ]),
@@ -71,9 +70,8 @@ export function generateCapabilityMap(): void {
       "src/ui/presets/crud-page.ts",
       "src/ui/presets/settings-page.ts",
     ]),
-    detectCapability("SSR and manifest rendering", [
+    detectCapability("SSR rendering", [
       "src/ssr/index.ts",
-      "src/ssr/manifest-renderer.ts",
       "src/ssr/render.ts",
     ]),
     detectCapability("React Server Components support", [
@@ -86,11 +84,9 @@ export function generateCapabilityMap(): void {
       "src/ssr/ppr-cache.ts",
       "src/vite/index.ts",
     ]),
-    detectCapability("CLI scaffold, sync, and manifest commands", [
+    detectCapability("CLI scaffold and sync commands", [
       "src/cli/commands/init.ts",
       "src/cli/commands/sync.ts",
-      "src/cli/commands/manifest/init.ts",
-      "src/cli/commands/manifest/validate.ts",
     ]),
     detectCapability("Community, notifications, and webhook APIs", [
       "src/community/index.ts",
@@ -141,10 +137,8 @@ export function generateCapabilityMap(): void {
     detectCapability("Testing infrastructure and contract suites", [
       "src/test-setup.ts",
       "src/create-snapshot.test.tsx",
-      "src/ui/manifest/__tests__/schema.test.ts",
       "src/ssr/__tests__/render.test.tsx",
       "src/vite/__tests__/plugin.test.ts",
-      "src/cli/__tests__/manifest-validate.test.ts",
     ]),
   ];
 

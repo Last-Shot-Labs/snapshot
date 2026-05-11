@@ -14,7 +14,7 @@ import { ComponentName } from '@lastshotlabs/snapshot/ui'
 
 **`*Base` components** — pure React, plain props, no context required. Use these for most work.
 
-**Config-driven components** (e.g. `StatCard`, `DataTable`) — take a single `config` prop typed from a Zod schema, require `PageContextProvider`. Use these when you want the manifest-style `id`/`from` cross-component binding.
+**Feature components** (e.g. `StatCardBase`, `DataTableBase`) — take focused props for app-owned data, callbacks, loading state, slots, and styling. Use these when you want richer UI without handing control to a generated runtime.
 
 ### Token setup (call once at app root)
 
@@ -191,8 +191,10 @@ interface CollapsibleBaseProps {
   {children}
 </CardBase>
 
-// Card: config-driven (needs PageContextProvider)
-<Card config={{ title: 'Match', gap: 'md', children: [...] }} />
+// CardBase with slots for targeted styling
+<CardBase title="Match" slots={{ root: { className: "match-card" } }}>
+  {children}
+</CardBase>
 ```
 
 ### `Layout` (page shell)

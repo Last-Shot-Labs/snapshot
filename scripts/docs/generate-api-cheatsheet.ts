@@ -218,7 +218,6 @@ const uiRules: [string, (e: ExportEntry) => boolean][] = [
   ["Context & Data Binding", (e) => e.source.startsWith("src/ui/context/")],
   ["State Runtime", (e) => e.source.startsWith("src/ui/state/")],
   ["Actions", (e) => e.source.startsWith("src/ui/actions/")],
-  ["Manifest & Rendering", (e) => e.source.startsWith("src/ui/manifest/")],
   ["Data Components", (e) => e.source.startsWith("src/ui/components/data/")],
   ["Form Components", (e) => e.source.startsWith("src/ui/components/forms/")],
   ["Communication Components", (e) => e.source.startsWith("src/ui/components/communication/")],
@@ -298,8 +297,8 @@ export function generateApiCheatsheet(): void {
       "useUpdateWebhookEndpoint", "useDeleteWebhookEndpoint",
       "useWebhookDeliveries", "useWebhookDelivery", "useTestWebhookEndpoint",
     ]],
-    ["Infrastructure", ["api", "tokenStorage", "queryClient", "useWebSocketManager", "bootstrap", "ManifestApp"]],
-    ["Routing", ["protectedBeforeLoad", "guestBeforeLoad"]],
+    ["Infrastructure", ["api", "tokenStorage", "queryClient", "useWebSocketManager", "bootstrap"]],
+    ["Routing", ["protectedBeforeLoad", "guestBeforeLoad", "protect", "guest", "setNavigator"]],
     ["Scaffold", ["QueryProvider"]],
   ];
 

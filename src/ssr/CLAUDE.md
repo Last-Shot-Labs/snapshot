@@ -1,13 +1,12 @@
 # Snapshot SSR Surface
 
-Read this after root `CLAUDE.md` when changing SSR, manifest rendering, RSC, PPR, prefetch, cache, or server action surfaces.
+Read this after root `CLAUDE.md` when changing SSR, RSC, PPR, prefetch, cache, or server action surfaces.
 
 ## Read First
 
 - `src/ssr/index.ts`
 - `src/ssr/render.ts`
 - `src/ssr/renderer.ts`
-- `src/ssr/manifest-renderer.ts`
 - `src/ssr/rsc.ts`
 - `src/ssr/ppr.ts`
 - `src/ssr/ppr-cache.ts`

@@ -10,7 +10,7 @@ const emptyShell: SsrShellShape = {
 };
 
 describe("entity page SSR rendering", () => {
-  it("createReactRenderer.renderPage() rejects config-driven entity pages", async () => {
+  it("createReactRenderer.renderPage() rejects removed entity-page declarations", async () => {
     const renderer = createReactRenderer({
       resolveComponent: async () =>
         (() => React.createElement("div")) as React.ComponentType<

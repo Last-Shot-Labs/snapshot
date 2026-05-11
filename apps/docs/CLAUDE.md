@@ -10,8 +10,6 @@ This app is Snapshot's public documentation product. It is also the primary disc
 - `apps/docs/src/content/docs/start-here/installation.md`
 - `apps/docs/src/content/docs/guides/authentication.md`
 - `apps/docs/src/content/docs/guides/forms.md`
-- `apps/docs/src/content/docs/manifest/quick-start.md`
-- `apps/docs/src/content/docs/manifest/examples.md`
 - `apps/docs/src/content/docs/contribute/overview.md`
 - `apps/docs/src/content/docs/contribute/agent-flow.md`
 - `apps/docs/src/content/docs/contribute/testing.md`
@@ -34,7 +32,7 @@ When a user-facing capability changes, review these pages in addition to the loc
 - `apps/docs/src/content/docs/start-here/index.md`
 - `apps/docs/src/content/docs/start-here/installation.md`
 - `apps/docs/src/content/docs/guides/` (the relevant guide)
-- `apps/docs/src/content/docs/manifest/examples.md`
+- `apps/docs/src/content/docs/examples/index.md`
 
 ## Required Follow-Through
 
