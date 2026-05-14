@@ -226,7 +226,6 @@ const uiRules: [string, (e: ExportEntry) => boolean][] = [
   ["Navigation Components", (e) => e.source.startsWith("src/ui/components/navigation/")],
   ["Layout Components", (e) => e.source.startsWith("src/ui/components/layout/")],
   ["Media Components", (e) => e.source.startsWith("src/ui/components/media/")],
-  ["Page Presets", (e) => e.source.startsWith("src/ui/presets/")],
   ["Hooks & Utilities", (e) => e.source.startsWith("src/ui/hooks/") || e.source.startsWith("src/ui/components/_base/")],
   ["Icons", (e) => e.source.startsWith("src/ui/icons/")],
   ["Workflows", (e) => e.source.startsWith("src/ui/workflows/")],

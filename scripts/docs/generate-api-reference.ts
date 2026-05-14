@@ -90,7 +90,6 @@ const uiGroups: GroupRule[] = [
     test: (p) => p.startsWith("src/ui/components/primitives/"),
   },
   { label: "Component Utilities", test: (p) => p.startsWith("src/ui/components/_base/") },
-  { label: "Page Presets", test: (p) => p.startsWith("src/ui/presets/") },
   { label: "Hooks & Utilities", test: (p) => p.startsWith("src/ui/hooks/") },
   { label: "Icons", test: (p) => p.startsWith("src/ui/icons/") },
   { label: "Workflows", test: (p) => p.startsWith("src/ui/workflows/") },

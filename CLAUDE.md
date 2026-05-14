@@ -12,7 +12,7 @@ It ships five contributor-facing surfaces:
 
 ## What Snapshot Supports On `main`
 
-Snapshot is no longer a JSON app-builder experiment.
+Snapshot is a code-first frontend framework for bunshot-powered backends.
 
 It currently supports:
 
@@ -22,7 +22,7 @@ It currently supports:
 - SSR, RSC-aware rendering, prefetch manifests, PPR, and SSG-oriented Vite integration
 - a large standalone UI catalog across data, forms, layout, navigation, overlays, content, media, communication, commerce, and workflow
 
-Code-first is the product path. Do not reintroduce JSON app-builder APIs, generated app renderers, or schema-driven component registries.
+Code-first is the product path. Keep authoring explicit: TypeScript config, React composition, typed props, and source-backed docs.
 
 ## Read Order For Contributors
 
@@ -44,9 +44,9 @@ Surface guides:
 - `playground/CLAUDE.md`
 - `apps/docs/CLAUDE.md`
 
-## Read Order For App Builders
+## Read Order For App Authors
 
-App-building agents should not scan the repo.
+App-authoring agents should not scan the repo.
 
 Use this order:
 
@@ -70,7 +70,7 @@ Use this order:
   - `apps/docs/src/content/docs/start-here/index.md`
   - `apps/docs/src/content/docs/start-here/installation.md`
   - `apps/docs/src/content/docs/examples/index.md`
-- If a change affects app-builder discovery, update the persona guide that should send readers to it.
+- If a change affects app-author discovery, update the persona guide that should send readers to it.
 - `bun run docs:ci` is the default docs validation path for contributor work.
 
 ## Writing Specs

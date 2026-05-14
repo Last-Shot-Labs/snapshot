@@ -23,14 +23,16 @@ export function generateCapabilityMap(): void {
       "src/create-snapshot.tsx",
       "src/api/client.ts",
     ]),
-    detectCapability("Plugin system and schema generation", [
-      "src/plugin.ts",
-      "src/schema-generator.ts",
+    detectCapability("OpenAPI sync and generated API hooks", [
+      "src/cli/sync.ts",
+      "src/cli/commands/sync.ts",
+      "src/vite/index.ts",
     ]),
     detectCapability("Auth screens, MFA, passkeys, and OAuth", [
       "src/auth/oauth-hooks.ts",
       "src/auth/mfa-hooks.ts",
-      "src/ui/presets/auth-page.ts",
+      "src/cli/templates/pages/auth-login.ts",
+      "src/cli/templates/pages/auth-mfa-verify.ts",
       "src/ui/components/primitives/passkey-button/index.ts",
       "src/ui/components/primitives/oauth-buttons/index.ts",
     ]),
@@ -64,11 +66,11 @@ export function generateCapabilityMap(): void {
       "src/ui/expressions/parser.ts",
       "src/ui/i18n/schema.ts",
     ]),
-    detectCapability("Entity-page mapping and preset-driven assembly", [
-      "src/ui/entity-pages/index.ts",
-      "src/ui/presets/index.ts",
-      "src/ui/presets/crud-page.ts",
-      "src/ui/presets/settings-page.ts",
+    detectCapability("Scaffolded routes, pages, and settings flows", [
+      "src/cli/templates/routes/root.ts",
+      "src/cli/templates/routes/authenticated.ts",
+      "src/cli/templates/pages/home.ts",
+      "src/cli/templates/pages/settings.ts",
     ]),
     detectCapability("SSR rendering", [
       "src/ssr/index.ts",

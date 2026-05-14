@@ -25,7 +25,7 @@ Read this after root `CLAUDE.md` when changing SSR, RSC, PPR, prefetch, cache, o
 - SSR and RSC docs must describe current runtime behavior, not intended behavior.
 - Public docs should talk about shipping render modes and integration contracts, not internal phase names.
 - If exports in `src/ssr/index.ts` or `src/vite/index.ts` change, update JSDoc and generated reference inputs.
-- If the integration path changed, update the app-builder docs that route readers into SSR, not just the reference page.
+- If the integration path changed, update the app-author docs that route readers into SSR, not just the reference page.
 
 ## Cross-Cutting Docs To Review
 

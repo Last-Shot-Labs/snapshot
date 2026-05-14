@@ -128,15 +128,6 @@ interface SyncConfig {
 
 async function readSyncConfig(cwd: string): Promise<SyncConfig> {
   try {
-    const content = await fs.readFile(
-      path.join(cwd, "snapshot.config.json"),
-      "utf8",
-    );
-    return JSON.parse(content) as SyncConfig;
-  } catch {
-    /* not found */
-  }
-  try {
     const content = await fs.readFile(path.join(cwd, "package.json"), "utf8");
     const pkg = JSON.parse(content) as { snapshot?: SyncConfig };
     return pkg.snapshot ?? {};

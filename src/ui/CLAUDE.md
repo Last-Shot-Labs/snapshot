@@ -21,7 +21,7 @@ Read this after root `CLAUDE.md` when changing code-first UI, standalone compone
 - Component prop changes should be reflected in the component's standalone types.
 - Styling guidance must match the real slots and state surfaces in `_base/types.ts` and `_base/style-surfaces.ts`.
 - If you change a visible UI capability, update the playground section or add one that proves the behavior on `main`.
-- If a change alters what app builders should discover, update the top-level docs pages, not just the reference page.
+- If a change alters what app authors should discover, update the top-level docs pages, not just the reference page.
 
 ## Required Follow-Through
 

@@ -1246,8 +1246,7 @@ export function createReactRenderer(config: SnapshotSsrConfig): {
      * Render an entity-driven bunshot page.
      *
      * Custom handler-ref pages are delegated back to the standard route render
-     * path using the handler module path as the route file. Config-driven
-     * entity pages were removed with the app builder path.
+     * path using the handler module path as the route file.
      */
     async renderPage(
       result: PageLoaderResult,

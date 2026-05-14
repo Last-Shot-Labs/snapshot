@@ -25,7 +25,7 @@ For Snapshot UI work, treat these files as the canonical styling and composition
 - `src/ui/components/overlay/popover/standalone.tsx`
 - `playground/src/showcase.tsx`
 
-For app-builder-facing discovery truth, treat these files as canonical:
+For app-author-facing discovery truth, treat these files as canonical:
 
 - `apps/docs/src/content/docs/index.md`
 - `apps/docs/src/content/docs/start-here/index.md`
@@ -50,7 +50,7 @@ If you introduce or change a visible UI surface:
 - define or update named `slots`
 - use canonical runtime state names
 - update [Theming and Styling](/guides/theming-and-styling/) when the platform pattern changed
-- update any persona guide that should send app builders to the new surface
+- update any persona guide that should send app authors to the new surface
 
 Canonical contributor instructions live in:
 
